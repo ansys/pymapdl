@@ -130,6 +130,43 @@ class Selecting:
 
             STAT - Display the current select status.
 
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in Table 105: ASEL - Valid Item and Component
+            Labels (p. 185). Some items also require a component label. If Item = PICK (or simply "P"), graphical
+            picking is enabled and all remaining command fields are ignored (valid only in the GUI). Defaults
+            to AREA.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in Table 105: ASEL - Valid
+            Item and Component Labels (p. 185).
+
+        VMIN
+            Minimum value of item range. Ranges are area numbers, coordinate values, attribute numbers, etc.,
+            as appropriate for the item. A component name (as specified on the CM (p. 338) command) may
+            also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or ESYS
+            and if VMIN is positive, the absolute value of Item is compared against the range for selection; if
+            VMIN is negative, the signed value of Item is compared. See the ALIST (p. 106) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for area numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only areas are to be selected:
+            
+                - `kswp = 0` - Select areas only.
+                - `kswp = 1` - Select areas, as well as keypoints, lines, nodes, and elements associated with selected areas.
+
+            Valid only with Type = S.
+
+
         Notes
         -----
         Selects a subset of areas. For example, to select those areas with area
@@ -597,6 +634,38 @@ class Selecting:
 
             STAT - Display the current select status.
 
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to KP.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are keypoint numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the CM (p. 338) command)
+            may also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or
+            ESYS and if VMIN is positive, the absolute value of Item is compared against the range for selection;
+            if VMIN is negative, the signed value of Item is compared. See the KLIST (p. 942) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for keypoint numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KABS
+            Absolute value key:
+
+                - `kabs = 0` - Check sign of value during selection.
+                - `kabs = 1` - Use absolute value during selection (sign ignored).
+
         Notes
         -----
         Selects a subset of keypoints or hard points.  For example, to select a
@@ -726,6 +795,40 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to LINE.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are line numbers, coordinate values, attribute numbers, etc.,
+            as appropriate for the item. If VMIN = 0.0, a tolerance of ±1.0E-6 is used, or ±0.005 x VMIN if VMIN
+            = VMAX. A component name (as specified on the CM (p. 338) command) may also be substituted
+            for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, ESYS, or NDIV and if VMIN is
+            positive, the absolute value of Item is compared against the range for selection; if VMIN is negative,
+            the signed value of Item is compared. See the LLIST (p. 1011) command for a discussion of signed
+            attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for line numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only lines are to be selected:
+
+                - `kswp = 0` - Select lines only.
+                - `kswp = 1` - Select lines, as well as keypoints, nodes, and elements associated with selected lines. Valid
+            only with Type = S.
 
         Notes
         -----
@@ -859,6 +962,36 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to NODE.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are node numbers, set numbers, coordinate values, load
+            values, or result values as appropriate for the item. A component name (as specified on the CM (p. 338)
+            command) may also be substituted for VMIN (VMAX and VINC are ignored).
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN for input values. For result values, VMAX
+            defaults to infinity if VMIN is positive, or to zero if VMIN is negative.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for node and set numbers).
+            Defaults to 1. VINC cannot be negative.
+
+        KABS
+            Absolute value key:
+            
+            - `kabs = 0` - Check sign of value during selection.
+            - `kabs = 1` - Use absolute value during selection (sign ignored)
 
         Notes
         -----
@@ -1267,6 +1400,38 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to VOLU.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are volume numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the CM (p. 338) command)
+            may also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or
+            ESYS and if VMIN is positive, the absolute value of Item is compared against the range for selection;
+            if VMIN is negative, the signed value of Item is compared. See the VLIST (p. 2050) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for volume numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only volumes are to be selected:
+
+            - `kswp = 0` - Select volumes only.
+            - `kswp = 1` - Select volumes, as well as keypoints, lines, areas,
+            nodes, and elements associated with selected volumes. Valid only with Type = S.
 
         Notes
         -----
