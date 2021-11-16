@@ -1,6 +1,5 @@
 import os
 import pytest
-import logging
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
