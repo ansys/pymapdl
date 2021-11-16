@@ -27,6 +27,7 @@ PyMAPDL library.
    math
    pool
    xpl
+   upf
 
 
 PyMAPDL Basic Overview
