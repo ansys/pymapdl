@@ -270,3 +270,12 @@ jobs:
           files: |
             ./**/*.whl
             ./**/*.pdf
+
+      - name: Build and publish Conda packages to Anaconda.org
+        uses: MichaelsJP/conda-package-publish-action@v1.1.0
+        with:
+          subDir: '.conda'
+          AnacondaToken: ${{ secrets.ANACONDA_TOKEN }}
+          platforms: 'all'
+          override: true
+          dry_run: False

@@ -1,0 +1,56 @@
+{% set name = "PyMAPDL" %}
+{% set version = "0.60.2" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_url: https://github.com/pyansys/pymapdl.git
+
+build:
+  noarch: python
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+
+requirements: # Package requirements
+  build: # To build. I took these from requirements_build
+    - python
+    - setuptools>=41.0.0
+    - wheel>=0.33.0
+  host: # For cross platform packages, requirements.
+    - pip
+    - python
+  run: # To run the package. I took this from setup. But I think Conda should take from there to.
+    - python
+    - matplotlib>=3.0.0  # for colormaps for pyvista
+    - numpy>=1.14.0
+    - pyvista>=0.32.0  # using new data attributes
+    - appdirs>=1.4.0
+    - tqdm>=4.45.0
+    - pyiges>=0.1.4
+    - scipy>=1.3.0  # for sparse (consider optional?)
+    - grpcio>=1.30.0  # tested up to grpcio==1.35
+    - ansys-api-mapdl-v0==0.4.1  # supports at least 2020R2 - 2021R2
+    - ansys-mapdl-reader>=0.50.15
+    - protobuf>=3.12.2  # minimum required based on latest ansys-grpc-mapdl
+
+# Since we do CI testing in `main` I'm going to skip this testing at the moment.
+# test:
+#   imports:
+#     - click
+
+about:
+  home: https://mapdldocs.pyansys.com/
+  license: MIT
+  license_family: MIT
+  license_file:
+    - LICENSE
+  summary: Pythonic interface to MAPDL
+  doc_url: https://mapdldocs.pyansys.com/
+  dev_url: https://github.com/pyansys/pymapdl
+
+extra:
+  maintainers:
+    - Alex Kaszynski
+    - German Martinez-Ayuso
