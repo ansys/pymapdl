@@ -1,8 +1,10 @@
 """
+.. _ref_statically_indeterminate_example2:
 
-Statically Indeterminate Reaction Force Analysis
-------------------------------------------------
+Statically Indeterminate Reaction Force Analysis 2
+-----------------------------------------------------
 
+our test
 
 Problem Description:
  - A prismatical bar with built-in ends is loaded axially at two
@@ -18,7 +20,7 @@ Element Type(s):
  - 3-D Spar (or Truss) Elements (LINK180)
 
 
-
 """
 
+# Setup
 print('asdf')
