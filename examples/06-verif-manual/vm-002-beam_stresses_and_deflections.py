@@ -1,10 +1,11 @@
 r"""
-.. _ref_vm5_example:
+.. _ref_vm2_example:
+
 Beam Stresses and Deflections
 ------------------------------------------------
 
 Problem Description:
--   A standard 30" WF beam, with a cross-sectional area A, is supported
+-   A standard 30 inch WF beam, with a cross-sectional area ``A``, is supported
     as shown below and loaded on the overhangs by a uniformly distributed
     load w. Determine the maximum bending stress in the middle portion of
     the beam and the deflection :math:`\delta` at the middle of the beam.
