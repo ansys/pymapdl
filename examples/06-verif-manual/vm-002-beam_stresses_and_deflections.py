@@ -86,9 +86,9 @@ mapdl.mp("PRXY", "", 0.3)
 # Set up the cross-section for a beam element.
 
 mapdl.run("SECT,1,BEAM,I")
-mapdl.run("W_F=1.048394965")
-mapdl.run("W_W=0.6856481")
-mapdl.run("SECD,15,15,28+(2*W_F),W_F,W_F,W_W")
+w_f = 1.048394965
+w_w = 0.6856481
+mapdl.secdata(15, 15, 28+(2*w_f), w_f, w_f, w_w)
 
 
 ###############################################################################
@@ -119,7 +119,7 @@ mapdl.eplot(show_node_numbering=True, cpos="xy") # Display elements with their n
 # Fix the nodes at the larger end (the "wall" end) and apply a vertical force
 # to the whole structure.
 
-mapdl.d(2, "UX", "", "", "", "", "UY")  # Application of boundary conditions.
+mapdl.d(2, "UX", lab2="UY")  # Application of boundary conditions.
 mapdl.d(4, "UY")
 mapdl.nsel("S", "LOC", "Y", 0)
 mapdl.d("ALL", "UZ")
