@@ -125,7 +125,7 @@ mapdl.nsel("S", "LOC", "Y", 0)
 mapdl.d("ALL", "UZ")
 mapdl.d("ALL", "ROTX")
 mapdl.d("ALL", "ROTY")
-mapdl.run("NALL")
+mapdl.nsel("ALL")
 
 
 ###############################################################################
