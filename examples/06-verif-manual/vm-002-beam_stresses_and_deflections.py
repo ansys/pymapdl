@@ -133,8 +133,8 @@ mapdl.run("NALL")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # - Apply a distributed force of :math:`w = (10000/12) lb/in` in the y-direction
 
-mapdl.sfbeam(1, 1, "PRES", "(10000/12)")
-mapdl.sfbeam(4, 1, "PRES", "(1E4/12)")
+mapdl.sfbeam(1, 1, "PRES", 10000/12)
+mapdl.sfbeam(4, 1, "PRES", 1E4/12)
 mapdl.finish()
 
 
