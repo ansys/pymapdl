@@ -710,12 +710,12 @@ def test_load_table(mapdl):
     mapdl.load_table("my_conv", my_conv)
     assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
         my_conv1[0, 1] = 4
         mapdl.load_table("my_conv", my_conv1)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
         my_conv1 = my_conv.copy()
         my_conv1[1, 0] = 4
         mapdl.load_table("my_conv", my_conv1)
