@@ -9,6 +9,7 @@ Extended Examples Library
 
     ex_01-gmsh_example/ex_01-gmsh_example
     techdemo-1/ex_0-tecbrakesqueal.rst
+    techdemo-28/ex_28-tecfricstir.rst
 
 Introduction
 ------------
