@@ -1,3 +1,5 @@
+.. _tech_demo_01:
+
 Tech Demo: Brake Squeal Analysis
 --------------------------------
 
