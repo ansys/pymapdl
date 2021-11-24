@@ -97,7 +97,7 @@ def test_convert_block_commands(tmpdir, cmd):
     assert pymapdl_output[cmd] in pyblock
 
 
-def test_logger(caplog):
+def test_logger(capsys):
     # I could not find a way to test the logging output. It seems that `caplog`
     # does not work well. Hence we just run the code with `show_log` equal `True`
     # to show it does not fail.
@@ -105,9 +105,9 @@ def test_logger(caplog):
     apdl_ = """FINISH
     /PREP7
     """.split('\n')
-    # caplog.clear()
+
     translator = FileTranslator(line_ending='\n', show_log=True)
     for line in apdl_:
         translator.translate_line(line)
-
-    # assert any(['Convert' in each for each in caplog.messages]) # This should work.
+    std = capsys.readouterr()
+    assert all(['Converted' in each for each in std.err.split('\n')[:-1]]) # last one is an empty line.
