@@ -166,7 +166,16 @@ shape tool, as shown in the following figure:
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
     mapdl.vglue(3, 4, 5, 6)
 
-    mapdl.vplot(vtk=True, title='Geometry')
+    # _ = mapdl.vplot(vtk=True, title='Geometry')
+    
+    vtk_mod = mapdl.mesh.grid
+    rotor.clear_data()
+    rotor['values'] = values
+    surf = rotor.extract_surface()
+    surf.points = surf.points.astype(np.float32)
+    surf = mesh.extract_surface()
+    
+
 
 The FSW process generally requires a tool made of a harder material than the workpiece
 material being welded. In the past, FSW was used for soft workpiece materials such as
@@ -584,7 +593,7 @@ CONTA174 elements:
     mapdl.e(1)  # Create target element on pilot node
     mapdl.allsel()
 
-    # Top sufaces of plates nodes for contact
+    # Top surfaces of plates nodes for contact
     mapdl.vsel("s", "volume", "", 1, 2)
     mapdl.allsel("below", "volume")
     mapdl.nsel("r", "loc", "z", 0)
