@@ -100,12 +100,12 @@ percent of the total heat and is therefore negligible.
 The simulation welds two 304L stainless steel plates (workpiece) with a cylindrical
 shape tool, as shown in the following figure: 
 
-.. .. figure:: graphics/gtecfricstir_fig1.png
-..     :align: center
-..     :alt: 3-D Model of Workpiece and Tool
-..     :figclass: align-center
-..    
-..     **Figure 28.1: 3-D Model of Workpiece and Tool**
+.. figure:: graphics/gtecfricstir_fig1.png
+    :align: center
+    :alt: 3-D Model of Workpiece and Tool
+    :figclass: align-center
+   
+    **Figure 28.1: 3-D Model of Workpiece and Tool**
 
 
 .. jupyter-execute::
@@ -128,6 +128,7 @@ shape tool, as shown in the following figure:
     :hide-code:
 
     from ansys.mapdl.core import launch_mapdl
+    mapdl = launch_mapdl()
     mapdl.prep7()
 
     # ***** Problem parameters ********
@@ -214,7 +215,7 @@ SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``).
 .. code:: python
 
     from ansys.mapdl.core import launch_mapdl
-    mapdl.prep7()
+    mapdl = mapdl.prep7()
 
     # ***** Problem parameters ********
     l = 76.2e-03     # Length of each plate,m
