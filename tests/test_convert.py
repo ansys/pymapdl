@@ -98,9 +98,6 @@ def test_convert_block_commands(tmpdir, cmd):
 
 
 def test_logger(capsys):
-    # I could not find a way to test the logging output. It seems that `caplog`
-    # does not work well. Hence we just run the code with `show_log` equal `True`
-    # to show it does not fail.
 
     apdl_ = """FINISH
     /PREP7
