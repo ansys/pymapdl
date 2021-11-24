@@ -700,18 +700,35 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    my_conv = np.array(
-        [
-            [0, 0.001],
-            [120, 0.001],
-            [130, 0.005],
-            [700, 0.005],
-            [710, 0.002],
-            [1000, 0.002],
-        ]
-    )
-    mapdl.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, -1])
+    dimx = np.random.randint(3, 15)
+    dimy = np.random.randint(3, 15)
+
+    my_conv = np.random.rand(dimx, dimy)
+    my_conv[:, 0] = np.arange(dimx)
+    my_conv[0, :] = np.arange(dimy)
+
+    mapdl.load_table("my_conv", my_conv)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+
+    with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
+        my_conv1 = my_conv.copy()
+        my_conv1[0, 1] = 4
+        mapdl.load_table("my_conv", my_conv1)
+
+    with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
+        my_conv1 = my_conv.copy()
+        my_conv1[1, 0] = 4
+        mapdl.load_table("my_conv", my_conv1)
+
+
+def test_load_array(mapdl):
+
+    dimx = np.random.randint(1, 15)
+    dimy = np.random.randint(1, 15)
+    my_conv = np.random.rand(dimx, dimy)
+
+    mapdl.load_array("my_conv", my_conv)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
 
 
 @pytest.mark.skip_grpc
