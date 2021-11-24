@@ -92,7 +92,7 @@ def convert_apdl_block(apdl_strings,
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
-        show_log = False):
+        show_log=False):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -154,7 +154,7 @@ def _convert(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-    show_log = False
+    show_log=False
              ):
 
     translator = FileTranslator(
@@ -210,7 +210,7 @@ class FileTranslator:
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
-        show_log = False
+        show_log=False
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
