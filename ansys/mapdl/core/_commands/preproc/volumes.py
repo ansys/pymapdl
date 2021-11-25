@@ -862,10 +862,9 @@ class Volumes:
         nseg="",
         **kwargs,
     ) -> str:
-        """Generate cylindrical volumes by rotating an area pattern about
+        """Generate cylindrical volumes by rotating an area pattern about an axis.
 
         APDL Command: VROTAT
-        an axis.
 
         Generates cylindrical volumes (and their corresponding
         keypoints, lines, and areas) by rotating an area pattern (and
