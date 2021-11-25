@@ -91,7 +91,8 @@ mapdl.finish()
 # ~~~~~~~~~~~~~~~
 # Enter the MAPDL post-postprocessing routine (/POST1) and obtain the
 # von-mises stress for the single static solution. Here, we use MAPDL
-# directly to obtain the results using a wrapper around the VGET method to efficiently obtain results without outputing to disk.
+# directly to obtain the results using a wrapper around the VGET
+# method to efficiently obtain results without outputting to disk.
 
 # enter the postprocessing routine
 mapdl.post1()
