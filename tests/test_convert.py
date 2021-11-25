@@ -1,8 +1,9 @@
 import os
 import pytest
+
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import convert_apdl_block
+from ansys.mapdl.core.convert import convert_apdl_block, FileTranslator
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -94,3 +95,16 @@ def test_convert_block_commands(tmpdir, cmd):
     pyblock = convert_apdl_block(apdl_strings=apdl_block.split('\n'))
     pyblock = '\n'.join(pyblock)
     assert pymapdl_output[cmd] in pyblock
+
+
+def test_logger(capsys):
+
+    apdl_ = """FINISH
+    /PREP7
+    """.split('\n')
+
+    translator = FileTranslator(line_ending='\n', show_log=True)
+    for line in apdl_:
+        translator.translate_line(line)
+    std = capsys.readouterr()
+    assert all(['Converted' in each for each in std.err.split('\n')[:-1]]) # last one is an empty line.

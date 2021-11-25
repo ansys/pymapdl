@@ -4,7 +4,7 @@ PyMAPDL
     :target: https://pypi.org/project/ansys-mapdl-core/
 
 .. image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/pyansys/pymapdl/actions/workflows/tci.yml
+   :target: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml
 
 .. image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
@@ -32,7 +32,7 @@ MAPDL and supports:
 
 Here's a quick demo of PyMAPDL within VSCode:
 
-.. image:: https://github.com/pyansys/pymapdl/raw/fix/auto_complete_vscode/doc/landing_page_demo.gif
+.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.

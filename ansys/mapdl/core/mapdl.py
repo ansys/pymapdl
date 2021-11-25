@@ -156,8 +156,7 @@ class _MapdlCore(Commands):
         self._solution = Solution(self)
 
         if log_apdl:
-            filename = os.path.join(self.directory, "log.inp")
-            self.open_apdl_log(filename, mode=log_apdl)
+            self.open_apdl_log(log_apdl, mode='w')
 
         self._post = PostProcessing(self)
 
@@ -673,23 +672,34 @@ class _MapdlCore(Commands):
         self._allow_ignore = bool(value)
 
     def open_apdl_log(self, filename, mode="w"):
-        """Start writing all APDL commands to an ANSYS input file.
+        """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
         ----------
         filename : str
             Filename of the log.
+        mode : str, optional
+            Python file modes (for example, ``'a'``, ``'w'``).  Should
+            be either write or append.
+
+        Examples
+        --------
+        Begin writing APDL commands to ``"log.inp"``.
+
+        >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
             raise RuntimeError("APDL command logging already enabled")
-
         self._log.debug("Opening ANSYS log file at %s", filename)
+
+        if mode not in ["w", "a", "x"]:
+            raise ValueError("File mode should either be write, append, or exclusive"
+                             " creation ('w', 'a', or 'x').")
+
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
-        if mode != "w":
-            self._apdl_log.write(
-                "! APDL script generated using ansys.mapdl.core %s\n"
-                % pymapdl.__version__
-            )
+        self._apdl_log.write(
+            "! APDL script generated using ansys.mapdl.core {pymapdl.__version__}\n"
+        )
 
     @supress_logging
     @run_as_prep7
@@ -1773,6 +1783,7 @@ class _MapdlCore(Commands):
         nrmkey="",
         modtype="",
         memory_option="",
+        mxpand="",
         elcalc=False,
     ):
         """Run a modal with basic settings analysis
@@ -1881,6 +1892,11 @@ class _MapdlCore(Commands):
                         I/O to the various files written by the
                         solver.
 
+        mxpand : bool, optional
+            Number of modes or array name (enclosed in percent signs)
+            to expand and write.  If -1, do not expand and do not
+            write modes to the results file during the
+            analysis. Default ``""``.
         elcalc : bool, optional
             Calculate element results, reaction forces, energies, and
             the nodal degree of freedom solution.  Default ``False``.
@@ -1921,13 +1937,17 @@ class _MapdlCore(Commands):
         nrmkey = "OFF"
 
         with self.chain_commands:
-            self.slashsolu()
-            self.antype(2, "new")
-            self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
-            self.bcsoption(memory_option)
+            self.slashsolu(mute=True)
+            self.antype(2, "new", mute=True)
+            self.modopt(
+                method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+            )
+            self.bcsoption(memory_option, mute=True)
 
+            if mxpand:
+                self.mxpand(mute=True)
             if elcalc:
-                self.mxpand(elcalc="YES")
+                self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)
@@ -2144,10 +2164,88 @@ class _MapdlCore(Commands):
     def ignore_errors(self, value):
         self._ignore_errors = bool(value)
 
-    def load_table(self, name, array, var1="", var2="", var3=""):
+    def load_array(self, name, array):
+        """Load an array from Python to MAPDL.
+
+        Uses ``VREAD`` to transfer the array.
+        The format of the numbers used in the intermediate file is F24.18.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : np.ndarray or list
+            List as a table or ``numpy`` array.
+
+        Examples
+        --------
+        >>> my_conv = np.array([[0, 0.001],
+        ...                     [120, 0.001],
+        ...                     [130, 0.005],
+        ...                     [700, 0.005],
+        ...                     [710, 0.002],
+        ...                     [1000, 0.002]])
+        >>> mapdl.load_array('MY_ARRAY', my_conv)
+        >>> mapdl.parameters['MY_ARRAY']
+        array([[0.0e+00, 1.0e-03],
+                [1.2e+02, 1.0e-03],
+                [1.3e+02, 5.0e-03],
+                [7.0e+02, 5.0e-03],
+                [7.1e+02, 2.0e-03],
+                [1.0e+03, 2.0e-03]])
+        """
+        if not isinstance(array, np.ndarray):
+            array = np.asarray(array)
+        if array.ndim != 2:
+            raise NotImplementedError("Only loading of 2D arrays is supported at the moment.")
+
+        imax = array.shape[0]
+        jmax = array.shape[1]
+        if array.ndim == 2:
+            kmax = ""
+        elif array.ndim == 3:
+            kmax = array.shape[2]
+        else:
+            raise ValueError(
+                f"Expecting only a 2D or 3D array, but input contains\n{array.ndim} dimensions."
+            )
+
+        self.dim(name, "ARRAY", imax=array.shape[0], jmax=array.shape[1], kmax="")
+
+        base_name = random_string() + ".txt"
+        filename = os.path.join(tempfile.gettempdir(), base_name)
+        self._log.info(f"Generating file for table in {filename}")
+        np.savetxt(filename, array, delimiter=',',
+                   header='File generated by PyMAPDL:load_array',
+                   fmt='%24.18e')
+
+        if not self._local:
+            self.upload(filename, progress_bar=False)
+            filename = base_name
+
+        with self.non_interactive:
+            label = 'jik'
+            n1 = jmax
+            n2 = imax
+            n3 = kmax
+            self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
+            fmt = '(' + ",',',".join(["E24.18" for i in range(jmax)]) + ')'
+            logger.info("Using *VREAD with format %s in %s", fmt, filename)
+            self.run(fmt)
+
+        if self._local:
+            os.remove(filename)
+
+    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
         Uses TREAD to transfer the table.
+        It should be noticed that PyMAPDL when query a table, it will return
+        the table but not its axis (meaning it will return ``table[1:,1:]``).
 
         Parameters
         ----------
@@ -2161,6 +2259,9 @@ class _MapdlCore(Commands):
             List as a table or ``numpy`` array.
 
         var1 : str, optional
+            Variable name corresponding to the first dimension (row).
+            Default Row
+
             A primary variable (listed below) or can be an independent
             parameter. If specifying an independent parameter, then
             you must define an additional table for the independent
@@ -2177,7 +2278,7 @@ class _MapdlCore(Commands):
             - ``"Z"``: Z-coordinate location
             - ``"TEMP"``: Temperature
             - ``"VELOCITY"``: Velocity
-            - ``"1"``]: Pressure	PRESSURE [
+            - ``"PRESSURE"``: Pressure
             - ``"GAP"``: Geometric gap/penetration
             - ``"SECTOR"``: Cyclic sector number
             - ``"OMEGS"``: Amplitude of the rotational velocity vector
@@ -2188,10 +2289,16 @@ class _MapdlCore(Commands):
             - ``"CONC"``: Concentration
 
         var2 : str, optional
-            See ``var1``
+            Variable name corresponding to the first dimension (column).
+            See ``var1``.  Default column.
 
         var3 : str, optional
-            See ``var1``
+            Variable name corresponding to the first dimension (plane).
+            See ``var1``. Default Plane.
+
+        csysid : str, optional
+            An integer corresponding to the coordinate system ID number.
+            APDL Default = 0 (global Cartesian)
 
         Examples
         --------
@@ -2205,19 +2312,38 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['MY_TABLE']
         array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
         """
-        if array.ndim < 2:
+        if not isinstance(array, np.ndarray):
+            raise ValueError("The table should be a Numpy array")
+        if array.shape[0] < 2 or array.shape[1] < 2:
+            raise ValueError("One or two of the array dimensions are too small to create a table.")
+        if array.ndim == 2:
+            self.dim(name, "TABLE", imax=array.shape[0]-1, jmax=array.shape[1] - 1, kmax="",
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        elif array.ndim == 3:
+            self.dim(name, "TABLE", imax=array.shape[0] - 1, jmax=array.shape[1] - 1, kmax=array.shape[2],
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        else:
             raise ValueError(
-                "Expecting at least a 2D table, but input contains " "only 1 dimension"
+                f"Expecting only a 2D or 3D table, but input contains\n{array.ndim} dimensions"
             )
-        self.dim(name, "TABLE", array.shape[0], var1=var1, var2=var2, var3=var3)
+
+        if not np.all(array[0, :-1] <= array[0, 1:]):
+            raise ValueError('The underlying ``TREAD`` command requires that the axis 0 is in ascending order.')
+        if not np.all(array[:-1, 0] <= array[1:, 0]):
+            raise ValueError('The underlying ``TREAD`` command requires that the axis 1 is in ascending order.')
+
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
-        np.savetxt(filename, array)
+        np.savetxt(filename, array,
+                   header='File generated by PyMAPDL:load_table')
 
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
-        self.tread(name, filename, mute=True)
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if self._local:
+            os.remove(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")

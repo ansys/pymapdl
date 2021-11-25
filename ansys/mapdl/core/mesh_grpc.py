@@ -11,6 +11,8 @@ from ansys.mapdl.core.misc import threaded, supress_logging
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.common_grpc import parse_chunks, DEFAULT_CHUNKSIZE
 
+TMP_NODE_CM = "__NODE__"
+
 
 class MeshGrpc(Mesh):
     """Provides an interface to the gRPC mesh from MAPDL."""
@@ -71,12 +73,12 @@ class MeshGrpc(Mesh):
     def _update_cache(self):
         """Threaded local cache update.
 
-        Used when needing all the geometry entries from MAPDL
+        Used when needing all the geometry entries from MAPDL.
         """
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
         with self._mapdl.chain_commands:
-            self._mapdl.cm("__NODE__", "NODE")
+            self._mapdl.cm(TMP_NODE_CM, "NODE")
             self._mapdl.nsle("S")
 
         threads = [
@@ -99,7 +101,7 @@ class MeshGrpc(Mesh):
 
         # TODO: flaky
         time.sleep(0.05)
-        self._mapdl.cmsel("S", "__NODE__", "NODE", mute=True)
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
     @property
@@ -115,15 +117,15 @@ class MeshGrpc(Mesh):
 
     @property
     def nnum_all(self) -> np.ndarray:
-        """Array of all node numbers.
+        """Array of all node numbers, even those not selected.
 
         Examples
         --------
-        >>> mapdl.mesh.nnum
+        >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
-        self._mapdl.cm("__NODE__", "NODE", mute=True)
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
         self._mapdl.nsel("all", mute=True)
 
         nnum = self._mapdl.get_array("NODE", item1="NLIST")
@@ -132,15 +134,39 @@ class MeshGrpc(Mesh):
             if nnum[0] == 0:
                 nnum = np.empty(0, np.int32)
 
-        self._mapdl.cmsel("S", "__NODE__", "NODE", mute=True)
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
         return nnum
 
     @property
+    def enum_all(self) -> np.ndarray:
+        """Array of all element numbers, even those not selected.
+
+        Examples
+        --------
+        >>> mapdl.mesh.enum_all
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        self._ignore_cache_reset = True
+        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
+        self._mapdl.esel("all", mute=True)
+
+        enum = self._mapdl.get_array("ELEM", item1="ELIST")
+        enum = enum.astype(np.int32)
+        if enum.size == 1:
+            if enum[0] == 0:
+                enum = np.empty(0, np.int32)
+
+        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
+        self._ignore_cache_reset = False
+
+        return enum
+
+    @property
     @supress_logging
     def n_node(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected nodes in MAPDL.
 
         Examples
         --------
@@ -152,7 +178,7 @@ class MeshGrpc(Mesh):
     @property
     @supress_logging
     def n_elem(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected elements in MAPDL.
 
         Examples
         --------
@@ -408,14 +434,14 @@ class MeshGrpc(Mesh):
 
         Access the node numbers of grid.
 
-        >>> grid.point_arrays
+        >>> grid.point_data
         Contains keys:
             ansys_node_num
             vtkOriginalPointIds
             origid
             VTKorigID
 
-        >>> grid.point_arrays['ansys_node_num']
+        >>> grid.point_data['ansys_node_num']
         pyvista_ndarray([    1,     2,     3, ..., 50684, 50685, 50686],
                         dtype=int32)
 

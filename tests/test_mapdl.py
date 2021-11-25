@@ -12,7 +12,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -406,9 +406,63 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 
-def test_logging(mapdl, tmpdir):
+@skip_in_cloud
+def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
-    if mapdl._log is None:
+
+    mapdl = pymapdl.launch_mapdl()
+    mapdl = launch_mapdl(log_apdl=filename)
+
+    mapdl.prep7()
+    mapdl.run('!comment test')
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert 'PREP7' in text
+    assert '!comment test'
+    assert 'K,1,0,0,0' in text
+    assert 'K,2,1,0,0' in text
+    assert 'K,3,1,1,0' in text
+    assert 'K,4,0,1,0' in text
+
+
+@pytest.mark.corba
+def test_corba_apdl_logging_start(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+
+    mapdl = pymapdl.launch_mapdl(mode='CORBA')
+    mapdl = launch_mapdl(log_apdl=filename)
+
+    mapdl.prep7()
+    mapdl.run('!comment test')
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, 'r') as fid:
+        text = ''.join(fid.readlines())
+
+    assert 'PREP7' in text
+    assert '!comment test'
+    assert 'K,1,0,0,0' in text
+    assert 'K,2,1,0,0' in text
+    assert 'K,3,1,1,0' in text
+    assert 'K,4,0,1,0' in text
+
+
+def test_apdl_logging(mapdl, tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+    if mapdl._apdl_log is None:
         mapdl.open_apdl_log(filename, mode="w")
     mapdl._close_apdl_log()
 
@@ -646,18 +700,35 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    my_conv = np.array(
-        [
-            [0, 0.001],
-            [120, 0.001],
-            [130, 0.005],
-            [700, 0.005],
-            [710, 0.002],
-            [1000, 0.002],
-        ]
-    )
-    mapdl.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, -1])
+    dimx = np.random.randint(3, 15)
+    dimy = np.random.randint(3, 15)
+
+    my_conv = np.random.rand(dimx, dimy)
+    my_conv[:, 0] = np.arange(dimx)
+    my_conv[0, :] = np.arange(dimy)
+
+    mapdl.load_table("my_conv", my_conv)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+
+    with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
+        my_conv1 = my_conv.copy()
+        my_conv1[0, 1] = 4
+        mapdl.load_table("my_conv", my_conv1)
+
+    with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
+        my_conv1 = my_conv.copy()
+        my_conv1[1, 0] = 4
+        mapdl.load_table("my_conv", my_conv1)
+
+
+def test_load_array(mapdl):
+
+    dimx = np.random.randint(1, 15)
+    dimy = np.random.randint(1, 15)
+    my_conv = np.random.rand(dimx, dimy)
+
+    mapdl.load_array("my_conv", my_conv)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
 
 
 @pytest.mark.skip_grpc

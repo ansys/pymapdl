@@ -1,5 +1,6 @@
 import os
 from warnings import warn
+from logging import Logger, StreamHandler
 
 from ansys.mapdl.core import __version__
 from ansys.mapdl.core.misc import is_float
@@ -21,6 +22,7 @@ def convert_script(
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
+    show_log = False
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -51,6 +53,10 @@ def convert_script(
         converted to ``mapdl.k``.  When ``False``, it will be
         converted to ``mapdl.run('k')``.
 
+    show_log : bool, optional
+        Print the converted commands using a logger (from ``logging``
+        Python module).
+
     Returns
     -------
     list
@@ -71,7 +77,8 @@ def convert_script(
                                 line_ending=line_ending,
                                 exec_file=exec_file,
                                 macros_as_functions=macros_as_functions,
-                                use_function_names=use_function_names
+                                use_function_names=use_function_names,
+                                show_log=show_log
                           )
 
     translator.save(filename_out)
@@ -79,13 +86,13 @@ def convert_script(
 
 
 def convert_apdl_block(apdl_strings,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True,
-                       ):
+        loglevel="WARNING",
+        auto_exit=True,
+        line_ending=None,
+        exec_file=None,
+        macros_as_functions=True,
+        use_function_names=True,
+        show_log=False):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -115,6 +122,10 @@ def convert_apdl_block(apdl_strings,
         converted to ``mapdl.k``.  When ``False``, it will be
         converted to ``mapdl.run('k')``.
 
+    show_log : bool, optional
+        Print the converted commands using a logger (from ``logging``
+        Python module).
+
     Returns
     -------
     list
@@ -128,7 +139,8 @@ def convert_apdl_block(apdl_strings,
     line_ending=line_ending,
     exec_file=exec_file,
     macros_as_functions=macros_as_functions,
-    use_function_names=use_function_names)
+    use_function_names=use_function_names,
+    show_log=show_log)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
@@ -142,6 +154,7 @@ def _convert(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
+    show_log=False
              ):
 
     translator = FileTranslator(
@@ -150,6 +163,7 @@ def _convert(apdl_strings,
         exec_file=exec_file,
         macros_as_functions=macros_as_functions,
         use_function_names=use_function_names,
+        show_log=show_log
     )
 
     if isinstance(apdl_strings, str):
@@ -161,6 +175,27 @@ def _convert(apdl_strings,
     if auto_exit:
         translator.write_exit()
     return translator
+
+
+class Lines(list):
+    def __init__(self, mute):
+        self._log = Logger('convert_logger')
+        self._setup_logger()
+        self._mute = mute
+        super().__init__()
+
+    def append(self, item, mute=True):
+        # append the item to itself (the list)
+        if not self._mute:
+            self._log.info(msg=f"Converted: '{item}'")
+        super(Lines, self).append(item)
+
+    def _setup_logger(self):
+        stdhdl = StreamHandler()
+        stdhdl.setLevel(10)
+        stdhdl.set_name('stdout')
+        self._log.addHandler(stdhdl)
+        self._log.propagate = True
 
 
 class FileTranslator:
@@ -175,9 +210,10 @@ class FileTranslator:
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
+        show_log=False
     ):
         self._non_interactive_level = 0
-        self.lines = []
+        self.lines = Lines(mute=not show_log)
         self._functions = []
         if line_ending:
             self.line_ending = line_ending
@@ -514,7 +550,12 @@ class FileTranslator:
             elif "ARG" in parameter and self._infunction:
                 parsed_parameters.append("%s" % parameter)
             else:
-                parsed_parameters.append('"%s"' % parameter)
+                # Removing strings '' and "" because they are going to be added by the converter module.
+                if parameter.startswith("'") and parameter.endswith("'"):
+                    parameter = parameter[1:-1]
+                if parameter.startswith('"') and parameter.endswith('"'):
+                    parameter = parameter[1:-1]
+                parsed_parameters.append(f'"{parameter}"')
 
         parameter_str = ", ".join(parsed_parameters)
         if self.comment:
