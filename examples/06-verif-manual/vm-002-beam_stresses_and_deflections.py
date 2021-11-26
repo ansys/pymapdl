@@ -32,7 +32,7 @@ Analytical Equations:
  - :math:`M` is the bending moment for the middle portion of the beam:
    :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
  - Determination of the maximum stress in the middle portion of the beam is:
-   :math:`\sigma_max = \frac{\sigma h}{2 I_z}`
+   :math:`\sigma_max = \frac{M h}{2 I_z}`
  - The deflection, :math:`\delta`, at the middle of the beam could be defined
    by the formulas of the Transversally Loaded Beams:
    :math:`\delta = 0.182 in`
@@ -180,7 +180,7 @@ output = f"""
 -------------------------- VM3 RESULTS COMPARISON --------------------------
               |   TARGET   |   Mechanical APDL   |   RATIO   |
 ----------------------------------------------------------------------------
-    Steel      {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
+    Stress     {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
     Deflection    {deflection_target:.3f}            {mid_node_uy:.3f}            {deflection_ratio:.3f}
 ----------------------------------------------------------------------------
 """
