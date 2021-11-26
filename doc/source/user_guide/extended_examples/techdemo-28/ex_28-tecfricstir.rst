@@ -100,12 +100,12 @@ percent of the total heat and is therefore negligible.
 The simulation welds two 304L stainless steel plates (workpiece) with a cylindrical
 shape tool, as shown in the following figure: 
 
-.. figure:: graphics/gtecfricstir_fig1.png
-    :align: center
-    :alt: 3-D Model of Workpiece and Tool
-    :figclass: align-center
-   
-    **Figure 28.1: 3-D Model of Workpiece and Tool**
+.. .. figure:: graphics/gtecfricstir_fig1.png
+..     :align: center
+..     :alt: 3-D Model of Workpiece and Tool
+..     :figclass: align-center
+..   
+..     **Figure 28.1: 3-D Model of Workpiece and Tool**
 
 
 .. jupyter-execute::
@@ -166,15 +166,11 @@ shape tool, as shown in the following figure:
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
     mapdl.vglue(3, 4, 5, 6)
 
-    # _ = mapdl.vplot(vtk=True, title='Geometry')
-    
-    vtk_mod = mapdl.mesh.grid
-    rotor.clear_data()
-    rotor['values'] = values
-    surf = rotor.extract_surface()
-    surf.points = surf.points.astype(np.float32)
-    surf = mesh.extract_surface()
-    
+    _ = mapdl.vplot(vtk=True, background='white')
+
+    ## To add code to plot the geometry dynamically   
+
+**Figure 28.1: 3-D Model of Workpiece and Tool**
 
 
 The FSW process generally requires a tool made of a harder material than the workpiece
@@ -222,6 +218,9 @@ SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``).
 
 
 .. code:: python
+    
+    import numpy as np
+    import pyvista
 
     from ansys.mapdl.core import launch_mapdl
     mapdl = mapdl.prep7()
@@ -261,7 +260,7 @@ SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``).
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
     mapdl.vglue(3, 4, 5, 6)
 
-    mapdl.vplot(vtk=True, title='Geometry')
+    _ = mapdl.vplot(vtk=True, title='Geometry', background='white')
 
 A hexahedral mesh with dropped midside nodes is used because the presence of
 midside nodes (or quadratic interpolation functions) can lead to oscillations in the
@@ -306,7 +305,9 @@ shows the 3-D meshed model:
     mapdl.mp("nuxy", 2, 0.22)  # Poisson's ratio
     mapdl.mp("kxx", 2, 100)  # Thermal conductivity(W/m'C)
     mapdl.mp("c", 2, 750)  # Specific heat(J/kg'C)
-    mapdl.mp("dens", 2, 4280)  # Density,kg/m^3
+    _ = mapdl.mp("dens", 2, 4280)  # Density,kg/m^3
+
+    _ = mapdl.geometry.lines.plot()
 
 
 .. jupyter-execute::
@@ -345,7 +346,10 @@ shows the 3-D meshed model:
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    mapdl.eplot(vtk=True)
+    _ = mapdl.eplot(vtk=True, background='white')
+
+**Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
+
 
 28.3.2. Contact Modeling
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -396,7 +400,7 @@ changes to bonded. The contact status remains bonded for the remainder of the
 simulation, even though the temperature subsequently decreases below the bonding
 value. 
 
-**Example 28.1: Defining the Contact Settings of the Contact Pair**
+.. **Example 28.1: Defining the Contact Settings of the Contact Pair**
 
 .. jupyter-execute::
 
@@ -408,12 +412,12 @@ value.
     mapdl.mat(1)
     mapdl.asel("s", "", "", 5)
     mapdl.nsla("", 1)
-    mapdl.nplot()
+    #mapdl.nplot()
     mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
     mapdl.asel("s", "", "", 12)
     mapdl.nsla("", 1)
-    mapdl.nplot()
+    #mapdl.nplot()
     mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
     mapdl.allsel("all")
@@ -425,13 +429,13 @@ value.
     # for welding, 'C
     mapdl.real(6)
     mapdl.cmsel("s", "tn.cnt")
-    mapdl.nplot()
+    mapdl.nplot(title='Example of Contact Nodes', background='white')
     mapdl.esurf()
     mapdl.type(7)
     mapdl.real(6)
     mapdl.cmsel("s", "tn.tgt")
     mapdl.esurf()
-    mapdl.allsel("all")
+    _ = mapdl.allsel("all")
     
 
 28.3.2.2. Contact Pair Between Tool and Workpiece
@@ -457,10 +461,11 @@ tool, as shown in this figure:
 .. jupyter-execute::
     :hide-code:
     
-    mapdl.esel("S", "ename","", 170)
+    mapdl.allsel("all")
+    mapdl.esel("s", "ename","", 170)
     mapdl.esel("a", "ename", "", 174)
 
-    mapdl.eplot(vtk=True, title="Figure 28.4: Contact Pair Between Tool and Workpiece")
+    _ = mapdl.eplot(vtk=True, background='white')
 
 **Figure 28.4: Contact Pair Between Tool and Workpiece**
 
@@ -480,9 +485,10 @@ material. Because the workpiece material softens and the value of friction
 coefficient drops as the temperature increases, a variable coefficient of friction
 (0.4 to 0.2) is defined (**TB**,FRIC with **TBTEMP** and **TBDATA**).
 
-**Example 28.2: Specifying the Settings for the Contact Pair**
+.. **Example 28.2: Specifying the Settings for the Contact Pair**
 
 .. jupyter-execute::
+    :hide-output:
     
     # * Define contact pair between tool & workpiece
     mapdl.et(4, "TARGE170")
@@ -562,6 +568,7 @@ CONTA174 elements:
 
 
 .. jupyter-execute::
+    :hide-output:
 
     # * Define Rigid Surface Constraint on tool top surface
     mapdl.et(2, "TARGE170")
@@ -753,9 +760,10 @@ low, radiation heat losses are ignored. An initial temperature of 25 °C is
 applied on the model. Temperature boundary conditions are not imposed anywhere on
 the model.
 
-**Example 28.3: Defining the Thermal Boundary Conditions**
+.. **Example 28.3: Defining the Thermal Boundary Conditions**
 
 .. jupyter-execute::
+    :hide-output:
 
     # Initial boundary conditions.
     mapdl.tref(25)  # Reference temperature 25'C
@@ -819,9 +827,10 @@ are constrained in the perpendicular direction (z direction).
 
 
 
-**Example 28.4: Defining the Mechanical Boundary Conditions**
+.. **Example 28.4: Defining the Mechanical Boundary Conditions**
     
 .. jupyter-execute::
+    :hide-output:
     
     # Mechanical Boundary Conditions
     # 20% ends of the each plate is constraint
@@ -929,7 +938,7 @@ step size is required. It is important to choose a time step size that does not 
 the subsequent criterion (minimum element size, maximum thermal conductivity over the
 whole model, minimum density, and minimum specific heat).
 
-**Example 28.5: Defining the Solution Settings**
+.. **Example 28.5: Defining the Solution Settings**
 
 .. code:: python
 
@@ -990,6 +999,14 @@ The following results topics for the FSW simulation are available:
     :figclass: align-center
     
     **Figure 28.8: Friction Stir Welding Animation**
+
+
+.. image:: graphics/gtecfricstir-anim.gif
+   :alt: Friction Stir Welding Animation
+   :align: center
+   
+
+
 
 
 28.7.1. Deformation and Stresses
@@ -1232,47 +1249,53 @@ The element contact area can be calculated using the
 CONTA174 element CAREA (NMISC, 58) output
 option.
 
-**Example 28.6: Defining the Frictional Heat Calculations**
+.. **Example 28.6: Defining the Frictional Heat Calculations**
 
-.. code::
+.. code:: python
 
-    /post1
-     set,last
-    *get,nst,active,,set,nset ! To get number of data sets on result file
+
+    mapdl.post1()
+    mapdl.set("last")
+    nst = mapdl.get("nst", "active", "", "set", "nset")  # To get number of data sets on result file
+
+    # Total frictional heat rate
+    mapdl.esel("s", "real", "", 5)
+    mapdl.esel("r", "ename", "", 174)  # Selecting the contact elements on Workpiece
+    fht = np.zeros(nst)
+    for i in range(1, nst):
+        mapdl.set("", "", "", "", "", "", i)
+        
+        # Frictional energy dissipation per unit
+        # area for an element, FDDIS
+        mapdl.etable("fri", "smisc", 18)  
+        mapdl.etable("are1", "nmisc", 58)  # Area of each contact element
+        
+        # Multiplying Fri. energy dissipation
+        # per unit area with the area of
+        # corresponding element
+        mapdl.smult("frri", "fri", "are1") 
+        mapdl.ssum()  # Summing up the Frictional heat rate
+
+        # Total Frictional heat rate on
+        # workpiece at a particular time
+        frhi = mapdl.get('frhi', 'ssum',, 'item', 'frri') 
+        fht(i) = frhi 
     
-                              ! Total frictional heat rate
-    esel,s,real,,5
-    esel,r,ename,,174         ! Selecting the contact elements on workpiece
-    *dim,fht,array,nst,1
-    *do,i,1,nst,1
-        set,,,,,,,i
-        etable,fri,smisc,18       ! Frictional energy dissipation per unit
-                                  ! area for an element, FDDIS
-        etable,are1,nmisc,58      ! Area of each contact element
-        smult,frri,fri,are1       ! Multiplying Fri. energy dissipation
-                                  ! per unit area with the area of
-                                  ! corresponding element
-        ssum                      ! Summing up the Frictional heat rate
-        *get,frhi,ssum,,item,frri ! Total Frictional heat rate on
-                                  ! workpiece at a particular time
-        fht(i,1)=frhi
-    *enddo
-    parsav,all
-    allsel,all
-    finish
-    
-    /post26
-    file,fsw,rst
-    numvar,200  
-    solu,191,ncmit            ! Solution summary data per substep to be
-                              ! stored for cumulative no. of iterations.
-    store,merge               ! Merge data from results file
-    filldata,191,,,,1,1 
-    realvar,191,191 
-    parres,new,'fsw','parm'
-    vput,fht,11,,,fric\_heat
-    plvar,11                  ! Plot of frictional heat rate against time
-    finish 
+    mapdl.parsav("all")
+    mapdl.allsel("all")
+    mapdl.finish()
+
+    mapdl.post26()
+    mapdl.file("fsw", "rst")
+    mapdl.numvar(200)
+    mapdl.solu(191, "ncmit")  # Solution summary data per substep to be
+    # stored for cumulative no. of iterations.
+    mapdl.store("merge")  # Merge data from results file
+    mapdl.filldata(191, "", "", "", 1, 1)
+    mapdl.realvar(191, 191)
+    mapdl.parres("new", "fsw", "parm")
+    mapdl.vput("fht", 11, "", "", "fric_heat")
+    mapdl.plvar(11)  # Plot of frictional heat rate against time 
 
 
 
@@ -1296,52 +1319,63 @@ total plastic heat-generation rate with time.
     **Figure 28.24: Total Plastic Heat Rate Variation with Time**
 
 
-**Example 28.7: Defining the Plastic Heat Calculations**
+.. **Example 28.7: Defining the Plastic Heat Calculations**
 
-.. code::
-
-    /post1
-    set,last
-    *get,nst,active,,set,nset ! To get number of data sets on result file
-
-                              ! Total Plastic heat rate
-    esel,s,mat,,1             ! Selecting the coupled elements on workpiece
-    etable,vlm1,volu          ! Volume of the each element
-    *dim,pha,array,nst,1
-    *do,i,1,nst,1
-        set,,,,,,,i
-        etable,pi,nmisc,5         ! Plastic heat rate per unit volume on
-                                  ! each element, PHEAT
-        smult,psi,pi,vlm1         ! Multiplying Pl. heat rate per unit
-                                  ! volume with the volume of
-                                  ! corresponding element
-        ssum                      ! Summing up the Plastic heat rate
-        *get,ppi,ssum,,item,psi   ! Total Plastic heat rate on workpiece
-                                  ! at a particular time
-        pha(i,1)=ppi
-    *enddo
-    parsav,all
-    allsel,all
-
-    /post26
-    file,fsw,rst
-    numvar,200  
-    solu,191,ncmit            ! solution summary data per substep to be
-                              ! stored for cumulative no. of iterations.
-    store,merge               ! Merge data from results file
-    filldata,191,,,,1,1 
-    realvar,191,191 
-    parres,new,'fsw','parm'
-    vput,pha,10,,,pheat\_nmisc
-    plvar,10                  ! Plot of Plastic heat rate against time
-    finish
+.. code:: python
     
+    
+    mapdl.post1()
+    mapdl.set("last")
+    nst = mapdl.get("nst", "active", "", "set", "nset")  # To get number of data sets on result file
 
-**Figure 28.23: Total Frictional Heat Rate Variation with Time** and **Figure 28.24: Total Plastic Heat Rate Variation with Time**
+    # Total Plastic heat rate
+    mapdl.esel("s", "mat", "", 1)  # Selecting the coupled elements on workpiece
+    mapdl.etable("vlm1", "volu")  # Volume of the each element
+    pha = np.zeros(nst)
+
+    for i in range(1, nst):
+        mapdl.set("", "", "", "", "", "", i)
+        
+        # Plastic heat rate per unit volume on
+        # each element, PHEAT
+        mapdl.etable("pi", "nmisc", 5) 
+
+        # Multiplying Pl. heat rate per unit
+        # volume with the volume of
+        # corresponding element
+        mapdl.smult("psi", "pi", "vlm1")  
+        
+        mapdl.ssum()  # Summing up the Plastic heat rate
+        # Total Plastic heat rate on workpiece
+        # at a particular time
+        ppi = mapdl.get('ppi','ssum',,'item','psi')  
+        
+        pha[i] = ppi 
+
+    mapdl.parsav("all")
+    mapdl.allsel("all")
+    
+    mapdl.post26()
+    mapdl.file("fsw", "rst")
+    mapdl.numvar(200)
+
+    # solution summary data per substep to be
+    # stored for cumulative no. of iterations.
+    mapdl.solu(191, "ncmit")
+    mapdl.store("merge")  # Merge data from results file
+    mapdl.filldata(191, "", "", "", 1, 1)
+    mapdl.realvar(191, 191)
+    mapdl.parres("new", "fsw", "parm")
+    mapdl.vput("pha", 10, "", "", "pheat_nmisc")
+    mapdl.plvar(10)  # Plot of Plastic heat rate against time
+
+
+**Figure 28.23** and **Figure 28.24**
 show that friction is responsible for generating most of the heat needed, while the
 contribution of heat due to plastic deformation is less significant. Because the
 tool-penetration is shallow and the tool pin is ignored, the plastic heat is small
 compared to frictional heat.
+
 
 28.8. Recommendations
 ---------------------
@@ -1394,27 +1428,27 @@ recommendations:
 The following reference works are cited in this example problem:
 
 1. Zhu, X. K. & Chao, Y. J. (2004). Numerical simulation of transient
-  temperature and residual stresses in friction stir welding of 304L stainless
-  steel. *Journal of Materials Processing Technology*. 146(2),
-  263-272.
+   temperature and residual stresses in friction stir welding of 304L stainless
+   steel. *Journal of Materials Processing Technology*. 146(2),
+   263-272.
 2. Chao, Y.J., Qi, X., & Tang, W. (2003). Heat transfer in friction stir
-  welding - Experimental and numerical studies. *Journal of Manufacturing
-  Science and Engineering-Transactions of the ASME*. 125(1),
-  138-145.
+   welding - Experimental and numerical studies. *Journal of Manufacturing
+   Science and Engineering-Transactions of the ASME*. 125(1),
+   138-145.
 3. Prasanna, P., Rao, B. S., & Rao, G. K. (2010). Finite element modeling for
-  maximum temperature in friction stir welding and its validation.
-  *Journal of Advanced Manufacturing Technology*. 51,
-  925-933.
+   maximum temperature in friction stir welding and its validation.
+   *Journal of Advanced Manufacturing Technology*. 51,
+   925-933.
 4. Sorensen, C.D. & Nelson, T. W. (2007). Friction stir welding of ferrous
-  and nickel alloys. (Mahoney, M. W. & Mirsha, R. S. Eds.) *Friction
-  Stir Welding and Processing. Materials Park, OH: ASM
-  International.* 111-121.
+   and nickel alloys. (Mahoney, M. W. & Mirsha, R. S. Eds.) *Friction
+   Stir Welding and Processing. Materials Park, OH: ASM
+   International.* 111-121.
 5. Ozel, T., Karpat, Y., & Srivastava, A. (2008). Hard turning with variable
-  micro-geometry PcBN tools. *CIRP Annals - Manufacturing
-  Technology*. 57, 73-76.
+   micro-geometry PcBN tools. *CIRP Annals - Manufacturing
+   Technology*. 57, 73-76.
 6. Mishra, R. S. (2007). *Friction Stir Welding and
-  Processing*. Ed. R. S. Mishra and M. W. Mahoney. Materials Park,
-  OH: ASM International.
+   Processing*. Ed. R. S. Mishra and M. W. Mahoney. Materials Park,
+   OH: ASM International.
 
 28.10. Input Files
 ------------------
@@ -1425,7 +1459,7 @@ The following files were used in this problem:
 * **fsw.cdb** -- Common database file containing the FSW model information (called by **fsw.dat**)
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download the zipped **td-28** file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a />`_      |
+| `Download the zipped td-28 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a />`_      |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
 | `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a />`_           |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
