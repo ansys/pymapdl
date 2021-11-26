@@ -3,10 +3,10 @@ r"""
 Beam Stresses and Deflections
 ------------------------------------------------
 Problem Description:
--   A standard 30 inch WF beam, with a cross-sectional area ``A``, is supported
+-   A standard 30 inch WF beam, with a cross-sectional area :math:`A`, is supported
     as shown below and loaded on the overhangs by a uniformly distributed
-    load w. Determine the maximum bending stress in the middle portion of
-    the beam and the deflection :math:`\delta` at the middle of the beam.
+    load :math:`w`. Determine the maximum bending stress, :math:`\sigma_max`, in the middle portion of
+    the beam and the deflection, :math:`\delta`, at the middle of the beam.
 Reference:
    -  S. Timoshenko, Strength of Material, Part I, Elementary Theory and
    Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
@@ -29,12 +29,14 @@ Geometric Properties:
 Loading:
  - :math:`w = (10000/12) lb/in`
 Analytical Equations:
- - :math:`P = R_1 + R_2` where :math:`P` is load.
- - :math:`\frac{R_2}{R_1} = \frac{a}{b}`
-   Where :math:`a` and :math:`b` are the ratios of distances between
-   the load and the wall.
+ - :math:`M` is the bending moment for the middle portion of the beam:
+   :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
+ - Determination of the maximum stress in the middle portion of the beam is:
+   :math:`\sigma_max = \frac{\sigma h}{2 I_z}`
+ - The deflection, :math:`\delta`, at the middle of the beam could be defined
+   by the formulas of the Transversally Loaded Beams:
+   :math:`\delta = 0.182 in`
 """
-
 
 # sphinx_gallery_thumbnail_path = '_static/vm2_setup.png'
 
@@ -62,11 +64,10 @@ mapdl.et(1, "BEAM188")
 mapdl.keyopt(1, 9, 3)  # Output at 9 intermediate locations
 mapdl.keyopt(1, 3, 3)  # Cubic shape function
 
-
 ###############################################################################
 # Define Material
 # ~~~~~~~~~~~~~~~
-# Set up the material and its type (a single material, with a beam-type section).
+# Set up the material.
 
 mapdl.mp("EX", 1, 30E6)
 mapdl.mp("PRXY", 1, 0.3)
@@ -74,45 +75,44 @@ mapdl.mp("PRXY", 1, 0.3)
 ###############################################################################
 # Define Section
 # ~~~~~~~~~~~~~~
-# Set up the cross-section for a beam element.
+# Set up the cross-section properties for a beam element.
 
 w_f = 1.048394965
 w_w = 0.6856481
 sec_num = 1
 mapdl.sectype(sec_num, "BEAM", "I", "ISection")
-mapdl.secdata(15, 15, 28+(2*w_f), w_f, w_f, w_w)
-
+mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
 
 ###############################################################################
 # Define Geometry:
 # ~~~~~~~~~~~~~~~~~~~~~~
-# Set up the nodes and elements.  This creates a mesh just like
-# in the problem setup. We create a square of nodes and use `fill` to add
-# mid-point nodes to two opposite sides.
+# Set up the nodes and elements. Create nodes then creating elements
+# bewtween nodes.
 
 # Define nodes
 mapdl.n(1)
 mapdl.n(5, 480)
 mapdl.n(6, 60, "1 $ N", 10, 420, 1)
-
-print(mapdl.mesh.nodes)  # list the node coordinates
-
-print(mapdl.mesh.nnum)  # list the node numbers
-
-mapdl.fill(1, 5)  # Generates a line of nodes between two existing nodes.
+mapdl.fill(1, 5)
 mapdl.fill(6, 10)
-mapdl.e(1, 2, 6)  # Define an element by node connectivity.
-mapdl.egen(4, 1, 1)  # Generates elements from an existing pattern.
-mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy")  # Display elements with their nodes numbers.
+print(mapdl.nlist())  # List of the created nodes.
 
+# Define elements
+
+mapdl.e(1, 2, 6)
+mapdl.egen(4, 1, 1)
+print(mapdl.elist())  # List of the created elements.
+
+# Display elements with their nodes numbers.
+
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy") 
 
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Fix the nodes at the larger end (the "wall" end) and apply a vertical force
-# to the whole structure.
+# Application of boundary conditions.
 
-mapdl.d(2, "UX", lab2="UY")  # Application of boundary conditions.
+mapdl.d(2, "UX", lab2="UY") 
 mapdl.d(4, "UY")
 mapdl.nsel("S", "LOC", "Y", 0)
 mapdl.d("ALL", "UZ")
@@ -120,16 +120,16 @@ mapdl.d("ALL", "ROTX")
 mapdl.d("ALL", "ROTY")
 mapdl.nsel("ALL")
 
-
 ###############################################################################
 # Define Distributed Loads
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# - Apply a distributed force of :math:`w = (10000/12) lb/in` in the y-direction
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# Application a distributed force of :math:`w = (10000/12) lb/in` 
+# in the y-direction.
 
-mapdl.sfbeam(1, 1, "PRES", 10000/12)
-mapdl.sfbeam(4, 1, "PRES", 1E4/12)
+w = 10000/12  # (lb/in) - distributed load.
+mapdl.sfbeam(1, 1, "PRES", w)
+mapdl.sfbeam(4, 1, "PRES", w)
 mapdl.finish()
-
 
 ###############################################################################
 # Solve
@@ -138,52 +138,51 @@ mapdl.finish()
 
 mapdl.run("/SOLU")
 out = mapdl.solve()
-print(out)
 mapdl.finish()
+print(out)
+
+result = mapdl.result
+print(result)
 
 
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
-# Enter post-processing. Select the nodes at ``y=10`` and ``y=0``, and
-# sum the forces there. Then store the y-components in two variables:
-# ``reaction_1`` and ``reaction_2``.
+# Enter post-processing. To get the stress and deflection results
+# from the middle node and cross-section of the beam we can use
+# mapdl.get().
 
 mapdl.post1()  # Start Post-Processing
 mapdl.set(1)  # Select first Load Step
 
 # Define Maximum Stress
 
+s_eqv_max_str = (mapdl.get('stress_eqv', 'secr', 2, 's', 'eqv', 'max')).split()
+s_eqv_max = -float(s_eqv_max_str[0])
 
-a = mapdl.post_processing.nodal_elastic_eqv
+# Difine deflection at the middle of the beam
 
+mid_node_uy = mapdl.get('disp', 'node', 3, 'u', 'y')
 
-# print(seqv_max)
+###############################################################################
+# Check Results
+# ~~~~~~~~~~~~~
+# Now that we have the results we can compare the nodal displacement and stress
+# experienced by middle node of the beam to the known stresses -11400 psi and 
+# 0.182 inches of the deflection. 
 
-# # Difine deflection at the middle of the beam
-# mid_node_uy = mapdl.get('disp', 'node', 3, 'u', 'y')
-# print(mid_node_uy)
-# print(type(mid_node_uy))
-#
-# ###############################################################################
-# # Check Results
-# # ~~~~~~~~~~~~~
-# # Now that we have the response we can compare the values to the
-# # expected stresses of 19695 and 10152 respectively.
-# #
-#
-# stress_target = -11400.000
-# print(type(stress_target))
-# stress_ratio = seqv_max / stress_target
-# deflection_target = 0.182
-# deflection_ratio = mid_node_uy / deflection_target
-#
-# output = f"""
-# ------------------- VM3 RESULTS COMPARISON ---------------------
-#              |   TARGET   |   Mechanical APDL   |   RATIO
-# ----------------------------------------------------------------
-#     Steel        {stress_target}        {seqv_max}            {stress_ratio:.6f}
-#     Copper       {deflection_target}        {mid_node_uy}            {deflection_ratio:.6f}
-# ----------------------------------------------------------------
-# """
-# print(output)
+stress_target = -11400.000
+stress_ratio = s_eqv_max / stress_target
+deflection_target = 0.182
+deflection_ratio = mid_node_uy / deflection_target
+
+output = f"""
+-------------------------- VM3 RESULTS COMPARISON --------------------------
+              |   TARGET   |   Mechanical APDL   |   RATIO   |
+----------------------------------------------------------------------------
+    Steel      {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
+    Deflection    {deflection_target:.3f}            {mid_node_uy:.3f}            {deflection_ratio:.3f}
+----------------------------------------------------------------------------
+"""
+
+print(output)
