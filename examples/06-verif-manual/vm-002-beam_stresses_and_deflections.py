@@ -180,7 +180,7 @@ output = f"""
 -------------------------- VM3 RESULTS COMPARISON --------------------------
               |   TARGET   |   Mechanical APDL   |   RATIO   |
 ----------------------------------------------------------------------------
-    Steel      {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
+    Stress     {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
     Deflection    {deflection_target:.3f}            {mid_node_uy:.3f}            {deflection_ratio:.3f}
 ----------------------------------------------------------------------------
 """
