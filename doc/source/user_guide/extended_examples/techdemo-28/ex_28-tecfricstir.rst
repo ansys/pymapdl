@@ -109,27 +109,29 @@ shape tool, as shown in the following figure:
 
 
 .. jupyter-execute::
-   :hide-code:
-
-   # jupyterlab boilerplate setup
-   import pyvista
-   from ansys.mapdl.core.examples import download_tech_demo_data
-
-   pyvista.set_jupyter_backend('pythreejs')
-   pyvista.global_theme.background = 'white'
-   pyvista.global_theme.window_size = [600, 400]
-   pyvista.global_theme.axes.show = True
-   pyvista.global_theme.antialiasing = True
-   pyvista.global_theme.show_scalar_bar = True
-
-   cdbfile = download_tech_demo_data("td-28", "fsw.cdb")
-
-.. jupyter-execute:: 
     :hide-code:
 
+    # jupyterlab boilerplate setup
+    import pyvista
+    from ansys.mapdl.core.examples import download_tech_demo_data
+
+    pyvista.set_jupyter_backend('pythreejs')
+    pyvista.global_theme.background = 'white'
+    pyvista.global_theme.window_size = [600, 400]
+    pyvista.global_theme.axes.show = True
+    pyvista.global_theme.antialiasing = True
+    pyvista.global_theme.show_scalar_bar = True
+
+    cdbfile = download_tech_demo_data("td-28", "fsw.cdb")
+
+    # Generating geometry, just for plotting purposes.
+    # The elements and nodes are going to be taken from the cdb file.
+    
     from ansys.mapdl.core import launch_mapdl
     mapdl = launch_mapdl()
     mapdl.prep7()
+
+    mapdl.cdread('db', cdbfile)
 
     # ***** Problem parameters ********
     l = 76.2e-03     # Length of each plate,m
@@ -166,7 +168,17 @@ shape tool, as shown in the following figure:
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
     mapdl.vglue(3, 4, 5, 6)
 
-    _ = mapdl.vplot(vtk=True, background='white')
+
+
+.. jupyter-execute:: 
+    :hide-code:
+    
+    # Plotting geometry
+    p = pyvista.Plotter()
+    p.background_color='white'
+    for each in mapdl.geometry.areas():
+        p.add_mesh(each, show_edges=False, show_scalar_bar=False, style='surface', color='grey')
+    p.show()
 
     ## To add code to plot the geometry dynamically   
 
@@ -223,7 +235,8 @@ SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``).
     import pyvista
 
     from ansys.mapdl.core import launch_mapdl
-    mapdl = mapdl.prep7()
+    mapdl = launch_mapdl()
+    mapdl.prep7()
 
     # ***** Problem parameters ********
     l = 76.2e-03     # Length of each plate,m
@@ -260,7 +273,6 @@ SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``).
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
     mapdl.vglue(3, 4, 5, 6)
 
-    _ = mapdl.vplot(vtk=True, title='Geometry', background='white')
 
 A hexahedral mesh with dropped midside nodes is used because the presence of
 midside nodes (or quadratic interpolation functions) can lead to oscillations in the
@@ -276,41 +288,8 @@ shows the 3-D meshed model:
 ..    
 ..     **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
 
-.. jupyter-execute::
-    :hide-code:
 
-    # ==========================================================
-    # * Material properties
-    # ==========================================================
-    # * Material properties for 304l stainless steel Plates
-    mapdl.mp("ex", 1, 193e9)  # Elastic modulus (N/m^2)
-    mapdl.mp("nuxy", 1, 0.3)  # Poisson's ratio
-    mapdl.mp("alpx", 1, 1.875e-5)  # Coefficient of thermal expansion, µm/m'c
-    # Fraction of plastic work converted to heat, 80%
-    mapdl.mp("qrate", 1, fplw)
-
-    # *BISO material model
-    EX = 193e9
-    ET = 2.8e9
-    EP = EX*ET/(EX-ET)
-    mapdl.tb("plas", 1, 1, "", "biso")  # Bilinear isotropic material
-    mapdl.tbdata(1, 290e6, EP)  # Yield stress & plastic tangent modulus
-    mapdl.mptemp(1, 0, 200, 400, 600, 800, 1000)
-    mapdl.mpdata("kxx", 1, 1, 16, 19, 21, 24, 29, 30)  # therm cond.(W/m'C)
-    mapdl.mpdata("c", 1, 1, 500, 540, 560, 590, 600, 610)  # spec heat(J/kg'C)
-    mapdl.mpdata("dens", 1, 1, 7894, 7744, 7631, 7518, 7406, 7406)  # kg/m^3
-
-    # * Material properties for PCBN tool
-    mapdl.mp("ex", 2, 680e9)  # Elastic modulus (N/m^2)
-    mapdl.mp("nuxy", 2, 0.22)  # Poisson's ratio
-    mapdl.mp("kxx", 2, 100)  # Thermal conductivity(W/m'C)
-    mapdl.mp("c", 2, 750)  # Specific heat(J/kg'C)
-    _ = mapdl.mp("dens", 2, 4280)  # Density,kg/m^3
-
-    _ = mapdl.geometry.lines.plot()
-
-
-.. jupyter-execute::
+.. code:: python
 
     # ==========================================================
     # * Meshing
@@ -346,7 +325,14 @@ shows the 3-D meshed model:
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    _ = mapdl.eplot(vtk=True, background='white')
+    mapdl.eplot(vtk=True, background='white')
+
+
+.. jupyter-execute::
+    :hide-code:
+
+    grid = mapdl.mesh.grid
+    grid.plot() #show_edges=True, show_scalar_bar=False
 
 **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
 
@@ -402,7 +388,7 @@ value.
 
 .. **Example 28.1: Defining the Contact Settings of the Contact Pair**
 
-.. jupyter-execute::
+.. code:: python
 
     # * Define contact pair between two plates
     mapdl.et(6, "TARGE170")
@@ -465,7 +451,11 @@ tool, as shown in this figure:
     mapdl.esel("s", "ename","", 170)
     mapdl.esel("a", "ename", "", 174)
 
-    _ = mapdl.eplot(vtk=True, background='white')
+    grid = mapdl.mesh.grid
+    grid.plot()
+    # _ = mapdl.eplot(vtk=True, background='white')
+
+
 
 **Figure 28.4: Contact Pair Between Tool and Workpiece**
 
@@ -487,8 +477,7 @@ coefficient drops as the temperature increases, a variable coefficient of fricti
 
 .. **Example 28.2: Specifying the Settings for the Contact Pair**
 
-.. jupyter-execute::
-    :hide-output:
+.. code:: python
     
     # * Define contact pair between tool & workpiece
     mapdl.et(4, "TARGE170")
@@ -567,8 +556,7 @@ CONTA174 elements:
     **Figure 28.5: Rigid Surface Constrained**
 
 
-.. jupyter-execute::
-    :hide-output:
+.. code:: python
 
     # * Define Rigid Surface Constraint on tool top surface
     mapdl.et(2, "TARGE170")
@@ -762,8 +750,7 @@ the model.
 
 .. **Example 28.3: Defining the Thermal Boundary Conditions**
 
-.. jupyter-execute::
-    :hide-output:
+.. code:: python
 
     # Initial boundary conditions.
     mapdl.tref(25)  # Reference temperature 25'C
@@ -829,8 +816,7 @@ are constrained in the perpendicular direction (z direction).
 
 .. **Example 28.4: Defining the Mechanical Boundary Conditions**
     
-.. jupyter-execute::
-    :hide-output:
+.. code:: python 
     
     # Mechanical Boundary Conditions
     # 20% ends of the each plate is constraint
@@ -999,13 +985,6 @@ The following results topics for the FSW simulation are available:
     :figclass: align-center
     
     **Figure 28.8: Friction Stir Welding Animation**
-
-
-.. image:: graphics/gtecfricstir-anim.gif
-   :alt: Friction Stir Welding Animation
-   :align: center
-   
-
 
 
 
@@ -1256,7 +1235,7 @@ option.
 
     mapdl.post1()
     mapdl.set("last")
-    nst = mapdl.get("nst", "active", "", "set", "nset")  # To get number of data sets on result file
+    nst = mapdl.get_value("nst", "active", "", "set", "nset")  # To get number of data sets on result file
 
     # Total frictional heat rate
     mapdl.esel("s", "real", "", 5)
