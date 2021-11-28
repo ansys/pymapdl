@@ -617,7 +617,7 @@ class MapdlGrpc(_MapdlCore):
         resp = grpc_response.response
         if resp is not None:
             return resp.strip()
-        return ""
+        return None
 
     @protect_grpc
     def _send_command_stream(self, cmd, verbose=False):
