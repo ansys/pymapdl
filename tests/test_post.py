@@ -112,13 +112,13 @@ def contact_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
     mapdl.clear()
-    mapdl.input(examples.verif_files.vmfiles["vm286"])
+    mapdl.input(examples.verif_files.vmfiles["vm266"])
 
     mapdl.post1()
     mapdl.set('last')
     mapdl.mute = False
-    
-    
+
+
 # must be run first before loading a result
 # since MAPDL may be on a remote windows machine, cannot test
 # @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
