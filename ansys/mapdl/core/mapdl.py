@@ -123,7 +123,7 @@ def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
                 log_file=True, local=True, **start_parm):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing

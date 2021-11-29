@@ -78,7 +78,7 @@ class MapdlConsole(_MapdlCore):
     Only works on Linux.
     """
 
-    def __init__(self, loglevel="INFO", log_apdl="w", use_vtk=True, **start_parm):
+    def __init__(self, loglevel="INFO", log_apdl=None, use_vtk=True, **start_parm):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
         self._continue_on_error = False
