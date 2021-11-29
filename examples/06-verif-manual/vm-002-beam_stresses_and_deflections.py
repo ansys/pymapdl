@@ -1,33 +1,41 @@
 r"""
 .. _ref_vm2_example:
+
 Beam Stresses and Deflections
-------------------------------------------------
+-----------------------------
 Problem Description:
 -   A standard 30 inch WF beam, with a cross-sectional area :math:`A`, is supported
     as shown below and loaded on the overhangs by a uniformly distributed
     load :math:`w`. Determine the maximum bending stress, :math:`\sigma_max`, in the middle portion of
     the beam and the deflection, :math:`\delta`, at the middle of the beam.
+
 Reference:
    -  S. Timoshenko, Strength of Material, Part I, Elementary Theory and
    Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
    pg. 98, problem 4.
+
 Analysis Type(s):
  - Static Analysis ``ANTYPE=0``
+
 Element Type(s):
  - 3-D 2 Node Beam (BEAM188)
 .. image:: ../../_static/vm2_setup.png
    :width: 400
    :alt: VM2 Problem Sketch
+
 Material Properties
  - :math:`E = 30 \cdot 10^6 psi`
+
 Geometric Properties:
  - :math:`a = 120 in`
  - :math:`l = 240 in`
  - :math:`h = 30 in`
  - :math:`A = 50.65 in^2`
  - :math:`I_z = 7892 in^4`
+
 Loading:
  - :math:`w = (10000/12) lb/in`
+
 Analytical Equations:
  - :math:`M` is the bending moment for the middle portion of the beam:
    :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
@@ -36,8 +44,8 @@ Analytical Equations:
  - The deflection, :math:`\delta`, at the middle of the beam could be defined
    by the formulas of the Transversally Loaded Beams:
    :math:`\delta = 0.182 in`
-"""
 
+"""
 # sphinx_gallery_thumbnail_path = '_static/vm2_setup.png'
 
 ###############################################################################
@@ -46,11 +54,11 @@ Analytical Equations:
 
 from ansys.mapdl.core import launch_mapdl
 
-# start mapdl and clear it
+# Start mapdl and clear it.
 mapdl = launch_mapdl()
-mapdl.clear()  # optional as MAPDL just started
+mapdl.clear()
 
-# enter verification example mode and the pre-processing routine
+# Enter verification example mode and the pre-processing routine.
 mapdl.verify()
 mapdl.prep7()
 
@@ -59,10 +67,24 @@ mapdl.prep7()
 # ~~~~~~~~~~~~~~~~~~~
 # Set up the element type (a beam-type).
 
+# Type of analysis: Static.
 mapdl.antype("STATIC")
+
+# Element type: BEAM188.
 mapdl.et(1, "BEAM188")
-mapdl.keyopt(1, 9, 3)  # Output at 9 intermediate locations
+
+# Special Features are defined by keyoptions of beam element:
+
+# KEYOPT(3)
+# Shape functions along the length:
+# Cubic
 mapdl.keyopt(1, 3, 3)  # Cubic shape function
+
+# KEYOPT(9)
+# Output control for values extrapolated to the element
+# and section nodes:
+# Same as KEYOPT(9) = 1 plus stresses and strains at all section nodes
+mapdl.keyopt(1, 9, 3)
 
 ###############################################################################
 # Define Material
@@ -85,35 +107,40 @@ mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
 
 ###############################################################################
 # Define Geometry:
-# ~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~
 # Set up the nodes and elements. Create nodes then creating elements
 # bewtween nodes.
 
 # Define nodes
-mapdl.n(1)
-mapdl.n(5, 480)
-mapdl.n(6, 60, "1 $ N", 10, 420, 1)
-mapdl.fill(1, 5)
-mapdl.fill(6, 10)
-print(mapdl.nlist())  # List of the created nodes.
+for node_num in range(1, 6):
+    mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
+
+# Define one node for the orientation of the beam cross-section
+orient_node = mapdl.n(6, 60, 1)
+
+# Print the list of the created nodes.
+print(mapdl.nlist())
 
 # Define elements
+for elem_num in range(1, 5):
+    mapdl.e(elem_num, elem_num + 1, orient_node)
 
-mapdl.e(1, 2, 6)
-mapdl.egen(4, 1, 1)
-print(mapdl.elist())  # List of the created elements.
+# Print the list of the created elements.
+print(mapdl.elist())
 
 # Display elements with their nodes numbers.
-
-mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy") 
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy")
 
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Application of boundary conditions.
 
-mapdl.d(2, "UX", lab2="UY") 
+# BC for the beams seats
+mapdl.d(2, "UX", lab2="UY")
 mapdl.d(4, "UY")
+
+# BC for all nodes of the beam
 mapdl.nsel("S", "LOC", "Y", 0)
 mapdl.d("ALL", "UZ")
 mapdl.d("ALL", "ROTX")
@@ -122,11 +149,14 @@ mapdl.nsel("ALL")
 
 ###############################################################################
 # Define Distributed Loads
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-# Application a distributed force of :math:`w = (10000/12) lb/in` 
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# Apply a distributed force of :math:`w = (10000/12) lb/in`
 # in the y-direction.
 
-w = 10000/12  # (lb/in) - distributed load.
+# Parametrization of the distributed load.
+w = 10000 / 12
+
+# Application of the surface load to the beam element.
 mapdl.sfbeam(1, 1, "PRES", w)
 mapdl.sfbeam(4, 1, "PRES", w)
 mapdl.finish()
@@ -141,10 +171,6 @@ out = mapdl.solve()
 mapdl.finish()
 print(out)
 
-result = mapdl.result
-print(result)
-
-
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
@@ -152,17 +178,15 @@ print(result)
 # from the middle node and cross-section of the beam we can use
 # mapdl.get().
 
-mapdl.post1()  # Start Post-Processing
-mapdl.set(1)  # Select first Load Step
+# Enter the post-processing routine and select the first load step.
+mapdl.post1()
+mapdl.set(1)
 
-# Define Maximum Stress
+# Define Maximum Stress at the middle of the beam.
+s_eqv_max = mapdl.get_value('secr', 2, 's', 'eqv', 'max')
 
-s_eqv_max_str = (mapdl.get('stress_eqv', 'secr', 2, 's', 'eqv', 'max')).split()
-s_eqv_max = -float(s_eqv_max_str[0])
-
-# Difine deflection at the middle of the beam
-
-mid_node_uy = mapdl.get('disp', 'node', 3, 'u', 'y')
+# Define deflection at the middle of the beam.
+mid_node_uy = mapdl.get_value(entity='NODE', entnum=3, item1='u', it1num='y')
 
 ###############################################################################
 # Check Results
@@ -171,16 +195,20 @@ mid_node_uy = mapdl.get('disp', 'node', 3, 'u', 'y')
 # experienced by middle node of the beam to the known stresses -11400 psi and 
 # 0.182 inches of the deflection. 
 
-stress_target = -11400.000
-stress_ratio = s_eqv_max / stress_target
+# Results obtained by hand-calculations.
+stress_target = 11400.000
 deflection_target = 0.182
+
+# Calculating the deviation.
+stress_ratio = s_eqv_max / stress_target
 deflection_ratio = mid_node_uy / deflection_target
 
+# Printing output results.
 output = f"""
 -------------------------- VM3 RESULTS COMPARISON --------------------------
               |   TARGET   |   Mechanical APDL   |   RATIO   |
 ----------------------------------------------------------------------------
-    Stress     {stress_target:.3f}        {s_eqv_max:.3f}         {stress_ratio:.3f}
+    Stress      {stress_target:.3f}       {s_eqv_max:.3f}           {stress_ratio:.3f}
     Deflection    {deflection_target:.3f}            {mid_node_uy:.3f}            {deflection_ratio:.3f}
 ----------------------------------------------------------------------------
 """
