@@ -44,6 +44,7 @@ def parse_e(msg: Optional[str]) -> Optional[int]:
 
 
 def parse_kpoint(msg):
+    """Parse create keypoint message and return keypoint number."""
     if msg:
         res = re.search(r"kpoint=\s+(\d+)\s+", msg)
         if res is not None:
@@ -51,15 +52,18 @@ def parse_kpoint(msg):
 
 
 def parse_output_areas(msg):
-    """Parse create area message and return area number"""
+    """Parse create area message and return area number."""
     if msg:
         res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+        res = re.search(r"(OUTPUT AREA\(S\) =\s*)([0-9]+)", msg)
         if res is not None:
             return int(res.group(2))
 
 
 def parse_a(msg):
-    """Parse create area message and return area number"""
+    """Parse create area message and return area number."""
     if msg:
         res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
         if res is not None:
@@ -67,7 +71,7 @@ def parse_a(msg):
 
 
 def parse_line_no(msg):
-    """Parse create area message and return area number"""
+    """Parse create line message and return line number."""
     if msg:
         res = re.search(r"LINE NO[.]=\s+(\d+)", msg)
         if res is not None:
