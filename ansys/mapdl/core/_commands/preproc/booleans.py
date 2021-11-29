@@ -36,9 +36,20 @@ class Booleans:
         conditions assigned to the original entities will not be
         transferred to the new entities generated.  Concatenated entities
         are not valid with this command.
+
+        Examples
+        --------
+        Generate two areas and combine them.
+
+        >>> a1 = mapdl.rectng(2.5, 3.5, 0, 10)
+        >>> a2 = mapdl.cyl4(0, 10, 2.5, 0, 3.5, 90)
+        >>> a_comb = mapdl.aadd(a1, a2)
+        >>> a_comb
+        3
+
         """
         command = f"AADD,{na1},{na2},{na3},{na4},{na5},{na6},{na7},{na8},{na9}"
-        return self.run(command, **kwargs)
+        return parse.parse_output_areas(self.run(command, **kwargs))
 
     def aglue(
         self,

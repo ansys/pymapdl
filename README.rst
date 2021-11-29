@@ -4,7 +4,7 @@ PyMAPDL
     :target: https://pypi.org/project/ansys-mapdl-core/
 
 .. image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/pyansys/pymapdl/actions/workflows/tci.yml
+   :target: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml
 
 .. image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
