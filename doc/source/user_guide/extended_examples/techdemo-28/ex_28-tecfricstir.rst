@@ -1,5 +1,7 @@
-Tech demo 28: Friction Stir Welding (FSW) Simulation
-*****************************************************
+.. _Technology_Showcase_Example_28:
+
+Technology Showcase Example 28: Friction Stir Welding (FSW) Simulation
+***********************************************************************
 
 This example problem shows how to simulate the friction stir welding (FSW) process.
 Several characteristics of FSW are presented, including tool-workpiece surface interaction,
@@ -331,8 +333,8 @@ shows the 3-D meshed model:
 .. jupyter-execute::
     :hide-code:
 
-    grid = mapdl.mesh.grid
-    grid.plot() #show_edges=True, show_scalar_bar=False
+    # grid = mapdl.mesh.grid
+    # grid.plot() #show_edges=True, show_scalar_bar=False
 
 **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
 
@@ -451,8 +453,8 @@ tool, as shown in this figure:
     mapdl.esel("s", "ename","", 170)
     mapdl.esel("a", "ename", "", 174)
 
-    grid = mapdl.mesh.grid
-    grid.plot()
+    # grid = mapdl.mesh.grid
+    # grid.plot()
     # _ = mapdl.eplot(vtk=True, background='white')
 
 
@@ -1438,7 +1440,7 @@ The following files were used in this problem:
 * **fsw.cdb** -- Common database file containing the FSW model information (called by **fsw.dat**)
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download the zipped td-28 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a />`_      |
+| `Download the zipped td-28 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a />`_          |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
 | `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a />`_           |
 +-------------------------------------------------------------------------------------------------------------------------------------------+

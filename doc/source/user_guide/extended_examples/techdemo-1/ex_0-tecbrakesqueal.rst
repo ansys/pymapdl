@@ -1,5 +1,7 @@
-Tech Demo: Brake Squeal Analysis
---------------------------------
+.. _Technology_Showcase_Example_01:
+
+Technology Showcase Example 01: Brake Squeal Analysis
+------------------------------------------------------
 
 
 This example analysis shows how to solve a brake-squeal problem.  `1.6. Analysis and Solution Controls`_ are highlighted: linear
