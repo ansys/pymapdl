@@ -1774,7 +1774,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_eqv_stress
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equilvanent\nStress"})
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equivalent\nStress"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
