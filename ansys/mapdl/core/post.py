@@ -3110,7 +3110,7 @@ class PostProcessing:
 
         """
         return self._ndof_rst("CONT", "SFRIC")
-    
+
     def plot_nodal_contact_friction_stress(self, show_node_numbering=False, **kwargs):
         """Plot the nodal contact friction stress of the current result.
 
