@@ -855,8 +855,7 @@ def launch_mapdl(
         Enables logging every APDL command to the local disk.  This
         can be used to "record" all the commands that are sent to
         MAPDL via PyMAPDL so a script can be run within MAPDL without
-        PyMAPDL. The input string should be the output file path.
-        Defaults is disable (``log_apdl=None``).
+        PyMAPDL. By default this is disabled.
 
     remove_temp_files : bool, optional
         Removes temporary files on exit.  Default ``False``.
