@@ -107,6 +107,18 @@ def plastic_solve(mapdl):
     mapdl.mute = False
 
 
+@pytest.fixture(scope="module")
+def contact_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm286"])
+
+    mapdl.post1()
+    mapdl.set('last')
+    mapdl.mute = False
+    
+    
 # must be run first before loading a result
 # since MAPDL may be on a remote windows machine, cannot test
 # @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
@@ -712,6 +724,13 @@ def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     cpos = mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
     assert isinstance(cpos, CameraPosition)
 
+
+def test_nodal_contact_friction_stress(mapdl, contact_solve):
+    return True
+
+def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
+    cpos = mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
+    assert isinstance(cpos, CameraPosition)
 
 ###############################################################################
 # @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
