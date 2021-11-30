@@ -323,7 +323,7 @@ def contact_solve(mapdl):
     mapdl.esurf()
     mapdl.allsel("all")
 
-    # Top sufaces of plates nodes for contact
+    # Top surfaces of plates nodes for contact
     mapdl.vsel("s", "volume", "", 1, 2)
     mapdl.allsel("below", "volume")
     mapdl.nsel("r", "loc", "z", 0)
