@@ -1,7 +1,7 @@
 """Test post-processing module for ansys.mapdl.core"""
 import numpy as np
 import pytest
-import regex as reg
+import re
 
 from pyvista.plotting.renderer import CameraPosition
 
@@ -1021,7 +1021,7 @@ def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 def test_nodal_contact_friction_stress(mapdl, contact_solve):
     prnsol = mapdl.prnsol('CONT')
     rgx = r"    NODE.*?(?=\n{2,})"
-    matches = reg.findall(rgx, prnsol, flags=reg.DOTALL | reg.MULTILINE)
+    matches = re.findall(rgx, prnsol, flags=re.DOTALL | re.MULTILINE)
 
     values = ''
     for each in matches:
