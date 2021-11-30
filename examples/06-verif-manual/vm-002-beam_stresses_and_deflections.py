@@ -109,7 +109,7 @@ mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
 # Define Geometry:
 # ~~~~~~~~~~~~~~~~
 # Set up the nodes and elements. Create nodes then creating elements
-# bewtween nodes.
+# between nodes.
 
 # Define nodes
 for node_num in range(1, 6):
@@ -176,7 +176,7 @@ print(out)
 # ~~~~~~~~~~~~~~~
 # Enter post-processing. To get the stress and deflection results
 # from the middle node and cross-section of the beam we can use
-# mapdl.get().
+# mapdl.get_value().
 
 # Enter the post-processing routine and select the first load step.
 mapdl.post1()
@@ -205,12 +205,11 @@ deflection_ratio = mid_node_uy / deflection_target
 
 # Printing output results.
 output = f"""
--------------------------- VM3 RESULTS COMPARISON --------------------------
-              |   TARGET   |   Mechanical APDL   |   RATIO   |
-----------------------------------------------------------------------------
-    Stress      {stress_target:.3f}       {s_eqv_max:.3f}           {stress_ratio:.3f}
-    Deflection    {deflection_target:.3f}            {mid_node_uy:.3f}            {deflection_ratio:.3f}
-----------------------------------------------------------------------------
+----------------------------- VM3 RESULTS COMPARISON -----------------------------
+\t\t\t\t|   TARGET   |   Mechanical APDL   |   RATIO   |
+----------------------------------------------------------------------------------
+\tStress{stress_target:18.3f} {s_eqv_max:16.3f} {stress_ratio:14.3f}
+\tDeflection{deflection_target:14.3f} {mid_node_uy:16.3f} {deflection_ratio:14.3f}
+----------------------------------------------------------------------------------
 """
-
 print(output)
