@@ -164,7 +164,7 @@ class MapdlCorba(_MapdlCore):
 
     """
 
-    def __init__(self, loglevel='INFO', log_apdl='w', use_vtk=True,
+    def __init__(self, loglevel='INFO', log_apdl=None, use_vtk=True,
                 log_file = True,
                  log_broadcast=False, verbose=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""

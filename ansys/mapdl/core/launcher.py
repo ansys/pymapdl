@@ -750,7 +750,7 @@ def launch_mapdl(
     start_instance=True,
     ip=LOCALHOST,
     clear_on_connect=True,
-    log_apdl=False,
+    log_apdl=None,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -855,7 +855,8 @@ def launch_mapdl(
         Enables logging every APDL command to the local disk.  This
         can be used to "record" all the commands that are sent to
         MAPDL via PyMAPDL so a script can be run within MAPDL without
-        PyMAPDL. The input string should be the output file path.
+        PyMAPDL. This string is the path of the output file (e.g.
+        ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
         Removes temporary files on exit.  Default ``False``.
