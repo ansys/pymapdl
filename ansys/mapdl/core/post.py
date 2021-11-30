@@ -3079,7 +3079,8 @@ class PostProcessing:
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    def nodal_contact_friction_stress(self):
+    @property
+    def nodal_contact_friction_stress(self) -> np.ndarray:
         """Nodal contact friction stress of the current result.
 
         Equivalent MAPDL command:
@@ -3148,8 +3149,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
 
         """
-        scalars = self.nodal_contact_friction_stress()
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Contact\n Friction Stress"})
         return self._plot_point_scalars(
-            scalars, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_contact_friction_stress, show_node_numbering=show_node_numbering, **kwargs
         )
