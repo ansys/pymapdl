@@ -9,8 +9,6 @@ from ansys.mapdl.core import examples
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
 )
-from ansys.mapdl.core.examples import download_tech_demo_data
-
 
 @pytest.fixture(scope="module")
 def static_solve(mapdl):
