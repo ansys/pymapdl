@@ -192,7 +192,7 @@ mid_node_uy = mapdl.get_value(entity='NODE', entnum=3, item1='u', it1num='y')
 # Check Results
 # ~~~~~~~~~~~~~
 # Now that we have the results we can compare the nodal displacement and stress
-# experienced by middle node of the beam to the known stresses -11400 psi and 
+# experienced by middle node of the beam to the known stresses -11400 psi and
 # 0.182 inches of the deflection.
 
 # Results obtained by hand-calculations.
