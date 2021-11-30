@@ -250,8 +250,6 @@ class Geometry:
         if amin or amax:
             if amax is None:
                 amax = amin
-            else:
-                amax = ""
 
             if amin is None:  # amax is non-zero
                 amin = 1
@@ -311,10 +309,6 @@ class Geometry:
             self._mapdl.smrtsize("OFF")
             self._mapdl.cmsel("S", "__tmp_area__", "AREA")
             self._mapdl.cmsel("S", "__tmp_elem__", "ELEM")
-
-        # ensure the number of groups matches the number of areas
-        if len(groups) != len(orig_anum):
-            groups = None
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
