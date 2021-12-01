@@ -48,6 +48,7 @@ Analytical Equations:
    :math:`\delta = 0.182 in`
 
 """
+# sphinx_gallery_thumbnail_path = '_static/vm2_setup.png'
 
 ###############################################################################
 # Start MAPDL
@@ -187,7 +188,7 @@ print(out)
 # ~~~~~~~~~~~~~~~
 # Enter post-processing. To get the stress and deflection results
 # from the middle node and cross-section of the beam we can use
-# :py:meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
+# :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
 
 # Enter the post-processing routine and select the first load step.
 mapdl.post1()
