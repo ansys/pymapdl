@@ -6,7 +6,7 @@ def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert 'apdl' in mapdl.inquire('apdl').lower()
 
-    # **Returning the Value of an Environment Variable to a Parameter**
+    # test returning the value of an environment variable to a parameter
     env = list(os.environ.keys())[0]
     if os.name == 'nt':
         env_value = os.getenv(env).split(';')[0]
@@ -18,12 +18,12 @@ def test_inquire(mapdl):
     env_ = mapdl.inquire('ENV', env, 0)
     assert env_ == env_value
 
-    # **Returning the Value of a Title to a Parameter**
+    # returning the value of a title to a parameter
     title = 'This is the title'
     mapdl.title(title)
     assert title == mapdl.inquire('title')
 
-    # **Returning Information About a File to a Parameter**
+    # return information about a file to a parameter
     jobname = mapdl.inquire('jobname')
     assert mapdl.inquire('exist', jobname + '.lock')
     assert mapdl.inquire('exist', jobname , 'lock')
