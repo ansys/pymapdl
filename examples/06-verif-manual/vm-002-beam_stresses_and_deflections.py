@@ -138,8 +138,7 @@ for elem_num in range(1, 5):
 print(mapdl.elist())
 
 # Display elements with their nodes numbers.
-mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy")
-
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
 
 ###############################################################################
 # Define Boundary Conditions
