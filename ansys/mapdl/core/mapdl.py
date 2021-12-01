@@ -1,7 +1,5 @@
 """Module to control interaction with MAPDL through Python"""
 
-from ansys.mapdl.core import LOG as logger
-
 import time
 import glob
 import re
@@ -29,6 +27,7 @@ from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core import LOG as logger
 
 
 _PERMITTED_ERRORS = [
@@ -1581,37 +1580,46 @@ class _MapdlCore(Commands):
     def get_value(
         self, entity="", entnum="", item1="", it1num="", item2="", it2num="", **kwargs
     ):
-        """Runs the GET command and returns a Python value.
+        """Runs the MAPDL GET command and returns a Python value.
 
-        This method uses :func:`_MapdlCore.get`.
+        This method uses :func:`Mapdl.get`.
 
         See the full MADPL command documentation at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
+        .. note::
+           This method is not available when within the
+           :func:`Mapdl.non_interactive`
+           context manager.
+
         Parameters
         ----------
-        entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc.
+        entity : str
+            Entity keyword. Valid keywords are ``"NODE"``, ``"ELEM"``,
+            ``"KP"``, ``"LINE"``, ``"AREA"``, ``"VOLU"``, ``"PDS"``,
+            etc.
 
-        entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
+        entnum : str, int, optional
+            The number or label for the entity. In some cases, a zero
+            (or blank ``""``) ``entnum`` represents all entities of
+            the set.
 
-        item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
+        item1 : str, optional
+            The name of a particular item for the given entity.
 
-        it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
+        it1num : str, int, optional
+            The number (or label) for the specified Item1 (if
+            any). Some Item1 labels do not require an IT1NUM value.
 
-        item2, it2num
+        item2 : str, optional
             A second set of item labels and numbers to further qualify the item
             for which data are to be retrieved. Most items do not require this
             level of information.
+
+        it2num : str, int, optional
+            The number (or label) for the specified ``item2`` (if
+            any). Some ``item2`` labels do not require an ``it2num``
+            value.
 
         Returns
         -------
