@@ -27,4 +27,3 @@ def test_inquire(mapdl):
     jobname = mapdl.inquire('jobname')
     assert mapdl.inquire('exist', jobname + '.lock')
     assert mapdl.inquire('exist', jobname , 'lock')
-    
