@@ -414,7 +414,7 @@ class ParameterDefinition:
         'file.rst'
         """
         response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
-        if func == 'ENV':  # the output is multiline, we just need the last.
+        if func.upper() in ['ENV', 'TITLE']:  # the output is multiline, we just need the last line.
             response = response.splitlines()[-1]
         if "=" in response:
             return response.split("=")[1].strip()
