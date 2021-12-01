@@ -43,8 +43,8 @@ Analytical Equations:
    :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
  - Determination of the maximum stress in the middle portion of the beam is:
    :math:`\sigma_max = \frac{M h}{2 I_z}`
- - The deflection, :math:`\delta`, at the middle of the beam could be defined
-   by the formulas of the Transversally Loaded Beams:
+ - The deflection, :math:`\delta`, at the middle of the beam can be defined
+   by the formulas of the transversally loaded beam:
    :math:`\delta = 0.182 in`
 
 """
@@ -139,6 +139,7 @@ print(mapdl.elist())
 
 # Display elements with their nodes numbers.
 mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+
 
 ###############################################################################
 # Define Boundary Conditions
