@@ -1226,9 +1226,16 @@ class MapdlGrpc(_MapdlCore):
     def _get(self, entity, entnum, item1, it1num, item2, it2num):
         """Sends gRPC *Get request.
 
-        WARNING: Not thread SAFE.  Uses _get_lock to ensure multiple
-        request aren't evaluated simultaneously.
+        .. warning::
+           Not thread safe.  Uses ``_get_lock`` to ensure multiple
+           request are not evaluated simultaneously.
         """
+        if self._store_commands:
+            raise RuntimeError(
+                "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
+                "Exit non_interactive mode before using this method."
+            )
+
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num}"
 
         # not threadsafe; don't allow multiple get commands
