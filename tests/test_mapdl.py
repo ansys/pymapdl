@@ -140,6 +140,55 @@ def make_block(mapdl, cleared):
     mapdl.vmesh("ALL")
 
 
+@pytest.fixture(scope="function")
+def beam188_solve(mapdl, cleared):
+    # run non-interactive for speed
+    with mapdl.non_interactive:
+        mapdl.antype("STATIC")
+        mapdl.et(1, "BEAM188")
+        mapdl.keyopt(1, 3, 3)  # Cubic shape function
+        mapdl.keyopt(1, 9, 3)
+
+        # define material
+        mapdl.mp("EX", 1, 30E6)
+        mapdl.mp("PRXY", 1, 0.3)
+
+        # define section
+        w_f = 1.048394965
+        w_w = 0.6856481
+        sec_num = 1
+        mapdl.sectype(sec_num, "BEAM", "I", "ISection")
+        mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
+
+        # define geometry
+        for node_num in range(1, 6):
+            mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
+
+        # define one node for the orientation of the beam cross-section
+        mapdl.n(6, 60, 1)
+
+        # define elements
+        for elem_num in range(1, 5):
+            mapdl.e(elem_num, elem_num + 1, 6)
+
+        # boundary conditions
+        mapdl.d(2, "UX", lab2="UY")
+        mapdl.d(4, "UY")
+        mapdl.nsel("S", "LOC", "Y", 0)
+        mapdl.d("ALL", "UZ")
+        mapdl.d("ALL", "ROTX")
+        mapdl.d("ALL", "ROTY")
+        mapdl.nsel("ALL")
+
+        # application of the surface load to the beam element
+        w = 10000 / 12
+        mapdl.sfbeam(1, 1, "PRES", w)
+        mapdl.sfbeam(4, 1, "PRES", w)
+
+        mapdl.run("/SOLU")
+        mapdl.solve()
+
+
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl._name
@@ -961,7 +1010,6 @@ def test_cwd_directory(mapdl, tmpdir):
 
 @skip_in_cloud
 def test_inquire(mapdl):
-
     # Testing basic functions (First block: Functions)
     assert 'apdl' in mapdl.inquire('apdl').lower()
 
@@ -986,3 +1034,13 @@ def test_inquire(mapdl):
     jobname = mapdl.inquire('jobname')
     assert mapdl.inquire('exist', jobname + '.lock')
     assert mapdl.inquire('exist', jobname , 'lock')
+
+
+def test_handle_hidden_nodes(mapdl, beam188_solve):
+    # Sometimes, MAPDL will return virtual, or hidden nodes.
+    # These appear to be at the beginning of the of the
+    # array. This behavior was identified in
+    # https://github.com/pyansys/pymapdl/issues/751
+
+    # this should just run without error. Add in a trivial assert as best-practice
+    assert mapdl.mesh.grid.n_points == mapdl.mesh.n_node
