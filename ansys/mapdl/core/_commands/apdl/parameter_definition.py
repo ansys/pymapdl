@@ -290,10 +290,8 @@ class ParameterDefinition:
 
         arg1 : str
             First argument. See notes for ``arg1`` definition.
-
         arg2 : str
             Second argument. See notes for ``arg1`` definition.
-
         strarray : str
             Name of the string array or parameter that will hold the returned values.
 
@@ -306,8 +304,9 @@ class ParameterDefinition:
         -----
         The ``/INQUIRE`` command is valid in any processor.
 
-        .. warning:: Please notice that the order of the arguments is different from the original
-        MAPDL argument order.
+        .. warning::
+           Take note that the order of the arguments is different from the original
+           MAPDL command.
 
         **GENERAL FUNC OPTIONS**
 
@@ -329,15 +328,15 @@ class ParameterDefinition:
 
         **RETURNING THE VALUE OF AN ENVIRONMENT VARIABLE TO A PARAMETER**
 
-        If FUNC=ENV, the command format is ``/INQUIRE,StrArray,ENV,ENVNAME,Substring``.
+        If ``FUNC=ENV``, the command format is ``/INQUIRE,StrArray,ENV,ENVNAME,Substring``.
         In this instance, ENV specifies that the command should return the
         value of an environment variable.
         The following defines the remaining fields:
 
-        Envname :
+        Envname:
             Specifies the name of the environment variable.
 
-        Substring :
+        Substring:
             If ``Substring = 1``, the first substring (up to the first colon (:)) is returned.
             If ``Substring = 2``, the second substring is returned, etc. For Windows platforms,
             the separating character is semicolon (;).
@@ -347,7 +346,7 @@ class ParameterDefinition:
 
         **RETURNING THE VALUE OF A TITLE TO A PARAMETER**
 
-        If FUNC = TITLE, the command format is ``/INQUIRE,StrArray,TITLE,Title_num``.
+        If ``FUNC = TITLE``, the command format is ``/INQUIRE,StrArray,TITLE,Title_num``.
         In this context, the value of Title_num can be blank or ``1`` through ``5``. If the
         value is ``1`` or blank, the title is returned. If the value is ``2`` through ``5``,
         a corresponding subtitle is returned (``2`` denoting the first subtitle, and so on).
@@ -360,46 +359,43 @@ class ParameterDefinition:
         For these capabilities, the format is ``/INQUIRE,Parameter,FUNC,Fname, Ext, --``.
         The following defines the fields:
 
-        Parameter :
+        Parameter:
             Name of the parameter that will hold the returned values.
 
-        Func :
+        Func:
             Specifies the type of file information returned:
 
-            EXIST :
+            EXIST:
                 Returns a ``1`` if the specified file exists, and ``0`` if it does not.
 
-            DATE :
-                Returns the date stamp of the specified file in the format *yyyymmdd.hhmmss*.
+            DATE:
+                Returns the date stamp of the specified file in the format ``*yyyymmdd.hhmmss*``.
 
-            SIZE :
+            SIZE:
                 Returns the size of the specified file in MB.
 
-            WRITE :
+            WRITE:
                 Returns the status of the write attribute. A ``0`` denotes no write permission while a ``1`` denotes
                 write permission.
 
-            READ :
+            READ:
                 Returns the status of the read attribute. A ``0`` denotes no read permission while a ``1`` denotes read
                 permission.
 
-            EXEC :
+            EXEC:
                 Returns the status of the execute attribute (this has meaning only on Linux). A ``0`` denotes no
                 execute permission while a ``1`` denotes execute permission.
 
-            LINES :
+            LINES:
                 Returns the number of lines in an ASCII file.
 
-        Fname :
+        Fname:
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case, you
             can use all 248 characters for the file name.
 
-        Ext :
+        Ext:
             Filename extension (eight-character maximum).
-
-        - - :
-            Unused field.
 
         Examples
         --------
