@@ -1426,7 +1426,7 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def xpl(self):
-        """MAPDL file exploer
+        """MAPDL file explorer
 
         Iteratively navigate through MAPDL files.
 
