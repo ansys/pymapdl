@@ -311,8 +311,16 @@ class ParameterDefinition:
         The ``/INQUIRE`` command is valid in any processor.
 
         .. warning::
-           Take note that the order of the arguments is different from the original
-           MAPDL command.
+           Take note that from version 0.60.4 and later, the previous command behaviour
+           has been changed. 
+           Previously, the ``StrArray`` argument was omitted by mistake. For example:
+           >>> mapdl.inquire('DIRECTORY')
+           C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
+           Now this will raise an exception. 
+           The default behaviour now, requires to input ``StrArray``:
+           >>> mapdl.inquire('', 'DIRECTORY')
+           C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
         **GENERAL FUNC OPTIONS**
 
@@ -405,14 +413,22 @@ class ParameterDefinition:
 
         Examples
         --------
+        Return the MAPDL working directory
+        >>> mapdl.inquire('', 'DIRECTORY')
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+        
+        Or
+        >>> mapdl.inquire()
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh        
+        
         Return the job name
 
-        >>> mapdl.inquire('JOBNAME')
+        >>> mapdl.inquire('', 'JOBNAME')
         file
 
         Return the result file name
 
-        >>> mapdl.inquire('RSTFILE')
+        >>> mapdl.inquire('', 'RSTFILE')
         'file.rst'
         """
         func_options = ['LOGIN',

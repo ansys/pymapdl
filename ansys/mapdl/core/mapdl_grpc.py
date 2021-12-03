@@ -1420,7 +1420,7 @@ class MapdlGrpc(_MapdlCore):
         if self.busy:
             return True
         try:
-            return bool(self.inquire("JOBNAME"))
+            return bool(self.inquire("", "JOBNAME"))
         except:
             return False
 
@@ -1599,7 +1599,7 @@ class MapdlGrpc(_MapdlCore):
             return
 
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except:
@@ -1631,14 +1631,14 @@ class MapdlGrpc(_MapdlCore):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except:
             filename = self.jobname
 
         try:
-            ext = self.inquire("RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except:  # check if rth file exists
             ext = ""
 

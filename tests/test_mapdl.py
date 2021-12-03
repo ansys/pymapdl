@@ -232,7 +232,7 @@ def test_global_mute(mapdl):
     # commands like /INQUIRE must always return something
     jobname = "file"
     mapdl.jobname = jobname
-    assert mapdl.inquire("JOBNAME") == jobname
+    assert mapdl.inquire("", "JOBNAME") == jobname
     mapdl.mute = False
 
 
@@ -1011,7 +1011,7 @@ def test_cwd_directory(mapdl, tmpdir):
 @skip_in_cloud
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
-    assert 'apdl' in mapdl.inquire('apdl').lower()
+    assert 'apdl' in mapdl.inquire("", 'apdl').lower()
 
     # **Returning the Value of an Environment Variable to a Parameter**
     env = list(os.environ.keys())[0]
@@ -1022,18 +1022,18 @@ def test_inquire(mapdl):
     else:
         raise Exception('Not supported OS.')
 
-    env_ = mapdl.inquire('ENV', env, 0)
+    env_ = mapdl.inquire("", 'ENV', env, 0)
     assert env_ == env_value
 
     # **Returning the Value of a Title to a Parameter**
     title = 'This is the title'
     mapdl.title(title)
-    assert title == mapdl.inquire('title')
+    assert title == mapdl.inquire("", 'title')
 
     # **Returning Information About a File to a Parameter**
-    jobname = mapdl.inquire('jobname')
-    assert mapdl.inquire('exist', jobname + '.lock')
-    assert mapdl.inquire('exist', jobname , 'lock')
+    jobname = mapdl.inquire("", 'jobname')
+    assert mapdl.inquire("", 'exist', jobname + '.lock')
+    assert mapdl.inquire("", 'exist', jobname , 'lock')
 
 
 def test_handle_hidden_nodes(mapdl, beam188_solve):
