@@ -757,7 +757,7 @@ def test_load_table(mapdl):
     my_conv[0, :] = np.arange(dimy)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], rtol=0.0001)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
@@ -777,7 +777,7 @@ def test_load_array(mapdl):
     my_conv = np.random.rand(dimx, dimy)
 
     mapdl.load_array("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=0.0001)
 
 
 @pytest.mark.skip_grpc
