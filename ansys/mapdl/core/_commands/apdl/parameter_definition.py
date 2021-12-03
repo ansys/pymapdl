@@ -287,13 +287,14 @@ class ParameterDefinition:
         func : str
            Specifies the type of system information returned.  See the
            notes section for more information.
-
-        arg1 : str
+        arg1 : str, optional
             First argument. See notes for ``arg1`` definition.
-        arg2 : str
+        arg2 : str, optional
             Second argument. See notes for ``arg1`` definition.
-        strarray : str
+        strarray : str, optional
             Name of the string array or parameter that will hold the returned values.
+            Normally, if used in a python script you should just work with the
+            return value from this method.
 
         Returns
         -------
