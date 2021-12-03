@@ -312,12 +312,12 @@ class ParameterDefinition:
 
         .. warning::
            Take note that from version 0.60.4 and later, the previous command behaviour
-           has been changed. 
+           has been changed.
            Previously, the ``StrArray`` argument was omitted by mistake. For example:
            >>> mapdl.inquire('DIRECTORY')
            C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
-           Now this will raise an exception. 
+           Now this will raise an exception.
            The default behaviour now, requires to input ``StrArray``:
            >>> mapdl.inquire('', 'DIRECTORY')
            C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
@@ -416,11 +416,12 @@ class ParameterDefinition:
         Return the MAPDL working directory
         >>> mapdl.inquire('', 'DIRECTORY')
         C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
-        
+
         Or
+
         >>> mapdl.inquire()
-        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh        
-        
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
         Return the job name
 
         >>> mapdl.inquire('', 'JOBNAME')
