@@ -279,22 +279,27 @@ class ParameterDefinition:
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
 
-    def inquire(self, func, arg1='', arg2='', strarray=''):
+    def inquire(self, strarray='', func='', arg1='', arg2=''):
         """Returns system information.
+
+        By default, with no arguments, it returns the working directory.
+
+        >>> mapdl.inquire()
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
         Parameters
         ----------
-        func : str
+        strarray : str, optional
+            Name of the string array or parameter that will hold the returned values.
+            Normally, if used in a python script you should just work with the
+            return value from this method.
+        func : str, optional
            Specifies the type of system information returned.  See the
            notes section for more information.
         arg1 : str, optional
             First argument. See notes for ``arg1`` definition.
         arg2 : str, optional
             Second argument. See notes for ``arg1`` definition.
-        strarray : str, optional
-            Name of the string array or parameter that will hold the returned values.
-            Normally, if used in a python script you should just work with the
-            return value from this method.
 
         Returns
         -------
@@ -410,6 +415,36 @@ class ParameterDefinition:
         >>> mapdl.inquire('RSTFILE')
         'file.rst'
         """
+        func_options = ['LOGIN',
+                        'DOCU',
+                        'APDL',
+                        'PROG',
+                        'AUTH',
+                        'USER',
+                        'DIRECTORY',
+                        'JOBNAME',
+                        'RSTDIR',
+                        'RSTFILE',
+                        'RSTEXT',
+                        'OUTPUT',
+                        'ENVNAME',
+                        'TITLE',
+                        'EXIST',
+                        'DATE',
+                        'SIZE',
+                        'WRITE',
+                        'READ',
+                        'EXEC',
+                        'LINES']
+
+        if strarray.upper() in func_options and func.upper() not in func_options:
+            # Likely you are using the old ``_Mapdl.inquire`` implementation.
+            func_ = func if func != '' else '{EMPTY}'
+            raise Exception(f"'Mapdl.inquire' got arguments in the wrong order.\n'StrArray' = '{strarray}'\t'Func' = '{func}'")
+
+        if func == '':
+            func = 'DIRECTORY'
+
         response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
         if func.upper() in ['ENV', 'TITLE']:  # the output is multiline, we just need the last line.
             response = response.splitlines()[-1]
