@@ -459,7 +459,7 @@ class ParameterDefinition:
             raise ValueError(
                   "Arguments of this method have changed. `Mapdl.inquire` now includes the optional `strarray` parameter "
                   f"as the first argument. Either use `inquire(func={strarray})`, or `inquire("", {strarray})`"
-            )
+                  )
 
         if func == '':
             func = 'DIRECTORY'
