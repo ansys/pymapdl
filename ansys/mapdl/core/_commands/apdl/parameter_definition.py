@@ -456,8 +456,10 @@ class ParameterDefinition:
 
         if strarray.upper() in func_options and func.upper() not in func_options:
             # Likely you are using the old ``_Mapdl.inquire`` implementation.
-            func_ = func if func != '' else '{EMPTY}'
-            raise Exception(f"'Mapdl.inquire' got arguments in the wrong order.\n'StrArray' = '{strarray}'\t'Func' = '{func}'")
+            raise ValueError(
+                  "Arguments of this method have changed. `Mapdl.inquire` now includes the optional `strarray` parameter "
+                  f"as the first argument. Either use `inquire(func={strarray})`, or `inquire("", {strarray})`"
+            )
 
         if func == '':
             func = 'DIRECTORY'
