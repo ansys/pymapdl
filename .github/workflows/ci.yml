@@ -28,15 +28,15 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install requirements
-        run: pip install -r requirements_style.txt --disable-pip-version-check
-
-      - name: Spelling
-        run: make codespell
+      - name: Style
+        run: |
+          pip install -r requirements_style.txt --disable-pip-version-check
+          make
 
       - name: flake8
         if: always()
-        run: make flake8
+        run: |
+          make flake8
 
   testimport:
     name: Smoke Tests
