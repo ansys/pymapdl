@@ -700,15 +700,15 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    dimx = np.random.randint(3, 15)
-    dimy = np.random.randint(3, 15)
+    dimx = 5
+    dimy = 8
 
     my_conv = np.random.rand(dimx, dimy)
     my_conv[:, 0] = np.arange(dimx)
     my_conv[0, :] = np.arange(dimy)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], rtol=0.0001)
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
@@ -721,14 +721,16 @@ def test_load_table(mapdl):
         mapdl.load_table("my_conv", my_conv1)
 
 
-def test_load_array(mapdl):
-
-    dimx = np.random.randint(1, 15)
-    dimy = np.random.randint(1, 15)
+@pytest.mark.parametrize("dimx", [1, 3, 10])
+@pytest.mark.parametrize("dimy", [1, 3, 10])
+def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
-
     mapdl.load_array("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=0.0001)
+
+    # flatten as MAPDL returns flat arrays when second dimension is 1.
+    if dimy == 1:
+        my_conv = my_conv.ravel()
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
 @pytest.mark.skip_grpc
