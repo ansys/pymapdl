@@ -140,55 +140,6 @@ def make_block(mapdl, cleared):
     mapdl.vmesh("ALL")
 
 
-@pytest.fixture(scope="function")
-def beam188_solve(mapdl, cleared):
-    # run non-interactive for speed
-    with mapdl.non_interactive:
-        mapdl.antype("STATIC")
-        mapdl.et(1, "BEAM188")
-        mapdl.keyopt(1, 3, 3)  # Cubic shape function
-        mapdl.keyopt(1, 9, 3)
-
-        # define material
-        mapdl.mp("EX", 1, 30E6)
-        mapdl.mp("PRXY", 1, 0.3)
-
-        # define section
-        w_f = 1.048394965
-        w_w = 0.6856481
-        sec_num = 1
-        mapdl.sectype(sec_num, "BEAM", "I", "ISection")
-        mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
-
-        # define geometry
-        for node_num in range(1, 6):
-            mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
-
-        # define one node for the orientation of the beam cross-section
-        mapdl.n(6, 60, 1)
-
-        # define elements
-        for elem_num in range(1, 5):
-            mapdl.e(elem_num, elem_num + 1, 6)
-
-        # boundary conditions
-        mapdl.d(2, "UX", lab2="UY")
-        mapdl.d(4, "UY")
-        mapdl.nsel("S", "LOC", "Y", 0)
-        mapdl.d("ALL", "UZ")
-        mapdl.d("ALL", "ROTX")
-        mapdl.d("ALL", "ROTY")
-        mapdl.nsel("ALL")
-
-        # application of the surface load to the beam element
-        w = 10000 / 12
-        mapdl.sfbeam(1, 1, "PRES", w)
-        mapdl.sfbeam(4, 1, "PRES", w)
-
-        mapdl.run("/SOLU")
-        mapdl.solve()
-
-
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl._name
@@ -749,15 +700,15 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    dimx = np.random.randint(3, 15)
-    dimy = np.random.randint(3, 15)
+    dimx = 5
+    dimy = 8
 
     my_conv = np.random.rand(dimx, dimy)
     my_conv[:, 0] = np.arange(dimx)
     my_conv[0, :] = np.arange(dimy)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
@@ -770,14 +721,16 @@ def test_load_table(mapdl):
         mapdl.load_table("my_conv", my_conv1)
 
 
-def test_load_array(mapdl):
-
-    dimx = np.random.randint(1, 15)
-    dimy = np.random.randint(1, 15)
+@pytest.mark.parametrize("dimx", [1, 3, 10])
+@pytest.mark.parametrize("dimy", [1, 3, 10])
+def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
-
     mapdl.load_array("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
+
+    # flatten as MAPDL returns flat arrays when second dimension is 1.
+    if dimy == 1:
+        my_conv = my_conv.ravel()
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
 @pytest.mark.skip_grpc

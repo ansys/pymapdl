@@ -16,6 +16,5 @@ you can use one of the following packages:
 
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
    post.PostProcessing

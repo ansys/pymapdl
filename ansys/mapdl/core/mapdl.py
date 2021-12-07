@@ -1494,7 +1494,7 @@ class _MapdlCore(Commands):
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
-        return float(self.get(*args, **kwargs))
+        return self.get(*args, **kwargs)
 
     def add_file_handler(self, filepath, append=False, level="DEBUG"):
         """Add a file handler to the mapdl log.  This allows you to
