@@ -987,13 +987,3 @@ def test_inquire(mapdl):
     jobname = mapdl.inquire("", 'jobname')
     assert mapdl.inquire("", 'exist', jobname + '.lock')
     assert mapdl.inquire("", 'exist', jobname , 'lock')
-
-
-def test_handle_hidden_nodes(mapdl, beam188_solve):
-    # Sometimes, MAPDL will return virtual, or hidden nodes.
-    # These appear to be at the beginning of the of the
-    # array. This behavior was identified in
-    # https://github.com/pyansys/pymapdl/issues/751
-
-    # this should just run without error. Add in a trivial assert as best-practice
-    assert mapdl.mesh.grid.n_points == mapdl.mesh.n_node
