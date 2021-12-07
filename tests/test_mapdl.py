@@ -985,5 +985,5 @@ def test_inquire(mapdl):
 
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", 'jobname')
-    assert mapdl.inquire("", 'exist', jobname + '.lock')
-    assert mapdl.inquire("", 'exist', jobname , 'lock')
+    assert float(mapdl.inquire("", 'exist', jobname + '.lock')) in [0, 1]
+    assert float(mapdl.inquire("", 'exist', jobname , 'lock')) in [0, 1]
