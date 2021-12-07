@@ -1019,27 +1019,22 @@ def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 
 
 def test_nodal_contact_friction_stress(mapdl, contact_solve):
+    # Format tables.
+    mapdl.post1()
+    mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+    nsigfig = 10
+    mapdl.format('', 'E', nsigfig + 9, nsigfig)
+    mapdl.page(1E9, '', -1, 240)
+
     prnsol = mapdl.prnsol('CONT')
-    rgx = r"    NODE.*?(?=\n{2,})"
-    matches = re.findall(rgx, prnsol, flags=re.DOTALL | re.MULTILINE)
-
-    values = ''
-    for each in matches:
-        # Remove the header and concatenate again
-        values += '\n'.join(each.split('\n')[1:]) + '\n'
-
-    array = []
-    for each in values.splitlines():
-        array.append(each.split()[:5]) # Catching up the 5th column. After give format errors.
-
-    array = np.array(array).astype(float)
-
-    sfric_prn = array[:, -1]
+    array = np.genfromtxt(prnsol.splitlines() , skip_header=1)
+    sfric_prn = array[:, 4]
     nodes = array[:, 0]
+
     index = nodes.astype(int) - 1  # -1 to convert apdl node number to python index.
     sfric_nod = mapdl.post_processing.nodal_contact_friction_stress[index]
 
-    assert np.allclose(sfric_prn, sfric_nod, rtol=0.01)
+    assert np.allclose(sfric_prn, sfric_nod)
 
 
 def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
