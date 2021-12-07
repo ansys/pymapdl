@@ -1,7 +1,6 @@
 """Test post-processing module for ansys.mapdl.core"""
 import numpy as np
 import pytest
-import re
 
 from pyvista.plotting.renderer import CameraPosition
 
