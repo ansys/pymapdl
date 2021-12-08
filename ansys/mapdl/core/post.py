@@ -119,6 +119,30 @@ class PostProcessing:
         self._mapdl_weakref = weakref.ref(mapdl)
         self._set_loaded = False
 
+        self._setting_format()
+
+    def _setting_format(self):
+        """Setting printing output format for commands:
+        PRNSOL, PRESOL, PRETAB, PRRSOL, PRPATH, and CYCCALC"""
+
+        nsigfig = 10
+        self.precision = nsigfig
+
+        # Storing previous processor.
+        prior_processor = self._mapdl.parameters.routine
+
+        # Setting format
+        self._mapdl.post1()
+        self._mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        self._mapdl.format('', 'E', nsigfig + 9, nsigfig)
+        self._mapdl.page(1E9, '', -1, 240)
+
+        # We return to previous routine.
+        if prior_processor == "Begin level":
+            self._mapdl.finish()
+        elif 'POST1' not in prior_processor:
+            self._mapdl.run("/%s" % prior_processor)
+
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of MAPDL"""
@@ -171,11 +195,6 @@ class PostProcessing:
          75.20949687626468]
         """
         self._mapdl.post1()
-        self._mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-        nsigfig = 10
-        self._mapdl.format('', 'E', nsigfig + 9, nsigfig)
-        self._mapdl.page(1E9, '', -1, 240)
-
         list_rsp = self._mapdl.set("LIST")
         return np.genfromtxt(list_rsp.splitlines(), skip_header=3)
 
