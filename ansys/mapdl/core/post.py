@@ -272,16 +272,14 @@ class PostProcessing:
         Parameters
         ----------
         item : str
-            Label identifying the item.  See the table below in the
-            notes section.
+            Label identifying the item.
         comp : str, optional
-            Component of the item if applicable.  See the table below
-            in the notes section.
+            Component of the item if applicable.
 
         Returns
         -------
         numpy.ndarray
-            Numpy array containing the requested element values for ta
+            Numpy array containing the requested element values for the
             given item and component.
 
         Notes
@@ -3141,7 +3139,7 @@ class PostProcessing:
         Plot off_screen and save a screenshot.
 
         >>> mapdl.post_processing.plot_nodal_contact_friction_stress(off_screen=True,
-        ...                                                     savefig='seqv_00.png')
+        ...                                                          savefig='seqv_00.png')
 
         Subselect a single result type and plot those strain results.
 
