@@ -28,7 +28,7 @@ from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core import LOG as logger
-
+from ansys.mapdl.reader.rst import Result
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -1364,7 +1364,7 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self):
+    def result(self) -> 'Result':
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
