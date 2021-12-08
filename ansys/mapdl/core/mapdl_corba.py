@@ -183,6 +183,29 @@ class MapdlCorba(_MapdlCore):
         # critical for collection
         INSTANCES.append(weakref.ref(self))
         self._corba_key = None
+        
+        self._setting_format()
+
+    def _setting_format(self):
+        """Setting printing output format for commands:
+        PRNSOL, PRESOL, PRETAB, PRRSOL, PRPATH, and CYCCALC"""
+
+        nsigfig = 10  # Number of digits after the decimal point
+        self._post.precision = nsigfig
+
+        prior_processor = self.parameters.routine
+
+        # Setting format
+        self.post1()
+        self.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        self.format('', 'E', nsigfig + 9, nsigfig)
+        self.page(1E9, '', -1, 240)
+
+        # Returning to previous routine.
+        if prior_processor == "Begin level":
+            self.finish()
+        elif 'POST1' not in prior_processor:
+            self.run("/%s" % prior_processor)
 
     def _launch(self, start_parm, verbose):
         """Launch CORBA."""
