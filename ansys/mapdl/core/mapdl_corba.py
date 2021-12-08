@@ -183,7 +183,7 @@ class MapdlCorba(_MapdlCore):
         # critical for collection
         INSTANCES.append(weakref.ref(self))
         self._corba_key = None
-        
+
         self._setting_format()
 
     def _setting_format(self):
