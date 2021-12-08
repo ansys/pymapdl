@@ -285,7 +285,7 @@ class ParameterDefinition:
         By default, with no arguments, it returns the working directory.
 
         >>> mapdl.inquire()
-        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+        C:\\Users\\user\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
         Parameters
         ----------
