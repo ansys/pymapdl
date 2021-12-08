@@ -16,16 +16,17 @@ PyMAPDL Documentation
 
 Introduction and Purpose
 ------------------------
-PyMAPDL is part of the larger PyAnsys effort to facilitate the use 
-of Ansys technologies directly from Python. Its primary package,
-``ansys-mapdl-core``, provides:
+PyMAPDL is part of the larger `PyAnsys <https://docs.pyansys.com>`_
+effort to facilitate the use of Ansys technologies directly from
+Python. Its primary package, ``ansys-mapdl-core``, provides:
 
-- scripting of MAPDL through both Python and Ansys Parametric Design
-  Language (APDL) syntax
-- plotting of MAPDL geometry and meshes using VTK from within a Python
-  script or an interactive Jupyter notebook
-- access to MAPDL arrays as Python objects (e.g. nodes, elements,
-  solution matrices, and results)
+- Scripting of MAPDL through both Python and Ansys Parametric Design
+  Language (APDL) syntax.
+- Plotting of MAPDL geometry and meshes using `PyVista
+  <https://docs.pyvista.org>`_ from within a Python script or an
+  interactive `Jupyter notebook <https://jupyter.org/>`_.
+- Access to MAPDL arrays as Python objects (e.g. nodes, elements,
+  solution matrices, and results).
 
 With PyMAPDL it is easier than ever to integrate the simulation capabilities 
 of the Ansys MAPDL multi-physics solver directly into novel applications 
@@ -44,9 +45,10 @@ application. It is now open source: Enjoy it! Contributions are welcome.
 
 Background
 ----------
-PyMAPDL, based on gRPC, represents an improvement over its predecessor based
-on CORBA. These technologies allow the MAPDL solver to function as a server, 
-ready to respond to connecting clients.  
+PyMAPDL, based on `gRPC <https://grpc.io/>`_, represents an
+improvement over its predecessor based on CORBA. These technologies
+allow the MAPDL solver to function as a server, ready to respond to
+connecting clients.
 
 Google remote procedure calls, or gRPC, are used to establish secure 
 connections so that a client application can directly call methods on 
@@ -95,10 +97,10 @@ stored to the logging module or can be immediately printed out with
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-MAPDL functions can be called directly from an ``Mapdl`` instance in a
-pythonic manner.  This is to simplify calling MAPDL, especially when
-inputs are variables within Python.  For example, the following two
-commands are equivalent:
+MAPDL functions can be called directly from an :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>` instance in a pythonic manner.  This is to
+simplify calling MAPDL, especially when inputs are variables within
+Python.  For example, the following two commands are equivalent:
 
 .. code:: python
 
@@ -110,7 +112,7 @@ example, inputting points from a numpy array:
 
 .. code:: python
 
-   # make 10 random keypoints in ANSYS
+   # make 10 random keypoints in MAPDL
    points = np.random.random((10, 3))
    for i, (x, y, z) in enumerate(points):
        mapdl.k(i + 1, x, y, z)

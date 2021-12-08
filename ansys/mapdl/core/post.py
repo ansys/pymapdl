@@ -264,6 +264,33 @@ class PostProcessing:
         """
         return self._mapdl.get_value("ACTIVE", item1="SET", it1num="FREQ")
 
+    def nodal_values(self, item, comp="") -> np.ndarray:
+        """Obtain the nodal values for a given item and component.
+
+        This method uses :func:`Mapdl.get_array()<ansys.mapdl.core.Mapdl.get_array`
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.
+        comp : str, optional
+            Component of the item if applicable.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the requested element values for the
+            given item and component.
+
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
+        """
+        # using _ndof_rst instead of get_array because it is wrapped to check the rst.
+        return self._ndof_rst(self, item, it1num=comp)
+
     def element_values(self, item, comp="", option="AVG") -> np.ndarray:
         """Compute the element-wise values for a given item and component.
 
@@ -396,6 +423,48 @@ class PostProcessing:
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
         return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[self.selected_elements]
 
+    def plot_node_values(
+        self, item, comp, show_elem_numbering=False, **kwargs
+    ):
+        """Plot nodal values
+
+        Displays solution results as continuous element contours.
+
+        Equivalent MAPDL command:
+
+        * ``PLNSOL``
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.  See the table below in the
+            notes section.
+        comp : str, optional
+            Component of the item if applicable.  See the table below
+            in the notes section.
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``.
+
+        Examples
+        --------
+        Plot the contact status for the selected elements.
+
+        >>> mapdl.post_processing.plot_node_values(
+        ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
+        ... )
+        """
+
+        values = self.nodal_values(self, item, comp="")
+        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
+        return self._plot_point_scalars(
+            values, show_node_numbering=show_elem_numbering, **kwargs
+        )
+
     def plot_element_values(
             self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
     ) -> CameraPosition:
@@ -403,7 +472,7 @@ class PostProcessing:
 
         Displays the solution results as discontinuous element contours.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PLESOL``
 
@@ -444,6 +513,7 @@ class PostProcessing:
         ... )
 
         """
+        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
         return self._plot_cell_scalars(
             self.element_values(item, comp, option),
             show_elem_numbering=show_elem_numbering, **kwargs
@@ -1155,9 +1225,21 @@ class PostProcessing:
         )
 
     @check_result_loaded
-    def _ndof_rst(self, item, it1num=""):
-        """Nodal degree of freedom result"""
-        return self._mapdl.get_array("NODE", item1=item, it1num=it1num)
+    def _ndof_rst(self, item, it1num="", item2=""):
+        """Nodal degree of freedom result using :func:`Mapdl.get_array()<ansys.mapdl.core.Mapdl.get_array`.
+
+        Notes
+        -----
+        Item2 controls whether nodal-averaged results are
+        used. Valid labels are:
+        * ``AUTO`` - Use nodal-averaged results, if available. Otherwise
+          use element-based
+          results.
+        * ``ESOL`` - Use element-based results only.
+        * ``NAR`` - Use nodal-averaged results only.
+
+        """
+        return self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
 
     @check_result_loaded
     def _edof_rst(self, item, it1num=""):
@@ -2993,4 +3075,79 @@ class PostProcessing:
         kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
+
+    @property
+    def nodal_contact_friction_stress(self) -> np.ndarray:
+        """Nodal contact friction stress of the current result.
+
+        Equivalent MAPDL command:
+
+        * ``PRNSOL, CONT, SFRIC``
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the thermal nodal equivalent strain
+            of the current result.
+
+        Examples
+        --------
+        Thermal quivalent strain for the current result.
+
+        >>> mapdl.post_processing.nodal_contact_friction_stress()
+        array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
+                   0.        ,     0.        ,     0.        ])
+
+        Strain from result 2.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.nodal_contact_friction_stress()
+        array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
+                   0.        ,     0.        ,     0.        ])
+
+        """
+        return self._ndof_rst("CONT", "SFRIC")
+
+    def plot_nodal_contact_friction_stress(self, show_node_numbering=False, **kwargs):
+        """Plot the nodal contact friction stress of the current result.
+
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+
+        Examples
+        --------
+        Plot the nodal contact friction stress for the second result.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress()
+
+        Plot off_screen and save a screenshot.
+
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress(off_screen=True,
+        ...                                                          savefig='seqv_00.png')
+
+        Subselect a single result type and plot those strain results.
+
+        >>> mapdl.esel('S', 'TYPE', vmin=1)
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
+
+        """
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Contact\n Friction Stress"})
+        return self._plot_point_scalars(
+            self.nodal_contact_friction_stress, show_node_numbering=show_node_numbering, **kwargs
         )

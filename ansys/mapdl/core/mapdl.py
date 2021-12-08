@@ -277,7 +277,7 @@ class _MapdlCore(Commands):
 
     @property
     def _distributed(self):
-        """Is a distributed analysis"""
+        """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
@@ -316,6 +316,11 @@ class _MapdlCore(Commands):
 
         View the response from MAPDL with :attr:`Mapdl.last_response`.
 
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
         Examples
         --------
         >>> with mapdl.chain_commands:
@@ -323,6 +328,10 @@ class _MapdlCore(Commands):
             mapdl.k(1, 1, 2, 3)
 
         """
+        if self._distributed:
+            raise RuntimeError(
+                "chained commands are not permitted in distributed ansys."
+            )
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -600,16 +609,15 @@ class _MapdlCore(Commands):
                 old_mute = self.mute
                 self.mute = True
 
-            with self.chain_commands:
-                self.cm("__NODE__", "NODE")
-                self.nsle("S")
-                self.cdwrite("db", arch_filename)
-                self.cmsel("S", "__NODE__", "NODE")
+            self.cm("__NODE__", "NODE", mute=True)
+            self.nsle("S", mute=True)
+            self.cdwrite("db", arch_filename, mute=True)
+            self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-                self.cm("__ELEM__", "ELEM")
-                self.esel("NONE")
-                self.cdwrite("db", nblock_filename)
-                self.cmsel("S", "__ELEM__", "ELEM")
+            self.cm("__ELEM__", "ELEM", mute=True)
+            self.esel("NONE", mute=True)
+            self.cdwrite("db", nblock_filename, mute=True)
+            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             if hasattr(self, "mute"):
                 self.mute = old_mute
@@ -998,10 +1006,12 @@ class _MapdlCore(Commands):
         show_lines=False,
         **kwargs,
     ):
-        """APDL Command: APLOT
+        """Display the selected areas.
 
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
+
+        APDL Command: ``APLOT``
 
         .. note::
             PyMAPDL plotting commands with ``vtk=True`` ignore any
@@ -1021,10 +1031,10 @@ class _MapdlCore(Commands):
         degen, str, optional
             Degeneracy marker.  This option is ignored when ``vtk=True``.
 
-        scale
+        scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
-            directions) (defaults to .075).  This option is ignored
+            directions) (defaults to 0.075).  This option is ignored
             when ``vtk=True``.
 
         vtk : bool, optional
@@ -1094,7 +1104,11 @@ class _MapdlCore(Commands):
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
-                meshes.append({"mesh": surf})
+                meshes.append(
+                    {"mesh": surf,
+                     "color": kwargs.get("color", "white")
+                     }
+                )
 
             if show_area_numbering:
                 anums = np.unique(surf["entity_num"])
@@ -1440,14 +1454,14 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire("RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
             ext = ""
 
@@ -1470,7 +1484,7 @@ class _MapdlCore(Commands):
     def _distributed_result_file(self):
         """Path of the distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
@@ -1494,7 +1508,7 @@ class _MapdlCore(Commands):
 
     def _get(self, *args, **kwargs):
         """Simply use the default get method"""
-        return float(self.get(*args, **kwargs))
+        return self.get(*args, **kwargs)
 
     def add_file_handler(self, filepath, append=False, level="DEBUG"):
         """Add a file handler to the mapdl log.  This allows you to
@@ -1769,7 +1783,7 @@ class _MapdlCore(Commands):
         This is requested from the active mapdl instance.
         """
         try:
-            self._jobname = self.inquire("JOBNAME")
+            self._jobname = self.inquire("", "JOBNAME")
         except Exception:
             pass
         return self._jobname
@@ -1944,18 +1958,17 @@ class _MapdlCore(Commands):
                 nrmkey = "ON"
         nrmkey = "OFF"
 
-        with self.chain_commands:
-            self.slashsolu(mute=True)
-            self.antype(2, "new", mute=True)
-            self.modopt(
-                method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
-            )
-            self.bcsoption(memory_option, mute=True)
+        self.slashsolu(mute=True)
+        self.antype(2, "new", mute=True)
+        self.modopt(
+            method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+        )
+        self.bcsoption(memory_option, mute=True)
 
-            if mxpand:
-                self.mxpand(mute=True)
-            if elcalc:
-                self.mxpand(elcalc="YES", mute=True)
+        if mxpand:
+            self.mxpand(mute=True)
+        if elcalc:
+            self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)
@@ -2398,7 +2411,7 @@ class _MapdlCore(Commands):
         """
         # always attempt to cache the path
         try:
-            self._path = self.inquire("DIRECTORY")
+            self._path = self.inquire("", "DIRECTORY")
         except Exception:
             pass
 

@@ -485,7 +485,7 @@ class LocalMapdlPool:
                     if not instance.busy:
                         # double check that this instance is alive:
                         try:
-                            instance.inquire("JOBNAME")
+                            instance.inquire("", "JOBNAME")
                         except:
                             instance.exit()
                             continue

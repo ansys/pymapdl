@@ -206,6 +206,8 @@ class MapdlGrpc(_MapdlCore):
                 log_file=True, cleanup_on_exit=False, log_apdl=None,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
+        self.__distributed = None
+
         # port and ip are needed to setup the log
         self._port = port
         self._ip = ip
@@ -1420,13 +1422,13 @@ class MapdlGrpc(_MapdlCore):
         if self.busy:
             return True
         try:
-            return bool(self.inquire("JOBNAME"))
+            return bool(self.inquire("", "JOBNAME"))
         except:
             return False
 
     @property
     def xpl(self):
-        """MAPDL file exploer
+        """MAPDL file explorer
 
         Iteratively navigate through MAPDL files.
 
@@ -1599,7 +1601,7 @@ class MapdlGrpc(_MapdlCore):
             return
 
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except:
@@ -1631,14 +1633,14 @@ class MapdlGrpc(_MapdlCore):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except:
             filename = self.jobname
 
         try:
-            ext = self.inquire("RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except:  # check if rth file exists
             ext = ""
 
@@ -1808,3 +1810,10 @@ class MapdlGrpc(_MapdlCore):
 
     def get_name(self):
         return self._name
+
+    @property
+    def _distributed(self) -> bool:
+        """MAPDL is running in distributed mode."""
+        if self.__distributed is None:
+            self.__distributed = self.parameters.numcpu > 1
+        return self.__distributed

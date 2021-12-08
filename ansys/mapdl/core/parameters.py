@@ -37,7 +37,7 @@ class Parameters:
 
     Examples
     --------
-    Simply list all parameters except for MAPDL MATH parameters
+    Simply list all parameters except for MAPDL MATH parameters.
 
     >>> mapdl.parameters
     ARR                              : ARRAY DIM (3, 1, 1)
@@ -75,6 +75,22 @@ class Parameters:
     @property
     def _log(self):
         return self._mapdl._log
+
+    @property
+    def numcpu(self) -> int:
+        """Number of Distributed MAPDL processes being used.
+
+        Notes
+        -----
+        This will always return ``1`` when using shared memory parallel.
+
+        Examples
+        --------
+        >>> mapdl.parameters.numcpu
+        2
+
+        """
+        return int(self._mapdl.get_value("ACTIVE", item1="NUMCPU"))
 
     @property
     def routine(self) -> str:
@@ -447,7 +463,7 @@ class Parameters:
             old_mute = self._mapdl.mute
             self._mapdl.mute = True
 
-        with self._mapdl.chain_commands:
+        with self._mapdl.non_interactive:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             for i in range(idim):
                 for j in range(jdim):
