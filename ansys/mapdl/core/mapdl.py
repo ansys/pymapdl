@@ -277,7 +277,7 @@ class _MapdlCore(Commands):
 
     @property
     def _distributed(self):
-        """Is a distributed analysis"""
+        """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
@@ -316,6 +316,11 @@ class _MapdlCore(Commands):
 
         View the response from MAPDL with :attr:`Mapdl.last_response`.
 
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
         Examples
         --------
         >>> with mapdl.chain_commands:
@@ -323,6 +328,10 @@ class _MapdlCore(Commands):
             mapdl.k(1, 1, 2, 3)
 
         """
+        if self._distributed:
+            raise RuntimeError(
+                "chained commands are not permitted in distributed ansys."
+            )
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -600,16 +609,15 @@ class _MapdlCore(Commands):
                 old_mute = self.mute
                 self.mute = True
 
-            with self.chain_commands:
-                self.cm("__NODE__", "NODE")
-                self.nsle("S")
-                self.cdwrite("db", arch_filename)
-                self.cmsel("S", "__NODE__", "NODE")
+            self.cm("__NODE__", "NODE", mute=True)
+            self.nsle("S", mute=True)
+            self.cdwrite("db", arch_filename, mute=True)
+            self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-                self.cm("__ELEM__", "ELEM")
-                self.esel("NONE")
-                self.cdwrite("db", nblock_filename)
-                self.cmsel("S", "__ELEM__", "ELEM")
+            self.cm("__ELEM__", "ELEM", mute=True)
+            self.esel("NONE", mute=True)
+            self.cdwrite("db", nblock_filename, mute=True)
+            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             if hasattr(self, "mute"):
                 self.mute = old_mute
@@ -1944,18 +1952,17 @@ class _MapdlCore(Commands):
                 nrmkey = "ON"
         nrmkey = "OFF"
 
-        with self.chain_commands:
-            self.slashsolu(mute=True)
-            self.antype(2, "new", mute=True)
-            self.modopt(
-                method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
-            )
-            self.bcsoption(memory_option, mute=True)
+        self.slashsolu(mute=True)
+        self.antype(2, "new", mute=True)
+        self.modopt(
+            method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+        )
+        self.bcsoption(memory_option, mute=True)
 
-            if mxpand:
-                self.mxpand(mute=True)
-            if elcalc:
-                self.mxpand(elcalc="YES", mute=True)
+        if mxpand:
+            self.mxpand(mute=True)
+        if elcalc:
+            self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)

@@ -206,6 +206,8 @@ class MapdlGrpc(_MapdlCore):
                 log_file=True, cleanup_on_exit=False, log_apdl=None,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
+        self.__distributed = None
+
         # port and ip are needed to setup the log
         self._port = port
         self._ip = ip
@@ -1808,3 +1810,10 @@ class MapdlGrpc(_MapdlCore):
 
     def get_name(self):
         return self._name
+
+    @property
+    def _distributed(self) -> bool:
+        """MAPDL is running in distributed mode."""
+        if self.__distributed is None:
+            self.__distributed = self.parameters.numcpu > 1
+        return self.__distributed
