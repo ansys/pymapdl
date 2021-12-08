@@ -171,11 +171,14 @@ class PostProcessing:
          75.03939292229019,
          75.20949687626468]
         """
-        list_rsp = self._mapdl.set("LIST")
-        groups = re.findall(r"([-+]?\d*\.\d+|\d+)", list_rsp)
+        self._mapdl.post1()
+        self._mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+        nsigfig = 10
+        self._mapdl.format('', 'E', nsigfig + 9, nsigfig)
+        self._mapdl.page(1E9, '', -1, 240)
 
-        # values will always be the second set
-        return np.array([float(item) for item in (groups[1::5])])
+        list_rsp = self._mapdl.set("LIST")
+        return np.genfromtxt(list_rsp.splitlines(), skip_header=3)
 
     def _reset_cache(self):
         """Reset local cache"""
