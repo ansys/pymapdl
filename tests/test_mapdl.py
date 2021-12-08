@@ -262,13 +262,19 @@ def test_allow_ignore(mapdl):
 
 
 def test_chaining(mapdl, cleared):
-    mapdl.prep7()
-    n_kp = 1000
-    with mapdl.chain_commands:
-        for i in range(1, 1 + n_kp):
-            mapdl.k(i, i, i, i)
+    # test chaining with distributed only
+    if mapdl._distributed:
+        with pytest.raises(RuntimeError):
+            with mapdl.chain_commands:
+                mapdl.prep7()
+    else:
+        mapdl.prep7()
+        n_kp = 1000
+        with mapdl.chain_commands:
+            for i in range(1, 1 + n_kp):
+                mapdl.k(i, i, i, i)
 
-    assert mapdl.geometry.n_keypoint == 1000
+        assert mapdl.geometry.n_keypoint == 1000
 
 
 def test_error(mapdl):
@@ -558,7 +564,7 @@ def test_elements(cleared, mapdl):
         [0, 1, 3],
     ]
 
-    with mapdl.chain_commands:
+    with mapdl.non_interactive:
         for cell in [cell1, cell2]:
             for x, y, z in cell:
                 mapdl.n(x=x, y=y, z=z)
