@@ -1006,10 +1006,12 @@ class _MapdlCore(Commands):
         show_lines=False,
         **kwargs,
     ):
-        """APDL Command: APLOT
+        """Display the selected areas.
 
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
+
+        APDL Command: ``APLOT``
 
         .. note::
             PyMAPDL plotting commands with ``vtk=True`` ignore any
@@ -1029,10 +1031,10 @@ class _MapdlCore(Commands):
         degen, str, optional
             Degeneracy marker.  This option is ignored when ``vtk=True``.
 
-        scale
+        scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
-            directions) (defaults to .075).  This option is ignored
+            directions) (defaults to 0.075).  This option is ignored
             when ``vtk=True``.
 
         vtk : bool, optional
@@ -1102,7 +1104,11 @@ class _MapdlCore(Commands):
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
-                meshes.append({"mesh": surf})
+                meshes.append(
+                    {"mesh": surf,
+                     "color": kwargs.get("color", "white")
+                     }
+                )
 
             if show_area_numbering:
                 anums = np.unique(surf["entity_num"])
