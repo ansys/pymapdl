@@ -132,6 +132,17 @@ mapdl.kgen(2, 1, 2, 1, "", 90)
 # Create an area through keypoints.
 mapdl.a(1, 2, 4, 3)
 
+# Plot the area using VTK.
+mapdl.aplot(title="Plot of the area",
+            cpos="iso",
+            vtk=True,
+            background="grey",
+            color_areas=False,
+            show_line_numbering=True,
+            show_area_numbering=True,
+            show_lines=True)
+
+
 # Specify the default number of line divisions.
 mapdl.esize("", 8)
 
@@ -141,11 +152,33 @@ mapdl.amesh(1)
 # Define global cartesian coordinate system.
 mapdl.csys(0)
 
+# Plot the mesh.
+mapdl.eplot(title="Plotting of the mesh",
+            vtk=True,
+            cpos="iso",
+            show_edges=True,
+            show_node_numbering=True,
+            point_size=10,
+            show_bounds=False)
+
+# Print the list of nodes.
+print(mapdl.elist())
+
+# Plot the nodes using VTK.
+mapdl.nplot(vtk=True,
+            nnum=True,
+            cpos="xy",
+            show_bounds=True,
+            point_size=10)
+
+# Print the list of nodes.
+print(mapdl.nlist())
+
 
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Application of boundary conditions (BC).
+# Application of symmetric boundary conditions for simplified model.
 
 # Select nodes by location and apply BC.
 mapdl.nsel("S", "LOC", "X", 0)
@@ -156,19 +189,17 @@ mapdl.nsel("S", "LOC", "Z", 0)
 mapdl.dsym("SYMM", "Z", 0)
 mapdl.nsel("ALL")
 
-
 ###############################################################################
 # Define Distributed Loads
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # Apply the force of :math:`F = (100/4) lb` in the y-direction.
 
 # Parametrization of the :math:`F` load for the quarter of the model.
-F = 100/4
+F = 100 / 4
 
 # Application of the load to the model.
 mapdl.fk(3, "FY", -F)
 mapdl.finish()
-
 
 ###############################################################################
 # Solve
@@ -180,14 +211,13 @@ out = mapdl.solve()
 mapdl.finish()
 print(out)
 
-#
+
 # ###############################################################################
 # # Post-processing
 # # ~~~~~~~~~~~~~~~
 #
 #
-#
-# mapdl.run("/POST1")
+# mapdl.post1()
 #
 # mapdl.nsel("S", "LOC", "Y", 4.953)  # SELECT NODE AT LOAD APPLICATION
 #
