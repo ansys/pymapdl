@@ -592,6 +592,11 @@ each command individually.  You can then view the final response of
 the chained commands with :attr:`Mapdl.last_response
 <ansys.mapdl.core.Mapdl.last_response>`.
 
+.. note::
+   Command chaining is not supported in distributed MAPDL.  To improve
+   performances, use ``mute=True`` or :attr:`Mapdl.non_interactive
+   <ansys.mapdl.core.Mapdl.non_interactive>`.
+
 
 Sending Arrays to MAPDL
 -----------------------
