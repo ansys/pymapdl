@@ -1440,14 +1440,14 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire("RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
             ext = ""
 
@@ -1470,7 +1470,7 @@ class _MapdlCore(Commands):
     def _distributed_result_file(self):
         """Path of the distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
@@ -1769,7 +1769,7 @@ class _MapdlCore(Commands):
         This is requested from the active mapdl instance.
         """
         try:
-            self._jobname = self.inquire("JOBNAME")
+            self._jobname = self.inquire("", "JOBNAME")
         except Exception:
             pass
         return self._jobname
@@ -2398,7 +2398,7 @@ class _MapdlCore(Commands):
         """
         # always attempt to cache the path
         try:
-            self._path = self.inquire("DIRECTORY")
+            self._path = self.inquire("", "DIRECTORY")
         except Exception:
             pass
 
