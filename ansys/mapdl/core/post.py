@@ -394,7 +394,7 @@ class PostProcessing:
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)
+        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[self.selected_elements]
 
     def plot_element_values(
             self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
@@ -905,7 +905,7 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        surf = self._mapdl.mesh._surf
+        surf = self._mapdl.mesh._surf[self.selected_elements]
 
         # as ``disp`` returns the result for all nodes, we need all node numbers
         # and to index to the output node numbers
