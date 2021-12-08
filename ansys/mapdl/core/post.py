@@ -1,5 +1,4 @@
 """Post-processing module using MAPDL interface"""
-import re
 import weakref
 
 import numpy as np
