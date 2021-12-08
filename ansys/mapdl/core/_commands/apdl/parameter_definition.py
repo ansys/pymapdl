@@ -311,16 +311,16 @@ class ParameterDefinition:
         The ``/INQUIRE`` command is valid in any processor.
 
         .. warning::
-           Take note that from version 0.60.4 and later, the previous command behaviour
+           Take note that from version 0.60.4 and later, the command behaviour
            has been changed.
-           Previously, the ``StrArray`` argument was omitted by mistake. For example:
+           Previously, the ``StrArray`` argument was omitted. For example:
            >>> mapdl.inquire('DIRECTORY')
-           C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+           C:\\Users\\user\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
            Now this will raise an exception.
            The default behaviour now, requires to input ``StrArray``:
            >>> mapdl.inquire('', 'DIRECTORY')
-           C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+           C:\\Users\\user\\AppData\\Local\\Temp\\ansys_nynvxsaooh
 
         **GENERAL FUNC OPTIONS**
 
