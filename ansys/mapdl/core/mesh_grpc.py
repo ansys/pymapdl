@@ -77,9 +77,8 @@ class MeshGrpc(Mesh):
         """
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
-        with self._mapdl.chain_commands:
-            self._mapdl.cm(TMP_NODE_CM, "NODE")
-            self._mapdl.nsle("S")
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsle("S", mute=True)
 
         threads = [
             self._update_cache_elem(),
@@ -173,7 +172,7 @@ class MeshGrpc(Mesh):
         >>> mapdl.mesh.n_node
         7217
         """
-        return int(self._mapdl.get_value(entity="NODE", item1="COUNT"))
+        return int(self._mapdl.get(entity="NODE", item1="COUNT"))
 
     @property
     @supress_logging
@@ -185,7 +184,7 @@ class MeshGrpc(Mesh):
         >>> mapdl.mesh.n_elem
         1520
         """
-        return int(self._mapdl.get_value(entity="ELEM", item1="COUNT"))
+        return int(self._mapdl.get(entity="ELEM", item1="COUNT"))
 
     @property
     def node_angles(self):
@@ -288,18 +287,18 @@ class MeshGrpc(Mesh):
         return self._node_coord
 
     def _load_nodes(self, chunk_size=DEFAULT_CHUNKSIZE):
-        """Loads nodes from server using the gRPC backend.
+        """Loads nodes from server.
 
         Parameters
         ----------
-        chunk_size : int, optional
+        chunk_size : int
             Size of the chunks to request from the server.  Default
-            256 kB.
+            256 kB
 
         Returns
         -------
         nodes : np.ndarray
-            Numpy array of nodes.
+            Numpy array of nodes
         """
         if self._chunk_size:
             chunk_size = self._chunk_size
@@ -307,14 +306,6 @@ class MeshGrpc(Mesh):
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.Nodes(request)
         nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
-
-        # Sometimes, MAPDL will return virtual, or hidden nodes.
-        # These appear to be at the beginning of the of the
-        # array. This behavior was identified in
-        # https://github.com/pyansys/pymapdl/issues/751
-        n_nodes = self.n_node
-        if n_nodes != nodes.shape[0]:
-            nodes = nodes[:n_nodes]
         return nodes
 
     @threaded

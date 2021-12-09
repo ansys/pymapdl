@@ -7,6 +7,5 @@ Local MAPDL Pool
 
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
    pool.LocalMapdlPool

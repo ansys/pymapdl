@@ -7,6 +7,5 @@ Mesh
 
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
    mesh_grpc.MeshGrpc

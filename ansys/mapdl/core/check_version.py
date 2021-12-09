@@ -110,8 +110,8 @@ def version_requires(min_version):
     class Client():
 
         def __init__(self):
-        '''Connects to a fake server'''
-        self._server = FakeServer()
+            '''Connects to a fake server'''
+            self._server = FakeServer()
 
         @version_requires((0, 1, 3))  # require 0.1.3
         def meth_a(self):

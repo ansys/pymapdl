@@ -4,12 +4,9 @@ import warnings
 import pyvista
 import numpy as np
 from sphinx_gallery.sorting import FileNameSortKey
+from pyansys_sphinx_theme import pyansys_logo_black
 
-import sys
-
-sys.path.append("../..")
 from ansys.mapdl.core import __version__
-
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -159,11 +156,10 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "pyansys_sphinx_theme"
-html_logo = os.path.join("_static", "pyansys-logo-black-cropped.png")
+html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
-    "logo_link": "https://docs.pyansys.com/",  # navigate to the main page
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------

@@ -140,55 +140,6 @@ def make_block(mapdl, cleared):
     mapdl.vmesh("ALL")
 
 
-@pytest.fixture(scope="function")
-def beam188_solve(mapdl, cleared):
-    # run non-interactive for speed
-    with mapdl.non_interactive:
-        mapdl.antype("STATIC")
-        mapdl.et(1, "BEAM188")
-        mapdl.keyopt(1, 3, 3)  # Cubic shape function
-        mapdl.keyopt(1, 9, 3)
-
-        # define material
-        mapdl.mp("EX", 1, 30E6)
-        mapdl.mp("PRXY", 1, 0.3)
-
-        # define section
-        w_f = 1.048394965
-        w_w = 0.6856481
-        sec_num = 1
-        mapdl.sectype(sec_num, "BEAM", "I", "ISection")
-        mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
-
-        # define geometry
-        for node_num in range(1, 6):
-            mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
-
-        # define one node for the orientation of the beam cross-section
-        mapdl.n(6, 60, 1)
-
-        # define elements
-        for elem_num in range(1, 5):
-            mapdl.e(elem_num, elem_num + 1, 6)
-
-        # boundary conditions
-        mapdl.d(2, "UX", lab2="UY")
-        mapdl.d(4, "UY")
-        mapdl.nsel("S", "LOC", "Y", 0)
-        mapdl.d("ALL", "UZ")
-        mapdl.d("ALL", "ROTX")
-        mapdl.d("ALL", "ROTY")
-        mapdl.nsel("ALL")
-
-        # application of the surface load to the beam element
-        w = 10000 / 12
-        mapdl.sfbeam(1, 1, "PRES", w)
-        mapdl.sfbeam(4, 1, "PRES", w)
-
-        mapdl.run("/SOLU")
-        mapdl.solve()
-
-
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl._name
@@ -232,7 +183,7 @@ def test_global_mute(mapdl):
     # commands like /INQUIRE must always return something
     jobname = "file"
     mapdl.jobname = jobname
-    assert mapdl.inquire("JOBNAME") == jobname
+    assert mapdl.inquire("", "JOBNAME") == jobname
     mapdl.mute = False
 
 
@@ -311,13 +262,19 @@ def test_allow_ignore(mapdl):
 
 
 def test_chaining(mapdl, cleared):
-    mapdl.prep7()
-    n_kp = 1000
-    with mapdl.chain_commands:
-        for i in range(1, 1 + n_kp):
-            mapdl.k(i, i, i, i)
+    # test chaining with distributed only
+    if mapdl._distributed:
+        with pytest.raises(RuntimeError):
+            with mapdl.chain_commands:
+                mapdl.prep7()
+    else:
+        mapdl.prep7()
+        n_kp = 1000
+        with mapdl.chain_commands:
+            for i in range(1, 1 + n_kp):
+                mapdl.k(i, i, i, i)
 
-    assert mapdl.geometry.n_keypoint == 1000
+        assert mapdl.geometry.n_keypoint == 1000
 
 
 def test_error(mapdl):
@@ -607,7 +564,7 @@ def test_elements(cleared, mapdl):
         [0, 1, 3],
     ]
 
-    with mapdl.chain_commands:
+    with mapdl.non_interactive:
         for cell in [cell1, cell2]:
             for x, y, z in cell:
                 mapdl.n(x=x, y=y, z=z)
@@ -749,15 +706,15 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    dimx = np.random.randint(3, 15)
-    dimy = np.random.randint(3, 15)
+    dimx = 5
+    dimy = 8
 
     my_conv = np.random.rand(dimx, dimy)
     my_conv[:, 0] = np.arange(dimx)
     my_conv[0, :] = np.arange(dimy)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
@@ -770,14 +727,16 @@ def test_load_table(mapdl):
         mapdl.load_table("my_conv", my_conv1)
 
 
-def test_load_array(mapdl):
-
-    dimx = np.random.randint(1, 15)
-    dimy = np.random.randint(1, 15)
+@pytest.mark.parametrize("dimx", [1, 3, 10])
+@pytest.mark.parametrize("dimy", [1, 3, 10])
+def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
-
     mapdl.load_array("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
+
+    # flatten as MAPDL returns flat arrays when second dimension is 1.
+    if dimy == 1:
+        my_conv = my_conv.ravel()
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
 @pytest.mark.skip_grpc
@@ -1008,11 +967,29 @@ def test_cwd_directory(mapdl, tmpdir):
         assert 'is not a directory on' in record.list[-1].message.args[0]
 
 
-def test_handle_hidden_nodes(mapdl, beam188_solve):
-    # Sometimes, MAPDL will return virtual, or hidden nodes.
-    # These appear to be at the beginning of the of the
-    # array. This behavior was identified in
-    # https://github.com/pyansys/pymapdl/issues/751
+@skip_in_cloud
+def test_inquire(mapdl):
+    # Testing basic functions (First block: Functions)
+    assert 'apdl' in mapdl.inquire("", 'apdl').lower()
 
-    # this should just run without error. Add in a trivial assert as best-practice
-    assert mapdl.mesh.grid.n_points == mapdl.mesh.n_node
+    # **Returning the Value of an Environment Variable to a Parameter**
+    env = list(os.environ.keys())[0]
+    if os.name == 'nt':
+        env_value = os.getenv(env).split(';')[0]
+    elif os.name == 'posix':
+        env_value = os.getenv(env).split(':')[0]
+    else:
+        raise Exception('Not supported OS.')
+
+    env_ = mapdl.inquire("", 'ENV', env, 0)
+    assert env_ == env_value
+
+    # **Returning the Value of a Title to a Parameter**
+    title = 'This is the title'
+    mapdl.title(title)
+    assert title == mapdl.inquire("", 'title')
+
+    # **Returning Information About a File to a Parameter**
+    jobname = mapdl.inquire("", 'jobname')
+    assert float(mapdl.inquire("", 'exist', jobname + '.lock')) in [0, 1]
+    assert float(mapdl.inquire("", 'exist', jobname , 'lock')) in [0, 1]
