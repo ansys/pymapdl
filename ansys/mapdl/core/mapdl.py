@@ -1364,7 +1364,7 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self) -> 'Result':
+    def result(self) -> Result:
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
