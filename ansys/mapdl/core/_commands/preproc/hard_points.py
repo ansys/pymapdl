@@ -1,7 +1,7 @@
 class HardPoints:
-
-    def hptcreate(self, type_="", entity="", nhp="", label="", val1="", val2="",
-                  val3="", **kwargs):
+    def hptcreate(
+        self, type_="", entity="", nhp="", label="", val1="", val2="", val3="", **kwargs
+    ):
         """Defines a hard point.
 
         APDL Command: HPTCREATE

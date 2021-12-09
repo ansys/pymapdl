@@ -4,21 +4,24 @@ import weakref
 import os
 import numpy as np
 
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.reader.mesh import Mesh
 
 from ansys.mapdl.core.misc import threaded, supress_logging
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.common_grpc import parse_chunks, DEFAULT_CHUNKSIZE
 
+TMP_NODE_CM = "__NODE__"
+
 
 class MeshGrpc(Mesh):
+    """Provides an interface to the gRPC mesh from MAPDL."""
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""
         super().__init__()
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
-            raise TypeError('Must be initialized using MapdlGrpc class')
+            raise TypeError("Must be initialized using MapdlGrpc class")
         self._mapdl_weakref = weakref.ref(mapdl)
 
         # allow default chunk_size to be overridden
@@ -70,18 +73,19 @@ class MeshGrpc(Mesh):
     def _update_cache(self):
         """Threaded local cache update.
 
-        Used when needing all the geometry entries from MAPDL
+        Used when needing all the geometry entries from MAPDL.
         """
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
-        with self._mapdl.chain_commands:
-            self._mapdl.cm('__NODE__', 'NODE')
-            self._mapdl.nsle('S')
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsle("S", mute=True)
 
-        threads = [self._update_cache_elem(),
-                   self._update_cache_element_desc(),
-                   self._update_cache_nnum(),
-                   self._update_node_coord()]
+        threads = [
+            self._update_cache_elem(),
+            self._update_cache_element_desc(),
+            self._update_cache_nnum(),
+            self._update_node_coord(),
+        ]
 
         for thread in threads:
             thread.join()
@@ -91,12 +95,12 @@ class MeshGrpc(Mesh):
 
         # somehow requesting path seems to help windows avoid an
         # outright segfault prior to running CMSEL
-        if os.name == 'nt':
+        if os.name == "nt":
             _ = self._mapdl.path
 
         # TODO: flaky
         time.sleep(0.05)
-        self._mapdl.cmsel('S', '__NODE__', 'NODE', mute=True)
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
     @property
@@ -112,51 +116,75 @@ class MeshGrpc(Mesh):
 
     @property
     def nnum_all(self) -> np.ndarray:
-        """Array of all node numbers.
+        """Array of all node numbers, even those not selected.
 
         Examples
         --------
-        >>> mapdl.mesh.nnum
+        >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
-        self._mapdl.cm('__NODE__', 'NODE', mute=True)
-        self._mapdl.nsel('all', mute=True)
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsel("all", mute=True)
 
-        nnum = self._mapdl.get_array('NODE', item1='NLIST')
+        nnum = self._mapdl.get_array("NODE", item1="NLIST")
         nnum = nnum.astype(np.int32)
         if nnum.size == 1:
             if nnum[0] == 0:
                 nnum = np.empty(0, np.int32)
 
-        self._mapdl.cmsel('S', '__NODE__', 'NODE', mute=True)
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
         return nnum
 
     @property
+    def enum_all(self) -> np.ndarray:
+        """Array of all element numbers, even those not selected.
+
+        Examples
+        --------
+        >>> mapdl.mesh.enum_all
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        self._ignore_cache_reset = True
+        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
+        self._mapdl.esel("all", mute=True)
+
+        enum = self._mapdl.get_array("ELEM", item1="ELIST")
+        enum = enum.astype(np.int32)
+        if enum.size == 1:
+            if enum[0] == 0:
+                enum = np.empty(0, np.int32)
+
+        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
+        self._ignore_cache_reset = False
+
+        return enum
+
+    @property
     @supress_logging
     def n_node(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected nodes in MAPDL.
 
         Examples
         --------
         >>> mapdl.mesh.n_node
         7217
         """
-        return int(self._mapdl.get(entity='NODE', item1='COUNT'))
+        return int(self._mapdl.get(entity="NODE", item1="COUNT"))
 
     @property
     @supress_logging
     def n_elem(self) -> int:
-        """Number of currently selected nodes in MAPDL
+        """Number of currently selected elements in MAPDL.
 
         Examples
         --------
         >>> mapdl.mesh.n_elem
         1520
         """
-        return int(self._mapdl.get(entity='ELEM', item1='COUNT'))
+        return int(self._mapdl.get(entity="ELEM", item1="COUNT"))
 
     @property
     def node_angles(self):
@@ -173,13 +201,13 @@ class MeshGrpc(Mesh):
         array([    1,     2,     3, ...,  9998,  9999, 10000])
         """
         if self._enum is None:
-            self._enum = self._mapdl.get_array('ELEM', item1='ELIST').astype(np.int32)
+            self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
         return self._enum
 
     @threaded
     def _update_cache_nnum(self):
         if self._cache_nnum is None:
-            nnum = self._mapdl.get_array('NODE', item1='NLIST')
+            nnum = self._mapdl.get_array("NODE", item1="NLIST")
             self._cache_nnum = nnum.astype(np.int32)
         if self._cache_nnum.size == 1:
             if self._cache_nnum[0] == 0:
@@ -377,7 +405,7 @@ class MeshGrpc(Mesh):
         chunks = self._mapdl._stub.LoadElementTypeDescription(request)
         data = parse_chunks(chunks, np.int32)
         n_items = data[0]
-        split_ind = data[1:1 + n_items]
+        split_ind = data[1 : 1 + n_items]
         # empty items sometimes...
         split_ind = split_ind[split_ind != 0]
         return np.split(data, split_ind)[1:]
@@ -405,14 +433,14 @@ class MeshGrpc(Mesh):
 
         Access the node numbers of grid.
 
-        >>> grid.point_arrays
+        >>> grid.point_data
         Contains keys:
             ansys_node_num
             vtkOriginalPointIds
             origid
             VTKorigID
 
-        >>> grid.point_arrays['ansys_node_num']
+        >>> grid.point_data['ansys_node_num']
         pyvista_ndarray([    1,     2,     3, ..., 50684, 50685, 50686],
                         dtype=int32)
 

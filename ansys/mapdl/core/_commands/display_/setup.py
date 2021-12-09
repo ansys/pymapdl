@@ -1,5 +1,4 @@
 class Setup:
-
     def cmap(self, fname="", ext="", kywrd="", ncntr="", **kwargs):
         """Changes an existing or creates a new color mapping table.
 
@@ -95,7 +94,7 @@ class Setup:
 
             Linux: Values 1 through 4 are used to find a match in the X11 database of font strings.  Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
 
-            Family name (e.g., Courier*New). Substitute an asterisk (*) for any blank character that appears in a family name. If Val1 = MENU, all other values are ignored, and a font selection menu appears (GUI must be active).  - Val2
+            Family name (e.g., ``Courier*New``). Substitute an asterisk (``*``) for any blank character that appears in a family name. If Val1 = MENU, all other values are ignored, and a font selection menu appears (GUI must be active).  - Val2
 
             Weight (e.g., medium) - Val3
 
@@ -108,7 +107,7 @@ class Setup:
             unused - PC: The values are encoded in a PC logical font structure.  Value 1 is a
                      character string, and the remaining values are integers:
 
-            Val1 - Family name (e.g., Courier*New) Substitute an asterisk (*) for any blank
+            Val1 - Family name (e.g., ``Courier*New``) Substitute an asterisk (``*``) for any blank
                    character that appears in a family name. If Val1 = MENU, all
                    other values are ignored and a font selection menu appears
                    (GUI must be active). A value containing all blank

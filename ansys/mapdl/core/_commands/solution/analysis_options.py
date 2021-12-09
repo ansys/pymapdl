@@ -1,9 +1,9 @@
-from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from typing import Optional
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class AnalysisOptions:
-
     def abextract(self, mode1="", mode2="", **kwargs):
         """Extracts the alpha-beta damping multipliers for Rayleigh damping.
 
@@ -137,8 +137,7 @@ class AnalysisOptions:
         command = f"ADAMS,{nmodes},{kstress},{kshell}"
         return self.run(command, **kwargs)
 
-    def antype(self, antype="", status="", ldstep="", substep="", action="",
-               **kwargs):
+    def antype(self, antype="", status="", ldstep="", substep="", action="", **kwargs):
         """Specifies the analysis type and restart status.
 
         APDL Command: ANTYPE
@@ -325,9 +324,8 @@ class AnalysisOptions:
         command = f"ASOL,{lab},{opt}"
         return self.run(command, **kwargs)
 
-    def bcsoption(self, memory_option="", memory_size="", solve_info="",
-                  **kwargs):
-        """ Sets memory option for the sparse solver.
+    def bcsoption(self, memory_option="", memory_size="", solve_info="", **kwargs):
+        """Sets memory option for the sparse solver.
 
         APDL Command: BCSOPTION
 
@@ -501,12 +499,13 @@ class AnalysisOptions:
         command = f"CGROW,{action},{par1},{par2}"
         return self.run(command, **kwargs)
 
-    def cmatrix(self, symfac="", condname="", numcond="", grndkey="",
-                capname="", **kwargs):
-        """Performs electrostatic field solutions and calculates the self and
+    def cmatrix(
+        self, symfac="", condname="", numcond="", grndkey="", capname="", **kwargs
+    ):
+        """Performs electrostatic field solutions and calculates the
+        self and mutual capacitances between multiple conductors.x
 
         APDL Command: CMATRIX
-        mutual capacitances between multiple conductors.
 
         Parameters
         ----------
@@ -558,11 +557,20 @@ class AnalysisOptions:
 
         This command does not support multiframe restarts.
         """
-        command = f"CMATRIX,{symfac},{condname},{numcond},{grndkey},{capname}"
+        command = f"CMATRIX,{symfac},'{condname}',{numcond},{grndkey},'{capname}'"
         return self.run(command, **kwargs)
 
-    def cmsopt(self, cmsmeth="", nmode="", freqb="", freqe="", fbddef="",
-               fbdval="", iokey="", **kwargs):
+    def cmsopt(
+        self,
+        cmsmeth="",
+        nmode="",
+        freqb="",
+        freqe="",
+        fbddef="",
+        fbdval="",
+        iokey="",
+        **kwargs,
+    ):
         """Specifies component mode synthesis (CMS) analysis options.
 
         APDL Command: CMSOPT
@@ -653,8 +661,19 @@ class AnalysisOptions:
         command = f"CMSOPT,{cmsmeth},{nmode},{freqb},{freqe},{fbddef},{fbdval},{iokey}"
         return self.run(command, **kwargs)
 
-    def cncheck(self, option="", rid1="", rid2="", rinc="", intertype="",
-                trlevel="", cgap="", cpen="", ioff="", **kwargs):
+    def cncheck(
+        self,
+        option="",
+        rid1="",
+        rid2="",
+        rinc="",
+        intertype="",
+        trlevel="",
+        cgap="",
+        cpen="",
+        ioff="",
+        **kwargs,
+    ):
         """Provides and/or adjusts the initial status of contact pairs.
 
         APDL Command: CNCHECK
@@ -747,7 +766,7 @@ class AnalysisOptions:
             They are only valid when Option = ADJUST or MORPH.  Control
             parameter for opening gap. Close the opening gap if the
             absolute value of the gap is smaller than the CGAP value. CGAP
-            defaults to 0.25*PINB (where PINB is the pinball radius) for
+            defaults to ``0.25*PINB`` (where PINB is the pinball radius) for
             bonded and no-separation contact; otherwise it defaults to the
             value of real constant ICONT.
 
@@ -755,7 +774,7 @@ class AnalysisOptions:
             They are only valid when Option = ADJUST or MORPH.  Control
             parameter for initial penetration. Close the initial
             penetration if the absolute value of the penetration is
-            smaller than the CPEN value. CPEN defaults to 0.25*PINB (where
+            smaller than the CPEN value. CPEN defaults to ``0.25*PINB`` (where
             PINB is the pinball radius) for any type of interface behavior
             (either bonded or standard contact).
 
@@ -1003,7 +1022,7 @@ class AnalysisOptions:
         return self.run(command, **kwargs)
 
     def ddoption(self, decomp="", **kwargs):
-        """ Sets domain decomposer option for Distributed ANSYS.
+        """Sets domain decomposer option for Distributed ANSYS.
 
         APDL Command: DDOPTION
 
@@ -1040,8 +1059,9 @@ class AnalysisOptions:
         command = f"DDOPTION,{decomp}"
         return self.run(command, **kwargs)
 
-    def dmpext(self, smode="", tmode="", dmpname="", freqb="", freqe="",
-               nsteps="", **kwargs):
+    def dmpext(
+        self, smode="", tmode="", dmpname="", freqb="", freqe="", nsteps="", **kwargs
+    ):
         """Extracts modal damping coefficients in a specified frequency range.
 
         APDL Command: DMPEXT
@@ -1215,9 +1235,10 @@ class AnalysisOptions:
         command = f"DMPOPTION,{filetype},{combine}"
         return self.run(command, **kwargs)
 
-    def dspoption(self, reord_option="", memory_option="", memory_size="",
-                  solve_info="", **kwargs):
-        """ Sets memory option for the distributed sparse solver.
+    def dspoption(
+        self, reord_option="", memory_option="", memory_size="", solve_info="", **kwargs
+    ):
+        """Sets memory option for the distributed sparse solver.
 
         APDL Command: DSPOPTION
 
@@ -1345,11 +1366,23 @@ class AnalysisOptions:
         file). In this case, it is typically more efficient to run with the
         OUTOFCORE memory mode.
         """
-        command = f"DSPOPTION,{reord_option},{memory_option},{memory_size},,,{solve_info}"
+        command = (
+            f"DSPOPTION,{reord_option},{memory_option},{memory_size},,,{solve_info}"
+        )
         return self.run(command, **kwargs)
 
-    def exbopt(self, outinv2="", outtcms="", outsub="", outcms="", outcomp="",
-               outrm="", noinv="", outele="", **kwargs):
+    def exbopt(
+        self,
+        outinv2="",
+        outtcms="",
+        outsub="",
+        outcms="",
+        outcomp="",
+        outrm="",
+        noinv="",
+        outele="",
+        **kwargs,
+    ):
         """Specifies .EXB file output options in a CMS generation pass.
 
         APDL Command: EXBOPT
@@ -1689,8 +1722,9 @@ class AnalysisOptions:
         command = f"ERESX,{key}"
         return self.run(command, **kwargs)
 
-    def escheck(self, sele: str = "", levl: str = "",
-                defkey: MapdlInt = "", **kwargs) -> Optional[str]:
+    def escheck(
+        self, sele: str = "", levl: str = "", defkey: MapdlInt = "", **kwargs
+    ) -> Optional[str]:
         """Perform element shape checking for a selected element set.
 
         APDL Command: ESCHECK
@@ -1735,9 +1769,22 @@ class AnalysisOptions:
         command = f"ESCHECK,{sele},{levl},{defkey}"
         return self.run(command, **kwargs)
 
-    def essolv(self, electit="", strutit="", dimn="", morphopt="", mcomp="",
-               xcomp="", electol="", strutol="", mxloop="", ruseky="",
-               restky="", eiscomp="", **kwargs):
+    def essolv(
+        self,
+        electit="",
+        strutit="",
+        dimn="",
+        morphopt="",
+        mcomp="",
+        xcomp="",
+        electol="",
+        strutol="",
+        mxloop="",
+        ruseky="",
+        restky="",
+        eiscomp="",
+        **kwargs,
+    ):
         """Performs a coupled electrostatic-structural analysis.
 
         APDL Command: ESSOLV
@@ -1955,8 +2002,7 @@ class AnalysisOptions:
         command = f"GAUGE,{opt},{freq}"
         return self.run(command, **kwargs)
 
-    def gmatrix(self, symfac="", condname="", numcond="", matrixname="",
-                **kwargs):
+    def gmatrix(self, symfac="", condname="", numcond="", matrixname="", **kwargs):
         """Performs electric field solutions and calculates the self and mutual
 
         APDL Command: GMATRIX
@@ -2496,8 +2542,16 @@ class AnalysisOptions:
         command = f"OVCHECK,{method},{frequency},{set_}"
         return self.run(command, **kwargs)
 
-    def pcgopt(self, lev_diff="", reduceio="", strmck="", wrtfull="",
-               memory="", lm_key="", **kwargs):
+    def pcgopt(
+        self,
+        lev_diff="",
+        reduceio="",
+        strmck="",
+        wrtfull="",
+        memory="",
+        lm_key="",
+        **kwargs,
+    ):
         """Controls PCG solver options.
 
         APDL Command: PCGOPT
@@ -2594,8 +2648,7 @@ class AnalysisOptions:
         command = f"PCGOPT,{lev_diff},,{reduceio},{strmck},{wrtfull},{memory},{lm_key}"
         return self.run(command, **kwargs)
 
-    def perturb(self, type_="", matkey="", contkey="", loadcontrol="",
-                **kwargs):
+    def perturb(self, type_="", matkey="", contkey="", loadcontrol="", **kwargs):
         """Sets linear perturbation analysis options.
 
         APDL Command: PERTURB
@@ -2674,24 +2727,28 @@ class AnalysisOptions:
             BONDED). The tables in the Notes section show how the contact
             status is adjusted by CNKMOD and/or the ContKey setting.
 
-            CURRENT - Use the current contact status from the restart snapshot (default). If the
-                      previous run is nonlinear, then the nonlinear contact
-                      status at the point of restart is frozen and used
+            CURRENT - Use the current contact status from the restart
+                      snapshot (default). If the previous run is
+                      nonlinear, then the nonlinear contact status at
+                      the point of restart is frozen and used
                       throughout the linear perturbation analysis.
 
-            STICKING - For frictional contact pairs (MU > 0), use sticking contact (e.g., MU*KN for
-                       tangential contact stiffness)  everywhere the contact
-                       state is closed (i.e., status is sticking or sliding).
-                       This option only applies to contact pairs that are in
-                       contact and have a frictional coefficient MU greater
-                       than zero. Contact pairs without friction (MU = 0) and
-                       in a sliding state remain free to slide in the linear
+            STICKING - For frictional contact pairs (MU > 0), use
+                       sticking contact (e.g., ``MU*KN`` for tangential
+                       contact stiffness) everywhere the contact state
+                       is closed (i.e., status is sticking or
+                       sliding).  This option only applies to contact
+                       pairs that are in contact and have a frictional
+                       coefficient MU greater than zero. Contact pairs
+                       without friction (MU = 0) and in a sliding
+                       state remain free to slide in the linear
                        perturbation analysis.
 
-            BONDED - Any contact pairs that are in the closed (sticking or sliding) state are moved
-                     to bonded (for example, KN for both normal and tangential
-                     contact stiffness). Contact pairs that have a status of
-                     far-field or near-field remain open.
+            BONDED - Any contact pairs that are in the closed
+                     (sticking or sliding) state are moved to bonded
+                     (for example, KN for both normal and tangential
+                     contact stiffness). Contact pairs that have a
+                     status of far-field or near-field remain open.
 
         loadcontrol
             Key that controls how the load vector of {Fperturbed} is
@@ -3046,8 +3103,9 @@ class AnalysisOptions:
         command = f"SEEXP,{sename},{usefil},{imagky},{expopt}"
         return self.run(command, **kwargs)
 
-    def seopt(self, sename="", sematr="", sepr="", sesst="", expmth="",
-              seoclvl="", **kwargs):
+    def seopt(
+        self, sename="", sematr="", sepr="", sesst="", expmth="", seoclvl="", **kwargs
+    ):
         """Specifies substructure analysis options.
 
         APDL Command: SEOPT
@@ -3128,9 +3186,16 @@ class AnalysisOptions:
         command = f"SEOPT,{sename},{sematr},{sepr},{sesst},{expmth},{seoclvl}"
         return self.run(command, **kwargs)
 
-    def snoption(self, rangefact="", blocksize="", robustlev="", compute="",
-                 solve_info="", **kwargs):
-        """ Specifies Supernode (SNODE) eigensolver options.
+    def snoption(
+        self,
+        rangefact="",
+        blocksize="",
+        robustlev="",
+        compute="",
+        solve_info="",
+        **kwargs,
+    ):
+        """Specifies Supernode (SNODE) eigensolver options.
 
         APDL Command: SNOPTION
 
@@ -3140,7 +3205,7 @@ class AnalysisOptions:
             Factor used to control the range of eigenvalues computed for each
             supernode. The value of RangeFact must be a number between 1.0 and
             5.0. By default the RangeFact value is set to 2.0, which means that
-            all eigenvalues between 0 and 2*FREQE are computed for each
+            all eigenvalues between 0 and ``2*FREQE`` are computed for each
             supernode (where FREQE is the upper end of the frequency range of
             interest as specified on the MODOPT command). As the RangeFact
             value increases, the eigensolution for the SNODE solver becomes
@@ -3250,7 +3315,9 @@ class AnalysisOptions:
         the two steps (computing eigenvalues and computing
         eigenvectors).
         """
-        command = f"SNOPTION,{rangefact},{blocksize},{robustlev},{compute},,{solve_info}"
+        command = (
+            f"SNOPTION,{rangefact},{blocksize},{robustlev},{compute},,{solve_info}"
+        )
         return self.run(command, **kwargs)
 
     def solve(self, action="", **kwargs):
@@ -3276,8 +3343,9 @@ class AnalysisOptions:
         command = f"SOLVE,{action}"
         return self.run(command, **kwargs)
 
-    def stabilize(self, key="", method="", value="", substpopt="",
-                  forcelimit="", **kwargs):
+    def stabilize(
+        self, key="", method="", value="", substpopt="", forcelimit="", **kwargs
+    ):
         """Activates stabilization for all elements that support nonlinear
 
         APDL Command: STABILIZE
@@ -3404,8 +3472,16 @@ class AnalysisOptions:
         command = f"THEXPAND,{key}"
         return self.run(command, **kwargs)
 
-    def thopt(self, refopt="", reformtol="", ntabpoints="", tempmin="",
-              tempmax="", algo="", **kwargs):
+    def thopt(
+        self,
+        refopt="",
+        reformtol="",
+        ntabpoints="",
+        tempmin="",
+        tempmax="",
+        algo="",
+        **kwargs,
+    ):
         """Specifies nonlinear transient thermal solution options.
 
         APDL Command: THOPT

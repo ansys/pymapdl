@@ -18,6 +18,7 @@ PyMAPDL library.
    launcher
    mapdl
    mapdl_examples
+   extended_examples/index
    plotting
    mesh_geometry
    post
@@ -26,6 +27,7 @@ PyMAPDL library.
    math
    pool
    xpl
+   upf
 
 
 PyMAPDL Basic Overview

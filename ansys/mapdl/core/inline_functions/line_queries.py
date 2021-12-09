@@ -1,7 +1,7 @@
-from .core import _ParameterParsing
+from .core import _QueryExecution
 
 
-class _LineFractionCoordinateQueries(_ParameterParsing):
+class _LineFractionCoordinateQueries(_QueryExecution):
     _mapdl = None
 
     def lx(self, n: int, lfrac: float) -> float:
@@ -29,19 +29,17 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 3)`` then find the X-coordinate halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 3)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lx(l0, 0.5)
         0.5
         """
-        response = self._mapdl.run(f'_=LX({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LX({n}, {lfrac})', integer=False)
 
     def ly(self, n: int, lfrac: float) -> float:
         """Y-coordinate of line ``n`` at length fraction ``lfrac``.
@@ -68,19 +66,17 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 3)`` then find the Y-coordinate halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 3)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.ly(l0, 0.5)
         1.0
         """
-        response = self._mapdl.run(f'_=LY({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LY({n}, {lfrac})', integer=False)
 
     def lz(self, n: int, lfrac: float) -> float:
         """Z-coordinate of line ``n`` at length fraction ``lfrac``.
@@ -107,22 +103,20 @@ class _LineFractionCoordinateQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 3)`` then find the Z-coordinate halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 3)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lz(l0, 0.5)
         1.5
         """
-        response = self._mapdl.run(f'_=LZ({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LZ({n}, {lfrac})', integer=False)
 
 
-class _LineFractionSlopeQueries(_ParameterParsing):
+class _LineFractionSlopeQueries(_QueryExecution):
     _mapdl = None
 
     def lsx(self, n: int, lfrac: float) -> float:
@@ -151,19 +145,17 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the X-slope halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 2)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lsx(l0, 0.5)
         0.3333333333
         """
-        response = self._mapdl.run(f'_=LSX({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LSX({n}, {lfrac})', integer=False)
 
     def lsy(self, n: int, lfrac: float) -> float:
         """Y-slope of line ``n`` at length fraction ``lfrac``.
@@ -191,19 +183,17 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the Y-slope halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 2)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lsy(l0, 0.5)
         0.6666666667
         """
-        response = self._mapdl.run(f'_=LSY({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LSY({n}, {lfrac})', integer=False)
 
     def lsz(self, n: int, lfrac: float) -> float:
         """Z-slope of line ``n`` at length fraction ``lfrac``.
@@ -231,16 +221,14 @@ class _LineFractionSlopeQueries(_ParameterParsing):
         Here we construct a line between the coordinates ``(0, 0, 0)``
         and ``(1, 2, 2)`` then find the Z-slope halfway along the line.
 
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k0 = mapdl.k(1, 0, 0, 0)
         >>> k1 = mapdl.k(2, 1, 2, 2)
         >>> l0 = mapdl.l(k0, k1)
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lsz(l0, 0.5)
         0.6666666667
         """
-        response = self._mapdl.run(f'_=LSZ({n},{lfrac})')
-        return self._parse_parameter_float_response(response)
+        return self._run_query(f'LSZ({n}, {lfrac})', integer=False)

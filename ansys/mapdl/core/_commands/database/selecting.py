@@ -3,11 +3,11 @@ entities for further operations.
 """
 
 from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class Selecting:
-
     def allsel(self, labt="", entity="", **kwargs):
         """Selects all entities with a single command.
 
@@ -102,8 +102,9 @@ class Selecting:
         command = "ASLL,%s,%s" % (str(type_), str(arkey))
         return self.run(command, **kwargs)
 
-    def asel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def asel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of areas.
 
         APDL Command: ASEL
@@ -128,6 +129,43 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in Table 105: ASEL - Valid Item and Component
+            Labels (p. 185). Some items also require a component label. If Item = PICK (or simply "P"), graphical
+            picking is enabled and all remaining command fields are ignored (valid only in the GUI). Defaults
+            to AREA.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in Table 105: ASEL - Valid
+            Item and Component Labels (p. 185).
+
+        VMIN
+            Minimum value of item range. Ranges are area numbers, coordinate values, attribute numbers, etc.,
+            as appropriate for the item. A component name (as specified on the CM (p. 338) command) may
+            also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or ESYS
+            and if VMIN is positive, the absolute value of Item is compared against the range for selection; if
+            VMIN is negative, the signed value of Item is compared. See the ALIST (p. 106) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for area numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only areas are to be selected:
+
+                - `kswp = 0` - Select areas only.
+                - `kswp = 1` - Select areas, as well as keypoints, lines, nodes, and elements associated with selected areas.
+
+            Valid only with Type = S.
+
 
         Notes
         -----
@@ -210,8 +248,9 @@ class Selecting:
         """
         return self.run(f"ASLV,{type_}", **kwargs)
 
-    def dofsel(self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="",
-               dof6="", **kwargs):
+    def dofsel(
+        self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="", dof6="", **kwargs
+    ):
         """Selects a DOF label set for reference by other commands.
 
         APDL Command: DOFSEL
@@ -266,14 +305,28 @@ class Selecting:
 
         This command is valid in any processor.
         """
-        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            dof1), str(dof2), str(dof3), str(dof4), str(dof5), str(dof6))
+        command = "DOFSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(dof1),
+            str(dof2),
+            str(dof3),
+            str(dof4),
+            str(dof5),
+            str(dof6),
+        )
         return self.run(command, **kwargs)
 
-    def esel(self, type_: str = "", item: str = "", comp: str = "",
-             vmin: Union[str, int, float] = "",
-             vmax: Union[str, int, float] = "", vinc: MapdlInt = "",
-             kabs: MapdlInt = "", **kwargs) -> Optional[str]:
+    def esel(
+        self,
+        type_: str = "",
+        item: str = "",
+        comp: str = "",
+        vmin: Union[str, int, float] = "",
+        vmax: Union[str, int, float] = "",
+        vinc: MapdlInt = "",
+        kabs: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Selects a subset of elements.
 
         APDL Command: ESEL
@@ -465,8 +518,9 @@ class Selecting:
         command = f"ESLL,{type_}"
         return self.run(command, **kwargs)
 
-    def esln(self, type_: str = "", ekey: MapdlInt = "",
-             nodetype: str = "", **kwargs) -> Optional[str]:
+    def esln(
+        self, type_: str = "", ekey: MapdlInt = "", nodetype: str = "", **kwargs
+    ) -> Optional[str]:
         """Selects those elements attached to the selected nodes.
 
         APDL Command: ESLN
@@ -552,8 +606,9 @@ class Selecting:
         command = f"ESLV,{type_}"
         return self.run(command, **kwargs)
 
-    def ksel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+    def ksel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+    ):
         """Selects a subset of keypoints or hard points.
 
         APDL Command: KSEL
@@ -578,6 +633,38 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to KP.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are keypoint numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the CM (p. 338) command)
+            may also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or
+            ESYS and if VMIN is positive, the absolute value of Item is compared against the range for selection;
+            if VMIN is negative, the signed value of Item is compared. See the KLIST (p. 942) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for keypoint numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KABS
+            Absolute value key:
+
+                - `kabs = 0` - Check sign of value during selection.
+                - `kabs = 1` - Use absolute value during selection (sign ignored).
 
         Notes
         -----
@@ -616,8 +703,15 @@ class Selecting:
 
         >>> mapdl.ksel('S', 'KP', '', 1)
         """
-        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "KSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kabs),
+        )
         return self.run(command, **kwargs)
 
     def ksll(self, type_="", **kwargs):
@@ -674,8 +768,9 @@ class Selecting:
         command = "KSLN,%s" % (str(type_))
         return self.run(command, **kwargs)
 
-    def lsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def lsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of lines.
 
         APDL Command: LSEL
@@ -700,6 +795,40 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to LINE.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are line numbers, coordinate values, attribute numbers, etc.,
+            as appropriate for the item. If VMIN = 0.0, a tolerance of ±1.0E-6 is used, or ±0.005 x VMIN if VMIN
+            = VMAX. A component name (as specified on the CM (p. 338) command) may also be substituted
+            for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, ESYS, or NDIV and if VMIN is
+            positive, the absolute value of Item is compared against the range for selection; if VMIN is negative,
+            the signed value of Item is compared. See the LLIST (p. 1011) command for a discussion of signed
+            attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for line numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only lines are to be selected:
+
+                - `kswp = 0` - Select lines only.
+                - `kswp = 1` - Select lines, as well as keypoints, nodes, and elements associated with selected lines. Valid
+            only with Type = S.
 
         Notes
         -----
@@ -737,8 +866,15 @@ class Selecting:
 
         Table: 204:: : LSEL - Valid Item and Component Labels
         """
-        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "LSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kswp),
+        )
         return self.run(command, **kwargs)
 
     def lsla(self, type_="", **kwargs):
@@ -799,8 +935,9 @@ class Selecting:
         command = "LSLK,%s,%s" % (str(type_), str(lskey))
         return self.run(command, **kwargs)
 
-    def nsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kabs="", **kwargs):
+    def nsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+    ):
         """Selects a subset of nodes.
 
         APDL Command: NSEL
@@ -825,6 +962,36 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to NODE.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are node numbers, set numbers, coordinate values, load
+            values, or result values as appropriate for the item. A component name (as specified on the CM (p. 338)
+            command) may also be substituted for VMIN (VMAX and VINC are ignored).
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN for input values. For result values, VMAX
+            defaults to infinity if VMIN is positive, or to zero if VMIN is negative.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for node and set numbers).
+            Defaults to 1. VINC cannot be negative.
+
+        KABS
+            Absolute value key:
+
+            - `kabs = 0` - Check sign of value during selection.
+            - `kabs = 1` - Use absolute value during selection (sign ignored)
 
         Notes
         -----
@@ -920,8 +1087,15 @@ class Selecting:
 
         >>> mapdl.nsel('R', 'LOC', 'X', 5)
         """
-        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kabs))
+        command = "NSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kabs),
+        )
         return self.run(command, **kwargs)
 
     def nsla(self, type_="", nkey="", **kwargs):
@@ -1196,12 +1370,12 @@ class Selecting:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "PARTSEL,%s,%s,%s,%s" % (
-            str(type_), str(pmin), str(pmax), str(pinc))
+        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
         return self.run(command, **kwargs)
 
-    def vsel(self, type_="", item="", comp="", vmin="", vmax="", vinc="",
-             kswp="", **kwargs):
+    def vsel(
+        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+    ):
         """Selects a subset of volumes.
 
         APDL Command: VSEL
@@ -1226,6 +1400,38 @@ class Selecting:
             INVE - Invert the current set (selected becomes unselected and vice versa).
 
             STAT - Display the current select status.
+
+        The following fields are used only with Type = S, R, A, or U:
+
+        Item
+            Label identifying data. Valid item labels are shown in the table below. Some items also require a
+            component label. If Item = PICK (or simply "P"), graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI). Defaults to VOLU.
+
+        Comp
+            Component of the item (if required). Valid component labels are shown in the table below.
+
+        VMIN
+            Minimum value of item range. Ranges are volume numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the CM (p. 338) command)
+            may also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or
+            ESYS and if VMIN is positive, the absolute value of Item is compared against the range for selection;
+            if VMIN is negative, the signed value of Item is compared. See the VLIST (p. 2050) command for a
+            discussion of signed attributes.
+
+        VMAX
+            Maximum value of item range. VMAX defaults to VMIN.
+
+        VINC
+            Value increment within range. Used only with integer ranges (such as for volume numbers). Defaults
+            to 1. VINC cannot be negative.
+
+        KSWP
+            Specifies whether only volumes are to be selected:
+
+            - `kswp = 0` - Select volumes only.
+            - `kswp = 1` - Select volumes, as well as keypoints, lines, areas,
+            nodes, and elements associated with selected volumes. Valid only with Type = S.
 
         Notes
         -----
@@ -1255,8 +1461,15 @@ class Selecting:
 
         Table: 251:: : VSEL - Valid Item and Component Labels
         """
-        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (str(type_), str(
-            item), str(comp), str(vmin), str(vmax), str(vinc), str(kswp))
+        command = "VSEL,%s,%s,%s,%s,%s,%s,%s" % (
+            str(type_),
+            str(item),
+            str(comp),
+            str(vmin),
+            str(vmax),
+            str(vinc),
+            str(kswp),
+        )
         return self.run(command, **kwargs)
 
     def vsla(self, type_="", vlkey="", **kwargs):

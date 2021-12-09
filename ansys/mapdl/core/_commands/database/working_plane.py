@@ -1,7 +1,7 @@
 class WorkingPlane:
-
-    def kwpave(self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="",
-               p9="", **kwargs):
+    def kwpave(
+        self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="", **kwargs
+    ):
         """Moves the working plane origin to the average location of keypoints.
 
         APDL Command: KWPAVE
@@ -99,8 +99,9 @@ class WorkingPlane:
         command = f"LWPLAN,{wn},{nl1},{ratio}"
         return self.run(command, **kwargs)
 
-    def nwpave(self, n1="", n2="", n3="", n4="", n5="", n6="", n7="", n8="",
-               n9="", **kwargs):
+    def nwpave(
+        self, n1="", n2="", n3="", n4="", n5="", n6="", n7="", n8="", n9="", **kwargs
+    ):
         """Moves the working plane origin to the average location of nodes.
 
         APDL Command: NWPAVE
@@ -164,8 +165,9 @@ class WorkingPlane:
         command = f"NWPLAN,{wn},{norig},{nxax},{nplan}"
         return self.run(command, **kwargs)
 
-    def wpave(self, x1="", y1="", z1="", x2="", y2="", z2="", x3="", y3="",
-              z3="", **kwargs):
+    def wpave(
+        self, x1="", y1="", z1="", x2="", y2="", z2="", x3="", y3="", z3="", **kwargs
+    ):
         """Moves the working plane origin to the average of specified points.
 
         APDL Command: WPAVE
@@ -237,8 +239,20 @@ class WorkingPlane:
         command = f"WPCSYS,{wn},{kcn}"
         return self.run(command, **kwargs)
 
-    def wplane(self, wn="", xorig="", yorig="", zorig="", xxax="", yxax="",
-               zxax="", xplan="", yplan="", zplan="", **kwargs):
+    def wplane(
+        self,
+        wn="",
+        xorig="",
+        yorig="",
+        zorig="",
+        xxax="",
+        yxax="",
+        zxax="",
+        xplan="",
+        yplan="",
+        zplan="",
+        **kwargs,
+    ):
         """Defines a working plane to assist in picking operations.
 
         APDL Command: WPLANE
@@ -328,8 +342,19 @@ class WorkingPlane:
         command = f"WPROTA,{thxy},{thyz},{thzx}"
         return self.run(command, **kwargs)
 
-    def wpstyl(self, snap="", grspac="", grmin="", grmax="", wptol="",
-               wpctyp="", grtype="", wpvis="", snapang="", **kwargs):
+    def wpstyl(
+        self,
+        snap="",
+        grspac="",
+        grmin="",
+        grmax="",
+        wptol="",
+        wpctyp="",
+        grtype="",
+        wpvis="",
+        snapang="",
+        **kwargs,
+    ):
         """Controls the display and style of the working plane.
 
         APDL Command: WPSTYL

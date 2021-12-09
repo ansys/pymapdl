@@ -1,5 +1,4 @@
 class TwoDTo3DAnalysis:
-
     def map2dto3d(self, action="", ldstep="", sbstep="", option="", **kwargs):
         """Initiates a 2-D to 3-D analysis and maps variables.
 

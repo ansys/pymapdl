@@ -1,7 +1,18 @@
 class TracePoints:
-
-    def pltrac(self, analopt="", item="", comp="", trpnum="", name="",
-               mxloop="", toler="", option="", escl="", mscl="", **kwargs):
+    def pltrac(
+        self,
+        analopt="",
+        item="",
+        comp="",
+        trpnum="",
+        name="",
+        mxloop="",
+        toler="",
+        option="",
+        escl="",
+        mscl="",
+        **kwargs,
+    ):
         """Displays a particle flow or charged particle trace on an element
 
         APDL Command: PLTRAC
@@ -163,8 +174,7 @@ class TracePoints:
         command = f"TRPLIS,{ntrp1},{ntrp2},{trpinc},{opt}"
         return self.run(command, **kwargs)
 
-    def trpoin(self, x="", y="", z="", vx="", vy="", vz="", chrg="", mass="",
-               **kwargs):
+    def trpoin(self, x="", y="", z="", vx="", vy="", vz="", chrg="", mass="", **kwargs):
         """Defines a point through which a particle flow or charged particle trace
 
         APDL Command: TRPOIN

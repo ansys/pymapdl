@@ -17,7 +17,7 @@ mapdl = pymapdl.launch_mapdl()
 ###############################################################################
 # Enter the pre-processor, create a block and mesh it with tetrahedral
 # elements.
-# 
+#
 mapdl.prep7()
 
 vnum0 = mapdl.block(0, 1, 0, 1, 0, 0.5)
@@ -47,9 +47,9 @@ mapdl.eplot()
 # Select all the elements at the intersection between the two blocks
 # and generate contact elements.
 
-mapdl.nsel('s', 'loc', 'z', 0.5, 0.50001)
-mapdl.esln('s')
-output = mapdl.gcgen('NEW', splitkey='SPLIT', selopt='SELECT')
+mapdl.nsel("s", "loc", "z", 0.5, 0.50001)
+mapdl.esln("s")
+output = mapdl.gcgen("NEW", splitkey="SPLIT", selopt="SELECT")
 print(output)
 
 ###############################################################################
@@ -59,5 +59,5 @@ print(output)
 # Here, we plot the element mesh as a wire-frame to show that the
 # contact pairs overlap.
 
-mapdl.esel('S', 'SEC', vmin=5, vmax=6)
-mapdl.eplot(style='wireframe', line_width=3)
+mapdl.esel("S", "SEC", vmin=5, vmax=6)
+mapdl.eplot(style="wireframe", line_width=3)

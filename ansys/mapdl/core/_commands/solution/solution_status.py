@@ -1,5 +1,4 @@
 class SolutionStatus:
-
     def atype(self, **kwargs):
         """Specifies "Analysis types" as the subsequent status topic.
 

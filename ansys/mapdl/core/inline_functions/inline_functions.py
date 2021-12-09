@@ -1,23 +1,32 @@
-from .component_queries import _DisplacementComponentQueries, \
-    _InverseGetComponentQueries, _ComponentQueries
-from .selection_queries import _SelectionStatusQueries, \
-    _NextSelectedEntityQueries
-from .line_queries import _LineFractionCoordinateQueries, \
-    _LineFractionSlopeQueries
+from .component_queries import (
+    _DisplacementComponentQueries,
+    _InverseGetComponentQueries,
+    _ComponentQueries,
+)
+from .selection_queries import _SelectionStatusQueries, _NextSelectedEntityQueries
+from .line_queries import _LineFractionCoordinateQueries, _LineFractionSlopeQueries
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
 from .nearest_queries import _EntityNearestEntityQueries
+from .connectivity_queries import _ConnectivityQueries
+from .geometry_queries import _AngleQueries, _AreaQueries, _DistanceQueries
 
 
-class Query(_ComponentQueries,
-            _InverseGetComponentQueries,
-            _DisplacementComponentQueries,
-            _SelectionStatusQueries,
-            _LineFractionCoordinateQueries,
-            _LineFractionSlopeQueries,
-            _NextSelectedEntityQueries,
-            _NodeNormalQueries,
-            _KeypointNormalQueries,
-            _EntityNearestEntityQueries):
+class Query(
+    _ComponentQueries,
+    _InverseGetComponentQueries,
+    _DisplacementComponentQueries,
+    _SelectionStatusQueries,
+    _LineFractionCoordinateQueries,
+    _LineFractionSlopeQueries,
+    _NextSelectedEntityQueries,
+    _NodeNormalQueries,
+    _KeypointNormalQueries,
+    _EntityNearestEntityQueries,
+    _ConnectivityQueries,
+    _AngleQueries,
+    _AreaQueries,
+    _DistanceQueries,
+):
     """Class containing all the inline functions of APDL.
 
     Most of the results of these methods are shortcuts for specific
@@ -68,17 +77,17 @@ class Query(_ComponentQueries,
     --------
     In this example we construct a solid box and mesh it. Then we use
     the ``Query`` methods ``nx``, ``ny``, and ``nz`` to find the
-    cartesian coordinates of the first node.
+    cartesian coordinates of the first node. We can access these
+    through the ``mapdl.queries`` property.
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> from ansys.mapdl.core.inline_functions import Query
     >>> mapdl = launch_mapdl()
     >>> mapdl.prep7()
     >>> mapdl.et(1, 'SOLID5')
     >>> mapdl.block(0, 10, 0, 20, 0, 30)
     >>> mapdl.esize(2)
     >>> mapdl.vmesh('ALL')
-    >>> q = Query(mapdl)
+    >>> q = mapdl.queries
     >>> q.nx(1), q.ny(1), q.nz(1)
     0.0 20.0 0.0
     """
