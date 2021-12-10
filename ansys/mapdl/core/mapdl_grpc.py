@@ -25,7 +25,7 @@ try:
 
 except ImportError:
     msg = "There was a problem importing the ANSYS API module (ansys.api.mapdl).\n" +\
-        "Please make sure you have the lastest updated version using:\n" +\
+        "Please make sure you have the latest updated version using:\n" +\
         "'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'\n" +\
         "If this does not solve it, please reinstall 'ansys.mapdl.core'. " +\
         "or contact Technical Support at 'https://github.com/pyansys/pymapdl'."
@@ -34,7 +34,7 @@ except ImportError:
 except ModuleNotFoundError:
     msg = "ANSYS API module (ansys.api.mapdl) could not be found.\n" +\
         "This might be due to a faulty installation or obsolete API module version. " +\
-        "Please make sure you have the lastest updated version using:\n" +\
+        "Please make sure you have the latest updated version using:\n" +\
         "'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'\n" +\
         "If this does not solve it, please reinstall 'ansys.mapdl.core'. " +\
         "or contact Technical Support at 'https://github.com/pyansys/pymapdl'."
