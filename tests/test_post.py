@@ -765,7 +765,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
-    sint = mapdl.post_processing.nodal_stress_intensity
+    sint = mapdl.post_processing.nodal_stress_intensity()
 
     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(sint_ans, sint_aligned)
