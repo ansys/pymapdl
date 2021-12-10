@@ -537,7 +537,7 @@ class PostProcessing:
         surf = self._mapdl.mesh._surf
 
         nods = surf["ansys_node_num"]-1
-        all_scalars = all_scalars[nods]
+        all_scalars = all_scalars[nods.astype(int)]
 
         meshes = [
             {
