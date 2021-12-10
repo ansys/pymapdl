@@ -554,10 +554,7 @@ class PostProcessing:
         return general_plotter(meshes, [], labels, **kwargs)
 
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
-        """Plot cell scalars.
-
-        Assumes scalars are from all elements and not just the active surface.
-        """
+        """Plot cell scalars."""
         if not scalars.size:
             raise RuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
