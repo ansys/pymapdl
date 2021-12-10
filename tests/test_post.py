@@ -1040,6 +1040,21 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     cpos = mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
     assert isinstance(cpos, CameraPosition)
 
+
+def test_plot_uncomplete_element_selection(mapdl, contact_solve):
+    n_elements = mapdl.mesh.n_elem
+    mapdl.esel('s', 'elem', '', 1, n_elements//2)
+    cpos = mapdl.post_processing.plot_element_displacement(smooth_shading=True)
+    assert isinstance(cpos, CameraPosition)
+
+
+def test_plot_uncomplete_nodal_selection(mapdl, contact_solve):
+    n_elements = mapdl.mesh.n_node
+    mapdl.nsel('s', 'node', '', 1, n_elements//2)
+    cpos = mapdl.post_processing.plot_element_displacement(smooth_shading=True)
+    assert isinstance(cpos, CameraPosition)
+
+
 ###############################################################################
 # @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
 # def test_nodal_thermal_component_strain(mapdl, thermal_solve, comp):
