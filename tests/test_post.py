@@ -472,7 +472,7 @@ def test_nodal_eqv_stress(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
-    seqv = mapdl.post_processing.nodal_eqv_stress
+    seqv = mapdl.post_processing.nodal_eqv_stress()
 
     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(seqv_ans, seqv_aligned)
@@ -523,7 +523,7 @@ def test_plot_rot(mapdl, static_solve, comp):
 
 # TODO: add valid result
 def test_temperature(mapdl, static_solve):
-    from_grpc = mapdl.post_processing.nodal_temperature
+    from_grpc = mapdl.post_processing.nodal_temperature()
     assert np.allclose(from_grpc, 0)
 
 
@@ -548,7 +548,7 @@ def test_plot_temperature(mapdl, static_solve):
 
 # TODO: add valid result
 def test_pressure(mapdl, static_solve):
-    from_grpc = mapdl.post_processing.nodal_pressure
+    from_grpc = mapdl.post_processing.nodal_pressure()
     assert np.allclose(from_grpc, 0)
 
 
@@ -559,7 +559,7 @@ def test_plot_pressure(mapdl, static_solve):
 
 # TODO: add valid result
 def test_voltage(mapdl, static_solve):
-    from_grpc = mapdl.post_processing.nodal_voltage
+    from_grpc = mapdl.post_processing.nodal_voltage()
     assert np.allclose(from_grpc, 0)
 
 
@@ -683,7 +683,7 @@ def test_nodal_total_strain_intensity(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("EPTO", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
-    sint = mapdl.post_processing.nodal_total_strain_intensity
+    sint = mapdl.post_processing.nodal_total_strain_intensity()
 
     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(sint_ans, sint_aligned)
@@ -702,7 +702,7 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("EPTO", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
-    seqv = mapdl.post_processing.nodal_total_eqv_strain
+    seqv = mapdl.post_processing.nodal_total_eqv_strain()
 
     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(seqv_ans, seqv_aligned)
@@ -828,7 +828,7 @@ def test_nodal_elastic_strain_intensity(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("EPEL", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
-    sint = mapdl.post_processing.nodal_elastic_strain_intensity
+    sint = mapdl.post_processing.nodal_elastic_strain_intensity()
 
     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(sint_ans, sint_aligned)
@@ -847,7 +847,7 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
     data = np.genfromtxt(mapdl.prnsol("EPEL", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
-    seqv = mapdl.post_processing.nodal_elastic_eqv_strain
+    seqv = mapdl.post_processing.nodal_elastic_eqv_strain()
 
     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(seqv_ans, seqv_aligned)
@@ -990,7 +990,7 @@ def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     sint_ans = data[:, -2]
-    sint = mapdl.post_processing.nodal_plastic_strain_intensity
+    sint = mapdl.post_processing.nodal_plastic_strain_intensity()
 
     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(sint_ans, sint_aligned)
@@ -1006,7 +1006,7 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
     nnum_ans = data[:, 0].astype(np.int32)
     seqv_ans = data[:, -1]
-    seqv = mapdl.post_processing.nodal_plastic_eqv_strain
+    seqv = mapdl.post_processing.nodal_plastic_eqv_strain()
 
     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
     assert np.allclose(seqv_ans, seqv_aligned)
@@ -1031,7 +1031,7 @@ def test_nodal_contact_friction_stress(mapdl, contact_solve):
     nodes = array[:, 0]
 
     index = nodes.astype(int) - 1  # -1 to convert apdl node number to python index.
-    sfric_nod = mapdl.post_processing.nodal_contact_friction_stress[index]
+    sfric_nod = mapdl.post_processing.nodal_contact_friction_stress()[index]
 
     assert np.allclose(sfric_prn, sfric_nod)
 
@@ -1087,7 +1087,7 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
 #     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
 #     nnum_ans = data[:, 0].astype(np.int32)
 #     sint_ans = data[:, -2]
-#     sint = mapdl.post_processing.nodal_thermal_strain_intensity
+#     sint = mapdl.post_processing.nodal_thermal_strain_intensity()
 
 #     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 #     assert np.allclose(sint_ans, sint_aligned)
@@ -1103,7 +1103,7 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
 #     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
 #     nnum_ans = data[:, 0].astype(np.int32)
 #     seqv_ans = data[:, -1]
-#     seqv = mapdl.post_processing.nodal_thermal_eqv_strain
+#     seqv = mapdl.post_processing.nodal_thermal_eqv_strain()
 
 #     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 #     assert np.allclose(seqv_ans, seqv_aligned)
