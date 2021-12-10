@@ -522,10 +522,7 @@ class PostProcessing:
         )
 
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
-        """Plot point scalars
-
-        Assumes scalars are from all nodes and not just the active surface.
-        """
+        """Plot point scalars"""
         if not scalars.size:
             raise RuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
