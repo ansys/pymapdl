@@ -101,7 +101,7 @@ mapdl.set(1, 1)
 # results directly from MAPDL's VGET command
 # *VGET, __VAR__, NODE, , S, EQV
 nnum = mapdl.mesh.nnum
-von_mises_mapdl = mapdl.post_processing.nodal_eqv_stress
+von_mises_mapdl = mapdl.post_processing.nodal_eqv_stress()
 
 # we could print out the solution for each node with:
 
