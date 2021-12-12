@@ -157,7 +157,7 @@ mapdl.post_processing.plot_nodal_displacement(
 #    text, it returns a numpy array.
 
 
-seqv = mapdl.post_processing.nodal_eqv_stress
+seqv = mapdl.post_processing.nodal_eqv_stress()
 
 # print out the nodes
 for i, nnum in enumerate(mapdl.mesh.nnum):

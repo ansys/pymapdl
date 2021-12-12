@@ -702,7 +702,6 @@ class PostProcessing:
         """Element degree of freedom result"""
         return self._mapdl.get_array("ELEM", item1=item, it1num=it1num)
 
-    @property
     def nodal_temperature(self) -> np.ndarray:
         """The nodal temperature of the current result.
 
@@ -766,7 +765,7 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nTemperature"})
         return self._plot_point_scalars(
-            self.nodal_temperature, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_temperature(), show_node_numbering=show_node_numbering, **kwargs
         )
 
     def nodal_displacement(self, component="NORM") -> np.ndarray:
@@ -1316,7 +1315,6 @@ class PostProcessing:
             scalars, show_elem_numbering=show_elem_numbering, **kwargs
         )
 
-    @property
     def nodal_pressure(self) -> np.ndarray:
         """The nodal pressure of the current result.
 
@@ -1335,7 +1333,7 @@ class PostProcessing:
 
         Examples
         --------
-        >>> mapdl.post_processing.pressure
+        >>> mapdl.post_processing.pressure()
         array([0., 0., 0., ..., 0., 0., 0.])
 
         """
@@ -1380,10 +1378,9 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nPressure"})
         return self._plot_point_scalars(
-            self.nodal_pressure, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_pressure(), show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_voltage(self) -> np.ndarray:
         """The nodal voltage of the current result.
 
@@ -1411,7 +1408,7 @@ class PostProcessing:
         --------
         Return the voltage of the current result.
 
-        >>> mapdl.post_processing.voltage
+        >>> mapdl.post_processing.voltage()
         array([0., 0., 0., ..., 0., 0., 0.])
         """
         return self.nodal_values("VOLT")
@@ -1454,7 +1451,7 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nVoltage"})
         return self._plot_point_scalars(
-            self.nodal_voltage, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_voltage(), show_node_numbering=show_node_numbering, **kwargs
         )
 
     def nodal_component_stress(self, component) -> np.ndarray:
@@ -1624,7 +1621,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_stress_intensity(self) -> np.ndarray:
         """The nodal stress intensity of the current result.
 
@@ -1646,7 +1642,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_stress_intensity
+        >>> mapdl.post_processing.nodal_stress_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -1691,13 +1687,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_stress_intensity(smooth_shading=True)
 
         """
-        scalars = self.nodal_stress_intensity
+        scalars = self.nodal_stress_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Stress\nIntensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_eqv_stress(self) -> np.ndarray:
         """The nodal equivalent stress of the current result.
 
@@ -1721,7 +1716,7 @@ class PostProcessing:
 
         Examples
         --------
-        >>> mapdl.post_processing.nodal_eqv_stress
+        >>> mapdl.post_processing.nodal_eqv_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -1729,7 +1724,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_eqv_stress
+        >>> mapdl.post_processing.nodal_eqv_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -1774,7 +1769,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True)
 
         """
-        scalars = self.nodal_eqv_stress
+        scalars = self.nodal_eqv_stress()
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equivalent\nStress"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -1955,7 +1950,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_total_strain_intensity(self) -> np.ndarray:
         """The total nodal strain intensity of the current result.
 
@@ -1979,7 +1973,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_total_strain_intensity
+        >>> mapdl.post_processing.nodal_total_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2022,13 +2016,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_strain_intensity()
 
         """
-        scalars = self.nodal_total_strain_intensity
+        scalars = self.nodal_total_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_total_eqv_strain(self) -> np.ndarray:
         """The total nodal equivalent strain of the current result.
 
@@ -2050,7 +2043,7 @@ class PostProcessing:
         --------
         Total quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_total_eqv_strain
+        >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2058,7 +2051,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_total_eqv_strain
+        >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2102,7 +2095,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_total_eqv_strain
+        scalars = self.nodal_total_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nEquivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2268,7 +2261,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_elastic_strain_intensity(self) -> np.ndarray:
         """The elastic nodal strain intensity of the current result.
 
@@ -2297,7 +2289,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_elastic_strain_intensity
+        >>> mapdl.post_processing.nodal_elastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2341,13 +2333,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity()
 
         """
-        scalars = self.nodal_elastic_strain_intensity
+        scalars = self.nodal_elastic_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_elastic_eqv_strain(self) -> np.ndarray:
         """The elastic nodal equivalent strain of the current result.
 
@@ -2368,7 +2359,7 @@ class PostProcessing:
         --------
         Elastic quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_elastic_eqv_strain
+        >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2376,7 +2367,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_elastic_eqv_strain
+        >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2420,7 +2411,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_elastic_eqv_strain
+        scalars = self.nodal_elastic_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2585,7 +2576,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_plastic_strain_intensity(self) -> np.ndarray:
         """The plastic nodal strain intensity of the current result.
 
@@ -2615,7 +2605,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_plastic_strain_intensity
+        >>> mapdl.post_processing.nodal_plastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2659,13 +2649,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity()
 
         """
-        scalars = self.nodal_plastic_strain_intensity
+        scalars = self.nodal_plastic_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_plastic_eqv_strain(self) -> np.ndarray:
         """The plastic nodal equivalent strain of the current result.
 
@@ -2693,7 +2682,7 @@ class PostProcessing:
         --------
         Plastic quivalent strain for the current result
 
-        >>> mapdl.post_processing.nodal_plastic_eqv_strain
+        >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2701,7 +2690,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_plastic_eqv_strain
+        >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2745,7 +2734,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_plastic_eqv_strain
+        scalars = self.nodal_plastic_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2917,7 +2906,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_thermal_strain_intensity(self) -> np.ndarray:
         """The thermal nodal strain intensity of the current result.
 
@@ -2947,7 +2935,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_thermal_strain_intensity
+        >>> mapdl.post_processing.nodal_thermal_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2988,13 +2976,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity()
 
         """
-        scalars = self.nodal_thermal_strain_intensity
+        scalars = self.nodal_thermal_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_thermal_eqv_strain(self) -> np.ndarray:
         """The thermal nodal equivalent strain of the current result.
 
@@ -3022,7 +3009,7 @@ class PostProcessing:
         --------
         Thermal quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_thermal_eqv_strain
+        >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -3030,7 +3017,7 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_thermal_eqv_strain
+        >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -3074,13 +3061,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_thermal_eqv_strain
+        scalars = self.nodal_thermal_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_contact_friction_stress(self) -> np.ndarray:
         """Nodal contact friction stress of the current result.
 
@@ -3152,5 +3138,5 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Contact\n Friction Stress"})
         return self._plot_point_scalars(
-            self.nodal_contact_friction_stress, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_contact_friction_stress(), show_node_numbering=show_node_numbering, **kwargs
         )
