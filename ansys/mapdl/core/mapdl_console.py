@@ -109,7 +109,7 @@ class MapdlConsole(_MapdlCore):
         if prior_processor == "Begin level":
             self.finish(mute=True)
         elif 'POST1' not in prior_processor:
-            self.run("/%s" % prior_processor, mute=True)
+            self.run(f"/{prior_processor}", mute=True)
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
