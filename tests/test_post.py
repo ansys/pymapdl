@@ -53,6 +53,7 @@ def static_solve(mapdl):
 
     mapdl.esize(elemsize)
     mapdl.allsel("all")
+    breakpoint()
     mapdl.vsweep("ALL")
     mapdl.csys(1)
     mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
@@ -207,6 +208,7 @@ def contact_solve(mapdl):
     mapdl.vsel("u", "volume", "", 1, 2)
     mapdl.mat(2)
     mapdl.esize(0.005)
+    mapdl.numstr("NODE", 1000)
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
@@ -1041,17 +1043,15 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     assert isinstance(cpos, CameraPosition)
 
 
-def test_plot_uncomplete_element_selection(mapdl, contact_solve):
-    n_elements = mapdl.mesh.n_elem
-    mapdl.esel('s', 'elem', '', 1, n_elements//2)
-    cpos = mapdl.post_processing.plot_element_displacement(smooth_shading=True)
+def test_plot_incomplete_element_selection(mapdl, contact_solve):
+    mapdl.esel('S', 'ELEM', '', 1, mapdl.mesh.n_elem//2)
+    cpos = mapdl.post_processing.plot_element_displacement()
     assert isinstance(cpos, CameraPosition)
 
 
-def test_plot_uncomplete_nodal_selection(mapdl, contact_solve):
-    n_elements = mapdl.mesh.n_node
-    mapdl.nsel('s', 'node', '', 1, n_elements//2)
-    cpos = mapdl.post_processing.plot_element_displacement(smooth_shading=True)
+def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
+    mapdl.nsel('S', 'NODE', '', 1, mapdl.mesh.n_node//2)
+    cpos = mapdl.post_processing.plot_nodal_displacement()
     assert isinstance(cpos, CameraPosition)
 
 

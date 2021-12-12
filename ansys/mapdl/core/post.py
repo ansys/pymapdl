@@ -530,14 +530,15 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        sel = self.selected_nodes
-        all_scalars = np.zeros(sel.shape)
-        all_scalars[sel] = scalars
+        mask = self.selected_nodes
+        all_scalars = np.empty(mask.size)
+        all_scalars[mask] = scalars
 
+        # we can directly the node numbers as the array of selected
+        # nodes will be a mask sized to the highest node index - 1
         surf = self._mapdl.mesh._surf
-
-        nods = surf["ansys_node_num"]-1
-        all_scalars = all_scalars[nods.astype(int)]
+        node_id = surf["ansys_node_num"].astype(np.int32) - 1
+        all_scalars = all_scalars[node_id]
 
         meshes = [
             {
@@ -638,8 +639,15 @@ class PostProcessing:
 
         Examples
         --------
-        >>> mapdl.post_processing.node_selection
+        The mask of the selected nodes.
+
+        >>> mapdl.post_processing.selected_nodes
         array([False, False, False, ..., True, True, True])
+
+        If you want the node numbers of the selected nodes.
+
+        >>> mapdl.post_processing.selected_nodes.nonzero()[0] + 1
+        array([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         """
         return self._nsel == 1
@@ -663,6 +671,11 @@ class PostProcessing:
         --------
         >>> mapdl.post_processing.selected_elements
         array([False, False, False, ..., True, True, True])
+
+        If you want the element numbers of the selected elements.
+
+        >>> mapdl.post_processing.selected_elements.nonzero()[0] + 1
+        array([1, 2, 3, 4, 5, 6, 7, 8, 9])
 
         """
         return self._esel == 1
