@@ -100,16 +100,16 @@ class MapdlConsole(_MapdlCore):
         prior_processor = self.parameters.routine
 
         # Setting format
-        self.post1()
-        self.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-        self.format('', 'E', nsigfig + 9, nsigfig)
-        self.page(1E9, '', -1, 240)
+        self.post1(mute=True)
+        self.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF', mute=True)
+        self.format('', 'E', nsigfig + 9, nsigfig, mute=True)
+        self.page(1E9, '', -1, 240, mute=True)
 
         # Returning to previous routine.
         if prior_processor == "Begin level":
-            self.finish()
+            self.finish(mute=True)
         elif 'POST1' not in prior_processor:
-            self.run("/%s" % prior_processor)
+            self.run("/%s" % prior_processor, mute=True)
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
