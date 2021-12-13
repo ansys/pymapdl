@@ -17,6 +17,7 @@ from ._commands import (
     display_,
     conn,
     misc,
+    upf
 )
 
 
@@ -188,6 +189,9 @@ class SolutionCommands(
     pass
 
 
+class UpfCommands(upf.UPF):
+    pass
+
 class Commands(
     APDLCommands,
     Aux2Commands,
@@ -207,6 +211,7 @@ class Commands(
     conn.Conn,
     hidden._Hidden,
     map_cmd.MapCommand,
+    UpfCommands,
 ):
 
     """Wrapped MAPDL commands"""
