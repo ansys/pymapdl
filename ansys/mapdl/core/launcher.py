@@ -185,6 +185,8 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
+    use_custom_upf=False,
+    ans_user_path=None
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -754,6 +756,8 @@ def launch_mapdl(
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
+    use_custom_upf=False,
+    ans_user_path=None,
     **kwargs,
 ) -> _MapdlCore:
     """Start MAPDL locally in gRPC mode.
@@ -878,6 +882,19 @@ def launch_mapdl(
         also raise a warning. If it is not used (``None``), no specific license
         will be requested, being up to the license server to provide a specific
         license type. Default is ``None``.
+
+    use_custom_upf : bool, optional
+        Allows the execution of User Programmable Features (UPF).
+        This should be equal to ``True`` if you want to use the APDL command
+        ``/UPF``. This command reads the user routine from the specified file
+        which should be in the ``ANS_USER_PATH``. This path can be specified
+        using the correspondent keyword argument (``ans_user_path``) or if not,
+        PyMAPDL will assume it correspond to the MAPDL working directory.
+
+    ans_user_path : str, optional
+        It specified the ``ANS_USER_PATH` environment variable which correspond
+        to the Ansys User Directory. It is used only for the UPF routines
+        (``use_custom_upf=True``).
 
     Returns
     -------
@@ -1012,6 +1029,7 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
+            use_custom_upf=use_custom_upf,
         )
         if clear_on_connect:
             mapdl.clear()
@@ -1118,6 +1136,8 @@ def launch_mapdl(
         "additional_switches": additional_switches,
         "jobname": jobname,
         "nproc": nproc,
+        "use_custom_upf": use_custom_upf,
+        "ans_user_path": ans_user_path,
     }
 
     if mode in ["console", "corba"]:
