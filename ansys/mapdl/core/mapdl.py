@@ -159,6 +159,13 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
+        # UPF
+        ## UPFs # This should be moved to MAPDL.
+        self._use_custom_upf = start_parm.get("use_custom_upf", False)
+        if self._use_custom_upf:
+            # Logic to be implemented.
+            # Requires `remote` module.
+
     @property
     def _name(self):  # pragma: no cover
         """Implemented by child class"""
