@@ -185,8 +185,9 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
-    use_custom_upf=False,
-    ans_user_path=None
+    upf_routine=False,
+    upf_files=None,
+    **kwargs
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -436,6 +437,7 @@ def launch_grpc(
             ]
         )
         command = " ".join(command_parm)
+
 
     if verbose:
         print(f"Running {command}")
@@ -756,9 +758,9 @@ def launch_mapdl(
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
-    use_custom_upf=False,
-    ans_user_path=None,
-    **kwargs,
+    upf_routine=None,
+    upf_files=None,
+    additional_env_vars=None
 ) -> _MapdlCore:
     """Start MAPDL locally in gRPC mode.
 
@@ -883,18 +885,25 @@ def launch_mapdl(
         will be requested, being up to the license server to provide a specific
         license type. Default is ``None``.
 
-    use_custom_upf : bool, optional
-        Allows the execution of User Programmable Features (UPF).
-        This should be equal to ``True`` if you want to use the APDL command
-        ``/UPF``. This command reads the user routine from the specified file
-        which should be in the ``ANS_USER_PATH``. This path can be specified
-        using the correspondent keyword argument (``ans_user_path``) or if not,
-        PyMAPDL will assume it correspond to the MAPDL working directory.
+    upf_routine : str, optional
+        Activates the execution of User Programmable Features (UPF). 
+        The possible values for this argument are:
+        ``'python'``, ``'fortran'``, or ``'c++'`` as strings, or the default
+        ``'None'`` which deactivates UPF routines.
+        Only Python UPF routines are supported at the moment in PyMAPDL.
 
-    ans_user_path : str, optional
-        It specified the ``ANS_USER_PATH` environment variable which correspond
+    upf_files : str, optional
+        It specifies the UPF files to be loaded.
+
+        ``ANS_USER_PATH` environment variable which correspond
         to the Ansys User Directory. It is used only for the UPF routines
         (``use_custom_upf=True``).
+
+    additional_env_vars : dict, optional
+        Add additional environmental variables to the execution. Since it uses
+        ``subprocess.Popen`` to add them, they do not affect the host OS 
+        environment variables. This argument accepts a dictionary or the default
+        ``None``, where means no new variables are added.
 
     Returns
     -------
@@ -1136,8 +1145,8 @@ def launch_mapdl(
         "additional_switches": additional_switches,
         "jobname": jobname,
         "nproc": nproc,
-        "use_custom_upf": use_custom_upf,
-        "ans_user_path": ans_user_path,
+        "upf_routine": upf_routine,
+        "upf_files": upf_files,
     }
 
     if mode in ["console", "corba"]:
@@ -1155,6 +1164,25 @@ def launch_mapdl(
             timeout=start_timeout*0.9, verbose=verbose_mapdl
         )
         lic_check.start()
+    
+    if additional_env_vars:
+        additional_env_vars = os.environ.copy().update(additional_env_vars)
+
+    # UPFs
+    if upf_routine:
+        env_var = os.environ.copy()
+        env_var['ANS_USE_UPF'] = 'TRUE'
+
+        # We need to know the location to add it to the env variables.
+        # use temporary directory if run_location is unspecified
+        if run_location is None:
+            run_location = create_temp_dir()
+        elif not os.path.isdir(run_location):
+            os.mkdir(run_location)
+        start_parm["run_location"] = run_location
+        env_var['ANS_USER_PATH'] = run_location
+
+        start_parm['ENV_VARS'] = env_var
 
     try:
         if mode == "console":
