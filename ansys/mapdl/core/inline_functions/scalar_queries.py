@@ -35,17 +35,14 @@ class _ScalarQueries(_QueryExecution):
         >>> mapdl.prep7()
         >>> mapdl.mp("kxx", 1, 45)
         >>> mapdl.et(1, 'SOLID70')
-        >>> mapdl.block(-0.3, 0.3, -0.46, 1.34, -0.2, -0.2 + 0.02)
-        >>> mapdl.esize(0.01)
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.esize(0.5)
         >>> mapdl.vmesh(1)
-        >>> mapdl.asel("S", vmin=3)
-        >>> mapdl.nsla()
         >>> mapdl.d("all", "temp", 5)
-        >>> mapdl.nsel('ALL')
-        >>> mapdl.run("/SOLU")
+        >>> mapdl.slashsolu()
         >>> mapdl.solve()
         >>> mapdl.queries.temp(1)
-        4.99999994201101
+        5.0
         """
         return self._run_query(f"TEMP({n})", integer=False)
 
