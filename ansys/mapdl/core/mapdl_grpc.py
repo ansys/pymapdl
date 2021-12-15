@@ -204,7 +204,8 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                 log_file=True, cleanup_on_exit=False, log_apdl=None,
-                set_no_abort=True, remove_temp_files=False, **kwargs):
+                set_no_abort=True, remove_temp_files=False, 
+                upf_routine=None, upf_files=None, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
 
@@ -284,6 +285,12 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in kwargs:
             self._cache_pids()
+
+        self.using_upf = bool(upf_routine)
+        if self.using_upf:
+            if self._local:
+                # Setting ennvironments
+                pass
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
