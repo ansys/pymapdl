@@ -80,7 +80,7 @@ def define_element(elem_type):
     # Type of analysis: Static.
     mapdl.antype("STATIC")
 
-    # Define element number.
+    # Define the element type number.
     elem_num = 1
 
     if elem_type == "SHELL181":
@@ -154,14 +154,15 @@ define_section()
 
 # Define geometry of the simplified mathematical model.
 def define_geometry():
-    # Define global cylindrical coordinate system.
+    # Change active coordinate system
+    # to the global cylindrical coordinate system.
     mapdl.csys(1)
 
     # Define keypoints by coordinates.
     mapdl.k(1, 4.953)
     mapdl.k(2, 4.953, "", 5.175)
 
-    # Generates additional keypoints from a pattern of keypoints.
+    # Generate additional keypoints from a pattern of keypoints.
     mapdl.kgen(2, 1, 2, 1, "", 90)
 
     # Create an area through keypoints.
@@ -171,7 +172,7 @@ def define_geometry():
         # Plot the lines.
         mapdl.lplot(color_lines=True, cpos='iso')
 
-        # Plot the area using PyVista properties.
+        # Plot the area using PyVista parameters.
         mapdl.aplot(title="Display the selected area",
                     cpos="iso",
                     vtk=True,
@@ -184,12 +185,12 @@ def define_geometry():
 define_geometry()
 
 # Define the number of the keypoint where F is applied using inline function.
-def keypoint_number():
+def keypoint_number(mapdl):
     keypoint_num = mapdl.queries.kp(4.953, 90, 0)
     return keypoint_num
 
 # Call the function to get the number of keypoint.
-top_keypoint = keypoint_number()
+top_keypoint = keypoint_number(mapdl)
 
 
 ###############################################################################
@@ -210,7 +211,7 @@ def meshing():
 
     if elem_type == "SHELL181":
         # Plot the mesh.
-        mapdl.eplot(title="Plot the currently selected elements",
+        mapdl.eplot(title="Plot of the currently selected elements",
                     vtk=True,
                     cpos="iso",
                     show_edges=True,
@@ -308,7 +309,7 @@ post_processing()
 ###############################################################################
 # Plotting
 # ~~~~~~~~
-# Plot nodal displacement with PyVista functionality.
+# Plot nodal displacement using PyVista.
 
 def plot_nodal_disp():
     mapdl.post_processing.plot_nodal_displacement(
