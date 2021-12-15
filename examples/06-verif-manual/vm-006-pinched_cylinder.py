@@ -52,12 +52,8 @@ Analysis Assumptions and Modeling Notes:
 
 from ansys.mapdl.core import launch_mapdl
 
-
-# Start mapdl and clear it.
-def initiate_mapdl(mapdl=None):
-    mapdl = launch_mapdl()
-    mapdl.clear()
-    return mapdl
+# Start mapdl.
+mapdl = launch_mapdl()
 
 
 ###############################################################################
@@ -65,10 +61,13 @@ def initiate_mapdl(mapdl=None):
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # Enter verification example mode and the pre-processing routine.
 
-def start_prep7(mapdl):
+def start_prep7():
+    mapdl.clear()
     mapdl.verify()
     mapdl.prep7()
-    return mapdl
+
+# Call the function.
+start_prep7()
 
 
 ###############################################################################
@@ -77,7 +76,7 @@ def start_prep7(mapdl):
 # Set up the element type (a shell-type).
 
 # Define the element type number.
-def define_element(mapdl, elem_type):
+def define_element(elem_type):
     # Type of analysis: Static.
     mapdl.antype("STATIC")
 
@@ -103,7 +102,10 @@ def define_element(mapdl, elem_type):
 
     # Show currently defined element type.
     print(mapdl.etlist())
-    return mapdl
+    return elem_type
+
+# Call the function and get the number of the element type.
+elem_type = define_element(elem_type="SHELL181")
 
 
 ###############################################################################
@@ -117,13 +119,14 @@ def define_element(mapdl, elem_type):
 mat_num = 1
 
 # Define material properties.
-def define_material(mapdl):
+def define_material():
     # Define material properties.
     mapdl.mp("EX", mat_num, 10.5E6)
     mapdl.mp("NUXY", mat_num, 0.3125)
     print(mapdl.mplist())
-    return mapdl
 
+# Call the function.
+define_material()
 
 ###############################################################################
 # Define Section
@@ -135,11 +138,13 @@ sec_num = 1
 t = 0.094
 
 # Define shell cross-section.
-def define_section(mapdl):
+def define_section():
     # Define shell cross-section.
     mapdl.sectype(secid=sec_num, type_="SHELL", name="shell181")
     mapdl.secdata(t, mat_num, 0, 5)
-    return mapdl
+
+# Call the function.
+define_section()
 
 
 ###############################################################################
@@ -148,8 +153,7 @@ def define_section(mapdl):
 # Set up the keypoints and create the area through the keypoints.
 
 # Define geometry of the simplified mathematical model.
-def define_geometry(mapdl):
-    global top_keypoint
+def define_geometry():
     # Define global cylindrical coordinate system.
     mapdl.csys(1)
 
@@ -163,21 +167,29 @@ def define_geometry(mapdl):
     # Create an area through keypoints.
     mapdl.a(1, 2, 4, 3)
 
-    # Define the number of the keypoint where F is applied using inline function.
-    top_keypoint = mapdl.queries.kp(4.953, 90, 0)
+    if elem_type == "SHELL181":
+        # Plot the lines.
+        mapdl.lplot(color_lines=True, cpos='iso')
 
-    # Plot the lines.
-    mapdl.lplot(color_lines=True, cpos='iso')
+        # Plot the area using PyVista properties.
+        mapdl.aplot(title="Display the selected area",
+                    cpos="iso",
+                    vtk=True,
+                    color="#06C2AC",
+                    show_line_numbering=True,
+                    show_area_numbering=True,
+                    show_lines=True)
 
-    # Plot the area using PyVista properties.
-    mapdl.aplot(title="Display the selected area",
-                cpos="iso",
-                vtk=True,
-                color="#06C2AC",
-                show_line_numbering=True,
-                show_area_numbering=True,
-                show_lines=True)
-    return mapdl
+# Call the function.
+define_geometry()
+
+# Define the number of the keypoint where F is applied using inline function.
+def keypoint_number():
+    keypoint_num = mapdl.queries.kp(4.953, 90, 0)
+    return keypoint_num
+
+# Call the function to get the number of keypoint.
+top_keypoint = keypoint_number()
 
 
 ###############################################################################
@@ -186,7 +198,7 @@ def define_geometry(mapdl):
 # Define line division of the lines, then mesh the area with shell elements.
 
 # Define mesh properties and create the mesh with shell elements.
-def meshing(mapdl):
+def meshing():
     # Specify the default number of line divisions.
     mapdl.esize(size='', ndiv=8)
 
@@ -196,14 +208,15 @@ def meshing(mapdl):
     # Define global cartesian coordinate system.
     mapdl.csys(0)
 
-    # Plot the mesh.
-    mapdl.eplot(title="Plot the currently selected elements",
-                vtk=True,
-                cpos="iso",
-                show_edges=True,
-                edge_color="white",
-                show_node_numbering=True,
-                color="purple")
+    if elem_type == "SHELL181":
+        # Plot the mesh.
+        mapdl.eplot(title="Plot the currently selected elements",
+                    vtk=True,
+                    cpos="iso",
+                    show_edges=True,
+                    edge_color="white",
+                    show_node_numbering=True,
+                    color="purple")
 
     # Print the list of elements.
     print(mapdl.elist())
@@ -218,7 +231,9 @@ def meshing(mapdl):
 
     # Print the list of nodes.
     print(mapdl.nlist())
-    return mapdl
+
+# Call the function.
+meshing()
 
 
 ###############################################################################
@@ -227,7 +242,7 @@ def meshing(mapdl):
 # Application of symmetric boundary conditions for simplified model.
 
 # Select nodes by location and apply BC.
-def define_bc(mapdl):
+def define_bc():
     # Select nodes by location and apply BC.
     mapdl.nsel("S", "LOC", "X", 0)
     mapdl.dsym("SYMM", "X", 0)
@@ -236,7 +251,9 @@ def define_bc(mapdl):
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.dsym("SYMM", "Z", 0)
     mapdl.nsel("ALL")
-    return mapdl
+
+# Call the function.
+define_bc()
 
 
 ###############################################################################
@@ -245,14 +262,16 @@ def define_bc(mapdl):
 # Apply the force of :math:`F = (100/4) lb` in the y-direction.
 
 # Define loads.
-def define_loads(mapdl):
+def define_loads():
     # Parametrization of the :math:`F` load for the quarter of the model.
     force = 100 / 4
 
     # Application of the load to the model.
     mapdl.fk(top_keypoint, "FY", -force)
     mapdl.finish()
-    return mapdl
+
+# Call the function.
+define_loads()
 
 
 ###############################################################################
@@ -260,12 +279,14 @@ def define_loads(mapdl):
 # ~~~~~
 # Enter solution mode and solve the system. Print the solver output.
 
-def solve_procedure(mapdl):
-    mapdl.run("/SOLU")
+def solve_procedure():
+    mapdl.run("/solu")
     out = mapdl.solve()
     mapdl.finish()
     print(out)
-    return mapdl
+
+# Call the function.
+solve_procedure()
 
 
 ###############################################################################
@@ -276,10 +297,12 @@ def solve_procedure(mapdl):
 # Get the the radial displacement at the node where force F is applied.
 
 # Start post-processing mode.
-def post_processing(mapdl):
+def post_processing():
     mapdl.post1()
     mapdl.set(1)
-    return mapdl
+
+# Call the function.
+post_processing()
 
 
 ###############################################################################
@@ -287,7 +310,7 @@ def post_processing(mapdl):
 # ~~~~~~~~
 # Plot nodal displacement with PyVista functionality.
 
-def plot_nodal_disp(mapdl):
+def plot_nodal_disp():
     mapdl.post_processing.plot_nodal_displacement(
         title="Nodal Displacements",
         component="Y",
@@ -297,7 +320,9 @@ def plot_nodal_disp(mapdl):
         show_axes=True,
         show_edges=True
     )
-    return mapdl
+
+# Call the function.
+plot_nodal_disp()
 
 
 ###############################################################################
@@ -306,7 +331,7 @@ def plot_nodal_disp(mapdl):
 # To determine the radial displacement :math:`\delta` at the point
 # where F is applied, we can use :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
 
-def get_displacements(mapdl):
+def get_displacements():
     # Select keypoint by its number ``top_keypoint``.
     mapdl.ksel("S", vmin="top_keypoint")
 
@@ -327,38 +352,46 @@ def get_displacements(mapdl):
 
     # Use ``round()`` function to obtain needed number of decimals.
     print(round(deflect_shell, 4))
-
     return deflect_shell
+
+# Call the function and get the value of the deflection.
+deflect_shell_181 = get_displacements()
 
 
 ###############################################################################
-# Problem solving
+# Rerun Model with SHELL281
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Perform the simulation again using the element type SHELL281.
+
+# Restart pre-processing routine.
+start_prep7()
+elem_type = define_element(elem_type="SHELL281")
+define_material()
+define_section()
+define_geometry()
+meshing()
+define_bc()
+define_loads()
+
+
+###############################################################################
+# Solve
+# ~~~~~
+# Enter solution mode and solve the system. Print the solver output.
+
+solve_procedure()
+
+
+###############################################################################
+# Post-processing
 # ~~~~~~~~~~~~~~~
-# Define the main function ``run_model`` for running the nested functions to obtain
-# the rotational deflection at the middle of the cylinder length where
-# the force :math:`F` is applied.
+# Enter post-processing for the model with elements ``shell281``.
+# Plotting nodal displacement.
+# Get the the radial displacement at the node where force F is applied.
 
-def run_model(elem_type):
-    mapdl = initiate_mapdl()
-    mapdl = start_prep7(mapdl)
-    mapdl = define_element(mapdl, elem_type)
-    mapdl = define_material(mapdl)
-    mapdl = define_section(mapdl)
-    mapdl = define_geometry(mapdl)
-    mapdl = meshing(mapdl)
-    mapdl = define_bc(mapdl)
-    mapdl = define_loads(mapdl)
-    mapdl = solve_procedure(mapdl)
-    mapdl = post_processing(mapdl)
-    mapdl = plot_nodal_disp(mapdl)
-    disp = get_displacements(mapdl)
-    return disp
-
-# Initiation of the simulation with elements SHELL181.
-deflect_shell_181 = run_model(elem_type="SHELL181")
-
-# Re-run the simulation with elements SHELL281.
-deflect_shell_281 = run_model(elem_type="SHELL281")
+post_processing()
+plot_nodal_disp()
+deflect_shell_281 = get_displacements()
 
 
 ###############################################################################
