@@ -161,11 +161,11 @@ class _MapdlCore(Commands):
 
         # UPF
         ## UPFs # This should be moved to MAPDL.
-        self._use_custom_upf = start_parm.get("use_custom_upf", False)
-        if self._use_custom_upf:
-            # Logic to be implemented.
-            # It will use `remote` module.
-            pass
+        # self._use_custom_upf = start_parm.get("use_custom_upf", False)
+        # if self._use_custom_upf:
+        #     # Logic to be implemented.
+        #     # Requires `remote` module.
+        #     pass
 
     @property
     def _name(self):  # pragma: no cover
