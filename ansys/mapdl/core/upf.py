@@ -51,6 +51,24 @@ def check_requirements(mapdl, ans_user_path):
     """Check the env variables."""
     pass
 
+def set_requirements(mapdl):
+    from ansys.mapdl.core.misc import get_ansys_bin
+
+    if mapdl._local:
+        os.environ['ANS_USER_PATH'] = os.getcwd()
+
+        # Updating PATH to add 'findUPF.bat'
+        platform = mapdl.get('__tmp__', 'active','0','platform')
+        bin_ = get_ansys_bin()
+        findupf_path = os.path.join(bin_, platform)
+
+        os.environ["PATH"] = findupf_path + os.pathsep + os.environ["PATH"]
+        os.environ['ANS_USE_UPF'] = 'TRUE'
+
+    else:
+        # Relying on the user/admin to setup proper env vars.
+        pass
+
 
 @wraps(_MapdlCore.upf)
 def upf(self, filename, **kwargs):
