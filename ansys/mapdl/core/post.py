@@ -171,13 +171,8 @@ class PostProcessing:
          75.20949687626468]
         """
         self._mapdl.post1()
-        self._mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-        nsigfig = 10
-        self._mapdl.format('', 'E', nsigfig + 9, nsigfig)
-        self._mapdl.page(1E9, '', -1, 240)
-
         list_rsp = self._mapdl.set("LIST")
-        return np.genfromtxt(list_rsp.splitlines(), skip_header=3)
+        return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
 
     def _reset_cache(self):
         """Reset local cache"""
