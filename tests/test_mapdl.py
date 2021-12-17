@@ -992,4 +992,14 @@ def test_inquire(mapdl):
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", 'jobname')
     assert float(mapdl.inquire("", 'exist', jobname + '.lock')) in [0, 1]
-    assert float(mapdl.inquire("", 'exist', jobname , 'lock')) in [0, 1]
+    assert float(mapdl.inquire("", 'exist', jobname, 'lock')) in [0, 1]
+
+
+def test__get_file_path(mapdl):
+    fname = 'dummy.txt'
+    with open(fname, 'w') as fid:
+        fid.write("Dummy file for testing")
+
+    assert fname == mapdl._get_file_path(fname)
+
+    os.remove(fname)
