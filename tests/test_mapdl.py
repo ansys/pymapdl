@@ -995,10 +995,10 @@ def test_inquire(mapdl):
     assert float(mapdl.inquire("", 'exist', jobname, 'lock')) in [0, 1]
 
 
-def test_get_file_path(mapdl):
+def test_get_file_path(mapdl, tmpdir):
     fname = 'dummy.txt'
-    with open(fname, 'w') as fid:
-        fid.write("Dummy file for testing")
+    fobject = tmpdir.join(fname)
+    fobject.write("Dummy file for testing")
 
     assert fname == mapdl._get_file_path(fname)
 
