@@ -1019,7 +1019,7 @@ class MapdlGrpc(_MapdlCore):
 
     @wraps(_MapdlCore.tbft)
     def tbft(self, oper='', id_='', option1='', option2='', option3='', option4='', option5='', option6='', option7='', **kwargs):
-
+        """Wraps ``_MapdlCore.tbft``."""
         if oper.lower() == 'eadd':
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
@@ -1028,7 +1028,7 @@ class MapdlGrpc(_MapdlCore):
 
             if self._local:
                 if not os.path.exists(file) and filename not in self.list_files:
-                    raise Exception(f"File '{filename}' could not be found.")
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
             else:
                 if os.path.exists(filename):
                     self.upload(filename)
@@ -1037,7 +1037,7 @@ class MapdlGrpc(_MapdlCore):
                     option4 = ''  # You don't need the directory if the file is in WDIR
                     pass
                 else:
-                    raise Exception(f"File '{filename}' could not be found.")
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
 
             self.tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
 
