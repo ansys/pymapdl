@@ -992,4 +992,30 @@ def test_inquire(mapdl):
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", 'jobname')
     assert float(mapdl.inquire("", 'exist', jobname + '.lock')) in [0, 1]
-    assert float(mapdl.inquire("", 'exist', jobname , 'lock')) in [0, 1]
+    assert float(mapdl.inquire("", 'exist', jobname, 'lock')) in [0, 1]
+
+
+@pytest.mark.parametrize("option2", ['expdata.dat', 'expdata', 'expdata'])
+@pytest.mark.parametrize("option3", ['', '.dat', 'dat'])
+@pytest.mark.parametrize("option4", ['', '', os.getcwd()])
+def test_tbft(mapdl, option2, option3, option4):
+    fname = 'expdata0.dat'
+    with open(fname, 'w') as fid:
+        fid.write("""0.819139E-01 0.82788577E+00
+        0.166709E+00 0.15437247E+01
+        0.253960E+00 0.21686152E+01
+        0.343267E+00 0.27201819E+01
+        0.434257E+00 0.32129833E+0""")
+
+    mat_id = mapdl.get_value('', 'MAT', 0, 'NUM', 'MAX') + 1
+
+    mapdl.prep7()
+    mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3')
+    mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4)
+
+    assert fname in mapdl.list_files
+
+    try:
+        os.remove(fname)
+    except OSError:
+        pass
