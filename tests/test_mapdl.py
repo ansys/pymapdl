@@ -997,8 +997,10 @@ def test_inquire(mapdl):
 
 @pytest.mark.parametrize("option2,option3,option4", [('expdata.dat', '', ''), ('expdata', '.dat', ''), ('expdata', 'dat', 'DIR')])
 def test_tbft(mapdl, option2, option3, option4):
-    fname = 'expdata0.dat'
-    with open(fname, 'w') as fid:
+    fname = 'expdata.dat'
+    fpath = os.path.join(os.getcwd(), fname)
+
+    with open(fpath, 'w') as fid:
         fid.write("""0.819139E-01 0.82788577E+00
         0.166709E+00 0.15437247E+01
         0.253960E+00 0.21686152E+01
@@ -1009,7 +1011,7 @@ def test_tbft(mapdl, option2, option3, option4):
         option4 = os.getcwd()
 
     mapdl.prep7(mute=True)
-    mat_id = mapdl.get_value( 'MAT', 0, 'NUM', 'MAX') + 1
+    mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
     mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
     mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4, mute=True)
 
@@ -1019,3 +1021,11 @@ def test_tbft(mapdl, option2, option3, option4):
         os.remove(fname)
     except OSError:
         pass
+
+
+def test_tbft_not_found(mapdl):
+    with pytest.raises(FileNotFoundError):
+        mapdl.prep7(mute=True)
+        mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
+        mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
+        mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)

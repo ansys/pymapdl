@@ -1024,7 +1024,8 @@ class MapdlGrpc(_MapdlCore):
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
             option3 = option3.replace('.', '')
-            filename = os.path.join(option4, option2 + '.' + option3)
+            fname = option2 if not option3 else option2 + '.' + option3
+            filename = os.path.join(option4, fname)
 
             if self._local:
                 if not os.path.exists(filename) and filename not in self.list_files():
@@ -1039,7 +1040,7 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            self.tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
+            return super().tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
 
     @protect_grpc
     def input(
