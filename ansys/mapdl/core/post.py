@@ -170,7 +170,7 @@ class PostProcessing:
          75.03939292229019,
          75.20949687626468]
         """
-        self._mapdl.post1()
+        self._mapdl.post1(mute=True)
         list_rsp = self._mapdl.set("LIST")
         return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
 
