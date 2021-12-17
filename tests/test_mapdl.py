@@ -1008,7 +1008,7 @@ def test_tbft(mapdl, option2, option3, option4):
         0.434257E+00 0.32129833E+0""")
 
     mapdl.prep7(mute=True)
-    mat_id = mapdl.get_value('', 'MAT', 0, 'NUM', 'MAX') + 1
+    mat_id = mapdl.get('', 'MAT', 0, 'NUM', 'MAX', mute=True) + 1
     mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
     mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4, mute=True)
 
