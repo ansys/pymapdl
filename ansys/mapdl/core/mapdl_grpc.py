@@ -1023,7 +1023,7 @@ class MapdlGrpc(_MapdlCore):
         if oper.lower() == 'eadd':
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
-            option3 = option3.replace('.', '')  # making sure extension does not include dot.
+            option3 = option3.replace('.', '')
             filename = os.path.join(option4, option2 + '.' + option3)
 
             if self._local:
