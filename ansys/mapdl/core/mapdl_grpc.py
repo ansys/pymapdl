@@ -1168,19 +1168,18 @@ class MapdlGrpc(_MapdlCore):
                     raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         else:
-            if os.path.dirname(fname):
-                # upload the file if it exists locally
-                if os.path.isfile(fname):
-                    self.upload(fname, progress_bar=progress_bar)
-                    filename = os.path.basename(fname)
+            # upload the file if it exists locally
+            if os.path.isfile(fname):
+                self.upload(fname, progress_bar=progress_bar)
+                filename = os.path.basename(fname)
 
-                elif fname in self.list_files():
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
+            elif fname in self.list_files():
+                # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
 
-                else:
-                    # Otherwise, it must be remote.  Use full path.
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+            else:
+                # Otherwise, it must be remote.  Use full path.
+                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         return filename
 
