@@ -1077,7 +1077,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
-        fname = self._get_file_path(fname, progress_bar)
+        filename = self._get_file_path(fname, progress_bar)
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
