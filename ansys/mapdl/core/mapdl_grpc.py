@@ -1146,9 +1146,10 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(tmp_out).decode("latin-1")
 
     def _get_file_path(self, fname, progress_bar=False):
-        """Function to find files in the Python working directory and MAPDL
-        working directory. The priority is for the Python directory, hence
-        if the file is found."""
+        """Find files in the Python working directory and MAPDL working directory.
+
+        The priority is for the Python directory.
+        """
 
         if self._local:
             if os.path.isdir(fname):
@@ -1156,7 +1157,7 @@ class MapdlGrpc(_MapdlCore):
             else:
                 # It must be a file!
                 if os.path.isfile(fname):
-                    # And it exist!
+                    # And it exists
                     filename = os.path.join(os.getcwd(), fname)
                 elif fname in self.list_files():
                     # It exists in the Mapdl working directory
