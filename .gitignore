@@ -85,3 +85,6 @@ venv/
 
 # Visual studio code local settings
 .vscode/
+ 
+# Pycharm settings
+.idea/
