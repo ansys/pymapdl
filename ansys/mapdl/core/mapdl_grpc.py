@@ -18,27 +18,34 @@ import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
+
+msg_import = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
+msg_module = """ANSYS API module (ansys.api.mapdl) could not be found.
+This might be due to a faulty installation or obsolete API module version.
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'. 
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
 try:
     from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 except ImportError:
-    msg = "There was a problem importing the ANSYS API module (ansys.api.mapdl).\n" +\
-        "Please make sure you have the latest updated version using:\n" +\
-        "'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'\n" +\
-        "If this does not solve it, please reinstall 'ansys.mapdl.core'. " +\
-        "or contact Technical Support at 'https://github.com/pyansys/pymapdl'."
-    raise ImportError(msg)
+    raise ImportError(msg_import)
 
 except ModuleNotFoundError:
-    msg = "ANSYS API module (ansys.api.mapdl) could not be found.\n" +\
-        "This might be due to a faulty installation or obsolete API module version. " +\
-        "Please make sure you have the latest updated version using:\n" +\
-        "'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'\n" +\
-        "If this does not solve it, please reinstall 'ansys.mapdl.core'. " +\
-        "or contact Technical Support at 'https://github.com/pyansys/pymapdl'."
-    raise ImportError(msg)
+    raise ImportError(msg_module)
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
