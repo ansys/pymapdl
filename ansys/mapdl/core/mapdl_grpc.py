@@ -1017,6 +1017,24 @@ class MapdlGrpc(_MapdlCore):
 
         self.input(fname, **kwargs)
 
+    @wraps(_MapdlCore.tbft)
+    def tbft(self, oper='', id_='', option1='', option2='', option3='', option4='', option5='', option6='', option7='', **kwargs):
+
+        if oper.lower() == 'eadd':
+            # Option 2 is a file and option 4 is the directory.
+            # Option 3 is be extension
+            option3 = option3.replace('.', '')  # making sure extension does not include dot.
+            filename = os.path.join(option4, option2 + '.' + option3)
+
+            if os.path.exists(filename):
+                self.upload(filename)
+            elif filename in self.list_files:
+                pass
+            else:
+                raise Exception(f"File '{filename}' could not be found.")
+
+            self.tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
+
     @protect_grpc
     def input(
         self,
