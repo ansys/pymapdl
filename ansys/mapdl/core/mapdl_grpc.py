@@ -1077,38 +1077,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
-        if self._local:
-            if os.path.isdir(fname):
-                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
-            else:
-                # It must be a file!
-                if os.path.isfile(fname):
-                    # And it exist!
-                    filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files(): #
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
-                elif os.path.dirname(fname):
-                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
-                else:
-                    # Finally
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-        else:
-            if not os.path.dirname(fname):
-                # might be trying to run a local file.  Check if the
-                # file exists remotely.
-                if fname not in self.list_files():
-                    self.upload(fname, progress_bar=progress_bar)
-                filename = fname
-            else:
-                # upload the file if it exists locally
-                if os.path.isfile(fname):
-                    self.upload(fname, progress_bar=progress_bar)
-                    filename = os.path.basename(fname)
-                else:
-                    # Otherwise, it must be remote.  Use full path.
-                    filename = fname
+        fname = self._get_file_path(fname, progress_bar)
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
@@ -1175,6 +1144,45 @@ class MapdlGrpc(_MapdlCore):
 
         # otherwise, read remote file
         return self._download_as_raw(tmp_out).decode("latin-1")
+
+    def _get_file_path(self, fname, progress_bar=False):
+        """Function to find files in the Python working directory and MAPDL
+        working directory. The priority is for the Python directory, hence
+        if the file is found."""
+
+        if self._local:
+            if os.path.isdir(fname):
+                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
+            else:
+                # It must be a file!
+                if os.path.isfile(fname):
+                    # And it exist!
+                    filename = os.path.join(os.getcwd(), fname)
+                elif fname in self.list_files():
+                    # It exists in the Mapdl working directory
+                    filename = os.path.join(self.directory, fname)
+                elif os.path.dirname(fname):
+                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
+                else:
+                    # Finally
+                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
+        else:
+            if os.path.dirname(fname):
+                # upload the file if it exists locally
+                if os.path.isfile(fname):
+                    self.upload(fname, progress_bar=progress_bar)
+                    filename = os.path.basename(fname)
+
+                elif fname in self.list_files():
+                    # It exists in the Mapdl working directory
+                    filename = os.path.join(self.directory, fname)
+
+                else:
+                    # Otherwise, it must be remote.  Use full path.
+                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
+        return filename
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
