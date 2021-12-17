@@ -1027,13 +1027,13 @@ class MapdlGrpc(_MapdlCore):
             filename = os.path.join(option4, option2 + '.' + option3)
 
             if self._local:
-                if not os.path.exists(file) and filename not in self.list_files:
+                if not os.path.exists(filename) and filename not in self.list_files():
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
             else:
                 if os.path.exists(filename):
                     self.upload(filename)
                     option4 = ''  # You don't need the directory if you upload it.
-                elif filename in self.list_files:
+                elif filename in self.list_files():
                     option4 = ''  # You don't need the directory if the file is in WDIR
                     pass
                 else:
