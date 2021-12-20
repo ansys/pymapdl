@@ -1000,4 +1000,4 @@ def test_get_file_path(mapdl, tmpdir):
     fobject = tmpdir.join(fname)
     fobject.write("Dummy file for testing")
 
-    assert fname == mapdl._get_file_path(fobject)
+    assert fname in mapdl._get_file_path(fobject)
