@@ -1163,7 +1163,7 @@ class MapdlGrpc(_MapdlCore):
         fext = fname.split('.')[-1]
         ffullpath = os.path.join(fpath, fname)
 
-        if os.path.exists(ffullpath):
+        if os.path.exists(ffullpath) and self._local:
             return ffullpath
 
         if self._local:
