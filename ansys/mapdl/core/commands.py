@@ -232,31 +232,21 @@ class CommandOutput(str):
     # Overwritting the string methods.
     # I used the UserString API.
     def __getitem__(self, index):
-        obj = self.__class__(self[index])
-        return obj
+        return self.__class__(super().__getitem__(index))
 
     def __add__(self, other):
-        if isinstance(other):
-            return self.__class__(self + other)
-        elif isinstance(other, str):
-            return self.__class__(self + other)
-        return self.__class__(self + str(other))
-
-    def __radd__(self, other):
-        if isinstance(other, str):
-            return self.__class__(other + self)
-        return self.__class__(str(other) + self)
+        return self.__class__(super().__add__(other))
 
     def __mul__(self, n):
-        return self.__class__(self * n)
+        return self.__class__(super().__mul__(n))
 
     __rmul__ = __mul__
 
     def __mod__(self, args):
-        return self.__class__(self % args)
+        return self.__class__(super().__mod__(args))
 
     def __rmod__(self, template):
-        return self.__class__(str(template) % self)
+        return self.__class__(str(template).__rmod__(self))
 
     # the following methods are overwritten and defined in alphabetical order:
     def capitalize(self):
