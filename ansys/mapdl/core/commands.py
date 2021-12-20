@@ -308,6 +308,27 @@ class CommandOutput(str):
     def zfill(self, width):
         return self.__class__(super().zfill(width))
 
+    def splitlines(self, keepends=False):
+        return [self.__class__(each) for each in super().splitlines(keepends)]
+
+    def rpartition(self, sep):
+        return [self.__class__(each) for each in super().rpartition(sep)]
+
+    def rstrip(self, chars=None):
+        return self.__class__(super().rstrip(chars))
+
+    def split(self, sep=None, maxsplit=-1):
+        return [self.__class__(each) for each in super().split(sep, maxsplit)]
+
+    def rsplit(self, sep=None, maxsplit=-1):
+        return [self.__class__(each) for each in super().rsplit(sep, maxsplit)]
+
+    def format(self, /, *args, **kwds):
+        return self.__class__(super().format(*args, **kwds))
+
+    def format_map(self, mapping):
+        return self.__class__(super().format_map(mapping))
+
     @property
     def cmd(self):
         return self._cmd
@@ -316,3 +337,36 @@ class CommandOutput(str):
     def cmd(self, cmd):
         """Forbidden to change the value of ``cmd``."""
         pass
+
+class CommandOutput2(str):
+
+    ## References:
+    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
+    # - https://docs.python.org/3/library/collections.html#userstring-objects
+    # - Source code of UserString
+
+    def __new__(cls, content, cmd=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        return obj
+
+    def __class__(self, seq):
+        # __new__ needs type and the args.
+        return self.__new__(type(self), seq, self._cmd)
+
+    def __getattribute__(self, name):
+        if name in dir(str): # only handle str methods here
+            def method(self, *args, **kwargs):
+                value = getattr(super(), name)(*args, **kwargs)
+                # not every string method returns a str:
+                if isinstance(value, str):
+                    return type(self)(value)
+                elif isinstance(value, list):
+                    return [type(self)(i) for i in value]
+                elif isinstance(value, tuple):
+                    return tuple(type(self)(i) for i in value)
+                else: # dict, bool, or int
+                    return value
+            return method.__get__(self) # bound method
+        else: # delegate to parent
+            return super().__getattribute__(name)
