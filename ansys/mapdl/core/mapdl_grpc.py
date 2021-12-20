@@ -17,9 +17,35 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
-from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+
+
+MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
+MSG_MODULE = """ANSYS API module (ansys.api.mapdl) could not be found.
+This might be due to a faulty installation or obsolete API module version.
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'.
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
+try:
+    from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+    from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+    from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+
+except ImportError:
+    raise ImportError(MSG_IMPORT)
+
+except ModuleNotFoundError:
+    raise ImportError(MSG_MODULE)
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
