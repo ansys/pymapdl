@@ -1146,12 +1146,13 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(tmp_out).decode("latin-1")
 
     def _get_file_path(self, fname, progress_bar=False):
-        """Find files in the Python working directory and MAPDL working directory.
+        """Find files in the Python and MAPDL working directories.
 
-        The priority is for the Python directory.
+        **The priority is for the Python directory.**
+
         Hence if the same file is in the Python directory and in the MAPDL directory,
         PyMAPDL will upload a copy from the Python directory to the MAPDL directory,
-        overwritting the MAPDL directory copy.
+        overwriting the MAPDL directory copy.
         """
 
         if os.path.isdir(fname):
