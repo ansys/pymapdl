@@ -1024,22 +1024,23 @@ class MapdlGrpc(_MapdlCore):
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
             option3 = option3.replace('.', '')
-            filename = os.path.join(option4, option2 + '.' + option3)
+            fname = option2 if not option3 else option2 + '.' + option3
+            filename = os.path.join(option4, fname)
 
             if self._local:
-                if not os.path.exists(file) and filename not in self.list_files:
+                if not os.path.exists(filename) and filename not in self.list_files():
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
             else:
                 if os.path.exists(filename):
                     self.upload(filename)
                     option4 = ''  # You don't need the directory if you upload it.
-                elif filename in self.list_files:
+                elif filename in self.list_files():
                     option4 = ''  # You don't need the directory if the file is in WDIR
                     pass
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            self.tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
+            return super().tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
 
     @protect_grpc
     def input(
