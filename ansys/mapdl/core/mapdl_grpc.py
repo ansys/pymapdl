@@ -1151,35 +1151,39 @@ class MapdlGrpc(_MapdlCore):
         The priority is for the Python directory.
         """
 
+        if os.path.isdir(fname):
+            raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
+
+        fpath = os.path.dirname(fname)
+        fname = os.path.basename(fname)
+        fext = fname.split('.')[-1]
+        ffullpath = os.path.join(fpath, fname + '.' + fext) if fext else os.path.join(fpath, fname)
+
+        if os.path.exists(ffullpath):
+            return ffullpath
+
         if self._local:
-            if os.path.isdir(fname):
-                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
-            else:
-                # It must be a file!
-                if os.path.isfile(fname):
-                    # And it exists
-                    filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files():
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
-                elif os.path.dirname(fname):
-                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
-                else:
-                    # Finally
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-        else:
-            # upload the file if it exists locally
             if os.path.isfile(fname):
-                self.upload(fname, progress_bar=progress_bar)
-                filename = os.path.basename(fname)
-
+                # And it exists
+                filename = os.path.join(os.getcwd(), fname)
             elif fname in self.list_files():
                 # It exists in the Mapdl working directory
                 filename = os.path.join(self.directory, fname)
+            else:
+                # Finally
+                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
+        else: # Non-local
+            # upload the file if it exists locally
+            if os.path.isfile(ffullpath):
+                self.upload(ffullpath, progress_bar=progress_bar)
+                filename = fname
+
+            elif fname in self.list_files():
+                # It exists in the Mapdl working directory
+                filename = fname
 
             else:
-                # Otherwise, it must be remote.  Use full path.
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         return filename
