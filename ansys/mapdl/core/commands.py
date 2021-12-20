@@ -212,3 +212,117 @@ class Commands(
     """Wrapped MAPDL commands"""
 
     pass
+
+class CommandOutput(str):
+
+    ## References:
+    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
+    # - https://docs.python.org/3/library/collections.html#userstring-objects
+    # - Source code of UserString
+
+    def __new__(cls, content, cmd=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        return obj
+
+    def __class__(self, seq):
+        # __new__ needs type and the args.
+        return self.__new__(type(self), seq, self._cmd)
+
+    # Overwritting the string methods.
+    # I used the UserString API.
+    def __getitem__(self, index):
+        obj = self.__class__(self[index])
+        return obj
+
+    def __add__(self, other):
+        if isinstance(other):
+            return self.__class__(self + other)
+        elif isinstance(other, str):
+            return self.__class__(self + other)
+        return self.__class__(self + str(other))
+
+    def __radd__(self, other):
+        if isinstance(other, str):
+            return self.__class__(other + self)
+        return self.__class__(str(other) + self)
+
+    def __mul__(self, n):
+        return self.__class__(self * n)
+
+    __rmul__ = __mul__
+
+    def __mod__(self, args):
+        return self.__class__(self % args)
+
+    def __rmod__(self, template):
+        return self.__class__(str(template) % self)
+
+    # the following methods are overwritten and defined in alphabetical order:
+    def capitalize(self):
+        return self.__class__(super().capitalize())
+
+    def casefold(self):
+        return self.__class__(super().casefold())
+
+    def center(self, width, *args):
+        return self.__class__(super().center(width, *args))
+
+    def removeprefix(self, prefix, /):
+        return self.__class__(super().removeprefix(prefix))
+
+    def removesuffix(self, suffix, /):
+        return self.__class__(super().removesuffix(suffix))
+
+    def expandtabs(self, tabsize=8):
+        return self.__class__(super().expandtabs(tabsize))
+
+    def join(self, seq):
+        return self.__class__(super().join(seq))
+
+    def ljust(self, width, *args):
+        return self.__class__(super().ljust(width, *args))
+
+    def lower(self):
+        return self.__class__(super().lower())
+
+    def lstrip(self, chars=None):
+        return self.__class__(super().lstrip(chars))
+
+    maketrans = str.maketrans
+
+    def replace(self, old, new, maxsplit=-1):
+        return self.__class__(super().replace(old, new, maxsplit))
+
+    def rjust(self, width, *args):
+        return self.__class__(super().rjust(width, *args))
+
+    def rstrip(self, chars=None):
+        return self.__class__(super().rstrip(chars))
+
+    def strip(self, chars=None):
+        return self.__class__(super().strip(chars))
+
+    def swapcase(self):
+        return self.__class__(super().swapcase())
+
+    def title(self):
+        return self.__class__(super().title())
+
+    def translate(self, *args):
+        return self.__class__(super().translate(*args))
+
+    def upper(self):
+        return self.__class__(super().upper())
+
+    def zfill(self, width):
+        return self.__class__(super().zfill(width))
+
+    @property
+    def cmd(self):
+        return self._cmd
+
+    @cmd.setter
+    def cmd(self, cmd):
+        """Forbidden to change the value of ``cmd``."""
+        pass
