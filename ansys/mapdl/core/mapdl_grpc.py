@@ -1149,6 +1149,9 @@ class MapdlGrpc(_MapdlCore):
         """Find files in the Python working directory and MAPDL working directory.
 
         The priority is for the Python directory.
+        Hence if the same file is in the Python directory and in the MAPDL directory,
+        PyMAPDL will upload a copy from the Python directory to the MAPDL directory,
+        overwritting the MAPDL directory copy.
         """
 
         if os.path.isdir(fname):
