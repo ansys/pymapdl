@@ -999,22 +999,24 @@ def test_inquire(mapdl):
 @pytest.mark.parametrize("option3", ['', '.dat', 'dat'])
 @pytest.mark.parametrize("option4", ['', '', os.getcwd()])
 def test_tbft(mapdl, option2, option3, option4):
-    fname = 'expdata0.dat'
-    with open(fname, 'w') as fid:
-        fid.write("""0.819139E-01 0.82788577E+00
-        0.166709E+00 0.15437247E+01
-        0.253960E+00 0.21686152E+01
-        0.343267E+00 0.27201819E+01
-        0.434257E+00 0.32129833E+0""")
-
-    mapdl.prep7(mute=True)
-    mat_id = mapdl.get('', 'MAT', 0, 'NUM', 'MAX', mute=True) + 1
-    mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
-    mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4, mute=True)
-
-    assert fname in mapdl.list_files
-
     try:
-        os.remove(fname)
-    except OSError:
-        pass
+        fname = 'expdata0.dat'
+        with open(fname, 'w') as fid:
+            fid.write("""0.819139E-01 0.82788577E+00
+            0.166709E+00 0.15437247E+01
+            0.253960E+00 0.21686152E+01
+            0.343267E+00 0.27201819E+01
+            0.434257E+00 0.32129833E+0""")
+
+        mapdl.prep7(mute=True)
+        mat_id = mapdl.get('', 'MAT', 0, 'NUM', 'MAX', mute=True) + 1
+        mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
+        mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4, mute=True)
+
+        assert fname in mapdl.list_files
+
+    finally:
+        try:
+            os.remove(fname)
+        except OSError:
+            pass
