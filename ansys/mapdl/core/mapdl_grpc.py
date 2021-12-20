@@ -1207,11 +1207,11 @@ class MapdlGrpc(_MapdlCore):
             # upload the file if it exists locally
             if os.path.isfile(ffullpath):
                 self.upload(ffullpath, progress_bar=progress_bar)
-                filename = ffullpath
+                filename = fname
 
             elif fname in self.list_files():
                 # It exists in the Mapdl working directory
-                filename = ffullpath
+                filename = fname
 
             else:
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
