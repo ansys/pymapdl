@@ -30,10 +30,14 @@ OPTIONS_RANDOM_STRINGS = [
     tuple(random_string() for each in range(3))
     ]
 
-OPTIONS_DICT_MAP = [({OUTPUT[5:10]: random_string(),
-                    OUTPUT[45:59]: random_string(),
-                    OUTPUT[89:104]: random_string()
-                      })]
+OPTIONS_DICT_MAP = [
+    (
+        {OUTPUT[5:10]: random_string(),
+         OUTPUT[45:59]: random_string(),
+         OUTPUT[89:104]: random_string()
+         }
+    )
+    ]
 
 # @pytest.mark.parametrize("args", [(), (), ()])
 # random_string
