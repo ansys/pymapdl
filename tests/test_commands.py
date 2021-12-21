@@ -11,9 +11,11 @@ These are numbers 1234567890.
 These are symbols !"£$%^^@~+_@~€
 This is for the format: {format1}-{format2}-{format3}"""
 
+## Commands options
 _CMD = '/INPUT'
 CMD = CommandOutput(OUTPUT, cmd=_CMD)
 
+## Testing configurations
 OPTIONS_ONE = [('.'), ('e'), ('t'), ('@'), ('1')]
 OPTIONS_TWO = [(50, ' '), (25, '0')]
 OPTIONS_TWO_STRINGS = [('a', ' '), ('2', '0'), ('@', 'm'), ('!', '['), ('*', 'r')]
