@@ -5,7 +5,7 @@ from ansys.mapdl.core.misc import random_string
 
 FUNCTION_COMMAND_OUTPUT = [each for each in dir(CommandOutput) if not each.startswith('__')]
 
-OUTPUT = """This is the ouput.
+OUTPUT = """This is the output.
 This is the second line.
 These are numbers 1234567890.
 These are symbols !"£$%^^@~+_@~€

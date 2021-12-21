@@ -229,7 +229,7 @@ class CommandOutput(str):
         # __new__ needs type and the args.
         return self.__new__(type(self), seq, self._cmd)
 
-    # Overwritting the string methods.
+    # Overwriting the string methods.
     # I used the UserString API.
     def __getitem__(self, index):
         return self.__class__(super().__getitem__(index))
