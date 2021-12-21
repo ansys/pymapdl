@@ -1,6 +1,6 @@
 import pytest
 
-from ansys.mapdl.core.commands import CommandOutput2 as CommandOutput
+from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 from ansys.mapdl.core.misc import random_string
 
 FUNCTION_COMMAND_OUTPUT = [each for each in dir(CommandOutput) if not each.startswith('__')]
@@ -45,11 +45,20 @@ OPTIONS_DICT_MAP = [
 # random_string
 
 def test_class():
-    assert isinstance(CMD, str)
-    assert isinstance(CMD[1:], str)
+    assert isinstance(CMD, (str, CommandOutput))
+    assert isinstance(CMD[1:], (str, CommandOutput))
     assert isinstance(CMD.splitlines(), list)
-    assert isinstance(CMD.splitlines()[0], str)
-    assert isinstance(CMD.replace('a', 'c'), str)
+    assert isinstance(CMD.splitlines()[0], (str, CommandOutput))
+    assert isinstance(CMD.replace('a', 'c'), (str, CommandOutput))
+    assert isinstance(CMD.partition('g'), tuple)
+    assert isinstance(CMD.split('g'), list)
+
+def test_heritance():
+    assert CMD._cmd == _CMD
+    assert CMD[1:]._cmd == _CMD
+    assert CMD.replace('a', 'c')._cmd == _CMD
+    dummy= CMD.replace('1', 'g')
+    assert dummy._cmd == _CMD
 
 def test_capitalize():
     assert OUTPUT.capitalize() == CMD.capitalize()

@@ -225,109 +225,109 @@ class CommandOutput(str):
         obj._cmd = cmd
         return obj
 
-    def __class__(self, seq):
+    def _copyobj(self, seq):
         # __new__ needs type and the args.
         return self.__new__(type(self), seq, self._cmd)
 
     # Overwriting the string methods.
     # I used the UserString API.
     def __getitem__(self, index):
-        return self.__class__(super().__getitem__(index))
+        return self._copyobj(super().__getitem__(index))
 
     def __add__(self, other):
-        return self.__class__(super().__add__(other))
+        return self._copyobj(super().__add__(other))
 
     def __mul__(self, n):
-        return self.__class__(super().__mul__(n))
+        return self._copyobj(super().__mul__(n))
 
     __rmul__ = __mul__
 
     def __mod__(self, args):
-        return self.__class__(super().__mod__(args))
+        return self._copyobj(super().__mod__(args))
 
     def __rmod__(self, template):
-        return self.__class__(str(template).__rmod__(self))
+        return self._copyobj(str(template).__rmod__(self))
 
     # the following methods are overwritten and defined in alphabetical order:
     def capitalize(self):
-        return self.__class__(super().capitalize())
+        return self._copyobj(super().capitalize())
 
     def casefold(self):
-        return self.__class__(super().casefold())
+        return self._copyobj(super().casefold())
 
     def center(self, width, *args):
-        return self.__class__(super().center(width, *args))
+        return self._copyobj(super().center(width, *args))
 
     def removeprefix(self, prefix):
-        return self.__class__(super().removeprefix(prefix))
+        return self._copyobj(super().removeprefix(prefix))
 
     def removesuffix(self, suffix):
-        return self.__class__(super().removesuffix(suffix))
+        return self._copyobj(super().removesuffix(suffix))
 
     def expandtabs(self, tabsize=8):
-        return self.__class__(super().expandtabs(tabsize))
+        return self._copyobj(super().expandtabs(tabsize))
 
     def join(self, seq):
-        return self.__class__(super().join(seq))
+        return self._copyobj(super().join(seq))
 
     def ljust(self, width, *args):
-        return self.__class__(super().ljust(width, *args))
+        return self._copyobj(super().ljust(width, *args))
 
     def lower(self):
-        return self.__class__(super().lower())
+        return self._copyobj(super().lower())
 
     def lstrip(self, chars=None):
-        return self.__class__(super().lstrip(chars))
+        return self._copyobj(super().lstrip(chars))
 
     maketrans = str.maketrans
 
     def replace(self, old, new, maxsplit=-1):
-        return self.__class__(super().replace(old, new, maxsplit))
+        return self._copyobj(super().replace(old, new, maxsplit))
 
     def rjust(self, width, *args):
-        return self.__class__(super().rjust(width, *args))
+        return self._copyobj(super().rjust(width, *args))
 
     def rstrip(self, chars=None):
-        return self.__class__(super().rstrip(chars))
+        return self._copyobj(super().rstrip(chars))
 
     def strip(self, chars=None):
-        return self.__class__(super().strip(chars))
+        return self._copyobj(super().strip(chars))
 
     def swapcase(self):
-        return self.__class__(super().swapcase())
+        return self._copyobj(super().swapcase())
 
     def title(self):
-        return self.__class__(super().title())
+        return self._copyobj(super().title())
 
     def translate(self, *args):
-        return self.__class__(super().translate(*args))
+        return self._copyobj(super().translate(*args))
 
     def upper(self):
-        return self.__class__(super().upper())
+        return self._copyobj(super().upper())
 
     def zfill(self, width):
-        return self.__class__(super().zfill(width))
+        return self._copyobj(super().zfill(width))
 
     def splitlines(self, keepends=False):
-        return [self.__class__(each) for each in super().splitlines(keepends)]
+        return [self._copyobj(each) for each in super().splitlines(keepends)]
 
     def rpartition(self, sep):
-        return [self.__class__(each) for each in super().rpartition(sep)]
+        return tuple(self._copyobj(each) for each in super().rpartition(sep))
 
     def rstrip(self, chars=None):
-        return self.__class__(super().rstrip(chars))
+        return self._copyobj(super().rstrip(chars))
 
     def split(self, sep=None, maxsplit=-1):
-        return [self.__class__(each) for each in super().split(sep, maxsplit)]
+        return [self._copyobj(each) for each in super().split(sep, maxsplit)]
 
     def rsplit(self, sep=None, maxsplit=-1):
-        return [self.__class__(each) for each in super().rsplit(sep, maxsplit)]
+        return [self._copyobj(each) for each in super().rsplit(sep, maxsplit)]
 
     def format(self, *args, **kwds):
-        return self.__class__(super().format(*args, **kwds))
+        return self._copyobj(super().format(*args, **kwds))
 
     def format_map(self, mapping):
-        return self.__class__(super().format_map(mapping))
+        return self._copyobj(super().format_map(mapping))
 
     @property
     def cmd(self):
@@ -350,23 +350,26 @@ class CommandOutput2(str):
         obj._cmd = cmd
         return obj
 
-    # def __class__(self, seq):
+    # def _copyobj(self, seq):
     #     # __new__ needs type and the args.
-    #     return self.__new__(type(self), seq, self._cmd)
+    #     # return self.__new__(type(self), seq, self._cmd)
 
     def __getattribute__(self, name):
-        if name in dir(str): # only handle str methods here
+        if name in dir(str) and name != '_copyobj': # only handle str methods here
             def method(self, *args, **kwargs):
                 value = getattr(super(), name)(*args, **kwargs)
                 # not every string method returns a str:
-                if isinstance(value, str):
-                    return type(self)(value)
+                if isinstance(value, str) and not isinstance(value, CommandOutput2):
+                    # return type(self)(value)
+                    return self.__new__(value, self._cmd)
+
                 elif isinstance(value, list):
-                    return [type(self)(i) for i in value]
+                    return [self.__new__(i, self._cmd) for i in value]
+
                 elif isinstance(value, tuple):
-                    return tuple(type(self)(i) for i in value)
-                else: # dict, bool, or int
+                    return tuple(self.__new__(i, self._cmd) for i in value)
+                else: # dict, bool, or int or type
                     return value
             return method.__get__(self) # bound method
-        else: # delegate to parent
-            return super().__getattribute__(name)
+        # else: # delegate to parent
+        #     return super().__getattribute__(name)
