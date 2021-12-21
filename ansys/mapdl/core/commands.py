@@ -350,9 +350,9 @@ class CommandOutput2(str):
         obj._cmd = cmd
         return obj
 
-    def __class__(self, seq):
-        # __new__ needs type and the args.
-        return self.__new__(type(self), seq, self._cmd)
+    # def __class__(self, seq):
+    #     # __new__ needs type and the args.
+    #     return self.__new__(type(self), seq, self._cmd)
 
     def __getattribute__(self, name):
         if name in dir(str): # only handle str methods here
