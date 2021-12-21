@@ -57,7 +57,7 @@ def test_heritance():
     assert CMD._cmd == _CMD
     assert CMD[1:]._cmd == _CMD
     assert CMD.replace('a', 'c')._cmd == _CMD
-    dummy= CMD.replace('1', 'g')
+    dummy = CMD.replace('1', 'g')
     assert dummy._cmd == _CMD
 
 def test_capitalize():
