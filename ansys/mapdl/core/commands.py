@@ -323,7 +323,7 @@ class CommandOutput(str):
     def rsplit(self, sep=None, maxsplit=-1):
         return [self.__class__(each) for each in super().rsplit(sep, maxsplit)]
 
-    def format(self, /, *args, **kwds):
+    def format(self, *args, **kwds):
         return self.__class__(super().format(*args, **kwds))
 
     def format_map(self, mapping):
