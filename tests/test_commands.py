@@ -44,6 +44,13 @@ OPTIONS_DICT_MAP = [
 # @pytest.mark.parametrize("args", [(), (), ()])
 # random_string
 
+def test_class():
+    assert isinstance(CMD, str)
+    assert isinstance(CMD[1:], str)
+    assert isinstance(CMD.splitlines(), list)
+    assert isinstance(CMD.splitlines()[0], str)
+    assert isinstance(CMD.replace('a', 'c'), str)
+
 def test_capitalize():
     assert OUTPUT.capitalize() == CMD.capitalize()
 
