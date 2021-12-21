@@ -229,7 +229,7 @@ class CommandOutput(str):
         # __new__ needs type and the args.
         return self.__new__(type(self), seq, self._cmd)
 
-    # Overwritting the string methods.
+    # Overwriting the string methods.
     # I used the UserString API.
     def __getitem__(self, index):
         return self.__class__(super().__getitem__(index))
@@ -258,10 +258,10 @@ class CommandOutput(str):
     def center(self, width, *args):
         return self.__class__(super().center(width, *args))
 
-    def removeprefix(self, prefix, /):
+    def removeprefix(self, prefix):
         return self.__class__(super().removeprefix(prefix))
 
-    def removesuffix(self, suffix, /):
+    def removesuffix(self, suffix):
         return self.__class__(super().removesuffix(suffix))
 
     def expandtabs(self, tabsize=8):
