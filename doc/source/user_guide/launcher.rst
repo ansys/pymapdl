@@ -10,7 +10,7 @@ the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`:
 
 .. code:: python
 
-    from ansys.mapdl import launch_mapdl
+    from ansys.mapdl.core import launch_mapdl
     mapdl = launch_mapdl()
 
 Python will automatically attempt to detect your MAPDL binary based on
@@ -25,6 +25,14 @@ sample input for Linux and Windows:
 .. code::
 
     Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v212\ANSYS\bin\winx64\ansys212.exe
+
+It is possible to specify the executable using the keyword argument ``exec_file``.
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(exec_file='C://Program Files//ANSYS Inc//v212//ANSYS//bin//winx64//ansys212.exe')
 
 The settings file is stored locally and you will not not need to enter
 the path again.  If you need to change the default ansys path
