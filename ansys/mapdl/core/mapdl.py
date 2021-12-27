@@ -144,8 +144,14 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        # Setting up logger
-        self._log = logger.add_instance_logger(self._name, self, level=loglevel)
+        # Setting up loggers
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
+        # adding a file handler to the logger
+        if log_file:
+            if not isinstance(log_file, str):
+                log_file = 'log.log'
+            self._log.log_to_file(filename=log_file, level=loglevel)
+
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
