@@ -229,7 +229,7 @@ class MapdlGrpc(_MapdlCore):
     _port = None
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
-                log_file=True, cleanup_on_exit=False, log_apdl=None,
+                log_file=False, cleanup_on_exit=False, log_apdl=None,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
