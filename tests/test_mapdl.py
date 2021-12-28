@@ -995,6 +995,14 @@ def test_inquire(mapdl):
     assert float(mapdl.inquire("", 'exist', jobname, 'lock')) in [0, 1]
 
 
+def test_get_file_path(mapdl, tmpdir):
+    fname = 'dummy.txt'
+    fobject = tmpdir.join(fname)
+    fobject.write("Dummy file for testing")
+
+    assert fname in mapdl._get_file_path(fobject)
+
+
 @pytest.mark.parametrize("option2,option3,option4", [('expdata.dat', '', ''), ('expdata', '.dat', ''), ('expdata', 'dat', 'DIR')])
 def test_tbft(mapdl, option2, option3, option4):
     try:
