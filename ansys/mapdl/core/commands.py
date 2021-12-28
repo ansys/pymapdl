@@ -410,7 +410,7 @@ class CommandOutputDataframe(CommandOutput):
         if short_cmd not in cls._ALLOWED_CMD_TO_DF:
             raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
 
-        if isinstance(mapdl, Commands): # _MapdlCore gives circular import.
+        if isinstance(mapdl, Commands):  # _MapdlCore gives circular import.
             obj._mapdl = mapdl
         else:
             obj._mapdl = None
@@ -460,7 +460,7 @@ class CommandOutputDataframe(CommandOutput):
         if self._mapdl:
             line = self._mapdl.page('STAT').splitlines()[id]
             num = int(line.split('=')[1].strip())
-            dd[key] = num #updating dict
+            dd[key] = num # updating dict
             return num
         else:
             return dd[key]
@@ -471,7 +471,7 @@ class CommandOutputDataframe(CommandOutput):
         try:
             value = int(value)
         except ValueError:
-            raise ValueError("The input should be convertible to 'int'.")
+            raise ValueError("Value should be convertible to 'int'.")
 
         if self._mapdl: # Updating mapdl
             args = [0, 0, 0, 0]
@@ -497,13 +497,14 @@ class CommandOutputDataframe(CommandOutput):
     def _parse_array(self):
         output = self.__str__()
 
-    def _pages(self):
+    def _get_pages(self):
         output = self.__str__().splitlines()[2:]
         N = self.file_output_lines_per_page-2
+        # Omitting headers
         if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
             start = 4
         else:
-            start = 2
+            start = 2  # Omitting header
         return (output[each:each+N][start:] for each in range(0, len(output), N))
 
     def _get_labels(self):
@@ -521,15 +522,12 @@ class CommandOutputDataframe(CommandOutput):
             return top_output[0].split()
 
     def _get_header(self):
-
         return 'NODE  LABEL     REAL           IMAG'.split()
 
     def _get_table(self):
-
-        labels = self._get_labels()
         header = self._get_header()
         table = []
-        for each_page in pages: #self._pages():
+        for each_page in self._pages():
             # find labels:
             ind = [ind for ind, each in enumerate(each_page) if each.split() == header]
             if not ind:
@@ -537,3 +535,23 @@ class CommandOutputDataframe(CommandOutput):
             else:
                 ind = ind[0]+1
             table.extend(each_page[ind:])
+
+        return table
+
+    def _get_dataframe(self):
+        table = self._get_table()
+        headers = self._get_header()
+        
+        return pandas.DataFrame(data=table, columns=headers)
+    
+    
+    
+    
+    
+    
+CMD_CONFIGURATION = {
+    'DLIST':{
+        'header': 2,
+        
+    }
+}
