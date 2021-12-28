@@ -229,7 +229,7 @@ class MapdlGrpc(_MapdlCore):
     _port = None
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
-                log_file=True, cleanup_on_exit=False, log_apdl=None,
+                log_file=False, cleanup_on_exit=False, log_apdl=None,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
@@ -1042,6 +1042,31 @@ class MapdlGrpc(_MapdlCore):
         kwargs.setdefault("cd_read_option", option.upper())
 
         self.input(fname, **kwargs)
+
+    @wraps(_MapdlCore.tbft)
+    def tbft(self, oper='', id_='', option1='', option2='', option3='', option4='', option5='', option6='', option7='', **kwargs):
+        """Wraps ``_MapdlCore.tbft``."""
+        if oper.lower() == 'eadd':
+            # Option 2 is a file and option 4 is the directory.
+            # Option 3 is be extension
+            option3 = option3.replace('.', '')
+            fname = option2 if not option3 else option2 + '.' + option3
+            filename = os.path.join(option4, fname)
+
+            if self._local:
+                if not os.path.exists(filename) and filename not in self.list_files():
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
+            else:
+                if os.path.exists(filename):
+                    self.upload(filename)
+                    option4 = ''  # You don't need the directory if you upload it.
+                elif filename in self.list_files():
+                    option4 = ''  # You don't need the directory if the file is in WDIR
+                    pass
+                else:
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
+
+            return super().tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
 
     @protect_grpc
     def input(
