@@ -19,6 +19,13 @@ from ._commands import (
     misc,
 )
 
+try:
+    import pandas
+    HAS_PANDAS = True
+
+except ImportError:
+    HAS_PANDAS = False
+
 
 class PreprocessorCommands(
     preproc.database.Database,
@@ -384,3 +391,149 @@ class CommandOutput2(str):
             return method.__get__(self) # bound method
         # else: # delegate to parent
         #     return super().__getattribute__(name)
+
+
+class CommandOutputDataframe(CommandOutput):
+    __CMDS = {'DLIST': 'CURRENTLY SELECTED DOF SET'}
+    _ALLOWED_CMD_TO_DF = list(__CMDS.keys())
+
+    PAGE_PROPERTIES = {
+        'interactive lines per page' : 20,
+        'interactive characters per line': 256,
+        'file output lines per page':  56,
+        'file output characters per line': 140
+        }
+
+    def __new__(cls, content, cmd=None, mapdl=None):
+        obj = super().__new__(cls, content, cmd=cmd)
+        short_cmd = cmd.split(',')[0].strip()
+        if short_cmd not in cls._ALLOWED_CMD_TO_DF:
+            raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
+
+        if isinstance(mapdl, Commands): # _MapdlCore gives circular import.
+            obj._mapdl = mapdl
+        else:
+            obj._mapdl = None
+
+        return obj
+
+    @property
+    def _has_pandas(self):
+        return HAS_PANDAS
+
+    @property
+    def interactive_lines_per_page(self):
+        return self._get_format(0)
+
+    @interactive_lines_per_page.setter
+    def interactive_lines_per_page(self, number):
+        self._set_format(0, number)
+
+    @property
+    def interactive_chars_per_line(self):
+        return self._get_format(1)
+
+    @interactive_chars_per_line.setter
+    def interactive_chars_per_line(self, number):
+        self._set_format(1, number)
+
+    @property
+    def file_output_lines_per_page(self):
+        return self._get_format(2)
+
+    @file_output_lines_per_page.setter
+    def file_output_lines_per_page(self, number):
+        self._set_format(2, number)
+
+    @property
+    def file_ouptut_chars_per_line(self):
+        return self._get_format(3)
+
+    @file_ouptut_chars_per_line.setter
+    def file_ouptut_chars_per_line(self, number):
+        self._set_format(3, number)
+
+    def _get_format(self, id):
+        dd = self.PAGE_PROPERTIES
+        key = list(dd.keys())[id]
+
+        if self._mapdl:
+            line = self._mapdl.page('STAT').splitlines()[id]
+            num = int(line.split('=')[1].strip())
+            dd[key] = num #updating dict
+            return num
+        else:
+            return dd[key]
+
+    def _set_format(self, id, value):
+        dd = self.PAGE_PROPERTIES
+        key = list(dd.keys())[id]
+        try:
+            value = int(value)
+        except ValueError:
+            raise ValueError("The input should be convertible to 'int'.")
+
+        if self._mapdl: # Updating mapdl
+            args = [0, 0, 0, 0]
+            args[id] = value
+            self._mapdl.page(*args)
+            dd[key] = value
+
+        dd[key] = value
+        return dd[key]
+
+    def parse_dataframe(self):
+        return self._parse_to_dataframe()
+
+    def _parse_to_dataframe(self):
+        if HAS_PANDAS:
+            raise NotImplementedError
+        else:
+            return None
+
+    def parse_array(self):
+        return self._parse_array()
+
+    def _parse_array(self):
+        output = self.__str__()
+
+    def _pages(self):
+        output = self.__str__().splitlines()[2:]
+        N = self.file_output_lines_per_page-2
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
+            start = 4
+        else:
+            start = 2
+        return (output[each:each+N][start:] for each in range(0, len(output), N))
+
+    def _get_labels(self):
+        output = self.__str__()
+        identifier = self.__CMDS[self.cmd]
+        top_output = '\n'.join(output.splitlines()[:10]).splitlines()
+
+        if identifier in top_output: # getting header line:
+            # There is a defined header
+            ind = [ind for ind, each in enumerate(top_output) if identifier in each][0]
+            line = top_output[ind]
+            return line.split('=')[1].split()
+        else:
+            # Assuming the first line is the header:
+            return top_output[0].split()
+
+    def _get_header(self):
+
+        return 'NODE  LABEL     REAL           IMAG'.split()
+
+    def _get_table(self):
+
+        labels = self._get_labels()
+        header = self._get_header()
+        table = []
+        for each_page in pages: #self._pages():
+            # find labels:
+            ind = [ind for ind, each in enumerate(each_page) if each.split() == header]
+            if not ind:
+                ind = 1
+            else:
+                ind = ind[0]+1
+            table.extend(each_page[ind:])
