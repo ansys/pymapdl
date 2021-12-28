@@ -331,13 +331,24 @@ class CommandOutput(str):
 
     @property
     def cmd(self):
-        return self._cmd
+        return self._cmd.split(',')[0]
 
     @cmd.setter
     def cmd(self, cmd):
-        """Forbidden to change the value of ``cmd``."""
+        """Not allowed to change the value of ``cmd``."""
         pass
 
+    @property
+    def command(self):
+        return self._cmd
+
+    @command.setter
+    def command(self):
+        """Not allowed to change the value of ``command``."""
+        pass
+
+
+# To be deleted after first review of PR.
 class CommandOutput2(str):
 
     ## References:
