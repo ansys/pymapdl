@@ -20,6 +20,7 @@ from ._commands import (
 )
 
 import numpy as np
+import regex as re
 
 try:
     import pandas as pd
@@ -28,10 +29,27 @@ try:
 except ImportError:
     HAS_PANDAS = False
 
+# Identify where the data start in the output
+GROUP_DATA_START = ['NODE', 'ELEM']
 
-COLUMNS_INT = ['NODE', 'ELEMENT']
+# Formatting dataframe output.
+COLUMNS_INT = ['NODE', 'ELEM', 'MAT', 'TYP', 'REL', 'ESY', 'SEC']
 COLUMNS_STR = ['LABEL']
-COLUMNS_NOT_FLOAT = COLUMNS_INT + COLUMNS_STR
+COLUMNS_TO_NOT_BE_FORMATTED = ['NODES']
+
+COLUMNS_NOT_FLOAT = COLUMNS_INT + COLUMNS_STR + COLUMNS_TO_NOT_BE_FORMATTED
+
+CMDS_PRINT_LIST = [
+    'DLIST', 'NLIST', 'ELIST', 'PRNSOL', 'PRENERGY','PRORB',
+    'PRCINT', 'PRESOL', 'PRJSOL', 'PRNLD', 'PRNSOL','PRRFOR',
+    'PRRSOL', 'PRVECT', 'PRETAB', 'PRERR', 'PRITER',
+    'NLDPOST', 'PRAS', 'PRFAR', 'PRMC', 'PRNEAR'
+    ]
+
+SUPPORTED_PRINT_CMDS = [
+    'DLIST', 'NLIST', 'ELIST', 'PRNSOL', 'PRESOL', 'PRRSOL'
+]
+
 
 class PreprocessorCommands(
     preproc.database.Database,
@@ -226,6 +244,12 @@ class Commands(
 
     pass
 
+def CommandFactory(output, cmd):
+    
+    short_cmd = cmd.split(',')[0]
+    
+    
+
 class CommandOutput(str):
     """
     Custom string subclass for handling the commands output.
@@ -413,7 +437,7 @@ class CommandOutput2(str):
         #     return super().__getattribute__(name)
 
 
-class CommandOutputDataframe(CommandOutput):
+class CommandListing(CommandOutput):
     """
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
@@ -431,7 +455,9 @@ class CommandOutputDataframe(CommandOutput):
     """
     def __new__(cls, content, cmd=None):
         obj = super().__new__(cls, content, cmd=cmd)
-        short_cmd = cmd.split(',')[0].strip()
+        short_cmd = cmd.split(',')[0].strip().upper()
+        if short_cmd not in SUPPORTED_PRINT_CMDS:
+            raise ValueError(f"The command {short_cmd} is not supported yet for conversion to 'CommandListing' class ")
         # if short_cmd not in _ALLOWED_CMD_TO_DF:
         #     raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
         return obj
@@ -443,7 +469,7 @@ class CommandOutputDataframe(CommandOutput):
     def _is_data_start(self, line, magicword=None):
         """Check if line is the start of a data group."""
         if not magicword:
-            magicword = ['NODE', 'ELEMENT']
+            magicword = GROUP_DATA_START
 
         # Checking if we are supplying a custom start function.
         if self.custom_data_start(line) is not None:
@@ -490,11 +516,16 @@ class CommandOutputDataframe(CommandOutput):
         else:
             return True
 
+    def _separate_columns(self, body):
+        """Replace the '-' sign (not preceded by 'E') by ' -' to ensure there is columns space sparation."""
+        return re.sub(r'[^E](-)', r' \1', body)
+
     def _get_body(self):
         """Get command body text.
 
-        Just remove the Maximum absolute values tail part."""
-        body = self.__str__().splitlines()
+        It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
+        body = self.__str__()
+        body = self._separate_columns(body).splitlines()
 
         # Removing maximum part
         if 'MAXIMUM ABSOLUTE VALUES' in self.__str__():
@@ -525,27 +556,51 @@ class CommandOutputDataframe(CommandOutput):
 
     def _format_df(self, df):
         """Format the columns data to be an specific data type."""
-        headers = df.columns.to_list()
+        columns = df.columns.to_list()
         try:
             dtype_ = str
             for each in COLUMNS_STR:
-                if each in headers:
+                if each in columns:
                     df[each] = df[each].astype(dtype_)
 
             dtype_ = int
             for each in COLUMNS_INT:
-                if each in headers:
+                if each in columns:
                     df[each] = df[each].astype(dtype_)
 
             dtype_ = float
-            for each in headers:
+            for each in columns:
                 if each not in COLUMNS_NOT_FLOAT:
                     df[each] = df[each].astype(dtype_)
+
+            if 'NODES' in columns:
+                # This is very likely a wrapped column.
+                if isinstance(df['NODES'].values[0], list):
+                    def _convert_to_int(each_row):
+                        return [int(each) for each in each_row]
+                    df['NODES'] = df['NODES'].apply(_convert_to_int)
 
         except ValueError:
             raise ValueError(f"The column '{each}' could not be converted to {dtype_}")
 
         return df
+
+    def _get_raw_list_of_lists(self, magicword=None):
+        """Get raw data as list of lists. No formatting or unwrapping."""
+
+        data = self._get_data_group()
+
+        return [each.split() for each in data if each.split()]
+
+    def _get_data_group(self, magicword=None):
+        """Get raw data groups"""
+        body = self._get_body()
+
+        data = []
+        for start, end in self._get_data_group_indexes(body, magicword=magicword):
+            data.extend(body[start+1:end])
+
+        return data
 
     def get_lists(self, magicword=None):
         """
@@ -565,13 +620,12 @@ class CommandOutputDataframe(CommandOutput):
         list of list
 
         """
-        body = self._get_body()
+        data = self._get_raw_list_of_lists()
 
-        data = []
-        for start, end in self._get_data_group_indexes(body, magicword=magicword):
-            data.extend(body[start+1:end])
+        if self._is_data_wrapper(data):
+            data = self._unwrap_data(data)
 
-        return [each.split() for each in data if each.split()]
+        return data
 
     def get_columns(self):
         """
@@ -600,7 +654,7 @@ class CommandOutputDataframe(CommandOutput):
             This command attemp to return an array of floats, but if there is non-float data,
             it will return a generic array of objects.
 
-        """     
+        """
         try:
             return np.array(self.get_lists(), dtype=float)
         except ValueError:
@@ -624,6 +678,47 @@ class CommandOutputDataframe(CommandOutput):
         data = self.get_lists()
         columns = self.get_columns()
 
+        # the data is wrapped to another line
+        if len(columns) != len(data[0]):
+            data = self._fit_columns(data, columns)
+
         df = pd.DataFrame(data=data, columns=columns)
 
         return self._format_df(df)
+
+    def _fit_columns(self, data, columns):
+        col_len = len(columns)
+        # the last column will encompass all the exceeding data
+        def group(each, col_len):
+            col_len_ = col_len-1
+            return *each[:col_len_], each[col_len_:]
+        return [group(each, col_len) for each in data]
+
+    def _is_data_wrapper(self, data):
+        return len(set([len(each) for each in data])) != 1
+
+    def _unwrap_data(self, data):
+        """Unwrap data by assuming there is a pattern"""
+        unique_lengths = set([len(each) for each in data])
+        if len(unique_lengths) != 2:
+            raise ValueError("The data presents more than 2 line lengths. This is unexpected.")
+
+        line_max = max(unique_lengths)
+        line_min = min(unique_lengths)
+
+        skip_next_line = False
+
+        data_ = []
+        for ind, each_line in enumerate(data[:-1]):
+            if skip_next_line:
+                skip_next_line = not skip_next_line
+
+            next_line = data[ind+1]
+            if len(each_line) == line_max and len(next_line) == line_min:
+                line = each_line.copy()
+                line.extend(next_line)
+                skip_next_line = True
+
+            data_.append(line)
+
+        return data_
