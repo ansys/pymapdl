@@ -1,6 +1,6 @@
 import pytest
 
-from ansys.mapdl.core.commands import CommandOutput as CommandOutput
+from ansys.mapdl.core.commands import CommandOutput, CommandListing
 from ansys.mapdl.core.misc import random_string
 
 FUNCTION_COMMAND_OUTPUT = [each for each in dir(CommandOutput) if not each.startswith('__')]
@@ -13,7 +13,10 @@ This is for the format: {format1}-{format2}-{format3}"""
 
 ## Commands options
 _CMD = '/INPUT'
+
 CMD = CommandOutput(OUTPUT, cmd=_CMD)
+
+CMD_DF = CommandListing(OUTPUT, cmd=_CMD)
 
 ## Testing configurations
 OPTIONS_ONE = [('.'), ('e'), ('t'), ('@'), ('1')]
@@ -214,6 +217,46 @@ def test_translate(args):
 def test_upper():
     assert OUTPUT.upper() == CMD.upper()
 
-# @pytest.mark.parametrize("args", OPTIONS_TWO_NUMBERS)
-# def test_zfil(args):
-#     assert OUTPUT.zfil(*args) == CMD.zfil(*args)
+## Dataframe class.
+
+def test_cmd_df_inheritance():
+    assert isinstance(CMD_DF, CommandListing)
+    assert isinstance(CMD_DF, CommandOutput)
+
+@pytest.mark.parametrize("method", ['get_lists', 'get_array', 'get_dataframe'])
+def test_cmd_df_methods(method):
+    assert hasattr(CMD_DF, method)
+
+@pytest.mark.parametrize("model,nnodediv", ([contact_solve, plastic_solve], [1, 2, 5]))
+def test_cmd_df_data_size_nodes(mapdl, model, nnodediv):
+    mapdl.post1()
+    mapdl.allsel()
+
+    n_nodes_tot = mapdl.mesh.n_node
+    mapdl.nsel('S', 0, n_nodes_tot//nnodediv)
+
+    out = mapdl.nlist()
+    cmd = CommandListing(out.__str__(), cmd=out._cmd)
+    arr = cmd.get_array()
+    df = cmd.get_dataframe()
+
+    assert arr.shape[0] == mapdl.mesh.n_node
+    assert arr.shape[1] > 3
+    assert df['NODE'].isin(mapdl.mesh.nnum).all()
+
+@pytest.mark.parametrize("model,nelemdiv", ([contact_solve, plastic_solve], [1, 2, 5]))
+def test_cmd_df_data_size_elem(mapdl, model, nelemdiv):
+    mapdl.post1()
+    mapdl.allsel()
+
+    n_elem_tot = mapdl.mesh.n_elem
+    mapdl.esel('S', 0, n_elem_tot//nelemdiv)
+
+    out = mapdl.elist()
+    cmd = CommandListing(out.__str__(), cmd=out._cmd)
+    arr = cmd.get_array()
+    df = cmd.get_dataframe()
+
+    assert arr.shape[0] == mapdl.mesh.n_elem
+    assert arr.shape[1] == mapdl.mesh.n_elem
+    assert df['ELEMENT'].isin(mapdl.mesh.enum).all()
