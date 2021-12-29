@@ -1,6 +1,6 @@
 import pytest
 
-from ansys.mapdl.core.commands import CommandOutput, CommandListing
+from ansys.mapdl.core.commands import CommandOutput, CommandListing, SUPPORTED_PRINT_CMDS
 from ansys.mapdl.core.misc import random_string
 
 from conftest import contact_solve, plastic_solve
@@ -227,7 +227,8 @@ def test_cmd_df_inheritance():
 def test_cmd_df_methods(method):
     assert hasattr(CMD_DF, method)
 
-@pytest.mark.parametrize("model,nnodediv", ([contact_solve, plastic_solve], [1, 2, 5]))
+@pytest.mark.parametrize("model", [contact_solve, plastic_solve])
+@pytest.mark.parametrize("nnodediv", [1, 2, 5])
 def test_cmd_df_data_size_nodes(mapdl, model, nnodediv):
     mapdl.post1()
     mapdl.allsel()
@@ -244,7 +245,8 @@ def test_cmd_df_data_size_nodes(mapdl, model, nnodediv):
     assert arr.shape[1] > 3
     assert df['NODE'].isin(mapdl.mesh.nnum).all()
 
-@pytest.mark.parametrize("model,nelemdiv", ([contact_solve, plastic_solve], [1, 2, 5]))
+@pytest.mark.parametrize("model", [contact_solve, plastic_solve])
+@pytest.mark.parametrize("nelemdiv", [1, 2, 5])
 def test_cmd_df_data_size_elem(mapdl, model, nelemdiv):
     mapdl.post1()
     mapdl.allsel()
@@ -261,14 +263,15 @@ def test_cmd_df_data_size_elem(mapdl, model, nelemdiv):
     assert df['ELEMENT'].isin(mapdl.mesh.enum).all()
 
 
-@pytest.mark.parametrize("model,command", ([contact_solve, plastic_solve], SUPPORTED_PRINT_CMDS ))
+@pytest.mark.parametrize("model", [contact_solve, plastic_solve])
+@pytest.mark.parametrize("command", SUPPORTED_PRINT_CMDS)
 def test_cmd_df_supported_(mapdl, model, command):
 
     mapdl.post1()
     mapdl.allsel()
 
     if command not in ['DLIST', 'NLIST', 'ELIST']:
-        out = mapdl.run(f"{command},U,X")
+        out = mapdl.run(f"{command}, U, X")
     else:
         out = mapdl.run(f"{command}")
 
