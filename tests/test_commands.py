@@ -3,6 +3,8 @@ import pytest
 from ansys.mapdl.core.commands import CommandOutput, CommandListing
 from ansys.mapdl.core.misc import random_string
 
+from conftest import contact_solve, plastic_solve
+
 FUNCTION_COMMAND_OUTPUT = [each for each in dir(CommandOutput) if not each.startswith('__')]
 
 OUTPUT = """This is the output.
@@ -15,8 +17,7 @@ This is for the format: {format1}-{format2}-{format3}"""
 _CMD = '/INPUT'
 
 CMD = CommandOutput(OUTPUT, cmd=_CMD)
-
-CMD_DF = CommandListing(OUTPUT, cmd=_CMD)
+CMD_DF = CommandListing(OUTPUT, cmd='NLIST')
 
 ## Testing configurations
 OPTIONS_ONE = [('.'), ('e'), ('t'), ('@'), ('1')]
@@ -217,8 +218,7 @@ def test_translate(args):
 def test_upper():
     assert OUTPUT.upper() == CMD.upper()
 
-## Dataframe class.
-
+# Dataframe class.
 def test_cmd_df_inheritance():
     assert isinstance(CMD_DF, CommandListing)
     assert isinstance(CMD_DF, CommandOutput)
@@ -278,5 +278,3 @@ def test_cmd_df_supported_(mapdl, model, command):
 
     assert arr.shape[0] == mapdl.mesh.n_elem
     assert df['ELEMENT'].isin(mapdl.mesh.enum).all() or df['NODE'].isin(mapdl.mesh.nnum).all()
-    
-    

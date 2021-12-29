@@ -40,8 +40,8 @@ COLUMNS_TO_NOT_BE_FORMATTED = ['NODES']
 COLUMNS_NOT_FLOAT = COLUMNS_INT + COLUMNS_STR + COLUMNS_TO_NOT_BE_FORMATTED
 
 CMDS_PRINT_LIST = [
-    'DLIST', 'NLIST', 'ELIST', 'PRNSOL', 'PRENERGY','PRORB',
-    'PRCINT', 'PRESOL', 'PRJSOL', 'PRNLD', 'PRNSOL','PRRFOR',
+    'DLIST', 'NLIST', 'ELIST', 'PRNSOL', 'PRENERGY', 'PRORB',
+    'PRCINT', 'PRESOL', 'PRJSOL', 'PRNLD', 'PRNSOL', 'PRRFOR',
     'PRRSOL', 'PRVECT', 'PRETAB', 'PRERR', 'PRITER',
     'NLDPOST', 'PRAS', 'PRFAR', 'PRMC', 'PRNEAR'
     ]
@@ -245,10 +245,8 @@ class Commands(
     pass
 
 def CommandFactory(output, cmd):
-    
     short_cmd = cmd.split(',')[0]
-    
-    
+
 
 class CommandOutput(str):
     """
