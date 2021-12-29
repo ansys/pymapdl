@@ -227,6 +227,20 @@ class Commands(
     pass
 
 class CommandOutput(str):
+    """
+    Custom string subclass for handling the commands output.
+
+    Main features is that this class always returns an object which is from its own class
+    (it never returns a string).
+
+    This class add two method to track the cmd which generated this output.
+    * ``cmd`` - The MAPDL command which generated the output.
+    * ``command`` - The full command line (with arguments) which generated the output.
+
+    These two methods and their values are inheritate by the consequents generated objects,
+    as long as you use the string-related methods in this class.
+
+    """
 
     ## References:
     # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
@@ -400,17 +414,26 @@ class CommandOutput2(str):
 
 
 class CommandOutputDataframe(CommandOutput):
-    def __new__(cls, content, cmd=None, mapdl=None):
+    """
+    Custom class for handling the commands whose output is sensible to be converted to
+    a list of lists, a Numpy array or a Pandas DataFrame.
+
+    This class adds the next useful commands (methods):
+    * ``get_lists``
+    * ``get_array``
+    * ``get_dataframe``
+
+    Also it adds the next functions as custom data processing helpers:
+    * ``custom_data_start``
+    * ``custom_data_end``
+
+    This class is a subclass of ``CommandOutput``.
+    """
+    def __new__(cls, content, cmd=None):
         obj = super().__new__(cls, content, cmd=cmd)
         short_cmd = cmd.split(',')[0].strip()
         # if short_cmd not in _ALLOWED_CMD_TO_DF:
         #     raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
-
-        if isinstance(mapdl, Commands):  # _MapdlCore gives circular import.
-            obj._mapdl = mapdl
-        else:
-            obj._mapdl = None
-
         return obj
 
     @property
@@ -438,7 +461,7 @@ class CommandOutputDataframe(CommandOutput):
         if self.custom_data_end(line) is not None:
             return self.custom_data_end(line)
         else:
-            return self.is_empty(line)
+            return self._is_empty(line)
 
     def custom_data_start(self, line):
         """Custom data start line check function.
@@ -461,7 +484,7 @@ class CommandOutputDataframe(CommandOutput):
         return None
 
     @staticmethod
-    def is_empty(each):
+    def _is_empty(each):
         if each.split():
             return False
         else:
@@ -490,7 +513,7 @@ class CommandOutputDataframe(CommandOutput):
 
         # Getting pairs of starting end
         start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
-        end_idxs = [ind - shift for ind, each in enumerate(body) if self.is_empty(each)]
+        end_idxs = [ind - shift for ind, each in enumerate(body) if self._is_empty(each)]
 
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
