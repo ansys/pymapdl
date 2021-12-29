@@ -482,10 +482,15 @@ class CommandOutputDataframe(CommandOutput):
 
     def _get_data_group_indexes(self, body, magicword=None):
         """Return the indexes of the start and end of the data groups."""
+
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
+            shift = 2
+        else:
+            shift = 0
+
         # Getting pairs of starting end
         start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
-        end_idxs = [ind for ind, each in enumerate(
-            body) if self.is_empty(each)]
+        end_idxs = [ind - shift for ind, each in enumerate(body) if self.is_empty(each)]
 
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
@@ -565,7 +570,6 @@ class CommandOutputDataframe(CommandOutput):
         If the command data has text (for example ``DLIST`` which contains the labels
         ``UX``, ``TEMP``, etc), it is recommended to get this data as dataframe
         (``get_dataframe``) or as list of list (``get_lists``).
-        
 
         Returns
         -------
