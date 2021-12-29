@@ -19,13 +19,19 @@ from ._commands import (
     misc,
 )
 
+import numpy as np
+
 try:
-    import pandas
+    import pandas as pd
     HAS_PANDAS = True
 
 except ImportError:
     HAS_PANDAS = False
 
+
+COLUMNS_INT = ['NODE', 'ELEMENT']
+COLUMNS_STR = ['LABEL']
+COLUMNS_NOT_FLOAT = COLUMNS_INT + COLUMNS_STR
 
 class PreprocessorCommands(
     preproc.database.Database,
@@ -394,21 +400,11 @@ class CommandOutput2(str):
 
 
 class CommandOutputDataframe(CommandOutput):
-    __CMDS = {'DLIST': 'CURRENTLY SELECTED DOF SET'}
-    _ALLOWED_CMD_TO_DF = list(__CMDS.keys())
-
-    PAGE_PROPERTIES = {
-        'interactive lines per page' : 20,
-        'interactive characters per line': 256,
-        'file output lines per page':  56,
-        'file output characters per line': 140
-        }
-
     def __new__(cls, content, cmd=None, mapdl=None):
         obj = super().__new__(cls, content, cmd=cmd)
         short_cmd = cmd.split(',')[0].strip()
-        if short_cmd not in cls._ALLOWED_CMD_TO_DF:
-            raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
+        # if short_cmd not in _ALLOWED_CMD_TO_DF:
+        #     raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
 
         if isinstance(mapdl, Commands):  # _MapdlCore gives circular import.
             obj._mapdl = mapdl
@@ -421,137 +417,186 @@ class CommandOutputDataframe(CommandOutput):
     def _has_pandas(self):
         return HAS_PANDAS
 
-    @property
-    def interactive_lines_per_page(self):
-        return self._get_format(0)
+    def _is_data_start(self, line, magicword=None):
+        """Check if line is the start of a data group."""
+        if not magicword:
+            magicword = ['NODE', 'ELEMENT']
 
-    @interactive_lines_per_page.setter
-    def interactive_lines_per_page(self, number):
-        self._set_format(0, number)
+        # Checking if we are supplying a custom start function.
+        if self.custom_data_start(line) is not None:
+            return self.custom_data_start(line)
 
-    @property
-    def interactive_chars_per_line(self):
-        return self._get_format(1)
+        if line.split():
+            if line.split()[0] in magicword or self.custom_data_start(line):
+                return True
+        return False
 
-    @interactive_chars_per_line.setter
-    def interactive_chars_per_line(self, number):
-        self._set_format(1, number)
+    def _is_data_end(self, line):
+        """Check if line is the end of a data group."""
 
-    @property
-    def file_output_lines_per_page(self):
-        return self._get_format(2)
-
-    @file_output_lines_per_page.setter
-    def file_output_lines_per_page(self, number):
-        self._set_format(2, number)
-
-    @property
-    def file_ouptut_chars_per_line(self):
-        return self._get_format(3)
-
-    @file_ouptut_chars_per_line.setter
-    def file_ouptut_chars_per_line(self, number):
-        self._set_format(3, number)
-
-    def _get_format(self, id):
-        dd = self.PAGE_PROPERTIES
-        key = list(dd.keys())[id]
-
-        if self._mapdl:
-            line = self._mapdl.page('STAT').splitlines()[id]
-            num = int(line.split('=')[1].strip())
-            dd[key] = num # updating dict
-            return num
+        # Checking if we are supplying a custom start function.
+        if self.custom_data_end(line) is not None:
+            return self.custom_data_end(line)
         else:
-            return dd[key]
+            return self.is_empty(line)
 
-    def _set_format(self, id, value):
-        dd = self.PAGE_PROPERTIES
-        key = list(dd.keys())[id]
+    def custom_data_start(self, line):
+        """Custom data start line check function.
+
+        This function is left empty so it can be overwritten by the user.
+
+        If modified, it should return ``True`` when the line is the start
+        of a data group, otherwise it should return ``False``.
+        """
+        return None
+
+    def custom_data_end(self, line):
+        """Custom data end line check function.
+
+        This function is left empty so it can be overwritten by the user.
+
+        If modified, it should return ``True`` when the line is the end
+        of a data group, otherwise it should return ``False``.
+        """
+        return None
+
+    @staticmethod
+    def is_empty(each):
+        if each.split():
+            return False
+        else:
+            return True
+
+    def _get_body(self):
+        """Get command body text.
+
+        Just remove the Maximum absolute values tail part."""
+        body = self.__str__().splitlines()
+
+        # Removing maximum part
+        if 'MAXIMUM ABSOLUTE VALUES' in self.__str__():
+            ind = [ind for ind, each in enumerate(
+                body) if 'MAXIMUM ABSOLUTE VALUES' in each]
+            body = body[:ind[0]]
+        return body
+
+    def _get_data_group_indexes(self, body, magicword=None):
+        """Return the indexes of the start and end of the data groups."""
+        # Getting pairs of starting end
+        start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
+        end_idxs = [ind for ind, each in enumerate(
+            body) if self.is_empty(each)]
+
+        indexes = [*start_idxs, *end_idxs]
+        indexes.sort()
+
+        ends = [indexes[indexes.index(each)+1] for each in start_idxs[:-1]]
+        ends.append(len(body))
+
+        return zip(start_idxs, ends)
+
+    def _format_df(self, df):
+        """Format the columns data to be an specific data type."""
+        headers = df.columns.to_list()
         try:
-            value = int(value)
+            dtype_ = str
+            for each in COLUMNS_STR:
+                if each in headers:
+                    df[each] = df[each].astype(dtype_)
+
+            dtype_ = int
+            for each in COLUMNS_INT:
+                if each in headers:
+                    df[each] = df[each].astype(dtype_)
+
+            dtype_ = float
+            for each in headers:
+                if each not in COLUMNS_NOT_FLOAT:
+                    df[each] = df[each].astype(dtype_)
+
         except ValueError:
-            raise ValueError("Value should be convertible to 'int'.")
+            raise ValueError(f"The column '{each}' could not be converted to {dtype_}")
 
-        if self._mapdl: # Updating mapdl
-            args = [0, 0, 0, 0]
-            args[id] = value
-            self._mapdl.page(*args)
-            dd[key] = value
+        return df
 
-        dd[key] = value
-        return dd[key]
+    def get_lists(self, magicword=None):
+        """
+        Get underlying command data as list of list.
 
-    def parse_dataframe(self):
-        return self._parse_to_dataframe()
+        This function assumes that the data groups in each page starts with a header which starts
+        with the magic word and ends with the next empty line.
 
-    def _parse_to_dataframe(self):
-        if HAS_PANDAS:
-            raise NotImplementedError
-        else:
+        Parameters
+        ----------
+        magicword : str, optional
+            Specify a magic word to identify the data group start. By default None, which translate
+            later to ['NODE', 'ELEMENT'].
+
+        Returns
+        -------
+        list of list
+
+        """
+        body = self._get_body()
+
+        data = []
+        for start, end in self._get_data_group_indexes(body, magicword=magicword):
+            data.extend(body[start+1:end])
+
+        return [each.split() for each in data if each.split()]
+
+    def get_columns(self):
+        """
+        Get the column names for the dataframe.
+
+        Returns
+        -------
+        List of strings
+
+        """
+        body = self._get_body()
+        pairs = list(self._get_data_group_indexes(body))
+        return body[pairs[0][0]].split()
+
+    def get_array(self):
+        """
+        Get Numpy array of the underlying command data.
+
+        If the command data has text (for example ``DLIST`` which contains the labels
+        ``UX``, ``TEMP``, etc), it is recommended to get this data as dataframe
+        (``get_dataframe``) or as list of list (``get_lists``).
+        
+
+        Returns
+        -------
+        numpy.ndarray
+            This command attemp to return an array of floats, but if there is non-float data,
+            it will return a generic array of objects.
+
+        """     
+        try:
+            return np.array(self.get_lists(), dtype=float)
+        except ValueError:
+            return np.array(self.get_lists())
+
+    def get_dataframe(self):
+        """
+        Get Pandas DataFrame of the underlying command data.
+
+        It requires to have Pandas installed. In case you don't, it will return ``None``
+        but it won't raise an error.
+
+        Returns
+        -------
+        Pandas.DataFrame
+
+        """
+        if not self._has_pandas:
             return None
 
-    def parse_array(self):
-        return self._parse_array()
+        data = self.get_lists()
+        columns = self.get_columns()
 
-    def _parse_array(self):
-        output = self.__str__()
+        df = pd.DataFrame(data=data, columns=columns)
 
-    def _get_pages(self):
-        output = self.__str__().splitlines()[2:]
-        N = self.file_output_lines_per_page-2
-        # Omitting headers
-        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
-            start = 4
-        else:
-            start = 2  # Omitting header
-        return (output[each:each+N][start:] for each in range(0, len(output), N))
-
-    def _get_labels(self):
-        output = self.__str__()
-        identifier = self.__CMDS[self.cmd]
-        top_output = '\n'.join(output.splitlines()[:10]).splitlines()
-
-        if identifier in top_output: # getting header line:
-            # There is a defined header
-            ind = [ind for ind, each in enumerate(top_output) if identifier in each][0]
-            line = top_output[ind]
-            return line.split('=')[1].split()
-        else:
-            # Assuming the first line is the header:
-            return top_output[0].split()
-
-    def _get_header(self):
-        return 'NODE  LABEL     REAL           IMAG'.split()
-
-    def _get_table(self):
-        header = self._get_header()
-        table = []
-        for each_page in self._pages():
-            # find labels:
-            ind = [ind for ind, each in enumerate(each_page) if each.split() == header]
-            if not ind:
-                ind = 1
-            else:
-                ind = ind[0]+1
-            table.extend(each_page[ind:])
-
-        return table
-
-    def _get_dataframe(self):
-        table = self._get_table()
-        headers = self._get_header()
-        
-        return pandas.DataFrame(data=table, columns=headers)
-    
-    
-    
-    
-    
-    
-CMD_CONFIGURATION = {
-    'DLIST':{
-        'header': 2,
-        
-    }
-}
+        return self._format_df(df)
