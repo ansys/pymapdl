@@ -263,12 +263,13 @@ def test_cmd_df_data_size_elem(mapdl, model, nelemdiv):
     assert df['ELEMENT'].isin(mapdl.mesh.enum).all()
 
 
-@pytest.mark.parametrize("model", [contact_solve, plastic_solve])
+# @pytest.mark.parametrize("model", [contact_solve, plastic_solve])
 @pytest.mark.parametrize("command", SUPPORTED_PRINT_CMDS)
-def test_cmd_df_supported_(mapdl, model, command):
+def test_cmd_df_supported_(mapdl, contact_solve, command):
 
     mapdl.post1()
     mapdl.allsel()
+    mapdl.set('last')
 
     if command not in ['DLIST', 'NLIST', 'ELIST']:
         out = mapdl.run(f"{command}, U, X")
