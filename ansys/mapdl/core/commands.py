@@ -20,7 +20,7 @@ from ._commands import (
 )
 
 import numpy as np
-import regex as re
+import re
 
 try:
     import pandas as pd
