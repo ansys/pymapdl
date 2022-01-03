@@ -80,7 +80,7 @@ class inq_function:
 
         Returns
         -------
-        ndinqr  :  (int,  func,  out)
+        ndinqr  (int,  func,  out)
             The returned value of ``ndinqr`` is based on setting of key.
         """
         return self.run(f"{pname} = ndinqr({node}, {key})", **kwargs)
@@ -159,7 +159,7 @@ class inq_function:
 
         Returns
         -------
-        elmiqr  :  (int,  sc,  out)
+        elmiqr  (int,  sc,  out)
             The returned value of ``elmiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = elmiqr({ielem}, {key})", **kwargs)
@@ -181,7 +181,7 @@ class inq_function:
         knmi  :  (int,  sc,  in)
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  (int,  sc,  in)    
+        key  :  (int,  sc,  in)
             Information flag.
 
             * = 1 - return select
@@ -259,7 +259,7 @@ class inq_function:
 
         Returns
         -------
-        kpinqr  :  (int, sc, out)
+        kpinqr  (int, sc, out)
             For key=1
 
             * 0 = ``knmi`` is undefined.
@@ -344,7 +344,7 @@ class inq_function:
 
         Returns
         -------
-        lsinqr  :  (int, sc, out)
+        lsinqr  (int, sc, out)
             For key=1
 
             * 0 = ``lnmi`` is undefined.
@@ -432,7 +432,7 @@ class inq_function:
 
         Returns
         -------
-        arinqr  :  (int, sc, out)
+        arinqr  (int, sc, out)
             For key=1
 
             * 0 = ``anmi`` is undefined.
@@ -505,7 +505,7 @@ class inq_function:
 
         Returns
         -------
-        vlinqr  :  (int, sc, out)
+        vlinqr  (int, sc, out)
             For key=1
 
             * 0 = ``vnmi`` is undefined.
@@ -560,7 +560,7 @@ class inq_function:
 
         Returns
         -------
-        rlinqr  :  (int, func, out)
+        rlinqr  (int, func, out)
             The returned value of ``rlinqr`` is based on setting of key.
 
         """
@@ -599,7 +599,7 @@ class inq_function:
 
         Returns
         -------
-        gapiqr  :  (int, sc, out)
+        gapiqr  (int, sc, out)
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = gapiqr({ngap}, {key})", **kwargs)
@@ -640,10 +640,10 @@ class inq_function:
 
         Returns
         -------
-        variable  :  (typ, siz, intent)
+        variable  (typ, siz, intent)
             Description
 
-        masiqr  :  (int, sc, out)
+        masiqr  (int, sc, out)
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
@@ -695,7 +695,7 @@ class inq_function:
 
         Returns
         -------
-        ceinqr  :  (int, func, out)
+        ceinqr  (int, func, out)
             The returned value of ``ceinqr`` is based on setting of key
         """
         return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
@@ -749,7 +749,7 @@ class inq_function:
 
         Returns
         -------
-        cpinqr  :  (int, func, out)
+        cpinqr  (int, func, out)
             The returned value of ``cpinqr`` is based on setting of key.
 
         """
@@ -791,7 +791,7 @@ class inq_function:
 
         Returns
         -------
-        csyiqr  :  (int, func, out)
+        csyiqr  (int, func, out)
             The returned value of ``csyiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = csyiqr({ncsy}, {key})", **kwargs)
@@ -840,7 +840,7 @@ class inq_function:
 
         Returns
         -------
-        etyiqr  :  (int, func, out)
+        etyiqr  (int, func, out)
             The returned value of ``etyiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = etyiqr({itype}, {key})", **kwargs)
@@ -877,7 +877,7 @@ class inq_function:
 
         Returns
         -------
-        foriqr  :  (int, func, out)
+        foriqr  (int, func, out)
             The returned value of ``foriqr`` is based on setting of key.
         """
         return self.run(f"{pname} = foriqr({node}, {key})", **kwargs)
@@ -909,7 +909,8 @@ class inq_function:
 
         Returns
         -------
-        for key = 1
+        sectinqr
+            for key = 1
             * = 0, section id table is undefined.
             * = -1, section id table is unselected.
             * = 1, section id table is selected
@@ -987,7 +988,7 @@ class inq_function:
 
         Returns
         -------
-        mpinqr  :  (int, func, out)
+        mpinqr   (int, func, out)
             Returned value of ``mpinqr`` is based on setting of key.
 
         """
@@ -1045,7 +1046,7 @@ class inq_function:
 
         Returns
         -------
-        dget  :  (dp, sc, out)
+        dget   (dp, sc, out)
             Constraint value (High number if undefined)
         """
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
@@ -1102,7 +1103,7 @@ class inq_function:
 
         Returns
         -------
-        fget  :  (dp, sc, out)
+        fget  (dp, sc, out)
             Force value (High number if undefined)
         """
         return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
@@ -1246,7 +1247,7 @@ class inq_function:
 
         Returns
         -------
-        erinqr  :  (int, sc, out)
+        erinqr  (int, sc, out)
             Value corresponding to key.
 
         """
