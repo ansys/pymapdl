@@ -604,7 +604,7 @@ class inq_function:
         return self.run(f"{pname} = gapiqr({ngap}, {key})", **kwargs)
 
     def masiqr(self, node, key, pname='__tmpvar__', **kwargs):
-        """Get information about masters.
+        """Get information about masters nodes.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -648,7 +648,7 @@ class inq_function:
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
 
     def ceinqr(self, nce, key, pname='__tmpvar__', **kwargs):
-        """Get information about a constraint equation set
+        """Get information about a constraint equation set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -755,7 +755,7 @@ class inq_function:
         return self.run(f"{pname} = cpinqr({ncp}, {key})", **kwargs)
 
     def csyiqr(self, ncsy, key, pname='__tmpvar__', **kwargs):
-        """Get information about a coordinate system
+        """Get information about a coordinate system.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -910,6 +910,7 @@ class inq_function:
         -------
         sectinqr
             for key = 1
+
             * = 0, section id table is undefined.
             * = -1, section id table is unselected.
             * = 1, section id table is selected
@@ -994,7 +995,7 @@ class inq_function:
         return self.run(f"{pname} = mpinqr({mat,  iprop}, { key})", **kwargs)
 
     def dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
-        """Get a constraint from the data bsae
+        """Get a constraint from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -1051,7 +1052,7 @@ class inq_function:
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
 
     def fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
-        """Get a force from the data bsae
+        """Get a force load from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -1108,7 +1109,7 @@ class inq_function:
         return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
 
     def erinqr(self, key, pname='__tmpvar__', **kwargs):
-        """Obtain information from errors common
+        """Obtain information from common errors.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
