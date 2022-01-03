@@ -67,6 +67,8 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
+import matplotlib.pyplot as plt
+
 from ansys.mapdl.core import launch_mapdl
 
 # Start mapdl.
@@ -129,6 +131,8 @@ mapdl.et(3, "SHELL181")  # FULL INTEGRATION
 # Full integration with incompatible modes.
 mapdl.keyopt(3, 3, 2)
 
+# Print
+print(mapdl.etlist())
 
 ###############################################################################
 # Define Material
@@ -158,11 +162,12 @@ mapdl.tb("BKIN", 2, 1)
 mapdl.tbtemp(0)
 mapdl.tbdata(1, 55000, 0)
 
+# Print
+print(mapdl.mplist())
 
 ###############################################################################
 # Plot Stress - Strain Curve.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import matplotlib as plt
 
 # Define Stress - Strain properties of the steel.
 steel = {"stress_s": [0, 86000, 86000, 86000],
@@ -239,6 +244,8 @@ mapdl.sectype(4, "PIPE")
 # OUTSIDE DIA. AND WALL THICKNESS FOR OUTSIDE TUBE (PIPE288)
 mapdl.secdata(8.139437, 0.5)
 
+# Print
+print(mapdl.slist())
 
 ###############################################################################
 # Define Geometry
@@ -351,14 +358,16 @@ mapdl.finish()
 # Enter solution mode and solve the system. Print the solver output.
 
 # Start solution presederu
-mapdl.run("/SOLU")
 
 # Define solution function.
 def solution(deflect=None):
+    mapdl.run("/solu")
     mapdl.nsel("R", "LOC", "Z", 10)
     mapdl.d(node="ALL", lab="UZ", value=deflect)
     mapdl.nsel("ALL")
-    mapdl.solve()
+    out = mapdl.solve()
+    mapdl.finish()
+    print(out)
 
 
 # Run each load step to reproduce needed deflection subsequently.
@@ -440,48 +449,97 @@ def getload():
 for i in range(1, ls + 1):
     mapdl.set(1, 1)
     load_288, load_185, load_181 = getload()
-    results_load_deflection = f"""
-    LOAD STEP {i}
-    PIPE288_LS{i}= {abs(round(load_288,0))}
-    SOLID185_LS{i} = {abs(round(load_185,0))}
-    SHELL181_LS{i} = {abs(round(load_181,0))}
-    
-    """
-    print(results_load_deflection)
+
+    if i == 1:
+        pipe288_ls1 = abs(round(load_288, 0))
+        solid185_ls1 = abs(round(load_185, 0))
+        shell181_ls1 = abs(round(load_181, 0))
+
+        results_load_deflection = f"""
+        LOAD STEP {i}
+        PIPE288_LS{i}= {pipe288_ls1}
+        SOLID185_LS{i} = {solid185_ls1}
+        SHELL181_LS{i} = {shell181_ls1}
+        """
+        print(results_load_deflection)
+
+    if i == 2:
+        pipe288_ls2 = abs(round(load_288, 0))
+        solid185_ls2 = abs(round(load_185, 0))
+        shell181_ls2 = abs(round(load_181, 0))
+
+        results_load_deflection = f"""
+        LOAD STEP {i}
+        PIPE288_LS{i}= {pipe288_ls2}
+        SOLID185_LS{i} = {solid185_ls2}
+        SHELL181_LS{i} = {shell181_ls2}
+        """
+        print(results_load_deflection)
+
+    if i == 3:
+        pipe288_ls3 = abs(round(load_288, 0))
+        solid185_ls3 = abs(round(load_185, 0))
+        shell181_ls3 = abs(round(load_181, 0))
+
+        results_load_deflection = f"""
+        LOAD STEP {i}
+        PIPE288_LS{i}= {pipe288_ls3}
+        SOLID185_LS{i} = {solid185_ls3}
+        SHELL181_LS{i} = {shell181_ls3}
+        """
+        print(results_load_deflection)
+
 
 
 ###############################################################################
 # Check Results with Pandas
 
+import pandas as pd
 
-# ###############################################################################
-# # Check Results
-# # ~~~~~~~~~~~~~
-# # Now we have the deflections, we can compare them to the expected values
-# # of radial deflection at the node where force :math:`F` was applied
-# # for both simulations. The expected value for :math:`\delta_{\mathrm{shell181}}` is 0.1139,
-# # and :math:`\delta_{\mathrm{shell281}}` is 0.1139.
-#
-#
-# deflect_shell_181 = 0
-# deflect_shell_281 = 0
-# # Results obtained by hand-calculations.
-# deflect_target_181 = 0.1139
-# deflect_target_281 = 0.1139
-#
-# # Calculate the deviation.
-# deflect_ratio_shell_181 = abs(deflect_shell_181) / deflect_target_181
-# deflect_ratio_shell_281 = abs(deflect_shell_281) / deflect_target_281
-#
-# # Print output results.
-# output = f"""
-# ----------------------------------------------------------------------------
-# ------------------------- VM3 RESULTS COMPARISON ---------------------------
-# ----------------------------------------------------------------------------
-#                             |   TARGET   |   Mechanical APDL   |   RATIO   |
-# ----------------------------------------------------------------------------
-#     Deflection, in SHELL181{deflect_target_181:11.4f} {abs(deflect_shell_181):17.4f} {deflect_ratio_shell_181:15.4f}
-#     Deflection, in SHELL281{deflect_target_281:11.4f} {abs(deflect_shell_281):17.4f} {deflect_ratio_shell_281:15.4f}
-# ----------------------------------------------------------------------------
-# """
-# print(output)
+main_columns = {
+    "Target": [1024400, 1262000, 1262000,
+               1024400, 1262000, 1262000,
+               1024400, 1262000, 1262000],
+    "Mechanical APDL": [pipe288_ls1, pipe288_ls2, pipe288_ls2,
+                        solid185_ls1, solid185_ls2, solid185_ls3,
+                        shell181_ls1, shell181_ls2, shell181_ls3,],
+    "Ratio": [0, 0, 0,
+              0, 0, 0,
+              0, 0, 0]
+}
+
+row_tuple = [("PIPE288", "Load, lb for Deflection = 0.032 in"),
+             ("PIPE288", "Load, lb for Deflection = 0.05 in"),
+             ("PIPE288", "Load, lb for Deflection = 0.1 in"),
+
+             ("SOLID185", "Load, lb for Deflection = 0.032 in"),
+             ("SOLID185", "Load, lb for Deflection = 0.05 in"),
+             ("SOLID185", "Load, lb for Deflection = 0.1 in"),
+
+             ("SHELL181", "Load, lb for Deflection = 0.032 in"),
+             ("SHELL181", "Load, lb for Deflection = 0.05 in"),
+             ("SHELL181", "Load, lb for Deflection = 0.1 in")]
+
+index_names = ["Element Type", "Load Step"]
+row_indexing = pd.MultiIndex.from_tuples(row_tuple, names=index_names)
+
+df = pd.DataFrame(main_columns, index=row_indexing)
+
+print(df)
+# df.style.set_table_styles(
+#     [{'selector': 'tr:hover',
+#       'props': [('background-color', 'yellow')]}]
+# )
+colors = {"PIPE288": (0.6, 0.8, 0.8, 1), "SOLID185": (1, 0.9, 0.4, 1), "SHELL181": (0.8, 0.7, 0.7, 1)}
+
+#convert rgba to integers
+c1 = {k: (int(r * 255),int(g * 255),int(b * 255), a) for k, (r,g,b,a) in colors.items()}
+c2 = {k: (int(r * 255),int(g * 255),int(b * 255), 0.25) for k, (r,g,b,a) in colors.items()}
+
+#get values of first level of MulitIndex
+idx = df.index.get_level_values(0)
+#counter per first level for pair and unpair coloring
+zipped = zip(df.groupby(idx).cumcount(), enumerate(idx))
+
+df.style.set_table_styles({'selector': f'.row{i}',
+                           'props': [('background-color', f'rgba{c1[j]}')]} for v,(i, j) in zipped)
