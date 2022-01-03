@@ -158,16 +158,53 @@ mapdl.tb("BKIN", 2, 1)
 mapdl.tbtemp(0)
 mapdl.tbdata(1, 55000, 0)
 
-# Plot material behaviour diagram
 
-import matplotlib.pyplot as plt
+###############################################################################
+# Plot Stress - Strain Curve.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+import matplotlib as plt
+
+# Define Stress - Strain properties of the steel.
+steel = {"stress_s": [0, 86000, 86000, 86000],
+         "strain_s": [0, 0.032, 0.1, 0.2]}
+
+# Define Stress - Strain point of the steel on the curve.
+Xp = steel["strain_s"][1]
+Yp = steel["stress_s"][1]
+
+# Set up the settings of the graph.
+plt.plot(steel["strain_s"], steel["stress_s"],
+         label="1020 CR STEEL", linewidth=2,
+         color='steelblue', linestyle="-", marker="o")
+plt.plot(Xp, Yp, marker='o')
+
+plt.annotate('sigma_y_steel', xy=(0.032, 86000), xytext=(0.05, 75000),
+             arrowprops=dict(facecolor='steelblue', shrink=0.05),
+             bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round,pad=1'))
 
 
-x1 = [0, 0.032, 0.1, 0.2]
-x2 = [0, 0.005, 0.1, 0.2]
+# Define dictionary with stress - strain properties of the aluminium.
+aluminium = {"stress_a": [0, 55000, 55000, 55000],
+             "strain_a": [0, 0.05, 0.1, 0.2]}
 
-y1 = [0, 86000, 86000, 86000]
-y2 = [0, 55000, 55000, 55000]
+Xp = aluminium["strain_a"][1]
+Yp = aluminium["stress_a"][1]
+
+# Set up the settings of the graph.
+plt.plot(aluminium["strain_a"], aluminium["stress_a"],
+         label="2024-T4 ALUMINIUM", linewidth=2,
+         color='sandybrown', linestyle="-", marker="o")
+plt.plot(Xp, Yp, marker='o')
+
+plt.annotate('sigma_y_aluminium', xy=(Xp, Yp), xytext=(0.07, 45000),
+             arrowprops=dict(facecolor='sandybrown', shrink=0.05),
+             bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round,pad=1'))
+
+
+plt.grid(True)
+plt.legend()
+plt.title("Stress - Strain Curve", fontsize=18)
+plt.show()
 
 
 ###############################################################################
