@@ -17,6 +17,7 @@ from ._commands import (
     display_,
     conn,
     misc,
+    inq_func
 )
 
 
@@ -187,6 +188,10 @@ class SolutionCommands(
 ):
     pass
 
+class InqFunctions(
+    inq_func.inq_function
+):
+    pass
 
 class Commands(
     APDLCommands,
@@ -207,6 +212,7 @@ class Commands(
     conn.Conn,
     hidden._Hidden,
     map_cmd.MapCommand,
+    InqFunctions
 ):
 
     """Wrapped MAPDL commands"""
