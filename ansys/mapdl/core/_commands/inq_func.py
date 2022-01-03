@@ -671,11 +671,11 @@ class inq_function:
               * = 0 - equation is undefined
               * =-1 - equation is unselected
 
-            * = ``DB_NUMDEFINED``  - return number of defined contraint equations
-            * = ``DB_NUMSELECTED`` - return number of selected contraint equations
+            * = ``DB_NUMDEFINED``  - return number of defined constraint equations
+            * = ``DB_NUMSELECTED`` - return number of selected constraint equations
             * = ``DB_MAXDEFINED``  - return number of highest numbered constraint
               equation defined
-            * = ``DB_MAXRECLENG``  - return length of longest contraint equation set
+            * = ``DB_MAXRECLENG``  - return length of longest constraint equation set
               (max record length)
             * =  2             - return length (data units)
             * =  3             - return layer number
@@ -1135,7 +1135,7 @@ class inq_function:
             * 7 = maxmsg (ER_MAXMESSAGE)
               Max allowed number of displayed messages before abort.
             * 8 = lvlerr (ER_ERRORLEVEL)
-              Used basicly in solution (from ``cnvr`` command.)
+              Used basically in solution (from ``cnvr`` command.)
 
               * -1 = do not set keyerr for notes/errors/warnings.
               * -2 = same as -1 but do not display message either.
@@ -1149,7 +1149,7 @@ class inq_function:
 
               * -1 = message is timed before removal
               * 0 = message needs pick or keyboard before removal
-              * 1 = message stays up untill replaced by another message
+              * 1 = message stays up until replaced by another message
 
             * 12 = nomore  (ER_NOMOREMSG)
               Display no more messages
