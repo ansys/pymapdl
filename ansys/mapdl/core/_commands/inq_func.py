@@ -891,10 +891,11 @@ class inq_function:
 
         Parameters
         ----------
-        nsect
+        nsect : int
             Section id table number, it should be 0 for key = 12, 13, 14.
 
-        key - information flag
+        key : int
+            information flag
             * = 1, select status
             * = 12, return number of defined section id tables
             * = 13, return number of selected section id tables
@@ -992,7 +993,7 @@ class inq_function:
             Returned value of ``mpinqr`` is based on setting of key.
 
         """
-        return self.run(f"{pname} = mpinqr({mat,  iprop}, { key})", **kwargs)
+        return self.run(f"{pname} = mpinqr({mat}, {iprop}, {key})", **kwargs)
 
     def dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a constraint from the data base.
