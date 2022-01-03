@@ -181,7 +181,7 @@ class inq_function:
         knmi  :  (int,  sc,  in)
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  (int,  sc,  in)     
+        key  :  (int,  sc,  in)    
             Information flag.
 
             * = 1 - return select
@@ -250,7 +250,7 @@ class inq_function:
             * = -110, pointer to keypoint displacements
             * = -111, pointer to keypoint forces
             * = -112, pointer to line list
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -496,7 +496,7 @@ class inq_function:
             * = -110, pointer to sub-volume list
             * = -111,
             * = -112, pointer to area shell list
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -551,7 +551,7 @@ class inq_function:
             * = ``DB_NUMSELECTED`` - return number of selected real constant tables
             * = ``DB_MAXDEFINED``  - return highest real constant table defined
             * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -590,7 +590,7 @@ class inq_function:
             * = 13, return number of selected
             * = 14, return highest number defined
             * = 15, return maximum record length (data units)
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -631,7 +631,7 @@ class inq_function:
             * = 13, return number of selected
             * = 14, return highest number defined
             * = 15, return maximum record length (data units)
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -686,7 +686,7 @@ class inq_function:
             * = 16             - return location of next record
             * = ``CE_NONLINEAR``   - return 1 if CE is nonlinear
             * = ``CE_ELEMNUMBER``  - return associated element number
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -740,7 +740,7 @@ class inq_function:
             * = 16             - return location of next record
             * = -1             - return master node for this eqn (this is
               currently only used by solution DB object)
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -782,7 +782,7 @@ class inq_function:
             * = ``DB_NUMDEFINED``  - number of defined coordinate systems
             * = ``DB_MAXDEFINED``  - maximum coordinate system reference
               number used.
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -831,7 +831,7 @@ class inq_function:
               see ``elccmt`` for definitions of element characteristics.
               note- this will not overwrite the current setting of
               ``etycom``.
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -868,7 +868,7 @@ class inq_function:
             * = ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
 
             .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the same functionality.
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -900,7 +900,7 @@ class inq_function:
             * = 12, return number of defined section id tables
             * = 13, return number of selected section id tables
             * = 14, return highest section id table defined
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -1036,7 +1036,7 @@ class inq_function:
 
             * 0 = real
             * 1 = imaginary
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -1093,7 +1093,7 @@ class inq_function:
 
             * 0 = real
             * 1 = imaginary
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
@@ -1237,7 +1237,7 @@ class inq_function:
               Interrupt button, so executable returns no error.
 
             * spare - spare integer variables
-        
+
         pname : str
             Name of the variable where the queried value is stored.
 
