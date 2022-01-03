@@ -52,8 +52,8 @@ class inq_function:
             * = -10, internal node flag
             * = -11, orientation node flag =1 is =0 is not
             * = -11, contact node flag <0
-            * = -12, constraint bit pattern (for DSYM)
-            * = -13, if dof constraint written to file.k (for LSDYNA only)
+            * = -12, constraint bit pattern (for ``DSYM``)
+            * = -13, if dof constraint written to file.k (for ``LSDYNA`` only)
             * = -14, nodal coordinate system number (set by ``NROTATE``)
             * =-101, pointer to node data record
             * =-102, pointer to angle record
@@ -131,7 +131,7 @@ class inq_function:
               * = 1 - double precision
               * = 2 - real
               * = 3 - complex
-              * = 4 - character*8
+              * = 4 - character\*8
               * = 7 - index
 
             * = 19 - return virtual type of file.
@@ -168,8 +168,7 @@ class inq_function:
         """Get information about a keypoints.
 
         **Secondary Functions:**
-        Set current keypoints pointer to this
-                            keypoints.
+        Set current keypoints pointer to this keypoints.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -212,7 +211,7 @@ class inq_function:
               * = 1 - double precision
               * = 2 - real
               * = 3 - complex
-              * = 4 - character*8
+              * = 4 - character\*8
               * = 7 - index
 
             * = 19 - return virtual type of file.
@@ -480,7 +479,7 @@ class inq_function:
             * = -6, number of elements.
             * = -7, pointer to volume in foreign db
             * = -8, element shape.
-            * = -9, (section id)*10 + 2
+            * = -9, (section id)\*10 + 2
             * = -10, element coordinate system.
             * = -11, KZ2 - 2nd kpt for elem Z
             * = -12, color and translucancy packed
@@ -732,13 +731,13 @@ class inq_function:
               coupled set
             * = ``DB_MAXRECLENG``  - return length of largest coupled set record
               (max record length)
-            * =  2             - return length (data units)
-            * =  3             - return layer number
-            * =  4             - return address of first data word
-            * =  5             - return number of values stored for ncp
-            * = 11             - return void percent (integer)
-            * = 16             - return location of next record
-            * = -1             - return master node for this eqn (this is
+            * =  2  - return length (data units)
+            * =  3  - return layer number
+            * =  4  - return address of first data word
+            * =  5  - return number of values stored for ncp
+            * = 11  - return void percent (integer)
+            * = 16  - return location of next record
+            * = -1  - return master node for this eqn (this is
               currently only used by solution DB object)
 
         pname : str
@@ -776,8 +775,8 @@ class inq_function:
             * = ``DB_SELECTED``    - return status:
 
               * = 0 - coordinate system is not defined
-              * -1 - coordinate system is not selected
-              * 1 - coordinate system is selected
+              * = -1 - coordinate system is not selected
+              * = 1 - coordinate system is selected
 
             * = ``DB_NUMDEFINED``  - number of defined coordinate systems
             * = ``DB_MAXDEFINED``  - maximum coordinate system reference
@@ -829,8 +828,8 @@ class inq_function:
               type itype.
               ``n`` is correlated to the parameter names in ``echprm``.
               see ``elccmt`` for definitions of element characteristics.
-              note- this will not overwrite the current setting of
-              ``etycom``.
+
+              .. note:: This will not overwrite the current setting of ``etycom``.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -1136,7 +1135,7 @@ class inq_function:
             * 7 = maxmsg (ER_MAXMESSAGE)
               Max allowed number of displayed messages before abort.
             * 8 = lvlerr (ER_ERRORLEVEL)
-              Used basicly in solution (from cnvr command.)
+              Used basicly in solution (from ``cnvr`` command.)
 
               * -1 = do not set keyerr for notes/errors/warnings.
               * -2 = same as -1 but do not display message either.
@@ -1175,10 +1174,10 @@ class inq_function:
               * 1 = perform all keyopt tests also flag to bypass setting of _STATUS upon resume
 
             * 16 = mxr4r5   (ER_MIXEDREV)
-              mixed rev4-rev5 input logic (*do,*if, *go, *if-go)
+              mixed rev4-rev5 input logic (\*do,\*if, \*go, \*if-go)
 
-              * 1 = rev5 found (*do,*fi-then-*endif)
-              * 2 = rev4 found (*go,:xxx,*if, ...., :xxx)
+              * 1 = rev5 found (\*do,\*fi-then-\*endif)
+              * 2 = rev4 found (\*go,:xxx,\*if, ...., :xxx)
               * 3 = warning printed. do not issue any more.
 
             * 17 = mshkey    (ER_MESHING)
