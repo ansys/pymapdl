@@ -1889,7 +1889,7 @@ class MapdlGrpc(_MapdlCore):
     def ndinqr(self, node, key, **kwargs):
         """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
         _ = super().ndinqr(node, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1897,7 +1897,7 @@ class MapdlGrpc(_MapdlCore):
     def elmiqr(self, ielem, key, **kwargs):
         """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
         _ = super().elmiqr(ielem, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1905,7 +1905,7 @@ class MapdlGrpc(_MapdlCore):
     def kpinqr(self, knmi, key, **kwargs):
         """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
         _ = super().kpinqr(knmi, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1913,7 +1913,7 @@ class MapdlGrpc(_MapdlCore):
     def lsinqr(self, line, key, **kwargs):
         """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
         _ = super().lsinqr(line, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1921,7 +1921,7 @@ class MapdlGrpc(_MapdlCore):
     def arinqr(self, anmi, key, **kwargs):
         """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
         _ = super().arinqr(anmi, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1929,7 +1929,7 @@ class MapdlGrpc(_MapdlCore):
     def vlinqr(self, vnmi, key, **kwargs):
         """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
         _ = super().vlinqr(vnmi, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1937,7 +1937,7 @@ class MapdlGrpc(_MapdlCore):
     def rlinqr(self, nreal, key, **kwargs):
         """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
         _ = super().rlinqr(nreal, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1945,7 +1945,7 @@ class MapdlGrpc(_MapdlCore):
     def gapiqr(self, ngap, key, **kwargs):
         """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
         _ = super().gapiqr(ngap, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1953,7 +1953,7 @@ class MapdlGrpc(_MapdlCore):
     def masiqr(self, node, key, **kwargs):
         """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
         _ = super().masiqr(node, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1961,7 +1961,7 @@ class MapdlGrpc(_MapdlCore):
     def ceinqr(self, nce, key, **kwargs):
         """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
         _ = super().ceinqr(nce, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1969,7 +1969,7 @@ class MapdlGrpc(_MapdlCore):
     def cpinqr(self, ncp, key, **kwargs):
         """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
         _ = super().cpinqr(ncp, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1977,7 +1977,7 @@ class MapdlGrpc(_MapdlCore):
     def csyiqr(self, ncsy, key, **kwargs):
         """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
         _ = super().csyiqr(ncsy, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1985,7 +1985,7 @@ class MapdlGrpc(_MapdlCore):
     def etyiqr(self, itype, key, **kwargs):
         """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
         _ = super().etyiqr(itype, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -1993,7 +1993,7 @@ class MapdlGrpc(_MapdlCore):
     def foriqr(self, node, key, **kwargs):
         """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
         _ = super().foriqr(node, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -2001,7 +2001,7 @@ class MapdlGrpc(_MapdlCore):
     def sectinqr(self, nsect, key, **kwargs):
         """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
         _ = super().sectinqr(nsect, key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -2009,7 +2009,7 @@ class MapdlGrpc(_MapdlCore):
     def mpinqr(self, mat,  iprop,  key, **kwargs):
         """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
         _ = super().mpinqr(mat,  iprop,  key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -2017,7 +2017,7 @@ class MapdlGrpc(_MapdlCore):
     def dget(self, node,  idf,  kcmplx, **kwargs):
         """Wrap the ``dget`` method to take advantage of the gRPC methods."""
         _ = super().dget(node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -2025,7 +2025,7 @@ class MapdlGrpc(_MapdlCore):
     def fget(self, node,  idf,  kcmplx, **kwargs):
         """Wrap the ``fget`` method to take advantage of the gRPC methods."""
         _ = super().fget(node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
 
@@ -2033,6 +2033,6 @@ class MapdlGrpc(_MapdlCore):
     def erinqr(self, key, **kwargs):
         """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
         _ = super().erinqr(key, pname='__tmpvar__', **kwargs)
-        value = self.scalar_param(self, '__tmpvar__')
+        value = self.scalar_param('__tmpvar__')
         self._run('__tmpvar__=') # Deleting temp parameter
         return value
