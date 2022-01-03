@@ -882,7 +882,7 @@ class inq_function:
         return self.run(f"{pname} = foriqr({node}, {key})", **kwargs)
 
     def sectinqr(self, nsect, key, pname='__tmpvar__', **kwargs):
-        """Get information about a section property.
+        """Get information about a section id set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
                    Hence its support is limited and it use is not encoraged.
@@ -891,15 +891,45 @@ class inq_function:
 
         Parameters
         ----------
-        nsect : int
-            Section id table number, it should be 0 for key = 12, 13, 14.
+        variable  :  (typ,siz,intent)
+            Description
 
-        key : int
-            information flag
-            * = 1, select status
-            * = 12, return number of defined section id tables
-            * = 13, return number of selected section id tables
-            * = 14, return highest section id table defined
+        nsect  :  (int,sc,in)
+            Section id table number
+            should be 0 for key=11, ``DB_NUMDEFINED``,
+            ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
+            ``DB_MAXRECLENG``.
+
+        key  :  (int,sc,in)
+            Information flag.
+            * = DB_SELECTED - return select status
+              * = 0 - ection id table is undefined.
+              * =-1 - section id table is unselected.
+              * = 1 - section id table is selected
+            * = ``DB_NUMDEFINED``  - return number of defined section id tables
+            * = ``DB_NUMSELECTED`` - return number of selected section id tables
+            * = ``DB_MAXDEFINED``  - return highest section id table defined
+            * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            * = 2 - return length (dp words)
+            * = 3 - return layer number (for cross reference files return number of entities)
+            * = 4 - return address of first data word
+            * = 5 - return length (in record type units)
+            * = 6 - return compressed record number.
+            * = 11 - return void percent (integer)
+            * = 16 - return location of next record (this increments the next record count)
+            * = 18 - return type of file.
+              * = 0 - integer
+              * = 1 - double precision
+              * = 2 - real
+              * = 3 - complex
+              * = 4 - character*8
+              * = 7 - index
+            * = 19 - return virtual type of file.
+              * = 0 - fixed length (4.4 form)
+              * = 1 - indexed variable length (layer data)
+              * = 2 - xref data tables
+              * = 3 - bitmap data (for 32 data item packed records)
+              * = 4 - data tables (three dimensional arrays)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -909,12 +939,8 @@ class inq_function:
 
         Returns
         -------
-        sectinqr
-            for key = 1
-
-            * = 0, section id table is undefined.
-            * = -1, section id table is unselected.
-            * = 1, section id table is selected
+        sectinqr   (int,func,out)
+            The returned value of sectinqr is based on setting of key.
         """
         return self.run(f"{pname} = sectinqr({nsect}, {key})", **kwargs)
 
