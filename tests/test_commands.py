@@ -45,6 +45,7 @@ ARGS_INQ_FUNC = {
         'idf': 1,
         'kcmplx': 1
         }
+
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
 def test_inquire_functions(mapdl, func):
     func_ = getattr(mapdl, func)
