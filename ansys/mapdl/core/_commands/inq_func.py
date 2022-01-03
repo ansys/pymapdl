@@ -1048,7 +1048,7 @@ class inq_function:
         dget  :  (dp, sc, out)
             Constraint value (High number if undefined)
         """
-        return self.run(f"{pname} = dget({node}, {idf}, { kcmplx})", **kwargs)
+        return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
 
     def fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a force from the data bsae

@@ -1888,7 +1888,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.ndinqr)
     def ndinqr(self, node, key, **kwargs):
         """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
-        _ = super().ndinqr(self, node, key, pname='__tmpvar__', **kwargs)
+        _ = super().ndinqr(node, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1896,7 +1896,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.elmiqr)
     def elmiqr(self, ielem, key, **kwargs):
         """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
-        _ = super().elmiqr(self, ielem, key, pname='__tmpvar__', **kwargs)
+        _ = super().elmiqr(ielem, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1904,7 +1904,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.kpinqr)
     def kpinqr(self, knmi, key, **kwargs):
         """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
-        _ = super().kpinqr(self, knmi, key, pname='__tmpvar__', **kwargs)
+        _ = super().kpinqr(knmi, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1912,7 +1912,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.lsinqr)
     def lsinqr(self, line, key, **kwargs):
         """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
-        _ = super().lsinqr(self, line, key, pname='__tmpvar__', **kwargs)
+        _ = super().lsinqr(line, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1920,7 +1920,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.arinqr)
     def arinqr(self, anmi, key, **kwargs):
         """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
-        _ = super().arinqr(self, anmi, key, pname='__tmpvar__', **kwargs)
+        _ = super().arinqr(anmi, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1928,7 +1928,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.vlinqr)
     def vlinqr(self, vnmi, key, **kwargs):
         """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
-        _ = super().vlinqr(self, vnmi, key, pname='__tmpvar__', **kwargs)
+        _ = super().vlinqr(vnmi, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1936,7 +1936,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.rlinqr)
     def rlinqr(self, nreal, key, **kwargs):
         """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
-        _ = super().rlinqr(self, nreal, key, pname='__tmpvar__', **kwargs)
+        _ = super().rlinqr(nreal, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1944,7 +1944,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.gapiqr)
     def gapiqr(self, ngap, key, **kwargs):
         """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
-        _ = super().gapiqr(self, ngap, key, pname='__tmpvar__', **kwargs)
+        _ = super().gapiqr(ngap, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1952,7 +1952,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.masiqr)
     def masiqr(self, node, key, **kwargs):
         """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
-        _ = super().masiqr(self, node, key, pname='__tmpvar__', **kwargs)
+        _ = super().masiqr(node, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1960,7 +1960,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.ceinqr)
     def ceinqr(self, nce, key, **kwargs):
         """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
-        _ = super().ceinqr(self, nce, key, pname='__tmpvar__', **kwargs)
+        _ = super().ceinqr(nce, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1968,7 +1968,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.cpinqr)
     def cpinqr(self, ncp, key, **kwargs):
         """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
-        _ = super().cpinqr(self, ncp, key, pname='__tmpvar__', **kwargs)
+        _ = super().cpinqr(ncp, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1976,7 +1976,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.csyiqr)
     def csyiqr(self, ncsy, key, **kwargs):
         """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
-        _ = super().csyiqr(self, ncsy, key, pname='__tmpvar__', **kwargs)
+        _ = super().csyiqr(ncsy, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1984,7 +1984,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.etyiqr)
     def etyiqr(self, itype, key, **kwargs):
         """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
-        _ = super().etyiqr(self, itype, key, pname='__tmpvar__', **kwargs)
+        _ = super().etyiqr(itype, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -1992,7 +1992,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.foriqr)
     def foriqr(self, node, key, **kwargs):
         """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
-        _ = super().foriqr(self, node, key, pname='__tmpvar__', **kwargs)
+        _ = super().foriqr(node, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -2000,7 +2000,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.sectinqr)
     def sectinqr(self, nsect, key, **kwargs):
         """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
-        _ = super().sectinqr(self, nsect, key, pname='__tmpvar__', **kwargs)
+        _ = super().sectinqr(nsect, key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -2008,7 +2008,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.mpinqr)
     def mpinqr(self, mat,  iprop,  key, **kwargs):
         """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
-        _ = super().mpinqr(self, mat,  iprop,  key, pname='__tmpvar__', **kwargs)
+        _ = super().mpinqr(mat,  iprop,  key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -2016,7 +2016,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.dget)
     def dget(self, node,  idf,  kcmplx, **kwargs):
         """Wrap the ``dget`` method to take advantage of the gRPC methods."""
-        _ = super().dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
+        _ = super().dget(node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -2024,7 +2024,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.fget)
     def fget(self, node,  idf,  kcmplx, **kwargs):
         """Wrap the ``fget`` method to take advantage of the gRPC methods."""
-        _ = super().fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
+        _ = super().fget(node,  idf,  kcmplx, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
@@ -2032,7 +2032,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.erinqr)
     def erinqr(self, key, **kwargs):
         """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
-        _ = super().erinqr(self, key, pname='__tmpvar__', **kwargs)
+        _ = super().erinqr(key, pname='__tmpvar__', **kwargs)
         presponse = self._stub.GetParameter(pb_types.ParameterRequest(name='__tmpvar__', array=False))
         self._run('__tmpvar__=') # Deleting temp parameter
         return presponse.val[0]
