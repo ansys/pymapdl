@@ -50,4 +50,9 @@ def test_inquire_functions(mapdl, func):
     func_ = getattr(mapdl, func)
     func_args = inspect.getfullargspec(func_).args
     args = [ARGS_INQ_FUNC[each_arg] for each_arg in func_args if each_arg not in ['self']]
-    assert any(isinstance(func_(*args), (float, int)))
+    output = func_(*args)
+    if 'GRPC' in mapdl._name:
+        assert isinstance(output, (float, int))
+    else:
+        assert isinstance(output, str)
+        assert '=' in output
