@@ -2,7 +2,7 @@
 
 class inq_function:
 
-    def ndinqr(self, node, key, **kwargs):
+    def ndinqr(self, node, key, pname='__tmpvar__', **kwargs):
         """Get information about a node.
 
         **Secondary Functions:**
@@ -15,13 +15,13 @@ class inq_function:
 
         Parameters
         ----------
-        node     (int,  sc,  in)
+        node  :  (int,  sc,  in)
             node number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key      (int,  sc,  in)
+        key  :  (int,  sc,  in)
             key as to information needed about the node.
 
             * = DB_SELECTED    - return select status:
@@ -72,17 +72,20 @@ class inq_function:
             * =-115, pointer to calculated displacements
             * =-116
 
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        ndinqr   (int,  func,  out)
+        ndinqr  :  (int,  func,  out)
             The returned value of ``ndinqr`` is based on setting of key.
         """
-        return self.run(f"__temp__ = ndinqr({node}, {key})", **kwargs)
+        return self.run(f"{pname} = ndinqr({node}, {key})", **kwargs)
 
-    def elmiqr(self, ielem, key, **kwargs):
+    def elmiqr(self, ielem, key, pname='__tmpvar__', **kwargs):
         """Get information about an element.
 
         **Secondary Functions:**
@@ -95,13 +98,13 @@ class inq_function:
 
         Parameters
         ----------
-        ielem    (int,  sc,  in)
+        ielem  :  (int,  sc,  in)
             Element number.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, ``DB_MAXRECLENG``,
             or 199
 
-        key      (int,  sc,  in)
+        key  :  (int,  sc,  in)
             information flag.
 
             * = DB_SELECTED    - return select status:                (1)
@@ -148,17 +151,20 @@ class inq_function:
             * = -5 - coordinate system number  ( = -EL_CSYS)
             * =-101 - pointer to element integers etc.
 
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        elmiqr  (int,  sc,  out)
+        elmiqr  :  (int,  sc,  out)
             The returned value of ``elmiqr`` is based on setting of key.
         """
-        return self.run(f"__temp__ = elmiqr({ielem}, {key})", **kwargs)
+        return self.run(f"{pname} = elmiqr({ielem}, {key})", **kwargs)
 
-    def kpinqr(self, knmi, key, **kwargs):
+    def kpinqr(self, knmi, key, pname='__tmpvar__', **kwargs):
         """Get information about a keypoints.
 
         **Secondary Functions:**
@@ -172,10 +178,10 @@ class inq_function:
 
         Parameters
         ----------
-        knmi     (int,  sc,  in)
+        knmi  :  (int,  sc,  in)
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key      (int,  sc,  in)     
+        key  :  (int,  sc,  in)     
             Information flag.
 
             * = 1 - return select
@@ -245,12 +251,15 @@ class inq_function:
             * = -111, pointer to keypoint forces
             * = -112, pointer to line list
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        kpinqr   (int, sc, out)
+        kpinqr  :  (int, sc, out)
             For key=1
 
             * 0 = ``knmi`` is undefined.
@@ -260,9 +269,9 @@ class inq_function:
             For key not equal to 1 returned data is based
             on setting of key.
         """
-        return self.run(f"__temp__ = kpinqr({knmi}, {key})", **kwargs)
+        return self.run(f"{pname} = kpinqr({knmi}, {key})", **kwargs)
 
-    def lsinqr(self, line, key, **kwargs):
+    def lsinqr(self, line, key, pname='__tmpvar__', **kwargs):
         """Get information about a line segment.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -272,10 +281,10 @@ class inq_function:
 
         Parameters
         ----------
-        lnmi     (int, sc, in)
+        lnmi  :  (int, sc, in)
             Line segment for inquire. It should be 0 for key=11 thru 15.
 
-        key      (dp, sc, in)
+        key  :  (dp, sc, in)
             key as to information needed about the ``lnmi``.
 
             * =  1, return select
@@ -326,13 +335,16 @@ class inq_function:
             * =-114, pointer to area list
             * =-115, pointer to sub-line list
             * =-116, pointer to line pressures
-        
+
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        lsinqr   (int, sc, out)
+        lsinqr  :  (int, sc, out)
             For key=1
 
             * 0 = ``lnmi`` is undefined.
@@ -343,9 +355,9 @@ class inq_function:
             on setting of key.
 
         """
-        return self.run(f"__temp__ = lsinqr({line}, {key})", **kwargs)
+        return self.run(f"{pname} = lsinqr({line}, {key})", **kwargs)
 
-    def arinqr(self, anmi, key, **kwargs):
+    def arinqr(self, anmi, key, pname='__tmpvar__', **kwargs):
         """Get information about a area.
 
         **Secondary Functions:**
@@ -358,10 +370,10 @@ class inq_function:
 
         Parameters
         ----------
-        anmi     (int, sc, in)
+        anmi  :  (int, sc, in)
             Area for inquire. may be 0 for key=11 thru 15.
 
-        key      (dp, sc, in)
+        key  :  (dp, sc, in)
             Key as to information needed about the ``anmi``.
 
             * =  1, return select
@@ -411,13 +423,16 @@ class inq_function:
             * = -114, pointer to sub-area list
             * = -115, pointer to area presaraes
             * = -116, pointer to area convections
-        
+
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        arinqr  (int, sc, out)
+        arinqr  :  (int, sc, out)
             For key=1
 
             * 0 = ``anmi`` is undefined.
@@ -427,9 +442,9 @@ class inq_function:
             For key ne 1 returned data is based
             on setting of key.
         """
-        return self.run(f"__temp__ = arinqr({anmi}, {key})", **kwargs)
+        return self.run(f"{pname} = arinqr({anmi}, {key})", **kwargs)
 
-    def vlinqr(self, vnmi, key, **kwargs):
+    def vlinqr(self, vnmi, key, pname='__tmpvar__', **kwargs):
         """Get information about a volume.
 
         **Secondary Functions:**
@@ -442,10 +457,10 @@ class inq_function:
 
         Parameters
         ----------
-        vnmi     (int, sc, in)
+        vnmi  :  (int, sc, in)
             Volume for inquire. may be 0 for key=11 thru 15.
 
-        key      (dp, sc, in)
+        key  :  (dp, sc, in)
             Key as to information needed about the ``vnmi``.
 
             * =  1, return select
@@ -482,12 +497,15 @@ class inq_function:
             * = -111,
             * = -112, pointer to area shell list
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        vlinqr   (int, sc, out)
+        vlinqr  :  (int, sc, out)
             For key=1
 
             * 0 = ``vnmi`` is undefined.
@@ -497,9 +515,9 @@ class inq_function:
             For key ne 1 returned data is based
             on setting of key.
         """
-        return self.run(f"__temp__ = vlinqr({vnmi}, {key})", **kwargs)
+        return self.run(f"{pname} = vlinqr({vnmi}, {key})", **kwargs)
 
-    def rlinqr(self, nreal, key, **kwargs):
+    def rlinqr(self, nreal, key, pname='__tmpvar__', **kwargs):
         """Get information about a real constant set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -509,16 +527,16 @@ class inq_function:
 
         Parameters
         ----------
-        variable (typ, siz, intent)
+        variable  :  (typ, siz, intent)
             description
 
-        nreal   (int, sc, in)
+        nreal  :  (int, sc, in)
             Real constant table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Information flag.
 
             * = 5 - return number of values stored for nreal.
@@ -534,18 +552,21 @@ class inq_function:
             * = ``DB_MAXDEFINED``  - return highest real constant table defined
             * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        rlinqr   (int, func, out)
+        rlinqr  :  (int, func, out)
             The returned value of ``rlinqr`` is based on setting of key.
 
         """
-        return self.run(f"__temp__ = rlinqr({nreal}, {key})", **kwargs)
+        return self.run(f"{pname} = rlinqr({nreal}, {key})", **kwargs)
 
-    def gapiqr(self, ngap, key, **kwargs):
+    def gapiqr(self, ngap, key, pname='__tmpvar__', **kwargs):
         """Get information about a dynamic gap set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -555,10 +576,10 @@ class inq_function:
 
         Parameters
         ----------
-        ngap    (int, sc, in)
+        ngap  :  (int, sc, in)
             gap number for inquire (must be zero for now).
 
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             key as to the information needed
 
             * =  1, return select
@@ -570,17 +591,20 @@ class inq_function:
             * = 14, return highest number defined
             * = 15, return maximum record length (data units)
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        gapiqr   (int, sc, out)
+        gapiqr  :  (int, sc, out)
             Returned data is based on setting of key.
         """
-        return self.run(f"__temp__ = gapiqr({ngap}, {key})", **kwargs)
+        return self.run(f"{pname} = gapiqr({ngap}, {key})", **kwargs)
 
-    def masiqr(self, node, key, **kwargs):
+    def masiqr(self, node, key, pname='__tmpvar__', **kwargs):
         """Get information about masters.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -590,13 +614,13 @@ class inq_function:
 
         Parameters
         ----------
-        variable (typ, siz, intent)
+        variable  :  (typ, siz, intent)
             Description
 
-        node    (int, sc, in)
+        node  :  (int, sc, in)
             Node number for inquire (must be zero for now).
 
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Key as to the information needed
 
             * =  1, return select
@@ -608,20 +632,23 @@ class inq_function:
             * = 14, return highest number defined
             * = 15, return maximum record length (data units)
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        variable (typ, siz, intent)
+        variable  :  (typ, siz, intent)
             Description
 
-        masiqr   (int, sc, out)
+        masiqr  :  (int, sc, out)
             Returned data is based on setting of key.
         """
-        return self.run(f"__temp__ = masiqr({node}, {key})", **kwargs)
+        return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
 
-    def ceinqr(self, nce, key, **kwargs):
+    def ceinqr(self, nce, key, pname='__tmpvar__', **kwargs):
         """Get information about a constraint equation set
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -631,9 +658,9 @@ class inq_function:
 
         Parameters
         ----------
-        nce         (int, sc, in)
+        nce  :  (int, sc, in)
             Constraint equation number
-        key         (int, sc, in)
+        key  :  (int, sc, in)
             Inquiry key.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
@@ -660,17 +687,20 @@ class inq_function:
             * = ``CE_NONLINEAR``   - return 1 if CE is nonlinear
             * = ``CE_ELEMNUMBER``  - return associated element number
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        ceinqr   (int, func, out)
+        ceinqr  :  (int, func, out)
             The returned value of ``ceinqr`` is based on setting of key
         """
-        return self.run(f"__temp__ = ceinqr({nce}, {key})", **kwargs)
+        return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
 
-    def cpinqr(self, ncp, key, **kwargs):
+    def cpinqr(self, ncp, key, pname='__tmpvar__', **kwargs):
         """Get information about a coupled set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -680,13 +710,13 @@ class inq_function:
 
         Parameters
         ----------
-        variable  (typ, siz, intent)
+        variable  :  (typ, siz, intent)
             Description
 
-        ncp       (int, sc, in)
+        ncp  :  (int, sc, in)
             Coupled set number
 
-        key       (int, sc, in)
+        key  :  (int, sc, in)
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
@@ -711,18 +741,21 @@ class inq_function:
             * = -1             - return master node for this eqn (this is
               currently only used by solution DB object)
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        cpinqr   (int, func, out)
+        cpinqr  :  (int, func, out)
             The returned value of ``cpinqr`` is based on setting of key.
 
         """
-        return self.run(f"__temp__ = cpinqr({ncp}, {key})", **kwargs)
+        return self.run(f"{pname} = cpinqr({ncp}, {key})", **kwargs)
 
-    def csyiqr(self, ncsy, key, **kwargs):
+    def csyiqr(self, ncsy, key, pname='__tmpvar__', **kwargs):
         """Get information about a coordinate system
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -732,12 +765,12 @@ class inq_function:
 
         Parameters
         ----------
-        ncsy     (int, sc, in)
+        ncsy  :  (int, sc, in)
             Coordinate system reference number
             should be zero for key= ``DB_NUMDEFINED``
             or ``DB_MAXDEFINED``
 
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Information flag.
 
             * = ``DB_SELECTED``    - return status:
@@ -750,17 +783,20 @@ class inq_function:
             * = ``DB_MAXDEFINED``  - maximum coordinate system reference
               number used.
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        csyiqr   (int, func, out)
+        csyiqr  :  (int, func, out)
             The returned value of ``csyiqr`` is based on setting of key.
         """
-        return self.run(f"__temp__ = csyiqr({ncsy}, {key})", **kwargs)
+        return self.run(f"{pname} = csyiqr({ncsy}, {key})", **kwargs)
 
-    def etyiqr(self, itype, key, **kwargs):
+    def etyiqr(self, itype, key, pname='__tmpvar__', **kwargs):
         """Get information about an element type.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -770,13 +806,13 @@ class inq_function:
 
         Parameters
         ----------
-        itype    (int, sc, in)
+        itype  :  (int, sc, in)
             Element type number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Information flag.
 
             * = DB_SELECTED    - return select status:
@@ -796,17 +832,20 @@ class inq_function:
               note- this will not overwrite the current setting of
               ``etycom``.
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        etyiqr   (int, func, out)
+        etyiqr  :  (int, func, out)
             The returned value of ``etyiqr`` is based on setting of key.
         """
-        return self.run(f"__temp__ = etyiqr({itype}, {key})", **kwargs)
+        return self.run(f"{pname} = etyiqr({itype}, {key})", **kwargs)
 
-    def foriqr(self, node, key, **kwargs):
+    def foriqr(self, node, key, pname='__tmpvar__', **kwargs):
         """Get information about nodal loads.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -816,12 +855,12 @@ class inq_function:
 
         Parameters
         ----------
-        node     (int, sc, in)
+        node  :  (int, sc, in)
             Number of node being inquired about.
             should be 0 for key=``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
-        key      (dp, sc, in)
+        key  :  (dp, sc, in)
             Key as to information needed
 
             * = 1              - return force mask for node
@@ -830,17 +869,20 @@ class inq_function:
 
             .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the same functionality.
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        foriqr   (int, func, out)
+        foriqr  :  (int, func, out)
             The returned value of ``foriqr`` is based on setting of key.
         """
-        return self.run(f"__temp__ = foriqr({node}, {key})", **kwargs)
+        return self.run(f"{pname} = foriqr({node}, {key})", **kwargs)
 
-    def sectinqr(self, nsect, key, **kwargs):
+    def sectinqr(self, nsect, key, pname='__tmpvar__', **kwargs):
         """Get information about a section property.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -859,6 +901,9 @@ class inq_function:
             * = 13, return number of selected section id tables
             * = 14, return highest section id table defined
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
@@ -869,9 +914,9 @@ class inq_function:
             * = -1, section id table is unselected.
             * = 1, section id table is selected
         """
-        return self.run(f"__temp__ = sectinqr({nsect}, {key})", **kwargs)
+        return self.run(f"{pname} = sectinqr({nsect}, {key})", **kwargs)
 
-    def mpinqr(self, mat,  iprop,  key, **kwargs):
+    def mpinqr(self, mat,  iprop,  key, pname='__tmpvar__', **kwargs):
         """Get information about a material property.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -881,12 +926,12 @@ class inq_function:
 
         Parameters
         ----------
-        mat      (int, sc, in)
+        mat  :  (int, sc, in)
             Material number
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
 
-        iprop    (int, sc, in)
+        iprop  :  (int, sc, in)
             Property reference number (See notes).
 
             If iprop = 0, test for existence of any material property with this
@@ -919,8 +964,7 @@ class inq_function:
 
                 (see ``TB`` command for more information)
 
-
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Key as to the information needed about material property.
 
             * = ``DB_SELECTED(1)``- return select status:
@@ -934,19 +978,22 @@ class inq_function:
             * =  2 - return length (dp words)
             * =  3 - return number of temp. values
             * = 11 - return void percent (integer)
-        
+
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        mpinqr   (int, func, out)
+        mpinqr  :  (int, func, out)
             Returned value of ``mpinqr`` is based on setting of key.
 
         """
-        return self.run(f"__temp__ = mpinqr({mat,  iprop}, { key})", **kwargs)
+        return self.run(f"{pname} = mpinqr({mat,  iprop}, { key})", **kwargs)
 
-    def dget(self, node,  idf,  kcmplx, **kwargs):
+    def dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a constraint from the data bsae
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -956,10 +1003,10 @@ class inq_function:
 
         Parameters
         ----------
-        node     (int, sc, in)
+        node  :  (int, sc, in)
             Node number
 
-        idf      (int, sc, in)
+        idf  :  (int, sc, in)
             Pointer to the dof (1-32)
 
             * 1 = ux,
@@ -985,22 +1032,25 @@ class inq_function:
             * 26 = curr
             * 27-32 = SP01-SP06
 
-        kcmplx   (int, sc, in)
+        kcmplx  :  (int, sc, in)
 
             * 0 = real
             * 1 = imaginary
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        dget   (dp, sc, out)
+        dget  :  (dp, sc, out)
             Constraint value (High number if undefined)
         """
-        return self.run(f"__temp__ = dget({node}, {idf}, { kcmplx})", **kwargs)
+        return self.run(f"{pname} = dget({node}, {idf}, { kcmplx})", **kwargs)
 
-    def fget(self, node,  idf,  kcmplx, **kwargs):
+    def fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a force from the data bsae
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -1010,10 +1060,10 @@ class inq_function:
 
         Parameters
         ----------
-        node     (int, sc, in)
+        node  :  (int, sc, in)
             Node number
 
-        idf      (int, sc, in)
+        idf  :  (int, sc, in)
             Pointer to the dof (1-32)
 
             * 1 = ux
@@ -1039,22 +1089,25 @@ class inq_function:
             * 26 = curr
             * 27-32 = spares
 
-        kcmplx   (int, sc, in)
+        kcmplx  :  (int, sc, in)
 
             * 0 = real
             * 1 = imaginary
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        fget   (dp, sc, out)
+        fget  :  (dp, sc, out)
             Force value (High number if undefined)
         """
-        return self.run(f"__temp__ = fget({node},  {idf}, {kcmplx})", **kwargs)
+        return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
 
-    def erinqr(self, key, **kwargs):
+    def erinqr(self, key, pname='__tmpvar__', **kwargs):
         """Obtain information from errors common
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
@@ -1064,7 +1117,7 @@ class inq_function:
 
         Parameters
         ----------
-        key      (int, sc, in)
+        key  :  (int, sc, in)
             Item to be returned.
 
             * 1 = keyerr (ER_ERRORFLAG)
@@ -1185,13 +1238,16 @@ class inq_function:
 
             * spare - spare integer variables
         
+        pname : str
+            Name of the variable where the queried value is stored.
+
         **kwargs
             Extra arguments to be passed to ``Mapdl.run``.
 
         Returns
         -------
-        erinqr   (int, sc, out)
+        erinqr  :  (int, sc, out)
             Value corresponding to key.
 
         """
-        return self.run(f"__temp__ = erinqr({key})", **kwargs)
+        return self.run(f"{pname} = erinqr({key})", **kwargs)
