@@ -1891,7 +1891,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().ndinqr(node, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.elmiqr)
@@ -1900,7 +1899,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().elmiqr(ielem, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.kpinqr)
@@ -1909,7 +1907,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().kpinqr(knmi, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.lsinqr)
@@ -1918,7 +1915,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().lsinqr(line, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.arinqr)
@@ -1927,7 +1923,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().arinqr(anmi, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.vlinqr)
@@ -1936,7 +1931,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().vlinqr(vnmi, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.rlinqr)
@@ -1945,7 +1939,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().rlinqr(nreal, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.gapiqr)
@@ -1954,7 +1947,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().gapiqr(ngap, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.masiqr)
@@ -1963,7 +1955,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().masiqr(node, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.ceinqr)
@@ -1972,7 +1963,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().ceinqr(nce, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.cpinqr)
@@ -1981,7 +1971,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().cpinqr(ncp, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.csyiqr)
@@ -1990,7 +1979,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().csyiqr(ncsy, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.etyiqr)
@@ -1999,7 +1987,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().etyiqr(itype, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.foriqr)
@@ -2008,7 +1995,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().foriqr(node, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.sectinqr)
@@ -2017,7 +2003,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().sectinqr(nsect, key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.mpinqr)
@@ -2026,7 +2011,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().mpinqr(mat,  iprop,  key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.dget)
@@ -2035,7 +2019,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().dget(node,  idf,  kcmplx, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.fget)
@@ -2044,7 +2027,6 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().fget(node,  idf,  kcmplx, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
 
     @wraps(_MapdlCore.erinqr)
@@ -2053,5 +2035,4 @@ class MapdlGrpc(_MapdlCore):
         pname = '__tmpvar__'
         super().erinqr(key, pname=pname, mute=True, **kwargs)
         value = self.scalar_param(pname)
-        self._run(f'{pname}=') # Deleting temp parameter
         return value
