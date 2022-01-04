@@ -212,15 +212,19 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
-    pass
 
+class CommandOutput(str):
+    """Customized Command Output class"""
 
-class CommandOutput(UserString):
-    """Customized Command Ouput class"""
+    ## References:
+    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
+    # - https://docs.python.org/3/library/collections.html#userstring-objects
+    # - Source code of UserString
 
-    def __init__(self, content, cmd=None):
-        super().__init__(content)
-        self._cmd = cmd
+    def __new__(cls, content, cmd=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        return obj
 
     @property
     def cmd(self):
