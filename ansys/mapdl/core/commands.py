@@ -242,25 +242,18 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
-    pass
 
 def CommandFactory(output, cmd):
-    short_cmd = cmd.split(',')[0]
+    pass
 
 
 class CommandOutput(str):
     """
     Custom string subclass for handling the commands output.
 
-    Main features is that this class always returns an object which is from its own class
-    (it never returns a string).
-
     This class add two method to track the cmd which generated this output.
     * ``cmd`` - The MAPDL command which generated the output.
     * ``command`` - The full command line (with arguments) which generated the output.
-
-    These two methods and their values are inheritate by the consequents generated objects,
-    as long as you use the string-related methods in this class.
 
     """
 
@@ -273,110 +266,6 @@ class CommandOutput(str):
         obj = super().__new__(cls, content)
         obj._cmd = cmd
         return obj
-
-    def _copyobj(self, seq):
-        # __new__ needs type and the args.
-        return self.__new__(type(self), seq, self._cmd)
-
-    # Overwriting the string methods.
-    # I used the UserString API.
-    def __getitem__(self, index):
-        return self._copyobj(super().__getitem__(index))
-
-    def __add__(self, other):
-        return self._copyobj(super().__add__(other))
-
-    def __mul__(self, n):
-        return self._copyobj(super().__mul__(n))
-
-    __rmul__ = __mul__
-
-    def __mod__(self, args):
-        return self._copyobj(super().__mod__(args))
-
-    def __rmod__(self, template):
-        return self._copyobj(str(template).__rmod__(self))
-
-    # the following methods are overwritten and defined in alphabetical order:
-    def capitalize(self):
-        return self._copyobj(super().capitalize())
-
-    def casefold(self):
-        return self._copyobj(super().casefold())
-
-    def center(self, width, *args):
-        return self._copyobj(super().center(width, *args))
-
-    def removeprefix(self, prefix):
-        return self._copyobj(super().removeprefix(prefix))
-
-    def removesuffix(self, suffix):
-        return self._copyobj(super().removesuffix(suffix))
-
-    def expandtabs(self, tabsize=8):
-        return self._copyobj(super().expandtabs(tabsize))
-
-    def join(self, seq):
-        return self._copyobj(super().join(seq))
-
-    def ljust(self, width, *args):
-        return self._copyobj(super().ljust(width, *args))
-
-    def lower(self):
-        return self._copyobj(super().lower())
-
-    def lstrip(self, chars=None):
-        return self._copyobj(super().lstrip(chars))
-
-    maketrans = str.maketrans
-
-    def replace(self, old, new, maxsplit=-1):
-        return self._copyobj(super().replace(old, new, maxsplit))
-
-    def rjust(self, width, *args):
-        return self._copyobj(super().rjust(width, *args))
-
-    def rstrip(self, chars=None):
-        return self._copyobj(super().rstrip(chars))
-
-    def strip(self, chars=None):
-        return self._copyobj(super().strip(chars))
-
-    def swapcase(self):
-        return self._copyobj(super().swapcase())
-
-    def title(self):
-        return self._copyobj(super().title())
-
-    def translate(self, *args):
-        return self._copyobj(super().translate(*args))
-
-    def upper(self):
-        return self._copyobj(super().upper())
-
-    def zfill(self, width):
-        return self._copyobj(super().zfill(width))
-
-    def splitlines(self, keepends=False):
-        return [self._copyobj(each) for each in super().splitlines(keepends)]
-
-    def rpartition(self, sep):
-        return tuple(self._copyobj(each) for each in super().rpartition(sep))
-
-    def rstrip(self, chars=None):
-        return self._copyobj(super().rstrip(chars))
-
-    def split(self, sep=None, maxsplit=-1):
-        return [self._copyobj(each) for each in super().split(sep, maxsplit)]
-
-    def rsplit(self, sep=None, maxsplit=-1):
-        return [self._copyobj(each) for each in super().rsplit(sep, maxsplit)]
-
-    def format(self, *args, **kwds):
-        return self._copyobj(super().format(*args, **kwds))
-
-    def format_map(self, mapping):
-        return self._copyobj(super().format_map(mapping))
 
     @property
     def cmd(self):
