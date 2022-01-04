@@ -67,6 +67,9 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
+
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
@@ -88,7 +91,6 @@ def start_prep7():
 
 start_prep7()
 
-
 ###############################################################################
 # Parameterization
 # ~~~~~~~~~~~~~~~~
@@ -103,7 +105,6 @@ defl_ls3 = -0.1
 
 # Quantity of the load steps.
 ls = 3
-
 
 ###############################################################################
 # Define Element Type
@@ -151,7 +152,6 @@ mapdl.tb("BKIN", 1, 1)
 mapdl.tbtemp(0)
 mapdl.tbdata(1, 86000, 0)
 
-
 # ALUMINUM material model.
 # Define Young's moulus and Poisson ratio for Aluminium.
 mapdl.mp("EX", 2, 11E6)
@@ -187,7 +187,6 @@ plt.annotate('sigma_y_steel', xy=(0.032, 86000), xytext=(0.05, 75000),
              arrowprops=dict(facecolor='steelblue', shrink=0.05),
              bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round,pad=1'))
 
-
 # Define dictionary with stress - strain properties of the aluminium.
 aluminium = {"stress_a": [0, 55000, 55000, 55000],
              "strain_a": [0, 0.05, 0.1, 0.2]}
@@ -205,12 +204,10 @@ plt.annotate('sigma_y_aluminium', xy=(Xp, Yp), xytext=(0.07, 45000),
              arrowprops=dict(facecolor='sandybrown', shrink=0.05),
              bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round,pad=1'))
 
-
 plt.grid(True)
 plt.legend()
 plt.title("Stress - Strain Curve", fontsize=18)
 plt.show()
-
 
 ###############################################################################
 # Define Section
@@ -223,20 +220,17 @@ mapdl.sectype(1, "SHELL")
 # THICKNESS (SHELL181)
 mapdl.secdata(0.5, 1, 0, 5)
 
-
 # Shell cross-section for outside (ALUMINUM) tube.
 mapdl.sectype(2, "SHELL")
 
 # THICKNESS (SHELL181)
 mapdl.secdata(0.5, 2, 0, 5)
 
-
 # Define Pipe cross-section for inside (STEEL) tube, where:
 mapdl.sectype(3, "PIPE")
 
 # OUTSIDE DIA. AND WALL THICKNESS FOR INSIDE TUBE (PIPE288)
 mapdl.secdata(4.9563384, 0.5)
-
 
 # Pipe cross-section for outside (ALUMINUM) tube.
 mapdl.sectype(4, "PIPE")
@@ -314,7 +308,6 @@ cpos = [(19.67899462804619, 17.856836088414664, 22.644135378046194),
         (0.0, 0.0, 1.0)]
 mapdl.eplot(cpos=cpos)
 
-
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -323,11 +316,13 @@ mapdl.eplot(cpos=cpos)
 mapdl.run("C*** APPLY CONSTRAINTS TO PIPE288 MODEL")
 
 mapdl.d(node=1, lab="ALL")  # FIX ALL DOFS FOR BOTTOM END OF PIPE288
-mapdl.d(node=2, lab="UX", lab2="UY", lab3="ROTX", lab4="ROTY", lab5="ROTZ")  # ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
+mapdl.d(node=2, lab="UX", lab2="UY", lab3="ROTX", lab4="ROTY",
+        lab5="ROTZ")  # ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
 
 mapdl.run("C*** APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS")
 
-mapdl.cp(nset=1, lab="UX", node1=101, node2=111, node3=105, node4=115)  # COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
+mapdl.cp(nset=1, lab="UX", node1=101, node2=111, node3=105,
+         node4=115)  # COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
 mapdl.cpsgen(itime=4, nset1=1)
 
 mapdl.cp(5, lab="UX", node1=201, node2=205, node3=203, node4=20)  # COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
@@ -359,15 +354,15 @@ mapdl.finish()
 
 # Start solution presederu
 
+mapdl.run("/solu")
+
+
 # Define solution function.
 def solution(deflect=None):
-    mapdl.run("/solu")
     mapdl.nsel("R", "LOC", "Z", 10)
     mapdl.d(node="ALL", lab="UZ", value=deflect)
     mapdl.nsel("ALL")
-    out = mapdl.solve()
-    mapdl.finish()
-    print(out)
+    mapdl.solve()
 
 
 # Run each load step to reproduce needed deflection subsequently.
@@ -379,8 +374,8 @@ solution(deflect=defl_ls2)
 
 # Load Step 3
 solution(deflect=defl_ls3)
-mapdl.finish()
 
+mapdl.finish()
 
 ###############################################################################
 # Post-processing
@@ -440,72 +435,55 @@ def getload():
     mapdl.run("*STATUS,LOAD")
 
     # Return load results of each element model.
-    return load_288, load_185, load_181
+    return abs(round(load_288, 0)), abs(round(load_185, 0)), abs(round(load_181, 0))
 
 
 ###############################################################################
-# Define loads for load step 1
+mapdl.set(1, 1)
+pipe288_ls1, solid185_ls1, shell181_ls1 = getload()
 
-for i in range(1, ls + 1):
-    mapdl.set(1, 1)
-    load_288, load_185, load_181 = getload()
+mapdl.set(2, 1)
+pipe288_ls2, solid185_ls2, shell181_ls2 = getload()
 
-    if i == 1:
-        pipe288_ls1 = abs(round(load_288, 0))
-        solid185_ls1 = abs(round(load_185, 0))
-        shell181_ls1 = abs(round(load_181, 0))
+mapdl.set(3, 1)
+pipe288_ls3, solid185_ls3, shell181_ls3 = getload()
 
-        results_load_deflection = f"""
-        LOAD STEP {i}
-        PIPE288_LS{i}= {pipe288_ls1}
-        SOLID185_LS{i} = {solid185_ls1}
-        SHELL181_LS{i} = {shell181_ls1}
-        """
-        print(results_load_deflection)
-
-    if i == 2:
-        pipe288_ls2 = abs(round(load_288, 0))
-        solid185_ls2 = abs(round(load_185, 0))
-        shell181_ls2 = abs(round(load_181, 0))
-
-        results_load_deflection = f"""
-        LOAD STEP {i}
-        PIPE288_LS{i}= {pipe288_ls2}
-        SOLID185_LS{i} = {solid185_ls2}
-        SHELL181_LS{i} = {shell181_ls2}
-        """
-        print(results_load_deflection)
-
-    if i == 3:
-        pipe288_ls3 = abs(round(load_288, 0))
-        solid185_ls3 = abs(round(load_185, 0))
-        shell181_ls3 = abs(round(load_181, 0))
-
-        results_load_deflection = f"""
-        LOAD STEP {i}
-        PIPE288_LS{i}= {pipe288_ls3}
-        SOLID185_LS{i} = {solid185_ls3}
-        SHELL181_LS{i} = {shell181_ls3}
-        """
-        print(results_load_deflection)
-
+results_load_deflection = f"""
+    ##############################
+    PIPE288_LS{1}= {pipe288_ls1}
+    PIPE288_LS{2}= {pipe288_ls2}
+    PIPE288_LS{3}= {pipe288_ls3}
+    
+    
+    ##############################
+    SOLID185_LS{1} = {solid185_ls1}
+    SOLID185_LS{2} = {solid185_ls2}
+    SOLID185_LS{3} = {solid185_ls3}
+    
+    
+    ##############################
+    SHELL181_LS{1} = {shell181_ls1}
+    SHELL181_LS{2} = {shell181_ls2}
+    SHELL181_LS{3} = {shell181_ls3}
+    """
+print(results_load_deflection)
+###############################################################################
 
 
 ###############################################################################
 # Check Results with Pandas
+target_res = np.asarray([1024400, 1262000, 1262000,
+                         1024400, 1262000, 1262000,
+                         1024400, 1262000, 1262000])
 
-import pandas as pd
+simulation_res = np.asarray([pipe288_ls1, pipe288_ls2, pipe288_ls2,
+                             solid185_ls1, solid185_ls2, solid185_ls3,
+                             shell181_ls1, shell181_ls2, shell181_ls3, ])
 
 main_columns = {
-    "Target": [1024400, 1262000, 1262000,
-               1024400, 1262000, 1262000,
-               1024400, 1262000, 1262000],
-    "Mechanical APDL": [pipe288_ls1, pipe288_ls2, pipe288_ls2,
-                        solid185_ls1, solid185_ls2, solid185_ls3,
-                        shell181_ls1, shell181_ls2, shell181_ls3,],
-    "Ratio": [0, 0, 0,
-              0, 0, 0,
-              0, 0, 0]
+    "Target": target_res,
+    "Mechanical APDL": simulation_res,
+    "Ratio": list(np.divide(simulation_res, target_res))
 }
 
 row_tuple = [("PIPE288", "Load, lb for Deflection = 0.032 in"),
@@ -521,25 +499,46 @@ row_tuple = [("PIPE288", "Load, lb for Deflection = 0.032 in"),
              ("SHELL181", "Load, lb for Deflection = 0.1 in")]
 
 index_names = ["Element Type", "Load Step"]
-row_indexing = pd.MultiIndex.from_tuples(row_tuple, names=index_names)
-
+row_indexing = pd.MultiIndex.from_tuples(row_tuple)
 df = pd.DataFrame(main_columns, index=row_indexing)
 
 print(df)
-# df.style.set_table_styles(
-#     [{'selector': 'tr:hover',
-#       'props': [('background-color', 'yellow')]}]
-# )
-colors = {"PIPE288": (0.6, 0.8, 0.8, 1), "SOLID185": (1, 0.9, 0.4, 1), "SHELL181": (0.8, 0.7, 0.7, 1)}
 
-#convert rgba to integers
-c1 = {k: (int(r * 255),int(g * 255),int(b * 255), a) for k, (r,g,b,a) in colors.items()}
-c2 = {k: (int(r * 255),int(g * 255),int(b * 255), 0.25) for k, (r,g,b,a) in colors.items()}
-
-#get values of first level of MulitIndex
-idx = df.index.get_level_values(0)
-#counter per first level for pair and unpair coloring
-zipped = zip(df.groupby(idx).cumcount(), enumerate(idx))
-
-df.style.set_table_styles({'selector': f'.row{i}',
-                           'props': [('background-color', f'rgba{c1[j]}')]} for v,(i, j) in zipped)
+df.style.set_caption('Results Comparison',
+                     ).set_table_styles([
+    {
+        "selector": "th.col_heading",
+        "props": [("background-color", "#FFEFD5"), ("color", "black"),
+                  ("border", "0.5px solid black"),
+                  ("font-style", "italic"), ("text-align", "center")]
+    },
+    {
+        "selector": "th.row_heading",
+        "props": [("background-color", "#FFEFD5"), ("color", "black"),
+                  ("border", "0.5px solid black"),
+                  ("font-style", "italic"), ("text-align", "center")]
+    },
+    {
+        "selector": "td:hover",
+        "props": [("background-color", "#FFF8DC")]
+    },
+    {
+        "selector": "th",
+        "props": [("max-width", '120px')]
+    },
+    {
+        "selector": "",
+        "props": [('border', '0.5px solid black')]
+    },
+    {
+        'selector': 'caption',
+        'props': [('color', 'black'), ("font-style", "italic"),
+                  ('font-size', '24px'), ("text-align", "center")]
+    }],
+).set_properties(**{
+    "background-color": "#FFFAFA",
+    "color": "black",
+    "border-color": "black",
+    "border-width": "0.5px",
+    "border-style": "solid",
+    "text-align": "center"}).format("{:.3f}")
