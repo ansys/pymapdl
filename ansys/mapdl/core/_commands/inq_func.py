@@ -8,69 +8,69 @@ class inq_function:
         **Secondary Functions:**
         Set current node pointer to this node.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        node  :  (int,  sc,  in)
+        node  :  int or str
             node number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  (int,  sc,  in)
+        key  :  int or str
             key as to information needed about the node.
 
-            * = DB_SELECTED    - return select status:
+            *  DB_SELECTED    - return select status:
 
-              * =  0 - node is undefined.
-              * = -1 - node is unselected.
-              * =  1 - node is selected.
+              *   0 - node is undefined.
+              *  -1 - node is unselected.
+              *   1 - node is selected.
 
-            * = ``DB_NUMDEFINED``  - return number of defined nodes
-            * = ``DB_NUMSELECTED`` - return number of selected nodes
-            * = ``DB_MAXDEFINED``  - return highest node number defined
-            * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
-            * =   2, return length (dp words)
-            * =   3,
-            * =   4, pointer to first data word
-            * =  11, return void percent (integer)
-            * =  17, pointer to start of index
-            * = 117, return the maximum number of DP contact data stored for any node
-            * =  -1,
-            * =  -2, superelement flag
-            * =  -3, master dof bit pattern
-            * =  -4, active dof bit pattern
-            * =  -5, solid model attachment
-            * =  -6, pack nodal line parametric value
-            * =  -7, constraint bit pattern
-            * =  -8, force bit pattern
-            * =  -9, body force bit pattern
-            * = -10, internal node flag
-            * = -11, orientation node flag =1 is =0 is not
-            * = -11, contact node flag <0
-            * = -12, constraint bit pattern (for ``DSYM``)
-            * = -13, if dof constraint written to file.k (for ``LSDYNA`` only)
-            * = -14, nodal coordinate system number (set by ``NROTATE``)
-            * =-101, pointer to node data record
-            * =-102, pointer to angle record
-            * =-103,
-            * =-104, pointer to attached couplings
-            * =-105, pointer to attacted constraint equations
-            * =-106, pointer to nodal stresses
-            * =-107, pointer to specified disp'S
-            * =-108, pointer to specified forces
-            * =-109, pointer to x/y/z record
-            * =-110,
-            * =-111,
-            * =-112, pointer to nodal temperatures
-            * =-113, pointer to nodal heat generations
-            * =-114,
-            * =-115, pointer to calculated displacements
-            * =-116
+            *  ``DB_NUMDEFINED``  - return number of defined nodes
+            *  ``DB_NUMSELECTED`` - return number of selected nodes
+            *  ``DB_MAXDEFINED``  - return highest node number defined
+            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            *    2, return length (dp words)
+            *    3,
+            *    4, pointer to first data word
+            *   11, return void percent (integer)
+            *   17, pointer to start of index
+            *  117, return the maximum number of DP contact data stored for any node
+            *   -1,
+            *   -2, superelement flag
+            *   -3, master dof bit pattern
+            *   -4, active dof bit pattern
+            *   -5, solid model attachment
+            *   -6, pack nodal line parametric value
+            *   -7, constraint bit pattern
+            *   -8, force bit pattern
+            *   -9, body force bit pattern
+            *  -10, internal node flag
+            *  -11, orientation node flag =1 is =0 is not
+            *  -11, contact node flag <0
+            *  -12, constraint bit pattern (for ``DSYM``)
+            *  -13, if dof constraint written to file.k (for ``LSDYNA`` only)
+            *  -14, nodal coordinate system number (set by ``NROTATE``)
+            * -101, pointer to node data record
+            * -102, pointer to angle record
+            * -103,
+            * -104, pointer to attached couplings
+            * -105, pointer to attacted constraint equations
+            * -106, pointer to nodal stresses
+            * -107, pointer to specified disp'S
+            * -108, pointer to specified forces
+            * -109, pointer to x/y/z record
+            * -110,
+            * -111,
+            * -112, pointer to nodal temperatures
+            * -113, pointer to nodal heat generations
+            * -114,
+            * -115, pointer to calculated displacements
+            * -116
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -80,7 +80,7 @@ class inq_function:
 
         Returns
         -------
-        ndinqr  (int,  func,  out)
+        str, int, or float
             The returned value of ``ndinqr`` is based on setting of key.
         """
         return self.run(f"{pname} = ndinqr({node}, {key})", **kwargs)
@@ -91,65 +91,65 @@ class inq_function:
         **Secondary Functions:**
         Set current element pointer to this element.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        ielem  :  (int,  sc,  in)
+        ielem  :  int or str
             Element number.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, ``DB_MAXRECLENG``,
             or 199
 
-        key  :  (int,  sc,  in)
+        key  :  int or str
             information flag.
 
-            * = DB_SELECTED    - return select status:                (1)
+            *  DB_SELECTED    - return select status:                (1)
 
-              * = 0 - element is undefined.
-              * =-1 - element is unselected.
-              * = 1 - element is selected.
+              *  0 - element is undefined.
+              * -1 - element is unselected.
+              *  1 - element is selected.
 
-            * = ``DB_NUMDEFINED``  - return number of defined elements    (12)
-            * = ``DB_NUMSELECTED`` - return number of selected elements   (13)
-            * = ``DB_MAXDEFINED``  - return maximum element number used   (14)
-            * = ``DB_MAXRECLENG``  - return maximum record length         (15)
-            * = 2 - return length (int words)
-            * = 3 - return layer number (for cross reference files return number of entities)
-            * = 4 - return address of first data word
-            * = 5 - return length (in record type units)
-            * = 6 - return compressed record number.
-            * = 11 - return void percent (integer)
-            * = 16 - return location of next record (this increments the next record count)
-            * = 17 - pointer to start of index
-            * = 18 - return type of file.
+            *  ``DB_NUMDEFINED``  - return number of defined elements    (12)
+            *  ``DB_NUMSELECTED`` - return number of selected elements   (13)
+            *  ``DB_MAXDEFINED``  - return maximum element number used   (14)
+            *  ``DB_MAXRECLENG``  - return maximum record length         (15)
+            *  2 - return length (int words)
+            *  3 - return layer number (for cross reference files return number of entities)
+            *  4 - return address of first data word
+            *  5 - return length (in record type units)
+            *  6 - return compressed record number.
+            *  11 - return void percent (integer)
+            *  16 - return location of next record (this increments the next record count)
+            *  17 - pointer to start of index
+            *  18 - return type of file.
 
-              * = 0 - integer
-              * = 1 - double precision
-              * = 2 - real
-              * = 3 - complex
-              * = 4 - character\*8
-              * = 7 - index
+              *  0 - integer
+              *  1 - double precision
+              *  2 - real
+              *  3 - complex
+              *  4 - character\*8
+              *  7 - index
 
-            * = 19 - return virtual type of file.
+            *  19 - return virtual type of file.
 
-              * = 0 - fixed length (4.4 form)
-              * = 1 - indexed variable length (layer data)
-              * = 2 - xref data tables
-              * = 3 - bitmap data (for 32 data item packed records)
-              * = 4 - data tables (three dimensional arrays)
+              *  0 - fixed length (4.4 form)
+              *  1 - indexed variable length (layer data)
+              *  2 - xref data tables
+              *  3 - bitmap data (for 32 data item packed records)
+              *  4 - data tables (three dimensional arrays)
 
-            * = 111 - return the maximum number of nodes stored for any element
-            * = 123 - return the maximum number of DP contact data stored for any element
-            * = -1 - material number           ( = -EL_MAT)
-            * = -2 - element type              ( = -EL_TYPE)
-            * = -3 - real constant number      ( = -EL_REAL)
-            * = -4 - element section ID number ( = -EL_SECT)
-            * = -5 - coordinate system number  ( = -EL_CSYS)
-            * =-101 - pointer to element integers etc.
+            *  111 - return the maximum number of nodes stored for any element
+            *  123 - return the maximum number of DP contact data stored for any element
+            *  -1 - material number           ( = -EL_MAT)
+            *  -2 - element type              ( = -EL_TYPE)
+            *  -3 - real constant number      ( = -EL_REAL)
+            *  -4 - element section ID number ( = -EL_SECT)
+            *  -5 - coordinate system number  ( = -EL_CSYS)
+            * -101 - pointer to element integers etc.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -159,7 +159,7 @@ class inq_function:
 
         Returns
         -------
-        elmiqr  (int,  sc,  out)
+        int or str
             The returned value of ``elmiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = elmiqr({ielem}, {key})", **kwargs)
@@ -170,85 +170,85 @@ class inq_function:
         **Secondary Functions:**
         Set current keypoints pointer to this keypoints.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        knmi  :  (int,  sc,  in)
+        knmi  :  int or str
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  (int,  sc,  in)
+        key  :  int or str
             Information flag.
 
-            * = 1 - return select
+            *  1 - return select
 
-              * = -1 - unselected
-              * =  0 - undefined
-              * =  1 - selected
+              *  -1 - unselected
+              *   0 - undefined
+              *   1 - selected
 
-            * = 2 - return length (data units)
-            * = 3 - return layer number
+            *  2 - return length (data units)
+            *  3 - return layer number
               (for cross reference files return
               number of entities)
-            * = 4 - return address of first data word
-            * = 5 - return length (in record type units)
-            * = 6 - return compressed record number.
-            * = 11 - return void percent (integer)
-            * = 12 - return number of defined
-            * = 13 - return number of selected
-            * = 14 - return highest number defined
-            * = 15 - return maximum record length
+            *  4 - return address of first data word
+            *  5 - return length (in record type units)
+            *  6 - return compressed record number.
+            *  11 - return void percent (integer)
+            *  12 - return number of defined
+            *  13 - return number of selected
+            *  14 - return highest number defined
+            *  15 - return maximum record length
               (data units)
-            * = 16 - return location of next record
+            *  16 - return location of next record
               (this increments the next
               record count)
-            * = 18 - return type of file.
+            *  18 - return type of file.
 
-              * = 0 - integer
-              * = 1 - double precision
-              * = 2 - real
-              * = 3 - complex
-              * = 4 - character\*8
-              * = 7 - index
+              *  0 - integer
+              *  1 - double precision
+              *  2 - real
+              *  3 - complex
+              *  4 - character\*8
+              *  7 - index
 
-            * = 19 - return virtual type of file.
+            *  19 - return virtual type of file.
 
-              * = 0 - fixed length (4.4 form)
-              * = 1 - indexed variable length
+              *  0 - fixed length (4.4 form)
+              *  1 - indexed variable length
                 (layer data)
-              * = 2 - xref data tables
-              * = 3 - bitmap data (for 32 data
+              *  2 - xref data tables
+              *  3 - bitmap data (for 32 data
                 item packed records)
-              * = 4 - data tables (three
+              *  4 - data tables (three
                 dimensional arrays)
 
-            * = -1, material number
-            * = -2, type
-            * = -3, real number
-            * = -4, node number, if meshed
-            * = -5, pointer to attached point
-            * = -6, esys number
-            * = -7, element number, if meshed
-            * = -8, Hardpoint stuff
-            * = -9, area number associated with hardpoint
-            * = -10, line number associated with hardpoint
-            * = -11, Orientation kp flag
-            * = -12, local integer workspace
-            * = -101, pointer to keypoint data
-            * = -102, pointer to keypoint fluences
-            * = -103, pointer to keypoint moisture content
-            * = -104, pointer to keypoint voltage
-            * = -105, pointer to keypoint current density
-            * = -106, pointer to keypoint heat generations
-            * = -107, pointer to keypoint virtual displacements
-            * = -108, pointer to parameter data
-            * = -109, pointer to keypoint temperatures
-            * = -110, pointer to keypoint displacements
-            * = -111, pointer to keypoint forces
-            * = -112, pointer to line list
+            *  -1, material number
+            *  -2, type
+            *  -3, real number
+            *  -4, node number, if meshed
+            *  -5, pointer to attached point
+            *  -6, esys number
+            *  -7, element number, if meshed
+            *  -8, Hardpoint stuff
+            *  -9, area number associated with hardpoint
+            *  -10, line number associated with hardpoint
+            *  -11, Orientation kp flag
+            *  -12, local integer workspace
+            *  -101, pointer to keypoint data
+            *  -102, pointer to keypoint fluences
+            *  -103, pointer to keypoint moisture content
+            *  -104, pointer to keypoint voltage
+            *  -105, pointer to keypoint current density
+            *  -106, pointer to keypoint heat generations
+            *  -107, pointer to keypoint virtual displacements
+            *  -108, pointer to parameter data
+            *  -109, pointer to keypoint temperatures
+            *  -110, pointer to keypoint displacements
+            *  -111, pointer to keypoint forces
+            *  -112, pointer to line list
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -258,7 +258,7 @@ class inq_function:
 
         Returns
         -------
-        kpinqr  (int, sc, out)
+        int or str
             For key=1
 
             * 0 = ``knmi`` is undefined.
@@ -273,67 +273,67 @@ class inq_function:
     def lsinqr(self, line, key, pname='__tmpvar__', **kwargs):
         """Get information about a line segment.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        lnmi  :  (int, sc, in)
+        lnmi  :  int or str
             Line segment for inquire. It should be 0 for key=11 thru 15.
 
-        key  :  (dp, sc, in)
+        key  :  float or str
             key as to information needed about the ``lnmi``.
 
-            * =  1, return select
-            * =  2, return length (data units)
-            * =  3,
-            * = 11, return void percent (integer)
-            * = 12  return number of defined
-            * = 13, return number of selected
-            * = 14, return highest number defined
-            * = 15, return maximum record length
+            *   1, return select
+            *   2, return length (data units)
+            *   3,
+            *  11, return void percent (integer)
+            *  12  return number of defined
+            *  13, return number of selected
+            *  14, return highest number defined
+            *  15, return maximum record length
               (data units)
-            * = 16, return location of next record
+            *  16, return location of next record
               (this increments the next
               record count)
-            * = 17, return next record from offset
-            * = -1, material number
-            * = -2, type
-            * = -3, real number
-            * = -4, number of nodes
-            * = -5, esys number
-            * = -6, number of elements
-            * = -7, pointer to line in foreign db
-            * = -8, # of elem divs in existing mesh
-            * = -9, keypoint 1
-            * = -10, keypoint 2
-            * = -11, color,translucency packed
-            * = -12, local integer workspace
+            *  17, return next record from offset
+            *  -1, material number
+            *  -2, type
+            *  -3, real number
+            *  -4, number of nodes
+            *  -5, esys number
+            *  -6, number of elements
+            *  -7, pointer to line in foreign db
+            *  -8, # of elem divs in existing mesh
+            *  -9, keypoint 1
+            *  -10, keypoint 2
+            *  -11, color,translucency packed
+            *  -12, local integer workspace
               (used in delete with sweeps)
-            * = -13, orientation kpa
-            * = -14, orientation kpb
-            * = -15, section id
-            * = -16, # of elem divs for next mesh
-            * = -17, 0=hard / 1=soft NDIV
-            * = -18, 0=hard / 1=soft SPACE
-            * =-101, pointer to line segment data
-            * =-102,
-            * =-103,
-            * =-104,
-            * =-105, pointer to node list
-            * =-106,
-            * =-107, pointer to element list
-            * =-108, pointer to parameter data
-            * =-109,
-            * =-110, pointer to line convections
-            * =-111, pointer to line constraints
-            * =-112,
-            * =-113,
-            * =-114, pointer to area list
-            * =-115, pointer to sub-line list
-            * =-116, pointer to line pressures
+            *  -13, orientation kpa
+            *  -14, orientation kpb
+            *  -15, section id
+            *  -16, # of elem divs for next mesh
+            *  -17, 0=hard / 1=soft NDIV
+            *  -18, 0=hard / 1=soft SPACE
+            * -101, pointer to line segment data
+            * -102,
+            * -103,
+            * -104,
+            * -105, pointer to node list
+            * -106,
+            * -107, pointer to element list
+            * -108, pointer to parameter data
+            * -109,
+            * -110, pointer to line convections
+            * -111, pointer to line constraints
+            * -112,
+            * -113,
+            * -114, pointer to area list
+            * -115, pointer to sub-line list
+            * -116, pointer to line pressures
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -343,7 +343,7 @@ class inq_function:
 
         Returns
         -------
-        lsinqr  (int, sc, out)
+        int or str
             For key=1
 
             * 0 = ``lnmi`` is undefined.
@@ -362,66 +362,66 @@ class inq_function:
         **Secondary Functions:**
         Set current area pointer to this area.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        anmi  :  (int, sc, in)
+        anmi  :  int or str
             Area for inquire. may be 0 for key=11 thru 15.
 
-        key  :  (dp, sc, in)
+        key  :  float or str
             Key as to information needed about the ``anmi``.
 
-            * =  1, return select
-            * =  2, return length (data units)
-            * =  3,
-            * = 11, return void percent (integer)
-            * = 12  return number of defined
-            * = 13, return number of selected
-            * = 14, return highest number defined
-            * = 15, return maximum record length
+            *   1, return select
+            *   2, return length (data units)
+            *   3,
+            *  11, return void percent (integer)
+            *  12  return number of defined
+            *  13, return number of selected
+            *  14, return highest number defined
+            *  15, return maximum record length
               (data units)
-            * = 16, return next record
+            *  16, return next record
               (this increments the next record count)
-            * = -1, material
-            * = -2, type.
-            * = -3, real.
-            * = -4, number of nodes.
-            * = -5,
-            * = -6, number of elements.
-            * = -7, pointer to area in foreign db
-            * = -8, element shape.
-            * = -9, mid-node element key.
-            * = -10, element coordinate system.
-            * = -11, area constraint information.
-            * = 0 - no constraint on this area.
-            * = 1 - symmetry constraint.
-            * = 2 - anti-symmetry
-            * = 3 - both symmetry and anti-symmetry
-            * = -12, local integer workspace
-            * = -13,
-            * = -14,
-            * = -15, section
-            * = -16, color and translucency packed.
-            * = -101, pointer to area data
-            * = -102,
-            * = -103,
-            * = -104,
-            * = -105, pointer to node list.
-            * = -106, pointer to parameter data
-            * = -107, pointer to element list.
-            * = -108,
-            * = -109,
-            * = -110,
-            * = -111,
-            * = -112, pointer to line loop list
-            * = -113, pointer to volume xref
-            * = -114, pointer to sub-area list
-            * = -115, pointer to area presaraes
-            * = -116, pointer to area convections
+            *  -1, material
+            *  -2, type.
+            *  -3, real.
+            *  -4, number of nodes.
+            *  -5,
+            *  -6, number of elements.
+            *  -7, pointer to area in foreign db
+            *  -8, element shape.
+            *  -9, mid-node element key.
+            *  -10, element coordinate system.
+            *  -11, area constraint information.
+            *  0 - no constraint on this area.
+            *  1 - symmetry constraint.
+            *  2 - anti-symmetry
+            *  3 - both symmetry and anti-symmetry
+            *  -12, local integer workspace
+            *  -13,
+            *  -14,
+            *  -15, section
+            *  -16, color and translucency packed.
+            *  -101, pointer to area data
+            *  -102,
+            *  -103,
+            *  -104,
+            *  -105, pointer to node list.
+            *  -106, pointer to parameter data
+            *  -107, pointer to element list.
+            *  -108,
+            *  -109,
+            *  -110,
+            *  -111,
+            *  -112, pointer to line loop list
+            *  -113, pointer to volume xref
+            *  -114, pointer to sub-area list
+            *  -115, pointer to area presaraes
+            *  -116, pointer to area convections
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -431,7 +431,7 @@ class inq_function:
 
         Returns
         -------
-        arinqr  (int, sc, out)
+        int or str
             For key=1
 
             * 0 = ``anmi`` is undefined.
@@ -449,52 +449,52 @@ class inq_function:
         **Secondary Functions:**
         Set current volume pointer to this volume.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        vnmi  :  (int, sc, in)
+        vnmi  :  int or str
             Volume for inquire. may be 0 for key=11 thru 15.
 
-        key  :  (dp, sc, in)
+        key  :  float or str
             Key as to information needed about the ``vnmi``.
 
-            * =  1, return select
-            * =  2, return length (data units)
-            * =  3,
-            * = 11, return void percent (integer)
-            * = 12  return number of defined
-            * = 13, return number of selected
-            * = 14, return highest number defined
-            * = 15, return maximum record length (data units)
-            * = 16, return next record
-            * = -1, material
-            * = -2, type.
-            * = -3, real.
-            * = -4, number of nodes.
-            * = -5, KZ1 - 1st kpt for elem Z
-            * = -6, number of elements.
-            * = -7, pointer to volume in foreign db
-            * = -8, element shape.
-            * = -9, (section id)\*10 + 2
-            * = -10, element coordinate system.
-            * = -11, KZ2 - 2nd kpt for elem Z
-            * = -12, color and translucancy packed
-            * = -101, pointer volume data file.
-            * = -102,
-            * = -103,
-            * = -104,
-            * = -105, pointer to node list.
-            * = -106, pointer to volume pvolmeter dat
-            * = -107, pointer to element list.
-            * = -108,
-            * = -109,
-            * = -110, pointer to sub-volume list
-            * = -111,
-            * = -112, pointer to area shell list
+            *   1, return select
+            *   2, return length (data units)
+            *   3,
+            *  11, return void percent (integer)
+            *  12  return number of defined
+            *  13, return number of selected
+            *  14, return highest number defined
+            *  15, return maximum record length (data units)
+            *  16, return next record
+            *  -1, material
+            *  -2, type.
+            *  -3, real.
+            *  -4, number of nodes.
+            *  -5, KZ1 - 1st kpt for elem Z
+            *  -6, number of elements.
+            *  -7, pointer to volume in foreign db
+            *  -8, element shape.
+            *  -9, (section id)\*10 + 2
+            *  -10, element coordinate system.
+            *  -11, KZ2 - 2nd kpt for elem Z
+            *  -12, color and translucancy packed
+            *  -101, pointer volume data file.
+            *  -102,
+            *  -103,
+            *  -104,
+            *  -105, pointer to node list.
+            *  -106, pointer to volume pvolmeter dat
+            *  -107, pointer to element list.
+            *  -108,
+            *  -109,
+            *  -110, pointer to sub-volume list
+            *  -111,
+            *  -112, pointer to area shell list
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -504,7 +504,7 @@ class inq_function:
 
         Returns
         -------
-        vlinqr  (int, sc, out)
+        int or str
             For key=1
 
             * 0 = ``vnmi`` is undefined.
@@ -519,37 +519,34 @@ class inq_function:
     def rlinqr(self, nreal, key, pname='__tmpvar__', **kwargs):
         """Get information about a real constant set.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        variable  :  (typ, siz, intent)
-            description
-
-        nreal  :  (int, sc, in)
+        nreal  :  int or str
             Real constant table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Information flag.
 
-            * = 5 - return number of values stored for nreal.
+            *  5 - return number of values stored for nreal.
               Return the REAL set width (number of fields)
-            * = ``DB_SELECTED``    - return select status
+            *  ``DB_SELECTED``    - return select status
 
-              * = 0 - real constant table is undefined.
-              * =-1 - real constant table is unselected.
-              * = 1 - real constant table is selected
+              *  0 - real constant table is undefined.
+              * -1 - real constant table is unselected.
+              *  1 - real constant table is selected
 
-            * = ``DB_NUMDEFINED``  - return number of defined real constant tables
-            * = ``DB_NUMSELECTED`` - return number of selected real constant tables
-            * = ``DB_MAXDEFINED``  - return highest real constant table defined
-            * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            *  ``DB_NUMDEFINED``  - return number of defined real constant tables
+            *  ``DB_NUMSELECTED`` - return number of selected real constant tables
+            *  ``DB_MAXDEFINED``  - return highest real constant table defined
+            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -559,7 +556,7 @@ class inq_function:
 
         Returns
         -------
-        rlinqr  (int, func, out)
+        int or str
             The returned value of ``rlinqr`` is based on setting of key.
 
         """
@@ -568,27 +565,27 @@ class inq_function:
     def gapiqr(self, ngap, key, pname='__tmpvar__', **kwargs):
         """Get information about a dynamic gap set.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        ngap  :  (int, sc, in)
+        ngap  :  int or str
             gap number for inquire (must be zero for now).
 
-        key  :  (int, sc, in)
+        key  :  int or str
             key as to the information needed
 
-            * =  1, return select
-            * =  2, return length (data units)
-            * =  3,
-            * = 11, return void percent (integer)
-            * = 12  return number of defined
-            * = 13, return number of selected
-            * = 14, return highest number defined
-            * = 15, return maximum record length (data units)
+            *   1, return select
+            *   2, return length (data units)
+            *   3,
+            *  11, return void percent (integer)
+            *  12  return number of defined
+            *  13, return number of selected
+            *  14, return highest number defined
+            *  15, return maximum record length (data units)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -598,7 +595,7 @@ class inq_function:
 
         Returns
         -------
-        gapiqr  (int, sc, out)
+        int or str
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = gapiqr({ngap}, {key})", **kwargs)
@@ -606,30 +603,27 @@ class inq_function:
     def masiqr(self, node, key, pname='__tmpvar__', **kwargs):
         """Get information about masters nodes.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        variable  :  (typ, siz, intent)
-            Description
-
-        node  :  (int, sc, in)
+        node  :  int or str
             Node number for inquire (must be zero for now).
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Key as to the information needed
 
-            * =  1, return select
-            * =  2, return length (data units)
-            * =  3,
-            * = 11, return void percent (integer)
-            * = 12  return number of defined
-            * = 13, return number of selected
-            * = 14, return highest number defined
-            * = 15, return maximum record length (data units)
+            *   1, return select
+            *   2, return length (data units)
+            *   3,
+            *  11, return void percent (integer)
+            *  12  return number of defined
+            *  13, return number of selected
+            *  14, return highest number defined
+            *  15, return maximum record length (data units)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -639,10 +633,7 @@ class inq_function:
 
         Returns
         -------
-        variable  (typ, siz, intent)
-            Description
-
-        masiqr  (int, sc, out)
+        masiqr  int or str
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
@@ -650,41 +641,44 @@ class inq_function:
     def ceinqr(self, nce, key, pname='__tmpvar__', **kwargs):
         """Get information about a constraint equation set.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        nce  :  (int, sc, in)
+        nce  :  int or str
             Constraint equation number
-        key  :  (int, sc, in)
+
+        key  :  int or str
             Inquiry key.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-            * = DB_SELECTED    - return select status
+            *  DB_SELECTED    - return select status
 
-              * = 1 - equation is selected
-              * = 0 - equation is undefined
-              * =-1 - equation is unselected
+              *  1 - equation is selected
+              *  0 - equation is undefined
+              * -1 - equation is unselected
 
-            * = ``DB_NUMDEFINED``  - return number of defined constraint equations
-            * = ``DB_NUMSELECTED`` - return number of selected constraint equations
-            * = ``DB_MAXDEFINED``  - return number of highest numbered constraint
-              equation defined
-            * = ``DB_MAXRECLENG``  - return length of longest constraint equation set
-              (max record length)
-            * =  2             - return length (data units)
-            * =  3             - return layer number
-            * =  4             - address of first data word
-            * =  5             - return number of values stored for nce
-            * = 11             - return void percent (integer)
-            * = 16             - return location of next record
-            * = ``CE_NONLINEAR``   - return 1 if CE is nonlinear
-            * = ``CE_ELEMNUMBER``  - return associated element number
+            *  ``DB_NUMDEFINED``  - return number of defined constraint
+              equations.
+            *  ``DB_NUMSELECTED`` - return number of selected constraint
+              equations.
+            *  ``DB_MAXDEFINED``  - return number of highest numbered
+              constraint equation defined.
+            *  ``DB_MAXRECLENG``  - return length of longest constraint
+              equation set (max record length)
+            *   2             - return length (data units)
+            *   3             - return layer number
+            *   4             - address of first data word
+            *   5             - return number of values stored for nce
+            *  11             - return void percent (integer)
+            *  16             - return location of next record
+            *  ``CE_NONLINEAR``   - return 1 if CE is nonlinear
+            *  ``CE_ELEMNUMBER``  - return associated element number
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -694,7 +688,7 @@ class inq_function:
 
         Returns
         -------
-        ceinqr  (int, func, out)
+        int or str
             The returned value of ``ceinqr`` is based on setting of key
         """
         return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
@@ -702,42 +696,39 @@ class inq_function:
     def cpinqr(self, ncp, key, pname='__tmpvar__', **kwargs):
         """Get information about a coupled set.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        variable  :  (typ, siz, intent)
-            Description
-
-        ncp  :  (int, sc, in)
+        ncp  :  int or str
             Coupled set number
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
-            * = DB_SELECTED    - return select status
+            *  DB_SELECTED    - return select status
 
-              * = 1 - coupled set is selected
-              * = 0 - coupled set in undefined
-              * =-1 - coupled set in unselected
+              *  1 - coupled set is selected
+              *  0 - coupled set in undefined
+              * -1 - coupled set in unselected
 
-            * = ``DB_NUMDEFINED``  - return number of defined coupled sets
-            * = ``DB_NUMSELECTED`` - return number of selected coupled sets
-            * = ``DB_MAXDEFINED``  - return the number of the highest numbered
+            *  ``DB_NUMDEFINED``  - return number of defined coupled sets
+            *  ``DB_NUMSELECTED`` - return number of selected coupled sets
+            *  ``DB_MAXDEFINED``  - return the number of the highest numbered
               coupled set
-            * = ``DB_MAXRECLENG``  - return length of largest coupled set record
+            *  ``DB_MAXRECLENG``  - return length of largest coupled set record
               (max record length)
-            * =  2  - return length (data units)
-            * =  3  - return layer number
-            * =  4  - return address of first data word
-            * =  5  - return number of values stored for ncp
-            * = 11  - return void percent (integer)
-            * = 16  - return location of next record
-            * = -1  - return master node for this eqn (this is
+            *   2  - return length (data units)
+            *   3  - return layer number
+            *   4  - return address of first data word
+            *   5  - return number of values stored for ncp
+            *  11  - return void percent (integer)
+            *  16  - return location of next record
+            *  -1  - return master node for this eqn (this is
               currently only used by solution DB object)
 
         pname : str
@@ -748,7 +739,7 @@ class inq_function:
 
         Returns
         -------
-        cpinqr  (int, func, out)
+        int or str
             The returned value of ``cpinqr`` is based on setting of key.
 
         """
@@ -757,29 +748,29 @@ class inq_function:
     def csyiqr(self, ncsy, key, pname='__tmpvar__', **kwargs):
         """Get information about a coordinate system.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        ncsy  :  (int, sc, in)
+        ncsy  :  int or str
             Coordinate system reference number
             should be zero for key= ``DB_NUMDEFINED``
             or ``DB_MAXDEFINED``
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Information flag.
 
-            * = ``DB_SELECTED``    - return status:
+            *  ``DB_SELECTED``    - return status:
 
-              * = 0 - coordinate system is not defined
-              * = -1 - coordinate system is not selected
-              * = 1 - coordinate system is selected
+              *  0 - coordinate system is not defined
+              *  -1 - coordinate system is not selected
+              *  1 - coordinate system is selected
 
-            * = ``DB_NUMDEFINED``  - number of defined coordinate systems
-            * = ``DB_MAXDEFINED``  - maximum coordinate system reference
+            *  ``DB_NUMDEFINED``  - number of defined coordinate systems
+            *  ``DB_MAXDEFINED``  - maximum coordinate system reference
               number used.
 
         pname : str
@@ -790,7 +781,7 @@ class inq_function:
 
         Returns
         -------
-        csyiqr  (int, func, out)
+        int or str
             The returned value of ``csyiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = csyiqr({ncsy}, {key})", **kwargs)
@@ -798,38 +789,39 @@ class inq_function:
     def etyiqr(self, itype, key, pname='__tmpvar__', **kwargs):
         """Get information about an element type.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        itype  :  (int, sc, in)
+        itype  :  int or str
             Element type number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Information flag.
 
-            * = DB_SELECTED    - return select status:
+            *  DB_SELECTED    - return select status:
 
-              * = 0 - element type is undefined.
-              * =-1 - element type is unselected.
-              * = 1 - element type is selected.
+              *  0 - element type is undefined.
+              * -1 - element type is unselected.
+              *  1 - element type is selected.
 
-            * = ``DB_NUMDEFINED``  - return number of defined element types
-            * = ``DB_NUMSELECTED`` - return number of selected element types
-            * = ``DB_MAXDEFINED``  - return highest element type number defined
-            * = ``DB_MAXRECLENG``  - return maximum record length (int words)
-            * = -n, return element characteristic n from ``etycom`` for element
+            *  ``DB_NUMDEFINED``  - return number of defined element types
+            *  ``DB_NUMSELECTED`` - return number of selected element types
+            *  ``DB_MAXDEFINED``  - return highest element type number defined
+            *  ``DB_MAXRECLENG``  - return maximum record length (int words)
+            *  -n, return element characteristic n from ``etycom`` for element
               type itype.
               ``n`` is correlated to the parameter names in ``echprm``.
               see ``elccmt`` for definitions of element characteristics.
 
-              .. note:: This will not overwrite the current setting of ``etycom``.
+              .. note:: This will not overwrite the current setting of
+                       ``etycom``.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -839,7 +831,7 @@ class inq_function:
 
         Returns
         -------
-        etyiqr  (int, func, out)
+        int or str
             The returned value of ``etyiqr`` is based on setting of key.
         """
         return self.run(f"{pname} = etyiqr({itype}, {key})", **kwargs)
@@ -847,26 +839,27 @@ class inq_function:
     def foriqr(self, node, key, pname='__tmpvar__', **kwargs):
         """Get information about nodal loads.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        node  :  (int, sc, in)
+        node  :  int or str
             Number of node being inquired about.
             should be 0 for key=``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
-        key  :  (dp, sc, in)
+        key  :  float or str
             Key as to information needed
 
-            * = 1              - return force mask for node
-            * = ``DB_MAXDEFINED``, - return number of nodal loadings in model.
-            * = ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
+            *  1              - return force mask for node
+            *  ``DB_MAXDEFINED``, - return number of nodal loadings in model.
+            *  ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
 
-            .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the same functionality.
+            .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the
+                     same functionality.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -876,7 +869,7 @@ class inq_function:
 
         Returns
         -------
-        foriqr  (int, func, out)
+        int or str
             The returned value of ``foriqr`` is based on setting of key.
         """
         return self.run(f"{pname} = foriqr({node}, {key})", **kwargs)
@@ -884,52 +877,51 @@ class inq_function:
     def sectinqr(self, nsect, key, pname='__tmpvar__', **kwargs):
         """Get information about a section id set.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        variable  :  (typ,siz,intent)
-            Description
-
-        nsect  :  (int,sc,in)
+        nsect  :  int or str
             Section id table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  (int,sc,in)
+        key  :  int or str
             Information flag.
-            * = DB_SELECTED - return select status
-              * = 0 - ection id table is undefined.
-              * =-1 - section id table is unselected.
-              * = 1 - section id table is selected
-            * = ``DB_NUMDEFINED``  - return number of defined section id tables
-            * = ``DB_NUMSELECTED`` - return number of selected section id tables
-            * = ``DB_MAXDEFINED``  - return highest section id table defined
-            * = ``DB_MAXRECLENG``  - return maximum record length (dp words)
-            * = 2 - return length (dp words)
-            * = 3 - return layer number (for cross reference files return number of entities)
-            * = 4 - return address of first data word
-            * = 5 - return length (in record type units)
-            * = 6 - return compressed record number.
-            * = 11 - return void percent (integer)
-            * = 16 - return location of next record (this increments the next record count)
-            * = 18 - return type of file.
-              * = 0 - integer
-              * = 1 - double precision
-              * = 2 - real
-              * = 3 - complex
-              * = 4 - character*8
-              * = 7 - index
-            * = 19 - return virtual type of file.
-              * = 0 - fixed length (4.4 form)
-              * = 1 - indexed variable length (layer data)
-              * = 2 - xref data tables
-              * = 3 - bitmap data (for 32 data item packed records)
-              * = 4 - data tables (three dimensional arrays)
+            *  DB_SELECTED - return select status
+              *  0 - ection id table is undefined.
+              * -1 - section id table is unselected.
+              *  1 - section id table is selected
+            *  ``DB_NUMDEFINED``  - return number of defined section id tables
+            *  ``DB_NUMSELECTED`` - return number of selected section id tables
+            *  ``DB_MAXDEFINED``  - return highest section id table defined
+            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            *  2 - return length (dp words)
+            *  3 - return layer number (for cross reference files return number
+              of entities)
+            *  4 - return address of first data word
+            *  5 - return length (in record type units)
+            *  6 - return compressed record number.
+            *  11 - return void percent (integer)
+            *  16 - return location of next record (this increments the next
+              record count)
+            *  18 - return type of file.
+              *  0 - integer
+              *  1 - double precision
+              *  2 - real
+              *  3 - complex
+              *  4 - character*8
+              *  7 - index
+            *  19 - return virtual type of file.
+              *  0 - fixed length (4.4 form)
+              *  1 - indexed variable length (layer data)
+              *  2 - xref data tables
+              *  3 - bitmap data (for 32 data item packed records)
+              *  4 - data tables (three dimensional arrays)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -939,7 +931,7 @@ class inq_function:
 
         Returns
         -------
-        sectinqr   (int,func,out)
+        int or str
             The returned value of sectinqr is based on setting of key.
         """
         return self.run(f"{pname} = sectinqr({nsect}, {key})", **kwargs)
@@ -947,19 +939,19 @@ class inq_function:
     def mpinqr(self, mat,  iprop,  key, pname='__tmpvar__', **kwargs):
         """Get information about a material property.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        mat  :  (int, sc, in)
+        mat  :  int or str
             Material number
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
 
-        iprop  :  (int, sc, in)
+        iprop  :  int or str
             Property reference number (See notes).
 
             If iprop = 0, test for existence of any material property with this
@@ -992,20 +984,20 @@ class inq_function:
 
                 (see ``TB`` command for more information)
 
-        key  :  (int, sc, in)
+        key  :  int or str
             Key as to the information needed about material property.
 
-            * = ``DB_SELECTED(1)``- return select status:
+            *  ``DB_SELECTED(1)``- return select status:
 
-              * = 0 - material prop is undefined.
-              * = 1 - material prop is selected.
+              *  0 - material prop is undefined.
+              *  1 - material prop is selected.
 
-            * = ``DB_NUMDEFINED(12)`` - number of defined material properties
-            * = ``DB_MAXDEFINED(14)`` - highest material property number defined
-            * = ``DB_MAXRECLENG(15)`` - maximum record length (dp words)
-            * =  2 - return length (dp words)
-            * =  3 - return number of temp. values
-            * = 11 - return void percent (integer)
+            *  ``DB_NUMDEFINED(12)`` - number of defined material properties
+            *  ``DB_MAXDEFINED(14)`` - highest material property number defined
+            *  ``DB_MAXRECLENG(15)`` - maximum record length (dp words)
+            *   2 - return length (dp words)
+            *   3 - return number of temp. values
+            *  11 - return void percent (integer)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -1015,7 +1007,7 @@ class inq_function:
 
         Returns
         -------
-        mpinqr   (int, func, out)
+        int or str
             Returned value of ``mpinqr`` is based on setting of key.
 
         """
@@ -1024,17 +1016,17 @@ class inq_function:
     def dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a constraint from the data base.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        node  :  (int, sc, in)
+        node  :  int or str
             Node number
 
-        idf  :  (int, sc, in)
+        idf  :  int or str
             Pointer to the dof (1-32)
 
             * 1 = ux,
@@ -1060,7 +1052,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = SP01-SP06
 
-        kcmplx  :  (int, sc, in)
+        kcmplx  :  int or str
 
             * 0 = real
             * 1 = imaginary
@@ -1073,7 +1065,7 @@ class inq_function:
 
         Returns
         -------
-        dget   (dp, sc, out)
+        float or str
             Constraint value (High number if undefined)
         """
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
@@ -1081,17 +1073,17 @@ class inq_function:
     def fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
         """Get a force load from the data base.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        node  :  (int, sc, in)
+        node  :  int or str
             Node number
 
-        idf  :  (int, sc, in)
+        idf  :  int or str
             Pointer to the dof (1-32)
 
             * 1 = ux
@@ -1117,7 +1109,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = spares
 
-        kcmplx  :  (int, sc, in)
+        kcmplx  :  int or str
 
             * 0 = real
             * 1 = imaginary
@@ -1130,22 +1122,22 @@ class inq_function:
 
         Returns
         -------
-        fget  (dp, sc, out)
-            Force value (High number if undefined)
+        float or str
+            Force value (high number if undefined)
         """
         return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
 
     def erinqr(self, key, pname='__tmpvar__', **kwargs):
         """Obtain information from common errors.
 
-        .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
         Parameters
         ----------
-        key  :  (int, sc, in)
+        key  :  int or str
             Item to be returned.
 
             * 1 = keyerr (ER_ERRORFLAG)
@@ -1173,7 +1165,8 @@ class inq_function:
             * 10 = nercmd (ER_NUMCOMMAND)
               Number of messages displayed for any one command.
             * 11 = nertim (ER_UICLEAR)
-              Key as to how message cleared from u/i pop-up (only for "info" calls)
+              Key as to how message cleared from u/i pop-up (only for "info"
+              calls)
 
               * -1 = message is timed before removal
               * 0 = message needs pick or keyboard before removal
@@ -1196,10 +1189,12 @@ class inq_function:
               * -1 = if interactive set keyerr (used by mesher and tessalation)
 
             * 15 = kystat (ER_KEYOPTTEST)
-              Flag to bypass keyopt tests in the elcxx routines associated with status/panel info inquiries.
+              Flag to bypass keyopt tests in the elcxx routines associated with
+              status/panel info inquiries.
 
               * 0 = do not bypass keyopt tests
-              * 1 = perform all keyopt tests also flag to bypass setting of _STATUS upon resume
+              * 1 = perform all keyopt tests also flag to bypass setting of 
+                _STATUS upon resume
 
             * 16 = mxr4r5   (ER_MIXEDREV)
               mixed rev4-rev5 input logic (\*do,\*if, \*go, \*if-go)
@@ -1210,7 +1205,8 @@ class inq_function:
 
             * 17 = mshkey    (ER_MESHING)
               CPU intensive meshing etc.
-              This will cause "nertim (11)" to be set to -1 for "notes", 1 for "warnings",and 0 for "errors".
+              This will cause "nertim (11)" to be set to -1 for "notes", 1 for
+              "warnings",and 0 for "errors".
               Checking of this key is done in "anserr".
 
               * 0 = not meshing or cpu intensive
@@ -1250,7 +1246,8 @@ class inq_function:
               No information is provided.
 
             * 26 = icloads (26)
-              K key to forbid the ``iclist`` command from listing solution data instead of the input data.
+              K key to forbid the ``iclist`` command from listing solution data
+              instead of the input data.
 
               * 0 = ``iclist`` is OK
               * 1 = do not permit ``iclist``
@@ -1274,7 +1271,7 @@ class inq_function:
 
         Returns
         -------
-        erinqr  (int, sc, out)
+        int or str
             Value corresponding to key.
 
         """

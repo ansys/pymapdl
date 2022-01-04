@@ -22,7 +22,7 @@ LIST_OF_INQUIRE_FUNCTIONS = [
     'dget',
     'fget',
     'erinqr'
-    ]
+]
 
 # Generic args
 ARGS_INQ_FUNC = {
@@ -44,7 +44,7 @@ ARGS_INQ_FUNC = {
         'iprop': 1,
         'idf': 1,
         'kcmplx': 1
-        }
+    }
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
 def test_inquire_functions(mapdl, func):
