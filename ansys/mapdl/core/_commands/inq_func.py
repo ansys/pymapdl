@@ -1286,58 +1286,60 @@ class inq_function:
                    **Please use it with caution.**
 
         .. warning:: Caution: the following variables are "saved/resumed".
-                    key=WR_COLINTER thru WR_SUPCOLMAX in "wrinqr/wrinfo".
+                    key=``WR_COLINTER`` thru ``WR_SUPCOLMAX`` in "wrinqr/wrinfo".
 
         Parameters
         ----------
         key  :  int or str
             Key.
 
-            * WR_PRINT        (kprint)
+            * WR_PRINT (kprint)				 key =  1
               Print flag.
 
               * 0 - no output
               * 1 - print
 
-            * WR_OUTPUT       (outfil)
+            * WR_OUTPUT (outfil)				 key =  2
               Current output unit number(iott).
-            * WR_MASTEROUT    (frstot)
+            * WR_MASTEROUT (frstot)			 key =  4
               Master output file.
-            * WR_COLINTER     (intcol)
+            * WR_COLINTER (intcol)			 key =  5
               Interactive columns per page.
-            * WR_COLBATCH     (batcol)
+            * WR_COLBATCH (batcol)			 key =  6
               Batch columns per page.
-            * WR_LINEINTER    (intlin)
+            * WR_LINEINTER (intlin)			 key =  7
               Interactive lines per page.
-            * WR_LINEBATCH    (batlin)
+            * WR_LINEBATCH (batlin)			 key =  8
               Batch lines per page.
-            * WR_COMMASEP     (CommaSep)
+            * WR_COMMASEP (CommaSep)			 key =  9
               1 for comma separated output.
-            * WR_CHARITEM     (chrper)
+            * WR_CHARITEM (chrper)			 key = 11
               Characters per output item.
-            * WR_CHARDECIMAL  (chrdec)
+            * WR_CHARDECIMAL (chrdec)			 key = 12
               Characters past decimal.
-            * WR_CHARINTEGER  (chrint)
+            * WR_CHARINTEGER (chrint)			 key = 13
               Characters in leading integer.
-            * WR_CHARTYPE     (chrtyp)
+            * WR_CHARTYPE (chrtyp)			 key = 14
 
               * 1 - using E format in output.
               * 2 - using F format in output.
               * 3 - using G format in output.
 
-            * WR_SUPTITLE     (keyhed)
+            * WR_TEMPLINEBATCH ( )			 key = 15
+              Undocumented (50 default).
+            * WR_SUPTITLE (keyhed)			 key = 16
               Tlabel suppress key.
-            * WR_SUPSUBTITLE  (keytit)
+            * WR_SUPSUBTITLE (keytit)			 key = 17
               Subtitle suppress key.
-            * WR_SUPLSITER    (keyid)
+            * WR_SUPLSITER (keyid)			 key = 18
               Ls,iter id suppress key.
-            * WR_NOTELINE     (keynot)
+            * WR_NOTELINE (keynot)			 key = 19
               Note line suppress key.
-            * WR_SUPCOLHEADER (keylab)
+            * WR_SUPCOLHEADER (keylab)		 key = 20
                column header suppress key.
-            * WR_SUPCOLMAX    (keysum)
+            * WR_SUPCOLMAX (keysum)			 key = 21
               Column maximum suppress key.
-            * WR_LISTOPT      (ListOpt)
+            * WR_LISTOPT (ListOpt)			 key = 22
               ListOpt from /output command.
 
         Returns
