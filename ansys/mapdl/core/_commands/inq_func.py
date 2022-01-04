@@ -1326,17 +1326,17 @@ class inq_function:
               * 3 - using G format in output.
 
             * WR_SUPTITLE     (keyhed)
-              Tlabel supress key.
+              Tlabel suppress key.
             * WR_SUPSUBTITLE  (keytit)
-              Subtitle supress key.
+              Subtitle suppress key.
             * WR_SUPLSITER    (keyid)
-              Ls,iter id supress key.
+              Ls,iter id suppress key.
             * WR_NOTELINE     (keynot)
-              Note line supress key.
+              Note line suppress key.
             * WR_SUPCOLHEADER (keylab)
-               column header supress key.
+               column header suppress key.
             * WR_SUPCOLMAX    (keysum)
-              Column maximum supress key.
+              Column maximum suppress key.
             * WR_LISTOPT      (ListOpt)
               ListOpt from /output command.
 
