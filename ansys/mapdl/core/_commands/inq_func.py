@@ -1193,7 +1193,7 @@ class inq_function:
               status/panel info inquiries.
 
               * 0 = do not bypass keyopt tests
-              * 1 = perform all keyopt tests also flag to bypass setting of 
+              * 1 = perform all keyopt tests also flag to bypass setting of
                 _STATUS upon resume
 
             * 16 = mxr4r5   (ER_MIXEDREV)
