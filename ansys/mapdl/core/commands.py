@@ -1,4 +1,3 @@
-from collections import UserString
 from ._commands import (
     hidden,
     session,
