@@ -216,7 +216,7 @@ class Commands(
 
 
 class CommandOutput(UserString):
-    """Customized subclass of UserString"""
+    """Customized Command Ouput class"""
 
     def __init__(self, content, cmd=None):
         super().__init__(content)
