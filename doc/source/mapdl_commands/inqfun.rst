@@ -6,6 +6,10 @@ Undocumented Inquire Commands
 
 .. currentmodule:: ansys.mapdl.core
 
+.. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
+            Hence its support is limited and it use is not encouraged.
+            **Please use it with caution.**
+
 Undocumented inquire commands.
 
 .. autosummary::

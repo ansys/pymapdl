@@ -317,8 +317,7 @@ Undocumented Inquire Commands
 Undocumented inquire commands.
 
 .. warning:: **DISCLAIMER**: This function is un-documented in the official ANSYS Command Reference Guide.
-                   Hence its support is limited and it use is not encoraged.
-
+                   Hence its support is limited and it use is not encouraged.
                    **Please use it with caution.**
 
 
