@@ -1998,3 +1998,9 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
         super().erinqr(*args, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.wrinqr)
+    def wrinqr(self, *args, **kwargs):
+        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
+        super().wrinqr(*args, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)

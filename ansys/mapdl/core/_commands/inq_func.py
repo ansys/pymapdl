@@ -1276,3 +1276,74 @@ class inq_function:
 
         """
         return self.run(f"{pname} = erinqr({key})", **kwargs)
+
+    def wrinqr(self, key, pname='__tmpvar__', **kwargs):
+        """Obtain information about output
+
+        .. warning:: **DISCLAIMER**: This function is un-documented in the
+                   official ANSYS Command Reference Guide.
+                   Hence its support is limited and it use is not encouraged.
+                   **Please use it with caution.**
+
+        .. warning:: Caution: the following variables are "saved/resumed".
+                    key=WR_COLINTER thru WR_SUPCOLMAX in "wrinqr/wrinfo".
+
+        Parameters
+        ----------
+        key  :  int or str
+            Key.
+
+            * WR_PRINT        (kprint)
+              Print flag.
+
+              * 0 - no output
+              * 1 - print
+
+            * WR_OUTPUT       (outfil)
+              Current output unit number(iott).
+            * WR_MASTEROUT    (frstot)
+              Master output file.
+            * WR_COLINTER     (intcol)
+              Interactive columns per page.
+            * WR_COLBATCH     (batcol)
+              Batch columns per page.
+            * WR_LINEINTER    (intlin)
+              Interactive lines per page.
+            * WR_LINEBATCH    (batlin)
+              Batch lines per page.
+            * WR_COMMASEP     (CommaSep)
+              1 for comma separated output.
+            * WR_CHARITEM     (chrper)
+              Characters per output item.
+            * WR_CHARDECIMAL  (chrdec)
+              Characters past decimal.
+            * WR_CHARINTEGER  (chrint)
+              Characters in leading integer.
+            * WR_CHARTYPE     (chrtyp)
+
+              * 1 - using E format in output.
+              * 2 - using F format in output.
+              * 3 - using G format in output.
+
+            * WR_SUPTITLE     (keyhed)
+              Tlabel supress key.
+            * WR_SUPSUBTITLE  (keytit)
+              Subtitle supress key.
+            * WR_SUPLSITER    (keyid)
+              Ls,iter id supress key.
+            * WR_NOTELINE     (keynot)
+              Note line supress key.
+            * WR_SUPCOLHEADER (keylab)
+               column header supress key.
+            * WR_SUPCOLMAX    (keysum)
+              Column maximum supress key.
+            * WR_LISTOPT      (ListOpt)
+              ListOpt from /output command.
+
+        Returns
+        -------
+        int or str
+            The value corresponding to key.
+
+        """
+        return self.run(f"{pname} = wrinqr({key})", **kwargs)
