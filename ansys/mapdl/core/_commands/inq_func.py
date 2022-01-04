@@ -15,13 +15,13 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int or str
+        node  :  int
             node number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int or str
+        key  :  int
             key as to information needed about the node.
 
             *  DB_SELECTED    - return select status:
@@ -98,13 +98,13 @@ class inq_function:
 
         Parameters
         ----------
-        ielem  :  int or str
+        ielem  :  int
             Element number.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, ``DB_MAXRECLENG``,
             or 199
 
-        key  :  int or str
+        key  :  int
             information flag.
 
             *  DB_SELECTED    - return select status:                (1)
@@ -177,10 +177,10 @@ class inq_function:
 
         Parameters
         ----------
-        knmi  :  int or str
+        knmi  :  int
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  int or str
+        key  :  int
             Information flag.
 
             *  1 - return select
@@ -280,10 +280,10 @@ class inq_function:
 
         Parameters
         ----------
-        lnmi  :  int or str
+        lnmi  :  int
             Line segment for inquire. It should be 0 for key=11 thru 15.
 
-        key  :  float or str
+        key  :  float
             key as to information needed about the ``lnmi``.
 
             *   1, return select
@@ -369,10 +369,10 @@ class inq_function:
 
         Parameters
         ----------
-        anmi  :  int or str
+        anmi  :  int
             Area for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float or str
+        key  :  float
             Key as to information needed about the ``anmi``.
 
             *   1, return select
@@ -438,8 +438,8 @@ class inq_function:
             * -1 = ``anmi`` is unselected.
             * 1 = ``anmi`` is selected.
 
-            For key ne 1 returned data is based
-            on setting of key.
+          For key not equal to 1, the returned data is based
+          on setting of key.
         """
         return self.run(f"{pname} = arinqr({anmi}, {key})", **kwargs)
 
@@ -456,10 +456,10 @@ class inq_function:
 
         Parameters
         ----------
-        vnmi  :  int or str
+        vnmi  :  int
             Volume for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float or str
+        key  :  float
             Key as to information needed about the ``vnmi``.
 
             *   1, return select
@@ -526,13 +526,13 @@ class inq_function:
 
         Parameters
         ----------
-        nreal  :  int or str
+        nreal  :  int
             Real constant table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int or str
+        key  :  int
             Information flag.
 
             *  5 - return number of values stored for nreal.
@@ -572,10 +572,10 @@ class inq_function:
 
         Parameters
         ----------
-        ngap  :  int or str
+        ngap  :  int
             gap number for inquire (must be zero for now).
 
-        key  :  int or str
+        key  :  int
             key as to the information needed
 
             *   1, return select
@@ -610,10 +610,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int or str
+        node  :  int
             Node number for inquire (must be zero for now).
 
-        key  :  int or str
+        key  :  int
             Key as to the information needed
 
             *   1, return select
@@ -633,7 +633,7 @@ class inq_function:
 
         Returns
         -------
-        masiqr  int or str
+        masiqr  int
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
@@ -648,10 +648,10 @@ class inq_function:
 
         Parameters
         ----------
-        nce  :  int or str
+        nce  :  int
             Constraint equation number
 
-        key  :  int or str
+        key  :  int
             Inquiry key.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
@@ -703,10 +703,10 @@ class inq_function:
 
         Parameters
         ----------
-        ncp  :  int or str
+        ncp  :  int
             Coupled set number
 
-        key  :  int or str
+        key  :  int
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
@@ -755,12 +755,12 @@ class inq_function:
 
         Parameters
         ----------
-        ncsy  :  int or str
+        ncsy  :  int
             Coordinate system reference number
             should be zero for key= ``DB_NUMDEFINED``
             or ``DB_MAXDEFINED``
 
-        key  :  int or str
+        key  :  int
             Information flag.
 
             *  ``DB_SELECTED``    - return status:
@@ -796,13 +796,13 @@ class inq_function:
 
         Parameters
         ----------
-        itype  :  int or str
+        itype  :  int
             Element type number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-        key  :  int or str
+        key  :  int
             Information flag.
 
             *  DB_SELECTED    - return select status:
@@ -846,12 +846,12 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int or str
+        node  :  int
             Number of node being inquired about.
             should be 0 for key=``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
-        key  :  float or str
+        key  :  float
             Key as to information needed
 
             *  1              - return force mask for node
@@ -884,13 +884,13 @@ class inq_function:
 
         Parameters
         ----------
-        nsect  :  int or str
+        nsect  :  int
             Section id table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int or str
+        key  :  int
             Information flag.
             *  DB_SELECTED - return select status
               *  0 - ection id table is undefined.
@@ -946,12 +946,12 @@ class inq_function:
 
         Parameters
         ----------
-        mat  :  int or str
+        mat  :  int
             Material number
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
 
-        iprop  :  int or str
+        iprop  :  int
             Property reference number (See notes).
 
             If iprop = 0, test for existence of any material property with this
@@ -984,7 +984,7 @@ class inq_function:
 
                 (see ``TB`` command for more information)
 
-        key  :  int or str
+        key  :  int
             Key as to the information needed about material property.
 
             *  ``DB_SELECTED(1)``- return select status:
@@ -1023,10 +1023,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int or str
+        node  :  int
             Node number
 
-        idf  :  int or str
+        idf  :  int
             Pointer to the dof (1-32)
 
             * 1 = ux,
@@ -1052,7 +1052,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = SP01-SP06
 
-        kcmplx  :  int or str
+        kcmplx  :  int
 
             * 0 = real
             * 1 = imaginary
@@ -1065,7 +1065,7 @@ class inq_function:
 
         Returns
         -------
-        float or str
+        float
             Constraint value (High number if undefined)
         """
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
@@ -1080,10 +1080,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int or str
+        node  :  int
             Node number
 
-        idf  :  int or str
+        idf  :  int
             Pointer to the dof (1-32)
 
             * 1 = ux
@@ -1109,7 +1109,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = spares
 
-        kcmplx  :  int or str
+        kcmplx  :  int
 
             * 0 = real
             * 1 = imaginary
@@ -1122,7 +1122,7 @@ class inq_function:
 
         Returns
         -------
-        float or str
+        float
             Force value (high number if undefined)
         """
         return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
@@ -1137,7 +1137,7 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int or str
+        key  :  int
             Item to be returned.
 
             * 1 = keyerr (ER_ERRORFLAG)
@@ -1278,7 +1278,7 @@ class inq_function:
         return self.run(f"{pname} = erinqr({key})", **kwargs)
 
     def wrinqr(self, key, pname='__tmpvar__', **kwargs):
-        """Obtain information about output
+        """Obtain information about output.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
                    official ANSYS Command Reference Guide.
@@ -1290,56 +1290,56 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int or str
+        key  :  int
             Key.
 
-            * WR_PRINT (kprint)				 key =  1
+            *  1                        kprint (WR_PRINT)
               Print flag.
 
               * 0 - no output
               * 1 - print
 
-            * WR_OUTPUT (outfil)				 key =  2
+            *  2 - outfil (WR_OUTPUT)
               Current output unit number(iott).
-            * WR_MASTEROUT (frstot)			 key =  4
+            *  4 - frstot (WR_MASTEROUT)
               Master output file.
-            * WR_COLINTER (intcol)			 key =  5
+            *  5 - intcol (WR_COLINTER)
               Interactive columns per page.
-            * WR_COLBATCH (batcol)			 key =  6
+            *  6 - batcol (WR_COLBATCH)
               Batch columns per page.
-            * WR_LINEINTER (intlin)			 key =  7
+            *  7 - intlin (WR_LINEINTER)
               Interactive lines per page.
-            * WR_LINEBATCH (batlin)			 key =  8
+            *  8 - batlin (WR_LINEBATCH)
               Batch lines per page.
-            * WR_COMMASEP (CommaSep)			 key =  9
+            *  9 - CommaSep (WR_COMMASEP)
               1 for comma separated output.
-            * WR_CHARITEM (chrper)			 key = 11
+            * 11 - chrper (WR_CHARITEM)
               Characters per output item.
-            * WR_CHARDECIMAL (chrdec)			 key = 12
+            * 12 - chrdec (WR_CHARDECIMAL)
               Characters past decimal.
-            * WR_CHARINTEGER (chrint)			 key = 13
+            * 13 - chrint (WR_CHARINTEGER)
               Characters in leading integer.
-            * WR_CHARTYPE (chrtyp)			 key = 14
+            * 14 - chrtyp (WR_CHARTYPE)
 
               * 1 - using E format in output.
               * 2 - using F format in output.
               * 3 - using G format in output.
 
-            * WR_TEMPLINEBATCH ( )			 key = 15
+            * 15 -  (WR_TEMPLINEBATCH)
               Undocumented (50 default).
-            * WR_SUPTITLE (keyhed)			 key = 16
+            * 16 - keyhed (WR_SUPTITLE)
               Tlabel suppress key.
-            * WR_SUPSUBTITLE (keytit)			 key = 17
+            * 17 - keytit (WR_SUPSUBTITLE)
               Subtitle suppress key.
-            * WR_SUPLSITER (keyid)			 key = 18
+            * 18 - keyid (WR_SUPLSITER)
               Ls,iter id suppress key.
-            * WR_NOTELINE (keynot)			 key = 19
+            * 19 - keynot (WR_NOTELINE)
               Note line suppress key.
-            * WR_SUPCOLHEADER (keylab)		 key = 20
+            * 20 - keylab (WR_SUPCOLHEADER)
                column header suppress key.
-            * WR_SUPCOLMAX (keysum)			 key = 21
+            * 21 - keysum (WR_SUPCOLMAX)
               Column maximum suppress key.
-            * WR_LISTOPT (ListOpt)			 key = 22
+            * 22 - ListOpt (WR_LISTOPT)
               ListOpt from /output command.
 
         Returns
