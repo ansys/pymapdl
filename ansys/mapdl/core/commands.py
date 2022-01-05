@@ -17,6 +17,7 @@ from ._commands import (
     display_,
     conn,
     misc,
+    inq_func
 )
 
 import numpy as np
@@ -251,6 +252,10 @@ class SolutionCommands(
 ):
     pass
 
+class InqFunctions(
+    inq_func.inq_function
+):
+    pass
 
 class Commands(
     APDLCommands,
@@ -271,6 +276,7 @@ class Commands(
     conn.Conn,
     hidden._Hidden,
     map_cmd.MapCommand,
+    InqFunctions
 ):
 
     """Wrapped MAPDL commands"""
@@ -302,12 +308,13 @@ class CommandOutput(str):
 
     @property
     def cmd(self):
+        """Cached original command to generate this command output."""
         return self._cmd.split(',')[0]
 
     @cmd.setter
     def cmd(self, cmd):
         """Not allowed to change the value of ``cmd``."""
-        pass
+        raise AttributeError("The `cmd` attribute cannot be set")
 
     @property
     def command(self):
