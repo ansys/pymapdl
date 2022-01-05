@@ -2157,6 +2157,7 @@ class _MapdlCore(Commands):
             response = self._response
             for err_str in _PERMITTED_ERRORS:
                 response = re.sub(err_str, "", response)
+                return response
 
             if "*** ERROR ***" in response:
                 # We don't need to log exception because they already included in the main logger.
