@@ -29,7 +29,7 @@ Element Type(s):
 
 Material Properties
  - :math:`E = 10.5 \cdot 10^6 psi`
- - :math:`Nu = 0.3125`
+ - :math:`\nu = 0.3125`
 
 Geometric Properties:
  - :math:`l = 10.35  in`
@@ -66,7 +66,7 @@ def start_prep7():
     mapdl.verify()
     mapdl.prep7()
 
-# Call the function.
+
 start_prep7()
 
 
@@ -100,12 +100,12 @@ def define_element(elem_type):
         # Element type: SHELL181.
         mapdl.et(elem_num, "SHELL281")
 
-    # Show currently defined element type.
-    print(mapdl.etlist())
-    return elem_type
+    return elem_type, mapdl.etlist()
 
-# Call the function and get the number of the element type.
-elem_type = define_element(elem_type="SHELL181")
+# Return the number of the element type.
+elem_type, elem_type_list = define_element(elem_type="SHELL181")
+print(f"Selected element type is: {elem_type},\n"
+      f"Printout the element list with its own properties:\n {elem_type_list}")
 
 
 ###############################################################################
@@ -113,7 +113,7 @@ elem_type = define_element(elem_type="SHELL181")
 # ~~~~~~~~~~~~~~~
 # Set up the material properties, where:
 # Young Modulus is :math:`E = 10.5 \cdot 10^6 psi`,
-# Poisson's ratio is :math:`Nu = 0.3125`.
+# Poisson's ratio is :math:`\nu = 0.3125`.
 
 # Define material number.
 mat_num = 1
@@ -123,10 +123,11 @@ def define_material():
     # Define material properties.
     mapdl.mp("EX", mat_num, 10.5E6)
     mapdl.mp("NUXY", mat_num, 0.3125)
-    print(mapdl.mplist())
+    return mapdl.mplist()
 
-# Call the function.
-define_material()
+material_list = define_material()
+print(material_list)
+
 
 ###############################################################################
 # Define Section
@@ -142,9 +143,10 @@ def define_section():
     # Define shell cross-section.
     mapdl.sectype(secid=sec_num, type_="SHELL", name="shell181")
     mapdl.secdata(t, mat_num, 0, 5)
+    return mapdl.slist()
 
-# Call the function.
-define_section()
+section_list = define_section()
+print(section_list)
 
 
 ###############################################################################
@@ -181,8 +183,8 @@ def define_geometry():
                     show_area_numbering=True,
                     show_lines=True)
 
-# Call the function.
 define_geometry()
+
 
 # Define the number of the keypoint where F is applied using inline function.
 def keypoint_number(mapdl):
@@ -191,6 +193,7 @@ def keypoint_number(mapdl):
 
 # Call the function to get the number of keypoint.
 top_keypoint = keypoint_number(mapdl)
+print(f"The number of the keypoint where F is applied: {top_keypoint}")
 
 
 ###############################################################################
@@ -233,7 +236,6 @@ def meshing():
     # Print the list of nodes.
     print(mapdl.nlist())
 
-# Call the function.
 meshing()
 
 
@@ -253,7 +255,6 @@ def define_bc():
     mapdl.dsym("SYMM", "Z", 0)
     mapdl.nsel("ALL")
 
-# Call the function.
 define_bc()
 
 
@@ -271,7 +272,6 @@ def define_loads():
     mapdl.fk(top_keypoint, "FY", -force)
     mapdl.finish()
 
-# Call the function.
 define_loads()
 
 
@@ -284,11 +284,10 @@ def solve_procedure():
     mapdl.run("/solu")
     out = mapdl.solve()
     mapdl.finish()
-    print(out)
+    return out
 
-# Call the function.
-solve_procedure()
-
+simulation_info = solve_procedure()
+print(simulation_info)
 
 ###############################################################################
 # Post-processing
@@ -302,7 +301,6 @@ def post_processing():
     mapdl.post1()
     mapdl.set(1)
 
-# Call the function.
 post_processing()
 
 
@@ -322,7 +320,6 @@ def plot_nodal_disp():
         show_edges=True
     )
 
-# Call the function.
 plot_nodal_disp()
 
 
@@ -342,21 +339,18 @@ def get_displacements():
     # Get the number of the selected node by :meth:`Mapdl.get <ansys.mapdl.core.Mapdl.get>`
     top_node = int(mapdl.get("_", "node", 0, "num", "max"))
 
-    # Check the number of the selected node.
-    print(top_node)
-
     # Define radial displacement at the node where F is applied.
     deflect_shell = mapdl.get_value(entity='node',
                                     entnum=top_node,
                                     item1='u',
                                     it1num='y')
 
-    # Use ``round()`` function to obtain needed number of decimals.
-    print(round(deflect_shell, 4))
-    return deflect_shell
+    return top_node, deflect_shell
 
 # Call the function and get the value of the deflection.
-deflect_shell_181 = get_displacements()
+top_node_181, deflect_shell_181 = get_displacements()
+print(f"Number of the node attached to the top keypoint: {top_node_181},\n"
+      f"Radial displacement: {(round(deflect_shell_181, 4))}")
 
 
 ###############################################################################
@@ -392,7 +386,7 @@ solve_procedure()
 
 post_processing()
 plot_nodal_disp()
-deflect_shell_281 = get_displacements()
+top_node_281, deflect_shell_281 = get_displacements()
 
 
 ###############################################################################
@@ -418,8 +412,8 @@ output = f"""
 ----------------------------------------------------------------------------
                             |   TARGET   |   Mechanical APDL   |   RATIO   |
 ----------------------------------------------------------------------------
-    Deflection, in SHELL181{deflect_target_181:11.4f} {abs(deflect_shell_181):17.4f} {deflect_ratio_shell_181:15.4f}
-    Deflection, in SHELL281{deflect_target_281:11.4f} {abs(deflect_shell_281):17.4f} {deflect_ratio_shell_281:15.4f}
+    Deflection, in SHELL181{deflect_target_181:11.4f} {abs(deflect_shell_181):17.4f} {deflect_ratio_shell_181:15.3f}
+    Deflection, in SHELL281{deflect_target_281:11.4f} {abs(deflect_shell_281):17.4f} {deflect_ratio_shell_281:15.3f}
 ----------------------------------------------------------------------------
 """
 print(output)
