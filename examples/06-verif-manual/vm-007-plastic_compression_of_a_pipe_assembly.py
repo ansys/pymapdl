@@ -202,13 +202,13 @@ plt.plot(steel["strain_s"], steel["stress_s"],
 plt.plot(xp, yp, marker='o')
 
 # Annotation settings
-plt.annotate('sigma_y_steel', xy=(0.032, 86000), xytext=(0.05, 75000),
+plt.annotate('sigma_y_steel', xy=(xp, yp), xytext=(0.05, 75000),
              arrowprops=dict(facecolor='steelblue', shrink=0.05),
              bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round,pad=1'))
 
 # Define stress - strain properties of the aluminum.
 aluminum = {"stress_a": [0, 55000, 55000, 55000],
-             "strain_a": [0, 0.05, 0.1, 0.2]}
+            "strain_a": [0, 0.05, 0.1, 0.2]}
 
 # Define yielding strength point of the Aluminum on the curve.
 xp = aluminum["strain_a"][1]
@@ -221,7 +221,7 @@ plt.plot(aluminum["strain_a"], aluminum["stress_a"],
 plt.plot(xp, yp, marker='o')
 
 # Annotation settings
-plt.annotate('sigma_y_aluminum', xy=(Xp, Yp), xytext=(0.07, 45000),
+plt.annotate('sigma_y_aluminum', xy=(xp, yp), xytext=(0.07, 45000),
              arrowprops=dict(facecolor='sandybrown', shrink=0.05),
              bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round,pad=1'))
 
@@ -543,35 +543,41 @@ df = pd.DataFrame(main_columns, index=row_indexing)
 
 df.style.set_caption('Results Comparison',
                      ).set_table_styles([
-    {
-        "selector": "th.col_heading",
-        "props": [("background-color", "#FFEFD5"), ("color", "black"),
-                  ("border", "0.5px solid black"),
-                  ("font-style", "italic"), ("text-align", "center")]
-    },
-    {
-        "selector": "th.row_heading",
-        "props": [("background-color", "#FFEFD5"), ("color", "black"),
-                  ("border", "0.5px solid black"),
-                  ("font-style", "italic"), ("text-align", "center")]
-    },
-    {
-        "selector": "td:hover",
-        "props": [("background-color", "#FFF8DC")]
-    },
-    {
-        "selector": "th",
-        "props": [("max-width", '120px')]
-    },
-    {
-        "selector": "",
-        "props": [('border', '0.5px solid black')]
-    },
-    {
-        'selector': 'caption',
-        'props': [('color', 'black'), ("font-style", "italic"),
-                  ('font-size', '24px'), ("text-align", "center")]
-    }],
+                        {
+                            "selector": "th.col_heading",
+                            "props": [("background-color", "#FFEFD5"),
+                                      ("color", "black"),
+                                      ("border", "0.5px solid black"),
+                                      ("font-style", "italic"),
+                                      ("text-align", "center")]
+                        },
+                        {
+                            "selector": "th.row_heading",
+                            "props": [("background-color", "#FFEFD5"),
+                                      ("color", "black"),
+                                      ("border", "0.5px solid black"),
+                                      ("font-style", "italic"),
+                                      ("text-align", "center")]
+                        },
+                        {
+                            "selector": "td:hover",
+                            "props": [("background-color", "#FFF8DC")]
+                        },
+                        {
+                            "selector": "th",
+                            "props": [("max-width", '120px')]
+                        },
+                        {
+                            "selector": "",
+                            "props": [('border', '0.5px solid black')]
+                        },
+                        {
+                            'selector': 'caption',
+                            'props': [('color', 'black'),
+                                      ("font-style", "italic"),
+                                      ('font-size', '24px'),
+                                      ("text-align", "center")]
+                        }],
 ).set_properties(**{
     "background-color": "#FFFAFA",
     "color": "black",
