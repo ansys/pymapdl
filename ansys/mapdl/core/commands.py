@@ -20,7 +20,6 @@ from ._commands import (
 )
 
 import numpy as np
-import re
 
 try:
     import pandas as pd
@@ -29,8 +28,42 @@ try:
 except ImportError:
     HAS_PANDAS = False
 
+MSG_NOT_PANDAS = "'Pandas' is not installed or could not be found.\nHence this command is not applicable."
+
 # Identify where the data start in the output
 GROUP_DATA_START = ['NODE', 'ELEM']
+
+# Allowed commands to get output as array or dataframe.
+# In theory (from 'paprnt.F' and 'post1.F'), these commands
+# should follow the same format.
+CMD_LISTING = [
+    'PRIN',
+    'NLIN',
+    'PRNS',
+    'PRES',
+    'PRET',
+    'PRVE',
+    'PRRS',
+    'PRPA',
+    'PRSE',
+    'PRIT',
+    'PRER',
+    'PRDI',
+    'PREF',
+    'PRNL',
+    'PRRF',
+    'PRST',
+    'STAT',
+    'PRSS',
+    'PRGS',
+    'PRJS',
+    'SWLI',
+    'PROR',
+    'PRCI',
+    'PREN',
+    'PRNM',
+    'PRXF'
+]
 
 # Formatting dataframe output.
 COLUMNS_INT = ['NODE', 'ELEM', 'MAT', 'TYP', 'REL', 'ESY', 'SEC']
@@ -285,73 +318,16 @@ class CommandOutput(str):
         """Not allowed to change the value of ``command``."""
         pass
 
-
-# To be deleted after first review of PR.
-class CommandOutput2(str):
-
-    ## References:
-    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
-    # - https://docs.python.org/3/library/collections.html#userstring-objects
-    # - Source code of UserString
-
-    def __new__(cls, content, cmd=None):
-        obj = super().__new__(cls, content)
-        obj._cmd = cmd
-        return obj
-
-    # def _copyobj(self, seq):
-    #     # __new__ needs type and the args.
-    #     # return self.__new__(type(self), seq, self._cmd)
-
-    def __getattribute__(self, name):
-        if name in dir(str) and name != '_copyobj': # only handle str methods here
-            def method(self, *args, **kwargs):
-                value = getattr(super(), name)(*args, **kwargs)
-                # not every string method returns a str:
-                if isinstance(value, str) and not isinstance(value, CommandOutput2):
-                    # return type(self)(value)
-                    return self.__new__(value, self._cmd)
-
-                elif isinstance(value, list):
-                    return [self.__new__(i, self._cmd) for i in value]
-
-                elif isinstance(value, tuple):
-                    return tuple(self.__new__(i, self._cmd) for i in value)
-                else: # dict, bool, or int or type
-                    return value
-            return method.__get__(self) # bound method
-        # else: # delegate to parent
-        #     return super().__getattribute__(name)
-
-
-class CommandListing(CommandOutput):
+class CommandListingOutput(CommandOutput):
     """
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
 
-    This class adds the next useful commands (methods):
-    * ``get_lists``
-    * ``get_array``
-    * ``get_dataframe``
-
-    Also it adds the next functions as custom data processing helpers:
-    * ``custom_data_start``
-    * ``custom_data_end``
-
     This class is a subclass of ``CommandOutput``.
     """
-    def __new__(cls, content, cmd=None):
-        obj = super().__new__(cls, content, cmd=cmd)
-        short_cmd = cmd.split(',')[0].strip().upper()
-        if short_cmd not in SUPPORTED_PRINT_CMDS:
-            raise ValueError(f"The command {short_cmd} is not supported yet for conversion to 'CommandListing' class ")
-        # if short_cmd not in _ALLOWED_CMD_TO_DF:
-        #     raise ValueError(f"The command '{short_cmd}' cannot have an array or Pandas DataFrame output.")
-        return obj
-
-    @property
-    def _has_pandas(self):
-        return HAS_PANDAS
+    # def __new__(cls, content, cmd=None):
+    #     obj = super().__new__(cls, content, cmd=cmd)
+    #     return obj
 
     def _is_data_start(self, line, magicword=None):
         """Check if line is the start of a data group."""
@@ -397,28 +373,32 @@ class CommandListing(CommandOutput):
         return None
 
     @staticmethod
-    def _is_empty(each):
+    def _is_empty_line(each):
         if each.split():
             return False
         else:
             return True
 
-    def _separate_columns(self, body):
-        """Replace the '-' sign (not preceded by 'E') by ' -' to ensure there is columns space sparation."""
-        return re.sub(r'[^E](-)', r' \1', body)
-
-    def _get_body(self):
+    def _get_body(self, trail_header=None):
         """Get command body text.
 
         It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
-        body = self.__str__()
-        body = self._separate_columns(body).splitlines()
+        body = self.__str__().splitlines()
 
-        # Removing maximum part
-        if 'MAXIMUM ABSOLUTE VALUES' in self.__str__():
-            ind = [ind for ind, each in enumerate(
-                body) if 'MAXIMUM ABSOLUTE VALUES' in each]
-            body = body[:ind[0]]
+        if not trail_header:
+            trail_header = ['MAXIMUM ABSOLUTE VALUES', 'TOTAL VALUES']
+
+        if not isinstance(trail_header, list):
+            trail_header = list(trail_header)
+
+        # Removing parts matching trail_header
+        for each_trail_header in trail_header:
+            if each_trail_header in self.__str__():
+                # starting to check from the bottom.
+                for i in range(len(body)-1, -1, -1):
+                    if each_trail_header in body[i]:
+                        break
+                body = body[:i]
         return body
 
     def _get_data_group_indexes(self, body, magicword=None):
@@ -431,7 +411,7 @@ class CommandListing(CommandOutput):
 
         # Getting pairs of starting end
         start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
-        end_idxs = [ind - shift for ind, each in enumerate(body) if self._is_empty(each)]
+        end_idxs = [ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)]
 
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
@@ -441,76 +421,16 @@ class CommandListing(CommandOutput):
 
         return zip(start_idxs, ends)
 
-    def _format_df(self, df):
-        """Format the columns data to be an specific data type."""
-        columns = df.columns.to_list()
-        try:
-            dtype_ = str
-            for each in COLUMNS_STR:
-                if each in columns:
-                    df[each] = df[each].astype(dtype_)
-
-            dtype_ = int
-            for each in COLUMNS_INT:
-                if each in columns:
-                    df[each] = df[each].astype(dtype_)
-
-            dtype_ = float
-            for each in columns:
-                if each not in COLUMNS_NOT_FLOAT:
-                    df[each] = df[each].astype(dtype_)
-
-            if 'NODES' in columns:
-                # This is very likely a wrapped column.
-                if isinstance(df['NODES'].values[0], list):
-                    def _convert_to_int(each_row):
-                        return [int(each) for each in each_row]
-                    df['NODES'] = df['NODES'].apply(_convert_to_int)
-
-        except ValueError:
-            raise ValueError(f"The column '{each}' could not be converted to {dtype_}")
-
-        return df
-
-    def _get_raw_list_of_lists(self, magicword=None):
-        """Get raw data as list of lists. No formatting or unwrapping."""
-
-        data = self._get_data_group()
-
-        return [each.split() for each in data if each.split()]
-
-    def _get_data_group(self, magicword=None):
+    def _get_data_groups(self, magicword=None, trail_header=None):
         """Get raw data groups"""
-        body = self._get_body()
+        body = self._get_body(trail_header=trail_header)
 
         data = []
         for start, end in self._get_data_group_indexes(body, magicword=magicword):
             data.extend(body[start+1:end])
 
-        return data
-
-    def get_lists(self, magicword=None):
-        """
-        Get underlying command data as list of list.
-
-        This function assumes that the data groups in each page starts with a header which starts
-        with the magic word and ends with the next empty line.
-
-        Parameters
-        ----------
-        magicword : str, optional
-            Specify a magic word to identify the data group start. By default None, which translate
-            later to ['NODE', 'ELEMENT'].
-
-        Returns
-        -------
-        list of list
-
-        """
-        data = self._get_raw_list_of_lists()
-
-        if self._is_data_wrapper(data):
-            data = self._unwrap_data(data)
+        # removing empty lines
+        data = [each for each in data if each]
 
         return data
 
@@ -527,85 +447,160 @@ class CommandListing(CommandOutput):
         pairs = list(self._get_data_group_indexes(body))
         return body[pairs[0][0]].split()
 
-    def get_array(self):
-        """
-        Get Numpy array of the underlying command data.
+    def _command_checker(func):
+        """Wrapper to check cmd input is allowed."""
+        def func_wrapper(self, *args, **kwargs):
+            short_cmd = self._cmd.split(',')[0][0:4]
+            if short_cmd not in CMD_LISTING:
+                raise ValueError(f"The command '{self._cmd.split(',')[0]}' is not allowed.")
+            else:
+                return func(self, *args, **kwargs)
+        return func_wrapper
 
-        If the command data has text (for example ``DLIST`` which contains the labels
-        ``UX``, ``TEMP``, etc), it is recommended to get this data as dataframe
-        (``get_dataframe``) or as list of list (``get_lists``).
+    def _requires_pandas(func):
+        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+        def func_wrapper(self, *args, **kwargs):
+            if HAS_PANDAS:
+                return func(self, *args, **kwargs)
+            else:
+                raise ModuleNotFoundError(MSG_NOT_PANDAS)
+    @_command_checker
+    def to_lists(self):
+        data = self._get_data_groups()
+        return [each.split() for each in data]
 
-        Returns
-        -------
-        numpy.ndarray
-            This command attemp to return an array of floats, but if there is non-float data,
-            it will return a generic array of objects.
+    @_command_checker
+    def to_numpy(self):
+        return np.array(self.to_lists(), dtype=float)
 
-        """
-        try:
-            return np.array(self.get_lists(), dtype=float)
-        except ValueError:
-            return np.array(self.get_lists())
+    @_command_checker
+    def to_dataframe(self):
+        return pd.DataFrame(data=self.to_numpy(), columns=self.get_columns())
 
-    def get_dataframe(self):
-        """
-        Get Pandas DataFrame of the underlying command data.
+    # ############################################################
+    ## NOTES
+    # The key format files are:
+    # - rptfmt.F
+    # - rptlb4.F
+    # - rptlb8.F
+    #
+    # def get_lists(self, magicword=None):
+    #     """
+    #     Get underlying command data as list of list.
 
-        It requires to have Pandas installed. In case you don't, it will return ``None``
-        but it won't raise an error.
+    #     This function assumes that the data groups in each page starts with a header which starts
+    #     with the magic word and ends with the next empty line.
 
-        Returns
-        -------
-        Pandas.DataFrame
+    #     Parameters
+    #     ----------
+    #     magicword : str, optional
+    #         Specify a magic word to identify the data group start. By default None, which translate
+    #         later to ['NODE', 'ELEMENT'].
 
-        """
-        if not self._has_pandas:
-            return None
+    #     Returns
+    #     -------
+    #     list of list
 
-        data = self.get_lists()
-        columns = self.get_columns()
+    #     """
+    #     data = self._get_raw_list_of_lists()
 
-        # the data is wrapped to another line
-        if len(columns) != len(data[0]):
-            data = self._fit_columns(data, columns)
+    #     if self._is_data_wrapper(data):
+    #         data = self._unwrap_data(data)
 
-        df = pd.DataFrame(data=data, columns=columns)
+    #     return data
 
-        return self._format_df(df)
+    # def get_columns(self):
+    #     """
+    #     Get the column names for the dataframe.
 
-    def _fit_columns(self, data, columns):
-        col_len = len(columns)
-        # the last column will encompass all the exceeding data
-        def group(each, col_len):
-            col_len_ = col_len-1
-            return *each[:col_len_], each[col_len_:]
-        return [group(each, col_len) for each in data]
+    #     Returns
+    #     -------
+    #     List of strings
 
-    def _is_data_wrapper(self, data):
-        return len(set([len(each) for each in data])) != 1
+    #     """
+    #     body = self._get_body()
+    #     pairs = list(self._get_data_group_indexes(body))
+    #     return body[pairs[0][0]].split()
 
-    def _unwrap_data(self, data):
-        """Unwrap data by assuming there is a pattern"""
-        unique_lengths = set([len(each) for each in data])
-        if len(unique_lengths) != 2:
-            raise ValueError("The data presents more than 2 line lengths. This is unexpected.")
+    # def get_array(self):
+    #     """
+    #     Get Numpy array of the underlying command data.
 
-        line_max = max(unique_lengths)
-        line_min = min(unique_lengths)
+    #     If the command data has text (for example ``DLIST`` which contains the labels
+    #     ``UX``, ``TEMP``, etc), it is recommended to get this data as dataframe
+    #     (``get_dataframe``) or as list of list (``get_lists``).
 
-        skip_next_line = False
+    #     Returns
+    #     -------
+    #     numpy.ndarray
+    #         This command attemp to return an array of floats, but if there is non-float data,
+    #         it will return a generic array of objects.
 
-        data_ = []
-        for ind, each_line in enumerate(data[:-1]):
-            if skip_next_line:
-                skip_next_line = not skip_next_line
+    #     """
+    #     try:
+    #         return np.array(self.get_lists(), dtype=float)
+    #     except ValueError:
+    #         return np.array(self.get_lists())
 
-            next_line = data[ind+1]
-            if len(each_line) == line_max and len(next_line) == line_min:
-                line = each_line.copy()
-                line.extend(next_line)
-                skip_next_line = True
+    # def get_dataframe(self):
+    #     """
+    #     Get Pandas DataFrame of the underlying command data.
 
-            data_.append(line)
+    #     It requires to have Pandas installed. In case you don't, it will return ``None``
+    #     but it won't raise an error.
 
-        return data_
+    #     Returns
+    #     -------
+    #     Pandas.DataFrame
+
+    #     """
+    #     if not self._has_pandas:
+    #         return None
+
+    #     data = self.get_lists()
+    #     columns = self.get_columns()
+
+    #     # the data is wrapped to another line
+    #     if len(columns) != len(data[0]):
+    #         data = self._fit_columns(data, columns)
+
+    #     df = pd.DataFrame(data=data, columns=columns)
+
+    #     return self._format_df(df)
+
+    # def _fit_columns(self, data, columns):
+    #     col_len = len(columns)
+    #     # the last column will encompass all the exceeding data
+    #     def group(each, col_len):
+    #         col_len_ = col_len-1
+    #         return *each[:col_len_], each[col_len_:]
+    #     return [group(each, col_len) for each in data]
+
+    # def _is_data_wrapper(self, data):
+    #     return len(set([len(each) for each in data])) != 1
+
+    # def _unwrap_data(self, data):
+    #     """Unwrap data by assuming there is a pattern"""
+    #     unique_lengths = set([len(each) for each in data])
+    #     if len(unique_lengths) != 2:
+    #         raise ValueError("The data presents more than 2 line lengths. This is unexpected.")
+
+    #     line_max = max(unique_lengths)
+    #     line_min = min(unique_lengths)
+
+    #     skip_next_line = False
+
+    #     data_ = []
+    #     for ind, each_line in enumerate(data[:-1]):
+    #         if skip_next_line:
+    #             skip_next_line = not skip_next_line
+
+    #         next_line = data[ind+1]
+    #         if len(each_line) == line_max and len(next_line) == line_min:
+    #             line = each_line.copy()
+    #             line.extend(next_line)
+    #             skip_next_line = True
+
+    #         data_.append(line)
+
+    #     return data_
