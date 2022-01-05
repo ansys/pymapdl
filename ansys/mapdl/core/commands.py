@@ -219,7 +219,7 @@ class Commands(
 
 
 class CommandOutput(str):
-    """Customized Command Output class"""
+    """Customized command output."""
 
     ## References:
     # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
@@ -233,12 +233,13 @@ class CommandOutput(str):
 
     @property
     def cmd(self):
+        """Cached original command to generate this command output."""
         return self._cmd.split(',')[0]
 
     @cmd.setter
     def cmd(self, cmd):
         """Not allowed to change the value of ``cmd``."""
-        pass
+        raise AttributeError("The `cmd` attribute cannot be set")
 
     @property
     def command(self):

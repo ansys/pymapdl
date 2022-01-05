@@ -49,15 +49,14 @@ ARGS_INQ_FUNC = {
 
 
 def test_cmd_class():
-    OUTPUT = """This is the output.
+    output = """This is the output.
 This is the second line.
 These are numbers 1234567890.
 These are symbols !"£$%^^@~+_@~€
 This is for the format: {format1}-{format2}-{format3}"""
 
-    # Commands options
     cmd = '/INPUT'
-    cmd_out = CommandOutput(OUTPUT, cmd=cmd)
+    cmd_out = CommandOutput(output, cmd=cmd)
 
     assert isinstance(cmd_out, (str, CommandOutput))
     assert isinstance(cmd_out[1:], (str, CommandOutput))
