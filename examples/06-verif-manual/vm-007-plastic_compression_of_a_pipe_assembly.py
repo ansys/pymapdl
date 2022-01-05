@@ -192,14 +192,14 @@ steel = {"stress_s": [0, 86000, 86000, 86000],
          "strain_s": [0, 0.032, 0.1, 0.2]}
 
 # Define yielding strength point of the steel on the curve.
-Xp = steel["strain_s"][1]
-Yp = steel["stress_s"][1]
+xp = steel["strain_s"][1]
+yp = steel["stress_s"][1]
 
 # Set up the settings of the steel curve.
 plt.plot(steel["strain_s"], steel["stress_s"],
          label="1020 CR STEEL", linewidth=2,
          color='steelblue', linestyle="-", marker="o")
-plt.plot(Xp, Yp, marker='o')
+plt.plot(xp, yp, marker='o')
 
 # Annotation settings
 plt.annotate('sigma_y_steel', xy=(0.032, 86000), xytext=(0.05, 75000),
@@ -211,14 +211,14 @@ aluminum = {"stress_a": [0, 55000, 55000, 55000],
              "strain_a": [0, 0.05, 0.1, 0.2]}
 
 # Define yielding strength point of the Aluminum on the curve.
-Xp = aluminum["strain_a"][1]
-Yp = aluminum["stress_a"][1]
+xp = aluminum["strain_a"][1]
+yp = aluminum["stress_a"][1]
 
 # Set up the settings of the aluminum curve.
 plt.plot(aluminum["strain_a"], aluminum["stress_a"],
          label="2024-T4 Aluminum", linewidth=2,
          color='sandybrown', linestyle="-", marker="o")
-plt.plot(Xp, Yp, marker='o')
+plt.plot(xp, yp, marker='o')
 
 # Annotation settings
 plt.annotate('sigma_y_aluminum', xy=(Xp, Yp), xytext=(0.07, 45000),
