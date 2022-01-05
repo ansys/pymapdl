@@ -17,3 +17,4 @@ sphinx-gallery>=0.8.1
 sphinx-notfound-page>=0.3.0
 sphinxcontrib-websupport
 vtk<9.1.0
+pyvista==0.32.1
