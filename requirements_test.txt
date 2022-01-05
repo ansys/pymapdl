@@ -5,3 +5,4 @@ pytest
 pytest-cov
 vtk<9.1.0
 pyvista>=0.24.0
+pandas>=1.3.0
