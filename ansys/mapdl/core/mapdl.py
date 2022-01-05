@@ -28,7 +28,7 @@ from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core import LOG as logger
-
+from ansys.mapdl.reader.rst import Result
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -123,7 +123,7 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
-                log_file=True, local=True, **start_parm):
+                log_file=False, local=True, **start_parm):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -144,8 +144,14 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        # Setting up logger
-        self._log = logger.add_instance_logger(self._name, self, level=loglevel)
+        # Setting up loggers
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
+        # adding a file handler to the logger
+        if log_file:
+            if not isinstance(log_file, str):
+                log_file = 'instance.log'
+            self._log.log_to_file(filename=log_file, level=loglevel)
+
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
@@ -1378,7 +1384,7 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self):
+    def result(self) -> Result:
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
