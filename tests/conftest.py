@@ -1,6 +1,7 @@
 from pathlib import Path
 from collections import namedtuple
 import os
+import signal
 import time
 
 import pytest
@@ -76,7 +77,10 @@ if START_INSTANCE and EXEC_FILE is None:
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
-        os.kill(pid, 0)
+        # There are two main options:
+        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
+        # - Kill signal (KILLTER). int=9. Hard termination
+        os.kill(pid, signal.SIGTERM)
     except OSError:
         return False
     else:
