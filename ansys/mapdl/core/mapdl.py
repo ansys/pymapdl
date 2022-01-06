@@ -2448,7 +2448,6 @@ class _MapdlCore(Commands):
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
         if self._cleanup:
-            logger.debug("Exiting MAPDL %s on collection.", self._name)
             try:
                 self.exit()
             except Exception as e:
@@ -2457,11 +2456,6 @@ class _MapdlCore(Commands):
                         self._log.error("exit: %s", str(e))
                 except Exception:
                     pass
-        else:
-            logger.debug(
-                "Not exiting MAPDL %s on collection due to ``cleanup_on_exit=False``",
-                self._name
-            )
 
     @supress_logging
     def get_array(
