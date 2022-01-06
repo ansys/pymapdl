@@ -1,18 +1,9 @@
 name: Nightly Documentation Build
 
-# on:
-#   schedule:  # UTC at 0400
-#     - cron:  '0 4 * * *'
-#   workflow_dispatch:
-
 on:
-  pull_request:
+  schedule:  # UTC at 0400
+    - cron:  '0 4 * * *'
   workflow_dispatch:
-  push:
-    tags:
-      - "*"
-    branches:
-      - main
 
 jobs:
   nightly_docs_build:
@@ -28,6 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # used for documentation deployment
       - name: Get Bot Application Token
         id: get_workflow_token
         uses: peter-murray/workflow-application-token-action@v1
@@ -42,8 +34,8 @@ jobs:
 
       - name: Install OS packages
         run: |
-          sudo apt update
-          sudo apt install libgl1-mesa-glx xvfb
+          sudo apt-get update
+          sudo apt-get install libgl1-mesa-glx xvfb pandoc -qy
 
       - name: Install ansys-mapdl-core
         run: |
@@ -66,7 +58,6 @@ jobs:
   
       - name: Build Documentation
         run: |
-          sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
           xvfb-run make -C doc html
 
