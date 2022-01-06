@@ -1,37 +1,41 @@
 """
-``log`` module
-*******************
+``logging`` module
+**************
 
 ## Objective
-This module intends to create a general framework for logging in Pymapdl.
-This module is built upon ``logging`` library and it does NOT intend to replace it rather provide a way to interact between ``logging`` and ``Pymapdl``.
+This module intends to create a general framework for logging in
+Pymapdl.  This module is built upon ``logging`` library and it does
+NOT intend to replace it rather provide a way to interact between
+``logging`` and ``Pymapdl``.
 
-The loggers used in the module include the name of the instance which is intended to be unique.
-This name is printed in all the active outputs and it is used to track the different MAPDL instances.
+The loggers used in the module include the name of the instance which
+is intended to be unique.  This name is printed in all the active
+outputs and it is used to track the different MAPDL instances.
 
 
 Usage
-----------
+-----
 
 Global logger
 ~~~~~~~~~~~~~~~~~
 
-There is a global logger named ``pymapdl_global`` which is created at ``ansys.mapdl.core.__init__``.
-If you want to use this global logger, you must call at the top of your module:
+There is a global logger named ``pymapdl_global`` which is created at
+``ansys.mapdl.core.__init__``.  If you want to use this global logger,
+you must call at the top of your module:
 
-.. code::
+.. code:: python
     from ansys.mapdl.core import LOG
 
 You could also rename it to avoid conflicts with other loggers (if any):
 
-.. code::
+.. code:: python
     from ansys.mapdl.core import LOG as logger
 
 
 It should be noticed that the default logging level of ``LOG`` is ``ERROR``.
 To change this and output lower level messages you can use the next snippet:
 
-.. code::
+.. code:: python
    LOG.logger.setLevel('DEBUG')
    LOG.file_handler.setLevel('DEBUG')  # If present.
    LOG.stdout_handler.setLevel('DEBUG')  # If present.
@@ -39,79 +43,78 @@ To change this and output lower level messages you can use the next snippet:
 
 Alternatively, you can do:
 
-.. code::
+.. code:: python
    LOG.setLevel('DEBUG')
 
 
 This way ensures all the handlers are set to the input log level.
 
-By default, this logger does not log to a file. If you wish to do so, you can add a file handler using:
+By default, this logger does not log to a file. If you wish to do so,
+you can add a file handler using:
 
-.. code::
+.. code:: python
    import os
    file_path = os.path.join(os.getcwd(), 'pymapdl.log')
    LOG.log_to_file(file_path)
 
 
-This sets the logger to be redirected also to that file.
-If you wish to change the characteristics of this global logger from the beginning of the execution,
-you must edit the file ``__init__`` in the directory ``ansys.mapdl.core``.
+This sets the logger to be redirected also to that file.  If you wish
+to change the characteristics of this global logger from the beginning
+of the execution, you must edit the file ``__init__`` in the directory
+``ansys.mapdl.core``.
 
 To log using this logger, just call the desired method as a normal logger.
 
-.. code::
+.. code:: python
     >>> import logging
     >>> from ansys.mapdl.core.logging import Logger
     >>> LOG = Logger(level=logging.DEBUG, to_file=False, to_stdout=True)
     >>> LOG.debug('This is LOG debug message.')
 
-       | Level    | Instance        | Module           | Function             | Message
-    |----------|-----------------|------------------|----------------------|--------------------------------------------------------
-    | DEBUG    |                 |  __init__        | <module>             | This is LOG debug message.
+    DEBUG -  -  <ipython-input-24-80df150fe31f> - <module> - This is LOG debug message.
 
 
-
-Instance logger
-~~~~~~~~~~~~~~~~~
-Every time that the class ``_MapdlCore`` is instantiated, a logger is created and stored in two places:
+Instance Logger
+~~~~~~~~~~~~~~~
+Every time that the class ``_MapdlCore`` is instantiated, a logger is
+created and stored in two places:
 
 * ``_MapdlCore._log``. For backward compatibility.
 * ``LOG._instances``. This field is a ``dict`` where the key is the name of the created logger.
 
-These instance loggers inheritate the ``pymapdl_global`` output handlers and logging level unless otherwise specified.
-The way this logger works is very similar to the global logger.
-You can add a file handler if you wish using the method ``log_to_file`` or change the log level using ``setLevel`` method.
+These instance loggers inheritate the ``pymapdl_global`` output
+handlers and logging level unless otherwise specified.  The way this
+logger works is very similar to the global logger.  You can add a file
+handler if you wish using the method ``log_to_file`` or change the log
+level using ``setLevel`` method.
 
 You can use this logger like this:
 
 .. code:: python
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> mapdl._log.info('This is an useful message')
+    >>> mapdl._log.info('This is a useful message')
 
-    | Level    | Instance        | Module           | Function             | Message
-    |----------|-----------------|------------------|----------------------|--------------------------------------------------------
-    | INFO     | 127.0.0.1:50052 |  test            | <module>             | This is an useful message
+    INFO - GRPC_127.0.0.1:50056 -  <ipython-input-19-f09bb2d8785c> - <module> - This is a useful message
 
 
 
 Other loggers
 ~~~~~~~~~~~~~~~~~
-You can create your own loggers using python ``logging`` library as you would do in any other script.
-There shall no be conflicts between these loggers.
+You can create your own loggers using python ``logging`` library as
+you would do in any other script.  There shall no be conflicts between
+these loggers.
 
-
-Notes
----------
 
 
 To-Do's
------------
+-------
 
 * [] Make sure the logging level is changed when instance is created.
 
 """
 
+import weakref
 import logging
 from datetime import datetime
 import sys
@@ -157,10 +160,12 @@ string_to_loglevel = {
 class PymapdlCustomAdapter(logging.LoggerAdapter):
     """This is key to keep the reference to the MAPDL instance name dynamic.
 
-    If we use the standard approach which is supplying ``extra`` input to the logger, we
-    would need to keep inputting MAPDL instances every time we do a log.
+    If we use the standard approach which is supplying ``extra`` input
+    to the logger, we would need to keep inputting MAPDL instances
+    every time we do a log.
 
-    Using adapters we just need to specify the MAPDL instance we refer to once.
+    Using adapters we just need to specify the MAPDL instance we refer
+    to once.
     """
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
@@ -169,7 +174,10 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     def __init__(self, logger, extra=None):
         self.logger = logger
-        self.extra = extra
+        if extra is not None:
+            self.extra = weakref.proxy(extra)
+        else:
+            self.extra = None
         self.file_handler = logger.file_handler
         self.std_out_handler = logger.std_out_handler
 
@@ -418,9 +426,13 @@ class Logger():
 
     def _add_mapdl_instance_logger(self, name, mapdl_instance, level):
         if isinstance(name, str):
-            instance_logger = PymapdlCustomAdapter(self._make_child_logger(name, level), mapdl_instance)
+            instance_logger = PymapdlCustomAdapter(
+                self._make_child_logger(name, level), mapdl_instance
+            )
         elif isinstance(name, None):
-            instance_logger = PymapdlCustomAdapter(self._make_child_logger("NO_NAMED_YET", level), mapdl_instance)
+            instance_logger = PymapdlCustomAdapter(
+                self._make_child_logger("NO_NAMED_YET", level), mapdl_instance
+            )
         else:
             raise ValueError("You can only input 'str' classes to this method.")
 
@@ -443,9 +455,9 @@ class Logger():
         Returns
         -------
         ansys.mapdl.core.logging.PymapdlCustomAdapter
-            Logger adapter customized to add MAPDL information to the logs.
-            You can use this class to log events in the same way you would with a logger
-            class.
+            Logger adapter customized to add MAPDL information to the
+            logs.  You can use this class to log events in the same
+            way you would with the logger class.
 
         Raises
         ------
@@ -458,7 +470,9 @@ class Logger():
             count_ += 1
             new_name = name + '_' + str(count_)
 
-        self._instances[new_name] = self._add_mapdl_instance_logger(new_name, mapdl_instance, level)
+        self._instances[new_name] = self._add_mapdl_instance_logger(
+            new_name, mapdl_instance, level
+        )
         return self._instances[new_name]
 
     def __getitem__(self, key):

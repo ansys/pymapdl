@@ -1,15 +1,14 @@
+"""Sphinx documentation configuration file."""
+from datetime import datetime
 import os
 import warnings
 
 import pyvista
 import numpy as np
 from sphinx_gallery.sorting import FileNameSortKey
+from pyansys_sphinx_theme import pyansys_logo_black
 
-import sys
-
-sys.path.append("../..")
 from ansys.mapdl.core import __version__
-
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -39,7 +38,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = "ansys.mapdl.core"
-copyright = "(c) 2021 ANSYS, Inc. All rights reserved"
+copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
 # The short X.Y version
@@ -159,11 +158,10 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 html_theme = "pyansys_sphinx_theme"
-html_logo = os.path.join("_static", "pyansys-logo-black-cropped.png")
+html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
-    "logo_link": "https://docs.pyansys.com/",  # navigate to the main page
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------

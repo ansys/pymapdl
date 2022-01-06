@@ -205,3 +205,9 @@ def test_read_input_file(mapdl, file_name):
     mapdl.clear()
     response = mapdl.input(test_file)
     assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+
+
+def test_no_get_value_non_interactive(mapdl):
+    with pytest.raises(RuntimeError, match="Cannot use gRPC enabled ``GET``"):
+        with mapdl.non_interactive:
+            mapdl.get_value("ACTIVE", item1="CSYS")

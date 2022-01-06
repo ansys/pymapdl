@@ -241,7 +241,7 @@ class Geometry:
             Steps to between amin and amax.
         """
         # store initially selected areas and elements
-        with self._mapdl.chain_commands:
+        with self._mapdl.non_interactive:
             self._mapdl.cm("__tmp_elem__", "ELEM")
             self._mapdl.cm("__tmp_area__", "AREA")
         orig_anum = self.anum
@@ -250,8 +250,6 @@ class Geometry:
         if amin or amax:
             if amax is None:
                 amax = amin
-            else:
-                amax = ""
 
             if amin is None:  # amax is non-zero
                 amin = 1
@@ -263,14 +261,13 @@ class Geometry:
 
         # duplicate areas to avoid affecting existing areas
         a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-        with self._mapdl.chain_commands:
-            self._mapdl.numstr("AREA", a_num)
-            self._mapdl.agen(2, "ALL", noelem=1)
+        self._mapdl.numstr("AREA", a_num, mute=True)
+        self._mapdl.agen(2, "ALL", noelem=1, mute=True)
         a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
-        with self._mapdl.chain_commands:
-            self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max)
-            self._mapdl.aatt()  # necessary to reset element/area meshing association
+        self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+        # necessary to reset element/area meshing association
+        self._mapdl.aatt(mute=True)
 
         # create a temporary etype
         etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
@@ -279,14 +276,13 @@ class Geometry:
 
         old_routine = self._mapdl.parameters.routine
 
-        with self._mapdl.chain_commands:
-            self._mapdl.et(etype_tmp, "MESH200", 6)
-            self._mapdl.shpp("off")
-            self._mapdl.smrtsize(density)
-            self._mapdl.type(etype_tmp)
+        self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
+        self._mapdl.shpp("off", mute=True)
+        self._mapdl.smrtsize(density, mute=True)
+        self._mapdl.type(etype_tmp, mute=True)
 
-            if old_routine != "PREP7":
-                self._mapdl.prep7()
+        if old_routine != "PREP7":
+            self._mapdl.prep7(mute=True)
 
         # Mesh and get the number of elements per area
         resp = self._mapdl.amesh("all")
@@ -301,20 +297,15 @@ class Geometry:
         # pd.clean(inplace=True)  # OPTIONAL
 
         # delete all temporary meshes and clean up settings
-        with self._mapdl.chain_commands:
-            self._mapdl.aclear("ALL")
-            self._mapdl.adele("ALL", kswp=1)
-            self._mapdl.numstr("AREA", 1)
-            self._mapdl.type(etype_old)
-            self._mapdl.etdele(etype_tmp)
-            self._mapdl.shpp("ON")
-            self._mapdl.smrtsize("OFF")
-            self._mapdl.cmsel("S", "__tmp_area__", "AREA")
-            self._mapdl.cmsel("S", "__tmp_elem__", "ELEM")
-
-        # ensure the number of groups matches the number of areas
-        if len(groups) != len(orig_anum):
-            groups = None
+        self._mapdl.aclear("ALL", mute=True)
+        self._mapdl.adele("ALL", kswp=1, mute=True)
+        self._mapdl.numstr("AREA", 1, mute=True)
+        self._mapdl.type(etype_old, mute=True)
+        self._mapdl.etdele(etype_tmp, mute=True)
+        self._mapdl.shpp("ON", mute=True)
+        self._mapdl.smrtsize("OFF", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_elem__", "ELEM", mute=True)
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
@@ -437,23 +428,21 @@ class Geometry:
     def _load_lines(self):
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        with self._mapdl.chain_commands:
-            self._mapdl.cm("__tmp_volu__", "VOLU")
-            self._mapdl.cm("__tmp_line__", "LINE")
-            self._mapdl.cm("__tmp_area__", "AREA")
-            self._mapdl.cm("__tmp_keyp__", "KP")
-            self._mapdl.ksel("ALL")
-            self._mapdl.lsel("ALL")
-            self._mapdl.asel("ALL")
-            self._mapdl.vsel("NONE")
+        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
+        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
+        self._mapdl.cm("__tmp_keyp__", "KP", mute=True)
+        self._mapdl.ksel("ALL", mute=True)
+        self._mapdl.lsel("ALL", mute=True)
+        self._mapdl.asel("ALL", mute=True)
+        self._mapdl.vsel("NONE", mute=True)
 
         iges = self._load_iges()
 
-        with self._mapdl.chain_commands:
-            self._mapdl.cmsel("S", "__tmp_volu__", "VOLU")
-            self._mapdl.cmsel("S", "__tmp_area__", "AREA")
-            self._mapdl.cmsel("S", "__tmp_line__", "LINE")
-            self._mapdl.cmsel("S", "__tmp_keyp__", "KP")
+        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
+        self._mapdl.cmsel("S", "__tmp_keyp__", "KP", mute=True)
 
         selected_lnum = self.lnum
         lines = []
@@ -489,20 +478,18 @@ class Geometry:
     def _load_keypoints(self):
         """Load keypoints from MAPDL using IGES"""
         # write only keypoints
-        with self._mapdl.chain_commands:
-            self._mapdl.cm("__tmp_volu__", "VOLU")
-            self._mapdl.cm("__tmp_area__", "AREA")
-            self._mapdl.cm("__tmp_line__", "LINE")
-            self._mapdl.vsel("NONE")
-            self._mapdl.asel("NONE")
-            self._mapdl.lsel("NONE")
+        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
+        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
+        self._mapdl.vsel("NONE", mute=True)
+        self._mapdl.asel("NONE", mute=True)
+        self._mapdl.lsel("NONE", mute=True)
 
         iges = self._load_iges()
 
-        with self._mapdl.chain_commands:
-            self._mapdl.cmsel("S", "__tmp_volu__", "VOLU")
-            self._mapdl.cmsel("S", "__tmp_area__", "AREA")
-            self._mapdl.cmsel("S", "__tmp_line__", "LINE")
+        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
 
         keypoints = []
         kp_num = []
@@ -887,7 +874,7 @@ class Geometry:
         # LSEL, , , ,P51X
 
         # unordered option
-        with self._mapdl.chain_commands:
+        with self._mapdl.non_interactive:
             self._mapdl.flst(5, items.size, FLST_LOOKUP[item_type])
             for item in items:
                 self._mapdl.fitem(5, item)

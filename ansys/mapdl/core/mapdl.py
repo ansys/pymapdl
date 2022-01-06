@@ -1,7 +1,5 @@
 """Module to control interaction with MAPDL through Python"""
 
-from ansys.mapdl.core import LOG as logger
-
 import time
 import glob
 import re
@@ -29,7 +27,8 @@ from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.inline_functions import Query
-
+from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.reader.rst import Result
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -123,8 +122,8 @@ def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
-                log_file=True, local=True, **start_parm):
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
+                log_file=False, local=True, **start_parm):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -145,8 +144,14 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        # Setting up logger
-        self._log = logger.add_instance_logger(self._name, self, level=loglevel)
+        # Setting up loggers
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
+        # adding a file handler to the logger
+        if log_file:
+            if not isinstance(log_file, str):
+                log_file = 'instance.log'
+            self._log.log_to_file(filename=log_file, level=loglevel)
+
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
@@ -278,7 +283,7 @@ class _MapdlCore(Commands):
 
     @property
     def _distributed(self):
-        """Is a distributed analysis"""
+        """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
@@ -317,6 +322,11 @@ class _MapdlCore(Commands):
 
         View the response from MAPDL with :attr:`Mapdl.last_response`.
 
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
         Examples
         --------
         >>> with mapdl.chain_commands:
@@ -324,6 +334,10 @@ class _MapdlCore(Commands):
             mapdl.k(1, 1, 2, 3)
 
         """
+        if self._distributed:
+            raise RuntimeError(
+                "chained commands are not permitted in distributed ansys."
+            )
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -601,16 +615,15 @@ class _MapdlCore(Commands):
                 old_mute = self.mute
                 self.mute = True
 
-            with self.chain_commands:
-                self.cm("__NODE__", "NODE")
-                self.nsle("S")
-                self.cdwrite("db", arch_filename)
-                self.cmsel("S", "__NODE__", "NODE")
+            self.cm("__NODE__", "NODE", mute=True)
+            self.nsle("S", mute=True)
+            self.cdwrite("db", arch_filename, mute=True)
+            self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-                self.cm("__ELEM__", "ELEM")
-                self.esel("NONE")
-                self.cdwrite("db", nblock_filename)
-                self.cmsel("S", "__ELEM__", "ELEM")
+            self.cm("__ELEM__", "ELEM", mute=True)
+            self.esel("NONE", mute=True)
+            self.cdwrite("db", nblock_filename, mute=True)
+            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             if hasattr(self, "mute"):
                 self.mute = old_mute
@@ -999,10 +1012,12 @@ class _MapdlCore(Commands):
         show_lines=False,
         **kwargs,
     ):
-        """APDL Command: APLOT
+        """Display the selected areas.
 
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
+
+        APDL Command: ``APLOT``
 
         .. note::
             PyMAPDL plotting commands with ``vtk=True`` ignore any
@@ -1022,10 +1037,10 @@ class _MapdlCore(Commands):
         degen, str, optional
             Degeneracy marker.  This option is ignored when ``vtk=True``.
 
-        scale
+        scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
-            directions) (defaults to .075).  This option is ignored
+            directions) (defaults to 0.075).  This option is ignored
             when ``vtk=True``.
 
         vtk : bool, optional
@@ -1095,7 +1110,11 @@ class _MapdlCore(Commands):
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
-                meshes.append({"mesh": surf})
+                meshes.append(
+                    {"mesh": surf,
+                     "color": kwargs.get("color", "white")
+                     }
+                )
 
             if show_area_numbering:
                 anums = np.unique(surf["entity_num"])
@@ -1365,7 +1384,7 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self):
+    def result(self) -> Result:
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -1441,14 +1460,14 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire("RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
             ext = ""
 
@@ -1471,7 +1490,7 @@ class _MapdlCore(Commands):
     def _distributed_result_file(self):
         """Path of the distributed result file"""
         try:
-            filename = self.inquire("RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
@@ -1581,37 +1600,46 @@ class _MapdlCore(Commands):
     def get_value(
         self, entity="", entnum="", item1="", it1num="", item2="", it2num="", **kwargs
     ):
-        """Runs the GET command and returns a Python value.
+        """Runs the MAPDL GET command and returns a Python value.
 
-        This method uses :func:`_MapdlCore.get`.
+        This method uses :func:`Mapdl.get`.
 
         See the full MADPL command documentation at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
+        .. note::
+           This method is not available when within the
+           :func:`Mapdl.non_interactive`
+           context manager.
+
         Parameters
         ----------
-        entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc.
+        entity : str
+            Entity keyword. Valid keywords are ``"NODE"``, ``"ELEM"``,
+            ``"KP"``, ``"LINE"``, ``"AREA"``, ``"VOLU"``, ``"PDS"``,
+            etc.
 
-        entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
+        entnum : str, int, optional
+            The number or label for the entity. In some cases, a zero
+            (or blank ``""``) ``entnum`` represents all entities of
+            the set.
 
-        item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
+        item1 : str, optional
+            The name of a particular item for the given entity.
 
-        it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
+        it1num : str, int, optional
+            The number (or label) for the specified Item1 (if
+            any). Some Item1 labels do not require an IT1NUM value.
 
-        item2, it2num
+        item2 : str, optional
             A second set of item labels and numbers to further qualify the item
             for which data are to be retrieved. Most items do not require this
             level of information.
+
+        it2num : str, int, optional
+            The number (or label) for the specified ``item2`` (if
+            any). Some ``item2`` labels do not require an ``it2num``
+            value.
 
         Returns
         -------
@@ -1761,7 +1789,7 @@ class _MapdlCore(Commands):
         This is requested from the active mapdl instance.
         """
         try:
-            self._jobname = self.inquire("JOBNAME")
+            self._jobname = self.inquire("", "JOBNAME")
         except Exception:
             pass
         return self._jobname
@@ -1936,18 +1964,17 @@ class _MapdlCore(Commands):
                 nrmkey = "ON"
         nrmkey = "OFF"
 
-        with self.chain_commands:
-            self.slashsolu(mute=True)
-            self.antype(2, "new", mute=True)
-            self.modopt(
-                method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
-            )
-            self.bcsoption(memory_option, mute=True)
+        self.slashsolu(mute=True)
+        self.antype(2, "new", mute=True)
+        self.modopt(
+            method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+        )
+        self.bcsoption(memory_option, mute=True)
 
-            if mxpand:
-                self.mxpand(mute=True)
-            if elcalc:
-                self.mxpand(elcalc="YES", mute=True)
+        if mxpand:
+            self.mxpand(mute=True)
+        if elcalc:
+            self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)
@@ -2127,11 +2154,11 @@ class _MapdlCore(Commands):
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             # remove permitted errors and allow MAPDL to continue
-            response = self._response
-            for err_str in _PERMITTED_ERRORS:
-                response = re.sub(err_str, "", response)
 
-            if "*** ERROR ***" in response:
+            for err_str in _PERMITTED_ERRORS:
+                self._response = re.sub(err_str, "", self._response)
+
+            if "*** ERROR ***" in self._response:
                 # We don't need to log exception because they already included in the main logger.
                 # logger.error(self._response)
                 # However, exceptions are recorded in the global logger which do not record
@@ -2390,7 +2417,7 @@ class _MapdlCore(Commands):
         """
         # always attempt to cache the path
         try:
-            self._path = self.inquire("DIRECTORY")
+            self._path = self.inquire("", "DIRECTORY")
         except Exception:
             pass
 

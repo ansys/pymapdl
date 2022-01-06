@@ -77,9 +77,8 @@ class MeshGrpc(Mesh):
         """
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
-        with self._mapdl.chain_commands:
-            self._mapdl.cm(TMP_NODE_CM, "NODE")
-            self._mapdl.nsle("S")
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsle("S", mute=True)
 
         threads = [
             self._update_cache_elem(),

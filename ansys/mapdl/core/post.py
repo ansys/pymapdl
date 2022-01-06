@@ -1,5 +1,4 @@
 """Post-processing module using MAPDL interface"""
-import re
 import weakref
 
 import numpy as np
@@ -171,11 +170,9 @@ class PostProcessing:
          75.03939292229019,
          75.20949687626468]
         """
+        self._mapdl.post1(mute=True)
         list_rsp = self._mapdl.set("LIST")
-        groups = re.findall(r"([-+]?\d*\.\d+|\d+)", list_rsp)
-
-        # values will always be the second set
-        return np.array([float(item) for item in (groups[1::5])])
+        return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
 
     def _reset_cache(self):
         """Reset local cache"""
@@ -263,6 +260,35 @@ class PostProcessing:
         956.86239847
         """
         return self._mapdl.get_value("ACTIVE", item1="SET", it1num="FREQ")
+
+    def nodal_values(self, item, comp="") -> np.ndarray:
+        """Obtain the nodal values for a given item and component.
+
+        This method uses :func:`Mapdl.get_array()<ansys.mapdl.core.Mapdl.get_array`
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.
+        comp : str, optional
+            Component of the item if applicable.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the requested element values for the
+            given item and component.
+
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
+        """
+        # using _ndof_rst instead of get_array because it is wrapped to check the rst.
+        values = self._ndof_rst(item=item, it1num=comp)
+        mask = self.selected_nodes
+        return values[mask]
 
     def element_values(self, item, comp="", option="AVG") -> np.ndarray:
         """Compute the element-wise values for a given item and component.
@@ -394,7 +420,49 @@ class PostProcessing:
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)
+        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[self.selected_elements]
+
+    def plot_nodal_values(
+        self, item, comp, show_elem_numbering=False, **kwargs
+    ):
+        """Plot nodal values
+
+        Displays solution results as continuous element contours.
+
+        Equivalent MAPDL command:
+
+        * ``PLNSOL``
+
+        Parameters
+        ----------
+        item : str
+            Label identifying the item.  See the table below in the
+            notes section.
+        comp : str, optional
+            Component of the item if applicable.  See the table below
+            in the notes section.
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.  Only returned when ``return_cpos`` is ``True``.
+
+        Examples
+        --------
+        Plot the contact status for the selected elements.
+
+        >>> mapdl.post_processing.plot_nodal_values(
+        ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
+        ... )
+        """
+
+        values = self.nodal_values(self, item, comp="")
+        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
+        return self._plot_point_scalars(
+            values, show_node_numbering=show_elem_numbering, **kwargs
+        )
 
     def plot_element_values(
             self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
@@ -403,7 +471,7 @@ class PostProcessing:
 
         Displays the solution results as discontinuous element contours.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PLESOL``
 
@@ -444,9 +512,474 @@ class PostProcessing:
         ... )
 
         """
+        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
         return self._plot_cell_scalars(
             self.element_values(item, comp, option),
             show_elem_numbering=show_elem_numbering, **kwargs
+        )
+
+    def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
+        """Plot point scalars"""
+        if not scalars.size:
+            raise RuntimeError(
+                "Result unavailable.  Either the result has not been loaded "
+                "with ``mapdl.set(step, sub_step)`` or the result does not "
+                "exist within the result file."
+            )
+
+        mask = self.selected_nodes
+        all_scalars = np.empty(mask.size)
+        all_scalars[mask] = scalars
+
+        # we can directly the node numbers as the array of selected
+        # nodes will be a mask sized to the highest node index - 1
+        surf = self._mapdl.mesh._surf
+        node_id = surf["ansys_node_num"].astype(np.int32) - 1
+        all_scalars = all_scalars[node_id]
+
+        meshes = [
+            {
+                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                "scalars": all_scalars,
+            }
+        ]
+
+        labels = []
+        if show_node_numbering:
+            labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
+
+        return general_plotter(meshes, [], labels, **kwargs)
+
+    def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
+        """Plot cell scalars."""
+        if not scalars.size:
+            raise RuntimeError(
+                "Result unavailable.  Either the result has not been loaded "
+                "with ``mapdl.set(step, sub_step)`` or the result does not "
+                "exist within the result file."
+            )
+
+        surf = self._mapdl.mesh._surf
+
+        # as ``disp`` returns the result for all nodes, we need all node numbers
+        # and to index to the output node numbers
+        if hasattr(self._mapdl.mesh, "enum_all"):
+            enum = self._mapdl.mesh.enum
+        else:
+            enum = self._all_enum
+
+        # it's possible that there are duplicated element numbers,
+        # therefore we need to get the unique values and a reverse index
+        uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
+        mask = np.isin(enum, uni, assume_unique=True)
+
+        if scalars.size != mask.size:
+            scalars = scalars[self.selected_elements]
+        scalars = scalars[mask][ridx]
+
+        meshes = [
+            {
+                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                "scalars": scalars,
+            }
+        ]
+
+        labels = []
+        if show_elem_numbering:
+            labels = [{"points": surf.cell_centers().points,
+                       "labels": surf["ansys_elem_num"]}]
+
+        return general_plotter(meshes, [], labels, **kwargs)
+
+    @property
+    @supress_logging
+    def _all_nnum(self):
+        self._mapdl.cm("__TMP_NODE__", "NODE")
+        self._mapdl.allsel()
+        nnum = self._mapdl.get_array("NODE", item1="NLIST")
+
+        # rerun if encountered weird edge case of negative first index.
+        if nnum[0] == -1:
+            nnum = self._mapdl.get_array("NODE", item1="NLIST")
+        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+        return nnum.astype(np.int32, copy=False)
+
+    @property
+    @supress_logging
+    def _all_enum(self):
+        self._mapdl.cm("__TMP_ELEM__", "ELEM")
+        self._mapdl.allsel()
+        nnum = self._mapdl.get_array("ELEM", item1="ELIST")
+
+        # rerun if encountered weird edge case of negative first index.
+        if nnum[0] == -1:
+            enum = self._mapdl.get_array("ELEM", item1="ELIST")
+        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
+        return enum.astype(np.int32, copy=False)
+
+    @property
+    def _nsel(self):
+        """Return the MAPDL formatted selected nodes array.
+
+        -1 for unselected
+        0 for undefined
+        1 for selected
+
+        """
+        return self._ndof_rst("NSEL").astype(np.int8)
+
+    @property
+    def selected_nodes(self) -> np.ndarray:
+        """Mask of the selected nodes.
+
+        Examples
+        --------
+        The mask of the selected nodes.
+
+        >>> mapdl.post_processing.selected_nodes
+        array([False, False, False, ..., True, True, True])
+
+        If you want the node numbers of the selected nodes.
+
+        >>> mapdl.post_processing.selected_nodes.nonzero()[0] + 1
+        array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        """
+        return self._nsel == 1
+
+    @property
+    def _esel(self):
+        """Return the MAPDL formatted selected elements array.
+
+        -1 for unselected
+        0 for undefined
+        1 for selected
+
+        """
+        return self._edof_rst("ESEL").astype(np.int8)
+
+    @property
+    def selected_elements(self) -> np.ndarray:
+        """Mask of the selected elements.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.selected_elements
+        array([False, False, False, ..., True, True, True])
+
+        If you want the element numbers of the selected elements.
+
+        >>> mapdl.post_processing.selected_elements.nonzero()[0] + 1
+        array([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+        """
+        return self._esel == 1
+
+    @check_result_loaded
+    def _ndof_rst(self, item, it1num="", item2=""):
+        """Nodal degree of freedom result using :func:`Mapdl.get_array()<ansys.mapdl.core.Mapdl.get_array`.
+
+        Notes
+        -----
+        Item2 controls whether nodal-averaged results are
+        used. Valid labels are:
+        * ``AUTO`` - Use nodal-averaged results, if available. Otherwise
+          use element-based
+          results.
+        * ``ESOL`` - Use element-based results only.
+        * ``NAR`` - Use nodal-averaged results only.
+
+        """
+        return self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
+
+    @check_result_loaded
+    def _edof_rst(self, item, it1num=""):
+        """Element degree of freedom result"""
+        return self._mapdl.get_array("ELEM", item1=item, it1num=it1num)
+
+    def nodal_temperature(self) -> np.ndarray:
+        """The nodal temperature of the current result.
+
+        Equilvanent MAPDL command:
+        ``PRNSOL, TEMP``
+
+        Notes
+        -----
+        The nodal results are averaged across all selected elements.
+        Not all nodes will contain valid results (e.g. midside nodes),
+        and those nodes will report a zero value.
+
+        Elements that are not selected will not contribute to the
+        averaged nodal values, and if a node's attached elements are
+        all unselected, the element will report a zero value.
+
+        Examples
+        --------
+        >>> mapdl.post_processing.temperature
+        array([0., 0., 0., ..., 0., 0., 0.])
+
+        """
+        return self.nodal_values("TEMP")
+
+    def plot_nodal_temperature(self, show_node_numbering=False, **kwargs):
+        """Plot nodal temperature of the current result.
+
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+
+        Examples
+        --------
+        Plot the nodal temperature for the second result
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.temperature()
+
+        Plot off_screen and save a screenshot
+
+        >>> mapdl.post_processing.plot_nodal_temperature(off_screen=True,
+        ...                                              savefig='temp_1_2.png')
+
+        Subselect a single result type and plot those stress results.
+
+        >>> mapdl.esel('S', 'TYPE', vmin=1)
+        >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
+        """
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nTemperature"})
+        return self._plot_point_scalars(
+            self.nodal_temperature(), show_node_numbering=show_node_numbering, **kwargs
+        )
+
+    def nodal_displacement(self, component="NORM") -> np.ndarray:
+        """Nodal X, Y, or Z structural displacement.
+
+        Equilvanent MAPDL command:
+
+        * ``PRNSOL, U, X``
+
+        Parameters
+        ----------
+        component : str, optional
+            Structural displacement component to retrieve.  Must be
+            ``'X'``, ``'Y'``, ``'Z'``, ``'ALL'``, or ``'NORM'``.
+            Defaults to ``'NORM'``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array containing the nodal structural displacement.
+
+        Notes
+        -----
+        This command always returns all nodal displacements regardless
+        of if the nodes are selected or not.
+
+        Examples
+        --------
+        Displacement in the ``'X'`` direction for the current result.
+
+        >>> mapdl.post_processing.nodal_displacement('X')
+        array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
+               5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
+
+        Displacement in all dimensions.
+
+        >>> mapdl.post_processing.nodal_displacement('ALL')
+        array([[ 1.07512979e-04,  6.05382076e-05, -1.64333622e-11],
+               [ 8.59137773e-05,  7.88053970e-05, -1.93668243e-11],
+               [ 5.70690047e-05,  1.23100157e-04, -1.04703715e-11],
+               ...,
+               [ 5.70333124e-05,  1.23023176e-04, -9.77598660e-12],
+               [ 8.58600402e-05,  7.87561008e-05, -9.12531408e-12],
+               [ 1.07445726e-04,  6.05003408e-05, -1.23634647e-11]])
+
+        Nodes corresponding to the nodal displacements.
+
+        >>> mapdl.mesh.nnum_all
+        array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
+
+        """
+        component = check_comp(component, DISP_TYPE)
+
+        if component in ["NORM", "ALL"]:
+            x = self.nodal_values("U", "X")
+            y = self.nodal_values("U", "Y")
+            z = self.nodal_values("U", "Z")
+            disp = np.vstack((x, y, z))
+            if component == "NORM":
+                return np.linalg.norm(disp, axis=0)
+            return disp.T
+
+        return self.nodal_values("U", component)
+
+    def plot_nodal_displacement(
+        self, component="NORM", show_node_numbering=False, **kwargs
+    ):
+        """Plot nodal displacement
+
+        Parameters
+        ----------
+        component : str, optional
+            Structural displacement component to retrieve.  Must be
+            ``'X'``, ``'Y'``, ``'Z'``, or ``'NORM'``.  Defaults to
+            ``'NORM'``.
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+
+        Examples
+        --------
+        Plot the normalized nodal displacement for the second result.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.plot_nodal_displacement('NORM',
+        ...                                               smooth_shading=True)
+
+        Plot the x displacement without smooth shading with individual
+        node numbering.
+
+        >>> mapdl.post_processing.plot_nodal_displacement('X',
+        ...                                               show_node_numbering=True)
+        """
+        if isinstance(component, str):
+            if component.upper() == "ALL":
+                raise ValueError(
+                    '"ALL" not allowed in this context.  Select a '
+                    'single displacement component (e.g. "X")'
+                )
+
+        disp = self.nodal_displacement(component)
+        kwargs.setdefault("scalar_bar_args", {'title': "%s Displacement" % component})
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
+        )
+
+    def nodal_rotation(self, component="ALL") -> np.ndarray:
+        """Nodal X, Y, or Z structural rotation
+
+        Equilvanent MAPDL commands:
+
+        * ``PRNSOL, ROT, X``
+        * ``PRNSOL, ROT, Y``
+        * ``PRNSOL, ROT, Z``
+
+        Parameters
+        ----------
+        component : str, optional
+            Structural rotational component to retrieve.  Must be
+            ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to ``'ALL'``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array with nodal X, Y, Z, or all structural rotations.
+
+        Notes
+        -----
+        This command always returns all nodal rotations regardless of
+        if the nodes are selected or not.  Use the
+        :attr:`selected_nodes <PostProcessing.selected_nodes>` mask to
+        get the currently selected nodes.
+
+        Examples
+        --------
+        Nodal rotation in all dimensions for current result.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> mapdl.post_processing.nodal_rotation('ALL')
+        array([[0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.],
+               ...,
+               [0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.]])
+
+        Nodes corresponding to the nodal rotations.
+
+        >>> mapdl.mesh.nnum_all
+        array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
+
+        """
+        component = check_comp(component, ROT_TYPE)
+
+        if component == "ALL":
+            x = self.nodal_values("ROT", "X")
+            y = self.nodal_values("ROT", "Y")
+            z = self.nodal_values("ROT", "Z")
+            return np.vstack((x, y, z)).T
+
+        return self.nodal_values("ROT", component)
+
+    def plot_nodal_rotation(self, component, show_node_numbering=False, **kwargs):
+        """Plot nodal rotation.
+
+        Parameters
+        ----------
+        component : str
+            Structural rotation component to retrieve.  Must be
+            ``'X'``, ``'Y'``, or ``'Z'``.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+
+        Examples
+        --------
+        Plot the x rotation without smooth shading with individual
+        node numbering.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.plot_nodal_rotation('X', show_node_numbering=True)
+        """
+        if isinstance(component, str):
+            if component.upper() == "ALL":
+                raise ValueError(
+                    '"ALL" not allowed in this context.  Select a '
+                    'single component (e.g. "X")'
+                )
+
+        disp = self.nodal_rotation(component)
+        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Rotation"})
+        return self._plot_point_scalars(
+            disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
     def element_displacement(
@@ -779,459 +1312,6 @@ class PostProcessing:
             scalars, show_elem_numbering=show_elem_numbering, **kwargs
         )
 
-    def nodal_displacement(self, component="NORM") -> np.ndarray:
-        """Nodal X, Y, or Z structural displacement.
-
-        Equilvanent MAPDL command:
-
-        * ``PRNSOL, U, X``
-
-        Parameters
-        ----------
-        component : str, optional
-            Structural displacement component to retrieve.  Must be
-            ``'X'``, ``'Y'``, ``'Z'``, ``'ALL'``, or ``'NORM'``.
-            Defaults to ``'NORM'``.
-
-        Returns
-        -------
-        numpy.ndarray
-            Array containing the nodal structural displacement.
-
-        Notes
-        -----
-        This command always returns all nodal displacements regardless
-        of if the nodes are selected or not.
-
-        Examples
-        --------
-        Displacement in the ``'X'`` direction for the current result.
-
-        >>> mapdl.post_processing.nodal_displacement('X')
-        array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
-               5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
-
-        Displacement in all dimensions.
-
-        >>> mapdl.post_processing.nodal_displacement('ALL')
-        array([[ 1.07512979e-04,  6.05382076e-05, -1.64333622e-11],
-               [ 8.59137773e-05,  7.88053970e-05, -1.93668243e-11],
-               [ 5.70690047e-05,  1.23100157e-04, -1.04703715e-11],
-               ...,
-               [ 5.70333124e-05,  1.23023176e-04, -9.77598660e-12],
-               [ 8.58600402e-05,  7.87561008e-05, -9.12531408e-12],
-               [ 1.07445726e-04,  6.05003408e-05, -1.23634647e-11]])
-
-        Nodes corresponding to the nodal displacements.
-
-        >>> mapdl.mesh.nnum_all
-        array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
-        """
-        component = check_comp(component, DISP_TYPE)
-
-        if component in ["NORM", "ALL"]:
-            x = self._ndof_rst("U", "X")
-            y = self._ndof_rst("U", "Y")
-            z = self._ndof_rst("U", "Z")
-            disp = np.vstack((x, y, z))
-            if component == "NORM":
-                return np.linalg.norm(disp, axis=0)
-            return disp.T
-
-        return self._ndof_rst("U", component)
-
-    def plot_nodal_displacement(
-        self, component="NORM", show_node_numbering=False, **kwargs
-    ):
-        """Plot nodal displacement
-
-        Parameters
-        ----------
-        component : str, optional
-            Structural displacement component to retrieve.  Must be
-            ``'X'``, ``'Y'``, ``'Z'``, or ``'NORM'``.  Defaults to
-            ``'NORM'``.
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-        **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
-
-        Returns
-        -------
-        list
-            Camera position from plotter.  Can be reused as an input
-            parameter to use the same camera position for future
-            plots.
-
-        Examples
-        --------
-        Plot the normalized nodal displacement for the second result.
-
-        >>> mapdl.post1()
-        >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.plot_nodal_displacement('NORM',
-        ...                                               smooth_shading=True)
-
-        Plot the x displacement without smooth shading with individual
-        node numbering.
-
-        >>> mapdl.post_processing.plot_nodal_displacement('X',
-        ...                                               show_node_numbering=True)
-        """
-        if isinstance(component, str):
-            if component.upper() == "ALL":
-                raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
-                    'single displacement component (e.g. "X")'
-                )
-
-        disp = self.nodal_displacement(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Displacement" % component})
-        return self._plot_point_scalars(
-            disp, show_node_numbering=show_node_numbering, **kwargs
-        )
-
-    def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
-        """Plot point scalars
-
-        Assumes scalars are from all nodes and not just the active surface.
-        """
-        if not scalars.size:
-            raise RuntimeError(
-                "Result unavailable.  Either the result has not been loaded "
-                "with ``mapdl.set(step, sub_step)`` or the result does not "
-                "exist within the result file."
-            )
-
-        surf = self._mapdl.mesh._surf
-
-        # as ``disp`` returns the result for all nodes, we need all node numbers
-        # and to index to the output node numbers
-        if hasattr(self._mapdl.mesh, "nnum_all"):
-            nnum = self._mapdl.mesh.nnum_all
-        else:
-            nnum = self._all_nnum
-
-        mask = np.in1d(nnum, surf["ansys_node_num"])
-        ridx = np.argsort(np.argsort(surf["ansys_node_num"]))
-        if scalars.size != mask.size:
-            scalars = scalars[self.selected_nodes]
-        scalars = scalars[mask][ridx]
-
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": scalars,
-            }
-        ]
-
-        labels = []
-        if show_node_numbering:
-            labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
-
-        return general_plotter(meshes, [], labels, **kwargs)
-
-    def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
-        """Plot cell scalars.
-
-        Assumes scalars are from all elements and not just the active surface.
-        """
-        if not scalars.size:
-            raise RuntimeError(
-                "Result unavailable.  Either the result has not been loaded "
-                "with ``mapdl.set(step, sub_step)`` or the result does not "
-                "exist within the result file."
-            )
-
-        surf = self._mapdl.mesh._surf
-
-        # as ``disp`` returns the result for all nodes, we need all node numbers
-        # and to index to the output node numbers
-        if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum
-        else:
-            enum = self._all_enum
-
-        # it's possible that there are duplicated element numbers,
-        # therefore we need to get the unique values and a reverse index
-        uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        mask = np.isin(enum, uni, assume_unique=True)
-
-        if scalars.size != mask.size:
-            scalars = scalars[self.selected_elements]
-        scalars = scalars[mask][ridx]
-
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": scalars,
-            }
-        ]
-
-        labels = []
-        if show_elem_numbering:
-            labels = [{"points": surf.cell_centers().points,
-                       "labels": surf["ansys_elem_num"]}]
-
-        return general_plotter(meshes, [], labels, **kwargs)
-
-    @property
-    @supress_logging
-    def _all_nnum(self):
-        self._mapdl.cm("__TMP_NODE__", "NODE")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
-        return nnum.astype(np.int32, copy=False)
-
-    @property
-    @supress_logging
-    def _all_enum(self):
-        self._mapdl.cm("__TMP_ELEM__", "ELEM")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("ELEM", item1="ELIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
-            enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
-        return enum.astype(np.int32, copy=False)
-
-    @property
-    def _nsel(self):
-        """Return the MAPDL formatted selected nodes array.
-
-        -1 for unselected
-        0 for undefined
-        1 for selected
-
-        """
-        return self._ndof_rst("NSEL").astype(np.int8)
-
-    @property
-    def selected_nodes(self) -> np.ndarray:
-        """Mask of the selected nodes.
-
-        Examples
-        --------
-        >>> mapdl.post_processing.node_selection
-        array([False, False, False, ..., True, True, True])
-
-        """
-        return self._nsel == 1
-
-    @property
-    def _esel(self):
-        """Return the MAPDL formatted selected elements array.
-
-        -1 for unselected
-        0 for undefined
-        1 for selected
-
-        """
-        return self._edof_rst("ESEL").astype(np.int8)
-
-    @property
-    def selected_elements(self) -> np.ndarray:
-        """Mask of the selected elements.
-
-        Examples
-        --------
-        >>> mapdl.post_processing.selected_elements
-        array([False, False, False, ..., True, True, True])
-
-        """
-        return self._esel == 1
-
-    def nodal_rotation(self, component="ALL") -> np.ndarray:
-        """Nodal X, Y, or Z structural rotation
-
-        Equilvanent MAPDL commands:
-
-        * ``PRNSOL, ROT, X``
-        * ``PRNSOL, ROT, Y``
-        * ``PRNSOL, ROT, Z``
-
-        Parameters
-        ----------
-        component : str, optional
-            Structural rotational component to retrieve.  Must be
-            ``'X'``, ``'Y'``, ``'Z'``, or ``'ALL'``.  Defaults to ``'ALL'``.
-
-        Returns
-        -------
-        numpy.ndarray
-            Numpy array with nodal X, Y, Z, or all structural rotations.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the
-        :attr:`selected_nodes <PostProcessing.selected_nodes>` mask to
-        get the currently selected nodes.
-
-        Examples
-        --------
-        Nodal rotation in all dimensions for current result.
-
-        >>> mapdl.post1()
-        >>> mapdl.set(1, 1)
-        >>> mapdl.post_processing.nodal_rotation('ALL')
-        array([[0., 0., 0.],
-               [0., 0., 0.],
-               [0., 0., 0.],
-               ...,
-               [0., 0., 0.],
-               [0., 0., 0.],
-               [0., 0., 0.]])
-
-        Nodes corresponding to the nodal rotations.
-
-        >>> mapdl.mesh.nnum_all
-        array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
-
-        """
-        component = check_comp(component, ROT_TYPE)
-
-        if component == "ALL":
-            x = self._ndof_rst("ROT", "X")
-            y = self._ndof_rst("ROT", "Y")
-            z = self._ndof_rst("ROT", "Z")
-            return np.vstack((x, y, z)).T
-
-        return self._ndof_rst("ROT", component)
-
-    def plot_nodal_rotation(self, component, show_node_numbering=False, **kwargs):
-        """Plot nodal rotation.
-
-        Parameters
-        ----------
-        component : str
-            Structural rotation component to retrieve.  Must be
-            ``'X'``, ``'Y'``, or ``'Z'``.
-
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
-
-        Returns
-        -------
-        list
-            Camera position from plotter.  Can be reused as an input
-            parameter to use the same camera position for future
-            plots.
-
-        Examples
-        --------
-        Plot the x rotation without smooth shading with individual
-        node numbering.
-
-        >>> mapdl.post1()
-        >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.plot_nodal_rotation('X', show_node_numbering=True)
-        """
-        if isinstance(component, str):
-            if component.upper() == "ALL":
-                raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
-                    'single component (e.g. "X")'
-                )
-
-        disp = self.nodal_rotation(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Rotation"})
-        return self._plot_point_scalars(
-            disp, show_node_numbering=show_node_numbering, **kwargs
-        )
-
-    @check_result_loaded
-    def _ndof_rst(self, item, it1num=""):
-        """Nodal degree of freedom result"""
-        return self._mapdl.get_array("NODE", item1=item, it1num=it1num)
-
-    @check_result_loaded
-    def _edof_rst(self, item, it1num=""):
-        """Element degree of freedom result"""
-        return self._mapdl.get_array("ELEM", item1=item, it1num=it1num)
-
-    @property
-    def nodal_temperature(self) -> np.ndarray:
-        """The nodal temperature of the current result.
-
-        Equilvanent MAPDL command:
-        ``PRNSOL, TEMP``
-
-        Notes
-        -----
-        The nodal results are averaged across all selected elements.
-        Not all nodes will contain valid results (e.g. midside nodes),
-        and those nodes will report a zero value.
-
-        Elements that are not selected will not contribute to the
-        averaged nodal values, and if a node's attached elements are
-        all unselected, the element will report a zero value.
-
-        Examples
-        --------
-        >>> mapdl.post_processing.temperature
-        array([0., 0., 0., ..., 0., 0., 0.])
-
-        """
-        return self._ndof_rst("TEMP")
-
-    def plot_nodal_temperature(self, show_node_numbering=False, **kwargs):
-        """Plot nodal temperature of the current result.
-
-        Parameters
-        ----------
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
-
-        Returns
-        -------
-        list
-            Camera position from plotter.  Can be reused as an input
-            parameter to use the same camera position for future
-            plots.
-
-        Examples
-        --------
-        Plot the nodal temperature for the second result
-
-        >>> mapdl.post1()
-        >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.temperature()
-
-        Plot off_screen and save a screenshot
-
-        >>> mapdl.post_processing.plot_nodal_temperature(off_screen=True,
-        ...                                              savefig='temp_1_2.png')
-
-        Subselect a single result type and plot those stress results.
-
-        >>> mapdl.esel('S', 'TYPE', vmin=1)
-        >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
-        """
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nTemperature"})
-        return self._plot_point_scalars(
-            self.nodal_temperature, show_node_numbering=show_node_numbering, **kwargs
-        )
-
-    @property
     def nodal_pressure(self) -> np.ndarray:
         """The nodal pressure of the current result.
 
@@ -1250,11 +1330,11 @@ class PostProcessing:
 
         Examples
         --------
-        >>> mapdl.post_processing.pressure
+        >>> mapdl.post_processing.pressure()
         array([0., 0., 0., ..., 0., 0., 0.])
 
         """
-        return self._ndof_rst("PRES")
+        return self.nodal_values("PRES")
 
     def plot_nodal_pressure(self, show_node_numbering=False, **kwargs):
         """Plot nodal pressure of the current result.
@@ -1295,10 +1375,9 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nPressure"})
         return self._plot_point_scalars(
-            self.nodal_pressure, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_pressure(), show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_voltage(self) -> np.ndarray:
         """The nodal voltage of the current result.
 
@@ -1326,10 +1405,10 @@ class PostProcessing:
         --------
         Return the voltage of the current result.
 
-        >>> mapdl.post_processing.voltage
+        >>> mapdl.post_processing.voltage()
         array([0., 0., 0., ..., 0., 0., 0.])
         """
-        return self._ndof_rst("VOLT")
+        return self.nodal_values("VOLT")
 
     def plot_nodal_voltage(self, show_node_numbering=False, **kwargs):
         """Plot nodal voltage of the current result.
@@ -1369,7 +1448,7 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nVoltage"})
         return self._plot_point_scalars(
-            self.nodal_voltage, show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_voltage(), show_node_numbering=show_node_numbering, **kwargs
         )
 
     def nodal_component_stress(self, component) -> np.ndarray:
@@ -1416,7 +1495,7 @@ class PostProcessing:
 
         """
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst("S", component)
+        return self.nodal_values("S", component)
 
     def plot_nodal_component_stress(
         self, component, show_node_numbering=False, **kwargs
@@ -1500,7 +1579,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst("S", component)
+        return self.nodal_values("S", component)
 
     def plot_nodal_principal_stress(
         self, component, show_node_numbering=False, **kwargs
@@ -1539,7 +1618,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_stress_intensity(self) -> np.ndarray:
         """The nodal stress intensity of the current result.
 
@@ -1561,12 +1639,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_stress_intensity
+        >>> mapdl.post_processing.nodal_stress_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("S", "INT")
+        return self.nodal_values("S", "INT")
 
     def plot_nodal_stress_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the nodal stress intensity of the current result.
@@ -1606,13 +1684,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_stress_intensity(smooth_shading=True)
 
         """
-        scalars = self.nodal_stress_intensity
+        scalars = self.nodal_stress_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Stress\nIntensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_eqv_stress(self) -> np.ndarray:
         """The nodal equivalent stress of the current result.
 
@@ -1636,7 +1713,7 @@ class PostProcessing:
 
         Examples
         --------
-        >>> mapdl.post_processing.nodal_eqv_stress
+        >>> mapdl.post_processing.nodal_eqv_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -1644,12 +1721,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_eqv_stress
+        >>> mapdl.post_processing.nodal_eqv_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("S", "EQV")
+        return self.nodal_values("S", "EQV")
 
     def plot_nodal_eqv_stress(self, show_node_numbering=False, **kwargs):
         """Plot nodal equivalent stress of the current result.
@@ -1689,7 +1766,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True)
 
         """
-        scalars = self.nodal_eqv_stress
+        scalars = self.nodal_eqv_stress()
         kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equivalent\nStress"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -1740,7 +1817,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst("EPTO", component)
+        return self.nodal_values("EPTO", component)
 
     def plot_nodal_total_component_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -1828,7 +1905,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst("EPTO", component)
+        return self.nodal_values("EPTO", component)
 
     def plot_nodal_total_principal_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -1870,7 +1947,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_total_strain_intensity(self) -> np.ndarray:
         """The total nodal strain intensity of the current result.
 
@@ -1894,12 +1970,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_total_strain_intensity
+        >>> mapdl.post_processing.nodal_total_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPEL", "INT")
+        return self.nodal_values("EPEL", "INT")
 
     def plot_nodal_total_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal strain intensity of the current result.
@@ -1937,13 +2013,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_strain_intensity()
 
         """
-        scalars = self.nodal_total_strain_intensity
+        scalars = self.nodal_total_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_total_eqv_strain(self) -> np.ndarray:
         """The total nodal equivalent strain of the current result.
 
@@ -1965,7 +2040,7 @@ class PostProcessing:
         --------
         Total quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_total_eqv_strain
+        >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -1973,12 +2048,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_total_eqv_strain
+        >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPTO", "EQV")
+        return self.nodal_values("EPTO", "EQV")
 
     def plot_nodal_total_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal equivalent strain of the current result.
@@ -2017,7 +2092,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_total_eqv_strain
+        scalars = self.nodal_total_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nEquivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2061,7 +2136,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst("EPEL", component)
+        return self.nodal_values("EPEL", component)
 
     def plot_nodal_elastic_component_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2144,7 +2219,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst("EPEL", component)
+        return self.nodal_values("EPEL", component)
 
     def plot_nodal_elastic_principal_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2183,7 +2258,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_elastic_strain_intensity(self) -> np.ndarray:
         """The elastic nodal strain intensity of the current result.
 
@@ -2212,12 +2286,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_elastic_strain_intensity
+        >>> mapdl.post_processing.nodal_elastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPEL", "INT")
+        return self.nodal_values("EPEL", "INT")
 
     def plot_nodal_elastic_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the elastic nodal strain intensity of the current result.
@@ -2256,13 +2330,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_strain_intensity()
 
         """
-        scalars = self.nodal_elastic_strain_intensity
+        scalars = self.nodal_elastic_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_elastic_eqv_strain(self) -> np.ndarray:
         """The elastic nodal equivalent strain of the current result.
 
@@ -2283,7 +2356,7 @@ class PostProcessing:
         --------
         Elastic quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_elastic_eqv_strain
+        >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2291,12 +2364,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_elastic_eqv_strain
+        >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPEL", "EQV")
+        return self.nodal_values("EPEL", "EQV")
 
     def plot_nodal_elastic_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the elastic nodal equivalent strain of the current result.
@@ -2335,7 +2408,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_elastic_eqv_strain
+        scalars = self.nodal_elastic_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2384,7 +2457,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst("EPPL", component)
+        return self.nodal_values("EPPL", component)
 
     def plot_nodal_plastic_component_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2461,7 +2534,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst("EPPL", component)
+        return self.nodal_values("EPPL", component)
 
     def plot_nodal_plastic_principal_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2500,7 +2573,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_plastic_strain_intensity(self) -> np.ndarray:
         """The plastic nodal strain intensity of the current result.
 
@@ -2530,12 +2602,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_plastic_strain_intensity
+        >>> mapdl.post_processing.nodal_plastic_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPPL", "INT")
+        return self.nodal_values("EPPL", "INT")
 
     def plot_nodal_plastic_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the plastic nodal strain intensity of the current result.
@@ -2574,13 +2646,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_strain_intensity()
 
         """
-        scalars = self.nodal_plastic_strain_intensity
+        scalars = self.nodal_plastic_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_plastic_eqv_strain(self) -> np.ndarray:
         """The plastic nodal equivalent strain of the current result.
 
@@ -2608,7 +2679,7 @@ class PostProcessing:
         --------
         Plastic quivalent strain for the current result
 
-        >>> mapdl.post_processing.nodal_plastic_eqv_strain
+        >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2616,12 +2687,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_plastic_eqv_strain
+        >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPPL", "EQV")
+        return self.nodal_values("EPPL", "EQV")
 
     def plot_nodal_plastic_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the plastic nodal equivalent strain of the current result.
@@ -2660,7 +2731,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_plastic_eqv_strain
+        scalars = self.nodal_plastic_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2710,7 +2781,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
-        return self._ndof_rst("EPTH", component)
+        return self.nodal_values("EPTH", component)
 
     def plot_nodal_thermal_component_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2793,7 +2864,7 @@ class PostProcessing:
         if isinstance(component, int):
             component = str(component)
         component = check_comp(component, PRINCIPAL_TYPE)
-        return self._ndof_rst("EPTH", component)
+        return self.nodal_values("EPTH", component)
 
     def plot_nodal_thermal_principal_strain(
         self, component, show_node_numbering=False, **kwargs
@@ -2832,7 +2903,6 @@ class PostProcessing:
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_thermal_strain_intensity(self) -> np.ndarray:
         """The thermal nodal strain intensity of the current result.
 
@@ -2862,12 +2932,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_thermal_strain_intensity
+        >>> mapdl.post_processing.nodal_thermal_strain_intensity()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPTH", "INT")
+        return self.nodal_values("EPTH", "INT")
 
     def plot_nodal_thermal_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the thermal nodal strain intensity of the current result.
@@ -2903,13 +2973,12 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_strain_intensity()
 
         """
-        scalars = self.nodal_thermal_strain_intensity
+        scalars = self.nodal_thermal_strain_intensity()
         kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    @property
     def nodal_thermal_eqv_strain(self) -> np.ndarray:
         """The thermal nodal equivalent strain of the current result.
 
@@ -2937,7 +3006,7 @@ class PostProcessing:
         --------
         Thermal quivalent strain for the current result.
 
-        >>> mapdl.post_processing.nodal_thermal_eqv_strain
+        >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
@@ -2945,12 +3014,12 @@ class PostProcessing:
 
         >>> mapdl.post1()
         >>> mapdl.set(1, 2)
-        >>> mapdl.post_processing.nodal_thermal_eqv_strain
+        >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
                    0.        ,     0.        ,     0.        ])
 
         """
-        return self._ndof_rst("EPTH", "EQV")
+        return self.nodal_values("EPTH", "EQV")
 
     def plot_nodal_thermal_eqv_strain(self, show_node_numbering=False, **kwargs):
         """Plot the thermal nodal equivalent strain of the current result.
@@ -2989,8 +3058,82 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
 
         """
-        scalars = self.nodal_thermal_eqv_strain
+        scalars = self.nodal_thermal_eqv_strain()
         kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\n Equivalent Strain"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
+        )
+
+    def nodal_contact_friction_stress(self) -> np.ndarray:
+        """Nodal contact friction stress of the current result.
+
+        Equivalent MAPDL command:
+
+        * ``PRNSOL, CONT, SFRIC``
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array containing the thermal nodal equivalent strain
+            of the current result.
+
+        Examples
+        --------
+        Thermal quivalent strain for the current result.
+
+        >>> mapdl.post_processing.nodal_contact_friction_stress()
+        array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
+                   0.        ,     0.        ,     0.        ])
+
+        Strain from result 2.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.nodal_contact_friction_stress()
+        array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
+                   0.        ,     0.        ,     0.        ])
+
+        """
+        return self.nodal_values("CONT", "SFRIC")
+
+    def plot_nodal_contact_friction_stress(self, show_node_numbering=False, **kwargs):
+        """Plot the nodal contact friction stress of the current result.
+
+        Parameters
+        ----------
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        list
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+
+        Examples
+        --------
+        Plot the nodal contact friction stress for the second result.
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress()
+
+        Plot off_screen and save a screenshot.
+
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress(off_screen=True,
+        ...                                                          savefig='seqv_00.png')
+
+        Subselect a single result type and plot those strain results.
+
+        >>> mapdl.esel('S', 'TYPE', vmin=1)
+        >>> mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
+
+        """
+        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Contact\n Friction Stress"})
+        return self._plot_point_scalars(
+            self.nodal_contact_friction_stress(), show_node_numbering=show_node_numbering, **kwargs
         )

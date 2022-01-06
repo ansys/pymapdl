@@ -126,7 +126,7 @@ def warns_in_cdread_error_log(mapdl):
 
     warns = []
     for each in error_files:
-        with open(os.path.join(mapdl.directory, each)) as fid:
+        with open(os.path.join(mapdl.directory, each), errors='ignore') as fid:
             error_log = ''.join(fid.readlines())
         warns.append((warn_cdread_1 in error_log) or (warn_cdread_2 in error_log) or (warn_cdread_3 in error_log))
         return any(warns)
@@ -183,7 +183,7 @@ def test_global_mute(mapdl):
     # commands like /INQUIRE must always return something
     jobname = "file"
     mapdl.jobname = jobname
-    assert mapdl.inquire("JOBNAME") == jobname
+    assert mapdl.inquire("", "JOBNAME") == jobname
     mapdl.mute = False
 
 
@@ -262,13 +262,19 @@ def test_allow_ignore(mapdl):
 
 
 def test_chaining(mapdl, cleared):
-    mapdl.prep7()
-    n_kp = 1000
-    with mapdl.chain_commands:
-        for i in range(1, 1 + n_kp):
-            mapdl.k(i, i, i, i)
+    # test chaining with distributed only
+    if mapdl._distributed:
+        with pytest.raises(RuntimeError):
+            with mapdl.chain_commands:
+                mapdl.prep7()
+    else:
+        mapdl.prep7()
+        n_kp = 1000
+        with mapdl.chain_commands:
+            for i in range(1, 1 + n_kp):
+                mapdl.k(i, i, i, i)
 
-    assert mapdl.geometry.n_keypoint == 1000
+        assert mapdl.geometry.n_keypoint == 1000
 
 
 def test_error(mapdl):
@@ -558,7 +564,7 @@ def test_elements(cleared, mapdl):
         [0, 1, 3],
     ]
 
-    with mapdl.chain_commands:
+    with mapdl.non_interactive:
         for cell in [cell1, cell2]:
             for x, y, z in cell:
                 mapdl.n(x=x, y=y, z=z)
@@ -700,15 +706,15 @@ def test_cyclic_solve(mapdl, cleared):
 
 
 def test_load_table(mapdl):
-    dimx = np.random.randint(3, 15)
-    dimy = np.random.randint(3, 15)
+    dimx = 5
+    dimy = 8
 
     my_conv = np.random.rand(dimx, dimy)
     my_conv[:, 0] = np.arange(dimx)
     my_conv[0, :] = np.arange(dimy)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:])
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
@@ -721,14 +727,16 @@ def test_load_table(mapdl):
         mapdl.load_table("my_conv", my_conv1)
 
 
-def test_load_array(mapdl):
-
-    dimx = np.random.randint(1, 15)
-    dimy = np.random.randint(1, 15)
+@pytest.mark.parametrize("dimx", [1, 3, 10])
+@pytest.mark.parametrize("dimy", [1, 3, 10])
+def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
-
     mapdl.load_array("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv)
+
+    # flatten as MAPDL returns flat arrays when second dimension is 1.
+    if dimy == 1:
+        my_conv = my_conv.ravel()
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
 @pytest.mark.skip_grpc
@@ -957,3 +965,77 @@ def test_cwd_directory(mapdl, tmpdir):
         mapdl.directory = wrong_path
         assert 'The working directory specified' in record.list[-1].message.args[0]
         assert 'is not a directory on' in record.list[-1].message.args[0]
+
+
+@skip_in_cloud
+def test_inquire(mapdl):
+    # Testing basic functions (First block: Functions)
+    assert 'apdl' in mapdl.inquire("", 'apdl').lower()
+
+    # **Returning the Value of an Environment Variable to a Parameter**
+    env = list(os.environ.keys())[0]
+    if os.name == 'nt':
+        env_value = os.getenv(env).split(';')[0]
+    elif os.name == 'posix':
+        env_value = os.getenv(env).split(':')[0]
+    else:
+        raise Exception('Not supported OS.')
+
+    env_ = mapdl.inquire("", 'ENV', env, 0)
+    assert env_ == env_value
+
+    # **Returning the Value of a Title to a Parameter**
+    title = 'This is the title'
+    mapdl.title(title)
+    assert title == mapdl.inquire("", 'title')
+
+    # **Returning Information About a File to a Parameter**
+    jobname = mapdl.inquire("", 'jobname')
+    assert float(mapdl.inquire("", 'exist', jobname + '.lock')) in [0, 1]
+    assert float(mapdl.inquire("", 'exist', jobname, 'lock')) in [0, 1]
+
+
+def test_get_file_path(mapdl, tmpdir):
+    fname = 'dummy.txt'
+    fobject = tmpdir.join(fname)
+    fobject.write("Dummy file for testing")
+
+    assert fname in mapdl._get_file_path(fobject)
+
+
+@pytest.mark.parametrize("option2,option3,option4", [('expdata.dat', '', ''), ('expdata', '.dat', ''), ('expdata', 'dat', 'DIR')])
+def test_tbft(mapdl, option2, option3, option4):
+    try:
+        fname = 'expdata.dat'
+        fpath = os.path.join(os.getcwd(), fname)
+
+        with open(fpath, 'w') as fid:
+            fid.write("""0.819139E-01 0.82788577E+00
+            0.166709E+00 0.15437247E+01
+            0.253960E+00 0.21686152E+01
+            0.343267E+00 0.27201819E+01
+            0.434257E+00 0.32129833E+0""")
+
+        if option4 == 'DIR':
+            option4 = os.getcwd()
+
+        mapdl.prep7(mute=True)
+        mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
+        mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
+        mapdl.tbft('EADD', mat_id, 'UNIA', option2, option3, option4, mute=True)
+
+        assert fname in mapdl.list_files()
+
+    finally:
+        try:
+            os.remove(fname)
+        except OSError:
+            pass
+
+
+def test_tbft_not_found(mapdl):
+    with pytest.raises(FileNotFoundError):
+        mapdl.prep7(mute=True)
+        mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
+        mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
+        mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
