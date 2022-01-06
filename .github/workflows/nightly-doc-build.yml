@@ -19,6 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Get Bot Application Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.APPLICATION_ID }}
+          application_private_key: ${{ secrets.APPLICATION_PRIVATE_KEY }}
+
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -58,7 +65,7 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           repository-name: pyansys/pymapdl-dev-docs
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          token: ${{ steps.get_workflow_token.outputs.token }}
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true
