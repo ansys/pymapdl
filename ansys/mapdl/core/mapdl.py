@@ -2447,9 +2447,8 @@ class _MapdlCore(Commands):
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
-        self._log.debug("Collecting...")
         if self._cleanup:
-            self._log.debug("Exiting MAPDL on collection.")
+            logger.debug("Exiting MAPDL %s on collection.", self._name)
             try:
                 self.exit()
             except Exception as e:
@@ -2459,8 +2458,9 @@ class _MapdlCore(Commands):
                 except Exception:
                     pass
         else:
-            self._log.debug(
-                "Not exiting MAPDL on collection due to ``cleanup_on_exit=False``"
+            logger.debug(
+                "Not exiting MAPDL %s on collection due to ``cleanup_on_exit=False``",
+                self._name
             )
 
     @supress_logging
