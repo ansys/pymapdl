@@ -2053,7 +2053,7 @@ class _MapdlCore(Commands):
         Parameters
         ----------
         commands : str or list of str
-            Commands separated by new lines, or a list of strings commands.
+            Commands separated by new lines, or a list of commands strings.
             See example.
 
         Returns
