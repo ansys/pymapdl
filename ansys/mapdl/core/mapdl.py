@@ -123,7 +123,7 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
-                log_file=True, local=True, **start_parm):
+                log_file=False, local=True, **start_parm):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -144,8 +144,14 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        # Setting up logger
-        self._log = logger.add_instance_logger(self._name, self, level=loglevel)
+        # Setting up loggers
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
+        # adding a file handler to the logger
+        if log_file:
+            if not isinstance(log_file, str):
+                log_file = 'instance.log'
+            self._log.log_to_file(filename=log_file, level=loglevel)
+
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
@@ -2148,11 +2154,11 @@ class _MapdlCore(Commands):
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             # remove permitted errors and allow MAPDL to continue
-            response = self._response
-            for err_str in _PERMITTED_ERRORS:
-                response = re.sub(err_str, "", response)
 
-            if "*** ERROR ***" in response:
+            for err_str in _PERMITTED_ERRORS:
+                self._response = re.sub(err_str, "", self._response)
+
+            if "*** ERROR ***" in self._response:
                 # We don't need to log exception because they already included in the main logger.
                 # logger.error(self._response)
                 # However, exceptions are recorded in the global logger which do not record

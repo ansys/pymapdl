@@ -93,13 +93,9 @@ mapdl = launch_mapdl()
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # Enter verification example mode and the pre-processing routine.
 
-def start_prep7():
-    mapdl.clear()
-    mapdl.verify()
-    mapdl.prep7()
-
-
-start_prep7()
+mapdl.clear()
+mapdl.verify()
+mapdl.prep7()
 
 
 ###############################################################################
@@ -426,7 +422,6 @@ mapdl.finish()
 # Enter post-processing.
 
 # Enter the post-processing routine.
-mapdl.run("/OUT,")
 mapdl.post1()
 
 
@@ -441,7 +436,6 @@ def getload():
     # Select the nodes in the PIPE288 element model.
     mapdl.nsel(type_="S", item="NODE", vmin=1, vmax=2)
     mapdl.nsel("R", "LOC", "Z", 0)
-    mapdl.run("/OUT,SCRATCH")
 
     # Sum the nodal force contributions of elements.
     mapdl.fsum()
@@ -459,7 +453,6 @@ def getload():
 
     # Extrapolation of the force results in the full 360 (deg) model.
     load_185 = load_185_theta * 360 / theta
-    mapdl.run("*STATUS,LOAD")
 
     # Select the nodes in the SHELL181 element model.
     mapdl.nsel("S", "NODE", "", 201, 212)  # SELECT NODES IN SHELL181 MODEL
@@ -467,14 +460,12 @@ def getload():
 
     # Sum the nodal force contributions of elements.
     mapdl.fsum()
-    mapdl.run("/OUT,")
 
     # Get the force value of the simplified model.
     load_181_theta = mapdl.get_value("FSUM", 0, "ITEM", "FZ")
 
     # Extrapolation of the force results in the full 360 (deg) model.
     load_181 = load_181_theta * 360 / theta
-    mapdl.run("*STATUS,LOAD")
 
     # Return load results of each element model.
     return abs(round(load_288, 0)), \
