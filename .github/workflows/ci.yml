@@ -156,6 +156,16 @@ jobs:
           path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
+      - name: Deploy
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          repository-name: pyansys/pymapdl-docs
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          BRANCH: gh-pages
+          FOLDER: doc/build/html
+          CLEAN: true
+
       - name: Build PDF Documentation
         working-directory: doc
         run: |
@@ -172,16 +182,6 @@ jobs:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
-
-      - name: Deploy
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@4.1.4
-        with:
-          repository-name: pyansys/pymapdl-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/build/html
-          CLEAN: true
 
   build_test:
     name: Build and Unit Testing
