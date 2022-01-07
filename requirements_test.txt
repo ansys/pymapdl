@@ -4,4 +4,7 @@ matplotlib
 pytest
 pytest-cov
 vtk<9.1.0
+<<<<<<< HEAD
 pyvista==0.32.1
+=======
+>>>>>>> refs/remotes/origin/doc/vm7
