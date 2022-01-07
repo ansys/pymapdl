@@ -2043,7 +2043,7 @@ class _MapdlCore(Commands):
         """
 
         warnings.warn("'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
-                      warnings.DeprecationWarning)
+                      DeprecationWarning)
         return self.input_strings(commands=commands)
 
     def input_strings(self, commands):
