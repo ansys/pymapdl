@@ -884,11 +884,12 @@ The following input files were used for this problem:
 * **disc\_pad\_model.cdb** -- Common database file used for the linear non-prestressed modal analysis, the partial prestressed modal analysis,
   and the full nonlinear prestressed modal analysis (called by the **linear\_non\_prestressed.dat**, **partial\_prestressed.dat**,
   **full\_non\_linear.html** and **linear\_non\_prestressed\_par.html** files, respectively).
+  :download:`Download file: disc_pad_model.cdb <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/disc_pad_model.cdb>`.
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download the zipped td-1 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-1-DLU-N2a />`_            |
+| `Download the zipped td-1 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-1-DLU-N2a>`_              |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a />`_           |
+| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a>`_             |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
 
-For more information, see `Obtaining the Input Files. <https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html />`_
+For more information, see `Obtaining the Input Files. <https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html>`_
