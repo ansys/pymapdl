@@ -33,7 +33,12 @@ clean-except-examples:
 
 # manually deploy to https://github.com/pyansys/pymapdl-docs
 # WARNING: Use with care as this overwrites history of gh-pages
-deploy:
+deploy: 
+	@echo "*** Warning ***"
+        @echo "You are about to deploy to 'PyMAPDL docs'."
+        @echo "This overwrites the history of gh-pages."
+        @echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+        @echo "Deploying..."
 	touch build/html/.nojekyll
 	echo "mapdldocs.pyansys.com" >> build/html/CNAME
 	cd build/html && git init
