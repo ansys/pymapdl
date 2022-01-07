@@ -35,10 +35,10 @@ clean-except-examples:
 # WARNING: Use with care as this overwrites history of gh-pages
 deploy: 
 	@echo "*** Warning ***"
-        @echo "You are about to deploy to 'PyMAPDL docs'."
-        @echo "This overwrites the history of gh-pages."
-        @echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-        @echo "Deploying..."
+	@echo "You are about to deploy to 'PyMAPDL docs'."
+	@echo "This overwrites the history of gh-pages."
+	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
+	@echo "Deploying..."
 	touch build/html/.nojekyll
 	echo "mapdldocs.pyansys.com" >> build/html/CNAME
 	cd build/html && git init
