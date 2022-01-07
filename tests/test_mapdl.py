@@ -215,8 +215,8 @@ def test_multiline_fail(mapdl):
 
 
 def test_multiline_fail(mapdl, cleared):
-    resp = mapdl.run_multiline(CMD_BLOCK)
     with pytest.warns(DeprecationWarning):
+        resp = mapdl.run_multiline(CMD_BLOCK)
         assert "IS SOLID186" in resp, "not capturing the beginning of the block"
         assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
 
