@@ -30,3 +30,16 @@ clean-except-examples:
 	rm -rf $(BUILDDIR)/*
 	rm -rf images/auto-generated
 	find . -type d -name "_autosummary" -exec rm -rf {} +
+
+# manually deploy to https://github.com/pyansys/pymapdl-docs
+# WARNING: Use with care as this overwrites history of gh-pages
+deploy:
+	touch build/html/.nojekyll
+	echo "mapdldocs.pyansys.com" >> build/html/CNAME
+	cd build/html && git init
+	cd build/html && git add .
+	cd build/html && git checkout -b gh-pages
+	cd build/html && git commit -am "manual build"
+	cd build/html && git remote add origin https://github.com/pyansys/pymapdl-docs
+	cd build/html && git push -u origin gh-pages --force
+	rm -rf build/html/.git
