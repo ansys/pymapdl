@@ -81,7 +81,8 @@ def check_valid_output(func):
     def func_wrapper(self, *args, **kwargs):
         output = func(self, *args, **kwargs)
         if '*** WARNING ***' in output or '*** ERROR ***': # Error should be caught in mapdl.run.
-            msg = '\n'.join(output.splitlines()[-2:])
+            err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
+            msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
             raise ValueError(msg)
     return func_wrapper
 
