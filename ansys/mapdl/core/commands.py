@@ -79,11 +79,14 @@ def check_valid_output(func):
     """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
 
     def func_wrapper(self, *args, **kwargs):
-        output = func(self, *args, **kwargs)
+        output = self.__str__()
         if '*** WARNING ***' in output or '*** ERROR ***': # Error should be caught in mapdl.run.
             err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
             msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
             raise ValueError(msg)
+        else:
+            return func(self, *args, **kwargs)
+    
     return func_wrapper
 
 
