@@ -221,6 +221,8 @@ jobs:
         run: |
           pip install -r requirements_build.txt
           python setup.py sdist
+          python setup.py bdist_wheel
+          echo "Printing list of files **GER**"
           ls dist/
           pip install dist/*.whl
           cd tests  # run from test directory to test installed module
