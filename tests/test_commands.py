@@ -119,8 +119,8 @@ def test_output_listing(mapdl, plastic_solve, func, args):
 
     assert isinstance(out, CommandListingOutput)
     assert isinstance(out_list, list) and bool(out_list)
-    assert isinstance(out_array, np.ndarray) and out_array.size == 0
+    assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
     if HAS_PANDAS:
         out_df = out.to_dataframe()
-        assert isinstance(out_df, pd.DataFrame) and out_df.empty
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty

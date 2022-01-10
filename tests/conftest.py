@@ -4,7 +4,6 @@ import os
 import signal
 import time
 
-import numpy as np
 import pytest
 import pyvista
 
