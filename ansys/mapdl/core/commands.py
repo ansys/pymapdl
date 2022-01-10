@@ -74,6 +74,18 @@ CMD_LISTING = [
     'SWLI'
 ]
 
+
+def check_valid_output(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        output = func(self, *args, **kwargs)
+        if '*** WARNING ***' in output or '*** ERROR ***': # Error should be caught in mapdl.run.
+            msg = '\n'.join(output.splitlines()[-2:])
+            raise ValueError(msg)
+    return func_wrapper
+
+
 class PreprocessorCommands(
     preproc.database.Database,
     preproc.explicit_dynamics.ExplicitDynamics,
@@ -455,6 +467,7 @@ class CommandListingOutput(CommandOutput):
                 raise ModuleNotFoundError(MSG_NOT_PANDAS)
         return func_wrapper
 
+    @check_valid_output
     def to_list(self):
         data = self._get_data_groups()
         return [each.split() for each in data]
