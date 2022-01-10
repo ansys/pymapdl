@@ -220,8 +220,9 @@ jobs:
       - name: Install ansys-mapdl-core
         run: |
           pip install -r requirements_build.txt
+          python setup.py sdist
           python setup.py bdist_wheel
-          pip install dist/ansys*.whl
+          pip install dist/*.whl
           cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
@@ -239,10 +240,15 @@ jobs:
           pip install pytest-azurepipelines
           xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
 
-      - name: Upload wheel
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
         with:
-          name: PyMAPDL-wheel
+          name: PyMAPDL-packages
           path: dist/
           retention-days: 7
 
@@ -269,6 +275,7 @@ jobs:
         run: |
           pip install twine
           twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -278,4 +285,5 @@ jobs:
         with:
           files: |
             ./**/*.whl
+            ./**/*.tar.gz
             ./**/*.pdf
