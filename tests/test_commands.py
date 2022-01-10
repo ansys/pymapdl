@@ -6,7 +6,7 @@ import numpy as np
 # from conftest import HAS_GRPC
 from ansys.mapdl.core import examples
 
-from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandListingOutput, BoundaryConditionsListingOutput
 from ansys.mapdl.core.commands import CommandOutput
 from ansys.mapdl.core.commands import HAS_PANDAS
 
@@ -70,6 +70,16 @@ def plastic_solve(mapdl):
     mapdl.set(1, 2)
     mapdl.mute = False
 
+@pytest.fixture(scope="module")
+def beam_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm10"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
 
 def test_cmd_class():
     output = """This is the output.
@@ -103,7 +113,6 @@ def test_inquire_functions(mapdl, func):
         assert '=' in output
 
 
-# @pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
 @pytest.mark.parametrize('func,args', [
         ('prnsol', ('U', 'X')),
         ('presol', ('S', 'X')),
@@ -120,6 +129,30 @@ def test_output_listing(mapdl, plastic_solve, func, args):
     assert isinstance(out, CommandListingOutput)
     assert isinstance(out_list, list) and bool(out_list)
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
+    if HAS_PANDAS:
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+@pytest.mark.parametrize('func', ['dlist', 'flist'])
+def test_bclist(mapdl, beam_solve, func):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm10"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
+
+    func_ = getattr(mapdl, func)
+    out = func_()
+
+    assert isinstance(out, BoundaryConditionsListingOutput)
+    assert isinstance(out.to_list(), list) and bool(out.to_list())
+
+    with pytest.raises(ValueError):
+        out.to_array()
 
     if HAS_PANDAS:
         out_df = out.to_dataframe()

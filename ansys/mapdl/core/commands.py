@@ -37,6 +37,11 @@ You can install it using:
 >>> pip install pandas
 """
 
+MSG_BCListingOutput_to_array = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+so it cannot be converted to Numpy Array.
+
+Please use 'to_list' or 'to_dataframe' instead."""
+
 # Identify where the data start in the output
 GROUP_DATA_START = ['NODE', 'ELEM']
 
@@ -472,9 +477,9 @@ class CommandListingOutput(CommandOutput):
         return pd.DataFrame(data=data, columns=data)
 
 
-class Dlist(CommandListingOutput):
+class BoundaryConditionsListingOutput(CommandListingOutput):
     def to_array(self):
-        raise ValueError("The command 'DLIST' has strings values ('UX', 'UY', 'TEMP', etc), so it cannot be converted to Numpy Array.\nPlease use 'to_list' or 'to_dataframe' instead.")
+        raise ValueError(MSG_BCListingOutput_to_array)
 
     @_requires_pandas
     def to_dataframe(self):
