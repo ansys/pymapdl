@@ -12,7 +12,7 @@ notches in a finite width thin plate
 First, start MAPDL as a service and disable all but error messages.
 """
 # sphinx_gallery_thumbnail_number = 3
-
+from matplotlib import pyplot as plt
 import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
@@ -181,7 +181,7 @@ mapdl.nsel("S", "NODE", vmin=single_node, vmax=single_node)
 mapdl.f("ALL", "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
-_ = mapdl.allsel()
+mapdl.allsel(mute=True)
 
 
 ###############################################################################
@@ -261,49 +261,53 @@ stress_con = max_stress / stress_adj
 print("Stress Concentration: %.2f" % stress_con)
 
 
-# ###############################################################################
-# # Batch Analysis
-# # ~~~~~~~~~~~~~~
-# # The above script can be placed within a function to compute the
-# # stress concentration for a variety of hole diameters.  For each
-# # batch, MAPDL is reset and the geometry is generated from scratch.
+###############################################################################
+# Batch Analysis
+# ~~~~~~~~~~~~~~
+# The above script can be placed within a function to compute the
+# stress concentration for a variety of hole diameters.  For each
+# batch, MAPDL is reset and the geometry is generated from scratch.
 
-# ###############################################################################
-# # Run the batch and record the stress concentration
-# k_t_exp = []
-# ratios = np.linspace(0.001, 0.5, 20)
-# print('    Ratio  : Stress Concentration (K_t)')
-# for ratio in ratios:
-#     stress_con = compute_stress_con(ratio)
-#     print('%10.4f : %10.4f' % (ratio, stress_con))
-#     k_t_exp.append(stress_con)
+###############################################################################
+# Run the batch and record the stress concentration
+def compute_stress_con(ratio):
+    adj = width / (width - notch_depth * 2)
+    stress_adj = far_field_stress * adj
+    return max_stress / stress_adj
+k_t_exp = []
+ratios = np.linspace(0.001, 0.5, 20)
+print('    Ratio  : Stress Concentration (K_t)')
+for ratio in ratios:
+    stress_con = compute_stress_con(ratio)
+    print('%10.4f : %10.4f' % (ratio, stress_con))
+    k_t_exp.append(stress_con)
 
 
-# ###############################################################################
-# # Analytical Comparison
-# # ~~~~~~~~~~~~~~~~~~~~~
-# # Stress concentrations are often obtained by referencing tablular
-# # results or polynominal fits for a variety of geometries.  According
-# # to Peterson's Stress Concentration Factors (ISBN 0470048247), the analytical
-# # equation for a hole in a thin plate in uniaxial tension:
-# #
-# # :math:`k_t = 3 - 3.14\frac{d}{h} + 3.667\left(\frac{d}{h}\right)^2 - 1.527\left(\frac{d}{h}\right)^3`
-# #
-# # Where:
-# #
-# # - :math:`k_t` is the stress concentration
-# # - :math:`d` is the diameter of the circle
-# # - :math:`h` is the height of the plate
-# #
-# # As shown in the following plot, ANSYS matches the known tabular
-# # result for this geometry remarkably well using PLANE183 elements.
-# # The fit to the results may vary depending on the ratio between the
-# # height and width of the plate.
+###############################################################################
+# Analytical Comparison
+# ~~~~~~~~~~~~~~~~~~~~~
+# Stress concentrations are often obtained by referencing tablular
+# results or polynominal fits for a variety of geometries.  According
+# to Peterson's Stress Concentration Factors (ISBN 0470048247), the analytical
+# equation for a hole in a thin plate in uniaxial tension:
+#
+# :math:`k_t = 3 - 3.14\frac{d}{h} + 3.667\left(\frac{d}{h}\right)^2 - 1.527\left(\frac{d}{h}\right)^3`
+#
+# Where:
+#
+# - :math:`k_t` is the stress concentration
+# - :math:`d` is the diameter of the circle
+# - :math:`h` is the height of the plate
+#
+# As shown in the following plot, ANSYS matches the known tabular
+# result for this geometry remarkably well using PLANE183 elements.
+# The fit to the results may vary depending on the ratio between the
+# height and width of the plate.
 
-# # where ratio is (d/h)
-# k_t_anl = 3 - 3.14*ratios + 3.667*ratios**2 - 1.527*ratios**3
+# where ratio is (d/h)
+k_t_anl = 3 - 3.14*ratios + 3.667*ratios**2 - 1.527*ratios**3
 
-# plt.plot(ratios, k_t_anl, label=r'$K_t$ Analytical')
-# plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
-# plt.legend()
-# plt.show()
+plt.plot(ratios, k_t_anl, label=r'$K_t$ Analytical')
+plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
+plt.legend()
+plt.show()
