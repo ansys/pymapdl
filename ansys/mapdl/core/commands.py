@@ -41,8 +41,7 @@ pip install pandas
 GROUP_DATA_START = ['NODE', 'ELEM']
 
 # Allowed commands to get output as array or dataframe.
-# In theory (from 'paprnt.F' and 'post1.F'), these commands
-# should follow the same format.
+# In theory, these commands should follow the same format.
 # Some of them are not documented (already deprecated?)
 # So they won't be wrapped.
 CMD_LISTING = [
@@ -80,13 +79,12 @@ def check_valid_output(func):
 
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
-        if '*** WARNING ***' in output or '*** ERROR ***': # Error should be caught in mapdl.run.
+        if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
             err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
             msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
             raise ValueError(msg)
         else:
             return func(self, *args, **kwargs)
-    
     return func_wrapper
 
 
