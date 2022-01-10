@@ -315,7 +315,7 @@ class CommandListingOutput(CommandOutput):
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
-    
+
     ## NOTES
     # The key format files are:
     # - rptfmt.F
@@ -374,8 +374,8 @@ class CommandListingOutput(CommandOutput):
 
     def _format(self):
         """Perform some formatting (replacing mainly) in the raw text."""
-        return re.sub(r'[^E](-)',' -', self.__str__())
-        
+        return re.sub(r'[^E](-)', ' -', self.__str__())
+
     def _get_body(self, trail_header=None):
         """Get command body text.
 
@@ -447,6 +447,7 @@ class CommandListingOutput(CommandOutput):
 
     def _requires_pandas(func):
         """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
         def func_wrapper(self, *args, **kwargs):
             if HAS_PANDAS:
                 return func(self, *args, **kwargs)
