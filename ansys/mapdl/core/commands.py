@@ -380,7 +380,7 @@ class CommandListingOutput(CommandOutput):
         """Get command body text.
 
         It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
-        # Doing some formating of the string
+        # Doing some formatting of the string
         body = self._format().splitlines()
 
         if not trail_header:
