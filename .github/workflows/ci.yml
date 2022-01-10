@@ -222,8 +222,6 @@ jobs:
           pip install -r requirements_build.txt
           python setup.py sdist
           python setup.py bdist_wheel
-          echo "Printing list of files **GER**"
-          ls dist/
           pip install dist/*.whl
           cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
@@ -241,6 +239,11 @@ jobs:
           pip install -r requirements_test.txt
           pip install pytest-azurepipelines
           xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
 
       - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
@@ -268,10 +271,19 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
 
-      - name: Upload to Public PyPi
+      - name: Build wheel and source binaries
+        run: |
+          python setup.py sdist
+          python setup.py bdist_wheel
+
+      - name: Check package with twine
         run: |
           pip install twine
-          twine upload --skip-existing ./**/*.whl
+          twine check dist/*
+
+      - name: Upload to Public PyPi
+        run: |
+          twine upload --skip-existing ./dist/*.whl
           twine upload --skip-existing ./dist/*.tar.gz
         env:
           TWINE_USERNAME: __token__
