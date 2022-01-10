@@ -49,7 +49,8 @@ GROUP_DATA_START = ['NODE', 'ELEM']
 # In theory, these commands
 # should follow the same format.
 # Some of them are not documented (already deprecated?)
-# So they won't be wrapped.
+# So they are not in the Mapdl class,
+# so they won't be wrapped.
 CMD_LISTING = [
     'NLIN', # not documented
     'PRCI',
