@@ -422,7 +422,7 @@ def solve_simulation(mapdl):
     mapdl.solve()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def static_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
@@ -507,7 +507,7 @@ def static_solve(mapdl):
     mapdl.mute = False
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def plastic_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
@@ -519,7 +519,7 @@ def plastic_solve(mapdl):
     mapdl.mute = False
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def contact_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
