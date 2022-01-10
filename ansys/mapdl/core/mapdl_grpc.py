@@ -64,7 +64,7 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
-from ansys.mapdl.core.commands import CommandListingOutput, CMD_LISTING
+from ansys.mapdl.core.commands import CommandListingOutput, CMD_LISTING, Dlist
 
 
 TMP_VAR = '__tmpvar__'
@@ -2018,3 +2018,8 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.dlist)
+    def dlist(self, node1='', node2='', ninc='', **kwargs):
+        """Wraps ``dlist`` to obtain a pandas dataframe."""
+        return Dlist(super().dlist(node1=node1, node2=node2, ninc=ninc, **kwargs))
