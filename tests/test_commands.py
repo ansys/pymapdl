@@ -94,17 +94,18 @@ def test_inquire_functions(mapdl, func):
         ('presol', ('S', 'X')),
         ('presol', ('S', 'ALL'))
         ])
-def test_output_listing(mapdl, cleared, static_solve, func, args):
+def test_output_listing(mapdl, static_solve, func, args):
     mapdl.post1()
     func_ = getattr(mapdl, func)
     out = func_(*args)
 
     out_list = out.to_list()
     out_array = out.to_array()
-    out_df = out.to_dataframe()
 
     assert isinstance(out, CommandListingOutput)
-    assert isinstance(out_list, list) and out_list
-    assert isinstance(out_array, np.ndarray) and out_array
+    assert isinstance(out_list, list) and not bool(out_list)
+    assert isinstance(out_array, np.ndarray) and not bool(out_array)
+
     if HAS_PANDAS:
-        assert isinstance(out_df, pd.DataFrame) and out_df
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not bool(out_df)
