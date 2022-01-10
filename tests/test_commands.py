@@ -3,8 +3,11 @@ import inspect
 
 import numpy as np
 
-from conftest import HAS_GRPC
-from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+# from conftest import HAS_GRPC
+from ansys.mapdl.core import examples
+
+from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandOutput
 from ansys.mapdl.core.commands import HAS_PANDAS
 
 if HAS_PANDAS:
@@ -56,6 +59,18 @@ ARGS_INQ_FUNC = {
 }
 
 
+@pytest.fixture(scope="module")
+def plastic_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm273"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
+
+
 def test_cmd_class():
     output = """This is the output.
 This is the second line.
@@ -88,19 +103,24 @@ def test_inquire_functions(mapdl, func):
         assert '=' in output
 
 
-@pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
+# @pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
 @pytest.mark.parametrize('func,args', [
         ('prnsol', ('U', 'X')),
         ('presol', ('S', 'X')),
         ('presol', ('S', 'ALL'))
         ])
-def test_output_listing(mapdl, cleared, static_solve, func, args):
+def test_output_listing(mapdl, plastic_solve, func, args):
     mapdl.post1()
     func_ = getattr(mapdl, func)
     out = func_(*args)
 
+    out_list = out.to_list()
+    out_array = out.to_array()
+
     assert isinstance(out, CommandListingOutput)
-    assert isinstance(out.to_list(), list)
-    assert isinstance(out.to_array(), np.ndarray)
+    assert isinstance(out_list, list) and bool(out_list)
+    assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
     if HAS_PANDAS:
-        assert isinstance(out.to_list(), pd.DataFrame)
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
