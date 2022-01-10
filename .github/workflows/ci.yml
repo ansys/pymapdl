@@ -221,7 +221,8 @@ jobs:
         run: |
           pip install -r requirements_build.txt
           python setup.py sdist
-          pip install dist/ansys*.whl
+          ls dist/
+          pip install dist/*.whl
           cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
