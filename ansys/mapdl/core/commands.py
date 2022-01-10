@@ -46,7 +46,7 @@ Please use 'to_list' or 'to_dataframe' instead."""
 GROUP_DATA_START = ['NODE', 'ELEM']
 
 # Allowed commands to get output as array or dataframe.
-# In theory (from 'paprnt.F' and 'post1.F'), these commands
+# In theory, these commands
 # should follow the same format.
 # Some of them are not documented (already deprecated?)
 # So they won't be wrapped.
