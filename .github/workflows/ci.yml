@@ -248,7 +248,7 @@ jobs:
       - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
         with:
-          name: PyMAPDL-wheel
+          name: PyMAPDL-packages
           path: dist/
           retention-days: 7
 
