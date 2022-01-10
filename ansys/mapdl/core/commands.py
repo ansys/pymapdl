@@ -455,12 +455,12 @@ class CommandListingOutput(CommandOutput):
                 raise ModuleNotFoundError(MSG_NOT_PANDAS)
         return func_wrapper
 
-    def to_lists(self):
+    def to_list(self):
         data = self._get_data_groups()
         return [each.split() for each in data]
 
     def to_array(self):
-        return np.array(self.to_lists(), dtype=float)
+        return np.array(self.to_list(), dtype=float)
 
     @_requires_pandas
     def to_dataframe(self):
