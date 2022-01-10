@@ -270,6 +270,16 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
+def _requires_pandas(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        if HAS_PANDAS:
+            return func(self, *args, **kwargs)
+        else:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
+    return func_wrapper
+
 
 class CommandOutput(str):
     """
@@ -445,16 +455,6 @@ class CommandListingOutput(CommandOutput):
         pairs = list(self._get_data_group_indexes(body))
         return body[pairs[0][0]].split()
 
-    def _requires_pandas(func):
-        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
-
-        def func_wrapper(self, *args, **kwargs):
-            if HAS_PANDAS:
-                return func(self, *args, **kwargs)
-            else:
-                raise ModuleNotFoundError(MSG_NOT_PANDAS)
-        return func_wrapper
-
     def to_list(self):
         data = self._get_data_groups()
         return [each.split() for each in data]
@@ -463,5 +463,32 @@ class CommandListingOutput(CommandOutput):
         return np.array(self.to_list(), dtype=float)
 
     @_requires_pandas
+    def to_dataframe(self, data=None, columns=None):
+        if not data:
+            data = self.to_array()
+        if not columns:
+            columns = self.get_columns()
+
+        return pd.DataFrame(data=data, columns=data)
+
+
+class Dlist(CommandListingOutput):
+    def to_array(self):
+        raise ValueError("The command 'DLIST' has strings values ('UX', 'UY', 'TEMP', etc), so it cannot be converted to Numpy Array.\nPlease use 'to_list' or 'to_dataframe' instead.")
+
+    @_requires_pandas
     def to_dataframe(self):
-        return pd.DataFrame(data=self.to_array(), columns=self.get_columns())
+        df = pd.DataFrame(data=self.to_list(), columns=self.get_columns())
+        if 'NODE' in df.columns:
+            df['NODE'] = df['NODE'].astype(int)
+
+        if 'LABEL' in df.columns:
+            df['LABEL'] = df['LABEL'].astype(str)
+
+        if 'REAL' in df.columns:
+            df['REAL'] = df['REAL'].astype(float)
+
+        if 'IMAG' in df.columns:
+            df['IMAG'] = df['IMAG'].astype(float)
+
+        return df
