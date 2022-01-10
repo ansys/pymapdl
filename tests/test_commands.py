@@ -1,6 +1,14 @@
 import pytest
 import inspect
-from ansys.mapdl.core.commands import CommandOutput as CommandOutput
+
+import numpy as np
+
+from conftest import HAS_GRPC
+from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+from ansys.mapdl.core.commands import HAS_PANDAS
+
+if HAS_PANDAS:
+    import pandas as pd
 
 
 LIST_OF_INQUIRE_FUNCTIONS = [
@@ -78,3 +86,21 @@ def test_inquire_functions(mapdl, func):
     else:
         assert isinstance(output, str)
         assert '=' in output
+
+
+@pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
+@pytest.mark.parametrize('func,args', [
+        ('prnsol', ('U', 'X')),
+        ('presol', ('S', 'X')),
+        ('presol', ('S', 'ALL'))
+        ])
+def test_output_listing(mapdl, cleared, static_solve, func, args):
+    mapdl.post1()
+    func_ = getattr(mapdl, func)
+    out = func_(*args)
+
+    assert isinstance(out, CommandListingOutput)
+    assert isinstance(out.to_list(), list)
+    assert isinstance(out.to_array(), np.ndarray)
+    if HAS_PANDAS:
+        assert isinstance(out.to_list(), pd.DataFrame)
