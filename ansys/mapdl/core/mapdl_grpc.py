@@ -64,7 +64,6 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
-from ansys.mapdl.core.commands import CommandOutput
 
 
 TMP_VAR = '__tmpvar__'
@@ -626,7 +625,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             response = self._send_command(cmd, mute=mute)
         self._busy = False
-        return CommandOutput(response.strip(), cmd)
+        return response.strip()
 
     @property
     def busy(self):
