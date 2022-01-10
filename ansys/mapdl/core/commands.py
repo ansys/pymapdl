@@ -325,6 +325,7 @@ class CommandOutput(str):
         """Not allowed to change the value of ``command``."""
         pass
 
+
 class CommandListingOutput(CommandOutput):
     """
     Custom class for handling the commands whose output is sensible to be converted to

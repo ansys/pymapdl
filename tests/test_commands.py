@@ -1,5 +1,6 @@
 import pytest
 import inspect
+from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 import numpy as np
 
@@ -80,6 +81,7 @@ def beam_solve(mapdl):
     mapdl.post1()
     mapdl.set(1, 2)
     mapdl.mute = False
+
 
 def test_cmd_class():
     output = """This is the output.
