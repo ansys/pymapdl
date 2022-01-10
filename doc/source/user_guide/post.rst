@@ -62,6 +62,35 @@ These commands are listed in Table-1_.
 | Listing    |                         |            |
 +------------+-------------------------+------------+
 
+These commands show the next output:
+
+.. code:: python
+
+    
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core import examples
+
+    >>> mapdl = launch_mapdl()
+    >>> example = examples.vmfiles['vm10']
+    >>> mapdl.input(example)
+
+    >>> mapdl.slashsolu()
+    >>> mapdl.solve()
+
+    >>> mapdl.post1()
+    >>> cmd = mapdl.prnsol('U', 'X')
+    >>> print(cmd.to_list())
+    [['1', '0.0000', '0.0000', '0.0000', '0.0000'],
+    ['2', '0.0000', '0.83333E-002', '0.0000', '0.83333E-002']]
+
+    >>> print(cmd.to_array())
+    array([[1.       , 0.       , 0.       , 0.       , 0.       ],
+        [2.       , 0.       , 0.0083333, 0.       , 0.0083333]])
+
+    >>> print(cmd.to_dataframe())
+       NODE   UX        UY   UZ      USUM
+    0   1.0  0.0  0.000000  0.0  0.000000
+    1   2.0  0.0  0.008333  0.0  0.008333
 
 Examples
 ~~~~~~~~
