@@ -1,14 +1,15 @@
 import pytest
 import inspect
 
-import numpy as np
+# import numpy as np
 
-from conftest import HAS_GRPC
-from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
+# from conftest import HAS_GRPC
+# from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandOutput
 from ansys.mapdl.core.commands import HAS_PANDAS
 
-if HAS_PANDAS:
-    import pandas as pd
+# if HAS_PANDAS:
+#     import pandas as pd
 
 
 LIST_OF_INQUIRE_FUNCTIONS = [
