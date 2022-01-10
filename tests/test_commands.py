@@ -1,5 +1,6 @@
 import pytest
 import inspect
+from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 import numpy as np
 

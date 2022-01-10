@@ -2154,11 +2154,11 @@ class _MapdlCore(Commands):
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             # remove permitted errors and allow MAPDL to continue
-            response = self._response
-            for err_str in _PERMITTED_ERRORS:
-                response = re.sub(err_str, "", response)
 
-            if "*** ERROR ***" in response:
+            for err_str in _PERMITTED_ERRORS:
+                self._response = re.sub(err_str, "", self._response)
+
+            if "*** ERROR ***" in self._response:
                 # We don't need to log exception because they already included in the main logger.
                 # logger.error(self._response)
                 # However, exceptions are recorded in the global logger which do not record

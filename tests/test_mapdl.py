@@ -126,7 +126,7 @@ def warns_in_cdread_error_log(mapdl):
 
     warns = []
     for each in error_files:
-        with open(os.path.join(mapdl.directory, each)) as fid:
+        with open(os.path.join(mapdl.directory, each), errors='ignore') as fid:
             error_log = ''.join(fid.readlines())
         warns.append((warn_cdread_1 in error_log) or (warn_cdread_2 in error_log) or (warn_cdread_3 in error_log))
         return any(warns)

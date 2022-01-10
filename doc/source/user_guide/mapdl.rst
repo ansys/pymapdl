@@ -42,6 +42,12 @@ these commands (e.g. ``"/SOLU"``):
     mapdl.run('/SOLU')
     mapdl.solve()
 
+You can use the alternative:
+
+.. code:: python
+
+    mapdl.slashsolu()
+
 Some commands can only be run non-interactively from within in a
 script.  PyMAPDL gets around this restriction by writing the commands
 to a temporary input file and then reading the input file.  To run a
@@ -139,6 +145,8 @@ You can run several MAPDL commands as a unified block using
 This is useful when using PyMAPDL with older MAPDL scripts.  For
 example:
 
+.. code:: python
+
     >>> cmd = '''/prep7
     ! Mat
     MP,EX,1,200000
@@ -146,69 +154,46 @@ example:
     MP,DENS,1,7.85e-09
     ! Elements
     et,1,186
-    et,2,154
     ! Geometry
     BLC4,0,0,1000,100,10
     ! Mesh
     esize,5
     vmesh,all
-    nsel,s,loc,x,0
-    d,all,all
-    nsel,s,loc,x,999,1001
-    type,2
-    esurf
-    esel,s,type,,2
-    nsle
-    sfe,all,3,pres,,-10
-    allsel
-    /solu
-    antype,0
-    solve
-    /post1
-    set,last
-    plnsol,u,sum
     '''
+
     >>> resp = mapdl.run_multiline(cmd)
     >>> resp
 
-     You have already entered the general preprocessor (PREP7).
+    You have already entered the general preprocessor (PREP7).
 
-     MATERIAL          1     EX   =   200000.0
+    MATERIAL          1     EX   =   200000.0
 
-     MATERIAL          1     NUXY =  0.3000000
+    MATERIAL          1     NUXY =  0.3000000
 
-     MATERIAL          1     DENS =  0.7850000E-08
+    MATERIAL          1     DENS =  0.7850000E-08
 
-     ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
-      KEYOPT( 1- 6)=        0      0      0        0      0      0
-      KEYOPT( 7-12)=        0      0      0        0      0      0
-      KEYOPT(13-18)=        0      0      0        0      0      0
+    ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+    KEYOPT( 1- 6)=        0      0      0        0      0      0
+    KEYOPT( 7-12)=        0      0      0        0      0      0
+    KEYOPT(13-18)=        0      0      0        0      0      0
 
-     CURRENT NODAL DOF SET IS  UX    UY    UZ
-      THREE-DIMENSIONAL MODEL
+    CURRENT NODAL DOF SET IS  UX    UY    UZ
+    THREE-DIMENSIONAL MODEL
 
-     ELEMENT TYPE          2 IS SURF154      3-D STRUCTURAL SURFACE
-      KEYOPT( 1- 6)=        0      0      0        0      0      0
-      KEYOPT( 7-12)=        0      0      0        0      0      0
-      KEYOPT(13-18)=        0      0      0        0      0      0
+    CREATE A HEXAHEDRAL VOLUME WITH
+    X-DISTANCES FROM      0.000000000     TO      1000.000000
+    Y-DISTANCES FROM      0.000000000     TO      100.0000000
+    Z-DISTANCES FROM      0.000000000     TO      10.00000000
 
-     CURRENT NODAL DOF SET IS  UX    UY    UZ
-      THREE-DIMENSIONAL MODEL
+        OUTPUT VOLUME =     1
 
-     CREATE A HEXAHEDRAL VOLUME WITH
-     X-DISTANCES FROM      0.000000000     TO      1000.000000
-     Y-DISTANCES FROM      0.000000000     TO      100.0000000
-     Z-DISTANCES FROM      0.000000000     TO      10.00000000
+    DEFAULT ELEMENT DIVISIONS PER LINE BASED ON ELEMENT SIZE =   5.00
 
-          OUTPUT VOLUME =     1
+    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED VOLUMES
 
-     DEFAULT ELEMENT DIVISIONS PER LINE BASED ON ELEMENT SIZE =   5.00
-
-     GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED VOLUMES
-    
-     NUMBER OF VOLUMES MESHED   =         1
-     MAXIMUM NODE NUMBER        =     45765
-     MAXIMUM ELEMENT NUMBER     =      8000
+    NUMBER OF VOLUMES MESHED   =         1
+    MAXIMUM NODE NUMBER        =     45765
+    MAXIMUM ELEMENT NUMBER     =      8000
 
 Alternatively, you can simply write the commands to a file and then
 run it using :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`.  For

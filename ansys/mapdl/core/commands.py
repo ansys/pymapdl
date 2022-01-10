@@ -272,8 +272,7 @@ class Commands(
 
 
 class CommandOutput(str):
-    """
-    Custom string subclass for handling the commands output.
+    """Custom string subclass for handling the commands output.
 
     This class add two method to track the cmd which generated this output.
     * ``cmd`` - The MAPDL command which generated the output.
@@ -309,6 +308,7 @@ class CommandOutput(str):
     def command(self):
         """Not allowed to change the value of ``command``."""
         pass
+
 
 class CommandListingOutput(CommandOutput):
     """

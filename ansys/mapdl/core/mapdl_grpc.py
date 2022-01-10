@@ -67,6 +67,7 @@ from ansys.mapdl.core import check_version
 from ansys.mapdl.core.commands import CommandListingOutput, CMD_LISTING
 
 
+
 TMP_VAR = '__tmpvar__'
 VOID_REQUEST = anskernel.EmptyRequest()
 
