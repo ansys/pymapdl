@@ -34,7 +34,7 @@ MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
 You can install it using:
->>> pip install pandas
+pip install pandas
 """
 
 # Identify where the data start in the output
