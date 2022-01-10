@@ -12,7 +12,6 @@ import socket
 from functools import wraps
 import tempfile
 import subprocess
-import inspect
 
 import grpc
 import numpy as np
@@ -2019,4 +2018,3 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
-
