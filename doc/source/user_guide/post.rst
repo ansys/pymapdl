@@ -23,6 +23,46 @@ streamed back to the client for review or visualization.
    via a Python client.
 
 
+
+Enriched Command Output
+~~~~~~~~~~~~~~~~~~~~~~~
+All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands output a string object which can be parsed to 
+obtain specific data from it.
+
+In certain Mapdl commands the returned string contains some methods to process the output.
+These commands are listed in Table-1_.
+
+.. _Table-1:
+
+** Table 1. `Mapdl` commands with extra processing methods.**
++------------+-------------------------+------------+
+| Category   | Extra Methods Available | Commands   |
++============+=========================+============+
+| Listing    | `.to_list()`            | `prcint`   |
+|            | `.to_array()`           | `prenergy` |
+|            | `.to_dataframe()`       | `prerr`    |
+|            |                         | `presol`   |
+|            |                         | `pretab`   |
+|            |                         | `print`    |
+|            |                         | `priter`   |
+|            |                         | `prjsol`   |
+|            |                         | `prnld`    |
+|            |                         | `prnsol`   |
+|            |                         | `prorb`    |
+|            |                         | `prpath`   |
+|            |                         | `prrfor`   |
+|            |                         | `prrsol`   |
+|            |                         | `prsect`   |
+|            |                         | `prvect`   |
+|            |                         | `stat`     |
+|            |                         | `swlist`   |
++------------+-------------------------+------------+
+| Boundary   | `.to_list()`            | `dlist`    |
+| Conditions | `.to_dataframe()`       | `flist`    |
+| Listing    |                         |            |
++------------+-------------------------+------------+
+
+
 Examples
 ~~~~~~~~
 Classically, one would request nodal results from MAPDL using the
