@@ -66,7 +66,6 @@ from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
 from ansys.mapdl.core.commands import CMD_LISTING, CommandListingOutput, BoundaryConditionsListingOutput
 
-
 TMP_VAR = '__tmpvar__'
 VOID_REQUEST = anskernel.EmptyRequest()
 

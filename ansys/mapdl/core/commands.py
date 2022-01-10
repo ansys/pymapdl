@@ -34,7 +34,7 @@ MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
 You can install it using:
->>> pip install pandas
+pip install pandas
 """
 
 MSG_BCListingOutput_to_array = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
@@ -46,8 +46,7 @@ Please use 'to_list' or 'to_dataframe' instead."""
 GROUP_DATA_START = ['NODE', 'ELEM']
 
 # Allowed commands to get output as array or dataframe.
-# In theory, these commands
-# should follow the same format.
+# In theory, these commands should follow the same format.
 # Some of them are not documented (already deprecated?)
 # So they are not in the Mapdl class,
 # so they won't be wrapped.
@@ -79,6 +78,21 @@ CMD_LISTING = [
     'STAT',
     'SWLI'
 ]
+
+
+def check_valid_output(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        output = self.__str__()
+        if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
+            err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
+            msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
+            raise ValueError(msg)
+        else:
+            return func(self, *args, **kwargs)
+    return func_wrapper
+
 
 class PreprocessorCommands(
     preproc.database.Database,
@@ -288,8 +302,7 @@ def _requires_pandas(func):
 
 
 class CommandOutput(str):
-    """
-    Custom string subclass for handling the commands output.
+    """Custom string subclass for handling the commands output.
 
     This class add two method to track the cmd which generated this output.
     * ``cmd`` - The MAPDL command which generated the output.
@@ -462,6 +475,17 @@ class CommandListingOutput(CommandOutput):
         pairs = list(self._get_data_group_indexes(body))
         return body[pairs[0][0]].split()
 
+    def _requires_pandas(func):
+        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+        def func_wrapper(self, *args, **kwargs):
+            if HAS_PANDAS:
+                return func(self, *args, **kwargs)
+            else:
+                raise ModuleNotFoundError(MSG_NOT_PANDAS)
+        return func_wrapper
+
+    @check_valid_output
     def to_list(self):
         data = self._get_data_groups()
         return [each.split() for each in data]
