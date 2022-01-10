@@ -217,4 +217,35 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
-    pass
+
+class CommandOutput(str):
+    """Customized command output."""
+
+    ## References:
+    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
+    # - https://docs.python.org/3/library/collections.html#userstring-objects
+    # - Source code of UserString
+
+    def __new__(cls, content, cmd=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        return obj
+
+    @property
+    def cmd(self):
+        """Cached original command to generate this command output."""
+        return self._cmd.split(',')[0]
+
+    @cmd.setter
+    def cmd(self, cmd):
+        """Not allowed to change the value of ``cmd``."""
+        raise AttributeError("The `cmd` attribute cannot be set")
+
+    @property
+    def command(self):
+        return self._cmd
+
+    @command.setter
+    def command(self):
+        """Not allowed to change the value of ``command``."""
+        pass

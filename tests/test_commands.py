@@ -1,5 +1,6 @@
 import pytest
 import inspect
+from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 
 LIST_OF_INQUIRE_FUNCTIONS = [
@@ -44,7 +45,27 @@ ARGS_INQ_FUNC = {
         'iprop': 1,
         'idf': 1,
         'kcmplx': 1
-    }
+}
+
+
+def test_cmd_class():
+    output = """This is the output.
+This is the second line.
+These are numbers 1234567890.
+These are symbols !"£$%^^@~+_@~€
+This is for the format: {format1}-{format2}-{format3}"""
+
+    cmd = '/INPUT'
+    cmd_out = CommandOutput(output, cmd=cmd)
+
+    assert isinstance(cmd_out, (str, CommandOutput))
+    assert isinstance(cmd_out[1:], (str, CommandOutput))
+    assert isinstance(cmd_out.splitlines(), list)
+    assert isinstance(cmd_out.splitlines()[0], (str, CommandOutput))
+    assert isinstance(cmd_out.replace('a', 'c'), (str, CommandOutput))
+    assert isinstance(cmd_out.partition('g'), tuple)
+    assert isinstance(cmd_out.split('g'), list)
+
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
 def test_inquire_functions(mapdl, func):
