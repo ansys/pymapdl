@@ -94,7 +94,7 @@ def test_inquire_functions(mapdl, func):
         ('presol', ('S', 'X')),
         ('presol', ('S', 'ALL'))
         ])
-def test_output_listing(mapdl, static_solve, func, args):
+def test_output_listing(mapdl, contact_solve, func, args):
     mapdl.post1()
     func_ = getattr(mapdl, func)
     out = func_(*args)
