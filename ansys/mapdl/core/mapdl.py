@@ -2102,7 +2102,7 @@ class _MapdlCore(Commands):
     def run(self, command, write_to_log=True, **kwargs):
         """Run single APDL command.
 
-        For multiple commands, use ``input_strings``.
+        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
