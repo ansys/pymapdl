@@ -17,7 +17,6 @@ from ansys.mapdl.core.launcher import (
 )
 from common import get_details_of_nodes, get_details_of_elements, Node, Element
 
-
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 

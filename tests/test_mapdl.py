@@ -210,24 +210,33 @@ def test_empty(mapdl):
 
 
 def test_multiline_fail(mapdl):
-    with pytest.raises(ValueError, match="Use ``run_multiline``"):
+    with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
 
 def test_multiline_fail(mapdl, cleared):
-    resp = mapdl.run_multiline(CMD_BLOCK)
+    with pytest.warns(DeprecationWarning):
+        resp = mapdl.run_multiline(CMD_BLOCK)
+        assert "IS SOLID186" in resp, "not capturing the beginning of the block"
+        assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
+
+
+def test_input_strings_fail(mapdl, cleared):
+    resp = mapdl.input_strings(CMD_BLOCK)
     assert "IS SOLID186" in resp, "not capturing the beginning of the block"
     assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
+
+
+def test_input_strings(mapdl, cleared):
+    assert isinstance(mapdl.input_strings(CMD_BLOCK), str)
+    assert isinstance(mapdl.input_strings(CMD_BLOCK.splitlines()), str)
 
 
 def test_str(mapdl):
     mapdl_str = str(mapdl)
     assert "Product:" in mapdl_str
     assert "MAPDL Version" in mapdl_str
-    try:
-        assert str(mapdl.version) in mapdl_str
-    except:
-        breakpoint()
+    assert str(mapdl.version) in mapdl_str
 
 
 def test_version(mapdl):

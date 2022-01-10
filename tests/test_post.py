@@ -4,10 +4,19 @@ import pytest
 
 from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core import examples
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
 )
+from ansys.mapdl.core import examples
+
+
+# must be run first before loading a result
+# since MAPDL may be on a remote windows machine, cannot test
+# @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
+# def test_nodal_eqv_stress_fail(mapdl, static_solve):
+#     with pytest.raises(MapdlRuntimeError):
+#         mapdl.post_processing.nodal_eqv_stress
+
 
 @pytest.fixture(scope="module")
 def static_solve(mapdl):
@@ -410,15 +419,6 @@ def contact_solve(mapdl):
     mapdl.allsel()
     mapdl.set('last')
     mapdl.mute = False
-
-
-# must be run first before loading a result
-# since MAPDL may be on a remote windows machine, cannot test
-# @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
-# def test_nodal_eqv_stress_fail(mapdl, static_solve):
-#     with pytest.raises(MapdlRuntimeError):
-#         mapdl.post_processing.nodal_eqv_stress
-
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_disp(mapdl, static_solve, comp):

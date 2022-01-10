@@ -20,6 +20,79 @@ from ._commands import (
     inq_func
 )
 
+import re
+import numpy as np
+
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+
+except ImportError:
+    HAS_PANDAS = False
+
+MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
+Hence this command is not applicable.
+
+You can install it using:
+pip install pandas
+"""
+
+MSG_BCListingOutput_to_array = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+so it cannot be converted to Numpy Array.
+
+Please use 'to_list' or 'to_dataframe' instead."""
+
+# Identify where the data start in the output
+GROUP_DATA_START = ['NODE', 'ELEM']
+
+# Allowed commands to get output as array or dataframe.
+# In theory, these commands should follow the same format.
+# Some of them are not documented (already deprecated?)
+# So they are not in the Mapdl class,
+# so they won't be wrapped.
+CMD_LISTING = [
+    'NLIN', # not documented
+    'PRCI',
+    'PRDI', # Not documented.
+    'PREF', # Not documented.
+    'PREN',
+    'PRER',
+    'PRES',
+    'PRET',
+    'PRGS', # Not documented.
+    'PRIN',
+    'PRIT',
+    'PRJS',
+    'PRNL',
+    'PRNM', # Not documented.
+    'PRNS',
+    'PROR',
+    'PRPA',
+    'PRRF',
+    'PRRS',
+    'PRSE',
+    'PRSS', # Not documented.
+    'PRST', # Not documented.
+    'PRVE',
+    'PRXF', # Not documented.
+    'STAT',
+    'SWLI'
+]
+
+
+def check_valid_output(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        output = self.__str__()
+        if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
+            err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
+            msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
+            raise ValueError(msg)
+        else:
+            return func(self, *args, **kwargs)
+    return func_wrapper
+
 
 class PreprocessorCommands(
     preproc.database.Database,
@@ -217,4 +290,236 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
-    pass
+def _requires_pandas(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        if HAS_PANDAS:
+            return func(self, *args, **kwargs)
+        else:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
+    return func_wrapper
+
+
+class CommandOutput(str):
+    """Custom string subclass for handling the commands output.
+
+    This class add two method to track the cmd which generated this output.
+    * ``cmd`` - The MAPDL command which generated the output.
+    * ``command`` - The full command line (with arguments) which generated the output.
+
+    """
+
+    ## References:
+    # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
+    # - https://docs.python.org/3/library/collections.html#userstring-objects
+    # - Source code of UserString
+
+    def __new__(cls, content, cmd=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        return obj
+
+    @property
+    def cmd(self):
+        """Cached original command to generate this command output."""
+        return self._cmd.split(',')[0]
+
+    @cmd.setter
+    def cmd(self, cmd):
+        """Not allowed to change the value of ``cmd``."""
+        raise AttributeError("The `cmd` attribute cannot be set")
+
+    @property
+    def command(self):
+        return self._cmd
+
+    @command.setter
+    def command(self):
+        """Not allowed to change the value of ``command``."""
+        pass
+
+
+class CommandListingOutput(CommandOutput):
+    """
+    Custom class for handling the commands whose output is sensible to be converted to
+    a list of lists, a Numpy array or a Pandas DataFrame.
+    """
+
+    ## NOTES
+    # The key format files are:
+    # - rptfmt.F
+    # - rptlb4.F
+    # - rptlb8.F
+
+    def _is_data_start(self, line, magicword=None):
+        """Check if line is the start of a data group."""
+        if not magicword:
+            magicword = GROUP_DATA_START
+
+        # Checking if we are supplying a custom start function.
+        if self.custom_data_start(line) is not None:
+            return self.custom_data_start(line)
+
+        if line.split():
+            if line.split()[0] in magicword or self.custom_data_start(line):
+                return True
+        return False
+
+    def _is_data_end(self, line):
+        """Check if line is the end of a data group."""
+
+        # Checking if we are supplying a custom start function.
+        if self.custom_data_end(line) is not None:
+            return self.custom_data_end(line)
+        else:
+            return self._is_empty(line)
+
+    def custom_data_start(self, line):
+        """Custom data start line check function.
+
+        This function is left empty so it can be overwritten by the user.
+
+        If modified, it should return ``True`` when the line is the start
+        of a data group, otherwise it should return ``False``.
+        """
+        return None
+
+    def custom_data_end(self, line):
+        """Custom data end line check function.
+
+        This function is left empty so it can be overwritten by the user.
+
+        If modified, it should return ``True`` when the line is the end
+        of a data group, otherwise it should return ``False``.
+        """
+        return None
+
+    @staticmethod
+    def _is_empty_line(each):
+        if each.split():
+            return False
+        else:
+            return True
+
+    def _format(self):
+        """Perform some formatting (replacing mainly) in the raw text."""
+        return re.sub(r'[^E](-)', ' -', self.__str__())
+
+    def _get_body(self, trail_header=None):
+        """Get command body text.
+
+        It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
+        # Doing some formatting of the string
+        body = self._format().splitlines()
+
+        if not trail_header:
+            trail_header = ['MAXIMUM ABSOLUTE VALUES', 'TOTAL VALUES']
+
+        if not isinstance(trail_header, list):
+            trail_header = list(trail_header)
+
+        # Removing parts matching trail_header
+        for each_trail_header in trail_header:
+            if each_trail_header in self.__str__():
+                # starting to check from the bottom.
+                for i in range(len(body)-1, -1, -1):
+                    if each_trail_header in body[i]:
+                        break
+                body = body[:i]
+        return body
+
+    def _get_data_group_indexes(self, body, magicword=None):
+        """Return the indexes of the start and end of the data groups."""
+
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
+            shift = 2
+        else:
+            shift = 0
+
+        # Getting pairs of starting end
+        start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
+        end_idxs = [ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)]
+
+        indexes = [*start_idxs, *end_idxs]
+        indexes.sort()
+
+        ends = [indexes[indexes.index(each)+1] for each in start_idxs[:-1]]
+        ends.append(len(body))
+
+        return zip(start_idxs, ends)
+
+    def _get_data_groups(self, magicword=None, trail_header=None):
+        """Get raw data groups"""
+        body = self._get_body(trail_header=trail_header)
+
+        data = []
+        for start, end in self._get_data_group_indexes(body, magicword=magicword):
+            data.extend(body[start+1:end])
+
+        # removing empty lines
+        data = [each for each in data if each]
+
+        return data
+
+    def get_columns(self):
+        """
+        Get the column names for the dataframe.
+
+        Returns
+        -------
+        List of strings
+
+        """
+        body = self._get_body()
+        pairs = list(self._get_data_group_indexes(body))
+        return body[pairs[0][0]].split()
+
+    def _requires_pandas(func):
+        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+        def func_wrapper(self, *args, **kwargs):
+            if HAS_PANDAS:
+                return func(self, *args, **kwargs)
+            else:
+                raise ModuleNotFoundError(MSG_NOT_PANDAS)
+        return func_wrapper
+
+    @check_valid_output
+    def to_list(self):
+        data = self._get_data_groups()
+        return [each.split() for each in data]
+
+    def to_array(self):
+        return np.array(self.to_list(), dtype=float)
+
+    @_requires_pandas
+    def to_dataframe(self, data=None, columns=None):
+        if not data:
+            data = self.to_array()
+        if not columns:
+            columns = self.get_columns()
+
+        return pd.DataFrame(data=data, columns=data)
+
+
+class BoundaryConditionsListingOutput(CommandListingOutput):
+    def to_array(self):
+        raise ValueError(MSG_BCListingOutput_to_array)
+
+    @_requires_pandas
+    def to_dataframe(self):
+        df = pd.DataFrame(data=self.to_list(), columns=self.get_columns())
+        if 'NODE' in df.columns:
+            df['NODE'] = df['NODE'].astype(int)
+
+        if 'LABEL' in df.columns:
+            df['LABEL'] = df['LABEL'].astype(str)
+
+        if 'REAL' in df.columns:
+            df['REAL'] = df['REAL'].astype(float)
+
+        if 'IMAG' in df.columns:
+            df['IMAG'] = df['IMAG'].astype(float)
+
+        return df
