@@ -271,20 +271,11 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
 
-      - name: Build wheel and source binaries
-        run: |
-          python setup.py sdist
-          python setup.py bdist_wheel
-
-      - name: Check package with twine
-        run: |
-          pip install twine
-          twine check dist/*
-
       - name: Upload to Public PyPi
         run: |
-          twine upload --skip-existing ./dist/*.whl
-          twine upload --skip-existing ./dist/*.tar.gz
+          pip install twine
+          twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
