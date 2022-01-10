@@ -99,8 +99,12 @@ def test_output_listing(mapdl, cleared, static_solve, func, args):
     func_ = getattr(mapdl, func)
     out = func_(*args)
 
+    out_list = out.to_list()
+    out_array = out.to_array()
+    out_df = out.to_dataframe()
+
     assert isinstance(out, CommandListingOutput)
-    assert isinstance(out.to_list(), list)
-    assert isinstance(out.to_array(), np.ndarray)
+    assert isinstance(out_list, list) and out_list
+    assert isinstance(out_array, np.ndarray) and out_array
     if HAS_PANDAS:
-        assert isinstance(out.to_list(), pd.DataFrame)
+        assert isinstance(out_df, pd.DataFrame) and out_df
