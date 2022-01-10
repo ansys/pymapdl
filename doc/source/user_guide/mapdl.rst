@@ -141,7 +141,7 @@ Run a command and stream its output while it is being run.
 Running Several Commands or an Input File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can run several MAPDL commands as a unified block using
-:func:`Mapdl.run_multiline() <ansys.mapdl.core.Mapdl.run_multiline>`.
+:func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
 This is useful when using PyMAPDL with older MAPDL scripts.  For
 example:
 
@@ -161,7 +161,7 @@ example:
     vmesh,all
     '''
 
-    >>> resp = mapdl.run_multiline(cmd)
+    >>> resp = mapdl.input_strings(cmd)
     >>> resp
 
     You have already entered the general preprocessor (PREP7).
