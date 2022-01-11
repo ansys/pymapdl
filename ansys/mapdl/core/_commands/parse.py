@@ -99,3 +99,10 @@ def parse_output_volume_area(msg):
         res = re.search(r"OUTPUT (AREA|VOLUME|AREAS) =\s*([0-9]+)", msg)
         if res is not None:
             return int(res.group(2))
+
+
+def parse_ndist(msg):
+    """Parse the node value from a node message"""
+    finds = re.findall(NUM_PATTERN, msg)[-3:]
+    if len(finds) == 3:
+        return [float(val) for val in finds]

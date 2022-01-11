@@ -404,9 +404,24 @@ class Nodes:
         functions and display the value on your model.
 
         This command is valid in any processor.
+
+        Returns
+        -------
+        list
+            ``[X, Y, Z]`` distance between two nodes.
+        Examples
+        --------
+        Compute the distance between two nodes.
+        >>> node1 = (0, 8, -3)
+        >>> node1 = (13, 5, 7)
+        >>> node_num0 = mapdl.n("", *kp0)
+        >>> node_num1 = mapdl.n("", *kp1)
+        >>> node_dist = mapdl.ndist(node_num0, node_num1)
+        >>> node_dist
+        [13.0, -3.0, 10.0]
         """
-        command = f"NDIST,{nd1},{nd2}"
-        return self.run(command, **kwargs)
+
+        return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
 
     def ngen(
         self,
