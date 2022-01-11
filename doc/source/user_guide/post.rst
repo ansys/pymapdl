@@ -34,34 +34,34 @@ These commands are listed in Table-1_.
 
 .. _Table-1:
 
-**Table 1. Commands with extra processing methods.**
+**Table 1. Commands with extra processing methods in the output.**
 
-+----------------+---------------------------+----------------+
-| Category       | Extra Methods Available   | Commands       |
-+================+===========================+================+
-| **Listing**    | * ``.to_list()``          | * ``prcint``   |
-|                | * ``.to_array()``         | * ``prenergy`` |
-|                | * ``.to_dataframe()``     | * ``prerr``    |
-|                |                           | * ``presol``   |
-|                |                           | * ``pretab``   |
-|                |                           | * ``print``    |
-|                |                           | * ``priter``   |
-|                |                           | * ``prjsol``   |
-|                |                           | * ``prnld``    |
-|                |                           | * ``prnsol``   |
-|                |                           | * ``prorb``    |
-|                |                           | * ``prpath``   |
-|                |                           | * ``prrfor``   |
-|                |                           | * ``prrsol``   |
-|                |                           | * ``prsect``   |
-|                |                           | * ``prvect``   |
-|                |                           | * ``stat``     |
-|                |                           | * ``swlist``   |
-+----------------+---------------------------+----------------+
-| **Boundary**   | * ``.to_list()``          | * ``dlist``    |
-| **Conditions** | * ``.to_dataframe()``     | * ``flist``    |
-| **Listing**    |                           |                |
-+----------------+---------------------------+----------------+
++----------------+---------------------------+--------------------+
+| Category       | Extra Methods Available   | Mapdl Commands     |
++================+===========================+====================+
+| **Listing**    | * ``to_list()``           | * ``prcint``       |
+|                | * ``to_array()``          | * ``prenergy``     |
+|                | * ``to_dataframe()``      | * ``prerr``        |
+|                |                           | * ``presol``       |
+|                |                           | * ``pretab``       |
+|                |                           | * ``print``        |
+|                |                           | * ``priter``       |
+|                |                           | * ``prjsol``       |
+|                |                           | * ``prnld``        |
+|                |                           | * ``prnsol``       |
+|                |                           | * ``prorb``        |
+|                |                           | * ``prpath``       |
+|                |                           | * ``prrfor``       |
+|                |                           | * ``prrsol``       |
+|                |                           | * ``prsect``       |
+|                |                           | * ``prvect``       |
+|                |                           | * ``stat``         |
+|                |                           | * ``swlist``       |
++----------------+---------------------------+--------------------+
+| **Boundary**   | * ``to_list()``           | * ``dlist``        |
+| **Conditions** | * ``to_dataframe()``      | * ``flist``        |
+| **Listing**    |                           |                    |
++----------------+---------------------------+--------------------+
 
 These commands show the next output:
 
@@ -125,8 +125,8 @@ Classically, one would request nodal results from MAPDL using the
      MORE (YES,NO OR CONTINUOUS)=
 
 
-However, using an instance of :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>`, you can instead request the
+However, using an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`, 
+you can instead request the
 nodal displacement with:
 
 .. code:: python
@@ -152,10 +152,8 @@ Selected Nodes
 The MAPDL database processes some results independently of if nodes or
 elements are selected.  If you have subselected a certain component
 and wish to also limit the result of a certain output
-(i.e. :func:`nodal_displacement()
-<ansys.mapdl.core.post.PostProcessing.nodal_displacement`), use the
-:attr:`selected_nodes
-<ansys.mapdl.core.post.PostProcessing.selected_nodes` attribute to get
+(i.e. :func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement`), 
+use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes` attribute to get
 a mask of the currently selected nodes.
 
 .. code::
