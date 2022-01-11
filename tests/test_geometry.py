@@ -1,4 +1,6 @@
 """Test geometry commands"""
+import math
+
 import numpy as np
 
 
@@ -166,7 +168,8 @@ def test_kdist(cleared, mapdl):
 
     knum0 = mapdl.k("", *kp0)
     knum1 = mapdl.k("", *kp1)
-    xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
+    kpdist, xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
+    assert kpdist == math.sqrt((kp1[0] - kp0[0])**2 + (kp1[1] - kp0[1])**2 + (kp1[2] - kp0[2])**2)
     assert xdist == kp1[0] - kp0[0]
     assert ydist == kp1[1] - kp0[1]
     assert zdist == kp1[2] - kp0[2]
