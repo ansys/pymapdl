@@ -500,7 +500,7 @@ class CommandListingOutput(CommandOutput):
         for each_trail_header in trail_header:
             if each_trail_header in self.__str__():
                 # starting to check from the bottom.
-                for i in range(len(body) -1, -1, -1):
+                for i in range(len(body) - 1, -1, -1):
                     if each_trail_header in body[i]:
                         break
                 body = body[:i]
