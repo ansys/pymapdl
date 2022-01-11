@@ -2004,13 +2004,3 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
-
-    @wraps(_MapdlCore.dlist)
-    def dlist(self, node1='', node2='', ninc='', **kwargs):
-        """Wraps ``dlist`` to obtain a list, numpy array or pandas dataframe."""
-        return BoundaryConditionsListingOutput(super().dlist(node1=node1, node2=node2, ninc=ninc, **kwargs))
-
-    @wraps(_MapdlCore.flist)
-    def flist(self, node1='', node2='', ninc='', **kwargs):
-        """Wraps ``flist`` to obtain a list, numpy array or pandas dataframe."""
-        return BoundaryConditionsListingOutput(super().flist(node1=node1, node2=node2, ninc=ninc, **kwargs))
