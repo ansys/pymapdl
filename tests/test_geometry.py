@@ -465,6 +465,6 @@ def test_ndist(cleared, mapdl):
     node_num1 = mapdl.n("", *node1)
     node_num2 = mapdl.n("", *node2)
     node_xdist, node_ydist, node_zdist = mapdl.ndist(node_num1, node_num2)
-    assert node_xdist == node_num2[0] - node_num1[0]
-    assert node_ydist == node_num2[1] - node_num1[1]
-    assert node_zdist == node_num2[2] - node_num1[2]
+    assert node_xdist == node2[0] - node1[0]
+    assert node_ydist == node2[1] - node1[1]
+    assert node_zdist == node2[2] - node1[2]
