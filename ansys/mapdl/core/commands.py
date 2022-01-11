@@ -23,9 +23,6 @@ from ._commands import (
 import re
 import numpy as np
 
-import importlib; 
-HAS_PANDAS = importlib.util.find_spec("pandas") is not None
-
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
@@ -421,12 +418,6 @@ class CommandListingOutput(CommandOutput):
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
 
-    ## NOTES
-    # The key format files are:
-    # - rptfmt.F
-    # - rptlb4.F
-    # - rptlb8.F
-
     def _is_data_start(self, line, magicword=None):
         """Check if line is the start of a data group."""
         if not magicword:
@@ -545,28 +536,35 @@ class CommandListingOutput(CommandOutput):
         pairs = list(self._get_data_group_indexes(body))
         return body[pairs[0][0]].split()
 
-    def _requires_pandas(func):
-        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
-
-        def func_wrapper(self, *args, **kwargs):
-            if HAS_PANDAS:
-                return func(self, *args, **kwargs)
-            else:
-                raise ModuleNotFoundError(MSG_NOT_PANDAS)
-        return func_wrapper
-
     @check_valid_output
     def to_list(self):
-        """Export the command output a list or list of lists."""
+        """Export the command output a list or list of lists.
+
+        Returns
+        -------
+            List of strings
+        """
         data = self._get_data_groups()
         return [each.split() for each in data]
 
     def to_array(self):
-        """Export the command output as a numpy array."""
+        """Export the command output as a numpy array.
+
+        Returns
+        -------
+            Numpy array
+        """
         return np.array(self.to_list(), dtype=float)
 
-    @_requires_pandas
     def to_dataframe(self):
-        """Export the command output as a Pandas DataFrame."""
-        import pandas as pd
+        """Export the command output as a Pandas DataFrame.
+
+        Returns
+        -------
+            Pandas Dataframe
+        """
+        try:
+            import pandas as pd
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)            
         return pd.DataFrame(data=self.to_array(), columns=self.get_columns())

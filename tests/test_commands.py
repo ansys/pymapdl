@@ -8,11 +8,13 @@ from ansys.mapdl.core import examples
 
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.commands import CommandOutput
-from ansys.mapdl.core.commands import HAS_PANDAS
 
-if HAS_PANDAS:
+try:
     import pandas as pd
+    HAS_PANDAS = True
 
+except ModuleNotFoundError:
+    HAS_PANDAS = False
 
 LIST_OF_INQUIRE_FUNCTIONS = [
     'ndinqr',
