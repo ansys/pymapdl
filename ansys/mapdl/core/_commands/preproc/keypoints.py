@@ -220,7 +220,7 @@ class KeyPoints:
         Returns
         -------
         list
-            ``[X, Y, Z]`` distance between two keypoints.
+            ``[DIST, X, Y, Z]`` distance between two keypoints.
 
         Examples
         --------
@@ -232,7 +232,7 @@ class KeyPoints:
         >>> knum1 = mapdl.k("", *kp1)
         >>> dist = mapdl.kdist(knum0, knum1)
         >>> dist
-        [1.0, -5.0, 13.0]
+        [13.96424004376894 ,1.0, -5.0, 13.0]
 
         """
         return parse.parse_kdist(self.run(f"KDIST,{kp1},{kp2}", **kwargs))
