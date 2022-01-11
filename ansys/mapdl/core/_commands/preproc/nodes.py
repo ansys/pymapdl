@@ -380,6 +380,21 @@ class Nodes:
 
         APDL Command: NDIST
 
+        Parameters
+        ----------
+        nd1
+            First node in distance calculation.  If ND1 = P, graphical picking
+            is enabled and all remaining command fields are ignored (valid only
+            in the GUI).
+
+        nd2
+            Second node in distance calculation.
+
+        Returns
+        -------
+        list
+            ``[X, Y, Z]`` distance between two nodes.
+
         Notes
         -----
         NDIST lists the distance between nodes ND1 and ND2, as well as the
@@ -396,22 +411,7 @@ class Nodes:
         functions and display the value on your model.
 
         This command is valid in any processor.
-
-        Parameters
-        ----------
-        nd1
-            First node in distance calculation.  If ND1 = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI).
-
-        nd2
-            Second node in distance calculation.
-
-        Returns
-        -------
-        list
-            ``[X, Y, Z]`` distance between two nodes.
-
+        
         Examples
         --------
         Compute the distance between two nodes.

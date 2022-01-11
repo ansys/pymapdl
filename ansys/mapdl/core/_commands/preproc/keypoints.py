@@ -200,15 +200,6 @@ class KeyPoints:
 
         APDL Command: KDIST
 
-        KDIST lists the distance between keypoints KP1 and KP2, as
-        well as the current coordinate system offsets from KP1 to KP2,
-        where the X, Y, and Z locations of KP1 are subtracted from the
-        X, Y, and Z locations of KP2 (respectively) to determine the
-        offsets.  KDIST is valid in any coordinate system except
-        toroidal [CSYS,3].
-
-        This command is valid in any processor.
-
         Parameters
         ----------
         kp1
@@ -222,6 +213,17 @@ class KeyPoints:
         list
             ``[X, Y, Z]`` distance between two keypoints.
 
+        Notes
+        -----
+        KDIST lists the distance between keypoints KP1 and KP2, as
+        well as the current coordinate system offsets from KP1 to KP2,
+        where the X, Y, and Z locations of KP1 are subtracted from the
+        X, Y, and Z locations of KP2 (respectively) to determine the
+        offsets.  KDIST is valid in any coordinate system except
+        toroidal [CSYS,3].
+
+        This command is valid in any processor.
+        
         Examples
         --------
         Compute the distance between two keypoints.
