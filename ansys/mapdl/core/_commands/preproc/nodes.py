@@ -411,6 +411,7 @@ class Nodes:
         -------
         list
             ``[X, Y, Z]`` distance between two nodes.
+
         Examples
         --------
         Compute the distance between two nodes.
