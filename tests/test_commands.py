@@ -4,16 +4,17 @@ from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 import numpy as np
 
-# from conftest import HAS_GRPC
 from ansys.mapdl.core import examples
 
 from ansys.mapdl.core.commands import CommandListingOutput, BoundaryConditionsListingOutput
 from ansys.mapdl.core.commands import CommandOutput
-from ansys.mapdl.core.commands import HAS_PANDAS
 
-if HAS_PANDAS:
+try:
     import pandas as pd
+    HAS_PANDAS = True
 
+except ModuleNotFoundError:
+    HAS_PANDAS = False
 
 LIST_OF_INQUIRE_FUNCTIONS = [
     'ndinqr',
