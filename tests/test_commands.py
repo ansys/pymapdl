@@ -136,17 +136,9 @@ def test_output_listing(mapdl, plastic_solve, func, args):
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
+
 @pytest.mark.parametrize('func', ['dlist', 'flist'])
 def test_bclist(mapdl, beam_solve, func):
-    mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
-    mapdl.input(examples.verif_files.vmfiles["vm10"])
-
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
-
     func_ = getattr(mapdl, func)
     out = func_()
 
