@@ -380,16 +380,6 @@ class Nodes:
 
         APDL Command: NDIST
 
-        Parameters
-        ----------
-        nd1
-            First node in distance calculation.  If ND1 = P, graphical picking
-            is enabled and all remaining command fields are ignored (valid only
-            in the GUI).
-
-        nd2
-            Second node in distance calculation.
-
         Notes
         -----
         NDIST lists the distance between nodes ND1 and ND2, as well as the
@@ -407,6 +397,16 @@ class Nodes:
 
         This command is valid in any processor.
 
+        Parameters
+        ----------
+        nd1
+            First node in distance calculation.  If ND1 = P, graphical picking
+            is enabled and all remaining command fields are ignored (valid only
+            in the GUI).
+
+        nd2
+            Second node in distance calculation.
+
         Returns
         -------
         list
@@ -414,6 +414,7 @@ class Nodes:
         Examples
         --------
         Compute the distance between two nodes.
+
         >>> node1 = (0, 8, -3)
         >>> node2 = (13, 5, 7)
         >>> node_num1 = mapdl.n("", *node1)
@@ -421,8 +422,8 @@ class Nodes:
         >>> node_dist = mapdl.ndist(node_num1, node_num2)
         >>> node_dist
         [13.0, -3.0, 10.0]
-        """
 
+        """
         return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
 
     def ngen(
