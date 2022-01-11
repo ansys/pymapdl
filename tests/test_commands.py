@@ -1,13 +1,11 @@
 import pytest
 import inspect
-from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 import numpy as np
 
 from ansys.mapdl.core import examples
-
-from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.commands import CommandOutput
+from ansys.mapdl.core.commands import CommandOutput, CommandListingOutput, BoundaryConditionsListingOutput
+from ansys.mapdl.core.commands import CMD_LISTING, CMD_BC_LISTING
 
 try:
     import pandas as pd
@@ -60,6 +58,8 @@ ARGS_INQ_FUNC = {
         'kcmplx': 1
 }
 
+CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
+CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 @pytest.fixture(scope="module")
 def plastic_solve(mapdl):
@@ -72,6 +72,16 @@ def plastic_solve(mapdl):
     mapdl.set(1, 2)
     mapdl.mute = False
 
+@pytest.fixture(scope="module")
+def beam_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm10"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
 
 def test_cmd_class():
     output = """This is the output.
@@ -105,7 +115,6 @@ def test_inquire_functions(mapdl, func):
         assert '=' in output
 
 
-# @pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
 @pytest.mark.parametrize('func,args', [
         ('prnsol', ('U', 'X')),
         ('presol', ('S', 'X')),
@@ -126,3 +135,33 @@ def test_output_listing(mapdl, plastic_solve, func, args):
     if HAS_PANDAS:
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+
+@pytest.mark.parametrize('func', ['dlist', 'flist'])
+def test_bclist(mapdl, beam_solve, func):
+    func_ = getattr(mapdl, func)
+    out = func_()
+
+    assert isinstance(out, BoundaryConditionsListingOutput)
+    assert isinstance(out.to_list(), list) and bool(out.to_list())
+
+    with pytest.raises(ValueError):
+        out.to_array()
+
+    if HAS_PANDAS:
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+
+@pytest.mark.parametrize('method', CMD_DOC_STRING_INJECTOR)
+def test_docstring_injector(mapdl, method):
+    """Check if the docstring has been injected."""
+    for name in dir(mapdl):
+        if name[0:4].upper() == method:
+            func = mapdl.__getattribute__(name)
+            docstring = func.__doc__ # If '__func__' not present (AttributeError) very likely it has not been wrapped.
+
+            assert "Returns" in docstring
+            assert "``str.to_list()``" in docstring
+            assert "``str.to_array()``" in docstring
+            assert "``str.to_dataframe()``" in docstring

@@ -65,7 +65,6 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
 
-
 TMP_VAR = '__tmpvar__'
 VOID_REQUEST = anskernel.EmptyRequest()
 

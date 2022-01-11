@@ -30,13 +30,20 @@ You can install it using:
 pip install pandas
 """
 
+MSG_BCListingOutput_to_array = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+so it cannot be converted to Numpy Array.
+
+Please use 'to_list' or 'to_dataframe' instead."""
+
+
 # Identify where the data start in the output
 GROUP_DATA_START = ['NODE', 'ELEM']
 
 # Allowed commands to get output as array or dataframe.
 # In theory, these commands should follow the same format.
 # Some of them are not documented (already deprecated?)
-# So they won't be wrapped.
+# So they are not in the Mapdl class,
+# so they won't be wrapped.
 CMD_LISTING = [
     'NLIN', # not documented
     'PRCI',
@@ -65,6 +72,8 @@ CMD_LISTING = [
     'STAT',
     'SWLI'
 ]
+
+CMD_BC_LISTING = ['FLIS', 'DLIS']
 
 # Adding empty lines to match current format.
 docstring_injection = """
@@ -371,6 +380,16 @@ class Commands(
 
     """Wrapped MAPDL commands"""
 
+def _requires_pandas(func):
+    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+
+    def func_wrapper(self, *args, **kwargs):
+        if HAS_PANDAS:
+            return func(self, *args, **kwargs)
+        else:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
+    return func_wrapper
+
 
 class CommandOutput(str):
     """Custom string subclass for handling the commands output.
@@ -556,7 +575,7 @@ class CommandListingOutput(CommandOutput):
         """
         return np.array(self.to_list(), dtype=float)
 
-    def to_dataframe(self):
+    def to_dataframe(self, data=None, columns=None):
         """Export the command output as a Pandas DataFrame.
 
         Returns
@@ -567,4 +586,31 @@ class CommandListingOutput(CommandOutput):
             import pandas as pd
         except ModuleNotFoundError:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
-        return pd.DataFrame(data=self.to_array(), columns=self.get_columns())
+
+        if not data:
+            data = self.to_array()
+        if not columns:
+            columns = self.get_columns()
+
+        return pd.DataFrame(data=data, columns=data)
+
+
+class BoundaryConditionsListingOutput(CommandListingOutput):
+    def to_array(self):
+        raise ValueError(MSG_BCListingOutput_to_array)
+
+    def to_dataframe(self):
+        df = super().to_dataframe(data=self.to_list())
+        if 'NODE' in df.columns:
+            df['NODE'] = df['NODE'].astype(int)
+
+        if 'LABEL' in df.columns:
+            df['LABEL'] = df['LABEL'].astype(str)
+
+        if 'REAL' in df.columns:
+            df['REAL'] = df['REAL'].astype(float)
+
+        if 'IMAG' in df.columns:
+            df['IMAG'] = df['IMAG'].astype(float)
+
+        return df
