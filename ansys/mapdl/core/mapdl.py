@@ -25,7 +25,7 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core.commands import Commands
+from ansys.mapdl.core.commands import Commands, CommandListingOutput, CMD_LISTING
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.reader.rst import Result
@@ -164,6 +164,21 @@ class _MapdlCore(Commands):
             self.open_apdl_log(log_apdl, mode='w')
 
         self._post = PostProcessing(self)
+
+        self._wrap_listing_functions()
+
+    def _wrap_listing_functions(self):
+        # Wrapping LISTING FUNCTIONS.
+        def wrap_listing_function(func):
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return CommandListingOutput(func(*args, **kwargs))
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_LISTING:
+                func = self.__getattribute__(name)
+                setattr(self, name, wrap_listing_function(func))
 
     @property
     def _name(self):  # pragma: no cover
