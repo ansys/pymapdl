@@ -566,5 +566,5 @@ class CommandListingOutput(CommandOutput):
         try:
             import pandas as pd
         except ModuleNotFoundError:
-            raise ModuleNotFoundError(MSG_NOT_PANDAS)            
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
         return pd.DataFrame(data=self.to_array(), columns=self.get_columns())
