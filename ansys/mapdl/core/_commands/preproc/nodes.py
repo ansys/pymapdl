@@ -1,5 +1,7 @@
 import re
 
+from ansys.mapdl.core._commands import parse
+
 
 class Nodes:
     def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
@@ -413,10 +415,10 @@ class Nodes:
         --------
         Compute the distance between two nodes.
         >>> node1 = (0, 8, -3)
-        >>> node1 = (13, 5, 7)
-        >>> node_num0 = mapdl.n("", *kp0)
-        >>> node_num1 = mapdl.n("", *kp1)
-        >>> node_dist = mapdl.ndist(node_num0, node_num1)
+        >>> node2 = (13, 5, 7)
+        >>> node_num1 = mapdl.n("", *node1)
+        >>> node_num2 = mapdl.n("", *node2)
+        >>> node_dist = mapdl.ndist(node_num1, node_num2)
         >>> node_dist
         [13.0, -3.0, 10.0]
         """
