@@ -25,7 +25,7 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core.commands import Commands, CommandListingOutput, CMD_LISTING
+from ansys.mapdl.core.commands import Commands, CommandListingOutput, CMD_LISTING, inject_docs
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.reader.rst import Result
@@ -170,6 +170,8 @@ class _MapdlCore(Commands):
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
         def wrap_listing_function(func):
+            # Injecting doc string modification
+            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 return CommandListingOutput(func(*args, **kwargs))

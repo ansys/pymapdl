@@ -73,6 +73,92 @@ CMD_LISTING = [
     'SWLI'
 ]
 
+# Adding empty lines to match current format.
+docstring_injection = """
+Returns
+-------
+
+str
+    Str object with the command console output.
+
+    This object also has the extra methods:
+
+    * ``str.to_list()``
+
+    * ``str.to_array()`` (Only on listing commands)
+
+    * ``str.to_dataframe()`` (Only if Pandas is installed)
+
+    For more information visit `PyMAPDL Post-Processing <https://mapdldocs.pyansys.com/user_guide/post.html>`_.
+
+"""
+
+
+def get_indentation(indentation_regx, docstring):
+    return re.findall(indentation_regx, docstring, flags=re.DOTALL|re.IGNORECASE)[0][0]
+
+def indent_text(indentation, docstring_injection):
+    return '\n'.join([indentation + each for each in docstring_injection.splitlines() if each.strip()])
+    # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
+
+def get_docstring_indentation(docstring):
+    indentation_regx = r'\n(\s*)\n'
+    return get_indentation(indentation_regx, docstring)
+
+def get_sections(docstring):
+    return [each.strip().lower() for each in re.findall(r'\n\s*(\S*)\n\s*-+\n', docstring)]
+
+def get_section_indentation(section_name, docstring):
+    sections = get_sections(docstring)
+    if section_name.lower().strip() not in sections:
+        raise ValueError(f"This section '{section_name.lower().strip()}' does not exist in the docstring.")
+    section_match = section_name + r'\n\s*-*'
+    indent_match = r'\n(\s*)(\S)'
+    indentation_regx = section_match + indent_match
+    return get_indentation(indentation_regx, docstring)
+
+def inject_before(section, indentation, indented_doc_inject, docstring):
+    return re.sub(section + r'\n\s*-*', f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>", docstring, flags=re.IGNORECASE)
+
+def inject_after_return_section(indented_doc_inject, docstring):
+    return re.sub('Returns' + r'\n\s*-*', f"{indented_doc_inject.strip()}\n", docstring, flags=re.IGNORECASE)
+
+def inject_docs(docstring):
+    """Inject a string in a docstring"""
+    return_header = r'Returns\n\s*-*'
+    if re.search(return_header, docstring):
+        # There is a return block already, probably it should not.
+        indentation = get_section_indentation('Returns', docstring)
+        indented_doc_inject = indent_text(indentation, docstring_injection)
+        return inject_after_return_section(indented_doc_inject, docstring)
+    else:
+        # There is not returns header
+        # find sections
+        sections = get_sections(docstring)
+
+        if 'parameters' in sections:
+            ind = sections.index('parameters')
+            if ind == len(sections)-1:
+                # The parameters is the last bit. Just append it.
+                indentation = get_section_indentation('Parameters', docstring)
+                indented_doc_inject = indent_text(indentation, docstring_injection)
+                return docstring + '\n' + indented_doc_inject
+            else:
+                # inject it right before the section after 'parameter'
+                sect_after_parameter = sections[ind+1]
+                indentation = get_section_indentation(sect_after_parameter, docstring)
+                indented_doc_inject = indent_text(indentation, docstring_injection)
+                return inject_before(sect_after_parameter, indentation, indented_doc_inject, docstring)
+
+        elif 'notes' in sections:
+            indentation = get_section_indentation('Notes', docstring)
+            indented_doc_inject = indent_text(indentation, docstring_injection)
+            return inject_before('Notes', indentation, indented_doc_inject, docstring)
+
+        else:
+            indentation = get_docstring_indentation(docstring)
+            indented_doc_inject = indent_text(indentation, docstring_injection)
+            return docstring + '\n' + indented_doc_inject
 
 def check_valid_output(func):
     """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
