@@ -4,7 +4,6 @@ from ansys.mapdl.core.commands import CommandOutput as CommandOutput
 
 import numpy as np
 
-# from conftest import HAS_GRPC
 from ansys.mapdl.core import examples
 
 from ansys.mapdl.core.commands import CommandListingOutput

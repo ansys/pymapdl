@@ -97,16 +97,20 @@ str
 def get_indentation(indentation_regx, docstring):
     return re.findall(indentation_regx, docstring, flags=re.DOTALL|re.IGNORECASE)[0][0]
 
+
 def indent_text(indentation, docstring_injection):
     return '\n'.join([indentation + each for each in docstring_injection.splitlines() if each.strip()])
     # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
+
 
 def get_docstring_indentation(docstring):
     indentation_regx = r'\n(\s*)\n'
     return get_indentation(indentation_regx, docstring)
 
+
 def get_sections(docstring):
     return [each.strip().lower() for each in re.findall(r'\n\s*(\S*)\n\s*-+\n', docstring)]
+
 
 def get_section_indentation(section_name, docstring):
     sections = get_sections(docstring)
@@ -117,11 +121,14 @@ def get_section_indentation(section_name, docstring):
     indentation_regx = section_match + indent_match
     return get_indentation(indentation_regx, docstring)
 
+
 def inject_before(section, indentation, indented_doc_inject, docstring):
     return re.sub(section + r'\n\s*-*', f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>", docstring, flags=re.IGNORECASE)
 
+
 def inject_after_return_section(indented_doc_inject, docstring):
     return re.sub('Returns' + r'\n\s*-*', f"{indented_doc_inject.strip()}\n", docstring, flags=re.IGNORECASE)
+
 
 def inject_docs(docstring):
     """Inject a string in a docstring"""
@@ -138,14 +145,14 @@ def inject_docs(docstring):
 
         if 'parameters' in sections:
             ind = sections.index('parameters')
-            if ind == len(sections)-1:
+            if ind == len(sections) - 1:
                 # The parameters is the last bit. Just append it.
                 indentation = get_section_indentation('Parameters', docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
                 return docstring + '\n' + indented_doc_inject
             else:
                 # inject it right before the section after 'parameter'
-                sect_after_parameter = sections[ind+1]
+                sect_after_parameter = sections[ind + 1]
                 indentation = get_section_indentation(sect_after_parameter, docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
                 return inject_before(sect_after_parameter, indentation, indented_doc_inject, docstring)
@@ -160,8 +167,9 @@ def inject_docs(docstring):
             indented_doc_inject = indent_text(indentation, docstring_injection)
             return docstring + '\n' + indented_doc_inject
 
+
 def check_valid_output(func):
-    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+    """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
@@ -411,7 +419,8 @@ class CommandOutput(str):
 
 
 class CommandListingOutput(CommandOutput):
-    """
+    """Allow the conversion of command output to native Python types.
+
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
@@ -466,11 +475,8 @@ class CommandListingOutput(CommandOutput):
         return None
 
     @staticmethod
-    def _is_empty_line(each):
-        if each.split():
-            return False
-        else:
-            return True
+    def _is_empty_line(line):
+        return bool(line.split())
 
     def _format(self):
         """Perform some formatting (replacing mainly) in the raw text."""
@@ -479,7 +485,8 @@ class CommandListingOutput(CommandOutput):
     def _get_body(self, trail_header=None):
         """Get command body text.
 
-        It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
+        It removes the maximum absolute values tail part and makes sure there is separation between columns.
+        """
         # Doing some formatting of the string
         body = self._format().splitlines()
 
@@ -493,7 +500,7 @@ class CommandListingOutput(CommandOutput):
         for each_trail_header in trail_header:
             if each_trail_header in self.__str__():
                 # starting to check from the bottom.
-                for i in range(len(body)-1, -1, -1):
+                for i in range(len(body) -1, -1, -1):
                     if each_trail_header in body[i]:
                         break
                 body = body[:i]
@@ -502,7 +509,7 @@ class CommandListingOutput(CommandOutput):
     def _get_data_group_indexes(self, body, magicword=None):
         """Return the indexes of the start and end of the data groups."""
 
-        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in str(self):
             shift = 2
         else:
             shift = 0
@@ -514,7 +521,7 @@ class CommandListingOutput(CommandOutput):
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
 
-        ends = [indexes[indexes.index(each)+1] for each in start_idxs[:-1]]
+        ends = [indexes[indexes.index(each) + 1] for each in start_idxs[:-1]]
         ends.append(len(body))
 
         return zip(start_idxs, ends)
@@ -528,13 +535,10 @@ class CommandListingOutput(CommandOutput):
             data.extend(body[start+1:end])
 
         # removing empty lines
-        data = [each for each in data if each]
-
-        return data
+        return [each for each in data if each]
 
     def get_columns(self):
-        """
-        Get the column names for the dataframe.
+        """Get the column names for the dataframe.
 
         Returns
         -------
