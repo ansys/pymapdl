@@ -83,7 +83,6 @@ def beam_solve(mapdl):
     mapdl.set(1, 2)
     mapdl.mute = False
 
-
 def test_cmd_class():
     output = """This is the output.
 This is the second line.
@@ -160,3 +159,4 @@ def test_bclist(mapdl, beam_solve, func):
     if HAS_PANDAS:
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+

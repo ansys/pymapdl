@@ -35,6 +35,7 @@ so it cannot be converted to Numpy Array.
 
 Please use 'to_list' or 'to_dataframe' instead."""
 
+
 # Identify where the data start in the output
 GROUP_DATA_START = ['NODE', 'ELEM']
 
