@@ -23,13 +23,6 @@ from ._commands import (
 import re
 import numpy as np
 
-try:
-    import pandas as pd
-    HAS_PANDAS = True
-
-except ImportError:
-    HAS_PANDAS = False
-
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
@@ -41,6 +34,7 @@ MSG_BCListingOutput_to_array = """This command has strings values in some of its
 so it cannot be converted to Numpy Array.
 
 Please use 'to_list' or 'to_dataframe' instead."""
+
 
 # Identify where the data start in the output
 GROUP_DATA_START = ['NODE', 'ELEM']
@@ -79,9 +73,105 @@ CMD_LISTING = [
     'SWLI'
 ]
 
+CMD_BC_LISTING = ['FLIS', 'DLIS']
+
+# Adding empty lines to match current format.
+docstring_injection = """
+Returns
+-------
+
+str
+    Str object with the command console output.
+
+    This object also has the extra methods:
+
+    * ``str.to_list()``
+
+    * ``str.to_array()`` (Only on listing commands)
+
+    * ``str.to_dataframe()`` (Only if Pandas is installed)
+
+    For more information visit `PyMAPDL Post-Processing <https://mapdldocs.pyansys.com/user_guide/post.html>`_.
+
+"""
+
+
+def get_indentation(indentation_regx, docstring):
+    return re.findall(indentation_regx, docstring, flags=re.DOTALL|re.IGNORECASE)[0][0]
+
+
+def indent_text(indentation, docstring_injection):
+    return '\n'.join([indentation + each for each in docstring_injection.splitlines() if each.strip()])
+    # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
+
+
+def get_docstring_indentation(docstring):
+    indentation_regx = r'\n(\s*)\n'
+    return get_indentation(indentation_regx, docstring)
+
+
+def get_sections(docstring):
+    return [each.strip().lower() for each in re.findall(r'\n\s*(\S*)\n\s*-+\n', docstring)]
+
+
+def get_section_indentation(section_name, docstring):
+    sections = get_sections(docstring)
+    if section_name.lower().strip() not in sections:
+        raise ValueError(f"This section '{section_name.lower().strip()}' does not exist in the docstring.")
+    section_match = section_name + r'\n\s*-*'
+    indent_match = r'\n(\s*)(\S)'
+    indentation_regx = section_match + indent_match
+    return get_indentation(indentation_regx, docstring)
+
+
+def inject_before(section, indentation, indented_doc_inject, docstring):
+    return re.sub(section + r'\n\s*-*', f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>", docstring, flags=re.IGNORECASE)
+
+
+def inject_after_return_section(indented_doc_inject, docstring):
+    return re.sub('Returns' + r'\n\s*-*', f"{indented_doc_inject.strip()}\n", docstring, flags=re.IGNORECASE)
+
+
+def inject_docs(docstring):
+    """Inject a string in a docstring"""
+    return_header = r'Returns\n\s*-*'
+    if re.search(return_header, docstring):
+        # There is a return block already, probably it should not.
+        indentation = get_section_indentation('Returns', docstring)
+        indented_doc_inject = indent_text(indentation, docstring_injection)
+        return inject_after_return_section(indented_doc_inject, docstring)
+    else:
+        # There is not returns header
+        # find sections
+        sections = get_sections(docstring)
+
+        if 'parameters' in sections:
+            ind = sections.index('parameters')
+            if ind == len(sections) - 1:
+                # The parameters is the last bit. Just append it.
+                indentation = get_section_indentation('Parameters', docstring)
+                indented_doc_inject = indent_text(indentation, docstring_injection)
+                return docstring + '\n' + indented_doc_inject
+            else:
+                # inject it right before the section after 'parameter'
+                sect_after_parameter = sections[ind + 1]
+                indentation = get_section_indentation(sect_after_parameter, docstring)
+                indented_doc_inject = indent_text(indentation, docstring_injection)
+                return inject_before(sect_after_parameter, indentation, indented_doc_inject, docstring)
+
+        elif 'notes' in sections:
+            indentation = get_section_indentation('Notes', docstring)
+            indented_doc_inject = indent_text(indentation, docstring_injection)
+            return inject_before('Notes', indentation, indented_doc_inject, docstring)
+
+        else:
+            indentation = get_docstring_indentation(docstring)
+            indented_doc_inject = indent_text(indentation, docstring_injection)
+            return docstring + '\n' + indented_doc_inject
+
 
 def check_valid_output(func):
-    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
+    """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
@@ -341,16 +431,11 @@ class CommandOutput(str):
 
 
 class CommandListingOutput(CommandOutput):
-    """
+    """Allow the conversion of command output to native Python types.
+
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
-
-    ## NOTES
-    # The key format files are:
-    # - rptfmt.F
-    # - rptlb4.F
-    # - rptlb8.F
 
     def _is_data_start(self, line, magicword=None):
         """Check if line is the start of a data group."""
@@ -396,11 +481,8 @@ class CommandListingOutput(CommandOutput):
         return None
 
     @staticmethod
-    def _is_empty_line(each):
-        if each.split():
-            return False
-        else:
-            return True
+    def _is_empty_line(line):
+        return bool(line.split())
 
     def _format(self):
         """Perform some formatting (replacing mainly) in the raw text."""
@@ -409,7 +491,8 @@ class CommandListingOutput(CommandOutput):
     def _get_body(self, trail_header=None):
         """Get command body text.
 
-        It removes the Maximum absolute values tail part and makes sure there is separation between columns"""
+        It removes the maximum absolute values tail part and makes sure there is separation between columns.
+        """
         # Doing some formatting of the string
         body = self._format().splitlines()
 
@@ -423,7 +506,7 @@ class CommandListingOutput(CommandOutput):
         for each_trail_header in trail_header:
             if each_trail_header in self.__str__():
                 # starting to check from the bottom.
-                for i in range(len(body)-1, -1, -1):
+                for i in range(len(body) - 1, -1, -1):
                     if each_trail_header in body[i]:
                         break
                 body = body[:i]
@@ -432,7 +515,7 @@ class CommandListingOutput(CommandOutput):
     def _get_data_group_indexes(self, body, magicword=None):
         """Return the indexes of the start and end of the data groups."""
 
-        if '*****ANSYS VERIFICATION RUN ONLY*****' in self.__str__():
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in str(self):
             shift = 2
         else:
             shift = 0
@@ -444,7 +527,7 @@ class CommandListingOutput(CommandOutput):
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
 
-        ends = [indexes[indexes.index(each)+1] for each in start_idxs[:-1]]
+        ends = [indexes[indexes.index(each) + 1] for each in start_idxs[:-1]]
         ends.append(len(body))
 
         return zip(start_idxs, ends)
@@ -458,13 +541,10 @@ class CommandListingOutput(CommandOutput):
             data.extend(body[start+1:end])
 
         # removing empty lines
-        data = [each for each in data if each]
-
-        return data
+        return [each for each in data if each]
 
     def get_columns(self):
-        """
-        Get the column names for the dataframe.
+        """Get the column names for the dataframe.
 
         Returns
         -------
@@ -475,26 +555,38 @@ class CommandListingOutput(CommandOutput):
         pairs = list(self._get_data_group_indexes(body))
         return body[pairs[0][0]].split()
 
-    def _requires_pandas(func):
-        """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
-
-        def func_wrapper(self, *args, **kwargs):
-            if HAS_PANDAS:
-                return func(self, *args, **kwargs)
-            else:
-                raise ModuleNotFoundError(MSG_NOT_PANDAS)
-        return func_wrapper
-
     @check_valid_output
     def to_list(self):
+        """Export the command output a list or list of lists.
+
+        Returns
+        -------
+            List of strings
+        """
         data = self._get_data_groups()
         return [each.split() for each in data]
 
     def to_array(self):
+        """Export the command output as a numpy array.
+
+        Returns
+        -------
+            Numpy array
+        """
         return np.array(self.to_list(), dtype=float)
 
-    @_requires_pandas
     def to_dataframe(self, data=None, columns=None):
+        """Export the command output as a Pandas DataFrame.
+
+        Returns
+        -------
+            Pandas Dataframe
+        """
+        try:
+            import pandas as pd
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(MSG_NOT_PANDAS)
+
         if not data:
             data = self.to_array()
         if not columns:
@@ -507,9 +599,8 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     def to_array(self):
         raise ValueError(MSG_BCListingOutput_to_array)
 
-    @_requires_pandas
     def to_dataframe(self):
-        df = pd.DataFrame(data=self.to_list(), columns=self.get_columns())
+        df = super().to_dataframe(data=self.to_list())
         if 'NODE' in df.columns:
             df['NODE'] = df['NODE'].astype(int)
 

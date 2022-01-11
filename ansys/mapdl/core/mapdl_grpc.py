@@ -64,7 +64,6 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
-from ansys.mapdl.core.commands import CMD_LISTING, CommandListingOutput, BoundaryConditionsListingOutput
 
 TMP_VAR = '__tmpvar__'
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -311,18 +310,6 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in kwargs:
             self._cache_pids()
-
-        # Wrapping LISTING FUNCTIONS.
-        def wrap_listing_function(func):
-            @wraps(func)
-            def inner_wrapper(*args, **kwargs):
-                return CommandListingOutput(func(*args, **kwargs))
-            return inner_wrapper
-
-        for name in dir(self):
-            if name[0:4].upper() in CMD_LISTING:
-                func = self.__getattribute__(name)
-                setattr(self, name, wrap_listing_function(func))
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
@@ -2017,13 +2004,3 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
-
-    @wraps(_MapdlCore.dlist)
-    def dlist(self, node1='', node2='', ninc='', **kwargs):
-        """Wraps ``dlist`` to obtain a list, numpy array or pandas dataframe."""
-        return BoundaryConditionsListingOutput(super().dlist(node1=node1, node2=node2, ninc=ninc, **kwargs))
-
-    @wraps(_MapdlCore.flist)
-    def flist(self, node1='', node2='', ninc='', **kwargs):
-        """Wraps ``flist`` to obtain a list, numpy array or pandas dataframe."""
-        return BoundaryConditionsListingOutput(super().flist(node1=node1, node2=node2, ninc=ninc, **kwargs))
