@@ -12,7 +12,6 @@ notches in a finite width thin plate
 First, start MAPDL as a service and disable all but error messages.
 """
 # sphinx_gallery_thumbnail_number = 3
-from matplotlib import pyplot as plt
 import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
