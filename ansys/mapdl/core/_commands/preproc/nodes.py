@@ -411,7 +411,7 @@ class Nodes:
         functions and display the value on your model.
 
         This command is valid in any processor.
-        
+
         Examples
         --------
         Compute the distance between two nodes.

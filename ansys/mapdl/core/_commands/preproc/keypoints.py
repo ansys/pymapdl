@@ -223,7 +223,7 @@ class KeyPoints:
         toroidal [CSYS,3].
 
         This command is valid in any processor.
-        
+
         Examples
         --------
         Compute the distance between two keypoints.
