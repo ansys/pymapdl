@@ -23,12 +23,8 @@ from ._commands import (
 import re
 import numpy as np
 
-try:
-    import pandas as pd
-    HAS_PANDAS = True
-
-except ImportError:
-    HAS_PANDAS = False
+import importlib; 
+HAS_PANDAS = importlib.util.find_spec("pandas") is not None
 
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
@@ -561,12 +557,16 @@ class CommandListingOutput(CommandOutput):
 
     @check_valid_output
     def to_list(self):
+        """Export the command output a list or list of lists."""
         data = self._get_data_groups()
         return [each.split() for each in data]
 
     def to_array(self):
+        """Export the command output as a numpy array."""
         return np.array(self.to_list(), dtype=float)
 
     @_requires_pandas
     def to_dataframe(self):
+        """Export the command output as a Pandas DataFrame."""
+        import pandas as pd
         return pd.DataFrame(data=self.to_array(), columns=self.get_columns())
