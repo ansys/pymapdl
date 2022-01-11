@@ -73,6 +73,8 @@ CMD_LISTING = [
     'SWLI'
 ]
 
+CMD_BC_LISTING = ['FLIS', 'DLIS']
+
 # Adding empty lines to match current format.
 docstring_injection = """
 Returns
