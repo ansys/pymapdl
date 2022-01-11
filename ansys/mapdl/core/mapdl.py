@@ -1605,7 +1605,7 @@ class _MapdlCore(Commands):
 
         # interactive result
         _ = self.input(tmp_inp, write_to_log=False)
-        time.sleep(0.1)  # allow MAPDL to close the file
+        # time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
 
