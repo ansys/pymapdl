@@ -397,7 +397,7 @@ _ = mapdl.finish()
 # Enter solution mode and solve the system.
 
 # Start solution procedure.
-mapdl.run("/solu")
+mapdl.slashsolu()
 
 # Define solution function.
 def solution(deflect=None):
