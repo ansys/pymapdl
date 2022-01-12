@@ -35,6 +35,10 @@ If your issue does not fit into one of these categories, create your own issue.
 
 To reach the project support team, email `alexander.kaszynski@ansys.com <alexander.kaszynski@ansys.com>`_.
 
+Viewing PyMAPDL Documentation
+-----------------------------
+Documentation for the latest stable release of PyAEDT is hosted at
+`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.  
 
 Logging in PyMAPDL
 ------------------
