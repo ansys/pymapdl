@@ -459,3 +459,15 @@ def test_sphere(cleared, mapdl):
 
 def test_sph5(cleared, mapdl):
     assert mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1
+
+def test_ndist(cleared, mapdl):
+    node1 = (0, -5, 13)
+    node2 = (-10, 70, 1)
+
+    node_num1 = mapdl.n("", *node1)
+    node_num2 = mapdl.n("", *node2)
+    node_dist, node_xdist, node_ydist, node_zdist = mapdl.ndist(node_num1, node_num2)
+    assert node_dist == math.sqrt((node2[0] - node1[0]) ** 2 + (node2[1] - node1[1]) ** 2 + (node2[2] - node1[2]) ** 2)
+    assert node_xdist == node2[0] - node1[0]
+    assert node_ydist == node2[1] - node1[1]
+    assert node_zdist == node2[2] - node1[2]
