@@ -151,13 +151,11 @@ print(mapdl.etlist())
 # ~~~~~~~~~~~~~~~
 # Set up the material properties.
 #
-# .. note::
-#
-#    * Young Modulus of steel is: :math:`E_{\mathrm{s}} = 26875000 psi`,
-#    * Yield strength of steel is: :math:`\sigma_{\mathrm{(yp)s}} = 86000 psi`,
-#    * Young Modulus of aluminum is: :math:`E_{\mathrm{a}} = 11000000  psi`,
-#    * Yield strength of aluminum is: :math:`\sigma_{\mathrm{(yp)a}} = 55000 psi`,
-#    * Poisson's ratio is: :math:`\nu = 0.3`
+# * Young Modulus of steel is: :math:`E_{\mathrm{s}} = 26875000 psi`,
+# * Yield strength of steel is: :math:`\sigma_{\mathrm{(yp)s}} = 86000 psi`,
+# * Young Modulus of aluminum is: :math:`E_{\mathrm{a}} = 11000000  psi`,
+# * Yield strength of aluminum is: :math:`\sigma_{\mathrm{(yp)a}} = 55000 psi`,
+# * Poisson's ratio is: :math:`\nu = 0.3`
 
 # Steel material model.
 # Define Young's moulus and Poisson ratio for Steel.
@@ -390,7 +388,7 @@ mapdl.d("ALL", "UZ", 0)
 
 # Select all nodes.
 mapdl.nsel("ALL")
-mapdl.finish()
+_ = mapdl.finish()
 
 
 ###############################################################################
