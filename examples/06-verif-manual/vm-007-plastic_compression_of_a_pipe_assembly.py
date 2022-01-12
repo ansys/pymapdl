@@ -400,7 +400,7 @@ _ = mapdl.finish()
 mapdl.slashsolu()
 
 # Define solution function.
-def solution(deflect=None):
+def solution(deflect):
     mapdl.nsel("R", "LOC", "Z", 10)
     mapdl.d(node="ALL", lab="UZ", value=deflect)
     mapdl.nsel("ALL")
