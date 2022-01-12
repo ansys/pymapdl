@@ -63,7 +63,7 @@ Analysis Assumptions and Modeling Notes:
    • using ``SHELL181`` - the 4-Node Finite Strain Shell
 
  - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
-   only a one element :math:`\Theta` -sector is modeled. A small angle :math:`\Theta = 6°`
+   only a one element :math:`\theta` -sector is modeled. A small angle :math:`\theta = 6°`
    is arbitrarily chosen to reasonably approximate the circular boundary
    with straight sided elements.
    The nodes at the boundaries have the UX (radial) degree of freedom coupled.
@@ -361,7 +361,7 @@ mapdl.cpsgen(itime=4, nset1=7)
 # Select only nodes in SOLID185 and SHELL181 models.
 mapdl.nsel(type_="S", item="NODE", vmin=101, vmax=212)
 
-# Select only nodes at THETA = 0 from the selected set.
+# Select only nodes at theta = 0 from the selected set.
 mapdl.nsel("R", "LOC", "Y", 0)
 
 # Apply symmetry boundary conditions.
@@ -370,7 +370,7 @@ mapdl.dsym("SYMM", "Y", 1)
 # Select only nodes in SOLID185 and SHELL181 models.
 mapdl.nsel(type_="S", item="NODE", vmin=101, vmax=212)
 
-# elect nodes at THETA from the selected set.
+# elect nodes at theta from the selected set.
 mapdl.nsel("R", "LOC", "Y", theta)
 
 # Apply symmetry boundary conditions.
