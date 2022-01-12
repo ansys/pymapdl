@@ -24,10 +24,6 @@ Element Type(s):
  - 4-Node Finite Strain Shell (SHELL181)
  - 3-D Structural Solid Elements (SOLID185)
 
-.. image:: ../../_static/vm7_setup.png
-   :width: 400
-   :alt: VM7 Problem Sketch
-
 .. image:: ../../_static/vm7_setup_2.png
    :width: 400
    :alt: VM7 Finite Element Models
@@ -39,6 +35,10 @@ Material Properties
  - :math:`\sigma_{\mathrm{(yp)a}} = 55000 psi`
  - :math:`\nu = 0.3`
 
+.. image:: ../../_static/vm7_setup_1.png
+   :width: 300
+   :alt: VM7 Material Model
+
 Geometric Properties:
  - :math:`l = 10  in`
  - :math:`A_{\mathrm{s}} = 7 in^2`
@@ -48,6 +48,10 @@ Loading:
  - 1st Load Step: :math:`\delta = 0.032 in`
  - 2nd Load Step: :math:`\delta = 0.050 in`
  - 3rd Load Step: :math:`\delta = 0.100 in`
+
+.. image:: ../../_static/vm7_setup.png
+   :width: 300
+   :alt: VM7 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
  - The following tube dimensions, which provide the desired cross-sectional
@@ -71,12 +75,13 @@ Analysis Assumptions and Modeling Notes:
    the ROTY degree of freedom coupled.
 
 """
-# sphinx_gallery_thumbnail_path = '_static/vm7_setup.png'
 
 ###############################################################################
 # Start MAPDL
 # ~~~~~~~~~~~
 # Start MAPDL and import additionally Numpy and Pandas libraries.
+
+# sphinx_gallery_thumbnail_path = '_static/vm7_setup.png'
 
 import numpy as np
 import pandas as pd
