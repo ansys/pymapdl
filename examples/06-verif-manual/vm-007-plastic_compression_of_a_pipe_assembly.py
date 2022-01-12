@@ -201,9 +201,9 @@ plt.plot(steel["strain_s"], steel["stress_s"],
 plt.plot(xp, yp, marker='o')
 
 # Annotation settings
-plt.annotate('sigma_y_steel', xy=(xp, yp), xytext=(0.05, 75000),
+plt.annotate(r'${(\sigma_{yp})_s}$', xy=(xp, yp), xytext=(0.05, 75000),
              arrowprops=dict(facecolor='steelblue', shrink=0.05),
-             bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round,pad=1'))
+             bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round, pad=1'))
 
 # Define stress - strain properties of the aluminum.
 aluminum = {"stress_a": [0, 55000, 55000, 55000],
@@ -220,9 +220,9 @@ plt.plot(aluminum["strain_a"], aluminum["stress_a"],
 plt.plot(xp, yp, marker='o')
 
 # Annotation settings
-plt.annotate('sigma_y_aluminum', xy=(xp, yp), xytext=(0.07, 45000),
+plt.annotate(r'${(\sigma_{yp})_a}$', xy=(xp, yp), xytext=(0.07, 45000),
              arrowprops=dict(facecolor='sandybrown', shrink=0.05),
-             bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round,pad=1'))
+             bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round, pad=1'))
 
 plt.grid(True)
 plt.legend()
