@@ -33,7 +33,7 @@ recommend that you use these issue templates:
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email `pyansys.support@ansys.com <pyansys.suport@ansys.com>`_.
+To reach the project support team, email `pyansys.support@ansys.com <pyansys.support@ansys.com>`_.
 
 Viewing PyMAPDL Documentation
 -----------------------------
