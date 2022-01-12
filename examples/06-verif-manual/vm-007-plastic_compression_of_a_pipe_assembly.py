@@ -55,24 +55,24 @@ Loading:
 
 Analysis Assumptions and Modeling Notes:
  - The following tube dimensions, which provide the desired cross-sectional
-   areas, are arbitrarily chosen.
-   Inner (steel) tube: inside radius = 1.9781692 in.,
-   wall thickness = 0.5 in.
-   Outer (aluminum) tube: inside radius = 3.5697185 in.,
-   wall thickness = 0.5 in.
+   areas, are arbitrarily chosen:
+
+   * Inner (steel) tube: inside radius = 1.9781692 in., wall thickness = 0.5 in.
+   * Outer (aluminum) tube: inside radius = 3.5697185 in., wall thickness = 0.5 in.
 
  - The problem can be solved in three ways:
-   • using ``PIPE288`` - the plastic straight pipe element
-   • using ``SOLID185`` - the 3-D structural solid element
-   • using ``SHELL181`` - the 4-Node Finite Strain Shell
+
+   * using ``PIPE288`` - the plastic straight pipe element
+   * using ``SOLID185`` - the 3-D structural solid element
+   * using ``SHELL181`` - the 4-Node Finite Strain Shell
 
  - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
    only a one element :math:`\theta` -sector is modeled. A small angle :math:`\theta = 6°`
    is arbitrarily chosen to reasonably approximate the circular boundary
    with straight sided elements.
-   The nodes at the boundaries have the UX (radial) degree of freedom coupled.
+   The nodes at the boundaries have the ``UX`` (radial) degree of freedom coupled.
    In the SHELL181 model, the nodes at the boundaries additionally have
-   the ROTY degree of freedom coupled.
+   the ``ROTY`` degree of freedom coupled.
 
 """
 
