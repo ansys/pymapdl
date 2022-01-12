@@ -58,9 +58,9 @@ Analysis Assumptions and Modeling Notes:
    wall thickness = 0.5 in.
 
  - The problem can be solved in three ways:
-   • using PIPE288 - the plastic straight pipe element
-   • using SOLID185 - the 3-D structural solid element
-   • using SHELL181 - the 4-Node Finite Strain Shell
+   • using ``PIPE288`` - the plastic straight pipe element
+   • using ``SOLID185`` - the 3-D structural solid element
+   • using ``SHELL181`` - the 4-Node Finite Strain Shell
 
  - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
    only a one element :math:`\Theta` -sector is modeled. A small angle :math:`\Theta = 6°`
