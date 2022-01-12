@@ -458,7 +458,7 @@ def getload():
     load_185 = load_185_theta * 360 / theta
 
     # Select the nodes in the SHELL181 element model.
-    mapdl.nsel("S", "NODE", "", 201, 212)  # SELECT NODES IN SHELL181 MODEL
+    mapdl.nsel("S", "NODE", "", 201, 212)
     mapdl.nsel("R", "LOC", "Z", 0)
 
     # Sum the nodal force contributions of elements.
@@ -498,8 +498,8 @@ pipe288_ls3, solid185_ls3, shell181_ls3 = getload()
 # Check Results
 # ~~~~~~~~~~~~~
 # Finally we have the results of the loads for the simplified axisymmetric model,
-# which can be compared with expected Target values for models with PIPE288,
-# SOLID185, and SHELL181 elements. Loads expected for each load step are:
+# which can be compared with expected target values for models with ``PIPE288``,
+# ``SOLID185``, and ``SHELL181`` elements. Loads expected for each load step are:
 #
 # - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load1 = 1024400 (lb)`.
 # - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load2 = 1262000 (lb)`.
