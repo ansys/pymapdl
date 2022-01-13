@@ -20,6 +20,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    geometry
    helper
    inline
+   logging
    mapdl
    math
    mesh
@@ -29,3 +30,4 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
+   
