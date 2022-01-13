@@ -21,13 +21,11 @@ class _ScalarQueries(_QueryExecution):
 
         Examples
         --------
-        This example has been adapted from the example script
-        :ref:`_ref_3d_plate_thermal`. We create a block
-        of solid material, and apply a temperature to one end
-        of the block, and then solve.
+        We create a block of solid material, and constrain the
+        temperature DOF of all its nodes to a uniform value, and then solve.
 
         Then we can use ``queries.temp`` to get the temperature
-        at the first node on the deformed.
+        at the first node of the solved model.
 
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
@@ -35,17 +33,14 @@ class _ScalarQueries(_QueryExecution):
         >>> mapdl.prep7()
         >>> mapdl.mp("kxx", 1, 45)
         >>> mapdl.et(1, 'SOLID70')
-        >>> mapdl.block(-0.3, 0.3, -0.46, 1.34, -0.2, -0.2 + 0.02)
-        >>> mapdl.esize(0.01)
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.esize(0.5)
         >>> mapdl.vmesh(1)
-        >>> mapdl.asel("S", vmin=3)
-        >>> mapdl.nsla()
         >>> mapdl.d("all", "temp", 5)
-        >>> mapdl.nsel('ALL')
-        >>> mapdl.run("/SOLU")
+        >>> mapdl.slashsolu()
         >>> mapdl.solve()
         >>> mapdl.queries.temp(1)
-        4.99999994201101
+        5.0
         """
         return self._run_query(f"TEMP({n})", integer=False)
 
@@ -63,6 +58,29 @@ class _ScalarQueries(_QueryExecution):
         -------
         float
             Pressure
+
+        Examples
+        --------
+        We create a block of solid material, and constrain the
+        pressure DOF of all its nodes to a uniform value, and then solve.
+
+        Then we can use ``queries.pres`` to get the pressure
+        at the first node of the solved model.
+
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.mp("ex", 1, 1)
+        >>> mapdl.et(1, 'CPT215')
+        >>> mapdl.keyopt(1, 12, 1)
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.esize(0.5)
+        >>> mapdl.vmesh(1)
+        >>> mapdl.d("all", "pres", 5)
+        >>> mapdl.d("all", "ux", 0, lab2="uy", lab3="uz")
+        >>> mapdl.run("/SOLU")
+        >>> mapdl.solve()
+        >>> mapdl.queries.pres(1)
+        5.0
         """
         return self._run_query(f"PRES({n})", integer=False)
 
@@ -80,6 +98,27 @@ class _ScalarQueries(_QueryExecution):
         -------
         float
             Electric potential
+
+        Examples
+        --------
+        We create a block of solid material, and constrain the
+        volt DOF of all its nodes to a uniform value, and then solve.
+
+        Then we can use ``queries.volt`` to get the Electric Potential
+        at the first node of the solved model.
+
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.mp("perx", 1, 1)
+        >>> mapdl.et(1, 'SOLID122')
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.esize(0.5)
+        >>> mapdl.vmesh(1)
+        >>> mapdl.d("all", "volt", 5)
+        >>> mapdl.run("/SOLU")
+        >>> mapdl.solve()
+        >>> mapdl.queries.volt(1)
+        5.0
         """
         return self._run_query(f"VOLT({n})", integer=False)
 
@@ -97,5 +136,26 @@ class _ScalarQueries(_QueryExecution):
         -------
         float
             Magnetic scalar potential
+
+        Examples
+        --------
+        We create a block of solid material, and constrain the
+        mag DOF of all its nodes to a uniform value, and then solve.
+
+        Then we can use ``queries.mag`` to get the Magnetic Scalar
+        Potential at the first node of the solved model.
+
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.mp("murx", 1, 1)
+        >>> mapdl.et(1, 'SOLID96')
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.esize(0.5)
+        >>> mapdl.vmesh(1)
+        >>> mapdl.d("all", "mag", 5)
+        >>> mapdl.run("/SOLU")
+        >>> mapdl.solve()
+        >>> mapdl.queries.mag(1)
+        5.0
         """
-        return self._run_query(f"VOLT({n})", integer=False)
+        return self._run_query(f"MAG({n})", integer=False)
