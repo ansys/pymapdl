@@ -26,11 +26,11 @@ streamed back to the client for review or visualization.
 
 Enriched Command Output
 ~~~~~~~~~~~~~~~~~~~~~~~
-All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands output a string object which can be parsed to 
-obtain specific data from it.
+All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands output
+a string object which can be parsed to obtain specific data from it.
 
-In certain :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands the returned string contains 
-some methods to process the output.
+In certain :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands
+the returned string contains some methods to process the output.
 These commands are listed in Table-1_.
 
 .. _Table-1:

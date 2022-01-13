@@ -572,7 +572,8 @@ class CommandListingOutput(CommandOutput):
 
         Returns
         -------
-            Numpy array (floats).
+        numpy.ndarray
+            Numpy array of floats.
         """
         return np.array(self.to_list(), dtype=float)
 
@@ -581,20 +582,27 @@ class CommandListingOutput(CommandOutput):
 
         Parameters
         ----------
-        data : None
+        data : numpy.ndarray (structured or homogeneous), Iterable, dict, or DataFrame
             The data to be converted to the dataframe values.
-            This directly passed to the dataframe constructor.
+            Passed directly to the pandas.DataFrame constructor.
+            Dict can contain Series, arrays, constants, dataclass or list-like objects. If
+            data is a dict, column order follows insertion-order.
 
-        columns : None
+        columns : Index or array-like
             Iterable with columns names.
+            Passed directly to the pandas.DataFrame constructor.
+            Column labels to use for resulting frame when data does not have them,
+            defaulting to RangeIndex(0, 1, 2, ..., n). If data contains column labels,
+            will perform column selection instead.
 
         Returns
         -------
-            Pandas Dataframe
+        pandas.DataFrame
+            Pandas DataFrame
 
         Notes
         -----
-        The returned dataframe has all its columns converted to float
+        The returned dataframe has all its data converted to float
         (inheritate from :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
         try:
@@ -626,6 +634,7 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         Returns
         -------
+        pandas.DataFrame
             Pandas Dataframe
 
         Notes
