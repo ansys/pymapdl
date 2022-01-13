@@ -113,7 +113,18 @@ This is for the format: {format1}-{format2}-{format3}"""
 
 def test_cmd_class_prnsol_short():
     cmd = 'PRRSOL,F'
-    cmd_out = CommandOutput(PRNSOL_OUT, cmd=cmd)
+    out = CommandListingOutput(PRNSOL_OUT, cmd=cmd)
+
+    out_list = out.to_list()
+    out_array = out.to_array()
+
+    assert isinstance(out, CommandListingOutput)
+    assert isinstance(out_list, list) and bool(out_list)
+    assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
+    if HAS_PANDAS:
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)

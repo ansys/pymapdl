@@ -533,19 +533,6 @@ class CommandListingOutput(CommandOutput):
 
         return zip(start_idxs, ends)
 
-    # def _is_header(self, line):
-        
-    #     has_labels = [each in line for each in ['UX', 'UY', 'UZ', 'FX', 'FY', 'FZ', 'TEMP', 'VOLT']]
-        
-    #     if has_labels:
-    #         return
-    #     try:
-    #         np.array(line.split(), dtype=float) #if this fail, there is headers,
-    #         return True and 
-    #     except:
-    #         # There is headers, assuming default format
-    #         return False
-
     def _get_data_groups(self, magicword=None, trail_header=None):
         """Get raw data groups"""
         body = self._get_body(trail_header=trail_header)
