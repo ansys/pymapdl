@@ -19,7 +19,7 @@ from ._commands import (
     misc,
     inq_func
 )
-
+from functools import wraps
 import re
 import numpy as np
 
@@ -173,6 +173,7 @@ def inject_docs(docstring):
 def check_valid_output(func):
     """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
+    @wraps(func)
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
         if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
@@ -571,16 +572,38 @@ class CommandListingOutput(CommandOutput):
 
         Returns
         -------
-            Numpy array
+        numpy.ndarray
+            Numpy array of floats.
         """
         return np.array(self.to_list(), dtype=float)
 
     def to_dataframe(self, data=None, columns=None):
         """Export the command output as a Pandas DataFrame.
 
+        Parameters
+        ----------
+        data : numpy.ndarray (structured or homogeneous), Iterable, dict, or DataFrame
+            The data to be converted to the dataframe values.
+            Passed directly to the pandas.DataFrame constructor.
+            Dict can contain Series, arrays, constants, dataclass or list-like objects. If
+            data is a dict, column order follows insertion-order.
+
+        columns : Index or array-like
+            Iterable with columns names.
+            Passed directly to the pandas.DataFrame constructor.
+            Column labels to use for resulting frame when data does not have them,
+            defaulting to RangeIndex(0, 1, 2, ..., n). If data contains column labels,
+            will perform column selection instead.
+
         Returns
         -------
-            Pandas Dataframe
+        pandas.DataFrame
+            Pandas DataFrame
+
+        Notes
+        -----
+        The returned dataframe has all its data converted to float
+        (inheritate from :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
         try:
             import pandas as pd
@@ -592,14 +615,39 @@ class CommandListingOutput(CommandOutput):
         if not columns:
             columns = self.get_columns()
 
-        return pd.DataFrame(data=data, columns=data)
+        return pd.DataFrame(data=data, columns=columns)
 
 
 class BoundaryConditionsListingOutput(CommandListingOutput):
+    """Allow the conversion of command output to native Python types.
+
+    Custom class for handling the boundary condition listing commands
+    whose output is sensible to be converted to a list of lists,
+    or a Pandas DataFrame.
+    """
+
     def to_array(self):
         raise ValueError(MSG_BCListingOutput_to_array)
 
     def to_dataframe(self):
+        """Convert the command output to a Pandas Dataframe.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Pandas Dataframe
+
+        Notes
+        -----
+
+        If present, the next columns will be converted to:
+
+        * ``'NODE'``: int
+        * ``'LABEL'``: str
+        * ``'REAL'``: float
+        * ``'IMAG'``: float
+
+        """
         df = super().to_dataframe(data=self.to_list())
         if 'NODE' in df.columns:
             df['NODE'] = df['NODE'].astype(int)
