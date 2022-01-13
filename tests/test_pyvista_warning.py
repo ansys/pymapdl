@@ -2,7 +2,6 @@
 # Check the Warning with PyVista
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Examples -> 02-geometry -> 02-areas.py
-import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine
