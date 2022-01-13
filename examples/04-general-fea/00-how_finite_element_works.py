@@ -891,7 +891,7 @@ results_txt = []
 for i, _ in enumerate(dof_list):
     mapdl.post1()
     mapdl.set(i + 1)
-    prrsol_txt = mapdl.prrsol("f")
+    prrsol_txt = mapdl.prrsol("f").to_array()[:,1:] # Omitting node column (0)
     results_txt.append(prrsol_txt)
 
 for txt in results_txt:
@@ -900,34 +900,9 @@ for txt in results_txt:
 
 
 ###############################################################################
-# Setup a regex to extract the components of the matrix.  Here we show
-# how it works with the first column
-
-
-re_result = re.compile(r"NODE\s+FX\s+FY(.+)?TOTAL\s+VALUES", re.DOTALL | re.MULTILINE)
-re_values = re.compile(
-    r"^\s*\d+\s*([+-]?\d+\.\d*(?:E[+-]?\d+)?)\s*([+-]?\d+\.\d*(?:E[+-]?\d+)?)"
-)
-
-def find_values(results):
-    return np.array(
-        [
-            re_values.findall(line)[0]
-            for line in re_result.findall(results)[0].split("\n")
-            if re_values.match(line)
-        ],
-        dtype=float,
-    )
-
-
-find_values(results_txt[0])
-
-
-###############################################################################
 # Now, apply this to the whole matrix and output it.
 
-
-stiffness_mapdl = np.array([find_values(res) for res in results_txt])
+stiffness_mapdl = np.array(results_txt)
 stiffness_mapdl = stiffness_mapdl.reshape(8, 8)
 stiffnes_mapdl_scaled = np.round(stiffness_mapdl / 1e4)
 stiffnes_mapdl_scaled
@@ -943,4 +918,5 @@ stiffness_scaled
 ###############################################################################
 # Show that the stiffness matrix in MAPDL matches what we derived.
 
-np.allclose(stiffnes_mapdl_scaled, stiffness_scaled)
+if np.allclose(stiffnes_mapdl_scaled, stiffness_scaled):
+    print('Both matrices are the equal within tolerance.')
