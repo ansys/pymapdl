@@ -16,7 +16,6 @@ Element Method (2nd Ed., PWS Publishing 1993).
 
 import itertools
 import numpy as np
-import re
 import matplotlib.pyplot as plt
 
 np.set_printoptions(linewidth=120)
@@ -204,13 +203,11 @@ def interpolate_nodal_values(self, s, t, nodal_values):
 
 MyElementDemo.interpolate_nodal_values = interpolate_nodal_values
 
-
 my_points = my_elem.interpolate_nodal_values(0, 0, nodes)
 my_points
 
-
 ###############################################################################
-
+# Plotting the mesh.
 
 plot_my_mesh(nodes, my_elem.interpolate_nodal_values(0, 0, nodes))
 
@@ -528,10 +525,6 @@ def B(self, s, t):
 MyElementDemo.grad_N = grad_N
 MyElementDemo.B = B
 
-
-###############################################################################
-
-
 my_elem.B(0, 0)
 
 ###############################################################################
@@ -680,19 +673,20 @@ MyElementDemo.ndof = 8
 ###############################################################################
 
 stiffness = my_elem.K(isotropic.evaluate())
-stiffness
+print(stiffness)
 
 
 ###############################################################################
 
 stiffness_scaled = np.round(stiffness / 1e4)
-stiffness_scaled
+print(stiffness_scaled)
 
 
 ###############################################################################
 # Putting it all together
 # ~~~~~~~~~~~~~~~~~~~~~~~
-
+# Creating `Elem2D` class.
+#
 
 class Elem2D:
     gauss_pts = (
@@ -786,7 +780,7 @@ class Elem2D:
 
 
 ###############################################################################
-
+# Isotropic class definition
 
 class Isotropic:
     def __init__(self, ex, nu):
@@ -802,28 +796,15 @@ class Isotropic:
 
 
 ###############################################################################
-
+# Aplying the created classes.
 
 isotropic = Isotropic(30e6, 0.25)
-
-
-###############################################################################
-
-
 elem = Elem2D(nodes)
-
-
-###############################################################################
-
 
 stiffness = elem.k(isotropic.evaluate())
 
-
-###############################################################################
-
-
 stiffness_scaled = np.round(stiffness / 1e4)
-stiffness_scaled
+print(stiffness_scaled)
 
 
 ###############################################################################
@@ -861,7 +842,7 @@ for i, n in zip(node_ids, nodes):
 ###############################################################################
 # Setup our element with the corresponding material properties.
 
-mapdl.e(*node_ids)
+_ = mapdl.e(*node_ids)  # Using '_ =' to hide output.
 
 
 ###############################################################################
@@ -881,7 +862,7 @@ for node_id, dof in dof_list:
     mapdl.d(node_id, dof, 1)
     mapdl.solve()
 
-mapdl.finish()
+_ = mapdl.finish()
 
 ###############################################################################
 # The columns of the stiffness matrix appear as nodal force reactions
@@ -891,7 +872,7 @@ results_txt = []
 for i, _ in enumerate(dof_list):
     mapdl.post1()
     mapdl.set(i + 1)
-    prrsol_txt = mapdl.prrsol("f").to_array()[:,1:] # Omitting node column (0)
+    prrsol_txt = mapdl.prrsol("f").to_array()[:, 1:] # Omitting node column (0)
     results_txt.append(prrsol_txt)
 
 for txt in results_txt:
@@ -905,14 +886,14 @@ for txt in results_txt:
 stiffness_mapdl = np.array(results_txt)
 stiffness_mapdl = stiffness_mapdl.reshape(8, 8)
 stiffnes_mapdl_scaled = np.round(stiffness_mapdl / 1e4)
-stiffnes_mapdl_scaled
+print(stiffnes_mapdl_scaled)
 
 
 ###############################################################################
 # Which is identical to the stiffness matrix obtained from our
 # academic formulation.
 
-stiffness_scaled
+print(stiffness_scaled)
 
 
 ###############################################################################
