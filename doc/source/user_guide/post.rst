@@ -81,18 +81,24 @@ These commands show the next output:
 
     >>> mapdl.post1()
     >>> cmd = mapdl.prnsol('U', 'X')
-    >>> print(cmd.to_list())
-    [['1', '0.0000', '0.0000', '0.0000', '0.0000'],
-    ['2', '0.0000', '0.83333E-002', '0.0000', '0.83333E-002']]
 
-    >>> print(cmd.to_array())
-    array([[1.       , 0.       , 0.       , 0.       , 0.       ],
-        [2.       , 0.       , 0.0083333, 0.       , 0.0083333]])
+    Output as a list.
 
-    >>> print(cmd.to_dataframe())
-       NODE   UX        UY   UZ      USUM
-    0   1.0  0.0  0.000000  0.0  0.000000
-    1   2.0  0.0  0.008333  0.0  0.008333
+    >>> cmd.to_list()
+    [['1', '0.0000'], ['2', '0.0000']]
+
+    Output as array.
+
+    >>> cmd.to_array()
+    array([[1., 0.],
+           [2., 0.]])
+
+    Output as dataframe.
+
+    >>> cmd.to_dataframe()
+    NODE   UX
+    0      1.0
+    1      2.0
 
 Examples
 ~~~~~~~~
