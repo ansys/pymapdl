@@ -1,5 +1,5 @@
 """
-.. _ref_build_element_example:
+.. _build_element_example:
 
 Build a Finite Element
 ----------------------
@@ -836,6 +836,7 @@ stiffness_scaled
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
+mapdl.clear()
 
 
 ###############################################################################
