@@ -100,6 +100,27 @@ allowing for better scripting and interaction with MAPDL.  See the
 :ref:`ref_example_gallery` for an overview of the various advanced
 methods to visualize, script, and interact with MAPDL.
 
+Interactive Command output
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The command output has stored the command and arguments that created it.
+You can inspect this command using:
+
+.. code:: python
+
+    >>> output = mapdl.prep7()
+    >>> print(output.command())
+    prep7
+
+
+or if you want to see only the command you can:
+
+.. code:: python
+
+    print(output.cmd())
+
+.. Certain PyMAPDL commands such as :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>`
+
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

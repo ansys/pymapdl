@@ -1,5 +1,6 @@
 import re
 
+from ansys.mapdl.core._commands import parse
 
 class Nodes:
     def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
@@ -384,9 +385,13 @@ class Nodes:
             First node in distance calculation.  If ND1 = P, graphical picking
             is enabled and all remaining command fields are ignored (valid only
             in the GUI).
-
         nd2
             Second node in distance calculation.
+
+        Returns
+        -------
+        list
+            ``[DIST, X, Y, Z]`` distance between two nodes.
 
         Notes
         -----
@@ -395,18 +400,29 @@ class Nodes:
         Z locations of ND1 are subtracted from the X, Y, and Z locations of ND2
         (respectively) to determine the offsets.  NDIST is valid in any
         coordinate system except toroidal [CSYS,3].
-
         NDIST returns a variable, called "_RETURN," which contains the distance
         value. You can use this value for various purposes, such as the
         calculation of distributed loads. In interactive mode, you can access
         this command by using the Model Query Picker (Utility Menu> List>
         Picked Entities), where you can also access automatic annotation
         functions and display the value on your model.
-
         This command is valid in any processor.
+
+        Examples
+        --------
+        Compute the distance between two nodes.
+
+        >>> node1 = (0, 8, -3)
+        >>> node2 = (13, 5, 7)
+        >>> node_num1 = mapdl.n("", *node1)
+        >>> node_num2 = mapdl.n("", *node2)
+        >>> node_dist = mapdl.ndist(node_num1, node_num2)
+        >>> node_dist
+        [16.673332000533065, 13.0, -3.0, 10.0]
+
         """
-        command = f"NDIST,{nd1},{nd2}"
-        return self.run(command, **kwargs)
+
+        return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
 
     def ngen(
         self,

@@ -10,7 +10,7 @@ on:
       - main
 
 env:
-  PYMAPDL_PORT: 32771  # default won't work on azure
+  PYMAPDL_PORT: 21000  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
@@ -88,6 +88,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # used for documentation deployment
+      - name: Get Bot Application Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.BOT_APPLICATION_ID }}
+          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
+
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -148,11 +156,20 @@ jobs:
           path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
+      - name: Deploy
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          repository-name: pyansys/pymapdl-docs
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          BRANCH: gh-pages
+          FOLDER: doc/build/html
+          CLEAN: true
+
       - name: Build PDF Documentation
         working-directory: doc
         run: |
           # Overwrite MAPDL commands section so it doesn't show up
-          mv source/mapdl_commands/.fake source/mapdl_commands/index.rst
           make latex
           python validate_png.py  # clean-up GIFs mislabeled as PNG
           cd build/latex
@@ -163,16 +180,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: PDF-Documentation
-          path: doc/build/latex/pymapdl.pdf
+          path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: doc/build/html
 
   build_test:
     name: Build and Unit Testing
@@ -211,8 +220,9 @@ jobs:
       - name: Install ansys-mapdl-core
         run: |
           pip install -r requirements_build.txt
+          python setup.py sdist
           python setup.py bdist_wheel
-          pip install dist/ansys*.whl
+          pip install dist/*.whl
           cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
@@ -230,10 +240,15 @@ jobs:
           pip install pytest-azurepipelines
           xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
 
-      - name: Upload wheel
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
         with:
-          name: PyMAPDL-wheel
+          name: PyMAPDL-packages
           path: dist/
           retention-days: 7
 
@@ -260,6 +275,7 @@ jobs:
         run: |
           pip install twine
           twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -269,4 +285,5 @@ jobs:
         with:
           files: |
             ./**/*.whl
+            ./**/*.tar.gz
             ./**/*.pdf

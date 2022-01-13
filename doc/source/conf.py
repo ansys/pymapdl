@@ -1,3 +1,5 @@
+"""Sphinx documentation configuration file."""
+from datetime import datetime
 import os
 import warnings
 
@@ -36,7 +38,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = "ansys.mapdl.core"
-copyright = "(c) 2021 ANSYS, Inc. All rights reserved"
+copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
 # The short X.Y version

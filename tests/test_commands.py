@@ -1,6 +1,18 @@
 import pytest
 import inspect
 
+import numpy as np
+
+from ansys.mapdl.core import examples
+from ansys.mapdl.core.commands import CommandOutput, CommandListingOutput, BoundaryConditionsListingOutput
+from ansys.mapdl.core.commands import CMD_LISTING, CMD_BC_LISTING
+
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+
+except ModuleNotFoundError:
+    HAS_PANDAS = False
 
 LIST_OF_INQUIRE_FUNCTIONS = [
     'ndinqr',
@@ -44,7 +56,51 @@ ARGS_INQ_FUNC = {
         'iprop': 1,
         'idf': 1,
         'kcmplx': 1
-    }
+}
+
+CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
+CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
+
+@pytest.fixture(scope="module")
+def plastic_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm273"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
+
+@pytest.fixture(scope="module")
+def beam_solve(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    mapdl.clear()
+    mapdl.input(examples.verif_files.vmfiles["vm10"])
+
+    mapdl.post1()
+    mapdl.set(1, 2)
+    mapdl.mute = False
+
+def test_cmd_class():
+    output = """This is the output.
+This is the second line.
+These are numbers 1234567890.
+These are symbols !"£$%^^@~+_@~€
+This is for the format: {format1}-{format2}-{format3}"""
+
+    cmd = '/INPUT'
+    cmd_out = CommandOutput(output, cmd=cmd)
+
+    assert isinstance(cmd_out, (str, CommandOutput))
+    assert isinstance(cmd_out[1:], (str, CommandOutput))
+    assert isinstance(cmd_out.splitlines(), list)
+    assert isinstance(cmd_out.splitlines()[0], (str, CommandOutput))
+    assert isinstance(cmd_out.replace('a', 'c'), (str, CommandOutput))
+    assert isinstance(cmd_out.partition('g'), tuple)
+    assert isinstance(cmd_out.split('g'), list)
+
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
 def test_inquire_functions(mapdl, func):
@@ -57,3 +113,55 @@ def test_inquire_functions(mapdl, func):
     else:
         assert isinstance(output, str)
         assert '=' in output
+
+
+@pytest.mark.parametrize('func,args', [
+        ('prnsol', ('U', 'X')),
+        ('presol', ('S', 'X')),
+        ('presol', ('S', 'ALL'))
+        ])
+def test_output_listing(mapdl, plastic_solve, func, args):
+    mapdl.post1()
+    func_ = getattr(mapdl, func)
+    out = func_(*args)
+
+    out_list = out.to_list()
+    out_array = out.to_array()
+
+    assert isinstance(out, CommandListingOutput)
+    assert isinstance(out_list, list) and bool(out_list)
+    assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
+    if HAS_PANDAS:
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+
+@pytest.mark.parametrize('func', ['dlist', 'flist'])
+def test_bclist(mapdl, beam_solve, func):
+    func_ = getattr(mapdl, func)
+    out = func_()
+
+    assert isinstance(out, BoundaryConditionsListingOutput)
+    assert isinstance(out.to_list(), list) and bool(out.to_list())
+
+    with pytest.raises(ValueError):
+        out.to_array()
+
+    if HAS_PANDAS:
+        out_df = out.to_dataframe()
+        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
+
+
+@pytest.mark.parametrize('method', CMD_DOC_STRING_INJECTOR)
+def test_docstring_injector(mapdl, method):
+    """Check if the docstring has been injected."""
+    for name in dir(mapdl):
+        if name[0:4].upper() == method:
+            func = mapdl.__getattribute__(name)
+            docstring = func.__doc__ # If '__func__' not present (AttributeError) very likely it has not been wrapped.
+
+            assert "Returns" in docstring
+            assert "``str.to_list()``" in docstring
+            assert "``str.to_array()``" in docstring
+            assert "``str.to_dataframe()``" in docstring
