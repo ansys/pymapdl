@@ -1,7 +1,7 @@
-from .core import _ParameterParsing, SelectionStatus
+from .core import _QueryExecution, SelectionStatus
 
 
-class _SelectionStatusQueries(_ParameterParsing):
+class _SelectionStatusQueries(_QueryExecution):
     _mapdl = None
 
     def nsel(self, n: int) -> SelectionStatus:
@@ -50,9 +50,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.nsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=NSEL({n})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"NSEL({n})", integer=True))
 
     def ksel(self, k: int) -> SelectionStatus:
         """Returns selection status of a keypoint.
@@ -79,7 +77,6 @@ class _SelectionStatusQueries(_ParameterParsing):
         status.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k1 = mapdl.k(1, 0, 0, 0)
@@ -91,7 +88,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         you query a node that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
 
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.ksel(k1)
         <SelectionStatus.SELECTED: 1>
         >>> mapdl.ksel('NONE')
@@ -100,9 +97,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.ksel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=KSEL({k})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"KSEL({k})", integer=True))
 
     def lsel(self, n: int) -> SelectionStatus:
         """Returns selection status of a line.
@@ -129,7 +124,6 @@ class _SelectionStatusQueries(_ParameterParsing):
         status.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k1 = mapdl.k(1, 0, 0, 0)
@@ -143,7 +137,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         you query a line that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
 
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.lsel(L1)
         <SelectionStatus.SELECTED: 1>
         >>> mapdl.lsel('NONE')
@@ -152,9 +146,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.lsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=LSEL({n})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"LSEL({n})", integer=True))
 
     def asel(self, a: int) -> SelectionStatus:
         """Returns selection status of an area.
@@ -181,7 +173,6 @@ class _SelectionStatusQueries(_ParameterParsing):
         status.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> k1 = mapdl.k(1, 0, 0, 0)
@@ -196,7 +187,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         you query a line that does not exist, it will return a status
         ``SelectionStatus.UNDEFINED``.
 
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.asel(a1)
         <SelectionStatus.SELECTED: 1>
         >>> mapdl.asel('NONE')
@@ -205,9 +196,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.asel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=ASEL({a})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"ASEL({a})", integer=True))
 
     def esel(self, e: int) -> SelectionStatus:
         """Returns selection status of an element.
@@ -234,7 +223,6 @@ class _SelectionStatusQueries(_ParameterParsing):
         status.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SHELL181')
@@ -250,7 +238,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         you query an element that does not exist, it will return a
         status ``SelectionStatus.UNDEFINED``.
 
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.esel(e1)
         <SelectionStatus.SELECTED: 1>
         >>> mapdl.esel('NONE')
@@ -259,9 +247,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.esel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=ESEL({e})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"ESEL({e})", integer=True))
 
     def vsel(self, v: int) -> SelectionStatus:
         """Returns selection status of a volume.
@@ -288,7 +274,6 @@ class _SelectionStatusQueries(_ParameterParsing):
         status.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'SHELL181')
@@ -305,7 +290,7 @@ class _SelectionStatusQueries(_ParameterParsing):
         you query a volume that does not exist, it will return a
         status ``SelectionStatus.UNDEFINED``.
 
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> q.vsel(v1)
         <SelectionStatus.SELECTED: 1>
         >>> mapdl.vsel('NONE')
@@ -314,12 +299,10 @@ class _SelectionStatusQueries(_ParameterParsing):
         >>> q.vsel(0)
         <SelectionStatus.UNDEFINED: 0>
         """
-        response = self._mapdl.run(f'_=VSEL({v})')
-        integer = self._parse_parameter_integer_response(response)
-        return SelectionStatus(integer)
+        return SelectionStatus(self._run_query(f"VSEL({v})", integer=True))
 
 
-class _NextSelectedEntityQueries(_ParameterParsing):
+class _NextSelectedEntityQueries(_QueryExecution):
     _mapdl = None
 
     def ndnext(self, n: int) -> int:
@@ -348,18 +331,15 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         nodes with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> nodes = [mapdl.n(i+1, i, 0, 0) for i in range(10)]
         >>> next_selected_nodes = [q.ndnext(j) for j in nodes]
         >>> next_selected_nodes
         [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
         """
-        response = self._mapdl.run(f'_=NDNEXT({n})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"NDNEXT({n})", integer=True)
 
     def kpnext(self, k: int) -> int:
         """Returns next selected keypoint with a number greater than `k`.
@@ -388,18 +368,15 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
         >>> next_selected_kps = [q.kpnext(j) for j in kps]
         >>> next_selected_kps
         [2, 3, 4, 5, 6, 7, 8, 9, 10, 0]
         """
-        response = self._mapdl.run(f'_=KPNEXT({k})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"KPNEXT({k})", integer=True)
 
     def elnext(self, e: int) -> int:
         """Returns next selected element with a number greater than `e`.
@@ -428,20 +405,17 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         other elements with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'LINK11')
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> nodes = [mapdl.n(i+1, i, 0, 0) for i in range(10)]
         >>> els = [mapdl.e(i, i+1) for i in nodes[:-1]]
         >>> next_selected_els = [q.elnext(j) for j in els]
         >>> next_selected_els
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=ELNEXT({e})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"ELNEXT({e})", integer=True)
 
     def lsnext(self, n: int) -> int:
         """Returns next selected line with a number greater than `n`.
@@ -470,20 +444,17 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         other lines with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
         >>> mapdl.et(1, 'LINK11')
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
         >>> lines = [mapdl.l(i, i+1) for i in kps[:-1]]
         >>> next_selected_lines = [q.lsnext(j) for j in lines]
         >>> next_selected_lines
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=LSNEXT({n})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"LSNEXT({n})", integer=True)
 
     def arnext(self, a: int) -> int:
         """Returns next selected area with a number greater than `a`.
@@ -512,10 +483,9 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         other areas with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> farpoint = mapdl.k(999, 0, 10, 0)
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
         >>> areas = [mapdl.a(i, i+1, farpoint) for i in kps[:-1]]
@@ -523,9 +493,7 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_areas
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=ARNEXT({a})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"ARNEXT({a})", integer=True)
 
     def vlnext(self, v: int) -> int:
         """Returns next selected volume with a number greater than `v`.
@@ -554,10 +522,9 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         other volumes with a higher number, so 0 is returned.
 
         >>> from ansys.mapdl.core import launch_mapdl
-        >>> from ansys.mapdl.core.inline_functions import Query
         >>> mapdl = launch_mapdl()
         >>> mapdl.prep7()
-        >>> q = Query(mapdl)
+        >>> q = mapdl.queries
         >>> point1 = mapdl.k(999, 0, 10, 0)
         >>> point2 = mapdl.k(99, 0, 0, 10)
         >>> kps = [mapdl.k(i+1, i, 0, 0) for i in range(10)]
@@ -566,6 +533,4 @@ class _NextSelectedEntityQueries(_ParameterParsing):
         >>> next_selected_vols
         [2, 3, 4, 5, 6, 7, 8, 9, 0]
         """
-        response = self._mapdl.run(f'_=VLNEXT({v})')
-        integer = self._parse_parameter_integer_response(response)
-        return integer
+        return self._run_query(f"VLNEXT({v})", integer=True)

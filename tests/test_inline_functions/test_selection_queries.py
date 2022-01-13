@@ -3,13 +3,13 @@ import pytest
 
 
 class TestSelectionStatus:
-    @pytest.mark.parametrize('value', [1, -1, 0, 1., -1., 0.])
+    @pytest.mark.parametrize("value", [1, -1, 0, 1.0, -1.0, 0.0])
     def test_happy(self, value):
         select = SelectionStatus(value)
         assert select == value
         assert select is not value
 
-    @pytest.mark.parametrize('value', [1.5, 999, 99., '1'])
+    @pytest.mark.parametrize("value", [1.5, 999, 99.0, "1"])
     def test_unhappy(self, value):
         with pytest.raises(ValueError):
             SelectionStatus(value)
@@ -18,7 +18,7 @@ class TestSelectionStatus:
 class TestNSEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.nsel('S', 'LOC', 'X', 0)
+        q._mapdl.nsel("S", "LOC", "X", 0)
         node = q.node(0, 0, 0)
         select = q.nsel(node)
         assert select == 1
@@ -26,7 +26,7 @@ class TestNSEL:
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
         node = q.node(0, 0, 0)
-        q._mapdl.nsel('NONE')
+        q._mapdl.nsel("NONE")
         select = q.nsel(node)
         assert select == -1
 
@@ -39,7 +39,7 @@ class TestNSEL:
 class TestKSEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.ksel('S', 'LOC', 'X', 0)
+        q._mapdl.ksel("S", "LOC", "X", 0)
         node = q.kp(0, 0, 0)
         select = q.ksel(node)
         assert select == 1
@@ -47,7 +47,7 @@ class TestKSEL:
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
         node = q.kp(0, 0, 0)
-        q._mapdl.ksel('NONE')
+        q._mapdl.ksel("NONE")
         select = q.ksel(node)
         assert select == -1
 
@@ -60,7 +60,7 @@ class TestKSEL:
 class TestLSEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.lsel('all')
+        q._mapdl.lsel("all")
         # there are 6 lines numbered 1-6
         for line in range(1, 7, 1):
             select = q.lsel(line)
@@ -68,7 +68,7 @@ class TestLSEL:
 
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.lsel('NONE')
+        q._mapdl.lsel("NONE")
         for line in range(1, 7, 1):
             select = q.lsel(line)
             assert select == -1
@@ -82,7 +82,7 @@ class TestLSEL:
 class TestASEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.asel('all')
+        q._mapdl.asel("all")
         # there are 4 areas numbered 1-4
         for area in range(1, 5, 1):
             select = q.asel(area)
@@ -90,7 +90,7 @@ class TestASEL:
 
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.asel('NONE')
+        q._mapdl.asel("NONE")
         for area in range(1, 5, 1):
             select = q.asel(area)
             assert select == -1
@@ -104,7 +104,7 @@ class TestASEL:
 class TestESEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.esel('all')
+        q._mapdl.esel("all")
         # there are at least 4 elements numbered 1-4
         for element in range(1, 5, 1):
             select = q.esel(element)
@@ -112,7 +112,7 @@ class TestESEL:
 
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.esel('NONE')
+        q._mapdl.esel("NONE")
         for element in range(1, 5, 1):
             select = q.esel(element)
             assert select == -1
@@ -126,13 +126,13 @@ class TestESEL:
 class TestVSEL:
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.vsel('all')
+        q._mapdl.vsel("all")
         select = q.vsel(1)
         assert select == 1
 
     def test_unselected(self, selection_test_geometry):
         q = selection_test_geometry
-        q._mapdl.vsel('NONE')
+        q._mapdl.vsel("NONE")
         select = q.vsel(1)
         assert select == -1
 
@@ -143,19 +143,29 @@ class TestVSEL:
 
 
 class TestNDNEXT:
-    def test_existing_nodes(self, selection_test_geometry,
-                            common_functions_and_classes):
-        get_details_of_nodes, get_details_of_elements, _, _ = \
-            common_functions_and_classes
+    def test_existing_nodes(
+        self, selection_test_geometry, common_functions_and_classes
+    ):
+        (
+            get_details_of_nodes,
+            get_details_of_elements,
+            _,
+            _,
+        ) = common_functions_and_classes
         q = selection_test_geometry
         nodes = get_details_of_nodes(q._mapdl)
         next_ = q.ndnext(1)
         assert next_ in nodes
 
-    def test_unselected_nodes(self, selection_test_geometry,
-                              common_functions_and_classes):
-        get_details_of_nodes, get_details_of_elements, _, _ = \
-            common_functions_and_classes
+    def test_unselected_nodes(
+        self, selection_test_geometry, common_functions_and_classes
+    ):
+        (
+            get_details_of_nodes,
+            get_details_of_elements,
+            _,
+            _,
+        ) = common_functions_and_classes
         q = selection_test_geometry
         nodes = get_details_of_nodes(q._mapdl)
         last_node = len(nodes)
@@ -169,19 +179,29 @@ class TestNDNEXT:
 
 
 class TestELNEXT:
-    def test_existing_elements(self, selection_test_geometry,
-                               common_functions_and_classes):
-        get_details_of_nodes, get_details_of_elements, _, _ = \
-            common_functions_and_classes
+    def test_existing_elements(
+        self, selection_test_geometry, common_functions_and_classes
+    ):
+        (
+            get_details_of_nodes,
+            get_details_of_elements,
+            _,
+            _,
+        ) = common_functions_and_classes
         q = selection_test_geometry
         elements = get_details_of_elements(q._mapdl)
         next_ = q.elnext(1)
         assert next_ in elements
 
-    def test_unselected_elements(self, selection_test_geometry,
-                                 common_functions_and_classes):
-        get_details_of_nodes, get_details_of_elements, _, _ = \
-            common_functions_and_classes
+    def test_unselected_elements(
+        self, selection_test_geometry, common_functions_and_classes
+    ):
+        (
+            get_details_of_nodes,
+            get_details_of_elements,
+            _,
+            _,
+        ) = common_functions_and_classes
         q = selection_test_geometry
         elements = get_details_of_elements(q._mapdl)
         last_element = len(elements)
@@ -272,5 +292,3 @@ class TestVLNEXT:
     def test_non_existing_volumes(self, query):
         next_ = query.vlnext(999)
         assert next_ == 0
-
-

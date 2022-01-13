@@ -4,7 +4,6 @@ processors in the program.
 
 
 class ProcessorEntry:
-
     def aux2(self, **kwargs):
         """Enters the binary file dumping processor.
 

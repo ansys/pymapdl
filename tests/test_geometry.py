@@ -1,10 +1,12 @@
 """Test geometry commands"""
+import math
+
 import numpy as np
 
 
 def test_keypoint_selection(mapdl, cleared):
     def generate_random_kp():
-        mapdl.k('', *np.random.random(3))
+        mapdl.k("", *np.random.random(3))
 
     # create n random rectangles
     n_item = 10
@@ -19,14 +21,14 @@ def test_keypoint_selection(mapdl, cleared):
     items = mapdl.geometry.keypoint_select(None, return_selected=True)
     assert items is None
 
-    items = mapdl.geometry.keypoint_select('ALL', return_selected=True)
+    items = mapdl.geometry.keypoint_select("ALL", return_selected=True)
     assert np.allclose(items, range(1, n_item + 1))
 
 
 def test_line_selection(mapdl, cleared):
     def generate_random_line():
-        k0 = mapdl.k('', *np.random.random(3))
-        k1 = mapdl.k('', *np.random.random(3))
+        k0 = mapdl.k("", *np.random.random(3))
+        k1 = mapdl.k("", *np.random.random(3))
         mapdl.l(k0, k1)
 
     # create n random rectangles
@@ -42,14 +44,14 @@ def test_line_selection(mapdl, cleared):
     items = mapdl.geometry.line_select(None, return_selected=True)
     assert items is None
 
-    items = mapdl.geometry.line_select('ALL', return_selected=True)
+    items = mapdl.geometry.line_select("ALL", return_selected=True)
     assert np.allclose(items, range(1, n_item + 1))
 
 
 def test_area_selection(mapdl, cleared):
     def generate_random_area():
         start_x, start_y, height, width = np.random.random(4)
-        mapdl.blc4(start_x*10, start_y*10, height, width)
+        mapdl.blc4(start_x * 10, start_y * 10, height, width)
 
     # create n random rectangles
     n_item = 10
@@ -64,14 +66,14 @@ def test_area_selection(mapdl, cleared):
     items = mapdl.geometry.area_select(None, return_selected=True)
     assert items is None
 
-    items = mapdl.geometry.area_select('ALL', return_selected=True)
+    items = mapdl.geometry.area_select("ALL", return_selected=True)
     assert np.allclose(items, range(1, n_item + 1))
 
 
 def test_volu_selection(mapdl, cleared):
     def generate_random_volu():
         start_x, start_y, height, width, depth = np.random.random(5)
-        mapdl.blc4(start_x*10, start_y*10, height, width, depth)
+        mapdl.blc4(start_x * 10, start_y * 10, height, width, depth)
 
     # create n random volumes
     n_item = 20
@@ -86,7 +88,7 @@ def test_volu_selection(mapdl, cleared):
     items = mapdl.geometry.volume_select(None, return_selected=True)
     assert items is None
 
-    items = mapdl.geometry.volume_select('ALL', return_selected=True)
+    items = mapdl.geometry.volume_select("ALL", return_selected=True)
     assert np.allclose(items, range(1, n_item + 1))
 
 
@@ -99,7 +101,7 @@ def test_vdrag(mapdl, cleared):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 0, 0, 1)
     l0 = mapdl.l(k0, k1)
-    assert 'DRAG AREAS' in mapdl.vdrag(aout, nlp1=l0)
+    assert "DRAG AREAS" in mapdl.vdrag(aout, nlp1=l0)
 
 
 def test_vext(mapdl, cleared):
@@ -133,15 +135,15 @@ def test_vrotate(mapdl, cleared):
 
 def test_vsymm(mapdl, cleared):
     vnum = mapdl.blc4(1, 1, 1, 1, depth=1)
-    mapdl.vsymm('X', vnum)
+    mapdl.vsymm("X", vnum)
     assert mapdl.geometry.vnum.size == 2
 
 
 def test_va(mapdl, cleared):
-    k0 = mapdl.k('', 0, 0, 0)
-    k1 = mapdl.k('', 1, 0,  0)
-    k2 = mapdl.k('', 1,  1, 0)
-    k3 = mapdl.k('', 1,  1, 1)
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 1, 0, 0)
+    k2 = mapdl.k("", 1, 1, 0)
+    k3 = mapdl.k("", 1, 1, 1)
 
     # create faces
     a0 = mapdl.a(k0, k1, k2)
@@ -162,11 +164,14 @@ def test_kbetw(cleared, mapdl):
 
 def test_kdist(cleared, mapdl):
     kp0 = (0, 10, -3)
-    kp1 = (-1E10, 10, 4)
+    kp1 = (-1e10, 10, 4)
 
     knum0 = mapdl.k("", *kp0)
     knum1 = mapdl.k("", *kp1)
-    xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
+    kpdist, xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
+    assert kpdist == round(math.sqrt((kp1[0] - kp0[0])**2
+                                     + (kp1[1] - kp0[1])**2
+                                     + (kp1[2] - kp0[2])**2), 7)
     assert xdist == kp1[0] - kp0[0]
     assert ydist == kp1[1] - kp0[1]
     assert zdist == kp1[2] - kp0[2]
@@ -195,8 +200,8 @@ def test_kl(cleared, mapdl):
 
 
 def test_knode(cleared, mapdl):
-    nnum = mapdl.n('', 1, 2, 3)
-    knum1 = mapdl.knode('', nnum)
+    nnum = mapdl.n("", 1, 2, 3)
+    knum1 = mapdl.knode("", nnum)
     assert knum1 == 1
 
 
@@ -211,11 +216,11 @@ def test_l2ang(cleared, mapdl):
 
 
 def test_spline(cleared, mapdl):
-    k0 = mapdl.k('', 0, 0, 0)
-    k1 = mapdl.k('', 0.2, 0.2, 0)
-    k2 = mapdl.k('', 0.4, 0.3, 0)
-    k3 = mapdl.k('', 0.6, 0.5, 0)
-    k4 = mapdl.k('', 0.8, 0.3, 0)
+    k0 = mapdl.k("", 0, 0, 0)
+    k1 = mapdl.k("", 0.2, 0.2, 0)
+    k2 = mapdl.k("", 0.4, 0.3, 0)
+    k3 = mapdl.k("", 0.6, 0.5, 0)
+    k4 = mapdl.k("", 0.8, 0.3, 0)
     assert mapdl.spline(k0, k1, k2, k3, k4) == [1, 2, 3, 4]
 
 
@@ -232,7 +237,7 @@ def test_adrag(cleared, mapdl):
     k1 = mapdl.k("", 0, 0, 1)
     carc = mapdl.circle(k0, 1, k1, arc=90)
     l0 = mapdl.l(k0, k1)
-    assert '2' in mapdl.adrag(carc[0], nlp1=l0)
+    assert "2" in mapdl.adrag(carc[0], nlp1=l0)
 
 
 def test_l2tan(cleared, mapdl):
@@ -267,7 +272,7 @@ def test_larc(cleared, mapdl):
 
 def test_kcenter(cleared, mapdl):
     # compute the center of a circle
-    x, y, z = 0+1j, 1+0j, 0-1j
+    x, y, z = 0 + 1j, 1 + 0j, 0 - 1j
 
     # commented out should we wish to confirm the coordinates
     # w = z-x
@@ -277,7 +282,7 @@ def test_kcenter(cleared, mapdl):
     k0 = mapdl.k("", x.real, x.imag, 0)
     k1 = mapdl.k("", y.real, y.imag, 0)
     k2 = mapdl.k("", z.real, z.imag, 0)
-    k3 = mapdl.kcenter('KP', k0, k1, k2)
+    k3 = mapdl.kcenter("KP", k0, k1, k2)
     assert k3 == k2 + 1
 
 
@@ -456,3 +461,17 @@ def test_sphere(cleared, mapdl):
 
 def test_sph5(cleared, mapdl):
     assert mapdl.sph5(xedge1=1, yedge1=1, xedge2=2, yedge2=2) == 1
+
+def test_ndist(cleared, mapdl):
+    node1 = (0, -5, 13)
+    node2 = (-10, 70, 1)
+
+    node_num1 = mapdl.n("", *node1)
+    node_num2 = mapdl.n("", *node2)
+    node_dist, node_xdist, node_ydist, node_zdist = mapdl.ndist(node_num1, node_num2)
+    assert node_dist == round(math.sqrt((node2[0] - node1[0]) ** 2
+                                        + (node2[1] - node1[1]) ** 2
+                                        + (node2[2] - node1[2]) ** 2), 7)
+    assert node_xdist == node2[0] - node1[0]
+    assert node_ydist == node2[1] - node1[1]
+    assert node_zdist == node2[2] - node1[2]

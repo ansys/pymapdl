@@ -1,5 +1,4 @@
 class LoadCase:
-
     def lcabs(self, lcno="", kabs="", **kwargs):
         """Specifies absolute values for load case operations.
 
@@ -195,7 +194,7 @@ class LoadCase:
         oper2
             Valid operations are:
 
-            MULT - Multiplication: LCASE1*LCASE2
+            MULT - Multiplication: ``LCASE1*LCASE2``
 
             CPXMAX - This option does a phase angle sweep to calculate the maximum of derived
                      stresses and equivalent strain for a complex solution

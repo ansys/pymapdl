@@ -3,64 +3,53 @@
 This has been copied from test_mapdl.py
 
 """
-import time
 import os
+import time
 
-import pytest
 import numpy as np
+import pytest
 import pyvista
-from pyvista.plotting.renderer import CameraPosition
-from pyvista.plotting import system_supports_plotting
-
-from ansys.mapdl.reader import examples
-
-from ansys.mapdl.core.misc import random_string
-from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.reader import examples
+from pyvista.plotting import system_supports_plotting
+from pyvista.plotting.renderer import CameraPosition
 
-skip_no_xserver = pytest.mark.skipif(not system_supports_plotting(),
-                                     reason="Requires active X Server")
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 # skip entire module unless --console is enabled
 pytestmark = pytest.mark.console
 
 
-@pytest.fixture(scope='function')
-def cleared(mapdl_console):
-    mapdl_console.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    mapdl_console.clear('NOSTART')
-    mapdl_console.prep7()
-    yield
-
-
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def make_block(mapdl_console, cleared):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
     mapdl_console.et(1, 186)
     mapdl_console.esize(0.25)
-    mapdl_console.vmesh('ALL')
+    mapdl_console.vmesh("ALL")
 
 
 def test_jobname(mapdl_console, cleared):
-    jobname = 'abcdefg'
+    jobname = "abcdefg"
     assert mapdl_console.jobname != jobname
     mapdl_console.finish()
     mapdl_console.filname(jobname)
     assert mapdl_console.jobname == jobname
 
-    other_jobname = 'gfedcba'
+    other_jobname = "gfedcba"
     mapdl_console.jobname = other_jobname
     assert mapdl_console.jobname == other_jobname
 
 
 def test_empty(mapdl_console):
     with pytest.raises(ValueError):
-        mapdl_console.run('')
+        mapdl_console.run("")
 
 
 def test_str(mapdl_console):
-    assert 'ANSYS Mechanical' in str(mapdl_console)
+    assert "ANSYS Mechanical" in str(mapdl_console)
 
 
 def test_version(mapdl_console):
@@ -68,7 +57,7 @@ def test_version(mapdl_console):
 
 
 def test_comment(cleared, mapdl_console):
-    comment = 'Testing...'
+    comment = "Testing..."
     resp = mapdl_console.com(comment)
     assert comment in resp
 
@@ -86,7 +75,7 @@ def test_comment(cleared, mapdl_console):
 
 def test_basic_command(cleared, mapdl_console):
     resp = mapdl_console.block(0, 1, 0, 1, 0, 1)
-    assert 'CREATE A HEXAHEDRAL VOLUME' in resp
+    assert "CREATE A HEXAHEDRAL VOLUME" in resp
 
 
 def test_allow_ignore(mapdl_console):
@@ -100,7 +89,7 @@ def test_allow_ignore(mapdl_console):
     mapdl_console.allow_ignore = True
     assert mapdl_console.allow_ignore is True
     mapdl_console.k()
-    assert mapdl_console.geometry.n_keypoint is 0
+    assert mapdl_console.geometry.n_keypoint == 0
 
 
 def test_chaining(mapdl_console, cleared):
@@ -209,8 +198,8 @@ def test_invalid_area(mapdl_console):
 
 
 # def test_invalid_input(mapdl_console):
-    # with pytest.raises(FileNotFoundError):
-        # mapdl_console.input('thisisnotafile')
+# with pytest.raises(FileNotFoundError):
+# mapdl_console.input('thisisnotafile')
 
 
 @skip_no_xserver
@@ -223,12 +212,12 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     mapdl_console.k("", 1, 1, 0)
     mapdl_console.k("", 0, 1, 0)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_console.kplot(savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
 
-    mapdl_console.kplot(knum=True, vtk=False)    # make sure legacy still works
+    mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
 
 
 @skip_no_xserver
@@ -243,8 +232,7 @@ def test_aplot(cleared, mapdl_console):
     l3 = mapdl_console.l(k3, k0)
     mapdl_console.al(l0, l1, l2, l3)
     mapdl_console.aplot(show_area_numbering=True)
-    mapdl_console.aplot(color_areas=True, show_lines=True,
-                show_line_numbering=True)
+    mapdl_console.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
 
     mapdl_console.aplot(quality=100)
     mapdl_console.aplot(quality=-1)
@@ -254,7 +242,7 @@ def test_aplot(cleared, mapdl_console):
 
 
 @skip_no_xserver
-@pytest.mark.parametrize('vtk', [True, False])
+@pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl_console, vtk):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
     mapdl_console.vplot(vtk=vtk, color_areas=True)
@@ -262,10 +250,7 @@ def test_vplot(cleared, mapdl_console, vtk):
 
 def test_keypoints(cleared, mapdl_console):
     assert mapdl_console.geometry.n_keypoint == 0
-    kps = [[0, 0, 0],
-           [1, 0, 0],
-           [1, 1, 0],
-           [0, 1, 0]]
+    kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
 
     i = 1
     knum = []
@@ -311,7 +296,7 @@ def test_lplot(cleared, mapdl_console, tmpdir):
     mapdl_console.l(k2, k3)
     mapdl_console.l(k3, k0)
 
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_console.lplot(show_keypoint_numbering=True, savefig=filename)
     assert isinstance(cpos, CameraPosition)
     assert os.path.isfile(filename)
@@ -320,17 +305,17 @@ def test_lplot(cleared, mapdl_console, tmpdir):
 
 
 def test_logging(mapdl_console, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.inp'))
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
     if mapdl_console._log is None:
-        mapdl_console.open_apdl_log(filename, mode='w')
+        mapdl_console.open_apdl_log(filename, mode="w")
     mapdl_console._close_apdl_log()
 
     # test append mode
-    mapdl_console.open_apdl_log(filename, mode='a')
+    mapdl_console.open_apdl_log(filename, mode="a")
 
     # don't allow to double log
     with pytest.raises(RuntimeError):
-        mapdl_console.open_apdl_log(filename, mode='w')
+        mapdl_console.open_apdl_log(filename, mode="w")
 
     mapdl_console.prep7()
     mapdl_console.k(1, 0, 0, 0)
@@ -341,8 +326,8 @@ def test_logging(mapdl_console, tmpdir):
     mapdl_console._apdl_log.flush()
 
     out = open(mapdl_console._apdl_log.name).read().strip().split()[-5:]
-    assert 'PREP7' in out[0]
-    assert 'K,4,0,1,0' in out[-1]
+    assert "PREP7" in out[0]
+    assert "K,4,0,1,0" in out[-1]
 
 
 def test_nodes(tmpdir, cleared, mapdl_console):
@@ -350,7 +335,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     mapdl_console.n(11, 10, 1, 1)
     mapdl_console.fill(1, 11, 9)
 
-    basename = 'tmp.nodes'
+    basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
     if mapdl_console._local:
         mapdl_console.nwrite(filename)
@@ -374,7 +359,7 @@ def test_enum(mapdl_console, make_block):
     assert np.allclose(mapdl_console.mesh.enum, range(1, mapdl_console.mesh.n_elem + 1))
 
 
-@pytest.mark.parametrize('knum', [True, False])
+@pytest.mark.parametrize("knum", [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl_console, knum):
     with pytest.raises(RuntimeError):
@@ -383,7 +368,7 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=True, knum=knum, background='w', color='k')
+    mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
 
 
 @skip_no_xserver
@@ -391,30 +376,34 @@ def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=False, background='w', color='k')
+    mapdl_console.nplot(vtk=False, background="w", color="k")
 
 
 def test_elements(cleared, mapdl_console):
     mapdl_console.et(1, 185)
 
     # two basic cells
-    cell1 = [[0, 0, 0],
-             [1, 0, 0],
-             [1, 1, 0],
-             [0, 1, 0],
-             [0, 0, 1],
-             [1, 0, 1],
-             [1, 1, 1],
-             [0, 1, 1]]
+    cell1 = [
+        [0, 0, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+        [0, 1, 0],
+        [0, 0, 1],
+        [1, 0, 1],
+        [1, 1, 1],
+        [0, 1, 1],
+    ]
 
-    cell2 = [[0, 0, 2],
-             [1, 0, 2],
-             [1, 1, 2],
-             [0, 1, 2],
-             [0, 0, 3],
-             [1, 0, 3],
-             [1, 1, 3],
-             [0, 1, 3]]
+    cell2 = [
+        [0, 0, 2],
+        [1, 0, 2],
+        [1, 1, 2],
+        [0, 1, 2],
+        [0, 0, 3],
+        [1, 0, 3],
+        [1, 1, 3],
+        [0, 1, 3],
+    ]
 
     with mapdl_console.chain_commands:
         for cell in [cell1, cell2]:
@@ -423,9 +412,13 @@ def test_elements(cleared, mapdl_console):
 
     mapdl_console.e(*list(range(1, 9)))
     mapdl_console.e(*list(range(9, 17)))
-    expected = np.array([[1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
-                         [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16]])
-    if 'Grpc' in str(type(mapdl_console)):
+    expected = np.array(
+        [
+            [1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+            [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16],
+        ]
+    )
+    if "Grpc" in str(type(mapdl_console)):
         # no element number in elements
         expected[:, 8] = 0
 
@@ -434,14 +427,19 @@ def test_elements(cleared, mapdl_console):
 
 # this test is prone to fail on console
 @pytest.mark.xfail
-@pytest.mark.parametrize("parm", ('my_string',
-                                  1,
-                                  10.0,
-                                  [1, 2, 3],
-                                  [[1, 2, 3], [1, 2, 3]],
-                                  np.random.random((10000)),  # fails on gRPC at 100000
-                                  np.random.random((10, 3)),
-                                  np.random.random((10, 3, 3))))
+@pytest.mark.parametrize(
+    "parm",
+    (
+        "my_string",
+        1,
+        10.0,
+        [1, 2, 3],
+        [[1, 2, 3], [1, 2, 3]],
+        np.random.random((10000)),  # fails on gRPC at 100000
+        np.random.random((10, 3)),
+        np.random.random((10, 3, 3)),
+    ),
+)
 def test_set_get_parameters(mapdl_console, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl_console.parameters[parm_name] = parm
@@ -452,13 +450,13 @@ def test_set_get_parameters(mapdl_console, parm):
 
 
 def test_set_parameters_arr_to_scalar(mapdl_console, cleared):
-    mapdl_console.parameters['PARM'] = np.arange(10)
-    mapdl_console.parameters['PARM'] = 2
+    mapdl_console.parameters["PARM"] = np.arange(10)
+    mapdl_console.parameters["PARM"] = 2
 
 
 def test_set_parameters_string_spaces(mapdl_console):
     with pytest.raises(ValueError):
-        mapdl_console.parameters['PARM'] = "string with spaces"
+        mapdl_console.parameters["PARM"] = "string with spaces"
 
 
 def test_builtin_parameters(mapdl_console, cleared):
@@ -470,8 +468,8 @@ def test_builtin_parameters(mapdl_console, cleared):
 
     assert isinstance(mapdl_console.parameters.revision, float)
 
-    if os.name == 'posix':
-        assert 'LIN' in mapdl_console.parameters.platform
+    if os.name == "posix":
+        assert "LIN" in mapdl_console.parameters.platform
 
     mapdl_console.csys(1)
     assert mapdl_console.parameters.csys == 1
@@ -496,35 +494,40 @@ def test_eplot_fail(mapdl_console):
 def test_eplot(mapdl_console, make_block):
     init_elem = mapdl_console.mesh.n_elem
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl_console.eplot(show_node_numbering=True, background='w', color='b')
+    mapdl_console.eplot(show_node_numbering=True, background="w", color="b")
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl_console.mesh.n_elem == init_elem
 
 
 @skip_no_xserver
 def test_eplot_screenshot(mapdl_console, make_block, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join('tmp.png'))
-    mapdl_console.eplot(background='w', show_edges=True, smooth_shading=True,
-                window_size=[1920, 1080], savefig=filename)
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
+    mapdl_console.eplot(
+        background="w",
+        show_edges=True,
+        smooth_shading=True,
+        window_size=[1920, 1080],
+        savefig=filename,
+    )
     assert os.path.isfile(filename)
 
 
 def test_cyclic_solve(mapdl_console, cleared):
     # build the cyclic model
     mapdl_console.prep7()
-    mapdl_console.shpp('off')
-    mapdl_console.cdread('db', examples.sector_archive_file)
+    mapdl_console.shpp("off")
+    mapdl_console.cdread("db", examples.sector_archive_file)
     mapdl_console.prep7()
     mapdl_console.cyclic()
 
     # set material properties
-    mapdl_console.mp('NUXY', 1, 0.31)
-    mapdl_console.mp('DENS', 1, 4.1408E-04)
-    mapdl_console.mp('EX', 1, 16900000)
-    mapdl_console.emodif('ALL', 'MAT', 1)
+    mapdl_console.mp("NUXY", 1, 0.31)
+    mapdl_console.mp("DENS", 1, 4.1408e-04)
+    mapdl_console.mp("EX", 1, 16900000)
+    mapdl_console.emodif("ALL", "MAT", 1)
 
     # setup and solve
-    mapdl_console.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl_console.modal_analysis("LANB", 1, 1, 100000, elcalc=True)
     mapdl_console.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
@@ -534,7 +537,7 @@ def test_cyclic_solve(mapdl_console, cleared):
 
 def test_partial_mesh_nnum(mapdl_console, make_block):
     allsel_nnum_old = mapdl_console.mesh.nnum
-    mapdl_console.nsel('S', 'NODE', vmin=100, vmax=200)
+    mapdl_console.nsel("S", "NODE", vmin=100, vmax=200)
     allsel_nnum_now = mapdl_console.mesh.nnum_all
     assert np.allclose(allsel_nnum_old, allsel_nnum_now)
 
@@ -543,28 +546,28 @@ def test_partial_mesh_nnum(mapdl_console, make_block):
 
 
 def test_partial_mesh_nnum(mapdl_console, make_block):
-    mapdl_console.nsel('S', 'NODE', vmin=1, vmax=10)
-    mapdl_console.esel('S', 'ELEM', vmin=10, vmax=20)
+    mapdl_console.nsel("S", "NODE", vmin=1, vmax=10)
+    mapdl_console.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl_console.mesh._grid.n_cells == 11
 
 
 def test_cyclic_solve(mapdl_console, cleared):
     # build the cyclic model
     mapdl_console.prep7()
-    mapdl_console.shpp('off')
-    mapdl_console.cdread('db', examples.sector_archive_file)
+    mapdl_console.shpp("off")
+    mapdl_console.cdread("db", examples.sector_archive_file)
     mapdl_console.prep7()
     time.sleep(1.0)
     mapdl_console.cyclic()
 
     # set material properties
-    mapdl_console.mp('NUXY', 1, 0.31)
-    mapdl_console.mp('DENS', 1, 4.1408E-04)
-    mapdl_console.mp('EX', 1, 16900000)
-    mapdl_console.emodif('ALL', 'MAT', 1)
+    mapdl_console.mp("NUXY", 1, 0.31)
+    mapdl_console.mp("DENS", 1, 4.1408e-04)
+    mapdl_console.mp("EX", 1, 16900000)
+    mapdl_console.emodif("ALL", "MAT", 1)
 
     # setup and solve
-    mapdl_console.modal_analysis('LANB', 1, 1, 100000, elcalc=True)
+    mapdl_console.modal_analysis("LANB", 1, 1, 100000, elcalc=True)
     mapdl_console.finish()
 
     # expect 16 result sets (1 mode, 16 blades, 16 modes in mode family)
@@ -572,11 +575,15 @@ def test_cyclic_solve(mapdl_console, cleared):
 
 
 def test_load_table(mapdl_console):
-    my_conv = np.array([[0, 0.001],
-                        [120, 0.001],
-                        [130, 0.005],
-                        [700, 0.005],
-                        [710, 0.002],
-                        [1000, 0.002]])
-    mapdl_console.load_table('my_conv', my_conv, 'TIME')
-    assert np.allclose(mapdl_console.parameters['my_conv'], my_conv[:, -1])
+    my_conv = np.array(
+        [
+            [0, 0.001],
+            [120, 0.001],
+            [130, 0.005],
+            [700, 0.005],
+            [710, 0.002],
+            [1000, 0.002],
+        ]
+    )
+    mapdl_console.load_table("my_conv", my_conv, "TIME")
+    assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])

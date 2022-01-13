@@ -1,11 +1,10 @@
 import warnings
-
 from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class Style:
-
     def cplane(self, key="", **kwargs):
         """Specifies the cutting plane for section and capped displays.
 
@@ -134,8 +133,9 @@ class Style:
         command = f"/EDGE,{wn},{key},{angle}"
         return self.run(command, **kwargs)
 
-    def eshape(self, scale: Union[str, int] = "", key: MapdlInt = "",
-               **kwargs) -> Optional[str]:
+    def eshape(
+        self, scale: Union[str, int] = "", key: MapdlInt = "", **kwargs
+    ) -> Optional[str]:
         """Displays elements with shapes determined from the real constants or section definition.
 
         APDL Command: /ESHAPE
@@ -268,9 +268,11 @@ class Style:
         This command is valid in any processor.
 
         """
-        warnings.warn('pymapdl does not support /ESHAPE when plotting in '
-                      'Python using ``mapdl.eplot()``.  '
-                      'Use ``mapdl.eplot(vtk=False)`` ')
+        warnings.warn(
+            "pymapdl does not support /ESHAPE when plotting in "
+            "Python using ``mapdl.eplot()``.  "
+            "Use ``mapdl.eplot(vtk=False)`` "
+        )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
 
@@ -408,8 +410,7 @@ class Style:
         command = f"GMFACE,{lab},{n}"
         return self.run(command, **kwargs)
 
-    def light(self, wn="", num="", int_="", xv="", yv="", zv="", refl="",
-              **kwargs):
+    def light(self, wn="", num="", int_="", xv="", yv="", zv="", refl="", **kwargs):
         """Specifies the light direction for the display window.
 
         APDL Command: /LIGHT

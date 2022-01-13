@@ -1,4 +1,5 @@
 """Module to control interaction with MAPDL through Python"""
+
 import time
 import glob
 import re
@@ -9,26 +10,33 @@ from shutil import rmtree, copyfile
 import weakref
 import warnings
 import pathlib
+from warnings import warn
+from functools import wraps
 
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.misc import (random_string, supress_logging,
-                                   run_as_prep7, last_created)
+from ansys.mapdl.core.misc import (
+    random_string,
+    supress_logging,
+    run_as_prep7,
+    last_created,
+)
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core.commands import Commands
+from ansys.mapdl.core.commands import Commands, CommandListingOutput, BoundaryConditionsListingOutput, CMD_LISTING, CMD_BC_LISTING, inject_docs
 from ansys.mapdl.core.inline_functions import Query
-
+from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.reader.rst import Result
 
 _PERMITTED_ERRORS = [
-    r'(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.',
-    r'(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.',
+    r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
+    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
 ]
 
 # test for png file
-PNG_TEST = re.compile('WRITTEN TO FILE(.*).png')
+PNG_TEST = re.compile("WRITTEN TO FILE(.*).png")
 
 VWRITE_REPLACEMENT = """
 Cannot use *VWRITE directly as a command in MAPDL
@@ -41,15 +49,42 @@ with self.non_interactive:
     self.run('(F20.12)')
 """
 
-INVAL_COMMANDS = {'*VWR': VWRITE_REPLACEMENT,
-                  '*CFO': 'Run CFOPEN as ``non_interactive``',
-                  '*CRE': 'Create a function within python or run as non_interactive',
-                  '*END': 'Create a function within python or run as non_interactive',
-                  '/EOF': 'Unsupported command.  Use ``exit`` to stop the server.',
-                  '*ASK': 'Unsupported command.  Use python ``input`` instead.',
-                  '*IF': 'Use a python ``if`` or run as non_interactive'}
+## Invalid commands in interactive mode.
+INVAL_COMMANDS = {
+    "*VWR": VWRITE_REPLACEMENT,
+    "*CFO": "Run CFOPEN as ``non_interactive``",
+    "*CRE": "Create a function within python or run as non_interactive",
+    "*END": "Create a function within python or run as non_interactive",
+    "/EOF": "Unsupported command.  Use ``exit`` to stop the server.",
+    "*ASK": "Unsupported command.  Use python ``input`` instead.",
+    "*IF": "Use a python ``if`` or run as non_interactive",
+    "CMAT": "Run `CMAT` as ``non_interactive``.",
+    "*REP": "Run '*REPEAT' in ``non_interactive``."
+}
 
-PLOT_COMMANDS = ['NPLO', 'EPLO', 'KPLO', 'LPLO', 'APLO', 'VPLO', 'PLNS', 'PLES']
+## Soft-invalid commands
+# Invalid commands in interactive mode but their execution is just ignored.
+# The correspondent command is replaced by a comment using the command '\COM'
+# and a warning is recorded in the logger
+#
+# This commands can still be executed in ``non_interactive`` mode or using
+# ``Mapdl._run`` method.
+#
+# Format of the message:
+# f"{CMD} is ignored: {INVAL_COMMANDS_SILENT[CMD]}.
+#
+# NOTE
+# Obtain the command from the string supplied using
+#
+#    string.split(',')[0].upper()
+#
+# This way to get the command is different from the one used in ``INVAL_COMMANDS``.
+#
+INVAL_COMMANDS_SILENT = {
+    "/NOPR": "Suppressing console output is not recommended, use ``Mute`` parameter instead. This command is disabled in interactive mode."
+}
+
+PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 
@@ -66,52 +101,30 @@ def parse_to_short_cmd(command):
     'VPLO'
     """
     try:
-        short_cmd = command.split(',')[0]
+        short_cmd = command.split(",")[0]
         return short_cmd[:4].upper()
     except Exception:  # pragma: no cover
         return
 
 
-def setup_logger(loglevel='INFO'):
+def setup_logger(loglevel='INFO', log_file=True, mapdl_instance=None):
     """Setup logger"""
 
     # return existing log if this function has already been called
-    if hasattr(setup_logger, 'log'):
-        setup_logger.log.setLevel(loglevel)
-        ch = setup_logger.log.handlers[0]
-        ch.setLevel(loglevel)
+    if hasattr(setup_logger, "log"):
         return setup_logger.log
+    else:
+        setup_logger.log = logger.add_instance_logger('MAPDL', mapdl_instance)
 
-    # create logger
-    log = logging.getLogger(__name__)
-    log.setLevel(loglevel)
-
-    # create console handler and set level to debug
-    ch = logging.StreamHandler()
-    ch.setLevel(loglevel)
-
-    # create formatter
-    formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-    formatter = logging.Formatter(formatstr)
-
-    # add formatter to ch
-    ch.setFormatter(formatter)
-
-    # add ch to logger
-    log.addHandler(ch)
-
-    # make persistent
-    setup_logger.log = log
-
-    return log
+    return setup_logger.log
 
 
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
-    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=False,
-                 local=True, **start_parm):
-        """Initialize connection with MAPDL. """
+    def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
+                log_file=False, local=True, **start_parm):
+        """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -124,14 +137,21 @@ class _MapdlCore(Commands):
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
-        self._jobname = start_parm.get('jobname', 'file')
+        self._jobname = start_parm.get("jobname", "file")
         self._cleanup = True
         self._vget_arr_counter = 0
         self._start_parm = start_parm
-        self._path = start_parm.get('run_location', None)
+        self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
 
-        self._log = setup_logger(loglevel.upper())
+        # Setting up loggers
+        self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
+        # adding a file handler to the logger
+        if log_file:
+            if not isinstance(log_file, str):
+                log_file = 'instance.log'
+            self._log.log_to_file(filename=log_file, level=loglevel)
+
         self._log.debug('Logging set to %s', loglevel)
 
         from ansys.mapdl.core.parameters import Parameters
@@ -141,12 +161,46 @@ class _MapdlCore(Commands):
         self._solution = Solution(self)
 
         if log_apdl:
-            filename = os.path.join(self.directory, 'log.inp')
-            self.open_apdl_log(filename, mode=log_apdl)
+            self.open_apdl_log(log_apdl, mode='w')
 
         self._post = PostProcessing(self)
 
-    def query(self):
+        self._wrap_listing_functions()
+
+    def _wrap_listing_functions(self):
+        # Wrapping LISTING FUNCTIONS.
+        def wrap_listing_function(func):
+            # Injecting doc string modification
+            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return CommandListingOutput(func(*args, **kwargs))
+            return inner_wrapper
+
+        def wrap_BC_listing_function(func):
+            # Injecting doc string modification
+            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return BoundaryConditionsListingOutput(func(*args, **kwargs))
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_LISTING:
+                func = self.__getattribute__(name)
+                setattr(self, name, wrap_listing_function(func))
+
+            if name[0:4].upper() in CMD_BC_LISTING:
+                func = self.__getattribute__(name)
+                setattr(self, name, wrap_BC_listing_function(func))
+
+    @property
+    def _name(self):  # pragma: no cover
+        """Implemented by child class"""
+        raise NotImplementedError("Implemented by child class")
+
+    @property
+    def queries(self):
         """Get instance of Query class containing inline functions of APDL.
 
         Most of the results of these methods are shortcuts for specific
@@ -208,7 +262,7 @@ class _MapdlCore(Commands):
         >>> mapdl.block(0, 10, 0, 20, 0, 30)
         >>> mapdl.esize(2)
         >>> mapdl.vmesh('ALL')
-        >>> q = mapdl.query()
+        >>> q = mapdl.queries
         >>> q.nx(1), q.ny(1), q.nz(1)
         0.0 20.0 0.0
 
@@ -253,13 +307,13 @@ class _MapdlCore(Commands):
         >>> mapdl.solution.converged
         """
         if self._exited:
-            raise RuntimeError('MAPDL exited.')
+            raise RuntimeError("MAPDL exited.")
         return self._solution
 
     @property
     def _distributed(self):
-        """Is a distributed analysis"""
-        return '-smp' not in self._start_parm.get('additional_switches', '')
+        """MAPDL is running in distributed mode."""
+        return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
     def post_processing(self):
@@ -276,8 +330,9 @@ class _MapdlCore(Commands):
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
         if self._exited:
-            raise RuntimeError('MAPDL exited.\n\nCan only postprocess a live '
-                               'MAPDL instance.')
+            raise RuntimeError(
+                "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
+            )
         return self._post
 
     @property
@@ -296,6 +351,11 @@ class _MapdlCore(Commands):
 
         View the response from MAPDL with :attr:`Mapdl.last_response`.
 
+        Notes
+        -----
+        Distributed Ansys cannot properly handle condensed data input
+        and chained commands are not permitted in distributed ansys.
+
         Examples
         --------
         >>> with mapdl.chain_commands:
@@ -303,6 +363,10 @@ class _MapdlCore(Commands):
             mapdl.k(1, 1, 2, 3)
 
         """
+        if self._distributed:
+            raise RuntimeError(
+                "chained commands are not permitted in distributed ansys."
+            )
         return self._chain_commands(self)
 
     def _chain_stored(self):
@@ -316,7 +380,7 @@ class _MapdlCore(Commands):
         for command in self._stored_commands:
             len_command = len(command) + 1  # include sep var
             if len_command + c > MAX_COMMAND_LENGTH:
-                chained_commands.append('$'.join(chunk))
+                chained_commands.append("$".join(chunk))
                 chunk = [command]
                 c = 0
             else:
@@ -324,11 +388,11 @@ class _MapdlCore(Commands):
                 c += len_command
 
         # join the last
-        chained_commands.append('$'.join(chunk))
+        chained_commands.append("$".join(chunk))
         self._stored_commands = []
 
         responses = [self._run(command) for command in chained_commands]
-        self._response = '\n'.join(responses)
+        self._response = "\n".join(responses)
 
     @property
     def parameters(self):
@@ -375,15 +439,16 @@ class _MapdlCore(Commands):
 
     class _non_interactive:
         """Allows user to enter commands that need to run non-interactively."""
+
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug('Entering non-interactive mode')
+            self._parent()._log.debug("Entering non-interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug('Entering non-interactive mode')
+            self._parent()._log.debug("Entering non-interactive mode")
             self._parent()._flush_stored()
 
     class _chain_commands:
@@ -393,11 +458,11 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug('Entering chained command mode')
+            self._parent()._log.debug("Entering chained command mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug('Entering chained command mode')
+            self._parent()._log.debug("Entering chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
@@ -417,12 +482,6 @@ class _MapdlCore(Commands):
 
         APDL Command: ``/CLEAR``
 
-        Examples
-        --------
-        >>> mapdl.clear()
-
-        Notes
-        -----
         Resets the ANSYS database to the conditions at the beginning
         of the problem.  Sets the import and Boolean options back to
         the ANSYS default. All items are deleted from the database and
@@ -439,34 +498,38 @@ class _MapdlCore(Commands):
         its original value, or to the most recent value specified on
         ``/FILNAME`` with KEY = 1.
 
-        this command is valid only at the Begin level.
+        This command is valid only at the Begin level.
+
+        Examples
+        --------
+        >>> mapdl.clear()
 
         """
-        self.run('/CLE,NOSTART', mute=True)
+        self.run("/CLE,NOSTART", mute=True)
 
     @supress_logging
     def __str__(self):
         try:
             if self._exited:
-                return 'MAPDL exited'
-            stats = self.slashstatus('PROD')
+                return "MAPDL exited"
+            stats = self.slashstatus("PROD")
         except Exception:  # pragma: no cover
-            return 'MAPDL exited'
+            return "MAPDL exited"
 
-        st = stats.find('*** Products ***')
-        en = stats.find('*** PrePro')
-        product = '\n'.join(stats[st:en].splitlines()[1:]).strip()
+        st = stats.find("*** Products ***")
+        en = stats.find("*** PrePro")
+        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
 
         # get product version
-        stats = self.slashstatus('TITLE')
-        st = stats.find('RELEASE')
-        en = stats.find('INITIAL', st)
-        mapdl_version = stats[st:en].split('CUSTOMER')[0].strip()
+        stats = self.slashstatus("TITLE")
+        st = stats.find("RELEASE")
+        en = stats.find("INITIAL", st)
+        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
 
-        info = [f'Product:         {product}']
-        info.append(f'MAPDL Version:   {mapdl_version}')
-        info.append(f'PyMAPDL Version: {pymapdl.__version__}\n')
-        return '\n'.join(info)
+        info = [f"Product:         {product}"]
+        info.append(f"MAPDL Version:   {mapdl_version}")
+        info.append(f"PyMAPDL Version: {pymapdl.__version__}\n")
+        return "\n".join(info)
 
     @property
     def geometry(self):
@@ -514,6 +577,7 @@ class _MapdlCore(Commands):
     def _geometry(self):  # pragma: no cover
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
+
         return Geometry(self)
 
     @property
@@ -572,38 +636,37 @@ class _MapdlCore(Commands):
 
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.directory, '_tmp.cdb')
-            nblock_filename = os.path.join(self.directory, 'nblock.cdb')
+            arch_filename = os.path.join(self.directory, "_tmp.cdb")
+            nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            if hasattr(self, 'mute'):
+            if hasattr(self, "mute"):
                 old_mute = self.mute
                 self.mute = True
 
-            with self.chain_commands:
-                self.cm('__NODE__', 'NODE')
-                self.nsle('S')
-                self.cdwrite('db', arch_filename)
-                self.cmsel('S', '__NODE__', 'NODE')
+            self.cm("__NODE__", "NODE", mute=True)
+            self.nsle("S", mute=True)
+            self.cdwrite("db", arch_filename, mute=True)
+            self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-                self.cm('__ELEM__', 'ELEM')
-                self.esel('NONE')
-                self.cdwrite('db', nblock_filename)
-                self.cmsel('S', '__ELEM__', 'ELEM')
+            self.cm("__ELEM__", "ELEM", mute=True)
+            self.esel("NONE", mute=True)
+            self.cdwrite("db", nblock_filename, mute=True)
+            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
-            if hasattr(self, 'mute'):
+            if hasattr(self, "mute"):
                 self.mute = old_mute
 
-            self._archive_cache = Archive(arch_filename, parse_vtk=False,
-                                          name='Mesh')
+            self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
             self._archive_cache._grid = grid
 
             # rare bug
             if grid is not None:
                 if grid.n_points != self._archive_cache.n_node:
-                    self._archive_cache = Archive(arch_filename, parse_vtk=True,
-                                                  name='Mesh')
+                    self._archive_cache = Archive(
+                        arch_filename, parse_vtk=True, name="Mesh"
+                    )
 
             # overwrite nodes in archive
             nblock = Archive(nblock_filename, parse_vtk=False)
@@ -650,27 +713,41 @@ class _MapdlCore(Commands):
         """Set allow ignore"""
         self._allow_ignore = bool(value)
 
-    def open_apdl_log(self, filename, mode='w'):
-        """Start writing all APDL commands to an ANSYS input file.
+    def open_apdl_log(self, filename, mode="w"):
+        """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
         ----------
         filename : str
             Filename of the log.
+        mode : str, optional
+            Python file modes (for example, ``'a'``, ``'w'``).  Should
+            be either write or append.
+
+        Examples
+        --------
+        Begin writing APDL commands to ``"log.inp"``.
+
+        >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
-            raise RuntimeError('APDL command logging already enabled')
+            raise RuntimeError("APDL command logging already enabled")
+        self._log.debug("Opening ANSYS log file at %s", filename)
 
-        self._log.debug('Opening ANSYS log file at %s', filename)
+        if mode not in ["w", "a", "x"]:
+            raise ValueError("File mode should either be write, append, or exclusive"
+                             " creation ('w', 'a', or 'x').")
+
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
-        if mode != 'w':
-            self._apdl_log.write('! APDL script generated using ansys.mapdl.core %s\n' % pymapdl.__version__)
+        self._apdl_log.write(
+            "! APDL script generated using ansys.mapdl.core {pymapdl.__version__}\n"
+        )
 
     @supress_logging
     @run_as_prep7
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.directory, '_tmp.iges')
+        filename = os.path.join(self.directory, "_tmp.iges")
         self.igesout(filename, att=1, mute=True)
         return filename
 
@@ -693,7 +770,7 @@ class _MapdlCore(Commands):
         >>> mapdl.k(1, 0, 0, 0)
         >>> mapdl.k(2, 1, 0, 0)
         >>> mapdl.k(3, 1, 1, 0)
-        >>> mapdl.k(4, 0, 1, 0)    
+        >>> mapdl.k(4, 0, 1, 0)
         >>> mapdl.l(1, 2)
         >>> mapdl.l(2, 3)
         >>> mapdl.l(3, 4)
@@ -708,24 +785,25 @@ class _MapdlCore(Commands):
 
         >>> mapdl.et(1, 'MESH200', 6)
         >>> mapdl.amesh('all')
-        >>> mapdl.eplot()    
+        >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
         from ansys.mapdl.core.launcher import get_ansys_path
 
         if not self._local:
-            raise RuntimeError('``open_gui`` can only be called from a local '
-                               'MAPDL instance')
+            raise RuntimeError(
+                "``open_gui`` can only be called from a local " "MAPDL instance"
+            )
 
         # specify a path for the temporary database
         temp_dir = tempfile.gettempdir()
-        save_path = os.path.join(temp_dir, f'ansys_{random_string(10)}')
+        save_path = os.path.join(temp_dir, f"ansys_{random_string(10)}")
         if os.path.isdir(save_path):
             rmtree(save_path)
         os.mkdir(save_path)
 
-        name = 'tmp'
-        tmp_database = os.path.join(save_path, '%s.db' % name)
+        name = "tmp"
+        tmp_database = os.path.join(save_path, "%s.db" % name)
         if os.path.isfile(tmp_database):
             os.remove(tmp_database)
 
@@ -742,27 +820,28 @@ class _MapdlCore(Commands):
         # copy result file to temp directory
         if include_result and self._result_file is not None:
             if os.path.isfile(resultfile):
-                tmp_resultfile = os.path.join(save_path, '%s.rst' % name)
+                tmp_resultfile = os.path.join(save_path, "%s.rst" % name)
                 copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
-        start_file = os.path.join(save_path, 'start%s.ans' % version)
-        with open(start_file, 'w') as f:
-            f.write('RESUME\n')
+        start_file = os.path.join(save_path, "start%s.ans" % version)
+        with open(start_file, "w") as f:
+            f.write("RESUME\n")
 
         # some versions of ANSYS just look for "start.ans" when starting
-        other_start_file = os.path.join(save_path, 'start.ans')
-        with open(other_start_file, 'w') as f:
-            f.write('RESUME\n')
+        other_start_file = os.path.join(save_path, "start.ans")
+        with open(other_start_file, "w") as f:
+            f.write("RESUME\n")
 
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(save_path)
-        exec_file = self._start_parm.get('exec_file',
-                                         get_ansys_path(allow_input=False))
-        nproc = self._start_parm.get('nproc', 2)
-        add_sw = self._start_parm.get('additional_switches', '')
-        os.system(f'cd "{save_path}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}')
+        exec_file = self._start_parm.get("exec_file", get_ansys_path(allow_input=False))
+        nproc = self._start_parm.get("nproc", 2)
+        add_sw = self._start_parm.get("additional_switches", "")
+        os.system(
+            f'cd "{save_path}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}'
+        )
         os.chdir(cwd)
         # Consider removing this temporary directory
 
@@ -770,11 +849,11 @@ class _MapdlCore(Commands):
         self._launch(self._start_parm)
         self.resume(tmp_database, mute=True)
         if prior_processor is not None:
-            if 'BEGIN' not in prior_processor.upper():
-                self.run(f'/{prior_processor}', mute=True)
+            if "BEGIN" not in prior_processor.upper():
+                self.run(f"/{prior_processor}", mute=True)
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
-        raise NotImplementedError('Implemented by child class')
+        raise NotImplementedError("Implemented by child class")
 
     def _close_apdl_log(self):
         """Closes the APDL log"""
@@ -788,8 +867,8 @@ class _MapdlCore(Commands):
         Displays nodes.
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
-            values set with the ``PNUM`` command.
+           PyMAPDL plotting commands with ``vtk=True`` ignore any
+           values set with the ``PNUM`` command.
 
         Parameters
         ----------
@@ -826,10 +905,6 @@ class _MapdlCore(Commands):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
 
-        Notes
-        -----
-        Only selected nodes [NSEL] are displayed.  Elements need not
-        be defined.
         """
         # lazy import here to avoid top level import
         import pyvista as pv
@@ -837,24 +912,24 @@ class _MapdlCore(Commands):
         if vtk is None:
             vtk = self._use_vtk
 
-        if 'knum' in kwargs:
-            raise ValueError('`knum` keyword deprecated.  Please use `nnum` instead.')
+        if "knum" in kwargs:
+            raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
         if vtk:
-            kwargs.setdefault('title', 'MAPDL Node Plot')
+            kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
-                warnings.warn('There are no nodes to plot.')
+                warnings.warn("There are no nodes to plot.")
                 return general_plotter([], [], [], **kwargs)
 
             labels = []
             if nnum:
                 # must eliminate duplicate points or labeling fails miserably.
                 pcloud = pv.PolyData(self.mesh.nodes)
-                pcloud['labels'] = self.mesh.nnum
+                pcloud["labels"] = self.mesh.nnum
                 pcloud.clean(inplace=True)
 
-                labels = [{'points': pcloud.points, 'labels': pcloud['labels']}]
-            points = [{'points': self.mesh.nodes}]
+                labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
+            points = [{"points": self.mesh.nodes}]
             return general_plotter([], points, labels, **kwargs)
 
         # otherwise, use the built-in nplot
@@ -864,11 +939,21 @@ class _MapdlCore(Commands):
         self._enable_interactive_plotting()
         return super().nplot(nnum, **kwargs)
 
-    def vplot(self, nv1="", nv2="", ninc="", degen="", scale="",
-              vtk=None, quality=4, show_area_numbering=False,
-              show_line_numbering=False,
-              color_areas=False, show_lines=True,
-              **kwargs):
+    def vplot(
+        self,
+        nv1="",
+        nv2="",
+        ninc="",
+        degen="",
+        scale="",
+        vtk=None,
+        quality=4,
+        show_area_numbering=False,
+        show_line_numbering=False,
+        color_areas=False,
+        show_lines=True,
+        **kwargs,
+    ):
         """Plot the selected volumes.
 
         APDL Command: VPLOT
@@ -920,29 +1005,48 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
-            kwargs.setdefault('title', 'MAPDL Volume Plot')
-            cm_name = '__tmp_area2__'
-            self.cm(cm_name, 'AREA', mute=True)
-            self.aslv('S', mute=True)  # select areas attached to active volumes
-            out = self.aplot(vtk=vtk, color_areas=color_areas, quality=quality,
-                             show_area_numbering=show_area_numbering,
-                             show_line_numbering=show_line_numbering,
-                             show_lines=show_lines, **kwargs)
-            self.cmsel('S', cm_name, 'AREA', mute=True)
+            kwargs.setdefault("title", "MAPDL Volume Plot")
+            cm_name = "__tmp_area2__"
+            self.cm(cm_name, "AREA", mute=True)
+            self.aslv("S", mute=True)  # select areas attached to active volumes
+            out = self.aplot(
+                vtk=vtk,
+                color_areas=color_areas,
+                quality=quality,
+                show_area_numbering=show_area_numbering,
+                show_line_numbering=show_line_numbering,
+                show_lines=show_lines,
+                **kwargs,
+            )
+            self.cmsel("S", cm_name, "AREA", mute=True)
             return out
         else:
             self._enable_interactive_plotting()
-            return super().vplot(nv1=nv1, nv2=nv2, ninc=ninc,
-                                 degen=degen, scale=scale, **kwargs)
+            return super().vplot(
+                nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
+            )
 
-    def aplot(self, na1="", na2="", ninc="", degen="", scale="",
-              vtk=None, quality=4, show_area_numbering=False,
-              show_line_numbering=False, color_areas=False,
-              show_lines=False, **kwargs):
-        """APDL Command: APLOT
+    def aplot(
+        self,
+        na1="",
+        na2="",
+        ninc="",
+        degen="",
+        scale="",
+        vtk=None,
+        quality=4,
+        show_area_numbering=False,
+        show_line_numbering=False,
+        color_areas=False,
+        show_lines=False,
+        **kwargs,
+    ):
+        """Display the selected areas.
 
         Displays the selected areas from ``na1`` to ``na2`` in steps
         of ``ninc``.
+
+        APDL Command: ``APLOT``
 
         .. note::
             PyMAPDL plotting commands with ``vtk=True`` ignore any
@@ -962,10 +1066,10 @@ class _MapdlCore(Commands):
         degen, str, optional
             Degeneracy marker.  This option is ignored when ``vtk=True``.
 
-        scale
+        scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
-            directions) (defaults to .075).  This option is ignored
+            directions) (defaults to 0.075).  This option is ignored
             when ``vtk=True``.
 
         vtk : bool, optional
@@ -1016,9 +1120,9 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
-            kwargs.setdefault('show_scalar_bar', False)
-            kwargs.setdefault('title', 'MAPDL Area Plot')
-            kwargs.setdefault('scalar_bar_args', {'title': 'Scalar Bar Title'})
+            kwargs.setdefault("show_scalar_bar", False)
+            kwargs.setdefault("title", "MAPDL Area Plot")
+            kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
             if quality > 10:
                 quality = 10
             if quality < 1:
@@ -1030,43 +1134,50 @@ class _MapdlCore(Commands):
             # individual surface isolation is quite slow, so just
             # color individual areas
             if color_areas:
-                anum = surf['entity_num']
+                anum = surf["entity_num"]
                 rand = np.random.random(anum[-1] + 1)
                 area_color = rand[anum]
-                meshes.append({'mesh': surf, 'scalars': area_color})
+                meshes.append({"mesh": surf, "scalars": area_color})
             else:
-                meshes.append({'mesh': surf})
+                meshes.append(
+                    {"mesh": surf,
+                     "color": kwargs.get("color", "white")
+                     }
+                )
 
             if show_area_numbering:
-                anums = np.unique(surf['entity_num'])
+                anums = np.unique(surf["entity_num"])
                 centers = []
                 for anum in anums:
-                    area = surf.extract_cells(surf['entity_num'] == anum)
+                    area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
-                labels.append({'points': np.array(centers), 'labels': anums})
+                labels.append({"points": np.array(centers), "labels": anums})
 
             if show_lines or show_line_numbering:
-                kwargs.setdefault('line_width', 2)
+                kwargs.setdefault("line_width", 2)
                 # subselect lines belonging to the current areas
-                self.cm('__area__', 'AREA', mute=True)
-                self.lsla('S', mute=True)
+                self.cm("__area__", "AREA", mute=True)
+                self.lsla("S", mute=True)
 
                 lines = self.geometry.lines
-                self.cmsel('S', '__area__', 'AREA', mute=True)
+                self.cmsel("S", "__area__", "AREA", mute=True)
 
                 if show_lines:
-                    meshes.append({'mesh': lines,
-                                   'color': kwargs.get('edge_color', 'k')})
+                    meshes.append(
+                        {"mesh": lines, "color": kwargs.get("edge_color", "k")}
+                    )
                 if show_line_numbering:
-                    labels.append({'points': lines.points[50::101],
-                                   'labels': lines['entity_num']})
+                    labels.append(
+                        {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                    )
 
             return general_plotter(meshes, [], labels, **kwargs)
 
         self._enable_interactive_plotting()
-        return super().aplot(na1=na1, na2=na2, ninc=ninc,
-                             degen=degen, scale=scale, **kwargs)
+        return super().aplot(
+            na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
+        )
 
     @supress_logging
     def _enable_interactive_plotting(self, pixel_res=1600):
@@ -1081,18 +1192,21 @@ class _MapdlCore(Commands):
             takes longer to render.
         """
         if not self._has_matplotlib:
-            raise ImportError('Install matplotlib to display plots from MAPDL ,'
-                              'from Python.  Otherwise, plot with vtk with:\n'
-                              '``vtk=True``')
+            raise ImportError(
+                "Install matplotlib to display plots from MAPDL ,"
+                "from Python.  Otherwise, plot with vtk with:\n"
+                "``vtk=True``"
+            )
 
         if not self._png_mode:
-            self.show('PNG', mute=True)
+            self.show("PNG", mute=True)
             self.gfile(pixel_res, mute=True)
 
     @property
     def _has_matplotlib(self):
         try:
-            import matplotlib
+            import matplotlib  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -1100,7 +1214,7 @@ class _MapdlCore(Commands):
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
-        return 'PNG' in self.show(mute=False)
+        return "PNG" in self.show(mute=False)
 
     def set_log_level(self, loglevel):
         """Sets log level
@@ -1133,19 +1247,26 @@ class _MapdlCore(Commands):
         setup_logger(loglevel=loglevel)
 
     def _list(self, command):
-        """ Replaces *LIST command """
-        items = command.split(',')
-        filename = os.path.join(self.directory, '.'.join(items[1:]))
+        """Replaces *LIST command"""
+        items = command.split(",")
+        filename = os.path.join(self.directory, ".".join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
             self._log.info(self._response)
         else:
-            raise Exception('Cannot run:\n{command}\n\nFile does not exist')
+            raise Exception("Cannot run:\n{command}\n\nFile does not exist")
 
-    def lplot(self, nl1="", nl2="", ninc="", vtk=None,
-              show_line_numbering=True,
-              show_keypoint_numbering=False, color_lines=False,
-              **kwargs):
+    def lplot(
+        self,
+        nl1="",
+        nl2="",
+        ninc="",
+        vtk=None,
+        show_line_numbering=True,
+        show_keypoint_numbering=False,
+        color_lines=False,
+        **kwargs,
+    ):
         """Display the selected lines.
 
         APDL Command: LPLOT
@@ -1175,10 +1296,6 @@ class _MapdlCore(Commands):
             more keyword arguments applicatle when visualizing with
             ``vtk=True``.
 
-        Examples
-        --------
-        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
-
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
@@ -1186,42 +1303,54 @@ class _MapdlCore(Commands):
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
+
+        Examples
+        --------
+        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
         """
         if vtk is None:
             vtk = self._use_vtk
 
         if vtk:
-            kwargs.setdefault('show_scalar_bar', False)
-            kwargs.setdefault('title', 'MAPDL Line Plot')
+            kwargs.setdefault("show_scalar_bar", False)
+            kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
-                warnings.warn('Either no lines have been selected or there '
-                              'is nothing to plot')
+                warnings.warn(
+                    "Either no lines have been selected or there " "is nothing to plot"
+                )
                 return general_plotter([], [], [], **kwargs)
 
             lines = self.geometry.lines
-            meshes = [{'mesh': lines}]
+            meshes = [{"mesh": lines}]
             if color_lines:
-                meshes[0]['scalars'] = np.random.random(lines.n_cells)
+                meshes[0]["scalars"] = np.random.random(lines.n_cells)
 
             labels = []
             if show_line_numbering:
-                labels.append({'points': lines.points[50::101],
-                               'labels': lines['entity_num']})
+                labels.append(
+                    {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                )
 
             if show_keypoint_numbering:
-                labels.append({'points': self.geometry.keypoints,
-                               'labels': self.geometry.knum})
+                labels.append(
+                    {"points": self.geometry.keypoints, "labels": self.geometry.knum}
+                )
 
-            return general_plotter(meshes,
-                                   [],
-                                   labels,
-                                   **kwargs)
+            return general_plotter(meshes, [], labels, **kwargs)
         else:
             self._enable_interactive_plotting()
             return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
-    def kplot(self, np1="", np2="", ninc="", lab="", vtk=None,
-              show_keypoint_numbering=True, **kwargs):
+    def kplot(
+        self,
+        np1="",
+        np2="",
+        ninc="",
+        lab="",
+        vtk=None,
+        show_keypoint_numbering=True,
+        **kwargs,
+    ):
         """Display the selected keypoints.
 
         APDL Command: KPLOT
@@ -1261,30 +1390,30 @@ class _MapdlCore(Commands):
             vtk = self._use_vtk
 
         if vtk:
-            kwargs.setdefault('title', 'MAPDL Keypoint Plot')
+            kwargs.setdefault("title", "MAPDL Keypoint Plot")
             if not self.geometry.n_keypoint:
-                warnings.warn('Either no keypoints have been '
-                              'selected or there are no keypoints in '
-                              'the database.')
+                warnings.warn(
+                    "Either no keypoints have been "
+                    "selected or there are no keypoints in "
+                    "the database."
+                )
                 return general_plotter([], [], [], **kwargs)
 
             keypoints = self.geometry.keypoints
-            points = [{'points': keypoints}]
+            points = [{"points": keypoints}]
 
             labels = []
             if show_keypoint_numbering:
-                labels.append({'points': keypoints,
-                               'labels': self.geometry.knum})
+                labels.append({"points": keypoints, "labels": self.geometry.knum})
 
-            return general_plotter([], points,
-                                   labels, **kwargs)
+            return general_plotter([], points, labels, **kwargs)
 
         # otherwise, use the legacy plotter
         self._enable_interactive_plotting()
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self):
+    def result(self) -> Result:
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -1324,7 +1453,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir(), 'ansys_tmp')
+            save_path = os.path.join(tempfile.gettempdir(), "ansys_tmp")
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
@@ -1344,15 +1473,15 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError('Distributed Cyclic result not supported')
+                        raise RuntimeError("Distributed Cyclic result not supported")
                     result_path = self._result_file
             else:
                 result_path = self._result_file
 
         if result_path is None:
-            raise FileNotFoundError('No result file(s) at %s' % self.directory)
+            raise FileNotFoundError("No result file(s) at %s" % self.directory)
         if not os.path.isfile(result_path):
-            raise FileNotFoundError('No results found at %s' % result_path)
+            raise FileNotFoundError("No results found at %s" % result_path)
 
         return read_binary(result_path)
 
@@ -1360,20 +1489,20 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire('RSTFILE')
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire('RSTEXT')
+            ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
-            ext = ''
+            ext = ""
 
-        if ext == '':
-            rth_file = os.path.join(self.directory, '%s.%s' % (filename, 'rth'))
-            rst_file = os.path.join(self.directory, '%s.%s' % (filename, 'rst'))
+        if ext == "":
+            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
+            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
 
             if os.path.isfile(rth_file) and os.path.isfile(rst_file):
                 return last_created([rth_file, rst_file])
@@ -1382,15 +1511,15 @@ class _MapdlCore(Commands):
             elif os.path.isfile(rst_file):
                 return rst_file
         else:
-            filename = os.path.join(self.directory, '%s.%s' % (filename, ext))
+            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
             if os.path.isfile(filename):
                 return filename
 
     @property
     def _distributed_result_file(self):
-        """Path of the distributed result file """
+        """Path of the distributed result file"""
         try:
-            filename = self.inquire('RSTFILE')
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
@@ -1398,10 +1527,10 @@ class _MapdlCore(Commands):
 
         # ansys decided that a jobname ended in a number needs a bonus "_"
         if filename[-1].isnumeric():
-            filename += '_'
+            filename += "_"
 
-        rth_basename = '%s0.%s' % (filename, 'rth')
-        rst_basename = '%s0.%s' % (filename, 'rst')
+        rth_basename = "%s0.%s" % (filename, "rth")
+        rst_basename = "%s0.%s" % (filename, "rst")
 
         rth_file = os.path.join(self.directory, rth_basename)
         rst_file = os.path.join(self.directory, rst_basename)
@@ -1416,7 +1545,7 @@ class _MapdlCore(Commands):
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
 
-    def add_file_handler(self, filepath, append=False, level='DEBUG'):
+    def add_file_handler(self, filepath, append=False, level="DEBUG"):
         """Add a file handler to the mapdl log.  This allows you to
         redirect the APDL logging to a file.
 
@@ -1440,12 +1569,12 @@ class _MapdlCore(Commands):
 
         """
         if append:
-            mode = 'a'
+            mode = "a"
         else:
-            mode = 'w'
+            mode = "w"
 
         self._log_filehandler = logging.FileHandler(filepath)
-        formatstr = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+        formatstr = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 
         self._log_filehandler = logging.FileHandler(filepath, mode=mode)
         self._log_filehandler.setFormatter(logging.Formatter(formatstr))
@@ -1453,32 +1582,34 @@ class _MapdlCore(Commands):
             level = level.uppder()
         self._log_filehandler.setLevel(level)
         self._log.addHandler(self._log_filehandler)
-        self._log.info('Added file handler at %s', filepath)
+        self._log.info("Added file handler at %s", filepath)
 
     def remove_file_handler(self):
         """Removes the filehander from the log"""
         self._log.removeHandler(self._log_filehandler)
-        self._log.info('Removed file handler')
+        self._log.info("Removed file handler")
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
         """
-        self._log.debug('Flushing stored commands')
+        self._log.debug("Flushing stored commands")
         rnd_str = random_string()
-        tmp_out = os.path.join(tempfile.gettempdir(), 'tmp_%s.out' % rnd_str)
+        tmp_out = os.path.join(tempfile.gettempdir(), "tmp_%s.out" % rnd_str)
         self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
-        self._stored_commands.append('/OUTPUT')
-        commands = '\n'.join(self._stored_commands)
+        self._stored_commands.append("/OUTPUT")
+        commands = "\n".join(self._stored_commands)
         if self._apdl_log:
-            self._apdl_log.write(commands + '\n')
+            self._apdl_log.write(commands + "\n")
 
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), 'tmp_%s.inp' % rnd_str)
-        self._log.debug('Writing the following commands to a temporary '
-                        'apdl input file:\n%s', commands)
+        tmp_inp = os.path.join(tempfile.gettempdir(), "tmp_%s.inp" % rnd_str)
+        self._log.debug(
+            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            commands,
+        )
 
-        with open(tmp_inp, 'w') as f:
+        with open(tmp_inp, "w") as f:
             f.writelines(commands)
 
         self._store_commands = False
@@ -1488,50 +1619,60 @@ class _MapdlCore(Commands):
         _ = self.input(tmp_inp, write_to_log=False)
         time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
-            self._response = '\n' + open(tmp_out).read()
+            self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:
-            self._log.warning('Unable to read response from flushed commands')
+            self._log.warning("Unable to read response from flushed commands")
         else:
             self._log.info(self._response)
 
-    def get_value(self, entity="", entnum="", item1="", it1num="",
-                  item2="", it2num="", **kwargs):
-        """Runs the GET command and returns a Python value.
+    def get_value(
+        self, entity="", entnum="", item1="", it1num="", item2="", it2num="", **kwargs
+    ):
+        """Runs the MAPDL GET command and returns a Python value.
 
-        This method uses :func:`_MapdlCore.get`.
+        This method uses :func:`Mapdl.get`.
 
         See the full MADPL command documentation at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
 
+        .. note::
+           This method is not available when within the
+           :func:`Mapdl.non_interactive`
+           context manager.
+
         Parameters
         ----------
-        entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc.
+        entity : str
+            Entity keyword. Valid keywords are ``"NODE"``, ``"ELEM"``,
+            ``"KP"``, ``"LINE"``, ``"AREA"``, ``"VOLU"``, ``"PDS"``,
+            etc.
 
-        entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
+        entnum : str, int, optional
+            The number or label for the entity. In some cases, a zero
+            (or blank ``""``) ``entnum`` represents all entities of
+            the set.
 
-        item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
+        item1 : str, optional
+            The name of a particular item for the given entity.
 
-        it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
+        it1num : str, int, optional
+            The number (or label) for the specified Item1 (if
+            any). Some Item1 labels do not require an IT1NUM value.
 
-        item2, it2num
+        item2 : str, optional
             A second set of item labels and numbers to further qualify the item
             for which data are to be retrieved. Most items do not require this
             level of information.
 
+        it2num : str, int, optional
+            The number (or label) for the specified ``item2`` (if
+            any). Some ``item2`` labels do not require an ``it2num``
+            value.
+
         Returns
         -------
-        par : float
+        float
             Floating point value of the parameter.
 
         Examples
@@ -1548,17 +1689,67 @@ class _MapdlCore(Commands):
         >>> value
         3003
         """
-        return self._get(entity=entity, entnum=entnum, item1=item1, it1num=it1num,
-                         item2=item2, it2num=it2num, **kwargs)
+        return self._get(
+            entity=entity,
+            entnum=entnum,
+            item1=item1,
+            it1num=it1num,
+            item2=item2,
+            it2num=it2num,
+            **kwargs,
+        )
 
-    def get(self, par="__floatparameter__", entity="", entnum="",
-            item1="", it1num="", item2="", it2num="", **kwargs):
+    def get(
+        self,
+        par="__floatparameter__",
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        **kwargs,
+    ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
-        APDL Command: \*GET
+        APDL Command: ``*GET``
 
         See the full MADPL command at `*GET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
+
+        GET retrieves a value for a specified item and stores the
+        value as a scalar parameter, or as a value in a user-named
+        array parameter. An item is identified by various keyword,
+        label, and number combinations.  Usage is similar to the SET
+        command except that the parameter values are retrieved from
+        previously input or calculated results. For example,
+        ``GET,A,ELEM,5,CENT,X`` returns the centroid x-location of element
+        5 and stores the result as parameter A. GET command
+        operations, along with the associated Get functions return
+        values in the active coordinate system unless stated
+        otherwise. A Get function is an alternative in- line function
+        that can be used to retrieve a value instead of the GET
+        command (see Using In-line Get Functions for more
+        information).
+
+        Both GET and VGET retrieve information from the active data
+        stored in memory. The database is often the source, and
+        sometimes the information is retrieved from common memory
+        blocks that the program uses to manipulate
+        information. Although POST1 and POST26 operations use a .rst
+        file, GET data is accessed from the database or from the
+        common blocks. Get operations do not access the .rst file
+        directly. For repeated gets of sequential items, such as from
+        a series of elements, see the VGET command.
+
+        Most items are stored in the database after they are
+        calculated and are available anytime thereafter. Items are
+        grouped according to where they are usually first defined or
+        calculated. Preprocessing data will often not reflect the
+        calculated values generated from section data. Do not use GET
+        to obtain data from elements that use calculated section data,
+        such as beams or shells. Most of the general items listed
+        below are available from all modules.
 
         Parameters
         ----------
@@ -1592,7 +1783,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        par : float
+        float
             Floating point value of the parameter.
 
         Examples
@@ -1610,47 +1801,11 @@ class _MapdlCore(Commands):
         >>> value
         3003
 
-        Notes
-        -----
-        GET retrieves a value for a specified item and stores the
-        value as a scalar parameter, or as a value in a user-named
-        array parameter. An item is identified by various keyword,
-        label, and number combinations.  Usage is similar to the SET
-        command except that the parameter values are retrieved from
-        previously input or calculated results. For example,
-        GET,A,ELEM,5,CENT,X returns the centroid x-location of element
-        5 and stores the result as parameter A. GET command
-        operations, along with the associated Get functions return
-        values in the active coordinate system unless stated
-        otherwise. A Get function is an alternative in- line function
-        that can be used to retrieve a value instead of the GET
-        command (see Using In-line Get Functions for more
-        information).
-
-        Both GET and VGET retrieve information from the active data
-        stored in memory. The database is often the source, and
-        sometimes the information is retrieved from common memory
-        blocks that the program uses to manipulate
-        information. Although POST1 and POST26 operations use a .rst
-        file, GET data is accessed from the database or from the
-        common blocks. Get operations do not access the .rst file
-        directly. For repeated gets of sequential items, such as from
-        a series of elements, see the VGET command.
-
-        Most items are stored in the database after they are
-        calculated and are available anytime thereafter. Items are
-        grouped according to where they are usually first defined or
-        calculated. Preprocessing data will often not reflect the
-        calculated values generated from section data. Do not use GET
-        to obtain data from elements that use calculated section data,
-        such as beams or shells. Most of the general items listed
-        below are available from all modules.
-
         """
-        command = f'*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}'
-        kwargs['mute'] = False
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+        kwargs["mute"] = False
         response = self.run(command, **kwargs)
-        value = response.split('=')[-1].strip()
+        value = response.split("=")[-1].strip()
         try:  # always either a float or string
             return float(value)
         except ValueError:
@@ -1663,7 +1818,7 @@ class _MapdlCore(Commands):
         This is requested from the active mapdl instance.
         """
         try:
-            self._jobname = self.inquire('JOBNAME')
+            self._jobname = self.inquire("", "JOBNAME")
         except Exception:
             pass
         return self._jobname
@@ -1675,8 +1830,19 @@ class _MapdlCore(Commands):
         self.filname(new_jobname, mute=True)
         self._jobname = new_jobname
 
-    def modal_analysis(self, method='lanb', nmode='', freqb='', freqe='', cpxmod='',
-                       nrmkey='', modtype='', memory_option='', elcalc=False):
+    def modal_analysis(
+        self,
+        method="lanb",
+        nmode="",
+        freqb="",
+        freqe="",
+        cpxmod="",
+        nrmkey="",
+        modtype="",
+        memory_option="",
+        mxpand="",
+        elcalc=False,
+    ):
         """Run a modal with basic settings analysis
 
         Parameters
@@ -1783,20 +1949,19 @@ class _MapdlCore(Commands):
                         I/O to the various files written by the
                         solver.
 
+        mxpand : bool, optional
+            Number of modes or array name (enclosed in percent signs)
+            to expand and write.  If -1, do not expand and do not
+            write modes to the results file during the
+            analysis. Default ``""``.
         elcalc : bool, optional
             Calculate element results, reaction forces, energies, and
             the nodal degree of freedom solution.  Default ``False``.
 
         Returns
         -------
-        response : str
+        str
             Output from MAPDL SOLVE command.
-
-        Examples
-        --------
-        Modal analysis using default parameters for the first 6 modes
-
-        >>> mapdl.modal_analysis(nmode=6)
 
         Notes
         -----
@@ -1816,20 +1981,29 @@ class _MapdlCore(Commands):
         spectrum analysis. The UNSYM method supports spectrum analysis
         when eigensolutions are real.
 
+        Examples
+        --------
+        Modal analysis using default parameters for the first 6 modes
+
+        >>> mapdl.modal_analysis(nmode=6)
+
         """
         if nrmkey:
-            if nrmkey.upper() != 'OFF':
-                nrmkey = 'ON'
-        nrmkey = 'OFF'
+            if nrmkey.upper() != "OFF":
+                nrmkey = "ON"
+        nrmkey = "OFF"
 
-        with self.chain_commands:
-            self.slashsolu()
-            self.antype(2, 'new')
-            self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype)
-            self.bcsoption(memory_option)
+        self.slashsolu(mute=True)
+        self.antype(2, "new", mute=True)
+        self.modopt(
+            method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True
+        )
+        self.bcsoption(memory_option, mute=True)
 
-            if elcalc:
-                self.mxpand(elcalc='YES')
+        if mxpand:
+            self.mxpand(mute=True)
+        if elcalc:
+            self.mxpand(elcalc="YES", mute=True)
 
         out = self.solve()
         self.finish(mute=True)
@@ -1837,6 +2011,8 @@ class _MapdlCore(Commands):
 
     def run_multiline(self, commands):
         """Run several commands as a single block
+
+        .. warning:: This function is being deprecated. Please use `input_strings` instead.
 
         Parameters
         ----------
@@ -1894,14 +2070,68 @@ class _MapdlCore(Commands):
         output continues...
 
         """
-        self._stored_commands = commands.splitlines()
+
+        warnings.warn("'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
+                      DeprecationWarning)
+        return self.input_strings(commands=commands)
+
+    def input_strings(self, commands):
+        """Run several commands as a single block.
+        These commands are all in a single string or in list of strings.
+
+        Parameters
+        ----------
+        commands : str or list of str
+            Commands separated by new lines, or a list of commands strings.
+            See example.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.  Includes the output from
+            running every command, as if it was an input file.
+
+        Examples
+        --------
+        Run several commands from Python multi-line string.
+
+        >>> cmd = '''/prep7
+        ! Mat
+        MP,EX,1,200000
+        MP,NUXY,1,0.3
+        MP,DENS,1,7.85e-09
+        ! Elements
+        et,1,186
+        et,2,154
+        ! Geometry
+        BLC4,0,0,1000,100,10
+        ! Mesh
+        esize,5
+        vmesh,all
+        '''
+        >>> resp = mapdl.input_strings(cmd)
+        >>> resp
+        MATERIAL          1     EX   =   200000.0
+        MATERIAL          1     NUXY =  0.3000000
+        MATERIAL          1     DENS =  0.7850000E-08
+        ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+         KEYOPT( 1- 6)=        0      0      0        0      0      0
+         KEYOPT( 7-12)=        0      0      0        0      0      0
+         KEYOPT(13-18)=        0      0      0        0      0      0
+        output continues...
+
+        """
+        if isinstance(commands, str):
+            commands = commands.splitlines()
+
+        self._stored_commands = commands
         self._flush_stored()
         return self._response
 
     def run(self, command, write_to_log=True, **kwargs):
         """Run single APDL command.
 
-        For multiple commands, use ``run_multiline``.
+        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
@@ -1918,16 +2148,8 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        command_output : str
+        str
             Command output from MAPDL.
-
-        Examples
-        --------
-        >>> mapdl.run('/PREP7')
-
-        Equivalent Pythonic method:
-
-        >>> mapdl.prep7()
 
         Notes
         -----
@@ -1940,69 +2162,97 @@ class _MapdlCore(Commands):
 
         Alternatively, you can simply run a block of commands with:
 
-        >>> mapdl.run_multiline(cmd)
+        >>> mapdl.input_strings(cmd)
+
+        Examples
+        --------
+        >>> mapdl.run('/PREP7')
+
+        Equivalent Pythonic method:
+
+        >>> mapdl.prep7()
+
         """
         command = command.strip()
         # check if multiline
-        if '\n' in command or '\r' in command:
-            raise ValueError('Use ``run_multiline`` for multi-line commands')
+        if "\n" in command or "\r" in command:
+            raise ValueError("Use ``input_strings`` for multi-line commands")
 
         # always reset the cache
         self._reset_cache()
 
         # address MAPDL /INPUT level issue
-        if command[:4].upper() == '/CLE':
+        if command[:4].upper() == "/CLE":
             # Address gRPC issue
             # https://github.com/pyansys/pymapdl/issues/380
-            command = '/CLE,NOSTART'
+            command = "/CLE,NOSTART"
+
+        # Invalid commands silently ignored.
+        cmd_ = command.split(',')[0].upper()
+        if cmd_ in INVAL_COMMANDS_SILENT:
+            msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
+            self._log.info(msg)
+
+            # This very likely won't be recorded anywhere.
+
+            # But just in case, I'm adding info as /com
+            command = f"/com, PyAnsys: {msg}" # Using '!' makes the output of '_run' empty
 
         if self._store_commands:
             self._stored_commands.append(command)
             return
         elif command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pymapdl command "%s"\n\n%s' %
-                                     (command, INVAL_COMMANDS[command[:3]]))
+            exception = RuntimeError(
+                'Invalid pymapdl command "%s"\n\n%s'
+                % (command, INVAL_COMMANDS[command[:3].upper()])
+            )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError('Invalid pymapdl command "%s"\n\n%s' %
-                                     (command, INVAL_COMMANDS[command[:4]]))
+            exception = RuntimeError(
+                'Invalid pymapdl command "%s"\n\n%s'
+                % (command, INVAL_COMMANDS[command[:4].upper()])
+            )
             raise exception
         elif write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
-                self._apdl_log.write('%s\n' % command)
+                self._apdl_log.write("%s\n" % command)
 
-        if command[:4].upper() == '/LIS':
+        if command[:4].upper() == "/LIS":
             # simply return the contents of the file
-            return self.list(*command.split(',')[1:])
+            return self.list(*command.split(",")[1:])
 
         text = self._run(command, **kwargs)
-        text = text.replace('\\r\\n', '\n').replace('\\n', '\n')
+        text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = text.strip()
             self._log.info(self._response)
         else:
-            self._response = ''
+            self._response = ""
             return self._response
 
-        if 'is not a recognized' in text:
+        if "is not a recognized" in text:
             if not self.allow_ignore:
-                text = text.replace('This command will be ignored.', '')
-                text += '\n\nIgnore these messages by setting allow_ignore=True'
+                text = text.replace("This command will be ignored.", "")
+                text += "\n\nIgnore these messages by setting allow_ignore=True"
                 raise MapdlInvalidRoutineError(text)
 
         # flag errors
-        if '*** ERROR ***' in self._response and not self._ignore_errors:
+        if "*** ERROR ***" in self._response and not self._ignore_errors:
             # remove permitted errors and allow MAPDL to continue
-            response = self._response
-            for err_str in _PERMITTED_ERRORS:
-                response = re.sub(err_str, '', response)
 
-            if '*** ERROR ***' in response:
-                self._log.error(self._response)
-                raise MapdlRuntimeError(self._response)
+            for err_str in _PERMITTED_ERRORS:
+                self._response = re.sub(err_str, "", self._response)
+
+            if "*** ERROR ***" in self._response:
+                # We don't need to log exception because they already included in the main logger.
+                # logger.error(self._response)
+                # However, exceptions are recorded in the global logger which do not record
+                # information of the instances name, hence we edit the error message.
+                raise MapdlRuntimeError(f"\n\nError in instance {self._name}\n\n" + self._response)
             else:
-                warnings.warn('MAPDL returned non-abort errors.  Please '
-                              'check the logs.')
+                warnings.warn(
+                    "MAPDL returned non-abort errors.  Please " "check the logs."
+                )
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -2026,10 +2276,88 @@ class _MapdlCore(Commands):
     def ignore_errors(self, value):
         self._ignore_errors = bool(value)
 
-    def load_table(self, name, array, var1='', var2='', var3=''):
+    def load_array(self, name, array):
+        """Load an array from Python to MAPDL.
+
+        Uses ``VREAD`` to transfer the array.
+        The format of the numbers used in the intermediate file is F24.18.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : np.ndarray or list
+            List as a table or ``numpy`` array.
+
+        Examples
+        --------
+        >>> my_conv = np.array([[0, 0.001],
+        ...                     [120, 0.001],
+        ...                     [130, 0.005],
+        ...                     [700, 0.005],
+        ...                     [710, 0.002],
+        ...                     [1000, 0.002]])
+        >>> mapdl.load_array('MY_ARRAY', my_conv)
+        >>> mapdl.parameters['MY_ARRAY']
+        array([[0.0e+00, 1.0e-03],
+                [1.2e+02, 1.0e-03],
+                [1.3e+02, 5.0e-03],
+                [7.0e+02, 5.0e-03],
+                [7.1e+02, 2.0e-03],
+                [1.0e+03, 2.0e-03]])
+        """
+        if not isinstance(array, np.ndarray):
+            array = np.asarray(array)
+        if array.ndim != 2:
+            raise NotImplementedError("Only loading of 2D arrays is supported at the moment.")
+
+        imax = array.shape[0]
+        jmax = array.shape[1]
+        if array.ndim == 2:
+            kmax = ""
+        elif array.ndim == 3:
+            kmax = array.shape[2]
+        else:
+            raise ValueError(
+                f"Expecting only a 2D or 3D array, but input contains\n{array.ndim} dimensions."
+            )
+
+        self.dim(name, "ARRAY", imax=array.shape[0], jmax=array.shape[1], kmax="")
+
+        base_name = random_string() + ".txt"
+        filename = os.path.join(tempfile.gettempdir(), base_name)
+        self._log.info(f"Generating file for table in {filename}")
+        np.savetxt(filename, array, delimiter=',',
+                   header='File generated by PyMAPDL:load_array',
+                   fmt='%24.18e')
+
+        if not self._local:
+            self.upload(filename, progress_bar=False)
+            filename = base_name
+
+        with self.non_interactive:
+            label = 'jik'
+            n1 = jmax
+            n2 = imax
+            n3 = kmax
+            self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
+            fmt = '(' + ",',',".join(["E24.18" for i in range(jmax)]) + ')'
+            logger.info("Using *VREAD with format %s in %s", fmt, filename)
+            self.run(fmt)
+
+        if self._local:
+            os.remove(filename)
+
+    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
         Uses TREAD to transfer the table.
+        It should be noticed that PyMAPDL when query a table, it will return
+        the table but not its axis (meaning it will return ``table[1:,1:]``).
 
         Parameters
         ----------
@@ -2043,6 +2371,9 @@ class _MapdlCore(Commands):
             List as a table or ``numpy`` array.
 
         var1 : str, optional
+            Variable name corresponding to the first dimension (row).
+            Default Row
+
             A primary variable (listed below) or can be an independent
             parameter. If specifying an independent parameter, then
             you must define an additional table for the independent
@@ -2059,7 +2390,7 @@ class _MapdlCore(Commands):
             - ``"Z"``: Z-coordinate location
             - ``"TEMP"``: Temperature
             - ``"VELOCITY"``: Velocity
-            - ``"1"``]: Pressure	PRESSURE [
+            - ``"PRESSURE"``: Pressure
             - ``"GAP"``: Geometric gap/penetration
             - ``"SECTOR"``: Cyclic sector number
             - ``"OMEGS"``: Amplitude of the rotational velocity vector
@@ -2070,10 +2401,16 @@ class _MapdlCore(Commands):
             - ``"CONC"``: Concentration
 
         var2 : str, optional
-            See ``var1``
+            Variable name corresponding to the first dimension (column).
+            See ``var1``.  Default column.
 
         var3 : str, optional
-            See ``var1``
+            Variable name corresponding to the first dimension (plane).
+            See ``var1``. Default Plane.
+
+        csysid : str, optional
+            An integer corresponding to the coordinate system ID number.
+            APDL Default = 0 (global Cartesian)
 
         Examples
         --------
@@ -2087,24 +2424,44 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['MY_TABLE']
         array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
         """
-        if array.ndim < 2:
-            raise ValueError('Expecting at least a 2D table, but input contains '
-                             'only 1 dimension')
-        self.dim(name, 'TABLE', array.shape[0], var1=var1, var2=var2, var3=var3)
-        base_name = random_string() + '.txt'
+        if not isinstance(array, np.ndarray):
+            raise ValueError("The table should be a Numpy array")
+        if array.shape[0] < 2 or array.shape[1] < 2:
+            raise ValueError("One or two of the array dimensions are too small to create a table.")
+        if array.ndim == 2:
+            self.dim(name, "TABLE", imax=array.shape[0]-1, jmax=array.shape[1] - 1, kmax="",
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        elif array.ndim == 3:
+            self.dim(name, "TABLE", imax=array.shape[0] - 1, jmax=array.shape[1] - 1, kmax=array.shape[2],
+                     var1=var1, var2=var2, var3=var3, csysid=csysid)
+        else:
+            raise ValueError(
+                f"Expecting only a 2D or 3D table, but input contains\n{array.ndim} dimensions"
+            )
+
+        if not np.all(array[0, :-1] <= array[0, 1:]):
+            raise ValueError('The underlying ``TREAD`` command requires that the axis 0 is in ascending order.')
+        if not np.all(array[:-1, 0] <= array[1:, 0]):
+            raise ValueError('The underlying ``TREAD`` command requires that the axis 1 is in ascending order.')
+
+        base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
-        np.savetxt(filename, array)
+        np.savetxt(filename, array,
+                   header='File generated by PyMAPDL:load_table')
 
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
-        self.tread(name, filename, mute=True)
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if self._local:
+            os.remove(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
-        raise NotImplementedError('Implemented by child class')
+        raise NotImplementedError("Implemented by child class")
 
     def _run(self, *args, **kwargs):  # pragma: no cover
-        raise NotImplementedError('Implemented by child class')
+        raise NotImplementedError("Implemented by child class")
 
     @property
     def version(self):
@@ -2134,30 +2491,44 @@ class _MapdlCore(Commands):
         >>> mapdl.directory
         'C:/temp_directory/'
 
+        Setting the directory
+
+        >>> mapdl.directory = 'C:/temp_directory/'
+        None
+
+        In case the directory does not exist or it is not
+        accessible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        a warning.
         """
         # always attempt to cache the path
         try:
-            self._path = self.inquire('DIRECTORY')
+            self._path = self.inquire("", "DIRECTORY")
         except Exception:
             pass
 
         # os independent path format
-        if self._path is not None:
-            self._path = self._path.replace('\\', '/')
+        if self._path: # self.inquire might return ''.
+            self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         return self._path
+
+    @directory.setter
+    @supress_logging
+    def directory(self, path):
+        """Change the directory using ``Mapdl.cwd``"""
+        self.cwd(path)  # this has been wrapped in Mapdl to show a warning if the file does not exist.
 
     @property
     def _lockfile(self):
         """lockfile path"""
         path = self.directory
         if path is not None:
-            return os.path.join(path, self.jobname + '.lock').replace('\\', '/')
+            return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
 
     def exit(self):  # pragma: no cover
         """Exit from MAPDL"""
-        raise NotImplementedError('Implemented by child class')
+        raise NotImplementedError("Implemented by child class")
 
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
@@ -2167,17 +2538,26 @@ class _MapdlCore(Commands):
             except Exception as e:
                 try:  # logger might be closed
                     if self._log is not None:
-                        self._log.error('exit: %s', str(e))
+                        self._log.error("exit: %s", str(e))
                 except Exception:
                     pass
 
     @supress_logging
-    def get_array(self, entity='', entnum='', item1='', it1num='', item2='',
-                  it2num='', kloop='', **kwargs):
-        """Uses the VGET command to Return an array from ANSYS as a
+    def get_array(
+        self,
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        kloop="",
+        **kwargs,
+    ):
+        """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
-        See `*VGET
+        See `VGET
         <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
         for more details.
 
@@ -2215,6 +2595,11 @@ class _MapdlCore(Commands):
             - 5 : Loop on the Item2 field.
             - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
 
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
         Examples
         --------
         List the current selected node numbers
@@ -2233,44 +2618,50 @@ class _MapdlCore(Commands):
                ...
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
-        Notes
-        -----
-        Please reference your ANSYS help manual *VGET command tables
-        for all the available *VGET values
         """
-        arr = self._get_array(entity, entnum, item1, it1num, item2,
-                              it2num, kloop)
+        arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
 
         # edge case where corba refuses to return the array
         ntry = 0
         while arr.size == 1 and arr[0] == -1:
-            arr = self._get_array(entity, entnum, item1, it1num,
-                                  item2, it2num, kloop)
+            arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
-                raise RuntimeError('Unable to get array for %s' % entity)
+                raise RuntimeError("Unable to get array for %s" % entity)
+            ntry += 1
         return arr
 
-    def _get_array(self, entity='', entnum='', item1='', it1num='', item2='',
-                   it2num='', kloop='', dtype=None, **kwargs):
+    def _get_array(
+        self,
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        kloop="",
+        dtype=None,
+        **kwargs,
+    ):
         """Uses the VGET command to get an array from ANSYS"""
-        parm_name = kwargs.pop('parm', None)
+        parm_name = kwargs.pop("parm", None)
 
         if parm_name is None:
-            parm_name = '__vget_tmp_%d__' % self._vget_arr_counter
+            parm_name = "__vget_tmp_%d__" % self._vget_arr_counter
             self._vget_arr_counter += 1
 
-        out = self.starvget(parm_name, entity, entnum, item1, it1num, item2,
-                            it2num, kloop, mute=False)
+        out = self.starvget(
+            parm_name, entity, entnum, item1, it1num, item2, it2num, kloop, mute=False
+        )
 
         # check if empty array
-        if 'the dimension number 1 is 0' in out:
+        if "the dimension number 1 is 0" in out:
             return np.empty(0)
 
         with self.non_interactive:
-            self.vwrite('%s(1)' % parm_name)
-            self.run('(F20.12)')
+            self.vwrite("%s(1)" % parm_name)
+            self.run("(F20.12)")
 
-        array = np.fromstring(self.last_response, sep='\n')
+        array = np.fromstring(self.last_response, sep="\n")
         if dtype:
             return array.astype(dtype)
         else:
@@ -2284,28 +2675,30 @@ class _MapdlCore(Commands):
         png_found = PNG_TEST.findall(text)
         if png_found:
             # flush graphics writer
-            self.show('CLOSE', mute=True)
-            self.show('PNG', mute=True)
+            self.show("CLOSE", mute=True)
+            self.show("PNG", mute=True)
 
             import matplotlib.pyplot as plt
             import matplotlib.image as mpimg
+
             filename = self._screenshot_path()
 
             if os.path.isfile(filename):
                 img = mpimg.imread(filename)
                 plt.imshow(img)
-                plt.axis('off')
+                plt.axis("off")
                 if self._show_matplotlib_figures:  # pragma: no cover
                     plt.show()  # consider in-line plotting
                 if scooby.in_ipython():
                     from IPython.display import display
+
                     display(plt.gcf())
             else:  # pragma: no cover
-                self._log.error('Unable to find screenshot at %s', filename)
+                self._log.error("Unable to find screenshot at %s", filename)
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, f'{self.jobname}*.png'))
+        filenames = glob.glob(os.path.join(self.directory, f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
@@ -2313,7 +2706,7 @@ class _MapdlCore(Commands):
         """alias for set_log_level"""
         self.set_log_level(level)
 
-    def list(self, filename, ext=''):
+    def list(self, filename, ext=""):
         """Displays the contents of an external, coded file.
 
         APDL Command: ``/LIST``
@@ -2327,14 +2720,24 @@ class _MapdlCore(Commands):
         ext : str, optional
             Filename extension
         """
-        if hasattr(self, '_local'):  # gRPC
+        if hasattr(self, "_local"):  # gRPC
             if not self._local:
                 return self._download_as_raw(filename).decode()
 
         path = pathlib.Path(filename)
-        if path.parent != '.':
+        if path.parent != ".":
             path = os.path.join(self.directory, filename)
 
         path = str(path) + ext
         with open(path) as fid:
             return fid.read()
+
+    @wraps(Commands.cwd)
+    def cwd(self, *args, **kwargs):
+        """Wraps cwd"""
+        returns_ = super().cwd( *args, **kwargs)
+
+        if '*** WARNING ***' in self._response:
+            warn('\n' + self._response)
+
+        return returns_

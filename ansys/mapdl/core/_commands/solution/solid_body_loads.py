@@ -1,7 +1,5 @@
 class SolidBodyLoads:
-
-    def bfa(self, area="", lab="", val1="", val2="", val3="", val4="",
-            **kwargs):
+    def bfa(self, area="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on an area.
 
         APDL Command: BFA
@@ -26,7 +24,7 @@ class SolidBodyLoads:
             is the voltage drop and VAL2 is the phase angle. If Lab = IMPD,
             VAL1 is the resistance and VAL2 is the reactance in ohms/square.
             When specifying a table name, you must enclose the table name in
-            percent signs (%), e.g., BFA,Area,Lab,%tabname%. Use the *DIM
+            percent signs (%), e.g., BFA,Area,Lab,%tabname%. Use the ``*DIM``
             command to define a table.
 
         val4
@@ -115,8 +113,7 @@ class SolidBodyLoads:
         command = f"BFALIST,{area},{lab}"
         return self.run(command, **kwargs)
 
-    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="",
-            **kwargs):
+    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="", **kwargs):
         """Defines a body force load at a keypoint.
 
         APDL Command: BFK
@@ -140,7 +137,7 @@ class SolidBodyLoads:
             for mass source in a harmonic analysis or mass source rate in a
             transient analysis, and ignoreVAL2 and VAL3. When specifying a
             table name, you must enclose the table name in percent signs (%),
-            e.g., BFK,Kpoi,Lab,%tabname%.  Use the *DIM command to define a
+            e.g., BFK,Kpoi,Lab,%tabname%.  Use the ``*DIM`` command to define a
             table.
 
         phase
@@ -234,8 +231,7 @@ class SolidBodyLoads:
         command = f"BFKLIST,{kpoi},{lab}"
         return self.run(command, **kwargs)
 
-    def bfl(self, line="", lab="", val1="", val2="", val3="", val4="",
-            **kwargs):
+    def bfl(self, line="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on a line.
 
         APDL Command: BFL
@@ -257,7 +253,7 @@ class SolidBodyLoads:
             a harmonic analysis or mass source rate in a transient analysis,
             and ignoreVAL2 and VAL3. When specifying a table name, you must
             enclose the table name in percent signs (%), e.g.,
-            BFL,Line,Lab,%tabname%.  Use the *DIM command to define a table.
+            BFL,Line,Lab,%tabname%.  Use the ``*DIM`` command to define a table.
 
         val4
             If Lab = JS, VAL4 is the phase angle in degrees.
@@ -361,8 +357,7 @@ class SolidBodyLoads:
         command = f"BFTRAN,"
         return self.run(command, **kwargs)
 
-    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="",
-            **kwargs):
+    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="", **kwargs):
         """Defines a body force load on a volume.
 
         APDL Command: BFV
@@ -387,7 +382,7 @@ class SolidBodyLoads:
             transient analysis, and ignoreVAL2 and VAL3. For Lab = VLTG, VAL1
             is the voltage drop and VAL2 is the phase angle.  When specifying a
             table name, you must enclose the table name in percent signs (%),
-            e.g., BFV,Volu,Lab,%tabname%.  Use the *DIM command to define a
+            e.g., BFV,Volu,Lab,%tabname%.  Use the ``*DIM`` command to define a
             table.
 
         phase

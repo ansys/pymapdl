@@ -1,11 +1,12 @@
-from typing import Optional, Union
-from ansys.mapdl.core.mapdl_types import MapdlInt, MapdlFloat
+from typing import Optional
+
+from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
 class ElementTable:
-
-    def detab(self, elem="", lab="", v1="", v2="", v3="", v4="", v5="", v6="",
-              **kwargs):
+    def detab(
+        self, elem="", lab="", v1="", v2="", v3="", v4="", v5="", v6="", **kwargs
+    ):
         """Modifies element table results in the database.
 
         APDL Command: DETAB
@@ -47,9 +48,15 @@ class ElementTable:
         command = f"DETAB,{elem},{lab},{v1},{v2},{v3},{v4},{v5},{v6}"
         return self.run(command, **kwargs)
 
-    def esort(self, item: str = "", lab: str = "", order: MapdlInt = "",
-              kabs: MapdlInt = "", numb: MapdlInt = "",
-              **kwargs) -> Optional[str]:
+    def esort(
+        self,
+        item: str = "",
+        lab: str = "",
+        order: MapdlInt = "",
+        kabs: MapdlInt = "",
+        numb: MapdlInt = "",
+        **kwargs,
+    ) -> Optional[str]:
         """Sorts the element table.
 
         APDL Command: ESORT
@@ -97,77 +104,13 @@ class ElementTable:
         command = f"ESORT,{item},{lab},{order},{kabs},{numb}"
         return self.run(command, **kwargs)
 
-    def etable(self, lab: str = "", item: str = "", comp: str = "",
-               option: str = "", **kwargs) -> Optional[str]:
+    def etable(
+        self, lab: str = "", item: str = "", comp: str = "", option: str = "", **kwargs
+    ) -> Optional[str]:
         """Fills a table of element values for further processing.
 
         APDL Command: ETABLE
 
-        Parameters
-        ----------
-        lab
-            Any unique user defined label for use in subsequent
-            commands and output headings (maximum of eight characters
-            and not a General predefined Item label). Defaults to an
-            eight character label formed by concatenating the first
-            four characters of the Item and Comp labels. If the same
-            as a previous user label, this result item will be
-            included under the same label. Up to 200 different labels
-            may be defined. The following labels are predefined and
-            are not available for user-defined labels: ``'REFL''`,
-            ``'STAT'``, and ``'ERAS'``.  ``lab='REFL'`` refills all
-            tables previously defined with the :meth:`etable` commands
-            (not the CALC module commands) according to the latest
-            ETABLE specifications and is convenient for refilling
-            tables after the load step (SET) has been
-            changed. Remaining fields will be ignored if
-            ``Lab='REFL'``.  ``lab='STAT'`` displays stored table
-            values.  ``lab='ERAS'`` erases the entire table.
-
-        item
-            Label identifying the item. General item labels are shown
-            in the table below. Some items also require a component
-            label. Character parameters may be used. ``item='eras'``
-            erases a Lab column.
-
-        comp
-            Component of the item (if required). General component
-            labels are shown in the table below. Character parameters
-            may be used.
-
-        option
-            Option for storing element table data:
-
-            * ``'MIN'`` - Store minimum element nodal value of the specified
-              item component.
-            * ``'MAX'`` - Store maximum element nodal value of the specified
-              item component.
-            * ``'AVG'`` - Store averaged element centroid value of the
-              specified item component (default).
-
-        Examples
-        --------
-        Print the volume of individual elements.
-
-        >>> mapdl.clear()
-        >>> output = mapdl.input(examples.vmfiles['vm6'])
-        >>> mapdl.post1()
-        >>> label = 'MYVOLU'
-        >>> mapdl.etable(label, 'VOLU')
-        >>> print(mapdl.pretab(label))
-        PRINT ELEMENT TABLE ITEMS PER ELEMENT
-           *****ANSYS VERIFICATION RUN ONLY*****
-             DO NOT USE RESULTS FOR PRODUCTION
-          ***** POST1 ELEMENT TABLE LISTING *****
-            STAT     CURRENT
-            ELEM     XDISP
-               1  0.59135E-001
-               2  0.59135E-001
-               3  0.59135E-001
-        ...
-
-        Notes
-        -----
         The ETABLE command defines a table of values per element (the
         element table) for use in further processing. The element
         table is organized similar to spreadsheet, with rows
@@ -251,6 +194,69 @@ class ElementTable:
         The element table data option (Option) is not available for
         all output items.
 
+        Parameters
+        ----------
+        lab
+            Any unique user defined label for use in subsequent
+            commands and output headings (maximum of eight characters
+            and not a General predefined Item label). Defaults to an
+            eight character label formed by concatenating the first
+            four characters of the Item and Comp labels. If the same
+            as a previous user label, this result item will be
+            included under the same label. Up to 200 different labels
+            may be defined. The following labels are predefined and
+            are not available for user-defined labels: ``'REFL''`,
+            ``'STAT'``, and ``'ERAS'``.  ``lab='REFL'`` refills all
+            tables previously defined with the :meth:`etable` commands
+            (not the CALC module commands) according to the latest
+            ETABLE specifications and is convenient for refilling
+            tables after the load step (SET) has been
+            changed. Remaining fields will be ignored if
+            ``Lab='REFL'``.  ``lab='STAT'`` displays stored table
+            values.  ``lab='ERAS'`` erases the entire table.
+
+        item
+            Label identifying the item. General item labels are shown
+            in the table below. Some items also require a component
+            label. Character parameters may be used. ``item='eras'``
+            erases a Lab column.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in the table below. Character parameters
+            may be used.
+
+        option
+            Option for storing element table data:
+
+            * ``'MIN'`` - Store minimum element nodal value of the specified
+              item component.
+            * ``'MAX'`` - Store maximum element nodal value of the specified
+              item component.
+            * ``'AVG'`` - Store averaged element centroid value of the
+              specified item component (default).
+
+        Examples
+        --------
+        Print the volume of individual elements.
+
+        >>> mapdl.clear()
+        >>> output = mapdl.input(examples.vmfiles['vm6'])
+        >>> mapdl.post1()
+        >>> label = 'MYVOLU'
+        >>> mapdl.etable(label, 'VOLU')
+        >>> print(mapdl.pretab(label))
+        PRINT ELEMENT TABLE ITEMS PER ELEMENT
+           *****ANSYS VERIFICATION RUN ONLY*****
+             DO NOT USE RESULTS FOR PRODUCTION
+          ***** POST1 ELEMENT TABLE LISTING *****
+            STAT     CURRENT
+            ELEM     XDISP
+               1  0.59135E-001
+               2  0.59135E-001
+               3  0.59135E-001
+        ...
+
         """
         command = f"ETABLE,{lab},{item},{comp},{option}"
         return self.run(command, **kwargs)
@@ -260,16 +266,17 @@ class ElementTable:
 
         APDL Command: EUSORT
 
+        Notes
+        -----
+        Changing the selected element set [ESEL] also restores the original
+        element order.
+
         Examples
         --------
         >>> mapdl.post1()
         >>> mapdl.eusort()
         'ELEMENT SORT REMOVED'
 
-        Notes
-        -----
-        Changing the selected element set [ESEL] also restores the original
-        element order.
         """
         return self.run("EUSORT", **kwargs)
 
@@ -361,36 +368,70 @@ class ElementTable:
         command = f"PLLS,{labi},{labj},{fact},{kund},{viewup}"
         return self.run(command, **kwargs)
 
-    def pretab(self, lab1="", lab2="", lab3="", lab4="", lab5="", lab6="",
-               lab7="", lab8="", lab9="", **kwargs):
-        """Prints the element table items.
+    def pretab(
+        self,
+        lab1="",
+        lab2="",
+        lab3="",
+        lab4="",
+        lab5="",
+        lab6="",
+        lab7="",
+        lab8="",
+        lab9="",
+        **kwargs,
+    ):
+        """Print the element table items.
 
         APDL Command: PRETAB
 
         Parameters
         ----------
-        lab1, lab2, lab3, . . . , lab9
-            Print selected items.  Valid labels are (blank) or any label as
-            specified with the ETABLE command.  Convenience labels may be used
-            for Lab1 to select groups of labels (10 labels maximum):  GRP1 for
-            first 10 stored items; GRP2 for items 11 to 20; GRP3 for items 21
-            to 30; GRP4 for items 31 to 40; GRP5 for items 41 to 50.  Enter
-            ETABLE,STAT command to list stored item order.  If all labels are
+        lab1, lab2, lab3, ... , lab9
+            Print selected items.  Valid labels are ``""`` or any
+            label as specified with the ETABLE command.  Convenience
+            labels may be used for Lab1 to select groups of labels (10
+            labels maximum): GRP1 for first 10 stored items; GRP2 for
+            items 11 to 20; GRP3 for items 21 to 30; GRP4 for items 31
+            to 40; GRP5 for items 41 to 50.  Run ``etable("stat")``
+            command to list stored item order.  If all labels are
             blank, print first 10 stored items (GRP1).
 
         Notes
         -----
-        Prints the items stored in the table defined with the ETABLE command.
-        Item values will be listed for the selected elements in the sorted
-        sequence [ESORT].  The FORCE command can be used to define which
-        component of the nodal load is to be used (static,  damping, inertia,
-        or total).
+        Prints the items stored in the table defined with the
+        :func:`etable() <ansys.mapdl.core.Mapdl.etable>` command.
+        Item values will be listed for the selected elements in the
+        sorted sequence [ESORT].  :func:`force()
+        <ansys.mapdl.core.Mapdl.force>` can be used to define which
+        component of the nodal load is to be used (static, damping,
+        inertia, or total).
 
-        Portions of this command are not supported by PowerGraphics
-        [/GRAPHICS,POWER].
+        Examples
+        --------
+        Print out element displacement results.
+
+        >>> mapdl.etable("values", "U", "X")
+        STORE VALUES   FROM ITEM=U    COMP=X     FOR ALL SELECTED ELEMENTS
+
+        Now print out the table.
+
+        >>> mapdl.pretab().splitlines()[:4]
+        ['PRINT ELEMENT TABLE ITEMS PER ELEMENT',
+         '       1   0.1073961540E-005  0.1073961540E-005',
+         '       2   0.3156317304E-005  0.3156317304E-005',
+         '       3   0.5125435148E-005  0.5125435148E-005']
+
+        Note that can access the array directly from APDL:
+
+        >>> mapdl.get_array("elem", 1, "ETAB", "values")
+        array([1.07396154e-06, 3.15631730e-06, 5.12543515e-06, ...,
+               5.41204700e-06, 3.33649806e-06, 1.13836132e-06])
+
         """
-        command = f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}"
-        return self.run(command, **kwargs)
+        return self.run(
+            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}", **kwargs
+        )
 
     def sabs(self, key="", **kwargs):
         """Specifies absolute values for element table operations.
@@ -414,8 +455,7 @@ class ElementTable:
         command = f"SABS,{key}"
         return self.run(command, **kwargs)
 
-    def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="",
-             **kwargs):
+    def sadd(self, labr="", lab1="", lab2="", fact1="", fact2="", const="", **kwargs):
         """Forms an element table item by adding two existing items.
 
         APDL Command: SADD
@@ -457,8 +497,9 @@ class ElementTable:
         command = f"SADD,{labr},{lab1},{lab2},{fact1},{fact2},{const}"
         return self.run(command, **kwargs)
 
-    def sallow(self, strs1="", strs2="", strs3="", strs4="", strs5="",
-               strs6="", **kwargs):
+    def sallow(
+        self, strs1="", strs2="", strs3="", strs4="", strs5="", strs6="", **kwargs
+    ):
         """Defines the allowable stress table for safety factor calculations.
 
         APDL Command: SALLOW
@@ -511,7 +552,7 @@ class ElementTable:
         elements by exponentiating and multiplying two existing labeled result
         items according to the operation:
 
-        LabR = (|Lab1|EXP1) x (|Lab2|EXP2)
+        ``LabR = (|Lab1|EXP1) x (|Lab2|EXP2)``
 
         Roots, reciprocals, and divides may also be done with this command.
         """
@@ -539,16 +580,16 @@ class ElementTable:
         Allows safety factor (SF) or margin of safety (MS) calculations to be
         made for the average nodal stresses according to:
 
-        SF = SALLOW/|Stress|
+        ``SF = SALLOW/|Stress|``
 
-        MS = (SALLOW/|Stress|) -- 1.0
+        ``MS = (SALLOW/|Stress|) -- 1.0``
 
         Calculations are done during the display, select, or sort operation (in
         the active coordinate system [RSYS]) with results stored in place of
         the nodal stresses.  Use the PRNSOL or PLNSOL command to display the
         results.
 
-        Note:: : The results are meaningful only for the stress (SIG1, SIGE,
+        The results are meaningful only for the stress (SIG1, SIGE,
         etc.) upon which SALLOW is based.  Nodal temperatures used are those
         automatically stored for the node.  Related commands are SFCALC,
         SALLOW, TALLOW.
@@ -725,8 +766,9 @@ class ElementTable:
         command = f"SSUM,"
         return self.run(command, **kwargs)
 
-    def tallow(self, temp1="", temp2="", temp3="", temp4="", temp5="",
-               temp6="", **kwargs):
+    def tallow(
+        self, temp1="", temp2="", temp3="", temp4="", temp5="", temp6="", **kwargs
+    ):
         """Defines the temperature table for safety factor calculations.
 
         APDL Command: TALLOW
@@ -750,8 +792,19 @@ class ElementTable:
         command = f"TALLOW,{temp1},{temp2},{temp3},{temp4},{temp5},{temp6}"
         return self.run(command, **kwargs)
 
-    def vcross(self, labxr="", labyr="", labzr="", labx1="", laby1="",
-               labz1="", labx2="", laby2="", labz2="", **kwargs):
+    def vcross(
+        self,
+        labxr="",
+        labyr="",
+        labzr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Forms element table items from the cross product of two vectors.
 
         APDL Command: VCROSS
@@ -780,8 +833,17 @@ class ElementTable:
         command = f"VCROSS,{labxr},{labyr},{labzr},{labx1},{laby1},{labz1},{labx2},{laby2},{labz2}"
         return self.run(command, **kwargs)
 
-    def vdot(self, labr="", labx1="", laby1="", labz1="", labx2="", laby2="",
-             labz2="", **kwargs):
+    def vdot(
+        self,
+        labr="",
+        labx1="",
+        laby1="",
+        labz1="",
+        labx2="",
+        laby2="",
+        labz2="",
+        **kwargs,
+    ):
         """Forms an element table item from the dot product of two vectors.
 
         APDL Command: VDOT

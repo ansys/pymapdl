@@ -1,5 +1,4 @@
 class Special:
-
     def cvar(self, ir="", ia="", ib="", itype="", datum="", name="", **kwargs):
         """Computes covariance between two quantities.
 
@@ -52,8 +51,18 @@ class Special:
         command = f"CVAR,{ir},{ia},{ib},{itype},{datum},{name}"
         return self.run(command, **kwargs)
 
-    def pmgtran(self, fname="", freq="", fcnam1="", fcnam2="", pcnam1="",
-                pcnam2="", ecnam1="", ccnam1="", **kwargs):
+    def pmgtran(
+        self,
+        fname="",
+        freq="",
+        fcnam1="",
+        fcnam2="",
+        pcnam1="",
+        pcnam2="",
+        ecnam1="",
+        ccnam1="",
+        **kwargs,
+    ):
         """Summarizes electromagnetic results from a transient analysis.
 
         APDL Command: PMGTRAN
@@ -150,8 +159,19 @@ class Special:
         command = f"RCYC,{ir},{ia},{sector},{name}"
         return self.run(command, **kwargs)
 
-    def resp(self, ir="", lftab="", ldtab="", spectype="", dampratio="",
-             dtime="", tmin="", tmax="", inputtype="", **kwargs):
+    def resp(
+        self,
+        ir="",
+        lftab="",
+        ldtab="",
+        spectype="",
+        dampratio="",
+        dtime="",
+        tmin="",
+        tmax="",
+        inputtype="",
+        **kwargs,
+    ):
         """Generates a response spectrum.
 
         APDL Command: RESP
@@ -232,7 +252,7 @@ class Special:
         TMIN)/DTIME and the number of frequency points (frequencies located in
         variable LFTAB).
 
-         Input solution points requested (using DTIME and the frequency range)
+        Input solution points requested (using DTIME and the frequency range)
         at a time not corresponding to an actual displacement solution time on
         the file are linearly interpolated with respect to the existing points.
 
@@ -242,8 +262,9 @@ class Special:
         command = f"RESP,{ir},{lftab},{ldtab},{spectype},{dampratio},{dtime},{tmin},{tmax},{inputtype}"
         return self.run(command, **kwargs)
 
-    def rpsd(self, ir="", ia="", ib="", itype="", datum="", name="", signif="",
-             **kwargs):
+    def rpsd(
+        self, ir="", ia="", ib="", itype="", datum="", name="", signif="", **kwargs
+    ):
         """Calculates response power spectral density (PSD).
 
         APDL Command: RPSD
@@ -304,8 +325,17 @@ class Special:
         command = f"RPSD,{ir},{ia},{ib},{itype},{datum},{name},{signif}"
         return self.run(command, **kwargs)
 
-    def smooth(self, vect1="", vect2="", datap="", fitpt="", vect3="",
-               vect4="", disp="", **kwargs):
+    def smooth(
+        self,
+        vect1="",
+        vect2="",
+        datap="",
+        fitpt="",
+        vect3="",
+        vect4="",
+        disp="",
+        **kwargs,
+    ):
         """Allows smoothing of noisy data and provides a graphical representation
 
         APDL Command: SMOOTH
@@ -377,13 +407,13 @@ class Special:
         controls (/GRID, /GTHK, /COLOR, etc.). If working interactively, these
         controls appear in this dialog box for convenience, as well as in their
         standard dialog boxes. You must always create Vect1 and Vect2 (using
-        *DIM) and fill these vectors before smoothing the data. If you're
+        ``*DIM``) and fill these vectors before smoothing the data. If you're
         working interactively, ANSYS automatically creates Vect3 and Vect4, but
         if you're working in batch (command) mode, you must create Vect3 and
-        Vect4 (using *DIM) before issuing SMOOTH.  Vect3 and Vect4 are then
+        Vect4 (using ``*DIM``) before issuing SMOOTH.  Vect3 and Vect4 are then
         filled automatically by ANSYS.  In addition, ANSYS creates an
         additional TABLE type array that contains the smoothed array and the
-        unsmoothed data to allow for plotting later with *VPLOT.  Column 1 in
+        unsmoothed data to allow for plotting later with ``*VPLOT``.  Column 1 in
         this table corresponds to Vect1, column 2 to Vect2, and column 3 to
         Vect4.  This array is named Vect3_SMOOTH, up to a limit of 32
         characters. For example, if the array name is X1, the table name is
@@ -425,7 +455,7 @@ class Special:
         variable 2 (starting at time 0.0) to array parameter A.  Looping
         continues from array element A(1) with the index number incremented by
         one until the variable is filled.  The number of loops may be
-        controlled with the *VLEN command (except that loop skipping (NINC) is
+        controlled with the ``*VLEN`` command (except that loop skipping (NINC) is
         not allowed).  For multi-dimensioned array parameters, only the first
         (row) subscript is incremented.
         """
@@ -470,7 +500,7 @@ class Special:
         2 starting at time 0.0.  Looping continues from array element A(1) with
         the index number incremented by one until the variable is filled.
         Unfilled variable locations are assigned a zero value.  The number of
-        loops may be controlled with the *VLEN command (except that loop
+        loops may be controlled with the ``*VLEN`` command (except that loop
         skipping (NINC) is not allowed).  For multi-dimensioned array
         parameters, only the first (row) subscript is incremented.
         """

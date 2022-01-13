@@ -1,5 +1,4 @@
 class Aux3:
-
     def compress(self, **kwargs):
         """Deletes all specified sets.
 
@@ -50,8 +49,9 @@ class Aux3:
         command = f"FILEAUX3,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def modify(self, set_="", lstep="", iter_="", cumit="", time="", ktitle="",
-               **kwargs):
+    def modify(
+        self, set_="", lstep="", iter_="", cumit="", time="", ktitle="", **kwargs
+    ):
         """Changes the listed values of the data in a set.
 
         APDL Command: MODIFY

@@ -5,9 +5,17 @@ is, to specify and define material models).
 
 
 class MaterialDataTables:
-
-    def tb(self, lab="", mat="", ntemp="", npts="", tbopt="", eosopt="",
-           funcname="", **kwargs):
+    def tb(
+        self,
+        lab="",
+        mat="",
+        ntemp="",
+        npts="",
+        tbopt="",
+        eosopt="",
+        funcname="",
+        **kwargs
+    ):
         """APDL Command: TB
 
         Activates a data table for material properties or special element
@@ -105,8 +113,15 @@ class MaterialDataTables:
                     Polynomial Form, Response Function, Yeoh, and user-
                     defined).
         """
-        command = "TB,%s,%s,%s,%s,%s,%s,%s" % (str(lab), str(mat), str(
-            ntemp), str(npts), str(tbopt), str(eosopt), str(funcname))
+        command = "TB,%s,%s,%s,%s,%s,%s,%s" % (
+            str(lab),
+            str(mat),
+            str(ntemp),
+            str(npts),
+            str(tbopt),
+            str(eosopt),
+            str(funcname),
+        )
         return self.run(command, **kwargs)
 
     def tbcopy(self, lab="", matf="", matt="", **kwargs):
@@ -145,8 +160,7 @@ class MaterialDataTables:
         command = "TBCOPY,%s,%s,%s" % (str(lab), str(matf), str(matt))
         return self.run(command, **kwargs)
 
-    def tbdata(self, stloc="", c1="", c2="", c3="", c4="", c5="", c6="",
-               **kwargs):
+    def tbdata(self, stloc="", c1="", c2="", c3="", c4="", c5="", c6="", **kwargs):
         """APDL Command: TBDATA
 
         Defines data for the material data table.
@@ -179,7 +193,14 @@ class MaterialDataTables:
         This command is also valid in SOLUTION.
         """
         command = "TBDATA,%s,%s,%s,%s,%s,%s,%s" % (
-            str(stloc), str(c1), str(c2), str(c3), str(c4), str(c5), str(c6))
+            str(stloc),
+            str(c1),
+            str(c2),
+            str(c3),
+            str(c4),
+            str(c5),
+            str(c6),
+        )
         return self.run(command, **kwargs)
 
     def tbdele(self, lab="", mat1="", mat2="", inc="", **kwargs):
@@ -360,7 +381,12 @@ class MaterialDataTables:
         Interpolation and Scaling in the Material Reference.
         """
         command = "TBIN,%s,%s,%s,%s,%s" % (
-            str(oper), str(par1), str(par2), str(par3), str(par4))
+            str(oper),
+            str(par1),
+            str(par2),
+            str(par3),
+            str(par4),
+        )
         return self.run(command, **kwargs)
 
     def tblist(self, lab="", mat="", **kwargs):
@@ -473,7 +499,12 @@ class MaterialDataTables:
         This command is valid in any processor.
         """
         command = "TBPLOT,%s,%s,%s,%s,%s" % (
-            str(lab), str(mat), str(tbopt), str(temp), str(segn))
+            str(lab),
+            str(mat),
+            str(tbopt),
+            str(temp),
+            str(segn),
+        )
         return self.run(command, **kwargs)
 
     def tbpt(self, oper="", x1="", x2="", x3="", xn="", **kwargs):
@@ -507,7 +538,12 @@ class MaterialDataTables:
         This command is also valid in SOLUTION.
         """
         command = "TBPT,%s,%s,%s,%s,%s" % (
-            str(oper), str(x1), str(x2), str(x3), str(xn))
+            str(oper),
+            str(x1),
+            str(x2),
+            str(x3),
+            str(xn),
+        )
         return self.run(command, **kwargs)
 
     def tbtemp(self, temp="", kmod="", **kwargs):

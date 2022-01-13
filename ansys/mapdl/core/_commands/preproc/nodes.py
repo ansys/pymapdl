@@ -1,10 +1,9 @@
 import re
 
+from ansys.mapdl.core._commands import parse
 
 class Nodes:
-
-    def center(self, node="", node1="", node2="", node3="", radius="",
-               **kwargs):
+    def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
         """Defines a node at the center of curvature of 2 or 3 nodes.
 
         APDL Command: CENTER
@@ -33,8 +32,18 @@ class Nodes:
         command = f"CENTER,{node},{node1},{node2},{node3},{radius}"
         return self.run(command, **kwargs)
 
-    def fill(self, node1="", node2="", nfill="", nstrt="", ninc="", itime="",
-             inc="", space="", **kwargs):
+    def fill(
+        self,
+        node1="",
+        node2="",
+        nfill="",
+        nstrt="",
+        ninc="",
+        itime="",
+        inc="",
+        space="",
+        **kwargs,
+    ):
         """Generates a line of nodes between two existing nodes.
 
         APDL Command: FILL
@@ -49,16 +58,16 @@ class Nodes:
 
         nfill
             Fill NFILL nodes between NODE1 and NODE2 (defaults to
-            |NODE2-NODE1|-1).  NFILL must be positive.
+            ``|NODE2-NODE1|-1``).  NFILL must be positive.
 
         nstrt
-            Node number assigned to first filled-in node (defaults to NODE1 +
-            NINC).
+            Node number assigned to first filled-in node (defaults to ``NODE1 +
+            NINC``).
 
         ninc
             Add this increment to each of the remaining filled-in node numbers
             (may be positive or negative).  Defaults to the integer result of
-            (NODE2-NODE1)/(NFILL + 1), i.e., linear interpolation.  If the
+            ``(NODE2-NODE1)/(NFILL + 1)``, i.e., linear interpolation.  If the
             default evaluates to zero, or if zero is input, NINC is set to 1.
 
         itime, inc
@@ -83,8 +92,19 @@ class Nodes:
         command = f"FILL,{node1},{node2},{nfill},{nstrt},{ninc},{itime},{inc},{space}"
         return self.run(command, **kwargs)
 
-    def move(self, node="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="",
-             z2="", **kwargs):
+    def move(
+        self,
+        node="",
+        kc1="",
+        x1="",
+        y1="",
+        z1="",
+        kc2="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
+    ):
         """Calculates and moves a node to an intersection.
 
         APDL Command: MOVE
@@ -124,7 +144,7 @@ class Nodes:
         different coordinate systems).  The three (of six) constants easiest to
         define should be used.  The program will calculate the remaining three
         coordinate constants.  All arguments, except KC1, must be input.  Use
-        the repeat command [*REPEAT] after the MOVE command to define a line of
+        the repeat command [``*REPEAT``] after the MOVE command to define a line of
         intersection by repeating the move operation on all nodes of the line.
 
         Surfaces of constant value are implied by some commands by specifying a
@@ -154,11 +174,16 @@ class Nodes:
         command = f"MOVE,{node},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-          **kwargs) -> int:
+    def n(self, node="", x="", y="", z="", thxy="", thyz="", thzx="", **kwargs) -> int:
         """Define a node.
 
         APDL Command: N
+
+        Defines a node in the active coordinate system [CSYS].  The
+        nodal coordinate system is parallel to the global Cartesian
+        system unless rotated.  Rotation angles are in degrees and
+        redefine any previous rotation angles.  See the NMODIF, NANG,
+        NROTAT, and NORA commands for other rotation options.
 
         Parameters
         ----------
@@ -199,13 +224,6 @@ class Nodes:
         >>> nnum
         10
 
-        Notes
-        -----
-        Defines a node in the active coordinate system [CSYS].  The
-        nodal coordinate system is parallel to the global Cartesian
-        system unless rotated.  Rotation angles are in degrees and
-        redefine any previous rotation angles.  See the NMODIF, NANG,
-        NROTAT, and NORA commands for other rotation options.
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
         msg = self.run(command, **kwargs)
@@ -280,8 +298,20 @@ class Nodes:
         command = f"NAXIS,{action},{val}"
         return self.run(command, **kwargs)
 
-    def nang(self, node="", x1="", x2="", x3="", y1="", y2="", y3="", z1="",
-             z2="", z3="", **kwargs):
+    def nang(
+        self,
+        node="",
+        x1="",
+        x2="",
+        x3="",
+        y1="",
+        y2="",
+        y3="",
+        z1="",
+        z2="",
+        z3="",
+        **kwargs,
+    ):
         """Rotates a nodal coordinate system by direction cosines.
 
         APDL Command: NANG
@@ -355,9 +385,13 @@ class Nodes:
             First node in distance calculation.  If ND1 = P, graphical picking
             is enabled and all remaining command fields are ignored (valid only
             in the GUI).
-
         nd2
             Second node in distance calculation.
+
+        Returns
+        -------
+        list
+            ``[DIST, X, Y, Z]`` distance between two nodes.
 
         Notes
         -----
@@ -366,21 +400,43 @@ class Nodes:
         Z locations of ND1 are subtracted from the X, Y, and Z locations of ND2
         (respectively) to determine the offsets.  NDIST is valid in any
         coordinate system except toroidal [CSYS,3].
-
         NDIST returns a variable, called "_RETURN," which contains the distance
         value. You can use this value for various purposes, such as the
         calculation of distributed loads. In interactive mode, you can access
         this command by using the Model Query Picker (Utility Menu> List>
         Picked Entities), where you can also access automatic annotation
         functions and display the value on your model.
-
         This command is valid in any processor.
-        """
-        command = f"NDIST,{nd1},{nd2}"
-        return self.run(command, **kwargs)
 
-    def ngen(self, itime="", inc="", node1="", node2="", ninc="", dx="", dy="",
-             dz="", space="", **kwargs):
+        Examples
+        --------
+        Compute the distance between two nodes.
+
+        >>> node1 = (0, 8, -3)
+        >>> node2 = (13, 5, 7)
+        >>> node_num1 = mapdl.n("", *node1)
+        >>> node_num2 = mapdl.n("", *node2)
+        >>> node_dist = mapdl.ndist(node_num1, node_num2)
+        >>> node_dist
+        [16.673332000533065, 13.0, -3.0, 10.0]
+
+        """
+
+        return parse.parse_ndist(self.run(f"NDIST,{nd1},{nd2}", **kwargs))
+
+    def ngen(
+        self,
+        itime="",
+        inc="",
+        node1="",
+        node2="",
+        ninc="",
+        dx="",
+        dy="",
+        dz="",
+        space="",
+        **kwargs,
+    ):
         """Generates additional nodes from a pattern of nodes.
 
         APDL Command: NGEN
@@ -442,8 +498,18 @@ class Nodes:
         command = f"NKPT,{node},{npt}"
         return self.run(command, **kwargs)
 
-    def nlist(self, node1="", node2="", ninc="", lcoord="", sort1="", sort2="",
-              sort3="", kinternal="", **kwargs):
+    def nlist(
+        self,
+        node1="",
+        node2="",
+        ninc="",
+        lcoord="",
+        sort1="",
+        sort2="",
+        sort3="",
+        kinternal="",
+        **kwargs,
+    ):
         """Lists nodes.
 
         APDL Command: NLIST
@@ -492,11 +558,12 @@ class Nodes:
 
         This command is valid in any processor.
         """
-        command = f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        command = (
+            f"NLIST,{node1},{node2},{ninc},{lcoord},{sort1},{sort2},{sort3},{kinternal}"
+        )
         return self.run(command, **kwargs)
 
-    def nmodif(self, node="", x="", y="", z="", thxy="", thyz="", thzx="",
-               **kwargs):
+    def nmodif(self, node="", x="", y="", z="", thxy="", thyz="", thzx="", **kwargs):
         """Modifies an existing node.
 
         APDL Command: NMODIF
@@ -739,8 +806,9 @@ class Nodes:
         command = f"NRRANG,{nmin},{nmax},{ninc}"
         return self.run(command, **kwargs)
 
-    def nscale(self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="",
-               **kwargs):
+    def nscale(
+        self, inc="", node1="", node2="", ninc="", rx="", ry="", rz="", **kwargs
+    ):
         """Generates a scaled set of nodes from a pattern of nodes.
 
         APDL Command: NSCALE
@@ -892,8 +960,17 @@ class Nodes:
         """
         return self.run(f"NWRITE,{fname},{ext},,{kappnd}", **kwargs)
 
-    def quad(self, node1="", nintr="", node2="", nfill="", nstrt="", ninc="",
-             pkfac="", **kwargs):
+    def quad(
+        self,
+        node1="",
+        nintr="",
+        node2="",
+        nfill="",
+        nstrt="",
+        ninc="",
+        pkfac="",
+        **kwargs,
+    ):
         """Generates a quadratic line of nodes from three nodes.
 
         APDL Command: QUAD
@@ -916,7 +993,7 @@ class Nodes:
 
         nfill
             Fill-in NFILL nodes between NODE1 and NODE2 (defaults to
-            |NODE2-NODE1|-1).  NFILL must be positive.
+            ``|NODE2-NODE1|-1``).  NFILL must be positive.
 
         nstrt
             Node number assigned to first filled-in node (defaults to NODE1 +
@@ -924,8 +1001,8 @@ class Nodes:
 
         ninc
             Add this increment to each of the remaining filled-in node numbers
-            (may be positive or negative).  Defaults to (NODE2-NODE1)/(NFILL +
-            1), i.e., linear interpolation.
+            (may be positive or negative).  Defaults to ``(NODE2-NODE1)/(NFILL +
+            1)``, i.e., linear interpolation.
 
         pkfac
             Peak location factor.  If PKFAC=0.5, the peak of the quadratic
@@ -959,14 +1036,13 @@ class Nodes:
         approaches the line through NODE1 and NINTR at an infinite distance
         from NODE1.  The QUAD command generates quadratic lines of nodes, which
         in turn may be used as a base line for generating irregular surfaces of
-        nodes (by repeating [*REPEAT], generating [NGEN, NSCALE], etc.).
+        nodes (by repeating [``*REPEAT``], generating [NGEN, NSCALE], etc.).
         Irregular surfaces may also be generated with the meshing commands.
         """
         command = f"QUAD,{node1},{nintr},{node2},{nfill},{nstrt},{ninc},{pkfac}"
         return self.run(command, **kwargs)
 
-    def transfer(self, kcnto="", inc="", node1="", node2="", ninc="",
-                 **kwargs):
+    def transfer(self, kcnto="", inc="", node1="", node2="", ninc="", **kwargs):
         """Transfers a pattern of nodes to another coordinate system.
 
         APDL Command: TRANSFER

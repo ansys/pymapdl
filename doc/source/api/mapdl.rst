@@ -16,7 +16,6 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.allow_ignore
    Mapdl.chain_commands
    Mapdl.directory
-   Mapdl.geometry
    Mapdl.get
    Mapdl.get_array
    Mapdl.get_value
@@ -33,8 +32,10 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.result
    Mapdl.run
    Mapdl.run_multiline
+   Mapdl.input_strings
    Mapdl.set_log_level
    Mapdl.version
+
 
 Latest 2021R1 and newer features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

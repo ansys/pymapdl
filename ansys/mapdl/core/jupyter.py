@@ -4,8 +4,10 @@ import warnings
 try:
     from ansys.jupyterhub import manager
 except ImportError:
-    raise ImportError('Module `ansys-jupyterhub-manager` missing.\n'
-                      'This module is required to spawn instances on jupyterhub')
+    raise ImportError(
+        "Module `ansys-jupyterhub-manager` missing.\n"
+        "This module is required to spawn instances on jupyterhub"
+    )
 
 
 MAX_CPU = 128
@@ -17,7 +19,7 @@ def check_manager():
         # response = manager.ping()
         manager.ping()
     except:
-        raise RuntimeError('Unable to connect to scheduler')
+        raise RuntimeError("Unable to connect to scheduler")
 
     # consider checking the version
     # version = re.findall('(\d*\.\d*\.\d*)', response)
@@ -27,9 +29,15 @@ def check_manager():
     #     raise RuntimeError('Invalid scheduler version')
 
 
-def launch_mapdl_on_cluster(nproc=2, memory=4, loglevel='INFO',
-                            additional_switches='', verbose=True,
-                            start_timeout=600, **kwargs):
+def launch_mapdl_on_cluster(
+    nproc=2,
+    memory=4,
+    loglevel="INFO",
+    additional_switches="",
+    verbose=True,
+    start_timeout=600,
+    **kwargs,
+):
     """Start MAPDL on the ANSYS jupyter cluster in gRPC mode.
 
     Parameters
@@ -77,41 +85,56 @@ def launch_mapdl_on_cluster(nproc=2, memory=4, loglevel='INFO',
     check_manager()
 
     # check additional_switches args
-    if '-m ' in additional_switches:
-        raise ValueError('Memory option "-m" not permitted when launching from the '
-                         'kubernetes cluster and is set with the `memory` parameter')
-    if '-np ' in additional_switches:
-        raise ValueError('CPU option "-np" not permitted when launching from the '
-                         'kubernetes cluster and is set with the `nproc` parameter')
+    if "-m " in additional_switches:
+        raise ValueError(
+            'Memory option "-m" not permitted when launching from the '
+            "kubernetes cluster and is set with the `memory` parameter"
+        )
+    if "-np " in additional_switches:
+        raise ValueError(
+            'CPU option "-np" not permitted when launching from the '
+            "kubernetes cluster and is set with the `nproc` parameter"
+        )
 
     # check resources
     nproc = int(nproc)
     if nproc < 0:
-        raise ValueError('Requested CPUs `nproc` must be greater than 0')
+        raise ValueError("Requested CPUs `nproc` must be greater than 0")
     if nproc > MAX_CPU:
-        raise ValueError(f'Requested CPUs `nproc` must be less than {MAX_CPU}')
+        raise ValueError(f"Requested CPUs `nproc` must be less than {MAX_CPU}")
 
     if memory < 0.25:
-        raise ValueError('Requested memory `mem` must be greater than 0.25')
+        raise ValueError("Requested memory `mem` must be greater than 0.25")
     if memory > MAX_MEM:
-        raise ValueError(f'Requested memory `mem` must be less than than {MAX_MEM}')
+        raise ValueError(f"Requested memory `mem` must be less than than {MAX_MEM}")
 
     # convert memory from GB to Mi
     memory *= 1024
-    if '-smp' in additional_switches:
-        warnings.warn('Ignoring additional switch "-smp".  Incompatible with docker '
-                      'container.')
-        additional_switches = additional_switches.replace('-smp', '')
-    additional_switches += f'-m -{memory} -np {nproc}'
+    if "-smp" in additional_switches:
+        warnings.warn(
+            'Ignoring additional switch "-smp".  Incompatible with docker ' "container."
+        )
+        additional_switches = additional_switches.replace("-smp", "")
+    additional_switches += f"-m -{memory} -np {nproc}"
 
     # need a way of making the image user-selectable
-    image = 'mapdlhelm.azurecr.io/mapdl:v22.0.0'
-    command = 'printf "" | /ansys_inc/v202/ansys/bin/mapdl %s -smp -grpc -custom /ansys_inc/v202/grpc/ansys.e201t.DEBUG-0.53.1' % additional_switches
-    env = {'ANSYSLMD_LICENSE_FILE': '1055@10.0.0.16'}
-    ip, pod_name = manager.spawn_pod(image, env=env, cpu=1000*nproc, memory=memory,
-                                     command=command, start_timeout=start_timeout,
-                                     verbose=verbose)
+    image = "mapdlhelm.azurecr.io/mapdl:v22.0.0"
+    command = (
+        'printf "" | /ansys_inc/v202/ansys/bin/mapdl %s -smp -grpc -custom /ansys_inc/v202/grpc/ansys.e201t.DEBUG-0.53.1'
+        % additional_switches
+    )
+    env = {"ANSYSLMD_LICENSE_FILE": "1055@10.0.0.16"}
+    ip, pod_name = manager.spawn_pod(
+        image,
+        env=env,
+        cpu=1000 * nproc,
+        memory=memory,
+        command=command,
+        start_timeout=start_timeout,
+        verbose=verbose,
+    )
 
     # connect to the pod instance
     from ansys.mapdl import Mapdl  # import here to avoid recursive
+
     return Mapdl(ip, loglevel=loglevel)

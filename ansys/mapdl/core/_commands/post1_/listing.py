@@ -1,7 +1,7 @@
 class Listing:
-
-    def format(self, ndigit="", ftype="", nwidth="", dsignf="", line="",
-               char="", **kwargs):
+    def format(
+        self, ndigit="", ftype="", nwidth="", dsignf="", line="", char="", **kwargs
+    ):
         """Specifies format controls for tables.
 
         APDL Command: /FORMAT
@@ -55,8 +55,9 @@ class Listing:
         command = f"/FORMAT,{ndigit},{ftype},{nwidth},{dsignf},{line},{char}"
         return self.run(command, **kwargs)
 
-    def header(self, header="", stitle="", idstmp="", notes="", colhed="",
-               minmax="", **kwargs):
+    def header(
+        self, header="", stitle="", idstmp="", notes="", colhed="", minmax="", **kwargs
+    ):
         """Sets page and table heading print controls.
 
         APDL Command: /HEADER
@@ -211,7 +212,7 @@ class Listing:
         for the thermal energy error).  These energy errors, along with the
         appropriate energy, are then used to calculate the percent error in
         energy norm (SEPC for structural and TEPC for thermal). These
-        percentages can be listed by the PRERR command, retrieved by the *GET
+        percentages can be listed by the PRERR command, retrieved by the ``*GET``
         command (with labels SEPC and TEPC) for further calculations, and shown
         on the displacement display (PLDISP), as applicable.
 

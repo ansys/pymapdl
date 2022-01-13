@@ -11,31 +11,38 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
-      MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.0'
-      PYMAPDL_PORT: 32771  # default won't work on azure
+      MAPDL_IMAGE: 'docker.pkg.github.com/pyansys/pymapdl/mapdl:v21.2.1'
+      PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_START_INSTANCE: FALSE
       PYANSYS_OFF_SCREEN: True
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2.1.4
+      # used for documentation deployment
+      - name: Get Bot Application Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
         with:
-          python-version: 3.7
+          application_id: ${{ secrets.BOT_APPLICATION_ID }}
+          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
-      - name: Install, start, and test the virtual framebuffer
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
         run: |
-          .ci/setup_headless_display.sh
-          pip install -r .ci/requirements_test_xvfb.txt
-          python .ci/display_test.py
+          sudo apt-get update
+          sudo apt-get install libgl1-mesa-glx xvfb pandoc -qy
 
       - name: Install ansys-mapdl-core
         run: |
           pip install -r requirements_build.txt
           python setup.py bdist_wheel
           pip install dist/ansys*.whl
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
         run: |
@@ -51,15 +58,14 @@ jobs:
   
       - name: Build Documentation
         run: |
-          sudo apt install pandoc -qy
           pip install -r requirements_docs.txt
-          make -C doc html
+          xvfb-run make -C doc html
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           repository-name: pyansys/pymapdl-dev-docs
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          token: ${{ steps.get_workflow_token.outputs.token }}
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true

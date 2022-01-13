@@ -1,7 +1,5 @@
 class FeForces:
-
-    def f(self, node="", lab="", value="", value2="", nend="", ninc="",
-          **kwargs):
+    def f(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies force loads at nodes.
 
         APDL Command: F
@@ -26,7 +24,7 @@ class FeForces:
         value
             Force value or table name reference for specifying tabular boundary
             conditions.  To specify a table, enclose the table name in percent
-            signs (%), e.g., F, NODE,HEAT,%tabname%).  Use the *DIM command to
+            signs (%), e.g., F, NODE,HEAT,%tabname%).  Use the ``*DIM`` command to
             define a table.
 
         value2

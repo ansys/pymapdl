@@ -1,0 +1,289 @@
+name: GitHub Actions
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+
+env:
+  PYMAPDL_PORT: 21000  # default won't work on azure
+  PYMAPDL_START_INSTANCE: FALSE
+  PYANSYS_OFF_SCREEN: True
+  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+
+jobs:
+  stylecheck:
+    name: Style Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: 3.8
+
+      - name: Style
+        run: |
+          pip install -r requirements_style.txt --disable-pip-version-check
+          make
+
+      - name: flake8
+        if: always()
+        run: |
+          make flake8
+
+  testimport:
+    name: Smoke Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python-version: ['3.6', '3.7', '3.8', '3.9']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Linux pip cache
+        uses: actions/cache@v2
+        if: ${{ runner.os == 'Linux' }}
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Window pip cache
+        uses: actions/cache@v2
+        if: ${{ runner.os == 'Windows' }}
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Install PyMAPDL
+        run: |
+          pip install .
+
+      - name: Test import
+        working-directory: tests
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+
+  docs_build:
+    name: Build Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # used for documentation deployment
+      - name: Get Bot Application Token
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.BOT_APPLICATION_ID }}
+          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install -r requirements_build.txt
+          python setup.py bdist_wheel
+          pip install dist/ansys*.whl
+          cd tests  # run from test directory to test installed module
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:v21.2.1'
+  
+      - name: Build Documentation
+        run: |
+          pip install -r requirements_docs.txt
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
+
+      # Verify that sphinx generates no warnings
+      - name: Check for sphinx warnings
+        run: python doc/print_errors.py
+
+      - name: Zip documentation
+        run: |
+          cd doc/build/html
+          zip -r PyMAPDL_documentation.zip *
+
+      - name: Upload HTML Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: HTML-Documentation
+          path: doc/build/html/PyMAPDL_documentation.zip
+          retention-days: 7
+
+      - name: Deploy
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          repository-name: pyansys/pymapdl-docs
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          BRANCH: gh-pages
+          FOLDER: doc/build/html
+          CLEAN: true
+
+      - name: Build PDF Documentation
+        working-directory: doc
+        run: |
+          # Overwrite MAPDL commands section so it doesn't show up
+          make latex
+          python validate_png.py  # clean-up GIFs mislabeled as PNG
+          cd build/latex
+          latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
+          (test -f *.pdf && echo pdf exists) || exit 1
+
+      - name: Upload PDF Documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: PDF-Documentation
+          path: doc/build/latex/pymapdl*.pdf
+          retention-days: 7
+
+  build_test:
+    name: Build and Unit Testing
+    needs: testimport
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mapdl-version: ['v21.1.1', 'v21.2.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-glx xvfb
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install -r requirements_build.txt
+          python setup.py sdist
+          python setup.py bdist_wheel
+          pip install dist/*.whl
+          cd tests  # run from test directory to test installed module
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+
+      - name: Unit Testing
+        run: |
+          pip install -r requirements_test.txt
+          pip install pytest-azurepipelines
+          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Upload wheel and binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: PyMAPDL-packages
+          path: dist/
+          retention-days: 7
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
+
+  Release:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    needs: [docs_build, build_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - uses: actions/download-artifact@v2
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Upload to Public PyPi
+        run: |
+          pip install twine
+          twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./**/*.whl
+            ./**/*.tar.gz
+            ./**/*.pdf

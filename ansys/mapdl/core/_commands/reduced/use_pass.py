@@ -1,7 +1,7 @@
 class UsePass:
-
-    def dcvswp(self, option="", elem="", cnum="", vmax="", vinc1="", vinc2="",
-               gap="", **kwargs):
+    def dcvswp(
+        self, option="", elem="", cnum="", vmax="", vinc1="", vinc2="", gap="", **kwargs
+    ):
         """Performs a DC voltage sweep on a ROM element.
 
         APDL Command: DCVSWP
@@ -66,8 +66,9 @@ class UsePass:
         command = f"DCVSWP,{option},{elem},{cnum},{vmax},{vinc1},{vinc2},{gap}"
         return self.run(command, **kwargs)
 
-    def rmlvscale(self, nload="", fact1="", fact2="", fact3="", fact4="",
-                  fact5="", **kwargs):
+    def rmlvscale(
+        self, nload="", fact1="", fact2="", fact3="", fact4="", fact5="", **kwargs
+    ):
         """Defines element load vector scaling for a ROM use pass.
 
         APDL Command: RMLVSCALE
