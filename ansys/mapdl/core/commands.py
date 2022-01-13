@@ -537,6 +537,17 @@ class CommandListingOutput(CommandOutput):
         """Get raw data groups"""
         body = self._get_body(trail_header=trail_header)
 
+        try:
+            np.array(body[1].split(), dtype=float) #if this fail, there is headers,
+            self._default_format = False
+        except:
+            # There is headers, assuming default format
+            self._default_format = True
+
+        if not self._default_format:
+            return [each for each in body[1:] if each]
+
+        # Using default format
         data = []
         for start, end in self._get_data_group_indexes(body, magicword=magicword):
             data.extend(body[start+1:end])
@@ -554,7 +565,10 @@ class CommandListingOutput(CommandOutput):
         """
         body = self._get_body()
         pairs = list(self._get_data_group_indexes(body))
-        return body[pairs[0][0]].split()
+        try:
+            return body[pairs[0][0]].split()
+        except:
+            return None
 
     @check_valid_output
     def to_list(self):
