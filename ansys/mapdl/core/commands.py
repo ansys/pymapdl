@@ -615,7 +615,7 @@ class CommandListingOutput(CommandOutput):
         if not columns:
             columns = self.get_columns()
 
-        return pd.DataFrame(data=data, columns=data)
+        return pd.DataFrame(data=data, columns=columns)
 
 
 class BoundaryConditionsListingOutput(CommandListingOutput):
