@@ -37,9 +37,12 @@ To reach the project support team, email `pyansys.support@ansys.com <pyansys.sup
 
 Viewing PyMAPDL Documentation
 -----------------------------
-Documentation for the latest stable release of PyAEDT is hosted at
-`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_, and latest development documentation at `PyMAPDL Development Documentation <https://dev.mapdldocs.pyansys.com>`_.  
+Documentation for the latest stable release of PyMAPDL is hosted at
+`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.
 
+Documentation for the latest development version, which tracks the
+``main`` branch, is hosted at  `Development PyMAPDD Documentation <https://dev.mapdldocs.pyansys.com/>`_.
+This version is automatically kept up to date via GitHub actions.
 
 Testing MAPDL
 -------------
