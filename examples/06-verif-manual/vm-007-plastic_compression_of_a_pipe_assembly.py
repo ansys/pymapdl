@@ -29,10 +29,10 @@ Element Type(s):
    :alt: VM7 Finite Element Models
 
 Material Properties
- - :math:`E_{\mathrm{s}} = 26875000 psi`
- - :math:`\sigma_{\mathrm{(yp)s}} = 86000 psi`
- - :math:`E_{\mathrm{a}} = 11000000  psi`
- - :math:`\sigma_{\mathrm{(yp)a}} = 55000 psi`
+ - :math:`E_{\mathrm{s}} = 26875000\,psi`
+ - :math:`\sigma_{\mathrm{(yp)s}} = 86000\,psi`
+ - :math:`E_{\mathrm{a}} = 11000000\,psi`
+ - :math:`\sigma_{\mathrm{(yp)a}} = 55000\,psi`
  - :math:`\nu = 0.3`
 
 .. image:: ../../_static/vm7_setup_1.png
@@ -40,14 +40,14 @@ Material Properties
    :alt: VM7 Material Model
 
 Geometric Properties:
- - :math:`l = 10  in`
- - :math:`A_{\mathrm{s}} = 7 in^2`
- - :math:`A_{\mathrm{a}} = 12 in^2`
+ - :math:`l = 10\,in`
+ - :math:`A_{\mathrm{s}} = 7\,in^2`
+ - :math:`A_{\mathrm{a}} = 12\,in^2`
 
 Loading:
- - 1st Load Step: :math:`\delta = 0.032 in`
- - 2nd Load Step: :math:`\delta = 0.050 in`
- - 3rd Load Step: :math:`\delta = 0.100 in`
+ - 1st Load Step: :math:`\delta = 0.032\,in`
+ - 2nd Load Step: :math:`\delta = 0.050\,in`
+ - 3rd Load Step: :math:`\delta = 0.100\,in`
 
 .. image:: ../../_static/vm7_setup.png
    :width: 300
@@ -79,7 +79,7 @@ Analysis Assumptions and Modeling Notes:
 ###############################################################################
 # Start MAPDL
 # ~~~~~~~~~~~
-# Start MAPDL and import additionally Numpy and Pandas libraries.
+# Start MAPDL and import Numpy and Pandas libraries.
 
 # sphinx_gallery_thumbnail_path = '_static/vm7_setup.png'
 
@@ -94,8 +94,8 @@ mapdl = launch_mapdl()
 
 
 ###############################################################################
-# Initiate Pre-Processing
-# ~~~~~~~~~~~~~~~~~~~~~~~
+# Pre-Processing
+# ~~~~~~~~~~~~~~
 # Enter verification example mode and the pre-processing routine.
 
 mapdl.clear()
@@ -151,10 +151,10 @@ print(mapdl.etlist())
 # ~~~~~~~~~~~~~~~
 # Set up the material properties.
 #
-# * Young Modulus of steel is: :math:`E_{\mathrm{s}} = 26875000 psi`,
-# * Yield strength of steel is: :math:`\sigma_{\mathrm{(yp)s}} = 86000 psi`,
-# * Young Modulus of aluminum is: :math:`E_{\mathrm{a}} = 11000000  psi`,
-# * Yield strength of aluminum is: :math:`\sigma_{\mathrm{(yp)a}} = 55000 psi`,
+# * Young Modulus of steel is: :math:`E_{\mathrm{s}} = 26875000\,psi`,
+# * Yield strength of steel is: :math:`\sigma_{\mathrm{(yp)s}} = 86000\, psi`,
+# * Young Modulus of aluminum is: :math:`E_{\mathrm{a}} = 11000000\,psi`,
+# * Yield strength of aluminum is: :math:`\sigma_{\mathrm{(yp)a}} = 55000\,psi`,
 # * Poisson's ratio is: :math:`\nu = 0.3`
 
 # Steel material model.
@@ -167,7 +167,7 @@ mapdl.tb("BKIN", 1, 1)
 mapdl.tbtemp(0)
 mapdl.tbdata(1, 86000, 0)
 
-# aluminum material model.
+# Aluminum material model.
 # Define Young's moulus and Poisson ratio for Aluminum.
 mapdl.mp("EX", 2, 11E6)
 mapdl.mp("PRXY", 2, 0.3)
@@ -184,7 +184,7 @@ print(mapdl.mplist())
 ###############################################################################
 # Plot Stress - Strain Curve
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Use Matplotlib library to represent material model curves of Steel and Aluminum.
+# Use Matplotlib library to plot material model curves of steel and aluminum.
 
 # Define stress - strain properties of the steel.
 steel = {"stress_s": [0, 86000, 86000, 86000],
