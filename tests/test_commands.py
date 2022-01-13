@@ -58,6 +58,13 @@ ARGS_INQ_FUNC = {
         'kcmplx': 1
 }
 
+PRNSOL_OUT = """PRINT F    REACTION SOLUTIONS PER NODE
+       1   0.1287512532E+008  0.4266737217E+007
+       2  -0.1512012179E+007  0.2247558576E+007
+       3  -0.7065315064E+007 -0.4038004530E+007
+       4  -0.4297798077E+007 -0.2476291263E+007"""
+
+
 CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
@@ -72,6 +79,7 @@ def plastic_solve(mapdl):
     mapdl.set(1, 2)
     mapdl.mute = False
 
+
 @pytest.fixture(scope="module")
 def beam_solve(mapdl):
     mapdl.mute = True
@@ -82,6 +90,7 @@ def beam_solve(mapdl):
     mapdl.post1()
     mapdl.set(1, 2)
     mapdl.mute = False
+
 
 def test_cmd_class():
     output = """This is the output.
@@ -100,6 +109,11 @@ This is for the format: {format1}-{format2}-{format3}"""
     assert isinstance(cmd_out.replace('a', 'c'), (str, CommandOutput))
     assert isinstance(cmd_out.partition('g'), tuple)
     assert isinstance(cmd_out.split('g'), list)
+
+
+def test_cmd_class_prnsol_short():
+    cmd = 'PRRSOL,F'
+    cmd_out = CommandOutput(PRNSOL_OUT, cmd=cmd)
 
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
