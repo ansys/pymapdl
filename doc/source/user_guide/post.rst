@@ -1,8 +1,8 @@
 Post-Processing
 ===============
 You can post process using an active MAPDL session using the
-:attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
-attrbute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
+:class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>`
+attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
 One advantage of this approach
 is it integrates well with existing MAPDL scripting or automation, but
 can also be carried out on result files generated from other programs,
@@ -37,32 +37,32 @@ These commands are listed in Table-1_.
 
 **Table 1. Commands with extra processing methods in the output.**
 
-+----------------+---------------------------+--------------------+
-| Category       | Extra Methods Available   | Mapdl Commands     |
-+================+===========================+====================+
-| **Listing**    | * ``to_list()``           | * ``prcint``       |
-|                | * ``to_array()``          | * ``prenergy``     |
-|                | * ``to_dataframe()``      | * ``prerr``        |
-|                |                           | * ``presol``       |
-|                |                           | * ``pretab``       |
-|                |                           | * ``print``        |
-|                |                           | * ``priter``       |
-|                |                           | * ``prjsol``       |
-|                |                           | * ``prnld``        |
-|                |                           | * ``prnsol``       |
-|                |                           | * ``prorb``        |
-|                |                           | * ``prpath``       |
-|                |                           | * ``prrfor``       |
-|                |                           | * ``prrsol``       |
-|                |                           | * ``prsect``       |
-|                |                           | * ``prvect``       |
-|                |                           | * ``stat``         |
-|                |                           | * ``swlist``       |
-+----------------+---------------------------+--------------------+
-| **Boundary**   | * ``to_list()``           | * ``dlist``        |
-| **Conditions** | * ``to_dataframe()``      | * ``flist``        |
-| **Listing**    |                           |                    |
-+----------------+---------------------------+--------------------+
++----------------+---------------------------------------------------------------------------------------------------+----------------------------------------------------------+
+| Category       | Extra Methods Available                                                                           | Mapdl Commands                                           |
++================+===================================================================================================+==========================================================+
+| **Listing**    | * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`                      | * :func:`prcint() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                | * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`                    | * :func:`prenergy() <ansys.mapdl.core.mapdl._MapdlCore>` |
+|                | * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`            | * :func:`prerr() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+|                |                                                                                                   | * :func:`presol() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`pretab() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`print() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+|                |                                                                                                   | * :func:`priter() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prjsol() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prnld() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+|                |                                                                                                   | * :func:`prnsol() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prorb() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+|                |                                                                                                   | * :func:`prpath() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prrfor() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prrsol() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prsect() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`prvect() <ansys.mapdl.core.mapdl._MapdlCore>`   |
+|                |                                                                                                   | * :func:`stat() <ansys.mapdl.core.mapdl._MapdlCore>`     |
+|                |                                                                                                   | * :func:`swlist() <ansys.mapdl.core.mapdl._MapdlCore>`   |
++----------------+---------------------------------------------------------------------------------------------------+----------------------------------------------------------+
+| **Boundary**   | * :func:`to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_list>`           | * :func:`dlist() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+| **Conditions** | * :func:`to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_dataframe>` | * :func:`flist() <ansys.mapdl.core.mapdl._MapdlCore>`    |
+| **Listing**    |                                                                                                   |                                                          |
++----------------+---------------------------------------------------------------------------------------------------+----------------------------------------------------------+
 
 These commands show the next output:
 
@@ -153,8 +153,8 @@ Selected Nodes
 The MAPDL database processes some results independently of if nodes or
 elements are selected.  If you have subselected a certain component
 and wish to also limit the result of a certain output
-(i.e. :func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement`), 
-use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes` attribute to get
+(i.e. :func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement>`), 
+use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes>` attribute to get
 a mask of the currently selected nodes.
 
 .. code::
