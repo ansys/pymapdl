@@ -235,28 +235,28 @@ plt.show()
 # ~~~~~~~~~~~~~~
 # Set up the cross-section properties for a shell and pipe elements.
 
-# Shell cross-section for inside (STEEL) tube.
+# Shell cross-section for inside tube(steel).
 mapdl.sectype(1, "SHELL")
 
 # Thickness (SHELL181)
 mapdl.secdata(0.5, 1, 0, 5)
 
-# Shell cross-section for outside (Aluminum) tube.
+# Shell cross-section for outside tube(aluminum).
 mapdl.sectype(2, "SHELL")
 
 # Thickness (SHELL181)
 mapdl.secdata(0.5, 2, 0, 5)
 
-# Define Pipe cross-section for inside (STEEL) tube, where:
+# Define Pipe cross-section for inside tube(steel).
 mapdl.sectype(3, "PIPE")
 
-# Outside diameter and wall thickness settings for Inside Tube (PIPE288)
+# Outside diameter and wall thickness settings for inside tube(PIPE288).
 mapdl.secdata(4.9563384, 0.5)
 
-# Pipe cross-section for outside (Aluminum) tube.
+# Pipe cross-section for outside tube(aluminum) .
 mapdl.sectype(4, "PIPE")
 
-# Outside diameter and wall thickness settings for Outside Tube (PIPE288)
+# Outside diameter and wall thickness settings for outside tube (PIPE288).
 mapdl.secdata(8.139437, 0.5)
 
 # Print the section properties for all sections.
@@ -416,7 +416,7 @@ solution(deflect=defl_ls2)
 
 # Load Step 3
 solution(deflect=defl_ls3)
-mapdl.finish()
+_ = mapdl.finish()
 
 
 ###############################################################################
@@ -429,8 +429,8 @@ _ = mapdl.post1()
 
 
 ###############################################################################
-# Define loads
-# ~~~~~~~~~~~~
+# Getting loads
+# ~~~~~~~~~~~~~
 # Set up the function to get load values of each load step of the simplified
 # axisymmetric model and convert it to the full model.
 
@@ -477,8 +477,8 @@ def getload():
 
 
 ###############################################################################
-# Get Loads For Each Load Step
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Getting Loads For Each Load Step
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Obtain the loads of the model using :func:`getload()` function.
 
 # Activate Load Step 1 and extract load data.
@@ -501,9 +501,9 @@ pipe288_ls3, solid185_ls3, shell181_ls3 = getload()
 # which can be compared with expected target values for models with ``PIPE288``,
 # ``SOLID185``, and ``SHELL181`` elements. Loads expected for each load step are:
 #
-# - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load1 = 1024400 (lb)`.
-# - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load2 = 1262000 (lb)`.
-# - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load3 = 1262000 (lb)`.
+# - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load_1 = 1024400\,(lb)`.
+# - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load_2 = 1262000\,(lb)`.
+# - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
 
 target_res = np.asarray([1024400, 1262000, 1262000,
                          1024400, 1262000, 1262000,
