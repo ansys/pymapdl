@@ -2,7 +2,7 @@ Post-Processing
 ===============
 You can post process using an active MAPDL session using the
 :class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>`
-attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
+an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
 One advantage of this approach
 is it integrates well with existing MAPDL scripting or automation, but
 can also be carried out on result files generated from other programs,
@@ -64,7 +64,7 @@ These commands are listed in Table-1_.
 | **Listing**    |                                                                                                   |                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+----------------------------------------------------------+
 
-These commands show the next output:
+Here's a simple example demonstrating the the usage:
 
 .. code:: python
 

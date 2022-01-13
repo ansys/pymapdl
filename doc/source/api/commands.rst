@@ -3,10 +3,10 @@
 Commands Output
 ===============
 
-Various PyMapdl classes and commands which helps in data post-processing.
+Various PyMAPDL classes and commands which helps in data post-processing.
 
-All these classes, are subclasses of ``str`` class, hence they inheritate all the
-methods and attributes of this class.
+All these classes are subclasses of ``str`` class, hence they inherit all the
+methods and attributes of :class:`string`.
 
 .. currentmodule:: ansys.mapdl.core.commands
 
