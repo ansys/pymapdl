@@ -328,7 +328,12 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \begin{bmatrix}
 #    u_x \\ u_y
 #    \end{bmatrix}
-#    =
+#    \end{equation*}
+#
+#
+# .. math::
+#    \begin{equation*}
+#    \mathbf{\varepsilon} =
 #    \mathbf{D} \cdot \mathbf{u_{\text{throughout}}}
 #    \end{equation*}
 #
@@ -379,7 +384,8 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #
 # .. math::
 #    \begin{equation*}
-#    \det{\mathbf{J}} =
+#    \begin{aligned}
+#    \det{\mathbf{J}} &=
 #    \frac{1}{8}
 #    \begin{bmatrix}{}^1x & {}^2x & {}^3x & {}^4x \end{bmatrix} \cdot
 #    \begin{bmatrix}
@@ -388,7 +394,8 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    s-t & -s-1 & 0 & t+1 \\
 #    1-s & s+t & -t-1 & 0 \\
 #    \end{bmatrix} \cdot
-#    \begin{bmatrix}{}^1y \\ {}^2y \\ {}^3y \\ {}^4y \end{bmatrix} =
+#    \begin{bmatrix}{}^1y \\ {}^2y \\ {}^3y \\ {}^4y \end{bmatrix}
+#    \\&=
 #    \mathbf{X_{\text{locs}}}^T \cdot
 #    \begin{bmatrix}
 #    0 & 1 - t & t-s & s-1 \\
@@ -397,6 +404,7 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    1-s & s+t & -t-1 & 0 \\
 #    \end{bmatrix} \cdot
 #    \mathbf{Y_{\text{locs}}}
+#    \end{aligned}
 #    \end{equation*}
 
 ###############################################################################
