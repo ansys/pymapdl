@@ -253,3 +253,59 @@ stress_adj = far_field_stress * adj
 # by the adjusted far-field stress.
 stress_con = max_stress / stress_adj
 print("Stress Concentration: %.2f" % stress_con)
+
+
+###############################################################################
+# Batch Analysis
+# ~~~~~~~~~~~~~~
+# The above script can be placed within a function to compute the
+# stress concentration for a variety of hole diameters.  For each
+# batch, MAPDL is reset and the geometry is generated from scratch.
+#
+# .. note::
+#    This section has been disabled to reduce the execution time of
+#    this example. Enable it by setting ``RUN_BATCH = TRUE``
+
+RUN_BATCH = False
+
+# Run the batch and record the stress concentration
+if RUN_BATCH:
+    k_t_exp = []
+    ratios = np.linspace(0.001, 0.5, 20)
+    print('    Ratio  : Stress Concentration (K_t)')
+    for ratio in ratios:
+        stress_con = compute_stress_con(ratio)
+        print('%10.4f : %10.4f' % (ratio, stress_con))
+        k_t_exp.append(stress_con)
+
+
+###############################################################################
+# Analytical Comparison
+# ~~~~~~~~~~~~~~~~~~~~~
+# Stress concentrations are often obtained by referencing tablular
+# results or polynominal fits for a variety of geometries.  According
+# to Peterson's Stress Concentration Factors (ISBN 0470048247), the analytical
+# equation for a hole in a thin plate in uniaxial tension:
+#
+# :math:`k_t = 3 - 3.14\frac{d}{h} + 3.667\left(\frac{d}{h}\right)^2 - 1.527\left(\frac{d}{h}\right)^3`
+#
+# Where:
+#
+# - :math:`k_t` is the stress concentration
+# - :math:`d` is the diameter of the circle
+# - :math:`h` is the height of the plate
+#
+# As shown in the following plot, ANSYS matches the known tabular
+# result for this geometry remarkably well using PLANE183 elements.
+# The fit to the results may vary depending on the ratio between the
+# height and width of the plate.
+
+
+if RUN_BATCH:
+    # where ratio is (d/h)
+    k_t_anl = 3 - 3.14*ratios + 3.667*ratios**2 - 1.527*ratios**3
+
+    plt.plot(ratios, k_t_anl, label=r'$K_t$ Analytical')
+    plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
+    plt.legend()
+    plt.show()
