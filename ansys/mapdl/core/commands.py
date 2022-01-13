@@ -486,7 +486,7 @@ class CommandListingOutput(CommandOutput):
 
     def _format(self):
         """Perform some formatting (replacing mainly) in the raw text."""
-        return re.sub(r'[^E](-)', ' -', self.__str__())
+        return re.sub(r'([^E])(-)', '\g<1> \g<2>', str(self))
 
     def _get_body(self, trail_header=None):
         """Get command body text.
