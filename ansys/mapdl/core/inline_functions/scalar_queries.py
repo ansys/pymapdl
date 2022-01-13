@@ -117,7 +117,6 @@ class _ScalarQueries(_QueryExecution):
         >>> mapdl.d("all", "volt", 5)
         >>> mapdl.run("/SOLU")
         >>> mapdl.solve()
-        >>> print(mapdl.queries.volt(1))
         >>> mapdl.queries.volt(1)
         5.0
         """
@@ -156,7 +155,7 @@ class _ScalarQueries(_QueryExecution):
         >>> mapdl.d("all", "mag", 5)
         >>> mapdl.run("/SOLU")
         >>> mapdl.solve()
-        >>> print(mapdl.queries.mag(1))
+        >>> mapdl.queries.mag(1)
         5.0
         """
         return self._run_query(f"MAG({n})", integer=False)
