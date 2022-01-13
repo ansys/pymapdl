@@ -28,3 +28,4 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    inline
+   logging
