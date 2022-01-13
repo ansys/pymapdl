@@ -19,7 +19,7 @@ from ._commands import (
     misc,
     inq_func
 )
-
+from functools import wraps
 import re
 import numpy as np
 
@@ -173,6 +173,7 @@ def inject_docs(docstring):
 def check_valid_output(func):
     """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
+    @wraps(func)
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
         if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
@@ -571,16 +572,30 @@ class CommandListingOutput(CommandOutput):
 
         Returns
         -------
-            Numpy array
+            Numpy array (floats).
         """
         return np.array(self.to_list(), dtype=float)
 
     def to_dataframe(self, data=None, columns=None):
         """Export the command output as a Pandas DataFrame.
 
+        Parameters
+        ----------
+        data : None
+            The data to be converted to the dataframe values.
+            This directly passed to the dataframe constructor.
+
+        columns : None
+            Iterable with columns names.
+
         Returns
         -------
             Pandas Dataframe
+
+        Notes
+        -----
+        The returned dataframe has all its columns converted to float
+        (inheritate from :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
         try:
             import pandas as pd
@@ -596,10 +611,34 @@ class CommandListingOutput(CommandOutput):
 
 
 class BoundaryConditionsListingOutput(CommandListingOutput):
+    """Allow the conversion of command output to native Python types.
+
+    Custom class for handling the boundary condition listing commands
+    whose output is sensible to be converted to a list of lists,
+    or a Pandas DataFrame.
+    """
+
     def to_array(self):
         raise ValueError(MSG_BCListingOutput_to_array)
 
     def to_dataframe(self):
+        """Convert the command output to a Pandas Dataframe.
+
+        Returns
+        -------
+            Pandas Dataframe
+
+        Notes
+        -----
+
+        If present, the next columns will be converted to:
+
+        * ``'NODE'``: int
+        * ``'LABEL'``: str
+        * ``'REAL'``: float
+        * ``'IMAG'``: float
+
+        """
         df = super().to_dataframe(data=self.to_list())
         if 'NODE' in df.columns:
             df['NODE'] = df['NODE'].astype(int)
