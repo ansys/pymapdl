@@ -13,7 +13,7 @@ psi and Poission's ratio of 0.25) and unit thickness, providing a live
 implementation of the discussions in Daryl Logan's A First Course in the Finite
 Element Method (2nd Ed., PWS Publishing 1993).
 """
-
+# sphinx_gallery_thumbnail_number = 2
 import itertools
 import numpy as np
 import matplotlib.pyplot as plt
@@ -83,15 +83,15 @@ my_elem = MyElementDemo(nodes)
 # element.  That way, as the structure deforms, we will know not only the
 # displacement at the nodes but also the displacements for any point within.
 #
-# What's special for an isoparametric formulation is to select a canonical
-# shape for our 2D element.  We assume that any 2D quadrilateral can be mapped
-# to a regular square, for example a domain in :math:`{\rm I\!R}^2` such as
-# :math:`s \in [-1,1]` and :math:`t\in [-1,1]`.  We derive all of our physical
-# quantities on that square and use the mapping to transform their values for
-# the actual shapes of our elements.  This transformation will help simplify
-# the calculation of integrals necessary for measuring how strain energy
-# accumulates throughout the continuum of the element as the discrete nodes
-# move and deform the shape.
+# What's special for an isoparametric formulation is to select a canonical shape
+# for our 2D element.  We assume that any 2D quadrilateral can be mapped to a
+# regular square, for example a domain in :math:`{\rm I\!R}^2` such as :math:`s
+# \in [-1,1]` and :math:`t\in [-1,1]`.  We derive all of our physical quantities
+# on that square and use the mapping to transform their values for the actual
+# shapes of our elements.  This transformation will help simplify the
+# calculation of integrals necessary for measuring how strain energy accumulates
+# throughout the continuum of the element as the discrete nodes move and deform
+# the shape.
 #
 # For an isoparametric 2D element, we define 4 shape functions as follows:
 #
@@ -624,6 +624,7 @@ isotropic = Isotropic(30e6, 0.25)
 # displacements :math:`\mathbf{u}_{\text{nodal}}`.  Loyal to our calculus
 # roots, we look for the minimum by taking the corresponding partial
 # derivative:
+#
 # .. math::
 #    \begin{equation*}
 #    \frac{\partial E}{\partial \mathbf{u}_{\text{nodal}}} = -\mathbf{F}_{\text{nodal}} + \frac{1}{2} \iiint_V{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \mathbf{u}_{\text{nodal}} \,dV =0
@@ -633,7 +634,7 @@ isotropic = Isotropic(30e6, 0.25)
 #    \begin{equation*}
 #    \mathbf{F}_{\text{nodal}}  = \frac{1}{2} \iiint_V{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \mathbf{u}_{\text{nodal}} \,dV = \mathbf{K} \cdot \mathbf{u}_{\text{nodal}}
 #    \end{equation*}
-
+#
 # Thus, we've unlocked the Hooke's law stiffness hidden in the integral:
 #
 # .. math::
@@ -875,15 +876,15 @@ _ = mapdl.finish()
 ###############################################################################
 # The columns of the stiffness matrix appear as nodal force reactions
 
-results_txt = []
+results = []
 
 for i, _ in enumerate(dof_list):
     mapdl.post1()
     mapdl.set(i + 1)
-    prrsol_txt = mapdl.prrsol("f").to_array()[:, 1:] # Omitting node column (0)
-    results_txt.append(prrsol_txt)
+    prrsol_f = mapdl.prrsol("f").to_array()[:, 1:] # Omitting node column (0)
+    results.append(prrsol_f)
 
-for txt in results_txt:
+for txt in results:
     print(txt)
     print("=" * 80)
 
@@ -891,7 +892,7 @@ for txt in results_txt:
 ###############################################################################
 # Now, apply this to the whole matrix and output it.
 
-stiffness_mapdl = np.array(results_txt)
+stiffness_mapdl = np.array(results)
 stiffness_mapdl = stiffness_mapdl.reshape(8, 8)
 stiffnes_mapdl_scaled = np.round(stiffness_mapdl / 1e4)
 print(stiffnes_mapdl_scaled)
