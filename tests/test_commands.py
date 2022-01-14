@@ -64,6 +64,34 @@ PRNSOL_OUT = """PRINT F    REACTION SOLUTIONS PER NODE
        3  -0.7065315064E+007 -0.4038004530E+007
        4  -0.4297798077E+007 -0.2476291263E+007"""
 
+PRNSOL_OUT_LONG = """PRINT F    REACTION SOLUTIONS PER NODE
+
+ *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2     ***
+ DISTRIBUTED Ansys Mechanical Enterprise
+
+ 00000000  VERSION=LINUX x64     15:56:42  JAN 13, 2022 CP=      0.665
+
+
+
+
+
+  ***** POST1 TOTAL REACTION SOLUTION LISTING *****
+
+  LOAD STEP=     1  SUBSTEP=     1
+   TIME=    1.0000      LOAD CASE=   0
+
+  THE FOLLOWING X,Y,Z SOLUTIONS ARE IN THE GLOBAL COORDINATE SYSTEM
+
+    NODE       FX           FY
+       1  0.12875E+008 0.42667E+007
+       2 -0.15120E+007 0.22476E+007
+       3 -0.70653E+007-0.40380E+007
+       4 -0.42978E+007-0.24763E+007
+
+ TOTAL VALUES
+ VALUE  -0.37253E-008 0.46566E-009
+"""
+
 
 CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
@@ -119,7 +147,8 @@ def test_cmd_class_prnsol_short():
     out_array = out.to_array()
 
     assert isinstance(out, CommandListingOutput)
-    assert isinstance(out_list, list) and bool(out_list)
+    assert isinstance(out_list, list)
+    assert out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
     if HAS_PANDAS:
@@ -154,7 +183,7 @@ def test_output_listing(mapdl, plastic_solve, func, args):
     out_array = out.to_array()
 
     assert isinstance(out, CommandListingOutput)
-    assert isinstance(out_list, list) and bool(out_list)
+    assert isinstance(out_list, list) and out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
     if HAS_PANDAS:
@@ -167,9 +196,10 @@ def test_bclist(mapdl, beam_solve, func):
     func_ = getattr(mapdl, func)
     out = func_()
 
-    assert isinstance(out, BoundaryConditionsListingOutput)
-    assert isinstance(out.to_list(), list) and bool(out.to_list())
+    out_list = out.to_list()
 
+    assert isinstance(out, BoundaryConditionsListingOutput)
+    assert isinstance(out_list, list) and out_list
     with pytest.raises(ValueError):
         out.to_array()
 
@@ -184,7 +214,9 @@ def test_docstring_injector(mapdl, method):
     for name in dir(mapdl):
         if name[0:4].upper() == method:
             func = mapdl.__getattribute__(name)
-            docstring = func.__doc__ # If '__func__' not present (AttributeError) very likely it has not been wrapped.
+            # If '__func__' not present (AttributeError) very likely it has not
+            # been wrapped.
+            docstring = func.__doc__
 
             assert "Returns" in docstring
             assert "``str.to_list()``" in docstring
