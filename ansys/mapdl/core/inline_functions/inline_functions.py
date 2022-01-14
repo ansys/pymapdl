@@ -1,8 +1,9 @@
 from .component_queries import (
     _DisplacementComponentQueries,
     _InverseGetComponentQueries,
-    _ComponentQueries,
+    _ComponentQueries
 )
+from .scalar_queries import _ScalarQueries
 from .selection_queries import _SelectionStatusQueries, _NextSelectedEntityQueries
 from .line_queries import _LineFractionCoordinateQueries, _LineFractionSlopeQueries
 from .normals_queries import _NodeNormalQueries, _KeypointNormalQueries
@@ -26,6 +27,7 @@ class Query(
     _AngleQueries,
     _AreaQueries,
     _DistanceQueries,
+    _ScalarQueries
 ):
     """Class containing all the inline functions of APDL.
 
