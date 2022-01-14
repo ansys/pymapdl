@@ -27,11 +27,10 @@ np.set_printoptions(linewidth=120)
 # Build a basic 2D element with the following coordinates:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{matrix}
 #    (1, 2) \\ (8, 0) \\ (9, 4) \\ (4, 5)
 #    \end{matrix}
-#    \end{equation*}
 #
 
 node_xy = [(1, 2), (8, 0), (9, 4), (4, 5)]
@@ -96,14 +95,13 @@ my_elem = MyElementDemo(nodes)
 # For an isoparametric 2D element, we define 4 shape functions as follows:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{matrix}
 #    N_1 = \frac{(1-s)\cdot(1-t)}{4} \\
 #    N_2 = \frac{(1+s)\cdot(1-t)}{4} \\
 #    N_3 = \frac{(1+s)\cdot(1+t)}{4} \\
 #    N_4 = \frac{(1-s)\cdot(1+t)}{4}
 #    \end{matrix}
-#    \end{equation*}
 #
 # These functions are built in such a way that the function at node :math:`i`
 # vanishes at all other nodes and their sum is 1 at all points in the domain.
@@ -159,7 +157,7 @@ MyElementDemo.shape_functions = shape_functions
 # operation.
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    x \\ y \end{bmatrix} =
 #    \begin{bmatrix}
@@ -169,12 +167,10 @@ MyElementDemo.shape_functions = shape_functions
 #    \begin{bmatrix}
 #    {}^1x \\ {}^1y \\ {}^2x \\ {}^2y \\ {}^3x \\ {}^3y \\ {}^4x \\ {}^4y
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{X}_{\text{throughout}} = \mathbf{N} \cdot \mathbf{X}_{\text{nodal}}
-#    \end{equation*}
 
 
 def N(self, s, t):
@@ -252,7 +248,7 @@ plot_my_mesh(nodes, gauss_pt_locs)
 # we consider only its in-plain components:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{\varepsilon} =
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
@@ -262,12 +258,11 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \frac{\partial u_x}{\partial x} \\ \frac{\partial u_y}{\partial y} \\
 #    \frac{\partial u_x}{\partial y} + \frac{\partial u_y}{\partial x}
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # and infer the operator as follows:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
 #    \end{bmatrix}
@@ -280,7 +275,6 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \begin{bmatrix}
 #    u_x \\ u_y
 #    \end{bmatrix}
-#    \end{equation*}
 #
 
 ###############################################################################
@@ -289,7 +283,7 @@ plot_my_mesh(nodes, gauss_pt_locs)
 # shape functions.  Thus
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    u_x \\ u_y \end{bmatrix} =
 #    \begin{bmatrix}
@@ -299,12 +293,10 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \begin{bmatrix}
 #    {}^1u_x \\ {}^1u_y \\ {}^2u_x \\ {}^2u_y \\ {}^3u_x \\ {}^3u_y \\ {}^4u_x \\ {}^4u_y
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{u}_{\text{throughout}} = \mathbf{N} \cdot \mathbf{u}_{\text{nodal}}
-#    \end{equation*}
 
 ###############################################################################
 # To incorporate the shape functions into the expressions of strain
@@ -315,7 +307,7 @@ plot_my_mesh(nodes, gauss_pt_locs)
 # determinant):
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
 #    \end{bmatrix}
@@ -328,19 +320,17 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \begin{bmatrix}
 #    u_x \\ u_y
 #    \end{bmatrix}
-#    \end{equation*}
 #
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{\varepsilon} =
 #    \mathbf{D} \cdot \mathbf{u_{\text{throughout}}}
-#    \end{equation*}
 #
 # Therefore:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
 #    \end{bmatrix}
@@ -348,30 +338,27 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \mathbf{D} \cdot \mathbf{N} \cdot \mathbf{u_{\text{nodal}}}
 #    =
 #    \mathbf{B} \cdot  \mathbf{u_{\text{nodal}}}
-#    \end{equation*}
 #
 # where
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{D}=
 #    \frac{1}{\det{\mathbf{J}}} \begin{bmatrix}
 #    \frac{\partial y}{\partial t} \frac{\partial \left( ... \right)}{\partial s} - \frac{\partial y}{\partial s} \frac{\partial \left( ... \right)}{\partial t} & 0 \\
 #    0 & \frac{\partial x}{\partial s} \frac{\partial \left( ... \right)}{\partial t} - \frac{\partial x}{\partial t} \frac{\partial \left( ... \right)}{\partial s} \\
 #    \frac{\partial x}{\partial s} \frac{\partial \left( ... \right)}{\partial t} - \frac{\partial x}{\partial t} \frac{\partial \left( ... \right)}{\partial s} & \frac{\partial y}{\partial t} \frac{\partial \left( ... \right)}{\partial s} - \frac{\partial y}{\partial s} \frac{\partial \left( ... \right)}{\partial t}
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # and
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{J}=
 #    \begin{bmatrix}
 #    \frac{\partial x}{\partial s} & \frac{\partial y}{\partial s} \\
 #    \frac{\partial x}{\partial t} & \frac{\partial y}{\partial t}
 #    \end{bmatrix}
-#    \end{equation*}
 
 ###############################################################################
 # Implementation: Jacobians
@@ -383,7 +370,7 @@ plot_my_mesh(nodes, gauss_pt_locs)
 # to be equivalent to the following bilinear form:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{aligned}
 #    \det{\mathbf{J}} &=
 #    \frac{1}{8}
@@ -405,7 +392,6 @@ plot_my_mesh(nodes, gauss_pt_locs)
 #    \end{bmatrix} \cdot
 #    \mathbf{Y_{\text{locs}}}
 #    \end{aligned}
-#    \end{equation*}
 
 ###############################################################################
 # We are now ready to implement it into our element
@@ -444,38 +430,35 @@ my_elem.J(-1, -1), my_elem.J(0, 0), my_elem.J(1, 1)
 # functions and nodal locations:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
 #    \end{bmatrix}
 #    =
 #    \mathbf{B} \cdot  \mathbf{u_{\text{nodal}}}
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{B} = \frac{1}{\det{\mathbf{J}}}
 #    \begin{bmatrix}
 #    \mathbf{B_1} & \mathbf{B_2} & \mathbf{B_3} & \mathbf{B_4}
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # where
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{B_i} =
 #    \begin{bmatrix}
 #    a \frac{\partial N_i}{\partial s} - b \frac{\partial N_i}{\partial t} & 0 \\
 #    0 & c \frac{\partial N_i}{\partial t} - d \frac{\partial N_i}{\partial s} \\
 #    c \frac{\partial N_i}{\partial t} - d \frac{\partial N_i}{\partial s} & a \frac{\partial N_i}{\partial s} - b \frac{\partial N_i}{\partial t}
 #    \end{bmatrix}
-#    \end{equation*}
 #
 # and
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    d & c\\
 #    a & b
@@ -483,19 +466,16 @@ my_elem.J(-1, -1), my_elem.J(0, 0), my_elem.J(1, 1)
 #    \frac{1}{4}
 #    \begin{bmatrix} \mathbf{X_{\text{locs}}}^T \\ \mathbf{Y_{\text{locs}}}^T \end{bmatrix}  \cdot
 #    \begin{bmatrix} \mathbf{S} & \mathbf{T} \end{bmatrix}
-#    \end{equation*}
 #
 # for
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{S} = \begin{bmatrix} s - 1 \\ -(s+1) \\ s+1 \\ -(s-1) \end{bmatrix}
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{T} = \begin{bmatrix} t - 1 \\ -(t-1) \\ t+1 \\ -(s+1) \end{bmatrix}
-#    \end{equation*}
 
 
 def grad_N(self, s, t):
@@ -544,14 +524,13 @@ my_elem.B(0, 0)
 # stresses according to the following matrix:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{\sigma}
 #    =
 #    \mathbf{C} \cdot \mathbf{\varepsilon}
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \begin{bmatrix}
 #    \sigma_x \\ \sigma_y \\ \tau_{xy}
 #    \end{bmatrix}
@@ -564,7 +543,6 @@ my_elem.B(0, 0)
 #    \begin{bmatrix}
 #    \varepsilon_x \\ \varepsilon_y \\ \gamma_{xy}
 #    \end{bmatrix}
-#    \end{equation*}
 
 
 class Isotropic:
@@ -590,9 +568,8 @@ isotropic = Isotropic(30e6, 0.25)
 # deformation :math:`\mathbf{u}_{\text{nodal}}` is:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    E = - \mathbf{F}_{\text{nodal}} \cdot \mathbf{u}_{\text{nodal}} + \frac{1}{2} \iiint_V{} \mathbf{\varepsilon}^T \cdot \mathbf{\sigma} \,dV
-#    \end{equation*}
 #
 #
 # The first term stems from the work by the force at the nodes while the second
@@ -607,9 +584,8 @@ isotropic = Isotropic(30e6, 0.25)
 # thus:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    E = -\mathbf{F}_{\text{nodal}} \cdot \mathbf{u}_{\text{nodal}} + \frac{1}{2} \iiint_V{} \mathbf{u}_{\text{nodal}}^T \cdot \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \mathbf{u}_{\text{nodal}} \,dV
-#    \end{equation*}
 
 ###############################################################################
 # Our assumed linear shape functions are not as rich as the true functions
@@ -626,21 +602,18 @@ isotropic = Isotropic(30e6, 0.25)
 # derivative:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \frac{\partial E}{\partial \mathbf{u}_{\text{nodal}}} = -\mathbf{F}_{\text{nodal}} + \frac{1}{2} \iiint_V{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \mathbf{u}_{\text{nodal}} \,dV =0
-#    \end{equation*}
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{F}_{\text{nodal}}  = \frac{1}{2} \iiint_V{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \mathbf{u}_{\text{nodal}} \,dV = \mathbf{K} \cdot \mathbf{u}_{\text{nodal}}
-#    \end{equation*}
 #
 # Thus, we've unlocked the Hooke's law stiffness hidden in the integral:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{K} = \iiint_V{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \,dV
-#    \end{equation*}
 
 ###############################################################################
 #
@@ -648,17 +621,15 @@ isotropic = Isotropic(30e6, 0.25)
 # :math:`A`:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{K} = h \iint_A{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \,dA=h \iint_A{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B}   \,dx \,dy = h \iint_A{} \mathbf{B}^T \cdot \mathbf{C} \cdot \mathbf{B} \cdot \det(\mathbf{J})  \,ds \,dt
-#    \end{equation*}
 #
 # And the integral can be approximated by Gaussian quadrature through a weighted sum with the optimal sampling points for :math:`\mathbf{B}`:
 #
 # .. math::
-#    \begin{equation*}
+#
 #    \mathbf{K}\approx
 #    h \sum_{(s,t) \in \text{Gauss}} w(s,t) \cdot \mathbf{B}^T(s,t) \cdot \mathbf{C} \cdot \mathbf{B}(s,t) \cdot \det(\mathbf{J}(s,t))
-#    \end{equation*}
 #
 # Thus the use of an isoparametric formulation allowed us to make this
 # integration easy, since the domain of integration is constant, regardless of
