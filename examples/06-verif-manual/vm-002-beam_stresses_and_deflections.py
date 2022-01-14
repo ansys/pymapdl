@@ -3,56 +3,65 @@ r"""
 
 Beam Stresses and Deflections
 -----------------------------
-Problem Description:
- - A standard 30 inch WF beam, with a cross-sectional area :math:`A`,
-   is supported as shown below and loaded on the overhangs by a
-   uniformly distributed load :math:`w`. Determine the maximum bending
-   stress, :math:`\sigma_max`, in the middle portion of the beam and
-   the deflection, :math:`\delta`, at the middle of the beam.
+**Problem Description**
 
-Reference:
- -  S. Timoshenko, Strength of Material, Part I, Elementary Theory and
-   Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
-   pg. 98, problem 4.
+A standard 30 inch WF beam, with a cross-sectional area :math:`A`,
+is supported as shown below and loaded on the overhangs by a
+uniformly distributed load :math:`w`. Determine the maximum bending
+stress, :math:`\sigma_max`, in the middle portion of the beam and
+the deflection, :math:`\delta`, at the middle of the beam.
 
-Analysis Type(s):
- - Static Analysis ``ANTYPE=0``
+**Reference**
 
-Element Type(s):
- - 3-D 2 Node Beam (BEAM188)
+S. Timoshenko, Strength of Material, Part I, Elementary Theory and
+Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
+pg. 98, problem 4.
+
+**Analysis Type(s)**
+
+Static Analysis ``ANTYPE=0``
+
+**Element Type(s):**
+
+3-D 2 Node Beam (BEAM188)
 
 .. image:: ../../_static/vm2_setup.png
    :width: 400
    :alt: VM2 Problem Sketch
 
-Material Properties
- - :math:`E = 30 \cdot 10^6 psi`
+**Material Properties**
 
-Geometric Properties:
- - :math:`a = 120 in`
- - :math:`l = 240 in`
- - :math:`h = 30 in`
- - :math:`A = 50.65 in^2`
- - :math:`I_z = 7892 in^4`
+:math:`E = 30 \cdot 10^6 psi`
 
-Loading:
- - :math:`w = (10000/12) lb/in`
+**Geometric Properties**
 
-Analytical Equations:
- - :math:`M` is the bending moment for the middle portion of the beam:
-   :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
- - Determination of the maximum stress in the middle portion of the beam is:
-   :math:`\sigma_max = \frac{M h}{2 I_z}`
- - The deflection, :math:`\delta`, at the middle of the beam can be defined
-   by the formulas of the transversally loaded beam:
-   :math:`\delta = 0.182 in`
+:math:`a = 120 in`
+:math:`l = 240 in`
+:math:`h = 30 in`
+:math:`A = 50.65 in^2`
+:math:`I_z = 7892 in^4`
+
+**Loading**
+
+:math:`w = (10000/12) lb/in`
+
+**Analytical Equations**
+
+- :math:`M` is the bending moment for the middle portion of the beam:
+  :math:`M = 10000 \cdot 10 \cdot 60 = 6 \cdot 10^6 lb \cdot in`
+- Determination of the maximum stress in the middle portion of the beam is
+  :math:`\sigma_max = \frac{M h}{2 I_z}`
+- The deflection, :math:`\delta`, at the middle of the beam can be defined
+  by the formulas of the transversally loaded beam:
+  :math:`\delta = 0.182 in`
 
 """
-# sphinx_gallery_thumbnail_path = '_static/vm2_setup.png'
 
 ###############################################################################
 # Start MAPDL
 # ~~~~~~~~~~~
+
+# sphinx_gallery_thumbnail_path = '_static/vm2_setup.png'
 
 from ansys.mapdl.core import launch_mapdl
 
