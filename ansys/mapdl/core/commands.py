@@ -23,6 +23,13 @@ from functools import wraps
 import re
 import numpy as np
 
+# compiled regular expressions used for parsing tablular outputs
+REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
+REG_FLOAT_INT = re.compile(r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+\s")
+BC_REGREP = re.compile(
+    r"([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
+)
+
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
@@ -30,7 +37,7 @@ You can install it using:
 pip install pandas
 """
 
-MSG_BCListingOutput_to_array = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+MSG_BCLISTINGOUTPUT_TO_ARRAY = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
 so it cannot be converted to Numpy Array.
 
 Please use 'to_list' or 'to_dataframe' instead."""
@@ -438,6 +445,9 @@ class CommandListingOutput(CommandOutput):
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
 
+    def __init__(self, *args, **kwargs):
+        self._cache = None
+
     def _is_data_start(self, line, magicword=None):
         """Check if line is the start of a data group."""
         if not magicword:
@@ -492,7 +502,8 @@ class CommandListingOutput(CommandOutput):
     def _get_body(self, trail_header=None):
         """Get command body text.
 
-        It removes the maximum absolute values tail part and makes sure there is separation between columns.
+        It removes the maximum absolute values tail part and makes sure there is
+        separation between columns.
         """
         # Doing some formatting of the string
         body = self._format().splitlines()
@@ -515,8 +526,7 @@ class CommandListingOutput(CommandOutput):
 
     def _get_data_group_indexes(self, body, magicword=None):
         """Return the indexes of the start and end of the data groups."""
-
-        if '*****ANSYS VERIFICATION RUN ONLY*****' in str(self):
+        if '*****ANSYS VERIFICATION RUN ONLY*****' in str(self[:1000]):
             shift = 2
         else:
             shift = 0
@@ -533,17 +543,6 @@ class CommandListingOutput(CommandOutput):
 
         return zip(start_idxs, ends)
 
-    def _get_data_groups(self, magicword=None, trail_header=None):
-        """Get raw data groups"""
-        body = self._get_body(trail_header=trail_header)
-
-        data = []
-        for start, end in self._get_data_group_indexes(body, magicword=magicword):
-            data.extend(body[start+1:end])
-
-        # removing empty lines
-        return [each for each in data if each]
-
     def get_columns(self):
         """Get the column names for the dataframe.
 
@@ -554,7 +553,35 @@ class CommandListingOutput(CommandOutput):
         """
         body = self._get_body()
         pairs = list(self._get_data_group_indexes(body))
-        return body[pairs[0][0]].split()
+        try:
+            return body[pairs[0][0]].split()
+        except:
+            return None
+
+    def _parse_table(self):
+        """Parse tabular command output.
+
+        Returns
+        -------
+        numpy.ndarray
+            Parsed tabular data from command output.
+
+        """
+        parsed_lines = []
+        for line in self.splitlines():
+            # exclude any line containing characters [A-Z] except for E
+            if line and not REG_LETTERS.search(line):
+                items = REG_FLOAT_INT.findall(line)
+                if items:
+                    parsed_lines.append(items)
+        return np.array(parsed_lines, dtype=np.float64)
+
+    @property
+    def _parsed(self):
+        """Return parsed output."""
+        if self._cache is None:
+            self._cache = self._parse_table()
+        return self._cache
 
     @check_valid_output
     def to_list(self):
@@ -562,10 +589,9 @@ class CommandListingOutput(CommandOutput):
 
         Returns
         -------
-            List of strings
+        list
         """
-        data = self._get_data_groups()
-        return [each.split() for each in data]
+        return self._parsed.tolist()
 
     def to_array(self):
         """Export the command output as a numpy array.
@@ -575,7 +601,7 @@ class CommandListingOutput(CommandOutput):
         numpy.ndarray
             Numpy array of floats.
         """
-        return np.array(self.to_list(), dtype=float)
+        return self._parsed
 
     def to_dataframe(self, data=None, columns=None):
         """Export the command output as a Pandas DataFrame.
@@ -583,17 +609,17 @@ class CommandListingOutput(CommandOutput):
         Parameters
         ----------
         data : numpy.ndarray (structured or homogeneous), Iterable, dict, or DataFrame
-            The data to be converted to the dataframe values.
-            Passed directly to the pandas.DataFrame constructor.
-            Dict can contain Series, arrays, constants, dataclass or list-like objects. If
-            data is a dict, column order follows insertion-order.
+            The data to be converted to the dataframe values.  Passed directly
+            to the pandas.DataFrame constructor.  Dict can contain Series,
+            arrays, constants, dataclass or list-like objects. If data is a
+            dict, column order follows insertion-order.
 
         columns : Index or array-like
-            Iterable with columns names.
-            Passed directly to the pandas.DataFrame constructor.
-            Column labels to use for resulting frame when data does not have them,
-            defaulting to RangeIndex(0, 1, 2, ..., n). If data contains column labels,
-            will perform column selection instead.
+            Iterable with columns names.  Passed directly to the
+            pandas.DataFrame constructor.  Column labels to use for resulting
+            frame when data does not have them, defaulting to RangeIndex(0, 1,
+            2, ..., n). If data contains column labels, will perform column
+            selection instead.
 
         Returns
         -------
@@ -603,15 +629,16 @@ class CommandListingOutput(CommandOutput):
         Notes
         -----
         The returned dataframe has all its data converted to float
-        (inheritate from :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
+        (inheritate from :func:`to_array()
+        <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
         try:
             import pandas as pd
         except ModuleNotFoundError:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
 
-        if not data:
-            data = self.to_array()
+        if data is None:
+            data = self.to_list()
         if not columns:
             columns = self.get_columns()
 
@@ -626,8 +653,30 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     or a Pandas DataFrame.
     """
 
+    def _parse_table(self):
+        """Parse tabular command output."""
+        parsed_lines = []
+        for line in self.splitlines():
+            # exclude any line containing characters [A-Z] except for E
+            if line:
+                items = BC_REGREP.findall(line)
+                if items:
+                    parsed_lines.append(items)
+
+        return parsed_lines
+
+    @check_valid_output
+    def to_list(self):
+        """Export the command output a list or list of lists.
+
+        Returns
+        -------
+        list
+        """
+        return self._parsed
+
     def to_array(self):
-        raise ValueError(MSG_BCListingOutput_to_array)
+        raise ValueError(MSG_BCLISTINGOUTPUT_TO_ARRAY)
 
     def to_dataframe(self):
         """Convert the command output to a Pandas Dataframe.
@@ -650,15 +699,15 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         """
         df = super().to_dataframe(data=self.to_list())
         if 'NODE' in df.columns:
-            df['NODE'] = df['NODE'].astype(int)
+            df['NODE'] = df['NODE'].astype(np.int32, copy=False)
 
         if 'LABEL' in df.columns:
-            df['LABEL'] = df['LABEL'].astype(str)
+            df['LABEL'] = df['LABEL'].astype(str, copy=False)
 
         if 'REAL' in df.columns:
-            df['REAL'] = df['REAL'].astype(float)
+            df['REAL'] = df['REAL'].astype(np.float64, copy=False)
 
         if 'IMAG' in df.columns:
-            df['IMAG'] = df['IMAG'].astype(float)
+            df['IMAG'] = df['IMAG'].astype(np.float64, copy=False)
 
         return df

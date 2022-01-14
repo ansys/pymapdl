@@ -31,6 +31,14 @@ clean-except-examples:
 	rm -rf images/auto-generated
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
+# customized to build the pdf rather than using latexpdf due to various issues
+# with our docs like GIFs being written as PNG.
+pdf:
+	@$(SPHINXBUILD) -M latex "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	python validate_png.py  # clean-up GIFs mislabeled as PNG
+	cd build/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
+	(test -f build/latex/*.pdf && echo pdf exists) || exit 1
+
 # manually deploy to https://github.com/pyansys/pymapdl-docs
 # WARNING: Use with care as this overwrites history of gh-pages
 deploy: 
