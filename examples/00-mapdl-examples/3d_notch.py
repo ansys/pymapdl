@@ -67,17 +67,15 @@ mapdl.lsla("S")
 mapdl.lplot(vtk=True, show_keypoint_numbering=True)
 mapdl.lsel("all")
 
-
 # plot the area using vtk/pyvista
 mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos="xy")
 
-
-# ###############################################################################
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
-mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
+# Checking volume plot
+_ = mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
 
 
 ###############################################################################
@@ -175,7 +173,7 @@ mapdl.nsel("S", "NODE", vmin=single_node, vmax=single_node)
 mapdl.f("ALL", "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
-mapdl.allsel(mute=True)
+_ = mapdl.allsel(mute=True)
 
 
 ###############################################################################
@@ -185,7 +183,7 @@ mapdl.allsel(mute=True)
 mapdl.run("/SOLU")
 mapdl.antype("STATIC")
 mapdl.solve()
-mapdl.finish()
+_ = mapdl.finish()
 
 
 ###############################################################################
@@ -377,7 +375,9 @@ def compute_stress_con(ratio):
     return max_stress / stress_adj
 
 
+###############################################################################
 # Run the batch and record the stress concentration
+
 if RUN_BATCH:
     k_t_exp = []
     ratios = np.linspace(0.05, 0.75, 9)
@@ -406,10 +406,10 @@ if RUN_BATCH:
 # .. math::
 #    \begin{array}{c|c|c}
 #        & 0.1 \leq h/r \leq 2.0                 & 2.0 \leq h/r \leq 50.0 \\ \hline
-#    C_1 & 0.85 + 2.628*\sqrt{h/r} - 0.413 h/r   & 0.833 + 2.069*\sqrt{h/r} - 0.009 h/r \\
-#    C_2 & -1.119 - 4.826*\sqrt{h/r} + 2.575 h/r & 2.732 - 4.157 * \sqrt{h/r} + 0.176 h/r \\
-#    C_3 & 3.563 - 0.514*\sqrt{h/r} - 2.402 h/r  & -8.859 + 5.327*\sqrt{h/r} - 0.32 h/r \\
-#    C_4 & -2.294 + 2.713*\sqrt{h/r} + 0.240 h/r & 6.294 - 3.239*\sqrt{h/r} + 0.154 h/r
+#    C_1 & 0.85 + 2.628 \sqrt{h/r} - 0.413 h/r   & 0.833 + 2.069 \sqrt{h/r} - 0.009 h/r \\
+#    C_2 & -1.119 - 4.826 \sqrt{h/r} + 2.575 h/r & 2.732 - 4.157   \sqrt{h/r} + 0.176 h/r \\
+#    C_3 & 3.563 - 0.514 \sqrt{h/r} - 2.402 h/r  & -8.859 + 5.327 \sqrt{h/r} - 0.32 h/r \\
+#    C_4 & -2.294 + 2.713 \sqrt{h/r} + 0.240 h/r & 6.294 - 3.239 \sqrt{h/r} + 0.154 h/r
 #    \end{array}
 #
 # Where:
@@ -419,7 +419,7 @@ if RUN_BATCH:
 # - :math:`h` is the notch depth
 # - :math:`D` is the width of the plate
 #
-# In this example the ratio is given as :math:`\\dfrac{2h}{D}`.
+# In this example the ratio is given as :math:`2h/D`.
 #
 # These formulas are converted in the following function:
 
@@ -442,6 +442,8 @@ def calc_teor_notch(ratio):
 
     return c1 + c2*(2*h/D) + c3*(2*h/D)**2 + c4*(2*h/D)**3
 
+
+###############################################################################
 # which is used later to calculate the concentration factor for the given ratios:
 
 if RUN_BATCH:
