@@ -17,7 +17,6 @@ from ansys.mapdl.core.launcher import (
 )
 from common import get_details_of_nodes, get_details_of_elements, Node, Element
 
-
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 
@@ -281,6 +280,22 @@ def cube_solve(cleared, mapdl):
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
+
+
+@pytest.fixture
+def box_with_fields(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.mp("kxx", 1, 45)
+    mapdl.mp("ex", 1, 2e10)
+    mapdl.mp("perx", 1, 1)
+    mapdl.mp("murx", 1, 1)
+    mapdl.et(1, 'SOLID70')
+    mapdl.et(2, 'CPT215')
+    mapdl.et(3, 'SOLID122')
+    mapdl.et(4, 'SOLID96')
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.esize(0.5)
+    return mapdl
 
 
 @pytest.fixture

@@ -39,8 +39,7 @@ using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` with:
 
 Script Translation
 ~~~~~~~~~~~~~~~~~~
-Existing ANSYS scripts can be translated using :func:`convert_script()
-<ansys.mapdl.core.convert_script>`
+Existing ANSYS scripts can be translated using :func:`convert_script() <ansys.mapdl.core.convert_script>`
 
 .. code:: python
 
@@ -50,7 +49,7 @@ Existing ANSYS scripts can be translated using :func:`convert_script()
     pymapdl.convert_script(inputfile, pyscript)
 
 Or additionally, you can convert code in form of strings for later processing
-using :func:`convert_apdl_block() <ansys.mapdl.core.convert.convert_apdl_block>`:
+using :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` :
 
 .. code:: python
 
