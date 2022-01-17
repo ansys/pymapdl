@@ -267,7 +267,7 @@ print("Stress Concentration: %.2f" % stress_con)
 #    This section has been disabled to reduce the execution time of
 #    this example. Enable it by setting ``RUN_BATCH = TRUE``
 
-RUN_BATCH = True
+RUN_BATCH = False
 
 # The function to compute the batch analysis is the following:
 
