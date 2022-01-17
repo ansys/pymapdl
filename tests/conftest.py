@@ -283,6 +283,22 @@ def cube_solve(cleared, mapdl):
 
 
 @pytest.fixture
+def box_with_fields(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.mp("kxx", 1, 45)
+    mapdl.mp("ex", 1, 2e10)
+    mapdl.mp("perx", 1, 1)
+    mapdl.mp("murx", 1, 1)
+    mapdl.et(1, 'SOLID70')
+    mapdl.et(2, 'CPT215')
+    mapdl.et(3, 'SOLID122')
+    mapdl.et(4, 'SOLID96')
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.esize(0.5)
+    return mapdl
+
+
+@pytest.fixture
 def box_geometry(mapdl, cleared):
     areas, keypoints = create_geometry(mapdl)
     q = mapdl.queries
