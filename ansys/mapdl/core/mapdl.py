@@ -2232,7 +2232,7 @@ class _MapdlCore(Commands):
 
         text = self._run(command, **kwargs)
 
-        if mute:
+        if kwargs.get('mute'):
             return
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
