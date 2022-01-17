@@ -48,8 +48,8 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
-import numpy as np
-import pandas as pd
+# import numpy as np
+# import pandas as pd
 
 from ansys.mapdl.core import launch_mapdl
 
