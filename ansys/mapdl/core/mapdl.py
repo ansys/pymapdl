@@ -2173,6 +2173,8 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        kwargs.setdefault("mute", False)
+
         command = command.strip()
         # check if multiline
         if "\n" in command or "\r" in command:
@@ -2222,6 +2224,10 @@ class _MapdlCore(Commands):
             return self.list(*command.split(",")[1:])
 
         text = self._run(command, **kwargs)
+
+        if kwargs['mute']:
+            return
+
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = text.strip()
