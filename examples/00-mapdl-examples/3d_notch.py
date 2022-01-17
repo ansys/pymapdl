@@ -459,7 +459,7 @@ if RUN_BATCH:
 # Analytical Comparison
 # ~~~~~~~~~~~~~~~~~~~~~
 #
-# As shown in the following plot, ANSYS matches the known tabular
+# As shown in the following plot, MAPDL matches the known tabular
 # result for this geometry remarkably well using PLANE183 elements.
 # The fit to the results may vary depending on the ratio between the
 # height and width of the plate.
