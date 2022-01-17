@@ -178,7 +178,7 @@ def test_server_version(mapdl):
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
-    assert mapdl.prep7() == ""
+    assert mapdl.prep7() == None
 
     # commands like /INQUIRE must always return something
     jobname = "file"
@@ -298,6 +298,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_errors is True
 
     # verify that an error is not raised
+    mapdl.prep7()
     out = mapdl._run("A, 0, 0, 0")
     assert "*** ERROR ***" in out
 

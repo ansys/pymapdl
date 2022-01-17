@@ -2173,7 +2173,14 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
-        kwargs.setdefault("mute", False)
+        if 'mute' in kwargs:
+            mute = kwargs['mute']
+        elif hasattr(self, 'mute'):
+            kwargs['mute'] = self.mute
+        else:
+            kwargs.setdefault("mute", False)
+
+        mute = kwargs['mute']
 
         command = command.strip()
         # check if multiline
@@ -2225,7 +2232,7 @@ class _MapdlCore(Commands):
 
         text = self._run(command, **kwargs)
 
-        if kwargs['mute']:
+        if mute:
             return
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
