@@ -70,7 +70,7 @@ _ = mapdl.prep7()
 ###############################################################################
 # Pre-Processing
 # ~~~~~~~~~~~~~~
-# Identifying the class ```create`` with methods ``create_kp_method`` and
+# Identifying the class ``create`` with methods ``create_kp_method`` and
 # ``create_node_method`` to calculate and plot the distances between keypoints
 # and nodes.
 
@@ -125,8 +125,8 @@ class Create:
 # Using already created method for keypoints to get the distance between them
 # and print out an output. The keypoints have got next coordinates:
 #
-#  - :math:`K_{\mathrm{3(x,y,z)}} = 100, 0, 30`
-#  - :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
+# * :math:`K_{\mathrm{3(x,y,z)}} = 100, 0, 30`
+# * :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
 
 kp = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
 kp_dist, keypoint_list = kp.create_kp_method()
@@ -140,8 +140,8 @@ print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
 # Using already created method for nodes to get the distance between them and
 # print out an output. The nodes have got next coordinates:
 #
-#  - :math:`N_{\mathrm{1(x,y,z)}} = 1.5, 2.5, 3.5`
-#  - :math:`N_{\mathrm{2(x,y,z)}} = -3.7, 4.6, -3`
+# * :math:`N_{\mathrm{1(x,y,z)}} = 1.5, 2.5, 3.5`
+# * :math:`N_{\mathrm{2(x,y,z)}} = -3.7, 4.6, -3`
 
 nodes = Create(100, 0, 30, -200, 25, 80)
 node_dist, node_list = nodes.create_node_method()
