@@ -130,7 +130,7 @@ print(f"Distance between keypoint is: {kp_dist}\n\n"
 
 nodes = Create(100, 0, 30, -200, 25, 80)
 node_dist, node_list = nodes.create_node_method()
-print(f"Distance between nodes is: {node_dist},\n"
+print(f"Distance between nodes is: {node_dist}\n\n"
       f"{node_list}")
 
 
@@ -140,8 +140,8 @@ print(f"Distance between nodes is: {node_dist},\n"
 # Finally we have the results of the distances for both simulations,
 # which can be compared with expected target values:
 #
-# - 1st simulation to get the distance between keypoints `K_3` and `K_4`, where `LEN_1 = 8.58\,(in)`.
-# - 2nd simulation to get the distance between nodes `N_1` and `N_2`, where `LEN_2 = 305.16\,(in)`.
+# - 1st simulation to get the distance between keypoints :math:`K_3` and :math:`K_4`, where :math:`LEN_1 = 8.58\,(in)`.
+# - 2nd simulation to get the distance between nodes :math:`N_1` and :math:`N_2`, where :math:`LEN_2 = 305.16\,(in)`.
 
 # Define the names of the rows.
 row_names = ["N1 - N2 distance (LEN2)",
