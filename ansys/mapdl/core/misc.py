@@ -386,4 +386,4 @@ def check_res_table(row_names=None, simulation_res=None, target_res=None):
                          "text-align": "center"
                      }).format("{:.2f}")
 
-    return df2, df
+    return df2
