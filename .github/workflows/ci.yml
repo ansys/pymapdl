@@ -234,6 +234,10 @@ jobs:
           pip install pytest-azurepipelines
           xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
 
+      - uses: codecov/codecov-action@v2
+        if: matrix.mapdl-version == 'v21.2.1'
+        name: 'Upload coverage to Codecov'
+
       - name: Check package
         run: |
           pip install twine
