@@ -92,6 +92,7 @@ class Create:
 
         # Plot keypoints.
         mapdl.kplot(show_keypoint_numbering=True,
+                    vtk=True,
                     background="grey",
                     show_bounds=True,
                     font_size=26)
@@ -107,7 +108,9 @@ class Create:
         dist_node, node_x, node_y, node_z = mapdl.ndist(node1, node2)
 
         # Plot nodes.
-        mapdl.nplot(background="grey",
+        mapdl.nplot(nnum=True,
+                    vtk=True,
+                    color="grey",
                     show_bounds=True,
                     font_size=26)
         return dist_node, mapdl.nlist()
