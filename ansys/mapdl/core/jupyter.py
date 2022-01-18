@@ -118,7 +118,7 @@ def launch_mapdl_on_cluster(
 
     if "-smp" in additional_switches:
         raise ValueError(
-            'Ignoring additional switch "-smp".  Incompatible with docker container.'
+            'The additional switch "-smp" is incompatible with docker containers.'
         )
 
     additional_switches += f"-m -{memory} -np {nproc}"
