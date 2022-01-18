@@ -8,6 +8,7 @@ from threading import Thread
 import random
 import string
 from functools import wraps
+import pathlib
 
 import scooby
 import numpy as np
@@ -298,7 +299,7 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None):
+def create_temp_dir(tmpdir=None) -> pathlib.Path:
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -322,7 +323,7 @@ def create_temp_dir(tmpdir=None):
             "directory %s\n" % path + "Please specify run_location="
         )
 
-    return path
+    return pathlib.Path(path)
 
 
 def no_return(func):

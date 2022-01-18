@@ -12,6 +12,7 @@ import warnings
 import pathlib
 from warnings import warn
 from functools import wraps
+from typing import Union
 
 import numpy as np
 
@@ -592,8 +593,8 @@ class _MapdlCore(Commands):
 
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.directory, "_tmp.cdb")
-            nblock_filename = os.path.join(self.directory, "nblock.cdb")
+            arch_filename = self.directory / "_tmp.cdb"
+            nblock_filename = self.directory / "nblock.cdb"
 
             # must have all nodes elements are using selected
             if hasattr(self, "mute"):
@@ -704,7 +705,7 @@ class _MapdlCore(Commands):
     @run_as_prep7
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.directory, "_tmp.iges")
+        filename = self.directory / "_tmp.iges"
         self.igesout(filename, att=1, mute=True)
         return filename
 
@@ -1200,7 +1201,7 @@ class _MapdlCore(Commands):
     def _list(self, command):
         """Replaces *LIST command"""
         items = command.split(",")
-        filename = os.path.join(self.directory, ".".join(items[1:]))
+        filename = self.directory / ".".join(items[1:])
         if os.path.isfile(filename):
             self._response = open(filename).read()
             self._log.info(self._response)
@@ -1404,12 +1405,12 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir(), "ansys_tmp")
-            result_path = self.download_result(save_path)
+            save_path = pathlib.Path(tempfile.gettempdir()) / "ansys_tmp"
+            result_path = self.download_result(save_path)  # todo: investigate download_result
         else:
             if self._distributed_result_file and self._result_file:
                 result_path = self._distributed_result_file
-                result = Result(result_path, read_mesh=False)
+                result = Result(str(result_path), read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
                 else:
@@ -1430,9 +1431,9 @@ class _MapdlCore(Commands):
                 result_path = self._result_file
 
         if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
+            raise FileNotFoundError(f"No result file(s) at {self.directory}")
         if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
+            raise FileNotFoundError(f"No results found at {result_path}")
 
         return read_binary(result_path)
 
@@ -1452,18 +1453,10 @@ class _MapdlCore(Commands):
             ext = ""
 
         if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
-
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
+            return self._result_file_constructor(f"{filename}.rth", f"{filename}.rst")
         else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
+            filename = self.directory / f"{filename}.{ext}"
+            if filename.is_file():
                 return filename
 
     @property
@@ -1483,13 +1476,16 @@ class _MapdlCore(Commands):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
-        if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+        return self._result_file_constructor(rth_basename, rst_basename)
+
+    def _result_file_constructor(self, rth: str, rst: str):
+        rth_file = self.directory / rth
+        rst_file = self.directory / rst
+        if rth_file.is_file() and rst_file.is_file():
             return last_created([rth_file, rst_file])
-        elif os.path.isfile(rth_file):
+        elif rth_file.is_file():
             return rth_file
-        elif os.path.isfile(rst_file):
+        elif rst_file.is_file():
             return rst_file
 
     def _get(self, *args, **kwargs):
@@ -2372,7 +2368,7 @@ class _MapdlCore(Commands):
 
     @property
     @supress_logging
-    def directory(self):
+    def directory(self) -> Union[pathlib.Path]:
         """Current MAPDL directory
 
         Examples
@@ -2400,18 +2396,13 @@ class _MapdlCore(Commands):
         try:
             self._path = self.inquire("DIRECTORY")
         except Exception:
-            pass
-
-        # os independent path format
-        if self._path: # self.inquire might return ''.
-            self._path = self._path.replace("\\", "/")
-            # new line to fix path issue, see #416
-            self._path = repr(self._path)[1:-1]
+            self._path = ''
+        self._path = pathlib.Path(self._path)
         return self._path
 
     @directory.setter
     @supress_logging
-    def directory(self, path):
+    def directory(self, path: Union[str, pathlib.Path]):
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)  # this has been wrapped in Mapdl to show a warning if the file does not exist.
 
@@ -2594,7 +2585,7 @@ class _MapdlCore(Commands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, f"{self.jobname}*.png"))
+        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
@@ -2602,38 +2593,40 @@ class _MapdlCore(Commands):
         """alias for set_log_level"""
         self.set_log_level(level)
 
-    def list(self, filename, ext=""):
+    def list(self, filename: Union[pathlib.Path, str], ext: str = ""):
         """Displays the contents of an external, coded file.
 
         APDL Command: ``/LIST``
 
         Parameters
         ----------
-        fname : str
+        filename : str
             File name and directory path. An unspecified directory
             path defaults to the working directory.
 
         ext : str, optional
             Filename extension
         """
+        path = pathlib.Path(filename)
         if hasattr(self, "_local"):  # gRPC
             if not self._local:
-                return self._download_as_raw(filename).decode()
+                return self._download_as_raw(path).decode()
 
-        path = pathlib.Path(filename)
-        if path.parent != ".":
-            path = os.path.join(self.directory, filename)
+        if filename.parent != ".":
+            path = self.directory / filename
 
-        path = str(path) + ext
+        path = path.with_suffix(ext)
         with open(path) as fid:
             return fid.read()
 
     @wraps(Commands.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd"""
-        returns_ = super().cwd( *args, **kwargs)
+        returns_ = super().cwd(*args, **kwargs)
 
         if '*** WARNING ***' in self._response:
             warn('\n' + self._response)
 
         return returns_
+
+

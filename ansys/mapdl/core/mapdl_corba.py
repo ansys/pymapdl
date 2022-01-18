@@ -212,7 +212,7 @@ class MapdlCorba(_MapdlCore):
 
     @property
     def _broadcast_file(self):
-        return os.path.join(self.directory, "mapdl_broadcasts.txt")
+        return self.directory / "mapdl_broadcasts.txt"
 
     @threaded
     def _start_broadcast_logger(self, update_rate=1.0):
@@ -341,7 +341,7 @@ class MapdlCorba(_MapdlCore):
 
                 if filename:
                     if os.path.basename(filename) == filename:
-                        filename = os.path.join(self.directory, filename)
+                        filename = self.directory / filename
                     self._output = filename
                     if len(items) == 5:
                         if items[4].lower().strip() == "append":

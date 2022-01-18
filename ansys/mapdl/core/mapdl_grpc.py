@@ -12,6 +12,7 @@ import socket
 from functools import wraps
 import tempfile
 import subprocess
+import pathlib
 
 import grpc
 import numpy as np
@@ -703,7 +704,7 @@ class MapdlGrpc(_MapdlCore):
         """Store the process IDs used when launching MAPDL"""
         for filename in self.list_files():
             if "cleanup" in filename:
-                script = os.path.join(self.directory, filename)
+                script = self.directory / filename
                 with open(script) as f:
                     raw = f.read()
 
@@ -741,7 +742,7 @@ class MapdlGrpc(_MapdlCore):
         if self._local:
             for filename in self.list_files():
                 if "cleanup" in filename:
-                    script = os.path.join(self.directory, filename)
+                    script = self.directory / filename
                     if not os.path.isfile(script):
                         return
                     if os.name != "nt":
@@ -846,7 +847,7 @@ class MapdlGrpc(_MapdlCore):
         tmp_file = "__tmp_sys_out__"
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
-            with open(os.path.join(self.directory, tmp_file)) as fobj:
+            with open(self.directory / tmp_file) as fobj:
                 return fobj.read()
         return self._download_as_raw(tmp_file).decode()
 
@@ -1083,9 +1084,9 @@ class MapdlGrpc(_MapdlCore):
                 if os.path.isfile(fname):
                     # And it exist!
                     filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files(): #
+                elif fname in self.list_files():
                     # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
+                    filename = self.directory / fname
                 elif os.path.dirname(fname):
                     raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
                 else:
@@ -1408,7 +1409,7 @@ class MapdlGrpc(_MapdlCore):
         """Download a file from the gRPC instance as a binary
         string without saving it to disk.
         """
-        request = pb_types.DownloadFileRequest(name=target_name)
+        request = pb_types.DownloadFileRequest(name=str(target_name))
         chunks = self._stub.DownloadFile(request)
         return b"".join([chunk.payload for chunk in chunks])
 
@@ -1584,11 +1585,11 @@ class MapdlGrpc(_MapdlCore):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
         if self._local:
-            filename = os.path.join(self.directory, basename)
+            filename = self.directory / basename
             self.igesout(basename, att=1)
         else:
             self.igesout(basename, att=1)
-            filename = os.path.join(tempfile.gettempdir(), basename)
+            filename = pathlib.Path(tempfile.gettempdir()) / basename
             self.download(basename, filename, progress_bar=False)
         return filename
 
@@ -1609,23 +1610,17 @@ class MapdlGrpc(_MapdlCore):
         if filename[-1].isnumeric():
             filename += "_"
 
-        rth_basename = "%s0.%s" % (filename, "rth")
-        rst_basename = "%s0.%s" % (filename, "rst")
+        rth_basename = f"{filename}.rth"
+        rst_basename = f"{filename}.rst"
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
                 raise FileNotFoundError("Thermal Result not available")
             return rth_file
 
-        if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-            return last_created([rth_file, rst_file])
-        elif os.path.isfile(rth_file):
-            return rth_file
-        elif os.path.isfile(rst_file):
-            return rst_file
+        return self._result_file_constructor(rth_basename, rst_basename)
 
     @property
     def _result_file(self):
@@ -1643,21 +1638,15 @@ class MapdlGrpc(_MapdlCore):
             ext = ""
 
         if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
+            rth_file = self.directory / f"{filename}.rth"
 
             if self._prioritize_thermal and os.path.isfile(rth_file):
                 return rth_file
 
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
+            return self._result_file_constructor(f"{filename}.rth", f"{filename}.rst")
         else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
+            filename = self.directory / f"{filename}.{ext}"
+            if filename.is_file():
                 return filename
 
     @property
@@ -1682,7 +1671,7 @@ class MapdlGrpc(_MapdlCore):
             return None
 
         if self.local:
-            return open(os.path.join(self.directory, error_file)).read()
+            return open(self.directory / error_file).read()
         elif self._exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has " "exited"
@@ -1752,9 +1741,9 @@ class MapdlGrpc(_MapdlCore):
                 result_path = self._result_file
 
         if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
+            raise FileNotFoundError(f"No result file(s) at {self.directory}")
         if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
+            raise FileNotFoundError(f"No results found at {result_path}")
 
         return read_binary(result_path)
 
