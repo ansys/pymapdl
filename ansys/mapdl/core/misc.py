@@ -335,6 +335,55 @@ def no_return(func):
     return wrapper
 
 
-def check_res_table():
-    
-    pass
+# Function to build main
+def check_res_table(row_names=None, simulation_res=None, target_res=None):
+
+    # If someone did not identified inputs at all.
+    if row_names is None:
+        print("No Inputs")
+        row_names = ["row1", "row2"]
+        simulation_res = [1, 2]
+        target_res = [10, 20]
+
+    # If the quantity of the rows does not eqaul to the quntity
+    if len(row_names) != len(target_res) or len(row_names) != len(target_res):
+        raise TypeError("Not the same quantity of the rows and filled data")
+
+
+
+
+    # Import Pandas and Numpy.
+    import pandas as pd
+    import numpy as np
+
+    # Define column names with corresponding inputs.
+    main_columns = {
+        "Target": target_res,
+        "Mechanical APDL": simulation_res,
+        "Ratio": list(np.divide(simulation_res, target_res))
+    }
+
+    # Create a Data Frame with Pandas.
+    df = pd.DataFrame(main_columns, index=row_names)
+
+    # Define setting of the Data Frame Style.
+    df2 = df.style.set_table_styles([
+        {
+            "selector": "th",
+            "props": [('font-size', '16px')]
+        },
+        {
+            "selector": "td",
+            "props": [('font-size', '16px')]
+        },
+        {
+            "selector": "td:hover",
+            "props": [("background-color", "#FFF8DC")]
+        }],
+    ).set_properties(**
+                     {
+                         "color": "black",
+                         "text-align": "center"
+                     }).format("{:.2f}")
+
+    return df2, df
