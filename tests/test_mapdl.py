@@ -1,5 +1,6 @@
 """Test MAPDL interface"""
 import os
+import random
 import time
 
 import numpy as np
@@ -812,7 +813,7 @@ def test_cdread(mapdl, cleared):
 # CDREAD tests are actually a good way to test 'input' command.
 @skip_in_cloud
 def test_cdread_different_location(mapdl, cleared, tmpdir):
-    random_letters = mapdl.directory.split('/')[0][-3:0]
+    random_letters = random_string(3)
     dirname = 'tt' + random_letters
 
     curdir = mapdl.directory
@@ -824,7 +825,7 @@ def test_cdread_different_location(mapdl, cleared, tmpdir):
     mapdl.clear()
     mapdl.cwd(subdir)
     mapdl.cdread("db", 'model2', "cdb")
-    mapdl.cwd(curdir)  #Going back
+    mapdl.cwd(curdir)  # Going back
 
     assert random_letters == mapdl.parameters['parmtest']
 
@@ -952,8 +953,6 @@ def test_path_with_single_quote(mapdl, path_tests):
 def test_cwd_directory(mapdl, tmpdir):
 
     mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir).replace('\\', '/')
-
     wrong_path = 'wrong_path'
     with pytest.warns(Warning) as record:
         mapdl.directory = wrong_path
