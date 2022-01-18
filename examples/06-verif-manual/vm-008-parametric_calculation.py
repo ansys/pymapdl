@@ -30,16 +30,21 @@ Geometric Properties(Coordinates):
    :alt: VM8 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
- - The user file is created by the *CREATE command within the run.
-   In normal use, this file would most likely already exist locally.
-   Colons are used in the user file to create non-echoing comments (the colon
-   character specifies a branching label in Mechanical APDL).
-   The active coordinate system is saved and restored within the macro to ensure
-   Cartesian coordinates in the distance calculations and to re-establish
-   the active coordinate system after the macro is used. Lowercase input
-   is used throughout. Input case is preserved by Mechanical APDL where
-   appropriate (system-dependent).
-   CHECK UNIT TESTING ISSUE
+ - Instead of ``*create``, ``*use``, etc., we have created a class
+   `` Create`` with methods that correspond to each type of simulation.
+   In normal use, this class would most likely already exist, so
+   it is possible to change coordinates and reuse it. The simulation
+   can be checked not just by target values, but also with the simple
+   distances' formula between keypoints as:
+
+    * To calculate the distance in cartesian coordinate system:
+    :math:`DIST = \sqrt[2]{(x_2 - x_1)^2 + (y_2 - y_1)^2 + (z_2 - z_1)^2}`
+
+    * Python representation of the distance formula:
+
+    .. doctest::
+        import math
+        DIST = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
