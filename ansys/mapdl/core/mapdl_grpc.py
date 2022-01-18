@@ -1720,7 +1720,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             if self._distributed_result_file and self._result_file:
                 result_path = self._distributed_result_file
-                result = Result(result_path, read_mesh=False)
+                result = Result(str(result_path), read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
                 else:
@@ -1732,7 +1732,7 @@ class MapdlGrpc(_MapdlCore):
 
             elif self._distributed_result_file:
                 result_path = self._distributed_result_file
-                result = Result(result_path, read_mesh=False)
+                result = Result(str(result_path), read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
                         raise RuntimeError("Distributed Cyclic result not supported")
@@ -1745,7 +1745,7 @@ class MapdlGrpc(_MapdlCore):
         if not os.path.isfile(result_path):
             raise FileNotFoundError(f"No results found at {result_path}")
 
-        return read_binary(result_path)
+        return read_binary(str(result_path))
 
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
