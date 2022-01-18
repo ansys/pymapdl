@@ -333,3 +333,8 @@ def no_return(func):
         func(*args, **kwargs)
 
     return wrapper
+
+
+def check_res_table():
+    
+    pass
