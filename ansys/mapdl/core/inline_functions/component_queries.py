@@ -673,3 +673,4 @@ class _DisplacementComponentQueries(_QueryExecution):
 
         """
         return self._run_query(f"UZ({n})", integer=False)
+

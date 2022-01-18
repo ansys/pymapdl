@@ -2,6 +2,8 @@
 session, including the jobname, Graphical User Interface behavior, and
 file switching.
 """
+import pathlib
+from typing import Union
 
 
 class RunControls:
@@ -110,7 +112,7 @@ class RunControls:
         command = "/CONFIG,%s,%s" % (str(lab), str(value))
         return self.run(command, **kwargs)
 
-    def cwd(self, dirpath="", **kwargs):
+    def cwd(self, dirpath: Union[str, pathlib.Path] = "", **kwargs):
         """Changes the current working directory.
 
         ``dirpath`` must not contain any singular quotations/apostrophes.
