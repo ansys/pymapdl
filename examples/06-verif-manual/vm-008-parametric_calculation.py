@@ -39,7 +39,7 @@ Analysis Assumptions and Modeling Notes:
    the active coordinate system after the macro is used. Lowercase input
    is used throughout. Input case is preserved by Mechanical APDL where
    appropriate (system-dependent).
-
+   CHECK UNIT TESTING ISSUE
 
 """
 # sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
