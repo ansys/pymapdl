@@ -31,7 +31,7 @@ Geometric Properties(Coordinates):
 
 Analysis Assumptions and Modeling Notes:
  - Instead of ``*create``, ``*use``, etc., we have created a class
-   `` Create`` with methods that correspond to each type of simulation.
+   ``Create`` with methods that correspond to each type of simulation.
    In normal use, this class would most likely already exist, so
    it is possible to change coordinates and reuse it. The simulation
    can be checked not just by target values, but also with the simple
