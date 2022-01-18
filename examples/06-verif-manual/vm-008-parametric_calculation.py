@@ -119,7 +119,7 @@ class Create:
 
 kp = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
 kp_dist, keypoint_list = kp.create_kp_method()
-print(f"Distance between keypoint is: {kp_dist}\n\n"
+print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
       f"{keypoint_list}")
 
 
@@ -130,7 +130,7 @@ print(f"Distance between keypoint is: {kp_dist}\n\n"
 
 nodes = Create(100, 0, 30, -200, 25, 80)
 node_dist, node_list = nodes.create_node_method()
-print(f"Distance between nodes is: {node_dist}\n\n"
+print(f"Distance between nodes is: {node_dist:.2f}\n\n"
       f"{node_list}")
 
 
