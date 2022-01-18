@@ -84,8 +84,8 @@ class Create:
     def create_kp_method(self):
 
         # Define keypoints by coordinates.
-        kp1 = mapdl.k(x=self.x1, y=self.y1, z=self.z1)
-        kp2 = mapdl.k(x=self.x2, y=self.y2, z=self.z2)
+        kp1 = mapdl.k(npt=3, x=self.x1, y=self.y1, z=self.z1)
+        kp2 = mapdl.k(npt=4, x=self.x2, y=self.y2, z=self.z2)
 
         # Get the distance between keypoints.
         dist_kp, kx, ky, kz = mapdl.kdist(kp1, kp2)
@@ -100,8 +100,8 @@ class Create:
     def create_node_method(self):
 
         # Define nodes by coordinates.
-        node1 = mapdl.n(x=self.x1, y=self.y1, z=self.z1)
-        node2 = mapdl.n(x=self.x2, y=self.y2, z=self.z2)
+        node1 = mapdl.n(node=1, x=self.x1, y=self.y1, z=self.z1)
+        node2 = mapdl.n(node=2, x=self.x2, y=self.y2, z=self.z2)
 
         # Get the distance between nodes.
         dist_node, node_x, node_y, node_z = mapdl.ndist(node1, node2)
