@@ -14,7 +14,7 @@ Reference:
  - None.
 
 Analysis Type(s):
- - Parametric Arithmetic
+ - Parametric Arithmetic.
 
 Element Type:
  - None.
@@ -128,7 +128,7 @@ class Create:
 # * :math:`K_{\mathrm{3(x,y,z)}} = 100, 0, 30`
 # * :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
 
-kp = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
+kp = Create(100, 0, 30, -200, 25, 80)
 kp_dist, keypoint_list = kp.create_kp_method()
 print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
       f"{keypoint_list}")
@@ -143,7 +143,7 @@ print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
 # * :math:`N_{\mathrm{1(x,y,z)}} = 1.5, 2.5, 3.5`
 # * :math:`N_{\mathrm{2(x,y,z)}} = -3.7, 4.6, -3`
 
-nodes = Create(100, 0, 30, -200, 25, 80)
+nodes = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
 node_dist, node_list = nodes.create_node_method()
 print(f"Distance between nodes is: {node_dist:.2f}\n\n"
       f"{node_list}")
@@ -155,8 +155,11 @@ print(f"Distance between nodes is: {node_dist:.2f}\n\n"
 # Finally we have the results of the distances for both simulations,
 # which can be compared with expected target values:
 #
-# - 1st simulation to get the distance between keypoints :math:`K_3` and :math:`K_4`, where :math:`LEN_1 = 8.58\,(in)`.
-# - 2nd simulation to get the distance between nodes :math:`N_1` and :math:`N_2`, where :math:`LEN_2 = 305.16\,(in)`.
+# - 1st simulation to get the distance between keypoints :math:`K_3` and :math:`K_4`, where :math:`LEN_1 = 305.16\,(in)`.
+# - 2nd simulation to get the distance between nodes :math:`N_1` and :math:`N_2`, where :math:`LEN_2 = 8.58\,(in)`.
+#
+# For better representation of the results we can use ``pandas`` dataframe
+# with following settings below:
 
 # Define the names of the rows.
 row_names = ["N1 - N2 distance (LEN2)",
@@ -171,7 +174,7 @@ col_names = ['Target',
 target_res = np.asarray([8.5849, 305.16])
 
 # Create an array with outputs of the simulations.
-simulation_res = np.asarray([kp_dist, node_dist])
+simulation_res = np.asarray([node_dist, kp_dist])
 
 # Identifying and filling corresponding columns.
 main_columns = {
