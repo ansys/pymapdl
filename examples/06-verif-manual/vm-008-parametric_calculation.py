@@ -155,8 +155,8 @@ print(f"Distance between nodes is: {node_dist:.2f}\n\n"
 # Finally we have the results of the distances for both simulations,
 # which can be compared with expected target values:
 #
-# - 1st simulation to get the distance between keypoints :math:`K_3` and :math:`K_4`, where :math:`LEN_1 = 305.16\,(in)`.
-# - 2nd simulation to get the distance between nodes :math:`N_1` and :math:`N_2`, where :math:`LEN_2 = 8.58\,(in)`.
+# - 1st simulation to get the distance between keypoints :math:`K_3` and :math:`K_4`, where :math:`LEN_1 = 305.16\,(in)`
+# - 2nd simulation to get the distance between nodes :math:`N_1` and :math:`N_2`, where :math:`LEN_2 = 8.58\,(in)`
 #
 # For better representation of the results we can use ``pandas`` dataframe
 # with following settings below:
@@ -199,10 +199,8 @@ df2.style.set_table_styles([
                             {
                                 "selector": "td:hover",
                                 "props": [("background-color", "#FFF8DC")]
-                            }],
-).set_properties(**
-                 {
-                    "color": "black",
-                    "text-align": "center"
-                 },
-).format("{:.2f}")
+                            }]).set_properties(**
+                                               {
+                                                    "color": "black",
+                                                    "text-align": "center"
+                                               }).format("{:.2f}")
