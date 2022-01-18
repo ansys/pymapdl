@@ -48,8 +48,8 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
-# import numpy as np
-# import pandas as pd
+import numpy as np
+import pandas as pd
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -73,7 +73,7 @@ _ = mapdl.prep7()
 
 class Create:
     def __init__(self, x1, y1, z1, x2, y2, z2):
-        # Coordinate Attributes
+        # Coordinate Attributes.
         self.x1 = x1
         self.y1 = y1
         self.z1 = z1
@@ -81,11 +81,16 @@ class Create:
         self.y2 = y2
         self.z2 = z2
 
-    # Method
     def create_kp_method(self):
+
+        # Define keypoints by coordinates.
         kp1 = mapdl.k(x=self.x1, y=self.y1, z=self.z1)
         kp2 = mapdl.k(x=self.x2, y=self.y2, z=self.z2)
+
+        # Get the distance between keypoints.
         dist_kp, kx, ky, kz = mapdl.kdist(kp1, kp2)
+
+        # Plot keypoints.
         mapdl.kplot(show_keypoint_numbering=True,
                     background="grey",
                     show_bounds=True,
@@ -93,10 +98,16 @@ class Create:
         return dist_kp, mapdl.klist()
 
     def create_node_method(self):
+
+        # Define nodes by coordinates.
         node1 = mapdl.n(x=self.x1, y=self.y1, z=self.z1)
         node2 = mapdl.n(x=self.x2, y=self.y2, z=self.z2)
+
+        # Get the distance between nodes.
         dist_node, node_x, node_y, node_z = mapdl.ndist(node1, node2)
-        mapdl.nplot(background="green",
+
+        # Plot nodes.
+        mapdl.nplot(background="grey",
                     show_bounds=True,
                     font_size=26)
         return dist_node, mapdl.nlist()
@@ -104,16 +115,18 @@ class Create:
 ###############################################################################
 # Distance between keypoints
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
 kp = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
 kp_dist, keypoint_list = kp.create_kp_method()
-print(f"Distance between keypoint is: {kp_dist},\n"
+print(f"Distance between keypoint is: {kp_dist}\n\n"
       f"{keypoint_list}")
 
 
 ###############################################################################
 # Distance between nodes.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
 nodes = Create(100, 0, 30, -200, 25, 80)
 node_dist, node_list = nodes.create_node_method()
@@ -124,41 +137,38 @@ print(f"Distance between nodes is: {node_dist},\n"
 ###############################################################################
 # Check Results
 # ~~~~~~~~~~~~~
-
-# Finally we have the results of the loads for the simplified axisymmetric model,
-# which can be compared with expected target values for models with ``PIPE288``,
-# ``SOLID185``, and ``SHELL181`` elements. Loads expected for each load step are:
+# Finally we have the results of the distances for both simulations,
+# which can be compared with expected target values:
 #
-# - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load_1 = 1024400\,(lb)`.
-# - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load_2 = 1262000\,(lb)`.
-# - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
+# - 1st simulation to get the distance between keypoints `K_3` and `K_4`, where `LEN_1 = 8.58\,(in)`.
+# - 2nd simulation to get the distance between nodes `N_1` and `N_2`, where `LEN_2 = 305.16\,(in)`.
 
-import numpy as np
-import pandas as pd
-
-
+# Define the names of the rows.
 row_names = ["N1 - N2 distance (LEN2)",
              "K3 - K4 distance (LEN1)"]
 
+# Define the names of the columns.
 col_names = ['Target',
              'Mechanical APDL',
              'RATIO']
 
+# Define the values of the target results.
+target_res = np.asarray([8.5849, 305.16])
 
-target_res = np.asarray([8.5849,
-                         305.16])
-
+# Create an array with outputs of the simulations.
 simulation_res = np.asarray([kp_dist, node_dist])
 
+# Identifying and filling corresponding columns.
 main_columns = {
     "Target": target_res,
     "Mechanical APDL": simulation_res,
     "Ratio": list(np.divide(simulation_res, target_res))
 }
 
+# Create and fill the output dataframe with pandas.
 df2 = pd.DataFrame(main_columns, index=row_names)
 
-
+# Apply style settings for the dataframe.
 df2.style.set_table_styles([
                             {
                               "selector": "th",
