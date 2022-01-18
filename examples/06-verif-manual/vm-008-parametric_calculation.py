@@ -37,21 +37,26 @@ Analysis Assumptions and Modeling Notes:
    can be checked not just by target values, but also with the simple
    distances' formula between keypoints as:
 
-    * To calculate the distance in cartesian coordinate system:
-    :math:`DIST = \sqrt[2]{(x_2 - x_1)^2 + (y_2 - y_1)^2 + (z_2 - z_1)^2}`
+   * Calculate distance between two keypoints in the Cartesian coordinate system:
+        :math:`D = \sqrt[2]{(x_2 - x_1)^2 + (y_2 - y_1)^2 + (z_2 - z_1)^2}`
+   * Python representation of the distance formula:
+        .. doctest::
 
-    * Python representation of the distance formula:
-
-    .. doctest::
-        import math
-        DIST = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+            import math
+            # Define coordinates for keypoints K3 and K4.
+            x1, y1, z1 = 100, 0, 30
+            x2, y2, z2 = -200, 25, 80
+            dist_kp = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+            print(dist_kp)
 
 """
-# sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
 
 ###############################################################################
 # Start MAPDL
 # ~~~~~~~~~~~
+# Start MAPDL and import Numpy and Pandas libraries.
+
+# sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
 
 import numpy as np
 import pandas as pd
