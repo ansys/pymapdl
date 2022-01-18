@@ -73,7 +73,7 @@ _ = mapdl.prep7()
 
 class Create:
     def __init__(self, x1, y1, z1, x2, y2, z2):
-        # Attributes
+        # Coordinate Attributes
         self.x1 = x1
         self.y1 = y1
         self.z1 = z1
@@ -81,6 +81,7 @@ class Create:
         self.y2 = y2
         self.z2 = z2
 
+    # Method
     def create_kp_method(self):
         kp1 = mapdl.k(x=self.x1, y=self.y1, z=self.z1)
         kp2 = mapdl.k(x=self.x2, y=self.y2, z=self.z2)
@@ -101,10 +102,10 @@ class Create:
         return dist_node, mapdl.nlist()
 
 ###############################################################################
-# Distance between keypoints.
+# Distance between keypoints
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-kp = Create(1, 2, 3, 10, 20, 30)
+kp = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
 kp_dist, keypoint_list = kp.create_kp_method()
 print(f"Distance between keypoint is: {kp_dist},\n"
       f"{keypoint_list}")
@@ -112,95 +113,68 @@ print(f"Distance between keypoint is: {kp_dist},\n"
 
 ###############################################################################
 # Distance between nodes.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-nodes = Create(1, 200, 3, 10, 20, 300)
+nodes = Create(100, 0, 30, -200, 25, 80)
 node_dist, node_list = nodes.create_node_method()
 print(f"Distance between nodes is: {node_dist},\n"
       f"{node_list}")
 
 
-# ###############################################################################
-# # Check Results
-# # ~~~~~~~~~~~~~
-# # Finally we have the results of the loads for the simplified axisymmetric model,
-# # which can be compared with expected target values for models with ``PIPE288``,
-# # ``SOLID185``, and ``SHELL181`` elements. Loads expected for each load step are:
-# #
-# # - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load_1 = 1024400\,(lb)`.
-# # - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load_2 = 1262000\,(lb)`.
-# # - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
+###############################################################################
+# Check Results
+# ~~~~~~~~~~~~~
+
+# Finally we have the results of the loads for the simplified axisymmetric model,
+# which can be compared with expected target values for models with ``PIPE288``,
+# ``SOLID185``, and ``SHELL181`` elements. Loads expected for each load step are:
 #
-# target_res = np.asarray([1024400, 1262000, 1262000,
-#                          1024400, 1262000, 1262000,
-#                          1024400, 1262000, 1262000])
-#
-# simulation_res = np.asarray([pipe288_ls1, pipe288_ls2, pipe288_ls2,
-#                              solid185_ls1, solid185_ls2, solid185_ls3,
-#                              shell181_ls1, shell181_ls2, shell181_ls3])
-#
-# main_columns = {
-#     "Target": target_res,
-#     "Mechanical APDL": simulation_res,
-#     "Ratio": list(np.divide(simulation_res, target_res))
-# }
-#
-# row_tuple = [("PIPE288", "Load, lb for Deflection = 0.032 in"),
-#              ("PIPE288", "Load, lb for Deflection = 0.05 in"),
-#              ("PIPE288", "Load, lb for Deflection = 0.1 in"),
-#
-#              ("SOLID185", "Load, lb for Deflection = 0.032 in"),
-#              ("SOLID185", "Load, lb for Deflection = 0.05 in"),
-#              ("SOLID185", "Load, lb for Deflection = 0.1 in"),
-#
-#              ("SHELL181", "Load, lb for Deflection = 0.032 in"),
-#              ("SHELL181", "Load, lb for Deflection = 0.05 in"),
-#              ("SHELL181", "Load, lb for Deflection = 0.1 in")]
-#
-# index_names = ["Element Type", "Load Step"]
-# row_indexing = pd.MultiIndex.from_tuples(row_tuple)
-# df = pd.DataFrame(main_columns, index=row_indexing)
-#
-# df.style.set_caption('Results Comparison',
-#                      ).set_table_styles([
-#                         {
-#                             "selector": "th.col_heading",
-#                             "props": [("background-color", "#FFEFD5"),
-#                                       ("color", "black"),
-#                                       ("border", "0.5px solid black"),
-#                                       ("font-style", "italic"),
-#                                       ("text-align", "center")]
-#                         },
-#                         {
-#                             "selector": "th.row_heading",
-#                             "props": [("background-color", "#FFEFD5"),
-#                                       ("color", "black"),
-#                                       ("border", "0.5px solid black"),
-#                                       ("font-style", "italic"),
-#                                       ("text-align", "center")]
-#                         },
-#                         {
-#                             "selector": "td:hover",
-#                             "props": [("background-color", "#FFF8DC")]
-#                         },
-#                         {
-#                             "selector": "th",
-#                             "props": [("max-width", '120px')]
-#                         },
-#                         {
-#                             "selector": "",
-#                             "props": [('border', '0.5px solid black')]
-#                         },
-#                         {
-#                             'selector': 'caption',
-#                             'props': [('color', 'black'),
-#                                       ("font-style", "italic"),
-#                                       ('font-size', '24px'),
-#                                       ("text-align", "center")]
-#                         }],
-# ).set_properties(**{
-#     "background-color": "#FFFAFA",
-#     "color": "black",
-#     "border-color": "black",
-#     "border-width": "0.5px",
-#     "border-style": "solid",
-#     "text-align": "center"}).format("{:.3f}")
+# - 1st Load Step with deflection :math:`\delta = 0.032 (in)` has :math:`load_1 = 1024400\,(lb)`.
+# - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load_2 = 1262000\,(lb)`.
+# - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
+
+import numpy as np
+import pandas as pd
+
+
+row_names = ["N1 - N2 distance (LEN2)",
+             "K3 - K4 distance (LEN1)"]
+
+col_names = ['Target',
+             'Mechanical APDL',
+             'RATIO']
+
+
+target_res = np.asarray([8.5849,
+                         305.16])
+
+simulation_res = np.asarray([kp_dist, node_dist])
+
+main_columns = {
+    "Target": target_res,
+    "Mechanical APDL": simulation_res,
+    "Ratio": list(np.divide(simulation_res, target_res))
+}
+
+df2 = pd.DataFrame(main_columns, index=row_names)
+
+
+df2.style.set_table_styles([
+                            {
+                              "selector": "th",
+                              "props": [('font-size', '16px')]
+                            },
+                            {
+                              "selector": "td",
+                              "props": [('font-size', '16px')]
+                            },
+                            {
+                                "selector": "td:hover",
+                                "props": [("background-color", "#FFF8DC")]
+                            }],
+).set_properties(**
+                 {
+                    "color": "black",
+                    "text-align": "center"
+                 },
+).format("{:.2f}")
