@@ -279,7 +279,7 @@ class ParameterDefinition:
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
 
-    def inquire(self, func):
+    def inquire(self, func) -> str:
         """Returns system information.
 
         Parameters
