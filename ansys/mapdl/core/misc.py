@@ -338,7 +338,8 @@ def no_return(func):
 # Function to build main
 def check_res_table(row_names=None, simulation_res=None, target_res=None):
 
-    # If someone did not identified inputs at all.
+    # If someone did not identify inputs at all,
+    # it represents default data frame example.
     if row_names is None:
         print("No Inputs")
         row_names = ["row1", "row2"]
@@ -349,12 +350,8 @@ def check_res_table(row_names=None, simulation_res=None, target_res=None):
     if len(row_names) != len(target_res) or len(row_names) != len(target_res):
         raise TypeError("Not the same quantity of the rows and filled data")
 
-
-
-
     # Import Pandas and Numpy.
     import pandas as pd
-    import numpy as np
 
     # Define column names with corresponding inputs.
     main_columns = {
