@@ -1513,20 +1513,20 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        :class:`MapdlDb <ansys.mapdl.core.math.MapdlDb>`
+        :class:`MapdlDb <ansys.mapdl.core.MapdlDb>`
 
         Examples
         --------
         Get the number of nodes in the MAPDL DB
 
         >>> db = mapdl.db
-        >>> print(db.n_nodes())
-        >>> 101
+        >>> 
+        >>> 
 
         Push a new node into MAPDL
 
-        >>> nod = mapdl.math.stiff()
-        >>> db.set_node(nod)
+        >>> 
+        >>> 
         """
         
         from ansys.mapdl.core.mapdl_db import MapdlDb

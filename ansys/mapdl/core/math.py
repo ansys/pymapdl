@@ -164,7 +164,7 @@ class MapdlMath:
         """Print out the status of all APDLMath Objects"""
         return self._mapdl.run("*STATUS,MATH", mute=False)
 
-    def vec(self, size=0, dtype=np.double, init=None, name=None):
+    def vec(self, size=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create a vector.
 
         Parameters
@@ -195,10 +195,19 @@ class MapdlMath:
         if not name:
             name = id_generator()
             self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
-            return AnsVec(name, self._mapdl, dtype, init)
+            
+            ans_vec = AnsVec(name, self._mapdl, dtype, init)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
         else:
-            return AnsVec(name, self._mapdl)
-
+            ans_vec = AnsVec(name, self._mapdl)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
+        
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
         """Create an APDLMath matrix.
 

@@ -1,12 +1,25 @@
 """Contains the ansXpl class"""
 import weakref
 import json
+import random
+import string
+import pathlib
 
 import numpy as np
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
+def id_generator(size=6, chars=string.ascii_uppercase):
+    """Generate a random string"""
+    return ''.join(random.choice(chars) for _ in range(size))
+
+MYCTYPE = {np.int32: 'I',
+           np.int64: 'L',
+           np.single: 'F',
+           np.double: 'D',
+           np.complex64: 'C',
+           np.complex128: 'Z'}
 
 class ansXpl:
     """ANSYS database explorer class.
@@ -290,13 +303,32 @@ class ansXpl:
         self._check_ignored(response)
         return response
 
-    def read(self, recordname):
-        """Read a given record and fill a Python array.
+    def extract(self, recordname, sets="ALL", asarray=False):
+        """Import a Matrix/Vector from a MAPDL File"""
+        rand_name = id_generator()
+        self._mapdl._log.info("Calling MAPDL to extract the %s matrix from %s",
+                            recordname, self._filename)
+        num_first = 1
+        num_last = 1
+        if sets == "ALL":
+            num_last = -1
 
+        dtype = np.double
+        file_extension = pathlib.Path(self._filename).suffix[1:]
+
+        self._mapdl.run(f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},{num_first},{num_last},{recordname}", mute=False)
+                
+        mm = self._mapdl.math
+        return mm.mat(dtype=dtype, name=rand_name)
+        
+
+    def read(self, recordname):
+        """Read a given record and fill an APDLMath array.
+        
         Returns
         -------
-        numpy.ndarray
-            The array of values.
+        arr : ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+            a handle to the APDLMath object.
 
         Examples
         --------
@@ -305,9 +337,10 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
-        response = self._mapdl.run("*XPL,READ,%s,TmpXplData" % recordname)
+        rand_name = id_generator()
+        response = self._mapdl.run("*XPL,READ,%s,rand_name" % recordname)
         self._check_ignored(response)
-        response = self._mapdl._data_info("TmpXplData")
+        response = self._mapdl._data_info(rand_name)
 
         if response.stype == anskernel.INTEGER:
             dtype = np.int32
@@ -325,7 +358,11 @@ class ansXpl:
             raise TypeError("Unhandled ANSYS type %s" % response.stype)
 
         mm = self._mapdl.math
-        return mm.vec(dtype=dtype, name="TmpXplData")
+        mtype = response.objtype
+        if mtype == 2:
+            return mm.vec(dtype=dtype, name=rand_name)
+
+        return mm.mat(dtype=dtype, name=rand_name)
 
     def write(self, recordname, vecname):
         """Write a given record back to an MAPDL File
