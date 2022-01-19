@@ -1,17 +1,112 @@
+r"""
+.. _ref_vm7_example:
+
+Plastic Compression of a Pipe Assembly
+--------------------------------------
+Problem Description:
+ - Two coaxial tubes, the inner one of 1020 CR steel and cross-sectional
+   area :math:`A_{\mathrm{s}}`, and the outer one of 2024-T4 aluminum alloy
+   and of area :math:`A_{\mathrm{a}}`, are compressed between heavy, flat end plates,
+   as shown below. Determine the load-deflection curve of the assembly
+   as it is compressed into the plastic region by an axial displacement.
+   Assume that the end plates are so stiff that both tubes are shortened by
+   exactly the same amount.
+
+Reference:
+ - S. H. Crandall, N. C. Dahl, An Introduction to the Mechanics of Solids,
+   McGraw-Hill Book Co., Inc., New York, NY, 1959, pg. 180, ex. 5.1.
+
+Analysis Type(s):
+ - Static, Plastic Analysis (``ANTYPE=0``)
+
+Element Type(s):
+ - Plastic Straight Pipe Element (PIPE288)
+ - 4-Node Finite Strain Shell (SHELL181)
+ - 3-D Structural Solid Elements (SOLID185)
+
+.. image:: ../../_static/vm7_setup_2.png
+   :width: 400
+   :alt: VM7 Finite Element Models
+
+Material Properties
+ - :math:`E_{\mathrm{s}} = 26875000\,psi`
+ - :math:`\sigma_{\mathrm{(yp)s}} = 86000\,psi`
+ - :math:`E_{\mathrm{a}} = 11000000\,psi`
+ - :math:`\sigma_{\mathrm{(yp)a}} = 55000\,psi`
+ - :math:`\nu = 0.3`
+
+.. image:: ../../_static/vm7_setup_1.png
+   :width: 300
+   :alt: VM7 Material Model
+
+Geometric Properties:
+ - :math:`l = 10\,in`
+ - :math:`A_{\mathrm{s}} = 7\,in^2`
+ - :math:`A_{\mathrm{a}} = 12\,in^2`
+
+Loading:
+ - 1st Load Step: :math:`\delta = 0.032\,in`
+ - 2nd Load Step: :math:`\delta = 0.050\,in`
+ - 3rd Load Step: :math:`\delta = 0.100\,in`
+
+.. image:: ../../_static/vm7_setup.png
+   :width: 300
+   :alt: VM7 Problem Sketch
+
+Analysis Assumptions and Modeling Notes:
+ - The following tube dimensions, which provide the desired cross-sectional
+   areas, are arbitrarily chosen:
+
+   * Inner (steel) tube: inside radius = 1.9781692 in., wall thickness = 0.5 in.
+   * Outer (aluminum) tube: inside radius = 3.5697185 in., wall thickness = 0.5 in.
+
+ - The problem can be solved in three ways:
+
+   * using ``PIPE288`` - the plastic straight pipe element
+   * using ``SOLID185`` - the 3-D structural solid element
+   * using ``SHELL181`` - the 4-Node Finite Strain Shell
+
+ - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
+   only a one element :math:`\theta` -sector is modeled. A small angle :math:`\theta = 6°`
+   is arbitrarily chosen to reasonably approximate the circular boundary
+   with straight sided elements.
+   The nodes at the boundaries have the ``UX`` (radial) degree of freedom coupled.
+   In the SHELL181 model, the nodes at the boundaries additionally have
+   the ``ROTY`` degree of freedom coupled.
+
+"""
+
 ###############################################################################
-#
+# Start MAPDL
+# ~~~~~~~~~~~
+# Start MAPDL and import Numpy and Pandas libraries.
+
+# sphinx_gallery_thumbnail_path = '_static/vm9_setup.png'
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
-mapdl = launch_mapdl(loglevel="WARNING")
+
+# Start MAPDL.
+mapdl = launch_mapdl()
 
 
 ###############################################################################
-#
+# Pre-Processing
+# ~~~~~~~~~~~~~~
+# Enter verification example mode and the pre-processing routine.
 
-mapdl.prep7()
+mapdl.clear()
+mapdl.verify()
+_ = mapdl.prep7()
+
 
 ###############################################################################
-#
+# Define Element Type
+# ~~~~~~~~~~~~~~~~~~~
+# Set up the element types .
 
 mapdl.et(1, "COMBIN14", "", "", 2)  # UX AND UY DOF ELEMENT
 mapdl.et(3, "COMBIN40", "", "", "", "", "", 2)  # ALL MASS IS AT NODE J, UX DOF ELEMENT
