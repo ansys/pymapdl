@@ -8,7 +8,7 @@ on:
     - cron:  '0 4 * * *'
 
 env:
-  PYMAPDL_PORT: 32771  # default won't work on azure
+  PYMAPDL_PORT: 21000  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
 

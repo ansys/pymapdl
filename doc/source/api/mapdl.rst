@@ -32,6 +32,7 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.result
    Mapdl.run
    Mapdl.run_multiline
+   Mapdl.input_strings
    Mapdl.set_log_level
    Mapdl.version
 

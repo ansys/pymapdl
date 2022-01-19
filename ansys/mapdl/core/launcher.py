@@ -62,6 +62,11 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
+    # gcc is installed by default
+    proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
+    if 'ubuntu' in proc.stdout.read().decode().lower():
+        return True
+
     # try lsb_release as this is more reliable
     try:
         import lsb_release
@@ -69,6 +74,7 @@ def _is_ubuntu():
         if lsb_release.get_distro_information()["ID"].lower() == "ubuntu":
             return True
     except ImportError:
+        # finally, check platform
         return "ubuntu" in platform.platform().lower()
 
 

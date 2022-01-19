@@ -17,9 +17,35 @@ import grpc
 import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
-from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+
+
+MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
+MSG_MODULE = """ANSYS API module (ansys.api.mapdl) could not be found.
+This might be due to a faulty installation or obsolete API module version.
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'.
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+
+try:
+    from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+    from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
+    from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+
+except ImportError:
+    raise ImportError(MSG_IMPORT)
+
+except ModuleNotFoundError:
+    raise ImportError(MSG_MODULE)
 
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
@@ -39,7 +65,7 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core import __version__, _LOCAL_PORTS
 from ansys.mapdl.core import check_version
 
-
+TMP_VAR = '__tmpvar__'
 VOID_REQUEST = anskernel.EmptyRequest()
 
 # Default 256 MB message length
@@ -203,7 +229,7 @@ class MapdlGrpc(_MapdlCore):
     _port = None
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
-                log_file=True, cleanup_on_exit=False, log_apdl=None,
+                log_file=False, cleanup_on_exit=False, log_apdl=None,
                 set_no_abort=True, remove_temp_files=False, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
@@ -1017,6 +1043,31 @@ class MapdlGrpc(_MapdlCore):
 
         self.input(fname, **kwargs)
 
+    @wraps(_MapdlCore.tbft)
+    def tbft(self, oper='', id_='', option1='', option2='', option3='', option4='', option5='', option6='', option7='', **kwargs):
+        """Wraps ``_MapdlCore.tbft``."""
+        if oper.lower() == 'eadd':
+            # Option 2 is a file and option 4 is the directory.
+            # Option 3 is be extension
+            option3 = option3.replace('.', '')
+            fname = option2 if not option3 else option2 + '.' + option3
+            filename = os.path.join(option4, fname)
+
+            if self._local:
+                if not os.path.exists(filename) and filename not in self.list_files():
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
+            else:
+                if os.path.exists(filename):
+                    self.upload(filename)
+                    option4 = ''  # You don't need the directory if you upload it.
+                elif filename in self.list_files():
+                    option4 = ''  # You don't need the directory if the file is in WDIR
+                    pass
+                else:
+                    raise FileNotFoundError(f"File '{filename}' could not be found.")
+
+            return super().tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
+
     @protect_grpc
     def input(
         self,
@@ -1077,38 +1128,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
-        if self._local:
-            if os.path.isdir(fname):
-                raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
-            else:
-                # It must be a file!
-                if os.path.isfile(fname):
-                    # And it exist!
-                    filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files(): #
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
-                elif os.path.dirname(fname):
-                    raise ValueError(f"'{fname}' appears to be an incomplete directory path rather than a filename.")
-                else:
-                    # Finally
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-        else:
-            if not os.path.dirname(fname):
-                # might be trying to run a local file.  Check if the
-                # file exists remotely.
-                if fname not in self.list_files():
-                    self.upload(fname, progress_bar=progress_bar)
-                filename = fname
-            else:
-                # upload the file if it exists locally
-                if os.path.isfile(fname):
-                    self.upload(fname, progress_bar=progress_bar)
-                    filename = os.path.basename(fname)
-                else:
-                    # Otherwise, it must be remote.  Use full path.
-                    filename = fname
+        filename = self._get_file_path(fname, progress_bar)
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
@@ -1175,6 +1195,53 @@ class MapdlGrpc(_MapdlCore):
 
         # otherwise, read remote file
         return self._download_as_raw(tmp_out).decode("latin-1")
+
+    def _get_file_path(self, fname, progress_bar=False):
+        """Find files in the Python and MAPDL working directories.
+
+        **The priority is for the Python directory.**
+
+        Hence if the same file is in the Python directory and in the MAPDL directory,
+        PyMAPDL will upload a copy from the Python directory to the MAPDL directory,
+        overwriting the MAPDL directory copy.
+        """
+
+        if os.path.isdir(fname):
+            raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
+
+        fpath = os.path.dirname(fname)
+        fname = os.path.basename(fname)
+        fext = fname.split('.')[-1]
+        ffullpath = os.path.join(fpath, fname)
+
+        if os.path.exists(ffullpath) and self._local:
+            return ffullpath
+
+        if self._local:
+            if os.path.isfile(fname):
+                # And it exists
+                filename = os.path.join(os.getcwd(), fname)
+            elif fname in self.list_files():
+                # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
+            else:
+                # Finally
+                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
+        else: # Non-local
+            # upload the file if it exists locally
+            if os.path.isfile(ffullpath):
+                self.upload(ffullpath, progress_bar=progress_bar)
+                filename = fname
+
+            elif fname in self.list_files():
+                # It exists in the Mapdl working directory
+                filename = fname
+
+            else:
+                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
+
+        return filename
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -1842,3 +1909,123 @@ class MapdlGrpc(_MapdlCore):
         if self.__distributed is None:
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
+
+    @wraps(_MapdlCore.ndinqr)
+    def ndinqr(self, node, key, **kwargs):
+        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
+        super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.elmiqr)
+    def elmiqr(self, ielem, key, **kwargs):
+        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
+        super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.kpinqr)
+    def kpinqr(self, knmi, key, **kwargs):
+        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
+        super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.lsinqr)
+    def lsinqr(self, line, key, **kwargs):
+        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
+        super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.arinqr)
+    def arinqr(self, anmi, key, **kwargs):
+        """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
+        super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.vlinqr)
+    def vlinqr(self, vnmi, key, **kwargs):
+        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
+        super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.rlinqr)
+    def rlinqr(self, nreal, key, **kwargs):
+        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
+        super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.gapiqr)
+    def gapiqr(self, ngap, key, **kwargs):
+        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
+        super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.masiqr)
+    def masiqr(self, node, key, **kwargs):
+        """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
+        super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.ceinqr)
+    def ceinqr(self, nce, key, **kwargs):
+        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
+        super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.cpinqr)
+    def cpinqr(self, ncp, key, **kwargs):
+        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
+        super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.csyiqr)
+    def csyiqr(self, ncsy, key, **kwargs):
+        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
+        super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.etyiqr)
+    def etyiqr(self, itype, key, **kwargs):
+        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
+        super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.foriqr)
+    def foriqr(self, node, key, **kwargs):
+        """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
+        super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.sectinqr)
+    def sectinqr(self, nsect, key, **kwargs):
+        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
+        super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.mpinqr)
+    def mpinqr(self, mat,  iprop,  key, **kwargs):
+        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
+        super().mpinqr(mat,  iprop,  key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.dget)
+    def dget(self, node,  idf,  kcmplx, **kwargs):
+        """Wrap the ``dget`` method to take advantage of the gRPC methods."""
+        super().dget(node,  idf,  kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.fget)
+    def fget(self, node,  idf,  kcmplx, **kwargs):
+        """Wrap the ``fget`` method to take advantage of the gRPC methods."""
+        super().fget(node,  idf,  kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.erinqr)
+    def erinqr(self, key, **kwargs):
+        """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
+        super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.wrinqr)
+    def wrinqr(self, key, **kwargs):
+        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
+        super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)

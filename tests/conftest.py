@@ -1,6 +1,7 @@
 from pathlib import Path
 from collections import namedtuple
 import os
+import signal
 import time
 
 import pytest
@@ -15,7 +16,6 @@ from ansys.mapdl.core.launcher import (
     _get_available_base_ansys,
 )
 from common import get_details_of_nodes, get_details_of_elements, Node, Element
-
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -76,7 +76,10 @@ if START_INSTANCE and EXEC_FILE is None:
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
-        os.kill(pid, 0)
+        # There are two main options:
+        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
+        # - Kill signal (KILLTER). int=9. Hard termination
+        os.kill(pid, signal.SIGTERM)
     except OSError:
         return False
     else:
