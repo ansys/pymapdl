@@ -624,6 +624,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             response = self._send_command(cmd, mute=mute)
         self._busy = False
+
         return response.strip()
 
     @property
