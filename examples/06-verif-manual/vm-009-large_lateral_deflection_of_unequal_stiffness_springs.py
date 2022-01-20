@@ -347,3 +347,4 @@ disp_y = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="y")
 # Check Results
 # ~~~~~~~~~~~~~
 # Print output results using pandas dataframe.
+
