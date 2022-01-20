@@ -162,7 +162,7 @@ print(mapdl.etlist())
 # Define Real Constants
 # ~~~~~~~~~~~~~~~~~~~~~
 # Define damping coefficients :math:`c_x = 1.41`, :math:`c_y = 2.0` and
-# stiffness values :math:`k_1 = 1\,N/cm`, :math:`k_2 = 8\,N/cm` for the spring elements.
+# stiffness values :math:`k_1 = 8\,N/cm`, :math:`k_2 = 1\,N/cm` for the spring elements.
 
 # Define real constant 1 with stiffness k2.
 mapdl.r(nset=1, r1=k_spring2)  # SPRING STIFFNESS = 1
@@ -196,21 +196,29 @@ for i in range(0, 5):
 # ~~~~~~~~~~~~~~~
 # Create the elements through the nodes.
 
+# Create  spring element COMBIN14 between nodes 1 nad 2
+# with stiffness k_2 = 1 N/cm.
 mapdl.type(1)
 mapdl.real(1)
-mapdl.e(1, 2)  # ELEMENT 1 IS SPRING ELEMENT WITH STIFFNESS 1
+mapdl.e(1, 2)
 
+# Create  spring element COMBIN14 between nodes 2 nad 3
+# with stiffness k_1 = 8 N/cm.
 mapdl.type(1)
 mapdl.real(2)
-mapdl.e(2, 3)  # ELEMENT 2 IS SPRING ELEMENT WITH STIFFNESS 8
+mapdl.e(2, 3)
 
+# Create  spring element COMBIN40 between nodes 4 nad 2
+# with damping coefficient c_x = 1.41.
 mapdl.type(3)
 mapdl.real(3)
-mapdl.e(4, 2)  # ELEMENT 3 IS COMBINATION ELEMENT WITH C = 1.41
+mapdl.e(4, 2)
 
+# Create  spring element COMBIN40 between nodes 5 nad 2
+# with damping coefficient c_y = 2.0.
 mapdl.type(4)
 mapdl.real(4)
-mapdl.e(5, 2)  # ELEMENT 4 IS COMBINATION ELEMENT WITH C = 2
+mapdl.e(5, 2)
 
 
 ###############################################################################
