@@ -2230,8 +2230,6 @@ class _MapdlCore(Commands):
         text = self._run(command, mute=mute, **kwargs)
 
         if mute:
-            self._response = None
-            self._log.info("The response is being muted.")
             return
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
