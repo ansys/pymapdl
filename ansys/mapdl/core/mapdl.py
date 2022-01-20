@@ -2128,7 +2128,7 @@ class _MapdlCore(Commands):
         self._flush_stored()
         return self._response
 
-    def run(self, command, write_to_log=True, **kwargs):
+    def run(self, command, write_to_log=True, mute=None, **kwargs):
         """Run single APDL command.
 
         For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
@@ -2173,6 +2173,12 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if mute is None:
+            if hasattr(self, 'mute'):
+                mute = self.mute
+            else: # if not gRPC
+                mute = False
+
         command = command.strip()
         # check if multiline
         if "\n" in command or "\r" in command:
@@ -2221,13 +2227,17 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        text = self._run(command, **kwargs)
+        text = self._run(command, mute=mute, **kwargs)
+
+        if mute:
+            return
+
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = text.strip()
             self._log.info(self._response)
         else:
-            self._response = ""
+            self._response = None
             return self._response
 
         if "is not a recognized" in text:
