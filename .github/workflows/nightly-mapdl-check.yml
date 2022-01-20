@@ -1,8 +1,6 @@
 name: GitHub Actions
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
   schedule:  # UTC at 0400
     - cron:  '0 4 * * *'
