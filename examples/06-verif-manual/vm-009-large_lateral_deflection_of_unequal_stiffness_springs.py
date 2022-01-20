@@ -73,10 +73,6 @@ Analysis Assumptions and Modeling Notes:
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup_1.png'
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup_2.png'
 
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
 from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL.
