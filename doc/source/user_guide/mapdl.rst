@@ -55,7 +55,7 @@ script.  PyMAPDL gets around this restriction by writing the commands
 to a temporary input file and then reading the input file.  To run a
 group of commands that must be run non-interactively, set the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` to run a series
- of commands as an input file by using
+of commands as an input file by using
 :func:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
 as in this example:
 
