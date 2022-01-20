@@ -1,78 +1,65 @@
 r"""
-.. _ref_vm7_example:
+.. _ref_vm9_example:
 
-Plastic Compression of a Pipe Assembly
---------------------------------------
+Large Lateral Deflection of Unequal Stiffness Springs
+-----------------------------------------------------
 Problem Description:
- - Two coaxial tubes, the inner one of 1020 CR steel and cross-sectional
-   area :math:`A_{\mathrm{s}}`, and the outer one of 2024-T4 aluminum alloy
-   and of area :math:`A_{\mathrm{a}}`, are compressed between heavy, flat end plates,
-   as shown below. Determine the load-deflection curve of the assembly
-   as it is compressed into the plastic region by an axial displacement.
-   Assume that the end plates are so stiff that both tubes are shortened by
-   exactly the same amount.
+ - A two-spring system is subjected to a force ``F`` as shown below.
+   Determine the strain energy of the system and
+   the displacements :math:`\delta_x` and :math:`\delta_y`
 
 Reference:
- - S. H. Crandall, N. C. Dahl, An Introduction to the Mechanics of Solids,
-   McGraw-Hill Book Co., Inc., New York, NY, 1959, pg. 180, ex. 5.1.
+ - G. N. Vanderplaats, Numerical Optimization Techniques for Engineering Design
+   with Applications, McGraw-Hill Book Co., Inc., New York, NY, 1984,
+   pp. 72-73, ex. 3-1.
 
 Analysis Type(s):
- - Static, Plastic Analysis (``ANTYPE=0``)
+ - Nonlinear Transient Dynamic Analysis (ANTYPE = 4)
 
 Element Type(s):
- - Plastic Straight Pipe Element (PIPE288)
- - 4-Node Finite Strain Shell (SHELL181)
- - 3-D Structural Solid Elements (SOLID185)
+ - Spring-Damper Elements (COMBIN14)
 
-.. image:: ../../_static/vm7_setup_2.png
+.. image:: ../../_static/vm9_setup_1.png
    :width: 400
-   :alt: VM7 Finite Element Models
+   :alt: COMBIN14 Geometry
+
+ - Combination Elements (COMBIN40)
+
+.. image:: ../../_static/vm9_setup_2.png
+   :width: 400
+   :alt: COMBIN40 Geometry
 
 Material Properties
- - :math:`E_{\mathrm{s}} = 26875000\,psi`
- - :math:`\sigma_{\mathrm{(yp)s}} = 86000\,psi`
- - :math:`E_{\mathrm{a}} = 11000000\,psi`
- - :math:`\sigma_{\mathrm{(yp)a}} = 55000\,psi`
- - :math:`\nu = 0.3`
-
-.. image:: ../../_static/vm7_setup_1.png
-   :width: 300
-   :alt: VM7 Material Model
+ - :math:`k_1 = 8\,N/cm`
+ - :math:`k_2 = 1\,N/cm`
+ - :math:`m = 1`
 
 Geometric Properties:
- - :math:`l = 10\,in`
- - :math:`A_{\mathrm{s}} = 7\,in^2`
- - :math:`A_{\mathrm{a}} = 12\,in^2`
+ - :math:`l = 10\,cm`
 
 Loading:
- - 1st Load Step: :math:`\delta = 0.032\,in`
- - 2nd Load Step: :math:`\delta = 0.050\,in`
- - 3rd Load Step: :math:`\delta = 0.100\,in`
+ - math:`F = 5\sqrt[2]{2}\,N`
 
-.. image:: ../../_static/vm7_setup.png
-   :width: 300
-   :alt: VM7 Problem Sketch
+.. image:: ../../_static/vm9_setup.png
+   :width: 400
+   :alt: VM9 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
- - The following tube dimensions, which provide the desired cross-sectional
-   areas, are arbitrarily chosen:
+ - The solution to this problem is best obtained by adding mass and using
+   the "slow dynamics" technique with approximately critical damping.
+   Combination elements ``COMBIN40`` are used to provide damping in the ``X`` and
+   ``Y`` directions. Approximate damping coefficients :math:`c_x` and :math:`c_y`, in the ``X`` and
+   ``Y`` directions respectively, are determined from:
 
-   * Inner (steel) tube: inside radius = 1.9781692 in., wall thickness = 0.5 in.
-   * Outer (aluminum) tube: inside radius = 3.5697185 in., wall thickness = 0.5 in.
+   * :math:`c_x = \sqrt[2]{k_xm}`
+   * :math:`c_y = \sqrt[2]{k_ym}`
+ where m is arbitrarily assumed to be unity.
 
- - The problem can be solved in three ways:
-
-   * using ``PIPE288`` - the plastic straight pipe element
-   * using ``SOLID185`` - the 3-D structural solid element
-   * using ``SHELL181`` - the 4-Node Finite Strain Shell
-
- - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
-   only a one element :math:`\theta` -sector is modeled. A small angle :math:`\theta = 6°`
-   is arbitrarily chosen to reasonably approximate the circular boundary
-   with straight sided elements.
-   The nodes at the boundaries have the ``UX`` (radial) degree of freedom coupled.
-   In the SHELL181 model, the nodes at the boundaries additionally have
-   the ``ROTY`` degree of freedom coupled.
+ - :math:`k_x` and :math:`k_y` cannot be known before solving so are approximated
+   by :math:`k_y = k_2 = 1\,N/cm` and :math:`k_x = k_y/2 = 0.5\,N/cm`, hence :math:`cx = 1.41` and :math:`cy = 2.0`.
+   Large deflection analysis is performed due to the fact that the resistance to
+   the load is a function of the deformed position. ``POST1`` is used to extract
+   results from the solution phase.
 
 """
 
@@ -82,6 +69,8 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL and import Numpy and Pandas libraries.
 
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup.png'
+# sphinx_gallery_thumbnail_path = '_static/vm9_setup_1.png'
+# sphinx_gallery_thumbnail_path = '_static/vm9_setup_2.png'
 
 import numpy as np
 import pandas as pd
@@ -150,7 +139,11 @@ print(mapdl.etlist())
 
 
 ###############################################################################
-#
+# Define Real Constants
+# ~~~~~~~~~~~~~~~~~~~~~
+# Define damping coefficients :math:`c_{\mathrm{x}}, :math:`c_{\mathrm{y}} and
+# stiffness values :math:`k_{\mathrm{1}}, :math:`k_{\mathrm{2}} for the spring
+# elements.
 
 mapdl.r(1, 1)  # SPRING STIFFNESS = 1
 mapdl.r(2, 8)  # SPRING STIFFNESS = 8
@@ -159,7 +152,10 @@ mapdl.r(4, "", 2, 1)  # C = 2, M = 1
 
 
 ###############################################################################
-#
+# Define Nodes
+# ~~~~~~~~~~~~
+# Set up the nodes coordinates using ``Numpy`` and create them
+# using python ``for-loop``.
 
 mapdl.n(1)
 mapdl.n(2, "", 10)
@@ -169,21 +165,28 @@ mapdl.n(5, "", 9)
 
 
 ###############################################################################
-#
+# Create Elements
+# ~~~~~~~~~~~~~~~
+# Create the elements through the nodes using python `for-loop``.
 
 mapdl.e(1, 2)  # ELEMENT 1 IS SPRING ELEMENT WITH STIFFNESS 1
+
 mapdl.real(2)
 mapdl.e(2, 3)  # ELEMENT 2 IS SPRING ELEMENT WITH STIFFNESS 8
+
 mapdl.type(3)
 mapdl.real(3)
 mapdl.e(4, 2)  # ELEMENT 3 IS COMBINATION ELEMENT WITH C = 1.41
+
 mapdl.type(4)
 mapdl.real(4)
 mapdl.e(5, 2)  # ELEMENT 4 IS COMBINATION ELEMENT WITH C = 2
 
 
 ###############################################################################
-#
+# Define Boundary Conditions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Application of boundary conditions (BC) for the spring model.
 
 mapdl.nsel("U", "NODE", "", 2)
 mapdl.d("ALL", "ALL")
@@ -192,9 +195,12 @@ mapdl.finish()
 
 
 ###############################################################################
-#
+# Solution settings
+# ~~~~~~~~~~~~~~~~~
+# Enter solution mode and apply settings for ``Transient Dynamic Analysis".
 
-mapdl.run("/SOLU")
+mapdl.slashsolu()
+
 mapdl.antype("TRANS")  # FULL TRANSIENT DYNAMIC ANALYSIS
 mapdl.nlgeom("ON")  # LARGE DEFLECTION
 mapdl.kbc(1)  # STEP BOUNDARY CONDITION
@@ -208,15 +214,30 @@ mapdl.time(15)  # ARBITRARY TIME FOR SLOW DYNAMICS
 
 
 ###############################################################################
-#
+# Solve
+# ~~~~~
+# Enter solution mode and solve the system , using ``_ =`` avoiding the printing output.
+
+# Enter to the pre-processing mode.
+mapdl.slashsolu()
+
+# Run the simulation.
 mapdl.solve()
-mapdl.finish()
+_ = mapdl.finish()
 
 
 ###############################################################################
-#
+# Post-processing
+# ~~~~~~~~~~~~~~~
+# Enter post-processing, using ``_ =`` avoiding the printing output.
 
-mapdl.run("/POST1")
+# Enter the post-processing mode.
+_ = mapdl.post1()
+
+
+###############################################################################
+# Getting Results
+# ~~~~~~~~~~~~~~~
 
 mapdl.set("", "", "", "", 15)  # USE ITERATION WHEN TIME = 15
 
@@ -245,17 +266,6 @@ mapdl.run("*VFILL,VALUE(1,3),DATA,ABS(ST_EN/24.01), ABS(8.631/DEF_X), ABS(DEF_Y/
 
 
 ###############################################################################
-#
-
-mapdl.run("/COM")
-mapdl.run("/OUT,vm9,vrt")
-mapdl.run("/COM,------------------- VM9 RESULTS COMPARISON ---------------------")
-mapdl.run("/COM,")
-mapdl.run("/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO")
-mapdl.run("/COM,")
-mapdl.run("*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
-mapdl.run("(1X,A8,A8,'   ',F10.3,'  ',F14.3,'   ',1F15.3)")
-mapdl.run("/COM,----------------------------------------------------------------")
-mapdl.run("/OUT")
-mapdl.run("/GOPR")
-mapdl.finish()
+# Check Results
+# ~~~~~~~~~~~~~
+# Print output results using pandas dataframe.
