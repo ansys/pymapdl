@@ -39,6 +39,7 @@ Geometric Properties:
 
 Loading:
  - math:`F = 5\sqrt[2]{2}\,N`
+ - math:`\alpha = 45\,º`
 
 .. image:: ../../_static/vm9_setup.png
    :width: 400
@@ -95,14 +96,24 @@ _ = mapdl.prep7()
 ###############################################################################
 # Parameterization
 # ~~~~~~~~~~~~~~~~
+# Parameterization block includes main constants as :
+# * :math:`l = 10\,cm` - spring length.
+# * :math:`k_1 = 8\,N/cm` - stiffness of the 1st spring.
+# * :math:`k_2 = 1\,N/cm` - stiffness of the 2nd spring.
+# * :math:`m = 1` - mass.
+# * math:`F = 5\sqrt[2]{2}\,N` - main load
+# * math:`\alpha = 45\,º` - force angle
+# * :math:`c_x = \sqrt[2]{k_xm} = 1,41` - damping coefficient, x-direction.
+# * :math:`c_y = \sqrt[2]{k_ym} = 2.0` - damping coefficient, y-direction.
 
-k1 = 8
-k2 = 1
-cx = 1.41
-cy = 2.0
-m = 1
-ky = k2
-kx = ky/2
+length = 10
+k_spring1 = 8
+k_spring2 = 1
+c_damp_x = 1.41
+c_damp_y = 2.0
+mass = 1
+f_x = 5
+f_y = 5
 
 
 ###############################################################################
