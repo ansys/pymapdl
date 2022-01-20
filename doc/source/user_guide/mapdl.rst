@@ -19,11 +19,11 @@ this causes a conflict with an existing name.  Most notable is
 ``/SOLU`` which would conflict with ``SOLU``.  Therefore, the
 ``/SOLU`` has been renamed to :func:`Mapdl.slashsolu()
 <ansys.mapdl.core.Mapdl.slashsolu>` to differentiate it from ``solu``.
-Out of the 1500 MAPDL commands, about 15 start with ``slash`` and 8
-with ``star``.
+Out of the 1500 MAPDL commands, about 15 start with ``slash (/)`` and 8
+with ``star (*)``.
 
-MAPDL commands that normally have an empty space, such as ``ESEL, S,
-TYPE, , 1`` should include an empty string when called by Python:
+MAPDL commands that normally have an empty space, such as 
+``ESEL,S,TYPE,,1`` should include an empty string when called by Python:
 
 .. code:: python
 
@@ -104,7 +104,7 @@ Should be written as:
     DISP(-.1)
 
 If you have an existing input file with a macro, it can be converted
-using :func:`convert_script() <ansys.mapdl.core.Mapdl.convert_script>`
+using :func:`convert_script() <ansys.mapdl.core.convert_script>`
 setting ``macros_as_functions=True``:
 
 .. code:: python
@@ -596,7 +596,7 @@ the chained commands with :attr:`Mapdl.last_response
 Sending Arrays to MAPDL
 -----------------------
 You can send ``numpy`` arrays or Python lists directly to MAPDL using
-:class:`Mapdl.parameters <ansys.mapdl.core.parameters.Parameters`.
+:attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>`.
 This is far more efficient than individually sending parameters to
 MAPDL through Python with :func:`Mapdl.run()
 <ansys.mapdl.core.Mapdl.run>`.  It uses :func:`Mapdl.vread()
@@ -612,7 +612,7 @@ and will be replaced with a faster interface in the future.
     mapdl.parameters['MYARR'] = arr
 
 Verify the data has been properly loaded to MAPDL by indexing
-``mapdl.parameters`` as if it was a Python dictionary:
+:attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>` as if it was a Python dictionary:
 
 .. code:: python
 
@@ -629,7 +629,7 @@ Downloading a Remote MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 When running MAPDL in gRPC mode, remote files can be listed and
 downloaded using :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
-with :func:`Mapdl.download() <ansys.mapdl.core.Mapdl.download>` For
+with :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>` For
 example, to list the remote files and download one of them:
 
 .. code:: python
@@ -650,7 +650,8 @@ example, to list the remote files and download one of them:
 Uploading a Local MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can upload a local file a the remote mapdl instance with
-:func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` For example:
+:func:`Mapdl.upload() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>`.
+For example:
 
 .. code:: python
 
@@ -692,7 +693,7 @@ and ``ERASE`` which clear the graphics screen.
 Others simply are not available or not supported for different reasons. 
 Some are quietly ignored by MAPDL but you are still free to
 use them.  For example ``/BATCH``, can be run as 
-:func:`mapdl.run("/BATCH") <ansys.mapdl.core.mapdl.run>`
+:func:`mapdl.run("/BATCH") <ansys.mapdl.core.Mapdl.run>`
 which returns:
 
 .. code::
@@ -709,57 +710,63 @@ These commands are detailed in Table-1_.
 
 **Table 1. Non-available commands.**
 
-+---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | MAPDL Command     | Interactive            | Non-interactive                         | Direct run                                   | Notes                                                                                                                                                   |
-+===========================+===================+========================+=========================================+==============================================+=========================================================================================================================================================+
-| **GUI commands**          | * ``*ASK``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | When used in :func:`mapdl.run() <ansys.mapdl.core.mapdl.run>` it automatically assumes the user input is 0. Use Python ``input`` instead.               |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*VEDIT``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It requires a GUI session to work.                                                                                                                      |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``/ERASE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``ERASE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not make sense in a non-GUI session.                                                                                                            |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``HELP``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``HELPDISP``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``NOERASE``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
-+---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Control flow commands** | * ``*CYCLE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*DO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``for``.                                                                            |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*DOWHILE``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``while``.                                                                          |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*ELSE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``else``.                                                                           |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*ELSEIF``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``elif``.                                                                           |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*ENDDO``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords.                                                                                                  |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*GO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, such as ``if`` or functions.                                                                     |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*IF``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*REPEAT``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``for`` or ``while``                                                                      |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``*RETURN``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``break``, ``continue`` or ``return``                                                     |
-+---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Others commands**       | * ``*DEL``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python variables (use Python memory) instead of MAPDL variables.                                                               |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``/BATCH``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL.       | It does not make sense in a PyMAPDL session.                                                                                                            |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``/EOF``        | |:x:| Not available    | |:x:| Not available                     | |:x:| PyMAPDL shows an exception             | To stop the server, use :func:`mapdl.exit() <ansys.mapdl.core.mapdl.exit>`                                                                                                              |
-|                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-|                           | * ``UNDO``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not undo any command.                                                                                                                           |
-+---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. table:: 
+  :class: longtable
+
+  +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | MAPDL Command     | Interactive            | Non-interactive                         | Direct run                                   | Notes                                                                                                                                                   |
+  +===========================+===================+========================+=========================================+==============================================+=========================================================================================================================================================+
+  | **GUI commands**          | * ``*ASK``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | When used in :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` it automatically assumes the user input is 0. Use Python ``input`` instead.               |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*VEDIT``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It requires a GUI session to work.                                                                                                                      |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``/ERASE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``ERASE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not make sense in a non-GUI session.                                                                                                            |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``HELP``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``HELPDISP``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``NOERASE``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
+  +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | **Control flow commands** | * ``*CYCLE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*DO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``for``.                                                                            |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*DOWHILE``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``while``.                                                                          |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*ELSE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``else``.                                                                           |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*ELSEIF``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``elif``.                                                                           |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*ENDDO``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords.                                                                                                  |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*GO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, such as ``if`` or functions.                                                                     |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*IF``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*REPEAT``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``for`` or ``while``                                                                      |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``*RETURN``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``break``, ``continue`` or ``return``                                                     |
+  +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  | **Others commands**       | * ``*DEL``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python variables (use Python memory) instead of MAPDL variables.                                                               |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``/BATCH``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL.       | It does not make sense in a PyMAPDL session.                                                                                                            |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``/EOF``        | |:x:| Not available    | |:x:| Not available                     | |:x:| PyMAPDL shows an exception             | To stop the server, use :func:`mapdl.exit() <ansys.mapdl.core.Mapdl.exit>`                                                                              |
+  |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
+  |                           | * ``UNDO``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not undo any command.                                                                                                                           |
+  +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
 .. note::
-    * **Interactive** means there is a method in the mapdl such as :func:`mapdl.prep7() <ansys.mapdl.core._commands.session.processor_entr.prep7>`.
-    * **Non-interactive** means it is run inside a :attr:`mapdl.non_interactive <ansys.mapdl.core.mapdl._MapdlCore.non-interactive>` context block,
-      :func:`mapdl.input() <ansys.mapdl.core.mapdl_grpc.input>` or :func:`mapdl.input_strings() <ansys.mapdl.core.mapdl_grpc.input_strings>`.
+    * **Interactive** means there is a method in the mapdl such as 
+      :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
+    * **Non-interactive** means it is run inside a 
+      :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` context block,
+      :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` or
+      :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
       For example:
 
       .. code:: python
@@ -767,19 +774,19 @@ These commands are detailed in Table-1_.
           with mapdl.non_interactive:
               mapdl.prep7()
 
-    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.mapdl.run>` 
+    * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` 
       method is used to run the MAPDL command.
-      For example, ``mapdl.run("/PREP7")``.
+      For example, :func:`mapdl.run("/PREP7") <ansys.mapdl.core.Mapdl.run>`.
 
 
 Note, that running these commands with
-:func:`mapdl.run('<command>') <ansys.mapdl.core.mapdl.run>` will
+:func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` will
 not cause MAPDL to exit, however it might raise runtime exceptions.
 
 These MAPDL commands can be executed also using 
-:func:`mapdl.input() <ansys.mapdl.core.mapdl_grpc.input>`
+:func:`mapdl.input() <ansys.mapdl.core.Mapdl.input>`
 or
-:func:`mapdl.input_strings() <ansys.mapdl.core.mapdl_grpc.input_strings>`
+:func:`mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`
 and the results should be same as running them in a normal batch MAPDL session.
 
 
@@ -787,8 +794,8 @@ Unsupported "Interactive" Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following commands can be only run in non-interactive mode (inside
-:attr:`mapdl.non_interactive <ansys.mapdl.core.mapdl._MapdlCore.non-interactive>` block or
-using :func:`mapdl.input() <ansys.mapdl.core.mapdl_grpc.input>`).
+:attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` block or
+using :func:`mapdl.input() <ansys.mapdl.core.Mapdl.input>`).
 These commands are detailed in Table-2_.
 
 
@@ -796,17 +803,17 @@ These commands are detailed in Table-2_.
 
 **Table 2. Non-interactive only commands.**
 
-+---------------+-------------------------+----------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-|               | Interactive             | Non-interactive                  | Direct Run                                            | Notes                                                                                               |
-+===============+=========================+==================================+=======================================================+=====================================================================================================+
-| * ``*CREATE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in ``non_interactive``      | It is recommended to create Python functions instead.                                               |
-+---------------+-------------------------+----------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``CFOPEN``  | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in ``non_interactive``      | It is recommended to use Python functions such as ``open``.                                         |
-+---------------+-------------------------+----------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``CFCLOSE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in ``non_interactive``      | It is recommended to use Python functions such as ``open``.                                         |
-+---------------+-------------------------+----------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``*VWRITE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in ``non_interactive``      | If you are working in a local session, it is recommended you use Python function such as ``open``.  |
-+---------------+-------------------------+----------------------------------+-------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
++---------------+-------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+|               | Interactive             | Non-interactive                  | Direct Run                                                                                                           | Notes                                                                                               |
++===============+=========================+==================================+======================================================================================================================+=====================================================================================================+
+| * ``*CREATE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to create Python functions instead.                                               |
++---------------+-------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| * ``CFOPEN``  | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to use Python functions such as ``open``.                                         |
++---------------+-------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| * ``CFCLOSE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to use Python functions such as ``open``.                                         |
++---------------+-------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| * ``*VWRITE`` | |:x:| Not available     | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | If you are working in a local session, it is recommended you use Python function such as ``open``.  |
++---------------+-------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
 
 
