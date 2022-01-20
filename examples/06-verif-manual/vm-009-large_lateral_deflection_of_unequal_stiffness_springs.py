@@ -4,9 +4,9 @@ r"""
 Large Lateral Deflection of Unequal Stiffness Springs
 -----------------------------------------------------
 Problem Description:
- - A two-spring system is subjected to a force ``F`` as shown below.
+ - A two-spring system is subjected to a force :math:`F` as shown below.
    Determine the strain energy of the system and
-   the displacements :math:`\delta_x` and :math:`\delta_y`
+   the displacements :math:`\delta_x` and :math:`\delta_y`.
 
 Reference:
  - G. N. Vanderplaats, Numerical Optimization Techniques for Engineering
@@ -14,20 +14,15 @@ Reference:
    NY,1984, pp. 72-73, ex. 3-1.
 
 Analysis Type(s):
- - Nonlinear Transient Dynamic Analysis (ANTYPE = 4)
+ - Nonlinear Transient Dynamic Analysis (``ANTYPE = 4``)
 
 Element Type(s):
  - Spring-Damper Elements (COMBIN14)
-
-.. image:: ../../_static/vm9_setup_1.png
-   :width: 400
-   :alt: COMBIN14 Geometry
-
- - Combination Elements (COMBIN40)
+ - Spring-Damper Elements (COMBIN40)
 
 .. image:: ../../_static/vm9_setup_2.png
    :width: 400
-   :alt: COMBIN40 Geometry
+   :alt: Geometry of COMBIN14 and COMBIN40
 
 Material Properties
  - :math:`k_1 = 8\,N/cm`
@@ -38,8 +33,8 @@ Geometric Properties:
  - :math:`l = 10\,cm`
 
 Loading:
- - math:`F = 5\sqrt[2]{2}\,N`
- - math:`\alpha = 45\,º`
+ - :math:`F = 5{\sqrt[2]{2}}\,N`
+ - :math:`\alpha = 45\,º`
 
 .. image:: ../../_static/vm9_setup.png
    :width: 400
@@ -48,9 +43,9 @@ Loading:
 Analysis Assumptions and Modeling Notes:
  - The solution to this problem is best obtained by adding mass and using
    the "slow dynamics" technique with approximately critical damping.
-   Combination elements ``COMBIN40`` are used to provide damping
-   in the ``X`` and ``Y`` directions. Approximate damping coefficients
-   :math:`c_x` and :math:`c_y`, in the ``X`` and ``Y`` directions respectively,
+   Combination elements :math:`COMBIN40` are used to provide damping
+   in the :math:`X` and :math:`Y` directions. Approximate damping coefficients
+   :math:`c_x` and :math:`c_y`, in the :math:`X` and :math:`Y` directions respectively,
    are determined from:
 
    * :math:`c_x = \sqrt[2]{k_xm}`
@@ -60,7 +55,7 @@ Analysis Assumptions and Modeling Notes:
 
  - :math:`k_x` and :math:`k_y` cannot be known before solving so are approximated
    by :math:`k_y = k_2 = 1\,N/cm` and :math:`k_x = k_y/2 = 0.5\,N/cm`,
-   hence :math:`cx = 1.41` and :math:`cy = 2.0`. Large deflection analysis is
+   hence :math:`c_x = 1.41` and :math:`c_y = 2.0`. Large deflection analysis is
    performed due to the fact that the resistance to the load is a function of
    the deformed position. ``POST1`` is used to extract results from
    the solution phase.
@@ -75,6 +70,9 @@ Analysis Assumptions and Modeling Notes:
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup.png'
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup_1.png'
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup_2.png'
+
+import numpy as np
+import pandas as pd
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -96,15 +94,17 @@ _ = mapdl.prep7()
 # Parameterization
 # ~~~~~~~~~~~~~~~~
 # Parameterization block includes main constants as :
+#
 # * :math:`l = 10\,cm` - spring length.
 # * :math:`k_1 = 8\,N/cm` - stiffness of the 1st spring.
 # * :math:`k_2 = 1\,N/cm` - stiffness of the 2nd spring.
 # * :math:`m = 1` - mass.
-# * math:`F = 5\sqrt[2]{2}\,N` - main load
-# * math:`\alpha = 45\,º` - force angle
+# * :math:`F = 5\sqrt[2]{2}\,N` - main load
+# * :math:`\alpha = 45\,º` - force angle
 # * :math:`c_x = \sqrt[2]{k_xm} = 1,41` - damping coefficient, x-direction.
 # * :math:`c_y = \sqrt[2]{k_ym} = 2.0` - damping coefficient, y-direction.
 
+# Main constants.
 length = 10
 k_spring1 = 8
 k_spring2 = 1
@@ -238,12 +238,6 @@ mapdl.e(5, 2)
 # Print the list of the created elements.
 print(mapdl.elist())
 
-# Display elements with their nodes numbers.
-mapdl.eplot(show_node_numbering=True,
-            line_width=5,
-            cpos="xy",
-            font_size=40)
-
 
 ###############################################################################
 # Define Boundary Conditions
@@ -258,13 +252,13 @@ mapdl.d("ALL", "ALL")
 mapdl.nsel("ALL")
 
 # Finish pre-processing mode.
-mapdl.finish()
+_ = mapdl.finish()
 
 
 ###############################################################################
 # Solution settings
 # ~~~~~~~~~~~~~~~~~
-# Enter solution mode and apply settings for ``Transient Dynamic Analysis".
+# Enter solution mode and apply settings for ``Transient Dynamic Analysis``.
 
 # Starts solution (/solu) mode.
 mapdl.slashsolu()
@@ -291,14 +285,13 @@ mapdl.outpr("", "LAST")
 mapdl.outpr("VENG", "LAST")
 
 # Sets the time for a load step.
-mapdl.time(15)  # ARBITRARY TIME FOR SLOW DYNAMICS
+_ = mapdl.time(15)
 
 
 ###############################################################################
 # Solve
 # ~~~~~
-# Enter solution mode and solve the system , using ``_ =`` avoiding
-# the printing output.
+# Enter solution mode and solve the system , avoiding the printing output.
 
 # Enter to the pre-processing mode.
 mapdl.slashsolu()
@@ -311,7 +304,7 @@ _ = mapdl.finish()
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
-# Enter post-processing, using ``_ =`` avoiding the printing output.
+# Enter post-processing, avoiding the printing output.
 
 # Enter the post-processing mode.
 _ = mapdl.post1()
@@ -320,6 +313,9 @@ _ = mapdl.post1()
 ###############################################################################
 # Getting Displacements
 # ~~~~~~~~~~~~~~~~~~~~~
+# Enter post-processing. To get results of the strain energy and displacements
+# in X and Y directions from the node where the force is applied using
+# :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
 
 # Defines the data set to be read from the results file by the time-point.
 mapdl.set(time=15)
@@ -338,7 +334,7 @@ strain_energy = mapdl.get_value(entity="SSUM",
 
 # Prints nodal solution results of the X, Y, and Z structural displacements
 # and vector sum.
-mapdl.prnsol("U", "COMP")  # PRINT DISPLACEMENTS IN GLOBAL COORDINATE SYSTEM
+print(mapdl.prnsol("U", "COMP"))
 
 # Get the value of the displacements in X-direction.
 disp_x = mapdl.get_value(entity="NODE",
@@ -356,4 +352,58 @@ disp_y = mapdl.get_value(entity="NODE",
 ###############################################################################
 # Check Results
 # ~~~~~~~~~~~~~
-# Print output results using pandas dataframe.
+# Finally we have the results of the strain energy and
+# displacements in :math:`X` and :math:`Y` directions, which can be compared with
+# expected target values:
+#
+# - Strain energy of the system :math:`U_{\mathrm{(energy)}} = 24.01\,N-cm`.
+# - Displacement in X-direction :math:`U_x = 8.631\,cm`.
+# - Displacement in Y-direction :math:`U_y = 4.533\,cm`.
+#
+# For better representation of the results we can use ``pandas`` dataframe
+# with following settings below:
+
+# Define the names of the rows.
+row_names = ["Strain Energy, N-cm",
+             "Deflection-x , cm",
+             "Deflection-y , cm"]
+
+# Define the names of the columns.
+col_names = ['Target',
+             'Mechanical APDL',
+             'RATIO']
+
+# Define the values of the target results.
+target_res = np.asarray([24.01, 8.631, 4.533])
+
+# Create an array with outputs of the simulations.
+simulation_res = np.asarray([strain_energy, disp_x, disp_y])
+
+# Identifying and filling corresponding columns.
+main_columns = {
+    "Target": target_res,
+    "Mechanical APDL": simulation_res,
+    "Ratio": list(np.divide(simulation_res, target_res))
+}
+
+# Create and fill the output dataframe with pandas.
+df2 = pd.DataFrame(main_columns, index=row_names)
+
+# Apply style settings for the dataframe.
+df2.style.set_table_styles([
+                            {
+                              "selector": "th",
+                              "props": [('font-size', '16px')]
+                            },
+                            {
+                              "selector": "td",
+                              "props": [('font-size', '16px')]
+                            },
+                            {
+                                "selector": "td:hover",
+                                "props": [("background-color", "#FFF8DC")]
+                            }]).set_properties(**
+                                               {
+                                                    "color": "black",
+                                                    "text-align": "center"
+                                               }).format("{:.2f}")
