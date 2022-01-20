@@ -141,9 +141,8 @@ print(mapdl.etlist())
 ###############################################################################
 # Define Real Constants
 # ~~~~~~~~~~~~~~~~~~~~~
-# Define damping coefficients :math:`c_{\mathrm{x}}, :math:`c_{\mathrm{y}} and
-# stiffness values :math:`k_{\mathrm{1}}, :math:`k_{\mathrm{2}} for the spring
-# elements.
+# Define damping coefficients :math:`c_x`, :math:`c_y` and
+# stiffness values :math:`k_1`, :math:`k_2` for the spring elements.
 
 mapdl.r(1, 1)  # SPRING STIFFNESS = 1
 mapdl.r(2, 8)  # SPRING STIFFNESS = 8
