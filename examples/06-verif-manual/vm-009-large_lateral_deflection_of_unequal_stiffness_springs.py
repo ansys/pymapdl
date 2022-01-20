@@ -161,13 +161,14 @@ print(mapdl.etlist())
 ###############################################################################
 # Define Real Constants
 # ~~~~~~~~~~~~~~~~~~~~~
-# Define damping coefficients :math:`c_x`, :math:`c_y` and
-# stiffness values :math:`k_1`, :math:`k_2` for the spring elements.
+# Define damping coefficients :math:`c_x = 1.41`, :math:`c_y = 2.0` and
+# stiffness values :math:`k_1 = 8\,N/cm`, :math:`k_2 = 1\,N/cm` for the spring elements.
 
-mapdl.r(1, 1)  # SPRING STIFFNESS = 1
-mapdl.r(2, 8)  # SPRING STIFFNESS = 8
-mapdl.r(3, "", 1.41, 1)  # C = 1.41, M = 1
-mapdl.r(4, "", 2, 1)  # C = 2, M = 1
+#
+mapdl.r(1, k_spring2)  # SPRING STIFFNESS = 1
+mapdl.r(2, k_spring1)  # SPRING STIFFNESS = 8
+mapdl.r(3, "", c_damp_x, mass)  # C = 1.41, M = 1
+mapdl.r(4, "", c_damp_y, mass)  # C = 2, M = 1
 
 
 ###############################################################################
@@ -186,10 +187,13 @@ mapdl.n(5, "", 9)
 ###############################################################################
 # Create Elements
 # ~~~~~~~~~~~~~~~
-# Create the elements through the nodes using python `for-loop``.
+# Create the elements through the nodes.
 
+mapdl.type(1)
+mapdl.real(1)
 mapdl.e(1, 2)  # ELEMENT 1 IS SPRING ELEMENT WITH STIFFNESS 1
 
+mapdl.type(1)
 mapdl.real(2)
 mapdl.e(2, 3)  # ELEMENT 2 IS SPRING ELEMENT WITH STIFFNESS 8
 
