@@ -9,9 +9,9 @@ Problem Description:
    the displacements :math:`\delta_x` and :math:`\delta_y`
 
 Reference:
- - G. N. Vanderplaats, Numerical Optimization Techniques for Engineering Design
-   with Applications, McGraw-Hill Book Co., Inc., New York, NY, 1984,
-   pp. 72-73, ex. 3-1.
+ - G. N. Vanderplaats, Numerical Optimization Techniques for Engineering
+   Design with Applications, McGraw-Hill Book Co., Inc., New York,
+   NY,1984, pp. 72-73, ex. 3-1.
 
 Analysis Type(s):
  - Nonlinear Transient Dynamic Analysis (ANTYPE = 4)
@@ -48,19 +48,22 @@ Loading:
 Analysis Assumptions and Modeling Notes:
  - The solution to this problem is best obtained by adding mass and using
    the "slow dynamics" technique with approximately critical damping.
-   Combination elements ``COMBIN40`` are used to provide damping in the ``X`` and
-   ``Y`` directions. Approximate damping coefficients :math:`c_x` and :math:`c_y`, in the ``X`` and
-   ``Y`` directions respectively, are determined from:
+   Combination elements ``COMBIN40`` are used to provide damping
+   in the ``X`` and ``Y`` directions. Approximate damping coefficients
+   :math:`c_x` and :math:`c_y`, in the ``X`` and ``Y`` directions respectively,
+   are determined from:
 
    * :math:`c_x = \sqrt[2]{k_xm}`
    * :math:`c_y = \sqrt[2]{k_ym}`
+
  where m is arbitrarily assumed to be unity.
 
  - :math:`k_x` and :math:`k_y` cannot be known before solving so are approximated
-   by :math:`k_y = k_2 = 1\,N/cm` and :math:`k_x = k_y/2 = 0.5\,N/cm`, hence :math:`cx = 1.41` and :math:`cy = 2.0`.
-   Large deflection analysis is performed due to the fact that the resistance to
-   the load is a function of the deformed position. ``POST1`` is used to extract
-   results from the solution phase.
+   by :math:`k_y = k_2 = 1\,N/cm` and :math:`k_x = k_y/2 = 0.5\,N/cm`,
+   hence :math:`cx = 1.41` and :math:`cy = 2.0`. Large deflection analysis is
+   performed due to the fact that the resistance to the load is a function of
+   the deformed position. ``POST1`` is used to extract results from
+   the solution phase.
 
 """
 
@@ -167,7 +170,8 @@ print(mapdl.elist())
 # Define Real Constants
 # ~~~~~~~~~~~~~~~~~~~~~
 # Define damping coefficients :math:`c_x = 1.41`, :math:`c_y = 2.0` and
-# stiffness values :math:`k_1 = 8\,N/cm`, :math:`k_2 = 1\,N/cm` for the spring elements.
+# stiffness values :math:`k_1 = 8\,N/cm`, :math:`k_2 = 1\,N/cm` for the
+# spring elements.
 
 # Define real constant 1 with stiffness k2.
 mapdl.r(nset=1, r1=k_spring2)  # SPRING STIFFNESS = 1
@@ -183,7 +187,6 @@ mapdl.r(nset=4, r2=c_damp_y, r3=mass)
 
 # Print the real constant list.
 print(mapdl.rlist())
-
 
 
 ###############################################################################
@@ -294,7 +297,8 @@ mapdl.time(15)  # ARBITRARY TIME FOR SLOW DYNAMICS
 ###############################################################################
 # Solve
 # ~~~~~
-# Enter solution mode and solve the system , using ``_ =`` avoiding the printing output.
+# Enter solution mode and solve the system , using ``_ =`` avoiding
+# the printing output.
 
 # Enter to the pre-processing mode.
 mapdl.slashsolu()
@@ -327,24 +331,29 @@ mapdl.etable("SENE", "SENE")
 mapdl.ssum()
 
 # Get the value of the stain energy of the spring elements.
-stain_energy = mapdl.get_value(entity="SSUM",entnum=0, item1="ITEM", it1num="SENE")
-# mapdl.run("*GET,ST_EN,SSUM,,ITEM,SENE")
+strain_energy = mapdl.get_value(entity="SSUM",
+                                entnum=0,
+                                item1="ITEM",
+                                it1num="SENE")
 
 # Prints nodal solution results of the X, Y, and Z structural displacements
 # and vector sum.
 mapdl.prnsol("U", "COMP")  # PRINT DISPLACEMENTS IN GLOBAL COORDINATE SYSTEM
 
 # Get the value of the displacements in X-direction.
-disp_x = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="X")
+disp_x = mapdl.get_value(entity="NODE",
+                         entnum=2,
+                         item1="U",
+                         it1num="X")
 
 # Get the value of the displacements in Y-direction.
-disp_y = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="y")
+disp_y = mapdl.get_value(entity="NODE",
+                         entnum=2,
+                         item1="U",
+                         it1num="y")
 
-# mapdl.run("*GET,DEF_X,NODE,2,U,X")
-# mapdl.run("*GET,DEF_Y,NODE,2,U,Y")
 
 ###############################################################################
 # Check Results
 # ~~~~~~~~~~~~~
 # Print output results using pandas dataframe.
-
