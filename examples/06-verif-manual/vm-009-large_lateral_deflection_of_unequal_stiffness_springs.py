@@ -108,9 +108,30 @@ _ = mapdl.prep7()
 # ~~~~~~~~~~~~~~~~~~~
 # Set up the element types .
 
+# Element type PIPE288.
 mapdl.et(1, "COMBIN14", "", "", 2)  # UX AND UY DOF ELEMENT
+
+# Special Features are defined by keyoptions of the element COMBIN14.
+#
+#
+
+
+# Element type SOLID185.
 mapdl.et(3, "COMBIN40", "", "", "", "", "", 2)  # ALL MASS IS AT NODE J, UX DOF ELEMENT
+
+# Special Features are defined by keyoptions of the element COMBIN40.
+#
+#
+
+# Element type SHELL181.
 mapdl.et(4, "COMBIN40", "", "", 2, "", "", 2)  # ALL MASS IS AT NODE J, UY DOF ELEMENT
+
+# Special Features are defined by keyoptions of the element COMBIN40.
+#
+#
+
+# Print
+print(mapdl.etlist())
 
 
 ###############################################################################
