@@ -78,7 +78,6 @@ from ansys.mapdl.core import launch_mapdl
 # Start MAPDL.
 mapdl = launch_mapdl()
 
-
 ###############################################################################
 # Pre-Processing
 # ~~~~~~~~~~~~~~
@@ -87,7 +86,6 @@ mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.verify()
 _ = mapdl.prep7()
-
 
 ###############################################################################
 # Parameterization
@@ -157,32 +155,36 @@ mapdl.keyopt(4, 6, 2)
 # Print the list of the elements and their attributes.
 print(mapdl.etlist())
 
-
 ###############################################################################
 # Define Real Constants
 # ~~~~~~~~~~~~~~~~~~~~~
 # Define damping coefficients :math:`c_x = 1.41`, :math:`c_y = 2.0` and
-# stiffness values :math:`k_1 = 8\,N/cm`, :math:`k_2 = 1\,N/cm` for the spring elements.
+# stiffness values :math:`k_1 = 1\,N/cm`, :math:`k_2 = 8\,N/cm` for the spring elements.
 
-#
-mapdl.r(1, k_spring2)  # SPRING STIFFNESS = 1
-mapdl.r(2, k_spring1)  # SPRING STIFFNESS = 8
-mapdl.r(3, "", c_damp_x, mass)  # C = 1.41, M = 1
-mapdl.r(4, "", c_damp_y, mass)  # C = 2, M = 1
+# Define real constant 1 with stiffness k2.
+mapdl.r(nset=1, r1=k_spring2)  # SPRING STIFFNESS = 1
 
+# Define real constant 2 with stiffness k1.
+mapdl.r(nset=2, r1=k_spring1)  # SPRING STIFFNESS = 8
+
+# Define real constant 3 with damping coef. in X-direction and mass.
+mapdl.r(nset=3, r2=c_damp_x, r3=mass)
+
+# Define real constant 4 with damping coef. in y-direction and mass.
+mapdl.r(nset=4, r2=c_damp_y, r3=mass)
 
 ###############################################################################
 # Define Nodes
 # ~~~~~~~~~~~~
-# Set up the nodes coordinates using ``Numpy`` and create them
-# using python ``for-loop``.
+# Set up the nodes coordinates using python ``for-loop``.
 
-mapdl.n(1)
-mapdl.n(2, "", 10)
-mapdl.n(3, "", 20)
-mapdl.n(4, -1, 10)
-mapdl.n(5, "", 9)
+# Node coordinates.
+n_x_coord = [0, 0, 0, -1, 0]
+n_y_coord = [0, 10, 20, 10, 9]
 
+# Create nodes.
+for i in range(0, 5):
+    mapdl.n(node=i+1, x=n_x_coord[i], y=n_y_coord[i])
 
 ###############################################################################
 # Create Elements
@@ -205,7 +207,6 @@ mapdl.type(4)
 mapdl.real(4)
 mapdl.e(5, 2)  # ELEMENT 4 IS COMBINATION ELEMENT WITH C = 2
 
-
 ###############################################################################
 # Define Boundary Conditions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,7 +216,6 @@ mapdl.nsel("U", "NODE", "", 2)
 mapdl.d("ALL", "ALL")
 mapdl.nsel("ALL")
 mapdl.finish()
-
 
 ###############################################################################
 # Solution settings
@@ -235,7 +235,6 @@ mapdl.outpr("", "LAST")
 mapdl.outpr("VENG", "LAST")
 mapdl.time(15)  # ARBITRARY TIME FOR SLOW DYNAMICS
 
-
 ###############################################################################
 # Solve
 # ~~~~~
@@ -248,7 +247,6 @@ mapdl.slashsolu()
 mapdl.solve()
 _ = mapdl.finish()
 
-
 ###############################################################################
 # Post-processing
 # ~~~~~~~~~~~~~~~
@@ -256,7 +254,6 @@ _ = mapdl.finish()
 
 # Enter the post-processing mode.
 _ = mapdl.post1()
-
 
 ###############################################################################
 # Getting Results
@@ -286,7 +283,6 @@ mapdl.run("LABEL(1,2) = ', N-cm  ','m)      ','m)      '")
 mapdl.run("*VFILL,VALUE(1,1),DATA,24.01,8.631,4.533")
 mapdl.run("*VFILL,VALUE(1,2),DATA,ST_EN ,DEF_X,DEF_Y")
 mapdl.run("*VFILL,VALUE(1,3),DATA,ABS(ST_EN/24.01), ABS(8.631/DEF_X), ABS(DEF_Y/4.533 )")
-
 
 ###############################################################################
 # Check Results
