@@ -159,6 +159,9 @@ mapdl.keyopt(4, 6, 2)
 # Print the list of the elements and their attributes.
 print(mapdl.etlist())
 
+# Print the list of the elements and their attributes.
+print(mapdl.elist())
+
 
 ###############################################################################
 # Define Real Constants
@@ -178,6 +181,10 @@ mapdl.r(nset=3, r2=c_damp_x, r3=mass)
 # Define real constant 4 with damping coef. in y-direction and mass.
 mapdl.r(nset=4, r2=c_damp_y, r3=mass)
 
+# Print the real constant list.
+print(mapdl.rlist())
+
+
 
 ###############################################################################
 # Define Nodes
@@ -191,6 +198,9 @@ node_y_coord = [0, 10, 20, 10, 9]
 # Create nodes.
 for i in range(0, 5):
     mapdl.n(node=i+1, x=node_x_coord[i], y=node_y_coord[i])
+
+# Print the list of the created nodes.
+print(mapdl.nlist())
 
 
 ###############################################################################
@@ -221,6 +231,15 @@ mapdl.e(4, 2)
 mapdl.type(4)
 mapdl.real(4)
 mapdl.e(5, 2)
+
+# Print the list of the created elements.
+print(mapdl.elist())
+
+# Display elements with their nodes numbers.
+mapdl.eplot(show_node_numbering=True,
+            line_width=5,
+            cpos="xy",
+            font_size=40)
 
 
 ###############################################################################
@@ -295,34 +314,34 @@ _ = mapdl.post1()
 
 
 ###############################################################################
-# Getting Results
-# ~~~~~~~~~~~~~~~
+# Getting Displacements
+# ~~~~~~~~~~~~~~~~~~~~~
 
-mapdl.set("", "", "", "", 15)  # USE ITERATION WHEN TIME = 15
+# Defines the data set to be read from the results file by the time-point.
+mapdl.set(time=15)
 
-mapdl.etable("SENE", "SENE")  # STORE STRAIN ENERGY
+# Fills a table of element values for further processing for strain energy.
+mapdl.etable("SENE", "SENE")
 
-mapdl.ssum()  # SUM ALL ACTIVE ENTRIES IN ELEMENT STRESS TABLE
+# Sum all active entries in element stress table.
+mapdl.ssum()
 
-mapdl.run("*GET,ST_EN,SSUM,,ITEM,SENE")
+# Get the value of the stain energy of the spring elements.
+stain_energy = mapdl.get_value(entity="SSUM",entnum=0, item1="ITEM", it1num="SENE")
+# mapdl.run("*GET,ST_EN,SSUM,,ITEM,SENE")
 
+# Prints nodal solution results of the X, Y, and Z structural displacements
+# and vector sum.
 mapdl.prnsol("U", "COMP")  # PRINT DISPLACEMENTS IN GLOBAL COORDINATE SYSTEM
 
-mapdl.run("*GET,DEF_X,NODE,2,U,X")
+# Get the value of the displacements in X-direction.
+disp_x = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="X")
 
-mapdl.run("*GET,DEF_Y,NODE,2,U,Y")
+# Get the value of the displacements in Y-direction.
+disp_y = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="y")
 
-mapdl.run("*DIM,LABEL,CHAR,3,2")
-
-mapdl.run("*DIM,VALUE,,3,3")
-
-mapdl.run("LABEL(1,1) = 'STRAIN E','DEF_X (C','DEF_Y (C'")
-mapdl.run("LABEL(1,2) = ', N-cm  ','m)      ','m)      '")
-
-mapdl.run("*VFILL,VALUE(1,1),DATA,24.01,8.631,4.533")
-mapdl.run("*VFILL,VALUE(1,2),DATA,ST_EN ,DEF_X,DEF_Y")
-mapdl.run("*VFILL,VALUE(1,3),DATA,ABS(ST_EN/24.01), ABS(8.631/DEF_X), ABS(DEF_Y/4.533 )")
-
+# mapdl.run("*GET,DEF_X,NODE,2,U,X")
+# mapdl.run("*GET,DEF_Y,NODE,2,U,Y")
 
 ###############################################################################
 # Check Results
