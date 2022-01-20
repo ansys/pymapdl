@@ -346,7 +346,7 @@ def check_res_table(row_names=None, simulation_res=None, target_res=None):
         simulation_res = [1, 2]
         target_res = [10, 20]
 
-    # If the quantity of the rows does not eqaul to the quntity
+    # If the quantity of the rows does not equal to the quantity.
     if len(row_names) != len(target_res) or len(row_names) != len(target_res):
         raise TypeError("Not the same quantity of the rows and filled data")
 
