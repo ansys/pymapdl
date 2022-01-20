@@ -78,8 +78,8 @@ _ = mapdl.prep7()
 
 
 ###############################################################################
-# Define Main Class
-# ~~~~~~~~~~~~~~~~~
+# Define Class
+# ~~~~~~~~~~~~
 # Identifying the class ``create`` with methods ``create_kp_method`` and
 # ``create_node_method`` to calculate and plot the distances between keypoints
 # and nodes.
