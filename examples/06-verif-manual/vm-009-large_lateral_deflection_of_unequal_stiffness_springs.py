@@ -106,31 +106,46 @@ _ = mapdl.prep7()
 ###############################################################################
 # Define Element Type
 # ~~~~~~~~~~~~~~~~~~~
-# Set up the element types .
+# Set up the element types.
 
-# Element type PIPE288.
-mapdl.et(1, "COMBIN14", "", "", 2)  # UX AND UY DOF ELEMENT
+# Element type COMBIN14.
+mapdl.et(1, "COMBIN14")
 
 # Special Features are defined by keyoptions of the element COMBIN14.
-#
-#
+# KEYOPT(3)(2)
+# Degree-of-freedom selection for 2-D and 3-D behavior:
+# 2-D longitudinal spring-damper (2-D elements must lie in an X-Y plane)
+mapdl.keyopt(1, 3, 2)
 
-
-# Element type SOLID185.
-mapdl.et(3, "COMBIN40", "", "", "", "", "", 2)  # ALL MASS IS AT NODE J, UX DOF ELEMENT
-
-# Special Features are defined by keyoptions of the element COMBIN40.
-#
-#
-
-# Element type SHELL181.
-mapdl.et(4, "COMBIN40", "", "", 2, "", "", 2)  # ALL MASS IS AT NODE J, UY DOF ELEMENT
+# Element type COMBIN40.
+mapdl.et(3, "COMBIN40")
 
 # Special Features are defined by keyoptions of the element COMBIN40.
-#
-#
+# KEYOPT(3)(1)
+# Element degrees of freedom:
+# UX (Displacement along nodal X axes)
+mapdl.keyopt(3, 3, 1)
 
-# Print
+# KEYOPT(6)(2)
+# Mass location:
+# Mass at node J
+mapdl.keyopt(3, 6, 2)
+
+# Element type COMBIN40.
+mapdl.et(4, "COMBIN40")
+
+# Special Features are defined by keyoptions of the element COMBIN40.
+# KEYOPT(3)(2)
+# Element degrees of freedom:
+# UX (Displacement along nodal X axes)
+mapdl.keyopt(4, 3, 2)
+
+# KEYOPT(6)(2)
+# Mass location:
+# Mass at node J
+mapdl.keyopt(4, 6, 2)
+
+# Print the list of the elements and their attributes.
 print(mapdl.etlist())
 
 
