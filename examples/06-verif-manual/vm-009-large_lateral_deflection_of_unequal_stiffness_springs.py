@@ -108,6 +108,8 @@ k_spring2 = 1
 c_damp_x = 1.41
 c_damp_y = 2.0
 mass = 1
+
+# Fx and Fy has been obtained by the projection F on the X and Y axes.
 f_x = 5
 f_y = 5
 
@@ -226,9 +228,14 @@ mapdl.e(5, 2)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Application of boundary conditions (BC) for the spring model.
 
-mapdl.nsel("U", "NODE", "", 2)
+# Unselect the node where the force is applied.
+mapdl.nsel("U", "NODE", vmin=2)
+
+# Apply BC to the selected set of the nodes.
 mapdl.d("ALL", "ALL")
 mapdl.nsel("ALL")
+
+# Finish pre-processing mode.
 mapdl.finish()
 
 
@@ -237,17 +244,31 @@ mapdl.finish()
 # ~~~~~~~~~~~~~~~~~
 # Enter solution mode and apply settings for ``Transient Dynamic Analysis".
 
+# Starts solution (/solu) mode.
 mapdl.slashsolu()
 
-mapdl.antype("TRANS")  # FULL TRANSIENT DYNAMIC ANALYSIS
-mapdl.nlgeom("ON")  # LARGE DEFLECTION
-mapdl.kbc(1)  # STEP BOUNDARY CONDITION
-mapdl.f(2, "FX", 5)
-mapdl.f(2, "FY", 5)
+# Define transient analysis with large deflection setting.
+mapdl.antype("TRANS")
+mapdl.nlgeom("ON")
+
+# Specifies the stepped loading condition within a load step.
+mapdl.kbc(1)
+
+# Apply forces to the node 2.
+mapdl.f(2, "FX", f_x)
+mapdl.f(2, "FY", f_y)
+
+# Uses automatic time stepping.
 mapdl.autots("ON")
+
+# Specifies the number of substeps to be taken this load step.
 mapdl.nsubst(30)
+
+# Controls the solution printout.
 mapdl.outpr("", "LAST")
 mapdl.outpr("VENG", "LAST")
+
+# Sets the time for a load step.
 mapdl.time(15)  # ARBITRARY TIME FOR SLOW DYNAMICS
 
 
