@@ -226,10 +226,10 @@ mapdl.etable(lab="STRS_B", item="LS", comp=1)
 mapdl.etable(lab="STRS_T", item="LS", comp=31)
 
 # Get the value of the maximum tensile stress.
-strss_b_t = mapdl.get_value(entity="ELEM", entnum=1, item1= "ETAB", it1num="STRS_T")
+strss_b_t = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_T")
 
 # Get the value of the maximum compressive bending stress.
-strss_b_c = mapdl.get_value(entity="ELEM", entnum=1, item1= "ETAB", it1num="STRS_B")
+strss_b_c = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_B")
 
 
 ###############################################################################
