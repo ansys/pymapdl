@@ -175,35 +175,33 @@ mapdl.eplot(show_node_numbering=True,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Application of boundary conditions (BC).
 
-mapdl.d(1, "ALL")
-mapdl.d("ALL", "UZ", "", "", "", "", "ROTX", "ROTY")
+mapdl.d(node=1, lab="ALL")
+mapdl.d(node="ALL", lab="UZ", lab2="ROTX", lab3="ROTY")
 
 
 ###############################################################################
 # Define Distributed Loads
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-# Apply a distributed force of :math:`w = (10000/12) lb/in`
-# in the y-direction.
+# Apply a bending moment :math:`bending_mz = 100000\,in-lb`.
 
 # Parametrization of the bending moment.
 bending_mz = 100000
 
 # Application of the surface load to the beam element.
-mapdl.f(2, "MZ", bending_mz)
+mapdl.f(node=2, lab="MZ", value=bending_mz)
 _ = mapdl.finish()
 
 
 ###############################################################################
 # Solve
 # ~~~~~
-# Enter solution mode and solve the system.
+# Enter solution mode and run the simulation.
 
 # Start solution procedure.
 mapdl.slashsolu()
 
-# Define solution function.
+# Define the number of substeps to be taken this load step.
 mapdl.nsubst(1)
-mapdl.outpr("ALL", 1)
 _ = mapdl.solve()
 
 
@@ -223,12 +221,15 @@ _ = mapdl.post1()
 # the the maximum tensile and compressive bending stresses in
 # an unsymmetric ``T-beam`` with :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
 
+#  Create a table of element values for BEAM188.
+mapdl.etable(lab="STRS_B", item="LS", comp=1)
+mapdl.etable(lab="STRS_T", item="LS", comp=31)
 
-mapdl.etable("STRS_B", "LS", 1)
-mapdl.etable("STRS_T", "LS", 31)
+# Get the value of the maximum tensile stress.
+strss_b_t = mapdl.get_value(entity="ELEM", entnum=1, item1= "ETAB", it1num="STRS_T")
 
-mapdl.get("STRSS_B", "ELEM", 1, "ETAB", "STRS_B")
-mapdl.get("STRSS_T", "ELEM", 1, "ETAB", "STRS_T")
+# Get the value of the maximum compressive bending stress.
+strss_b_c = mapdl.get_value(entity="ELEM", entnum=1, item1= "ETAB", it1num="STRS_B")
 
 
 ###############################################################################
@@ -246,9 +247,8 @@ mapdl.get("STRSS_T", "ELEM", 1, "ETAB", "STRS_T")
 # with following settings below:
 
 # Define the names of the rows.
-row_names = ["Strain Energy, N-cm",
-             "Deflection-x , cm",
-             "Deflection-y , cm"]
+row_names = ["StressBEND,Bot, psi",
+             "StressBEND,Top, psi"]
 
 # Define the names of the columns.
 col_names = ['Target',
@@ -256,10 +256,10 @@ col_names = ['Target',
              'RATIO']
 
 # Define the values of the target results.
-target_res = np.asarray([24.01, 8.631, 4.533])
+target_res = np.asarray([300, -700])
 
 # Create an array with outputs of the simulations.
-simulation_res = np.asarray([strain_energy, disp_x, disp_y])
+simulation_res = np.asarray([strss_b_t, strss_b_c])
 
 # Identifying and filling corresponding columns.
 main_columns = {
