@@ -39,10 +39,10 @@ Loading:
    :alt: VM10 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
- - A length (:math:`l = 100 in`) is arbitrarily selected since the bending moment
-   is constant. A ``T-section`` beam is modeled using flange width (:math:`6b`),
+ - A length (:math:`l = 100 in`) is arbitrarily selected since the bending moment is constant.
+   A `T-section` beam is modeled using flange width (:math:`6b`),
    flange thickness (:math:`\frac{h}{2}`), overall depth (:math:`2h + \frac{h}{2}`), and
-   stem thickness (:math:`b`), input using ``SECDATA``.
+   stem thickness (:math:`b`), input using :meth:`Mapdl.secdata <ansys.mapdl.core.Mapdl.secdata>`.
 
 """
 
@@ -75,7 +75,7 @@ _ = mapdl.prep7()
 ###############################################################################
 # Define Element Type
 # ~~~~~~~~~~~~~~~~~~~
-# Set up the element type (``BEAM188``).
+# Set up the element type ``BEAM188``.
 
 # Type of analysis: Static.
 mapdl.antype("STATIC")
@@ -163,10 +163,14 @@ mapdl.e(1, 2, 3)
 print(mapdl.elist())
 
 # Display elements with their nodes numbers.
-mapdl.eplot(show_node_numbering=True,
-            line_width=5,
-            cpos="xy",
-            font_size=40)
+cpos = [(162.20508123980457, 109.41124535475498, 112.95887397446565),
+        (50.0, 0.0, 0.0),
+        (-0.4135015240403764, -0.4134577015789461, 0.8112146563156641)]
+
+_ = mapdl.eplot(show_node_numbering=True,
+                line_width=5,
+                cpos=cpos,
+                font_size=40)
 
 
 ###############################################################################
@@ -174,14 +178,14 @@ mapdl.eplot(show_node_numbering=True,
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Application of boundary conditions (BC).
 
-mapdl.d(node=1, lab="ALL")
-mapdl.d(node="ALL", lab="UZ", lab2="ROTX", lab3="ROTY")
+_ = mapdl.d(node=1, lab="ALL")
+_ = mapdl.d(node="ALL", lab="UZ", lab2="ROTX", lab3="ROTY")
 
 
 ###############################################################################
 # Define Distributed Loads
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-# Apply a bending moment :math:`bending_mz = 100000\,in-lb`.
+# Apply a bending moment :math:`bending_{\mathrm{(M_z)}}= 100000\,in-lb`.
 
 # Parametrization of the bending moment.
 bending_mz = 100000
@@ -225,10 +229,16 @@ mapdl.etable(lab="STRS_B", item="LS", comp=1)
 mapdl.etable(lab="STRS_T", item="LS", comp=31)
 
 # Get the value of the maximum compressive stress.
-strss_top_compr = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_T")
+strss_top_compr = mapdl.get_value(entity="ELEM",
+                                  entnum=1,
+                                  item1="ETAB",
+                                  it1num="STRS_T")
 
 # Get the value of the maximum tensile bending stress.
-strss_bot_tens = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_B")
+strss_bot_tens = mapdl.get_value(entity="ELEM",
+                                 entnum=1,
+                                 item1="ETAB",
+                                 it1num="STRS_B")
 
 
 ###############################################################################
