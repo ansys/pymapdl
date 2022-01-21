@@ -208,6 +208,9 @@ Start this example by launching MAPDL and loading the model.
    :hide-code:
 
    # jupyterlab boilerplate setup
+   import numpy as np
+   import plotly.graph_objects as go
+   import pandas as pd
    import pyvista
 
    pyvista.set_jupyter_backend('pythreejs')
@@ -814,10 +817,6 @@ other and couple as the coefficient of friction increases:
 
 .. jupyter-execute::
    :hide-code:
-   
-   import numpy as np
-   import plotly.graph_objects as go
-   import pandas as pd
    
    columns_names = ['x', 'mode 21', 'mode 22']
    values = np.array(
