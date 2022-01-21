@@ -55,7 +55,6 @@ Analysis Assumptions and Modeling Notes:
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 
