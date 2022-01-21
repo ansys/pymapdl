@@ -5,8 +5,8 @@ Bending of a Tee-Shaped Beam
 ----------------------------
 Problem Description:
  - Find the maximum tensile and compressive bending stresses in
-   an unsymmetric ``T-beam`` subjected to uniform bending :math:`M_z`, with dimensions
-   and geometric properties as shown below.
+   an unsymmetrical ``T-beam`` subjected to uniform bending :math:`M_z`,
+   with dimensions and geometric properties as shown below.
 
 Reference:
  - S. H. Crandall, N. C. Dahl, An Introduction to the Mechanics of Solids,
@@ -27,6 +27,7 @@ Material Properties
  - :math:`\nu = 0.3`
 
 Geometric Properties:
+ - :math:`l = 100\,in`
  - :math:`h = 1.5\,in`
  - :math:`b = 8\,in`
 
@@ -34,29 +35,14 @@ Loading:
  - :math:`M_z = 100,000\,in-lb`
 
 .. image:: ../../_static/vm10_setup.png
-   :width: 300
+   :width: 400
    :alt: VM10 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
- - The following tube dimensions, which provide the desired cross-sectional
-   areas, are arbitrarily chosen:
-
-   * Inner (steel) tube: inside radius = 1.9781692 in., wall thickness = 0.5 in.
-   * Outer (aluminum) tube: inside radius = 3.5697185 in., wall thickness = 0.5 in.
-
- - The problem can be solved in three ways:
-
-   * using ``PIPE288`` - the plastic straight pipe element
-   * using ``SOLID185`` - the 3-D structural solid element
-   * using ``SHELL181`` - the 4-Node Finite Strain Shell
-
- - In the SOLID185 and SHELL181 cases, since the problem is axisymmetric,
-   only a one element :math:`\theta` -sector is modeled. A small angle :math:`\theta = 6°`
-   is arbitrarily chosen to reasonably approximate the circular boundary
-   with straight sided elements.
-   The nodes at the boundaries have the ``UX`` (radial) degree of freedom coupled.
-   In the SHELL181 model, the nodes at the boundaries additionally have
-   the ``ROTY`` degree of freedom coupled.
+ - A length (:math:`l = 100 in`) is arbitrarily selected since the bending moment
+   is constant. A ``T-section`` beam is modeled using flange width (:math:`6b`),
+   flange thickness (:math:`\frac{h}{2}`), overall depth (:math:`2h + \frac{h}{2}`), and
+   stem thickness (:math:`b`), input using ```SECDATA``.
 
 """
 
@@ -90,7 +76,7 @@ _ = mapdl.prep7()
 ###############################################################################
 # Define Element Type
 # ~~~~~~~~~~~~~~~~~~~
-# Set up the element type (a beam-type).
+# Set up the element type (``BEAM188``).
 
 # Type of analysis: Static.
 mapdl.antype("STATIC")
@@ -98,7 +84,7 @@ mapdl.antype("STATIC")
 # Element type: BEAM188.
 mapdl.et(1, "BEAM188")
 
-# Special Features are defined by keyoptions of beam element:
+# Special Features are defined by keyoptions of BEAM188:
 
 # KEYOPT(3)
 # Shape functions along the length:
@@ -109,22 +95,43 @@ mapdl.keyopt(1, 3, 3)  # Cubic shape function
 ###############################################################################
 # Define Material
 # ~~~~~~~~~~~~~~~
-# Set up the material.
+# Set up the material, where:
+#
+# * :math:`E = 30 \cdot 10^6 psi` - Young Modulus of steel.
+# * :math:`\nu = 0.3` - Poisson's ratio.
 
+# Steel material model.
+# Define Young's moulus and Poisson ratio for Steel.
 mapdl.mp("EX", 1, 30E6)
 mapdl.mp("PRXY", 1, 0.3)
+
+# Pring the list of material properties.
 print(mapdl.mplist())
 
 
 ###############################################################################
 # Define Section
 # ~~~~~~~~~~~~~~
-# Set up the cross-section properties for a beam element.
+# Set up the cross-section properties for a beam elements, where:
+#
+# * :math:`w_1 = 6b = 6 * 1.5 = 9\,in` - flange width.
+# * :math:`w_2 = 2h + \frac{h}{2} = 2 * 8 + \frac{8}{2} = 20\,in` - overall depth.
+# * :math:`t_1 = \frac{h}{2} = \frac{8}{2} = 4\,in` - flange thickness.
+# * :math:`t_2 = b = 1.5\,in` - stem thickness.
 
+# Parameterization of the cross-section dimensions.
 sec_num = 1
-mapdl.sectype(sec_num, "BEAM", "T")
-mapdl.secdata(9, 20, 4, 1.5)
+w1 = 9
+w2 = 20
+t1 = 4
+t2 = 1.5
 
+# Define the beam cross-section.
+mapdl.sectype(sec_num, "BEAM", "T")
+mapdl.secdata(w1, w2, t1, t2)
+
+# Print the section properties.
+print(mapdl.slist())
 
 ###############################################################################
 # Define Geometry
@@ -132,12 +139,12 @@ mapdl.secdata(9, 20, 4, 1.5)
 # Set up the nodes and elements. Create nodes then create elements
 # between nodes.
 
-# Define nodes
-mapdl.n(1)
-mapdl.n(2, 100)
+# Define nodes for the beam element.
+mapdl.n(1, x=0, y=0)
+mapdl.n(2, x=100, y=0)
 
 # Define one node for the orientation of the beam T-section.
-mapdl.n(3, "", 1)
+mapdl.n(3, x=0, y=1)
 
 # Print the list of the created nodes.
 print(mapdl.nlist())
@@ -146,7 +153,7 @@ print(mapdl.nlist())
 # Define elements
 mapdl.e(1, 2, 3)
 
-# Print the list of the created elements.
+# Print the list of the elements and their attributes.
 print(mapdl.elist())
 
 # Display elements with their nodes numbers.
