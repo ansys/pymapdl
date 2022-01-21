@@ -91,6 +91,9 @@ mapdl.et(1, "BEAM188")
 # Cubic
 mapdl.keyopt(1, 3, 3)  # Cubic shape function
 
+# Print the list with currently defined element types.
+print(mapdl.etlist())
+
 
 ###############################################################################
 # Define Material
@@ -105,7 +108,7 @@ mapdl.keyopt(1, 3, 3)  # Cubic shape function
 mapdl.mp("EX", 1, 30E6)
 mapdl.mp("PRXY", 1, 0.3)
 
-# Pring the list of material properties.
+# Print the list of material properties.
 print(mapdl.mplist())
 
 
@@ -151,13 +154,21 @@ print(mapdl.nlist())
 
 ###############################################################################
 # Define elements
+# ~~~~~~~~~~~~~~~
+# Create element between nodes 1 and 2 using node 3 as orientational node.
+
+# Create element.
 mapdl.e(1, 2, 3)
 
 # Print the list of the elements and their attributes.
 print(mapdl.elist())
 
 # Display elements with their nodes numbers.
-mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+mapdl.eplot(show_node_numbering=True,
+            line_width=5,
+            cpos="xy",
+            font_size=40,
+            vtk=False)
 
 
 ###############################################################################
