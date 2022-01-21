@@ -4,8 +4,8 @@ r"""
 Bending of a Tee-Shaped Beam
 ----------------------------
 Problem Description:
- - Find the maximum tensile and compressive bending stresses in
-   an unsymmetrical ``T-beam`` subjected to uniform bending :math:`M_z`,
+ - Find the maximum tensile :math:`\sigma_{\mathrm{(BEND)(BOT)}}` and compressive :math:`\sigma_{\mathrm{(BEND)(TOP)}}`
+   bending stresses in an unsymmetrical `T-beam` subjected to uniform bending :math:`M_z`,
    with dimensions and geometric properties as shown below.
 
 Reference:
@@ -13,13 +13,13 @@ Reference:
    McGraw-Hill Book Co., Inc., New York, NY, 1959, pg. 294, ex. 7.2.
 
 Analysis Type(s):
- - Static Analysis (``ANTYPE = 0``)
+ - Static Analysis (`ANTYPE = 0`)
 
 Element Type(s):
  - 3-D 2 Node Beam (BEAM188)
 
 .. image:: ../../_static/vm10_setup_1.png
-   :width: 400
+   :width: 300
    :alt: VM10 Geometry of Beam188 and Element Model
 
 Material Properties
@@ -42,7 +42,7 @@ Analysis Assumptions and Modeling Notes:
  - A length (:math:`l = 100 in`) is arbitrarily selected since the bending moment
    is constant. A ``T-section`` beam is modeled using flange width (:math:`6b`),
    flange thickness (:math:`\frac{h}{2}`), overall depth (:math:`2h + \frac{h}{2}`), and
-   stem thickness (:math:`b`), input using ```SECDATA``.
+   stem thickness (:math:`b`), input using ``SECDATA``.
 
 """
 
@@ -166,8 +166,7 @@ print(mapdl.elist())
 mapdl.eplot(show_node_numbering=True,
             line_width=5,
             cpos="xy",
-            font_size=40,
-            vtk=False)
+            font_size=40)
 
 
 ###############################################################################
@@ -219,17 +218,17 @@ _ = mapdl.post1()
 # ~~~~~~~~~~~~~~~~~~~~~
 # Using :meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>` get the results of
 # the the maximum tensile and compressive bending stresses in
-# an unsymmetric ``T-beam`` with :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
+# an unsymmetric `T-beam` with :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
 
 #  Create a table of element values for BEAM188.
 mapdl.etable(lab="STRS_B", item="LS", comp=1)
 mapdl.etable(lab="STRS_T", item="LS", comp=31)
 
-# Get the value of the maximum tensile stress.
-strss_b_t = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_T")
+# Get the value of the maximum compressive stress.
+strss_top_compr = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_T")
 
-# Get the value of the maximum compressive bending stress.
-strss_b_c = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_B")
+# Get the value of the maximum tensile bending stress.
+strss_bot_tens = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_B")
 
 
 ###############################################################################
@@ -239,9 +238,8 @@ strss_b_c = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_
 # compressive bending stresses, which can be compared with expected target
 # values:
 #
-# - Strain energy of the system :math:`U_{\mathrm{(energy)}} = 24.01\,N-cm`.
-# - Displacement in X-direction :math:`U_x = 8.631\,cm`.
-# - Displacement in Y-direction :math:`U_y = 4.533\,cm`.
+# - maximum tensile bending stress :math:`\sigma_{\mathrm{(BEND)(BOT)}} = 300\,psi`.
+# - maximum compressive bending stress :math:`\sigma_{\mathrm{(BEND)(TOP)}} = -700\,psi`.
 #
 # For better representation of the results we can use ``pandas`` dataframe
 # with following settings below:
@@ -259,7 +257,7 @@ col_names = ['Target',
 target_res = np.asarray([300, -700])
 
 # Create an array with outputs of the simulations.
-simulation_res = np.asarray([strss_b_t, strss_b_c])
+simulation_res = np.asarray([strss_bot_tens, strss_top_compr])
 
 # Identifying and filling corresponding columns.
 main_columns = {
