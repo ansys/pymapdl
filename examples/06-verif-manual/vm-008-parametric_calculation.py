@@ -4,7 +4,7 @@ r"""
 Parametric Calculation
 ----------------------
 Problem Description:
- - Write a user file macro to calculate the distance d between either nodes
+ - Write a user file macro to calculate the distance ``d`` between either nodes
    or keypoints in ``PREP7``. Define abbreviations for calling the macro and
    verify the parametric expressions by using the macro to calculate
    the distance between nodes :math:`N_1` and :math:`N_2` and
@@ -30,12 +30,11 @@ Geometric Properties(Coordinates):
    :alt: VM8 Problem Sketch
 
 Analysis Assumptions and Modeling Notes:
- - Instead of ``*create``, ``*use``, etc., we have created a class
+ - Instead of ``*CREATE``, ``*USE``, etc., we have created a class
    ``Create`` with methods that correspond to each type of simulation.
-   In normal use, this class would most likely already exist, so
-   it is possible to change coordinates and reuse it. The simulation
-   can be checked not just by target values, but also with the simple
-   distances' formula between keypoints as:
+   This class gives a possibility to change coordinates and reuse it.
+   The simulation can be checked not just by target values, but also
+   with the simple distances' formula between keypoints as:
 
    * Calculate distance between two keypoints in the Cartesian coordinate system:
         :math:`D = \sqrt[2]{(x_2 - x_1)^2 + (y_2 - y_1)^2 + (z_2 - z_1)^2}`
@@ -94,7 +93,7 @@ class Create:
         self.y2 = y2
         self.z2 = z2
 
-    def create_kp_method(self):
+    def kp_distances(self):
 
         # Define keypoints by coordinates.
         kp1 = mapdl.k(npt=3, x=self.x1, y=self.y1, z=self.z1)
@@ -111,7 +110,7 @@ class Create:
                     font_size=26)
         return dist_kp, mapdl.klist()
 
-    def create_node_method(self):
+    def node_distances(self):
 
         # Define nodes by coordinates.
         node1 = mapdl.n(node=1, x=self.x1, y=self.y1, z=self.z1)
@@ -139,7 +138,7 @@ class Create:
 # * :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
 
 kp = Create(100, 0, 30, -200, 25, 80)
-kp_dist, keypoint_list = kp.create_kp_method()
+kp_dist, keypoint_list = kp.kp_distances()
 print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
       f"{keypoint_list}")
 
@@ -154,7 +153,7 @@ print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
 # * :math:`N_{\mathrm{2(x,y,z)}} = -3.7, 4.6, -3`
 
 nodes = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
-node_dist, node_list = nodes.create_node_method()
+node_dist, node_list = nodes.node_distances()
 print(f"Distance between nodes is: {node_dist:.2f}\n\n"
       f"{node_list}")
 
