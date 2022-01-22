@@ -108,7 +108,7 @@ class Create:
                     background="grey",
                     show_bounds=True,
                     font_size=26)
-        return dist_kp, mapdl.klist()
+        return dist_kp
 
     def node_distances(self):
 
@@ -125,7 +125,7 @@ class Create:
                     color="grey",
                     show_bounds=True,
                     font_size=26)
-        return dist_node, mapdl.nlist()
+        return dist_node
 
 
 ###############################################################################
@@ -138,9 +138,11 @@ class Create:
 # * :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
 
 kp = Create(100, 0, 30, -200, 25, 80)
-kp_dist, keypoint_list = kp.kp_distances()
-print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
-      f"{keypoint_list}")
+kp_dist = kp.kp_distances()
+print(f"Distance between keypoint is: {kp_dist:.2f}\n\n")
+
+# Print the list of keypoints.
+print(mapdl.klist())
 
 
 ###############################################################################
@@ -153,9 +155,11 @@ print(f"Distance between keypoint is: {kp_dist:.2f}\n\n"
 # * :math:`N_{\mathrm{2(x,y,z)}} = -3.7, 4.6, -3`
 
 nodes = Create(1.5, 2.5, 3.5, -3.7, 4.6, -3)
-node_dist, node_list = nodes.node_distances()
-print(f"Distance between nodes is: {node_dist:.2f}\n\n"
-      f"{node_list}")
+node_dist = nodes.node_distances()
+print(f"Distance between nodes is: {node_dist:.2f}\n\n")
+
+# Print the list of nodes.
+print(mapdl.nlist())
 
 
 ###############################################################################
