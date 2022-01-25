@@ -9,8 +9,8 @@ Problem Description:
    the displacements :math:`\delta_x` and :math:`\delta_y`.
 
 Reference:
- - G. N. Vanderplaats, Numerical Optimization Techniques for Engineering
-   Design with Applications, McGraw-Hill Book Co., Inc., New York,
+ - G. N. Vanderplaats, *Numerical Optimization Techniques for Engineering
+   Design with Applications*, McGraw-Hill Book Co., Inc., New York,
    NY,1984, pp. 72-73, ex. 3-1.
 
 Analysis Type(s):
@@ -43,7 +43,7 @@ Loading:
 Analysis Assumptions and Modeling Notes:
  - The solution to this problem is best obtained by adding mass and using
    the "slow dynamics" technique with approximately critical damping.
-   Combination elements :math:`COMBIN40` are used to provide damping
+   Combination elements ``COMBIN40`` are used to provide damping
    in the :math:`X` and :math:`Y` directions. Approximate damping coefficients
    :math:`c_x` and :math:`c_y`, in the :math:`X` and :math:`Y` directions respectively,
    are determined from:
@@ -51,7 +51,7 @@ Analysis Assumptions and Modeling Notes:
    * :math:`c_x = \sqrt[2]{k_xm}`
    * :math:`c_y = \sqrt[2]{k_ym}`
 
- where m is arbitrarily assumed to be unity.
+   where m is arbitrarily assumed to be unity.
 
  - :math:`k_x` and :math:`k_y` cannot be known before solving so are approximated
    by :math:`k_y = k_2 = 1\,N/cm` and :math:`k_x = k_y/2 = 0.5\,N/cm`,
@@ -68,8 +68,6 @@ Analysis Assumptions and Modeling Notes:
 # Start MAPDL and import Numpy and Pandas libraries.
 
 # sphinx_gallery_thumbnail_path = '_static/vm9_setup.png'
-# sphinx_gallery_thumbnail_path = '_static/vm9_setup_1.png'
-# sphinx_gallery_thumbnail_path = '_static/vm9_setup_2.png'
 
 import numpy as np
 import pandas as pd
@@ -87,13 +85,13 @@ mapdl = launch_mapdl()
 
 mapdl.clear()
 mapdl.verify()
-_ = mapdl.prep7()
+mapdl.prep7(mute=True)
 
 
 ###############################################################################
 # Parameterization
 # ~~~~~~~~~~~~~~~~
-# Parameterization block includes main constants as :
+# Parameterization block includes main variables as :
 #
 # * :math:`l = 10\,cm` - spring length.
 # * :math:`k_1 = 8\,N/cm` - stiffness of the 1st spring.
@@ -104,7 +102,7 @@ _ = mapdl.prep7()
 # * :math:`c_x = \sqrt[2]{k_xm} = 1,41` - damping coefficient, x-direction.
 # * :math:`c_y = \sqrt[2]{k_ym} = 2.0` - damping coefficient, y-direction.
 
-# Main constants.
+# Main variables:
 length = 10
 k_spring1 = 8
 k_spring2 = 1
@@ -162,9 +160,6 @@ mapdl.keyopt(4, 6, 2)
 # Print the list of the elements and their attributes.
 print(mapdl.etlist())
 
-# Print the list of the elements and their attributes.
-print(mapdl.elist())
-
 
 ###############################################################################
 # Define Real Constants
@@ -192,7 +187,7 @@ print(mapdl.rlist())
 ###############################################################################
 # Define Nodes
 # ~~~~~~~~~~~~
-# Set up the nodes coordinates using python ``for-loop``.
+# Set up the nodes coordinates using python ``for`` loop.
 
 # Lists with nodes coordinates.
 node_x_coord = [0, 0, 0, -1, 0]
@@ -252,13 +247,13 @@ mapdl.d("ALL", "ALL")
 mapdl.nsel("ALL")
 
 # Finish pre-processing mode.
-_ = mapdl.finish()
+mapdl.finish(mute=True)
 
 
 ###############################################################################
 # Solution settings
 # ~~~~~~~~~~~~~~~~~
-# Enter solution mode and apply settings for ``Transient Dynamic Analysis``.
+# Enter solution mode and apply settings for *Transient Dynamic Analysis*.
 
 # Starts solution (/solu) mode.
 mapdl.slashsolu()
@@ -285,20 +280,17 @@ mapdl.outpr("", "LAST")
 mapdl.outpr("VENG", "LAST")
 
 # Sets the time for a load step.
-_ = mapdl.time(15)
+mapdl.time(15, mute=True)
 
 
 ###############################################################################
 # Solve
 # ~~~~~
-# Enter solution mode and solve the system , avoiding the printing output.
-
-# Enter to the pre-processing mode.
-mapdl.slashsolu()
+# Solve the system , avoiding the printing output.
 
 # Run the simulation.
 mapdl.solve()
-_ = mapdl.finish()
+mapdl.finish(mute=True)
 
 
 ###############################################################################
@@ -307,7 +299,7 @@ _ = mapdl.finish()
 # Enter post-processing, avoiding the printing output.
 
 # Enter the post-processing mode.
-_ = mapdl.post1()
+mapdl.post1(mute=True)
 
 
 ###############################################################################
@@ -346,7 +338,7 @@ disp_x = mapdl.get_value(entity="NODE",
 disp_y = mapdl.get_value(entity="NODE",
                          entnum=2,
                          item1="U",
-                         it1num="y")
+                         it1num="Y")
 
 
 ###############################################################################
@@ -356,7 +348,7 @@ disp_y = mapdl.get_value(entity="NODE",
 # displacements in :math:`X` and :math:`Y` directions, which can be compared with
 # expected target values:
 #
-# - Strain energy of the system :math:`U_{\mathrm{(energy)}} = 24.01\,N-cm`.
+# - Strain energy of the system :math:`U_{\mathrm{(energy)}} = 24.01\;N\,cm`.
 # - Displacement in X-direction :math:`U_x = 8.631\,cm`.
 # - Displacement in Y-direction :math:`U_y = 4.533\,cm`.
 #
