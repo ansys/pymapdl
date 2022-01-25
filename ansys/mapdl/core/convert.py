@@ -1,6 +1,9 @@
 import os
+import re
 from warnings import warn
 from logging import Logger, StreamHandler
+
+from importlib_metadata import re
 
 from ansys.mapdl.core import __version__
 from ansys.mapdl.core.misc import is_float
@@ -22,7 +25,9 @@ def convert_script(
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-    show_log = False
+    show_log = False,
+    add_imports = True,
+    comment_solve = False
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -57,6 +62,22 @@ def convert_script(
         Print the converted commands using a logger (from ``logging``
         Python module).
 
+    add_imports : bool, optional
+        If ``True``, it add the next lines to the beginning of the
+        output file:
+
+        .. code:: python
+
+           from ansys.mapdl.core import launch_mapdl
+           mapdl = launch_mapdl(loglevel="WARNING")
+
+        This option is useful if you are planning to use the output
+        script from another mapdl session. See examples section.
+
+    comment_solve : bool, optional
+        If ``True``, it will pythonically comment the lines with
+        contains ``mapdl.solve`` or ``/EOF``.
+
     Returns
     -------
     list
@@ -67,18 +88,36 @@ def convert_script(
     >>> from ansys.mapdl import core as pymapdl
     >>> from ansys.mapdl.core import examples
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
+
+    # Converting a script and using it already in the same session.
+    # For this case, tt is recommended to use ``convert_apdl_block`` 
+    # from ``converter``module since you do not have to write the file.
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core import examples
+    >>> from ansys.mapdl.core import convert_script
+    >>> in_file = examples.vmfiles['vm10']
+    >>> filename = in_file.split('\\')[-1]
+    >>> out_file = 'out_' + filename.replace('.dat', '.py')
+    >>> output = convert_script(file, out_file, line_ending='\n')
+    >>> mapdl = launch_mapdl()
+    >>> with open(out_file, 'r') as fid:
+            cmds = fid.read()
+    >>> mapdl.input_strings(cmds.splitlines()[2:10])
+
     """
     with open(filename_in, 'r') as fid:
         apdl_strings = fid.readlines()
 
     translator = _convert(apdl_strings=apdl_strings,
-                                loglevel=loglevel,
-                                auto_exit=auto_exit,
-                                line_ending=line_ending,
-                                exec_file=exec_file,
-                                macros_as_functions=macros_as_functions,
-                                use_function_names=use_function_names,
-                                show_log=show_log
+                        loglevel=loglevel,
+                        auto_exit=auto_exit,
+                        line_ending=line_ending,
+                        exec_file=exec_file,
+                        macros_as_functions=macros_as_functions,
+                        use_function_names=use_function_names,
+                        show_log=show_log,
+                        add_imports = add_imports,
+                        comment_solve = comment_solve
                           )
 
     translator.save(filename_out)
@@ -86,13 +125,15 @@ def convert_script(
 
 
 def convert_apdl_block(apdl_strings,
-        loglevel="WARNING",
-        auto_exit=True,
-        line_ending=None,
-        exec_file=None,
-        macros_as_functions=True,
-        use_function_names=True,
-        show_log=False):
+            loglevel="WARNING",
+            auto_exit=True,
+            line_ending=None,
+            exec_file=None,
+            macros_as_functions=True,
+            use_function_names=True,
+            show_log=False,
+            add_imports = True,
+            comment_solve = False):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -126,10 +167,39 @@ def convert_apdl_block(apdl_strings,
         Print the converted commands using a logger (from ``logging``
         Python module).
 
+    add_imports : bool, optional
+        If ``True``, it add the next lines to the beginning of the
+        output file:
+
+        .. code:: python
+
+           from ansys.mapdl.core import launch_mapdl
+           mapdl = launch_mapdl(loglevel="WARNING")
+
+        This option is useful if you are planning to use the output
+        script from another mapdl session. See examples section.
+
+    comment_solve : bool, optional
+        If ``True``, it will pythonically comment the lines with
+        contains ``mapdl.solve`` or ``/EOF``.
+
     Returns
     -------
     list
         List of lines translated.
+
+    Examples
+    --------
+    # Converting a script and using it already in the same session:
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core import examples
+    >>> from ansys.mapdl.core import convert_apdl_block
+    >>> in_file = examples.vmfiles['vm10']
+    >>> filename = in_file.split('\\')[-1]
+    >>> out_file = 'out_' + filename.replace('.dat', '.py')
+    >>> cmds = convert_apdl_block(file, out_file, line_ending='\n')
+    >>> mapdl = launch_mapdl()
+    >>> mapdl.input_strings(cmds.splitlines()[2:10])
 
     """
 
@@ -140,7 +210,9 @@ def convert_apdl_block(apdl_strings,
     exec_file=exec_file,
     macros_as_functions=macros_as_functions,
     use_function_names=use_function_names,
-    show_log=show_log)
+    show_log=show_log
+    add_imports = add_imports,
+    comment_solve = comment_solve)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
@@ -148,13 +220,15 @@ def convert_apdl_block(apdl_strings,
 
 
 def _convert(apdl_strings,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True,
-    show_log=False
+            loglevel="WARNING",
+            auto_exit=True,
+            line_ending=None,
+            exec_file=None,
+            macros_as_functions=True,
+            use_function_names=True,
+            show_log=False,
+            add_imports = True,
+            comment_solve = False
              ):
 
     translator = FileTranslator(
@@ -163,7 +237,9 @@ def _convert(apdl_strings,
         exec_file=exec_file,
         macros_as_functions=macros_as_functions,
         use_function_names=use_function_names,
-        show_log=show_log
+        show_log=show_log,
+        add_imports = add_imports,
+        comment_solve = comment_solve
     )
 
     if isinstance(apdl_strings, str):
@@ -210,7 +286,9 @@ class FileTranslator:
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
-        show_log=False
+        show_log=False,
+        add_imports = True,
+        comment_solve = False
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -223,9 +301,12 @@ class FileTranslator:
         self._infunction = False
         self.use_function_names = use_function_names
         self.comment = ""
+        self._add_imports = add_imports
+        self._comment_solve = comment_solve
 
         self.write_header()
-        self.initialize_mapdl_object(loglevel, exec_file)
+        if self._add_imports:
+            self.initialize_mapdl_object(loglevel, exec_file)
 
         self._valid_commands = dir(Commands)
         self._block_commands = {
@@ -258,12 +339,17 @@ class FileTranslator:
         self.lines.append(header)
 
     def write_exit(self):
-        self.lines.append(f"{self.obj_name}.exit()")
+        if self._add_imports:
+            self.lines.append(f"{self.obj_name}.exit()")
 
     def save(self, filename):
         """Saves lines to file"""
         if os.path.isfile(filename):
             os.remove(filename)
+
+        # Making sure we write python string with double slash.
+        # We are not expecting other type of unicode symbols.
+        self.lines = [each_line.replace('\\', '\\\\') for each_line in self.lines]
 
         with open(filename, "w") as f:
             f.write(self.line_ending.join(self.lines))
@@ -295,7 +381,7 @@ class FileTranslator:
         self.comment = ""
         line = line.strip()
         line = line.replace('"', "'")
-
+        line = line.replace(r'\', r'\\')
         if self._in_block:
             self._block_count += 1
 
@@ -321,7 +407,12 @@ class FileTranslator:
 
         if not line:
             return
+
         cmd_ = line.split(',')[0].upper()
+
+        if cmd_[:4] == '/COM':
+            # It is a comment
+            self.store_command('com', line[5:])
 
         if cmd_ == '*DO':
             self.start_non_interactive()
