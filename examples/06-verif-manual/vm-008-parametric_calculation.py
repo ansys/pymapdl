@@ -230,4 +230,3 @@ df2 = pd.DataFrame(main_columns, index=row_names)
 
 # Apply style settings for the dataframe.
 df2.style.format("{:.2f}")
-
