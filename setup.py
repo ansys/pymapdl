@@ -27,6 +27,8 @@ install_requires = [
     "ansys-api-mapdl-v0==0.4.1",  # supports at least 2020R2 - 2021R2
     "ansys-mapdl-reader>=0.50.15",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
+    "opentelemetry-api>=1.8.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.8.0",
 ]
 # 'grpcio-health-checking>=1.30.0',
 

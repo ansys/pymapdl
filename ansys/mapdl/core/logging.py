@@ -113,6 +113,7 @@ import logging
 from datetime import datetime
 import sys
 from copy import copy
+from os import environ
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -149,6 +150,19 @@ string_to_loglevel = {
     'ERROR': ERROR,
     'CRITICAL': CRITICAL,
 }
+
+## OpenTelemetry instrumentation
+OPENTELEMETRY_ENABLED = 'ENABLE_OPENTELEMETRY' in environ
+if OPENTELEMETRY_ENABLED:
+    from opentelemetry.exporter.otlp.proto.grpc._log_exporter import (
+        OTLPLogExporter,
+    )
+    from opentelemetry.sdk._logs import (
+        LogEmitterProvider,
+        OTLPHandler,
+    )
+    from opentelemetry.sdk._logs.export import BatchLogProcessor, ConsoleLogExporter
+    from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_INSTANCE_ID, Resource
 
 
 class PymapdlCustomAdapter(logging.LoggerAdapter):
@@ -351,6 +365,9 @@ class Logger():
         # Using logger to record unhandled exceptions
         self.add_handling_uncaught_expections(self.logger)
 
+        if OPENTELEMETRY_ENABLED:
+            add_opentelemetry_handler(self.logger)
+
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
         """Add file handler to logger.
 
@@ -405,6 +422,9 @@ class Logger():
 
         if self.logger.hasHandlers:
             for each_handler in self.logger.handlers:
+                if OPENTELEMETRY_ENABLED:
+                    if each_handler is OTLPHandler:
+                        continue
                 new_handler = copy(each_handler)
 
                 if each_handler == self.file_handler:
@@ -430,6 +450,10 @@ class Logger():
             logger.setLevel(self.logger.level)
 
         logger.propagate = True
+
+        if OPENTELEMETRY_ENABLED:
+            add_opentelemetry_handler(logger)
+
         return logger
 
     def add_child_logger(self, sufix, level=None):
@@ -521,8 +545,28 @@ class Logger():
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
-            logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+            logger.critical(f"Uncaught exception: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
         sys.excepthook = handle_exception
+
+    
+def add_opentelemetry_handler(logger):
+    """Add OpenTelemetry handler to the logger."""
+    level = logging.DEBUG # logger.level
+    logProcessor = BatchLogProcessor(OTLPLogExporter(insecure=True))
+    # logProcessor = BatchLogProcessor(ConsoleLogExporter())
+    log_emitter_provider = LogEmitterProvider(
+        resource=Resource.create(
+            {
+                SERVICE_NAME: logger.name,
+                SERVICE_INSTANCE_ID: environ.get("HOSTNAME"),
+            }
+        )
+    )
+    log_emitter_provider.add_log_processor(logProcessor)
+    log_emitter = log_emitter_provider.get_log_emitter(logger.name, "0.1")
+    handler = OTLPHandler(level=level, log_emitter=log_emitter)
+    logger.setLevel(level)
+    logger.addHandler(handler)
 
 
 def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=False):
