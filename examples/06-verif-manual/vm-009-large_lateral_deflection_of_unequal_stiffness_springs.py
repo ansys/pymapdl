@@ -382,20 +382,4 @@ main_columns = {
 df2 = pd.DataFrame(main_columns, index=row_names)
 
 # Apply style settings for the dataframe.
-df2.style.set_table_styles([
-                            {
-                              "selector": "th",
-                              "props": [('font-size', '16px')]
-                            },
-                            {
-                              "selector": "td",
-                              "props": [('font-size', '16px')]
-                            },
-                            {
-                                "selector": "td:hover",
-                                "props": [("background-color", "#FFF8DC")]
-                            }]).set_properties(**
-                                               {
-                                                    "color": "black",
-                                                    "text-align": "center"
-                                               }).format("{:.2f}")
+df2.style.format("{:.2f}")
