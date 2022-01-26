@@ -379,7 +379,7 @@ main_columns = {
 }
 
 # Create and fill the output dataframe with pandas.
-df2 = pd.DataFrame(main_columns, index=row_names)
+df2 = pd.DataFrame(main_columns, index=row_names).round(2)
 
-# Apply style settings for the dataframe.
-df2.style.format("{:.2f}")
+# Apply settings for the dataframe.
+df2.head()
