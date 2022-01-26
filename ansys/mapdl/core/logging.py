@@ -162,8 +162,14 @@ if OPENTELEMETRY_ENABLED:
         OTLPHandler,
     )
     from opentelemetry.sdk._logs.export import BatchLogProcessor, ConsoleLogExporter
-    from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_INSTANCE_ID, Resource
-
+    from opentelemetry.sdk.resources import (
+        SERVICE_NAME,
+        SERVICE_NAMESPACE,
+        SERVICE_INSTANCE_ID,
+        SERVICE_VERSION,
+        Resource
+    )
+    from ansys.mapdl.core._version import __version__ as mapdl_core_version
 
 class PymapdlCustomAdapter(logging.LoggerAdapter):
     """This is key to keep the reference to the MAPDL instance name dynamic.
@@ -545,7 +551,11 @@ class Logger():
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
-            logger.critical(f"Uncaught exception: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+            if OPENTELEMETRY_ENABLED:
+                # Note: traceback is not appended to the message.
+                logger.critical(f"Uncaught exception: {exc_value}", exc_info=(exc_type, exc_value, exc_traceback))
+            else:
+                logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
         sys.excepthook = handle_exception
 
     
@@ -558,12 +568,14 @@ def add_opentelemetry_handler(logger):
         resource=Resource.create(
             {
                 SERVICE_NAME: logger.name,
+                SERVICE_NAMESPACE: '.'.join(__name__.split('.')[:-1]),
                 SERVICE_INSTANCE_ID: environ.get("HOSTNAME"),
+                SERVICE_VERSION: mapdl_core_version,
             }
         )
     )
     log_emitter_provider.add_log_processor(logProcessor)
-    log_emitter = log_emitter_provider.get_log_emitter(logger.name, "0.1")
+    log_emitter = log_emitter_provider.get_log_emitter(logger.name, mapdl_core_version)
     handler = OTLPHandler(level=level, log_emitter=log_emitter)
     logger.setLevel(level)
     logger.addHandler(handler)
