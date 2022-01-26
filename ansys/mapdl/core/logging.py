@@ -161,13 +161,16 @@ if OPENTELEMETRY_ENABLED:
         LogEmitterProvider,
         OTLPHandler,
     )
-    from opentelemetry.sdk._logs.export import BatchLogProcessor, ConsoleLogExporter
+    from opentelemetry.sdk._logs.export import (
+        BatchLogProcessor,
+        # ConsoleLogExporter,
+    )
     from opentelemetry.sdk.resources import (
         SERVICE_NAME,
         SERVICE_NAMESPACE,
         SERVICE_INSTANCE_ID,
         SERVICE_VERSION,
-        Resource
+        Resource,
     )
     from ansys.mapdl.core._version import __version__ as mapdl_core_version
 
@@ -558,7 +561,7 @@ class Logger():
                 logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
         sys.excepthook = handle_exception
 
-    
+
 def add_opentelemetry_handler(logger):
     """Add OpenTelemetry handler to the logger."""
     level = logging.DEBUG # logger.level
