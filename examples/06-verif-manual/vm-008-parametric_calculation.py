@@ -47,15 +47,13 @@ Analysis Assumptions and Modeling Notes:
             x2, y2, z2 = -200, 25, 80
             dist_kp = math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
             print(dist_kp)
-
+# sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
 """
 
 ###############################################################################
 # Start MAPDL
 # ~~~~~~~~~~~
 # Start MAPDL and import Numpy and Pandas libraries.
-
-# sphinx_gallery_thumbnail_path = '_static/vm8_setup.png'
 
 import numpy as np
 import pandas as pd
