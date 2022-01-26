@@ -258,8 +258,8 @@ strss_bot_tens = mapdl.get_value(entity="ELEM",
 # with following settings below:
 
 # Define the names of the rows.
-row_names = ["StressBEND,Bot, psi",
-             "StressBEND,Top, psi"]
+row_names = ['$$Stress - \sigma_{\mathrm{(B,Bot)}},\,psi$$',
+             '$$Stress - \sigma_{\mathrm{(B,Top)}},\,psi$$']
 
 # Define the names of the columns.
 col_names = ['Target',
@@ -280,6 +280,7 @@ main_columns = {
 }
 
 # Create and fill the output dataframe with pandas.
-df2 = pd.DataFrame(main_columns, index=row_names)
+df2 = pd.DataFrame(main_columns, index=row_names).round(1)
 
+# Apply settings for the dataframe.
 df2.head()
