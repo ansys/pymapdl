@@ -16,6 +16,10 @@ COMMANDS_TO_NOT_BE_CONVERTED = {
     'INT1'
 }
 
+FORMAT_OPTIONS = {'select': 'W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403',
+'max-line-length': 100}
+
+
 def convert_script(
     filename_in,
     filename_out,
@@ -27,7 +31,9 @@ def convert_script(
     use_function_names=True,
     show_log = False,
     add_imports = True,
-    comment_solve = False
+    comment_solve = False,
+    format_output = True,
+    header = True
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -73,10 +79,20 @@ def convert_script(
 
         This option is useful if you are planning to use the output
         script from another mapdl session. See examples section.
+        This option overrides ``'auto_exit'``.
 
     comment_solve : bool, optional
         If ``True``, it will pythonically comment the lines with
         contains ``mapdl.solve`` or ``/EOF``.
+
+    format_output : bool, optional
+        If ``True`` the output is formated using ``autopep8`` before
+        writing the file or returning the string.
+
+    header : bool, optional
+        If ``True``, the default header is written in the first line
+        of the output. If a string is provided, this string will be
+        used as header.
 
     Returns
     -------
@@ -90,7 +106,7 @@ def convert_script(
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
     # Converting a script and using it already in the same session.
-    # For this case, tt is recommended to use ``convert_apdl_block`` 
+    # For this case, it is recommended to use ``convert_apdl_block`` 
     # from ``converter``module since you do not have to write the file.
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
@@ -117,7 +133,9 @@ def convert_script(
                         use_function_names=use_function_names,
                         show_log=show_log,
                         add_imports = add_imports,
-                        comment_solve = comment_solve
+                        comment_solve = comment_solve,
+                        format_output = format_output,
+                        header = header
                           )
 
     translator.save(filename_out)
@@ -133,7 +151,9 @@ def convert_apdl_block(apdl_strings,
             use_function_names=True,
             show_log=False,
             add_imports = True,
-            comment_solve = False):
+            comment_solve = False,
+            format_output = True,
+            header=True):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -178,10 +198,20 @@ def convert_apdl_block(apdl_strings,
 
         This option is useful if you are planning to use the output
         script from another mapdl session. See examples section.
+        This option overrides ``'auto_exit'``.
 
     comment_solve : bool, optional
         If ``True``, it will pythonically comment the lines with
         contains ``mapdl.solve`` or ``/EOF``.
+
+    format_output : bool, optional
+        If ``True`` the output is formated using ``autopep8`` before
+        writing the file or returning the string.
+
+    header : bool, optional
+        If ``True``, the default header is written in the first line
+        of the output. If a string is provided, this string will be
+        used as header.
 
     Returns
     -------
@@ -198,6 +228,8 @@ def convert_apdl_block(apdl_strings,
     >>> filename = in_file.split('\\')[-1]
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
     >>> cmds = convert_apdl_block(file, out_file, line_ending='\n')
+    >>> # Do any change in the text, for example:
+    >>> cmds = cmds.replace('solve', '!solve')
     >>> mapdl = launch_mapdl()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
 
@@ -210,9 +242,11 @@ def convert_apdl_block(apdl_strings,
     exec_file=exec_file,
     macros_as_functions=macros_as_functions,
     use_function_names=use_function_names,
-    show_log=show_log
+    show_log=show_log,
     add_imports = add_imports,
-    comment_solve = comment_solve)
+    comment_solve = comment_solve,
+    format_output = format_output,
+    header = header)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
@@ -228,7 +262,9 @@ def _convert(apdl_strings,
             use_function_names=True,
             show_log=False,
             add_imports = True,
-            comment_solve = False
+            comment_solve = False,
+            format_output = True,
+            header = True,
              ):
 
     translator = FileTranslator(
@@ -239,16 +275,26 @@ def _convert(apdl_strings,
         use_function_names=use_function_names,
         show_log=show_log,
         add_imports = add_imports,
-        comment_solve = comment_solve
+        comment_solve = comment_solve,
+        format_output = format_output,
+        header = header
     )
 
     if isinstance(apdl_strings, str):
+        # os.linesep does not work very good, so we are making sure
+        # the line separation is appropriate.
+        if translator.line_ending not in apdl_strings:
+            if '\r\n' in apdl_strings:
+                translator.line_ending = '\r\n'
+            elif '\n' in apdl_strings:
+                translator.line_ending = '\n'
+
         apdl_strings = apdl_strings.split(translator.line_ending)
 
     for line in apdl_strings:
         translator.translate_line(line)
 
-    if auto_exit:
+    if auto_exit and add_imports:
         translator.write_exit()
     return translator
 
@@ -288,7 +334,9 @@ class FileTranslator:
         use_function_names=True,
         show_log=False,
         add_imports = True,
-        comment_solve = False
+        comment_solve = False,
+        format_output = True,
+        header = True,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -303,6 +351,8 @@ class FileTranslator:
         self.comment = ""
         self._add_imports = add_imports
         self._comment_solve = comment_solve
+        self.format_output = format_output
+        self._header = header
 
         self.write_header()
         if self._add_imports:
@@ -335,14 +385,40 @@ class FileTranslator:
         self._block_current_cmd = None
 
     def write_header(self):
-        header = f'"""Script generated by ansys-mapdl-core version {__version__}"""'
-        self.lines.append(header)
+        if isinstance(self._header, bool):
+            if self._header:
+                header = f'"""Script generated by ansys-mapdl-core version {__version__}"""'
+                self.lines.append(header)
+        elif isinstance(self._header, str):
+            self.lines.append(f'"""{self._header}"""')
+
+        else:
+            raise TypeError("The keyword argument 'header' should be a string or a boolean.")
 
     def write_exit(self):
-        if self._add_imports:
-            self.lines.append(f"{self.obj_name}.exit()")
+        self.lines.append(f"{self.obj_name}.exit()")
 
-    def save(self, filename):
+    def _has_autopep8(self):
+        try:
+            import autopep8
+            return True
+        except ModuleNotFoundError:
+            return False
+
+    def format_using_autopep8(self, text=None):
+        if self._has_autopep8 and self.format_output:
+            import autopep8
+
+            if not text:
+                text = self.line_ending.join(self.lines)
+                self.lines = autopep8.fix_code(text).splitlines()
+
+            else:
+                # Developing purposes
+                return autopep8.fix_code(text)
+
+
+    def save(self, filename, format_autopep8=True):
         """Saves lines to file"""
         if os.path.isfile(filename):
             os.remove(filename)
@@ -350,6 +426,9 @@ class FileTranslator:
         # Making sure we write python string with double slash.
         # We are not expecting other type of unicode symbols.
         self.lines = [each_line.replace('\\', '\\\\') for each_line in self.lines]
+
+        #Trying to format the file using AutoPEP8
+        self.format_using_autopep8()
 
         with open(filename, "w") as f:
             f.write(self.line_ending.join(self.lines))
@@ -379,9 +458,9 @@ class FileTranslator:
     def translate_line(self, line):
         """Converts a single line from an ANSYS APDL script"""
         self.comment = ""
+        original_line = line.replace('\r\n','').replace('\n','')  # It is needed for the nblock, eblock since they have spaces before the numbers
         line = line.strip()
         line = line.replace('"', "'")
-        line = line.replace(r'\', r'\\')
         if self._in_block:
             self._block_count += 1
 
@@ -410,9 +489,15 @@ class FileTranslator:
 
         cmd_ = line.split(',')[0].upper()
 
+        if cmd_[:4] in ['SOLV', 'LSSO'] and self._comment_solve:
+            self.store_command('com', ["The following line has been commented on purpose:"])
+            self.store_command('com', [line])
+            return
+
         if cmd_[:4] == '/COM':
             # It is a comment
-            self.store_command('com', line[5:])
+            self.store_command('com', [line[5:]])
+            return
 
         if cmd_ == '*DO':
             self.start_non_interactive()
@@ -432,7 +517,7 @@ class FileTranslator:
         if self.output_to_default(line):
             self.end_non_interactive()
             self.store_run_command(line)
-            self.store_run_command('/GOPR')
+            self.store_run_command('/GOPR') # Adding gopr to ensure printing out
             return
 
         if cmd_ == '/VERIFY':
@@ -536,30 +621,37 @@ class FileTranslator:
 
         # check valid command
         if command not in self._valid_commands:
-            if line[:4].upper() == "*CRE":  # creating a function
+            cmd = line[:4].upper()
+            if cmd == "*CRE":  # creating a function
                 if self.macros_as_functions:
                     self.start_function(items[1].strip())
                     return
                 else:
                     self.start_non_interactive()
-            elif line[:4].upper() in self._non_interactive_commands:
-                if line[:4].upper() in self._block_commands:
+
+            elif cmd in self._non_interactive_commands:
+                if cmd in self._block_commands:
                     self._in_block = True
                     self._block_count = 0
                     self._block_count_target = 0
 
-                elif line[:4].upper() in self._enum_block_commands:
+                elif cmd in self._enum_block_commands:
                     self._in_block = True
                     self._block_count = 0
-                    if line[:4].upper() == 'CMBL': # In cmblock
+                    if cmd == 'CMBL': # In cmblock
                         # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
                         numitems = int(line.split(',')[3])
                         _block_count_target = numitems//8 + 1 if numitems%8 != 0 else numitems//8
                         self._block_count_target = _block_count_target + 2 # because the cmd line and option line.
 
-                self._block_current_cmd = line[:4].upper()
+                self._block_current_cmd = cmd
                 self.start_non_interactive()
-            self.store_run_command(line)
+
+            if self._in_block and cmd not in self._non_interactive_commands:
+                self.store_run_command(original_line)
+            else:
+                self.store_run_command(line)
+
         elif self.use_function_names:
             self.store_command(command, parameters)
         else:
