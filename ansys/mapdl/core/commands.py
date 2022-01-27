@@ -661,7 +661,7 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
             if line:
                 items = BC_REGREP.findall(line)
                 if items:
-                    parsed_lines.append(items)
+                    parsed_lines.append(list(items[0]))
 
         return parsed_lines
 
