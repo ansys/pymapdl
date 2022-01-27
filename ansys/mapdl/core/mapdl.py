@@ -448,7 +448,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
 
     class _chain_commands:
