@@ -51,8 +51,7 @@ jobs:
       - name: Unit Testing
         run: |
           pip install -r requirements_test.txt
-          pip install pytest-azurepipelines
-          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display MAPDL Logs
         if: always()
