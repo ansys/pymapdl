@@ -2747,7 +2747,7 @@ class _MapdlCore(Commands):
         """Wraps cwd"""
         returns_ = super().cwd( *args, **kwargs)
 
-        if returns_: # if sucessfull, it should be none.
+        if returns_: # if successful, it should be none.
             if '*** WARNING ***' in self._response:
                 warn('\n' + self._response)
 
