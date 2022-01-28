@@ -1,6 +1,4 @@
 import os
-import re
-from black import out
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -126,7 +124,7 @@ aa = 1
 APDL_MACRO = """
 /PREP7
 *CREATE,SLV
-/SOLU 
+/SOLU
 ACEL,,386
 aa = ARG1
 KBC,1 ! STEP BOUNDARY CONDITION
@@ -245,7 +243,7 @@ def test_com():
 
 
 def test_do_loops():
-    cmd= """*do,1,1,10
+    cmd = """*do,1,1,10
 /prep7
 *enddo
 /com, asdf
@@ -288,7 +286,7 @@ def test_no_macro_as_functions():
 
 def test_format_ouput():
     """Just testing it runs"""
-    non_formated="""def(a,b):
+    non_formated = """def(a,b):
 return a + b"""
     assert isinstance(FileTranslator().format_using_autopep8(non_formated), str)
 

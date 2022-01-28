@@ -1,9 +1,6 @@
 import os
-import re
 from warnings import warn
 from logging import Logger, StreamHandler
-
-from importlib_metadata import re
 
 from ansys.mapdl.core import __version__
 from ansys.mapdl.core.misc import is_float
@@ -106,7 +103,7 @@ def convert_script(
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
     # Converting a script and using it already in the same session.
-    # For this case, it is recommended to use ``convert_apdl_block`` 
+    # For this case, it is recommended to use ``convert_apdl_block``
     # from ``converter``module since you do not have to write the file.
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
@@ -406,8 +403,12 @@ class FileTranslator:
             return False
 
     def format_using_autopep8(self, text=None):
-        if self._has_autopep8 and self.format_output:
-            import autopep8
+        if self.format_output:
+
+            try:
+                import autopep8
+            except ModuleNotFoundError:
+                return
 
             if not text:
                 text = self.line_ending.join(self.lines)
