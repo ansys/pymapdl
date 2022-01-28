@@ -288,7 +288,11 @@ def test_format_ouput():
     """Just testing it runs"""
     non_formated = """def(a,b):
 return a + b"""
-    assert isinstance(FileTranslator().format_using_autopep8(non_formated), str)
+    converted = FileTranslator().format_using_autopep8(non_formated)
+    if converted:
+        assert isinstance(converted, str)
+    else:
+        assert converted is None
 
 
 def test_header_error():

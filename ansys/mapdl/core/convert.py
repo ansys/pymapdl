@@ -1,4 +1,5 @@
 import os
+import re
 from warnings import warn
 from logging import Logger, StreamHandler
 
@@ -280,7 +281,8 @@ def _convert(apdl_strings,
     if isinstance(apdl_strings, str):
         # os.linesep does not work very good, so we are making sure
         # the line separation is appropriate.
-        if translator.line_ending not in apdl_strings:
+        regx =  f"[^\\r]({translator.line_ending})"
+        if re.search(regx, apdl_strings):
             if '\r\n' in apdl_strings:
                 translator.line_ending = '\r\n'
             elif '\n' in apdl_strings:
