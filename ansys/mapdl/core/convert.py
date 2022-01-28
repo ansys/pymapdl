@@ -103,6 +103,8 @@ def convert_script(
     >>> from ansys.mapdl.core import examples
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
+    Notes
+    -----
     # Converting a script and using it already in the same session.
     # For this case, it is recommended to use ``convert_apdl_block``
     # from ``converter``module since you do not have to write the file.
