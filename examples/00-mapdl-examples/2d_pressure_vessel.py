@@ -2,7 +2,7 @@
 .. _2d_pressure_vessel_example:
 
 2D Pressure Vessel
----------------
+------------------
 This example demonstrates how to create a basic pressure vessel and
 apply a pressure to it.
 
