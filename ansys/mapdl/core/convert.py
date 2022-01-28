@@ -282,7 +282,7 @@ def _convert(apdl_strings,
         # os.linesep does not work very good, so we are making sure
         # the line separation is appropriate.
         regx =  f"[^\\r]({translator.line_ending})"
-        if re.search(regx, apdl_strings):
+        if not re.search(regx, apdl_strings):
             if '\r\n' in apdl_strings:
                 translator.line_ending = '\r\n'
             elif '\n' in apdl_strings:
