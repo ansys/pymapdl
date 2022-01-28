@@ -395,13 +395,6 @@ class FileTranslator:
     def write_exit(self):
         self.lines.append(f"{self.obj_name}.exit()")
 
-    def _has_autopep8(self):
-        try:
-            import autopep8
-            return True
-        except ModuleNotFoundError:
-            return False
-
     def format_using_autopep8(self, text=None):
         if self.format_output:
 
