@@ -1,5 +1,6 @@
 import os
 import re
+from black import out
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -39,33 +40,34 @@ cmblock = """CMBLOCK,PRESSURE_AREAS,NODE,    48
 pynblock = """with mapdl.non_interactive:
     mapdl.run("nblock,3,,326253")
     mapdl.run("(1i9,3e20.9e3)")
-    mapdl.run("1     3.352881632E-03     1.110639271E-02     5.172433282E-03")
-    mapdl.run("2     3.485685736E-03     1.110981270E-02     4.999255638E-03")
-    mapdl.run("3     3.615164748E-03     1.111323677E-02     4.823719994E-03")
-    mapdl.run("4     3.673859471E-03     1.111439119E-02     4.740300611E-03")
-    mapdl.run("5     3.709417144E-03     1.111407057E-02     4.691582629E-03")"""
+    mapdl.run("        1     3.352881632E-03     1.110639271E-02     5.172433282E-03")
+    mapdl.run("        2     3.485685736E-03     1.110981270E-02     4.999255638E-03")
+    mapdl.run("        3     3.615164748E-03     1.111323677E-02     4.823719994E-03")
+    mapdl.run("        4     3.673859471E-03     1.111439119E-02     4.740300611E-03")
+    mapdl.run("        5     3.709417144E-03     1.111407057E-02     4.691582629E-03")
+    mapdl.run("-1")"""
 
 pyeblock = """with mapdl.non_interactive:
     mapdl.run("eblock,19,solid,,6240")
     mapdl.run("(19i9)")
-    mapdl.run("1        1        1        1        0        0        0        0       20        0    38161   186586   186589   192999   193065   191265   191262   193063   193064")
-    mapdl.run("194712   194731   213866   194716   210305   210306   213993   210310   194715   194730   213865   213995")
-    mapdl.run("1        1        1        1        0        0        0        0       20        0    38162   186586   193065   192999   186589   186781   193066   192935   186784")
-    mapdl.run("194716   213866   194731   194712   195560   213737   195572   195557   194714   213997   213736   194729")
-    mapdl.run("1        1        1        1        0        0        0        0       20        0    38163   186781   193066   192935   186784   186976   193067   192871   186979")
-    mapdl.run("195560   213737   195572   195557   196210   213608   196222   196207   195559   213998   213607   195571")
-    mapdl.run("1        1        1        1        0        0        0        0       20        0    38164   186976   193067   192871   186979   187171   193068   192807   187174")
-    mapdl.run("196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221")"""
+    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38161   186586   186589   192999   193065   191265   191262   193063   193064")
+    mapdl.run("   194712   194731   213866   194716   210305   210306   213993   210310   194715   194730   213865   213995")
+    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38162   186586   193065   192999   186589   186781   193066   192935   186784")
+    mapdl.run("   194716   213866   194731   194712   195560   213737   195572   195557   194714   213997   213736   194729")
+    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38163   186781   193066   192935   186784   186976   193067   192871   186979")
+    mapdl.run("   195560   213737   195572   195557   196210   213608   196222   196207   195559   213998   213607   195571")
+    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38164   186976   193067   192871   186979   187171   193068   192807   187174")
+    mapdl.run("   196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221")"""
 
 pycmblock = """with mapdl.non_interactive:
     mapdl.run("CMBLOCK,PRESSURE_AREAS,NODE,    48")
     mapdl.run("(8i10)")
-    mapdl.run("1688      1689      1690      1691      1700      1701      1702      1703")
-    mapdl.run("1704      1705      1706      1707      1708      1709      1710      1711")
-    mapdl.run("1712      1721      1723      1731      1736      1754      1755      1756")
-    mapdl.run("1757      1758      1759      1760      1761      1762      1763      1764")
-    mapdl.run("1765      1766      1767      1768      1769      1802      1803      1804")
-    mapdl.run("1805      1806      1807      1808      1809      1831      1832      1833")"""
+    mapdl.run("      1688      1689      1690      1691      1700      1701      1702      1703")
+    mapdl.run("      1704      1705      1706      1707      1708      1709      1710      1711")
+    mapdl.run("      1712      1721      1723      1731      1736      1754      1755      1756")
+    mapdl.run("      1757      1758      1759      1760      1761      1762      1763      1764")
+    mapdl.run("      1765      1766      1767      1768      1769      1802      1803      1804")
+    mapdl.run("      1805      1806      1807      1808      1809      1831      1832      1833")"""
 
 
 block_commands = ['nblock', 'eblock', 'cmblock']
@@ -77,7 +79,7 @@ APDL_CMDS = """
 /CLE,NOSTART
 FINISH,
 /PREP7
-
+!comment
 /SOLU,
 /COM,Time step: 1
 ACEL,0.0,9.80665,0.0
@@ -96,6 +98,29 @@ SOLVE,
 /POST1,
 SET,last,,,,,,,
 LSSOLVE
+/out,test,inp !testing *get insider non_interactive
+*get,dummy,node,0,u,x
+/out
+!testing if
+aa = 1
+*if,aa,eq,1
+/prep7
+*endif
+
+! comment
+! empty line
+/prep7
+
+!testing
+/out,term
+
+*cfopen
+*cfclos
+
+/prep7
+
+!non accepted command
+/test
 """
 
 APDL_MACRO = """
@@ -103,6 +128,7 @@ APDL_MACRO = """
 *CREATE,SLV
 /SOLU 
 ACEL,,386
+aa = ARG1
 KBC,1 ! STEP BOUNDARY CONDITION
 D,1,UZ,,,2
 D,1,UX,,,,,UY
@@ -253,3 +279,20 @@ def test_detect_line_ending(ending):
     assert ending in convert_apdl_block(f'/com First line{ending}/com Second line', header=False, add_imports=False, line_ending='\r\n')
 
 
+def test_no_macro_as_functions():
+    output = convert_apdl_block(APDL_MACRO, macros_as_functions=False, add_imports=False, header=False)
+    assert 'with mapdl.non_interactive' in output
+    assert '    mapdl.run("*CREATE,SLV")' in output
+    assert '    mapdl.run("*END")' in output
+
+
+def test_format_ouput():
+    """Just testing it runs"""
+    non_formated="""def(a,b):
+return a + b"""
+    assert isinstance(FileTranslator().format_using_autopep8(non_formated), str)
+
+
+def test_header_error():
+    with pytest.raises(TypeError):
+        convert_apdl_block("asdf", header=2)
