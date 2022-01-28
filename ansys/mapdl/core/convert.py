@@ -98,21 +98,20 @@ def convert_script(
     >>> from ansys.mapdl.core import examples
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
-    Notes
-    -----
-    # Converting a script and using it already in the same session.
-    # For this case, it is recommended to use ``convert_apdl_block``
-    # from ``converter``module since you do not have to write the file.
+    Converting a script and using it already in the same session.
+    For this case, it is recommended to use ``convert_apdl_block``
+    from ``converter``module since you do not have to write the file.
+
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
     >>> from ansys.mapdl.core import convert_script
     >>> in_file = examples.vmfiles['vm10']
     >>> filename = in_file.split('\\')[-1]
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
-    >>> output = convert_script(file, out_file, line_ending='\n')
+    >>> output = convert_script(file, out_file, line_ending='\\n')
     >>> mapdl = launch_mapdl()
     >>> with open(out_file, 'r') as fid:
-            cmds = fid.read()
+    ...    cmds = fid.read()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
 
     """
