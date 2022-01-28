@@ -43,6 +43,7 @@ def general_plotter(
     text_color=None,
     theme=None,
     return_plotter=False,
+    return_cpos = False
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -158,6 +159,9 @@ def general_plotter(
         Return the plotting object rather than showing the plot and
         returning the camera position.  Default ``False``.
 
+    return_cpos : bool, optional
+        Returns the camera position as an array. Default ``False``.
+
     Returns
     -------
     cpos or pyvista.Plotter
@@ -268,6 +272,20 @@ def general_plotter(
     if title:
         pl.add_title(title)
 
+    returns_parameter = []
+    if return_plotter:
+        returns_parameter.append(pl)
+    if return_cpos:
+        returns_parameter.append(pl.camera_position)
+
+    if not returns_parameter:
+        returns_parameter = None
+    else:
+        if len(returns_parameter) == 1:
+            returns_parameter = returns_parameter[0]
+        else:
+            returns_parameter = tuple(returns_parameter)
+
     # permit user to save the figure as a screenshot
     if savefig:
         pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
@@ -275,14 +293,14 @@ def general_plotter(
 
         # return unclosed plotter
         if return_plotter:
-            return pl
+            return returns_parameter
 
         # if not returning plotter, close right away
         pl.close()
 
     elif return_plotter:
-        return pl
+        return returns_parameter
     else:
         pl.show()
 
-    return pl.camera_position
+    return returns_parameter
