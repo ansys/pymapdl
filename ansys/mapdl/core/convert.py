@@ -417,7 +417,6 @@ class FileTranslator:
                 # Developing purposes
                 return autopep8.fix_code(text)
 
-
     def save(self, filename, format_autopep8=True):
         """Saves lines to file"""
         if os.path.isfile(filename):
@@ -458,7 +457,7 @@ class FileTranslator:
     def translate_line(self, line):
         """Converts a single line from an ANSYS APDL script"""
         self.comment = ""
-        original_line = line.replace('\r\n','').replace('\n','')  # It is needed for the nblock, eblock since they have spaces before the numbers
+        original_line = line.replace('\r\n', '').replace('\n', '')  # It is needed for the nblock, eblock since they have spaces before the numbers
         line = line.strip()
         line = line.replace('"', "'")
         if self._in_block:
@@ -504,7 +503,7 @@ class FileTranslator:
             self.store_run_command(line)
             return
 
-        if cmd_ == '*ENDDO':
+        if cmd_ == '*ENDDO' or cmd_ == '*ENDIF':
             self.store_run_command(line)
             self.end_non_interactive()
             return
@@ -515,9 +514,9 @@ class FileTranslator:
             return
 
         if self.output_to_default(line):
-            self.end_non_interactive()
             self.store_run_command(line)
             self.store_run_command('/GOPR') # Adding gopr to ensure printing out
+            self.end_non_interactive()
             return
 
         if cmd_ == '/VERIFY':
