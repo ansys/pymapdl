@@ -83,7 +83,7 @@ def convert_script(
         contains ``mapdl.solve`` or ``/EOF``.
 
     format_output : bool, optional
-        If ``True`` the output is formated using ``autopep8`` before
+        If ``True`` the output is formatted using ``autopep8`` before
         writing the file or returning the string.
 
     header : bool, optional
@@ -202,7 +202,7 @@ def convert_apdl_block(apdl_strings,
         contains ``mapdl.solve`` or ``/EOF``.
 
     format_output : bool, optional
-        If ``True`` the output is formated using ``autopep8`` before
+        If ``True`` the output is formatted using ``autopep8`` before
         writing the file or returning the string.
 
     header : bool, optional
