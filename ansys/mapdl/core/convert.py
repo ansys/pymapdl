@@ -67,14 +67,9 @@ def convert_script(
         Python module).
 
     add_imports : bool, optional
-        If ``True``, it add the next lines to the beginning of the
-        output file:
-
-        .. code:: python
-
-           from ansys.mapdl.core import launch_mapdl
-           mapdl = launch_mapdl(loglevel="WARNING")
-
+        If ``True``, it add the lines ``rom ansys.mapdl.core import launch_mapdl``
+        and ``mapdl = launch_mapdl(loglevel="WARNING")``to the beginning of the
+        output file.
         This option is useful if you are planning to use the output
         script from another mapdl session. See examples section.
         This option overrides ``'auto_exit'``.
