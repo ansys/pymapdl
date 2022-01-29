@@ -15,13 +15,13 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             node number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             key as to information needed about the node.
 
             *  DB_SELECTED    - return select status:
@@ -98,13 +98,13 @@ class inq_function:
 
         Parameters
         ----------
-        ielem  :  int
+        ielem : int
             Element number.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, ``DB_MAXRECLENG``,
             or 199
 
-        key  :  int
+        key : int
             information flag.
 
             *  DB_SELECTED    - return select status:                (1)
@@ -177,78 +177,78 @@ class inq_function:
 
         Parameters
         ----------
-        knmi  :  int
+        knmi : int
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  int
+        key : int
             Information flag.
 
-            *  1 - return select
+            * 1 - return select
 
               *  -1 - unselected
               *   0 - undefined
               *   1 - selected
 
-            *  2 - return length (data units)
-            *  3 - return layer number
+            * 2 - return length (data units)
+            * 3 - return layer number
               (for cross reference files return
               number of entities)
-            *  4 - return address of first data word
-            *  5 - return length (in record type units)
-            *  6 - return compressed record number.
-            *  11 - return void percent (integer)
-            *  12 - return number of defined
-            *  13 - return number of selected
-            *  14 - return highest number defined
-            *  15 - return maximum record length
+            * 4 - return address of first data word
+            * 5 - return length (in record type units)
+            * 6 - return compressed record number.
+            * 11 - return void percent (integer)
+            * 12 - return number of defined
+            * 13 - return number of selected
+            * 14 - return highest number defined
+            * 15 - return maximum record length
               (data units)
-            *  16 - return location of next record
+            * 16 - return location of next record
               (this increments the next
               record count)
-            *  18 - return type of file.
+            * 18 - return type of file.
 
-              *  0 - integer
-              *  1 - double precision
-              *  2 - real
-              *  3 - complex
-              *  4 - character\*8
-              *  7 - index
+              * 0 - integer
+              * 1 - double precision
+              * 2 - real
+              * 3 - complex
+              * 4 - character\*8
+              * 7 - index
 
-            *  19 - return virtual type of file.
+            * 19 - return virtual type of file.
 
-              *  0 - fixed length (4.4 form)
-              *  1 - indexed variable length
+              * 0 - fixed length (4.4 form)
+              * 1 - indexed variable length
                 (layer data)
-              *  2 - xref data tables
-              *  3 - bitmap data (for 32 data
+              * 2 - xref data tables
+              * 3 - bitmap data (for 32 data
                 item packed records)
-              *  4 - data tables (three
+              * 4 - data tables (three
                 dimensional arrays)
 
-            *  -1, material number
-            *  -2, type
-            *  -3, real number
-            *  -4, node number, if meshed
-            *  -5, pointer to attached point
-            *  -6, esys number
-            *  -7, element number, if meshed
-            *  -8, Hardpoint stuff
-            *  -9, area number associated with hardpoint
-            *  -10, line number associated with hardpoint
-            *  -11, Orientation kp flag
-            *  -12, local integer workspace
-            *  -101, pointer to keypoint data
-            *  -102, pointer to keypoint fluences
-            *  -103, pointer to keypoint moisture content
-            *  -104, pointer to keypoint voltage
-            *  -105, pointer to keypoint current density
-            *  -106, pointer to keypoint heat generations
-            *  -107, pointer to keypoint virtual displacements
-            *  -108, pointer to parameter data
-            *  -109, pointer to keypoint temperatures
-            *  -110, pointer to keypoint displacements
-            *  -111, pointer to keypoint forces
-            *  -112, pointer to line list
+            * -1, material number
+            * -2, type
+            * -3, real number
+            * -4, node number, if meshed
+            * -5, pointer to attached point
+            * -6, esys number
+            * -7, element number, if meshed
+            * -8, Hardpoint stuff
+            * -9, area number associated with hardpoint
+            * -10, line number associated with hardpoint
+            * -11, Orientation kp flag
+            * -12, local integer workspace
+            * -101, pointer to keypoint data
+            * -102, pointer to keypoint fluences
+            * -103, pointer to keypoint moisture content
+            * -104, pointer to keypoint voltage
+            * -105, pointer to keypoint current density
+            * -106, pointer to keypoint heat generations
+            * -107, pointer to keypoint virtual displacements
+            * -108, pointer to parameter data
+            * -109, pointer to keypoint temperatures
+            * -110, pointer to keypoint displacements
+            * -111, pointer to keypoint forces
+            * -112, pointer to line list
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -280,44 +280,44 @@ class inq_function:
 
         Parameters
         ----------
-        lnmi  :  int
+        lnmi : int
             Line segment for inquire. It should be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             key as to information needed about the ``lnmi``.
 
-            *   1, return select
-            *   2, return length (data units)
-            *   3,
-            *  11, return void percent (integer)
-            *  12  return number of defined
-            *  13, return number of selected
-            *  14, return highest number defined
-            *  15, return maximum record length
+            * 1, return select
+            * 2, return length (data units)
+            * 3,
+            * 11, return void percent (integer)
+            * 12  return number of defined
+            * 13, return number of selected
+            * 14, return highest number defined
+            * 15, return maximum record length
               (data units)
-            *  16, return location of next record
+            * 16, return location of next record
               (this increments the next
               record count)
-            *  17, return next record from offset
-            *  -1, material number
-            *  -2, type
-            *  -3, real number
-            *  -4, number of nodes
-            *  -5, esys number
-            *  -6, number of elements
-            *  -7, pointer to line in foreign db
-            *  -8, # of elem divs in existing mesh
-            *  -9, keypoint 1
-            *  -10, keypoint 2
-            *  -11, color,translucency packed
-            *  -12, local integer workspace
+            * 17, return next record from offset
+            * -1, material number
+            * -2, type
+            * -3, real number
+            * -4, number of nodes
+            * -5, esys number
+            * -6, number of elements
+            * -7, pointer to line in foreign db
+            * -8, # of elem divs in existing mesh
+            * -9, keypoint 1
+            * -10, keypoint 2
+            * -11, color,translucency packed
+            * -12, local integer workspace
               (used in delete with sweeps)
-            *  -13, orientation kpa
-            *  -14, orientation kpb
-            *  -15, section id
-            *  -16, # of elem divs for next mesh
-            *  -17, 0=hard / 1=soft NDIV
-            *  -18, 0=hard / 1=soft SPACE
+            * -13, orientation kpa
+            * -14, orientation kpb
+            * -15, section id
+            * -16, # of elem divs for next mesh
+            * -17, 0=hard / 1=soft NDIV
+            * -18, 0=hard / 1=soft SPACE
             * -101, pointer to line segment data
             * -102,
             * -103,
@@ -369,59 +369,59 @@ class inq_function:
 
         Parameters
         ----------
-        anmi  :  int
+        anmi : int
             Area for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             Key as to information needed about the ``anmi``.
 
-            *   1, return select
-            *   2, return length (data units)
-            *   3,
-            *  11, return void percent (integer)
-            *  12  return number of defined
-            *  13, return number of selected
-            *  14, return highest number defined
-            *  15, return maximum record length
+            * 1, return select
+            * 2, return length (data units)
+            * 3,
+            * 11, return void percent (integer)
+            * 12  return number of defined
+            * 13, return number of selected
+            * 14, return highest number defined
+            * 15, return maximum record length
               (data units)
-            *  16, return next record
+            * 16, return next record
               (this increments the next record count)
-            *  -1, material
-            *  -2, type.
-            *  -3, real.
-            *  -4, number of nodes.
-            *  -5,
-            *  -6, number of elements.
-            *  -7, pointer to area in foreign db
-            *  -8, element shape.
-            *  -9, mid-node element key.
-            *  -10, element coordinate system.
-            *  -11, area constraint information.
-            *  0 - no constraint on this area.
-            *  1 - symmetry constraint.
-            *  2 - anti-symmetry
-            *  3 - both symmetry and anti-symmetry
-            *  -12, local integer workspace
-            *  -13,
-            *  -14,
-            *  -15, section
-            *  -16, color and translucency packed.
-            *  -101, pointer to area data
-            *  -102,
-            *  -103,
-            *  -104,
-            *  -105, pointer to node list.
-            *  -106, pointer to parameter data
-            *  -107, pointer to element list.
-            *  -108,
-            *  -109,
-            *  -110,
-            *  -111,
-            *  -112, pointer to line loop list
-            *  -113, pointer to volume xref
-            *  -114, pointer to sub-area list
-            *  -115, pointer to area presaraes
-            *  -116, pointer to area convections
+            * -1, material
+            * -2, type.
+            * -3, real.
+            * -4, number of nodes.
+            * -5,
+            * -6, number of elements.
+            * -7, pointer to area in foreign db
+            * -8, element shape.
+            * -9, mid-node element key.
+            * -10, element coordinate system.
+            * -11, area constraint information.
+            * 0 - no constraint on this area.
+            * 1 - symmetry constraint.
+            * 2 - anti-symmetry
+            * 3 - both symmetry and anti-symmetry
+            * -12, local integer workspace
+            * -13,
+            * -14,
+            * -15, section
+            * -16, color and translucency packed.
+            * -101, pointer to area data
+            * -102,
+            * -103,
+            * -104,
+            * -105, pointer to node list.
+            * -106, pointer to parameter data
+            * -107, pointer to element list.
+            * -108,
+            * -109,
+            * -110,
+            * -111,
+            * -112, pointer to line loop list
+            * -113, pointer to volume xref
+            * -114, pointer to sub-area list
+            * -115, pointer to area presaraes
+            * -116, pointer to area convections
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -432,7 +432,7 @@ class inq_function:
         Returns
         -------
         int or str
-            For key=1
+            For ``key=1``:
 
             * 0 = ``anmi`` is undefined.
             * -1 = ``anmi`` is unselected.
@@ -456,45 +456,45 @@ class inq_function:
 
         Parameters
         ----------
-        vnmi  :  int
+        vnmi : int
             Volume for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             Key as to information needed about the ``vnmi``.
 
-            *   1, return select
-            *   2, return length (data units)
-            *   3,
-            *  11, return void percent (integer)
-            *  12  return number of defined
-            *  13, return number of selected
-            *  14, return highest number defined
-            *  15, return maximum record length (data units)
-            *  16, return next record
-            *  -1, material
-            *  -2, type.
-            *  -3, real.
-            *  -4, number of nodes.
-            *  -5, KZ1 - 1st kpt for elem Z
-            *  -6, number of elements.
-            *  -7, pointer to volume in foreign db
-            *  -8, element shape.
-            *  -9, (section id)\*10 + 2
-            *  -10, element coordinate system.
-            *  -11, KZ2 - 2nd kpt for elem Z
-            *  -12, color and translucancy packed
-            *  -101, pointer volume data file.
-            *  -102,
-            *  -103,
-            *  -104,
-            *  -105, pointer to node list.
-            *  -106, pointer to volume pvolmeter dat
-            *  -107, pointer to element list.
-            *  -108,
-            *  -109,
-            *  -110, pointer to sub-volume list
-            *  -111,
-            *  -112, pointer to area shell list
+            * 1, return select
+            * 2, return length (data units)
+            * 3,
+            * 11, return void percent (integer)
+            * 12  return number of defined
+            * 13, return number of selected
+            * 14, return highest number defined
+            * 15, return maximum record length (data units)
+            * 16, return next record
+            * -1, material
+            * -2, type.
+            * -3, real.
+            * -4, number of nodes.
+            * -5, KZ1 - 1st kpt for elem Z
+            * -6, number of elements.
+            * -7, pointer to volume in foreign db
+            * -8, element shape.
+            * -9, (section id)\*10 + 2
+            * -10, element coordinate system.
+            * -11, KZ2 - 2nd kpt for elem Z
+            * -12, color and translucancy packed
+            * -101, pointer volume data file.
+            * -102,
+            * -103,
+            * -104,
+            * -105, pointer to node list.
+            * -106, pointer to volume pvolmeter dat
+            * -107, pointer to element list.
+            * -108,
+            * -109,
+            * -110, pointer to sub-volume list
+            * -111,
+            * -112, pointer to area shell list
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -526,27 +526,27 @@ class inq_function:
 
         Parameters
         ----------
-        nreal  :  int
+        nreal : int
             Real constant table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             Information flag.
 
-            *  5 - return number of values stored for nreal.
+            * 5 - return number of values stored for nreal.
               Return the REAL set width (number of fields)
-            *  ``DB_SELECTED``    - return select status
+            * ``DB_SELECTED``    - return select status
 
-              *  0 - real constant table is undefined.
+              * 0 - real constant table is undefined.
               * -1 - real constant table is unselected.
-              *  1 - real constant table is selected
+              * 1 - real constant table is selected
 
-            *  ``DB_NUMDEFINED``  - return number of defined real constant tables
-            *  ``DB_NUMSELECTED`` - return number of selected real constant tables
-            *  ``DB_MAXDEFINED``  - return highest real constant table defined
-            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            * ``DB_NUMDEFINED``  - return number of defined real constant tables
+            * ``DB_NUMSELECTED`` - return number of selected real constant tables
+            * ``DB_MAXDEFINED``  - return highest real constant table defined
+            * ``DB_MAXRECLENG``  - return maximum record length (dp words)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -572,20 +572,20 @@ class inq_function:
 
         Parameters
         ----------
-        ngap  :  int
+        ngap : int
             gap number for inquire (must be zero for now).
 
-        key  :  int
+        key : int
             key as to the information needed
 
-            *   1, return select
-            *   2, return length (data units)
-            *   3,
-            *  11, return void percent (integer)
-            *  12  return number of defined
-            *  13, return number of selected
-            *  14, return highest number defined
-            *  15, return maximum record length (data units)
+            * 1, return select
+            * 2, return length (data units)
+            * 3,
+            * 11, return void percent (integer)
+            * 12  return number of defined
+            * 13, return number of selected
+            * 14, return highest number defined
+            * 15, return maximum record length (data units)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -610,20 +610,20 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number for inquire (must be zero for now).
 
-        key  :  int
+        key : int
             Key as to the information needed
 
-            *   1, return select
-            *   2, return length (data units)
-            *   3,
-            *  11, return void percent (integer)
-            *  12  return number of defined
-            *  13, return number of selected
-            *  14, return highest number defined
-            *  15, return maximum record length (data units)
+            * 1, return select
+            * 2, return length (data units)
+            * 3,
+            * 11, return void percent (integer)
+            * 12  return number of defined
+            * 13, return number of selected
+            * 14, return highest number defined
+            * 15, return maximum record length (data units)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -648,37 +648,37 @@ class inq_function:
 
         Parameters
         ----------
-        nce  :  int
+        nce : int
             Constraint equation number
 
-        key  :  int
+        key : int
             Inquiry key.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-            *  DB_SELECTED    - return select status
+            * DB_SELECTED - return select status
 
-              *  1 - equation is selected
-              *  0 - equation is undefined
+              * 1 - equation is selected
+              * 0 - equation is undefined
               * -1 - equation is unselected
 
-            *  ``DB_NUMDEFINED``  - return number of defined constraint
+            * ``DB_NUMDEFINED``  - return number of defined constraint
               equations.
-            *  ``DB_NUMSELECTED`` - return number of selected constraint
+            * ``DB_NUMSELECTED`` - return number of selected constraint
               equations.
-            *  ``DB_MAXDEFINED``  - return number of highest numbered
+            * ``DB_MAXDEFINED``  - return number of highest numbered
               constraint equation defined.
-            *  ``DB_MAXRECLENG``  - return length of longest constraint
+            * ``DB_MAXRECLENG``  - return length of longest constraint
               equation set (max record length)
-            *   2             - return length (data units)
-            *   3             - return layer number
-            *   4             - address of first data word
-            *   5             - return number of values stored for nce
-            *  11             - return void percent (integer)
-            *  16             - return location of next record
-            *  ``CE_NONLINEAR``   - return 1 if CE is nonlinear
-            *  ``CE_ELEMNUMBER``  - return associated element number
+            * 2 - return length (data units)
+            * 3 - return layer number
+            * 4 - address of first data word
+            * 5 - return number of values stored for nce
+            * 11 - return void percent (integer)
+            * 16 - return location of next record
+            * ``CE_NONLINEAR``   - return 1 if CE is nonlinear
+            * ``CE_ELEMNUMBER``  - return associated element number
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -689,7 +689,7 @@ class inq_function:
         Returns
         -------
         int or str
-            The returned value of ``ceinqr`` is based on setting of key
+            The returned value of ``ceinqr`` is based on setting of key.
         """
         return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
 
@@ -703,32 +703,32 @@ class inq_function:
 
         Parameters
         ----------
-        ncp  :  int
-            Coupled set number
+        ncp : int
+            Coupled set number.
 
-        key  :  int
+        key : int
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
-            *  DB_SELECTED    - return select status
+            * ``DB_SELECTED`` - return select status:
 
-              *  1 - coupled set is selected
-              *  0 - coupled set in undefined
+              * 1 - coupled set is selected
+              * 0 - coupled set in undefined
               * -1 - coupled set in unselected
 
-            *  ``DB_NUMDEFINED``  - return number of defined coupled sets
-            *  ``DB_NUMSELECTED`` - return number of selected coupled sets
-            *  ``DB_MAXDEFINED``  - return the number of the highest numbered
+            * ``DB_NUMDEFINED`` - return number of defined coupled sets
+            * ``DB_NUMSELECTED`` - return number of selected coupled sets
+            * ``DB_MAXDEFINED`` - return the number of the highest numbered
               coupled set
-            *  ``DB_MAXRECLENG``  - return length of largest coupled set record
+            * ``DB_MAXRECLENG`` - return length of largest coupled set record
               (max record length)
-            *   2  - return length (data units)
-            *   3  - return layer number
-            *   4  - return address of first data word
-            *   5  - return number of values stored for ncp
-            *  11  - return void percent (integer)
-            *  16  - return location of next record
-            *  -1  - return master node for this eqn (this is
+            * 2 - return length (data units)
+            * 3 - return layer number
+            * 4 - return address of first data word
+            * 5 - return number of values stored for ncp
+            * 11 - return void percent (integer)
+            * 16 - return location of next record
+            * -1 - return master node for this eqn (this is
               currently only used by solution DB object)
 
         pname : str
@@ -755,22 +755,22 @@ class inq_function:
 
         Parameters
         ----------
-        ncsy  :  int
+        ncsy : int
             Coordinate system reference number
             should be zero for key= ``DB_NUMDEFINED``
             or ``DB_MAXDEFINED``
 
-        key  :  int
+        key : int
             Information flag.
 
-            *  ``DB_SELECTED``    - return status:
+            * ``DB_SELECTED`` - return status:
 
-              *  0 - coordinate system is not defined
-              *  -1 - coordinate system is not selected
-              *  1 - coordinate system is selected
+              * 0 - coordinate system is not defined
+              * -1 - coordinate system is not selected
+              * 1 - coordinate system is selected
 
-            *  ``DB_NUMDEFINED``  - number of defined coordinate systems
-            *  ``DB_MAXDEFINED``  - maximum coordinate system reference
+            * ``DB_NUMDEFINED``  - number of defined coordinate systems
+            * ``DB_MAXDEFINED``  - maximum coordinate system reference
               number used.
 
         pname : str
@@ -796,32 +796,32 @@ class inq_function:
 
         Parameters
         ----------
-        itype  :  int
+        itype : int
             Element type number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-        key  :  int
+        key : int
             Information flag.
 
-            *  DB_SELECTED    - return select status:
+            * DB_SELECTED    - return select status:
 
-              *  0 - element type is undefined.
+              * 0 - element type is undefined.
               * -1 - element type is unselected.
-              *  1 - element type is selected.
+              * 1 - element type is selected.
 
-            *  ``DB_NUMDEFINED``  - return number of defined element types
-            *  ``DB_NUMSELECTED`` - return number of selected element types
-            *  ``DB_MAXDEFINED``  - return highest element type number defined
-            *  ``DB_MAXRECLENG``  - return maximum record length (int words)
-            *  -n, return element characteristic n from ``etycom`` for element
-              type itype.
-              ``n`` is correlated to the parameter names in ``echprm``.
-              see ``elccmt`` for definitions of element characteristics.
+            * ``DB_NUMDEFINED``  - return number of defined element types
+            * ``DB_NUMSELECTED`` - return number of selected element types
+            * ``DB_MAXDEFINED``  - return highest element type number defined
+            * ``DB_MAXRECLENG``  - return maximum record length (int words)
+            * ``-n``, return element characteristic n from ``etycom`` for
+              element type itype. ``n`` is correlated to the parameter names in
+              ``echprm``.  see ``elccmt`` for definitions of element
+              characteristics.
 
               .. note:: This will not overwrite the current setting of
-                       ``etycom``.
+                        ``etycom``.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -846,17 +846,17 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Number of node being inquired about.
             should be 0 for key=``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
-        key  :  float
+        key : float
             Key as to information needed
 
-            *  1              - return force mask for node
-            *  ``DB_MAXDEFINED``, - return number of nodal loadings in model.
-            *  ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
+            * 1              - return force mask for node
+            * ``DB_MAXDEFINED``, - return number of nodal loadings in model.
+            * ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
 
             .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the
                      same functionality.
@@ -884,44 +884,46 @@ class inq_function:
 
         Parameters
         ----------
-        nsect  :  int
+        nsect : int
             Section id table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             Information flag.
-            *  DB_SELECTED - return select status
-              *  0 - ection id table is undefined.
+            * DB_SELECTED - return select status
+
+              * 0 - section id table is undefined.
               * -1 - section id table is unselected.
-              *  1 - section id table is selected
-            *  ``DB_NUMDEFINED``  - return number of defined section id tables
-            *  ``DB_NUMSELECTED`` - return number of selected section id tables
-            *  ``DB_MAXDEFINED``  - return highest section id table defined
-            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
-            *  2 - return length (dp words)
-            *  3 - return layer number (for cross reference files return number
+              * 1 - section id table is selected
+
+            * ``DB_NUMDEFINED``  - return number of defined section id tables
+            * ``DB_NUMSELECTED`` - return number of selected section id tables
+            * ``DB_MAXDEFINED``  - return highest section id table defined
+            * ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            * 2 - return length (dp words)
+            * 3 - return layer number (for cross reference files return number
               of entities)
-            *  4 - return address of first data word
-            *  5 - return length (in record type units)
-            *  6 - return compressed record number.
-            *  11 - return void percent (integer)
-            *  16 - return location of next record (this increments the next
+            * 4 - return address of first data word
+            * 5 - return length (in record type units)
+            * 6 - return compressed record number.
+            * 11 - return void percent (integer)
+            * 16 - return location of next record (this increments the next
               record count)
-            *  18 - return type of file.
-              *  0 - integer
-              *  1 - double precision
-              *  2 - real
-              *  3 - complex
-              *  4 - character*8
-              *  7 - index
-            *  19 - return virtual type of file.
-              *  0 - fixed length (4.4 form)
-              *  1 - indexed variable length (layer data)
-              *  2 - xref data tables
-              *  3 - bitmap data (for 32 data item packed records)
-              *  4 - data tables (three dimensional arrays)
+            * 18 - return type of file.
+              * 0 - integer
+              * 1 - double precision
+              * 2 - real
+              * 3 - complex
+              * 4 - character*8
+              * 7 - index
+            * 19 - return virtual type of file.
+              * 0 - fixed length (4.4 form)
+              * 1 - indexed variable length (layer data)
+              * 2 - xref data tables
+              * 3 - bitmap data (for 32 data item packed records)
+              * 4 - data tables (three dimensional arrays)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -946,12 +948,12 @@ class inq_function:
 
         Parameters
         ----------
-        mat  :  int
+        mat : int
             Material number
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
 
-        iprop  :  int
+        iprop : int
             Property reference number (See notes).
 
             If iprop = 0, test for existence of any material property with this
@@ -984,20 +986,20 @@ class inq_function:
 
                 (see ``TB`` command for more information)
 
-        key  :  int
+        key : int
             Key as to the information needed about material property.
 
-            *  ``DB_SELECTED(1)``- return select status:
+            * ``DB_SELECTED(1)``- return select status:
 
-              *  0 - material prop is undefined.
-              *  1 - material prop is selected.
+              * 0 - material prop is undefined.
+              * 1 - material prop is selected.
 
-            *  ``DB_NUMDEFINED(12)`` - number of defined material properties
-            *  ``DB_MAXDEFINED(14)`` - highest material property number defined
-            *  ``DB_MAXRECLENG(15)`` - maximum record length (dp words)
-            *   2 - return length (dp words)
-            *   3 - return number of temp. values
-            *  11 - return void percent (integer)
+            * ``DB_NUMDEFINED(12)`` - number of defined material properties
+            * ``DB_MAXDEFINED(14)`` - highest material property number defined
+            * ``DB_MAXRECLENG(15)`` - maximum record length (dp words)
+            * 2 - return length (dp words)
+            * 3 - return number of temp. values
+            * 11 - return void percent (integer)
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -1023,10 +1025,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number
 
-        idf  :  int
+        idf : int
             Pointer to the dof (1-32)
 
             * 1 = ux,
@@ -1052,7 +1054,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = SP01-SP06
 
-        kcmplx  :  int
+        kcmplx : int
 
             * 0 = real
             * 1 = imaginary
@@ -1080,10 +1082,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number
 
-        idf  :  int
+        idf : int
             Pointer to the dof (1-32)
 
             * 1 = ux
@@ -1109,7 +1111,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = spares
 
-        kcmplx  :  int
+        kcmplx : int
 
             * 0 = real
             * 1 = imaginary
@@ -1137,7 +1139,7 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int
+        key : int
             Item to be returned.
 
             * 1 = keyerr (ER_ERRORFLAG)
@@ -1290,28 +1292,28 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int
+        key : int
             Key.
 
-            *  1                        kprint (WR_PRINT)
+            * 1 - kprint (WR_PRINT)
               Print flag.
 
               * 0 - no output
               * 1 - print
 
-            *  2 - outfil (WR_OUTPUT)
+            * 2 - outfil (WR_OUTPUT)
               Current output unit number(iott).
-            *  4 - frstot (WR_MASTEROUT)
+            * 4 - frstot (WR_MASTEROUT)
               Master output file.
-            *  5 - intcol (WR_COLINTER)
+            * 5 - intcol (WR_COLINTER)
               Interactive columns per page.
-            *  6 - batcol (WR_COLBATCH)
+            * 6 - batcol (WR_COLBATCH)
               Batch columns per page.
-            *  7 - intlin (WR_LINEINTER)
+            * 7 - intlin (WR_LINEINTER)
               Interactive lines per page.
-            *  8 - batlin (WR_LINEBATCH)
+            * 8 - batlin (WR_LINEBATCH)
               Batch lines per page.
-            *  9 - CommaSep (WR_COMMASEP)
+            * 9 - CommaSep (WR_COMMASEP)
               1 for comma separated output.
             * 11 - chrper (WR_CHARITEM)
               Characters per output item.

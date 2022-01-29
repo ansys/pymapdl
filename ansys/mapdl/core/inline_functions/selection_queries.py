@@ -252,11 +252,12 @@ class _SelectionStatusQueries(_QueryExecution):
     def vsel(self, v: int) -> SelectionStatus:
         """Returns selection status of a volume.
 
-        Returns a ``SelectionStatus`` object with values:
+        Returns a :class:`SelectionStatus
+        <mapdl.ansys.core.inline_functions.SelectionStatus>` with values:
 
-        1  - SELECTED
-        0  - UNDEFINED
-        -1 - UNSELECTED
+        * 1 - SELECTED
+        * 0 - UNDEFINED
+        * -1 - UNSELECTED
 
         Parameters
         ----------

@@ -825,7 +825,6 @@ def test_cdread(mapdl, cleared):
     assert random_letters in mapdl.parameters['PARMTEST']
 
 
-# CDREAD tests are actually a good way to test 'input' command.
 @skip_in_cloud
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split('/')[0][-3:0]
@@ -948,25 +947,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
     resp = mapdl.cwd(path_tests.path_without_spaces)
-    assert 'WARNING' not in resp
+    assert resp is None
 
 
 @skip_in_cloud
 def test_path_with_spaces(mapdl, path_tests):
     resp = mapdl.cwd(path_tests.path_with_spaces)
-    assert 'WARNING' not in resp
+    assert resp is None
 
 
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(RuntimeError):
         resp = mapdl.cwd(path_tests.path_with_single_quote)
-        assert 'WARNING' not in resp
-
 
 @skip_in_cloud
 def test_cwd_directory(mapdl, tmpdir):
-
     mapdl.directory = str(tmpdir)
     assert mapdl.directory == str(tmpdir).replace('\\', '/')
 
