@@ -214,7 +214,7 @@ def test_kplot(cleared, mapdl_console, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_console.kplot(savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
@@ -298,7 +298,7 @@ def test_lplot(cleared, mapdl_console, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_console.lplot(show_keypoint_numbering=True, savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl_console.lplot(vtk=False)  # make sure legacy still works
