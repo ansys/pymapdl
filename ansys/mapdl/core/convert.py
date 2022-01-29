@@ -111,7 +111,7 @@ def convert_script(
     >>> output = convert_script(file, out_file, line_ending='\\n')
     >>> mapdl = launch_mapdl()
     >>> with open(out_file, 'r') as fid:
-    ...    cmds = fid.read()
+    ...     cmds = fid.read()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
 
     """
