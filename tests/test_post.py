@@ -1024,13 +1024,17 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 def test_general_plotter_returns(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True)
-    assert isinstance(cpos, CameraPosition)
-
-    plotter = mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_plotter=True)
-    assert isinstance(plotter, Plotter)
-
+    # Returns
     assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True) is None
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True), CameraPosition)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_plotter=True), Plotter)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True, return_plotter=True), tuple)
+
+    # Returns + Save figure.
+    assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=False) is None
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=False), CameraPosition)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=True), Plotter)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=True), tuple)
 
 
 ###############################################################################
