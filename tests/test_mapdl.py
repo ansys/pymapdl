@@ -3,7 +3,6 @@ import os
 import time
 
 import numpy as np
-import py
 import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
