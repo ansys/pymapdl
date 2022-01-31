@@ -1046,6 +1046,11 @@ def test_tbft_not_found(mapdl):
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
 
 
+def test_rescontrol(mapdl):
+    # Making sure we have the maximum number of arguments.
+    mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
+
+
 def test_get_with_gopr(mapdl):
     """Get should work independently of the /gopr state."""
 
