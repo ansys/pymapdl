@@ -5,7 +5,7 @@ import numpy as np
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.commands import CommandOutput, CommandListingOutput, BoundaryConditionsListingOutput
-from ansys.mapdl.core.commands import CMD_LISTING, CMD_BC_LISTING
+from ansys.mapdl.core.commands import CMD_LISTING, CMD_BC_LISTING, Commands
 
 try:
     import pandas as pd
@@ -212,7 +212,8 @@ def test_bclist(mapdl, beam_solve, func):
 def test_docstring_injector(mapdl, method):
     """Check if the docstring has been injected."""
     for name in dir(mapdl):
-        if name[0:4].upper() == method:
+        if name[0:4].upper() == method and name in dir(Commands): # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+
             func = mapdl.__getattribute__(name)
             # If '__func__' not present (AttributeError) very likely it has not
             # been wrapped.
