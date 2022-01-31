@@ -1045,3 +1045,24 @@ def test_tbft_not_found(mapdl):
         mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
         mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
+
+
+def test_get_with_gopr(mapdl):
+    """Get should work independently of the /gopr state."""
+
+    mapdl._run("/gopr")
+    assert mapdl.wrinqr(1) == 1
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/nopr")
+    assert mapdl.wrinqr(1) == 0
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/gopr") # Going back
+    assert mapdl.wrinqr(1) == 1
