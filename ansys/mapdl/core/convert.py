@@ -470,15 +470,6 @@ class FileTranslator:
         line = line.strip()
         line = line.replace('"', "'")
 
-        # Cleaning ending empty arguments.
-        # Because of an extra comma added to toffst command when generating ds.dat.
-        line_ = line.split(',')[::-1] # inverting order
-        for ind, each in enumerate(line_):
-            if each:
-                break
-            else:
-                line_.pop(ind)
-        line = ','.join(line_[::-1])[:-1]
 
         if self._in_block:
             self._block_count += 1
@@ -505,6 +496,19 @@ class FileTranslator:
 
         if not line:
             return
+
+        # Cleaning ending empty arguments.
+        # Because of an extra comma added to toffst command when generating ds.dat.
+        line_ = line.split(',')[::-1] # inverting order
+        for ind, each in enumerate(line_):
+            if each:
+                break
+            else:
+                line_.pop(ind)
+        line = ','.join(line_[::-1])
+
+        #removing trailing comma
+        line = line[:-1] if line[-1] == ',' else line
 
         cmd_ = line.split(',')[0].upper()
 

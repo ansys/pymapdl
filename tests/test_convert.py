@@ -263,7 +263,7 @@ def test_empty_line():
 def test_repeat():
     assert 'with mapdl.non_interactive:' in convert_apdl_block('/prep7\n*rep,', header=False, add_imports=False)
     assert '    mapdl.prep7()' in convert_apdl_block('/prep7\n*rep,', header=False, add_imports=False)
-    assert '    mapdl.run("*rep,")' in convert_apdl_block('/prep7\n*rep, ', header = False, add_imports = False)
+    assert '    mapdl.run("*rep' in convert_apdl_block('/prep7\n*rep, ', header = False, add_imports = False)
 
 
 @pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
