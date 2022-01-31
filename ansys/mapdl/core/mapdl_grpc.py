@@ -207,6 +207,10 @@ class MapdlGrpc(_MapdlCore):
         Copy the log to a file called `logs.log` located where the
         python script is executed. Default ``True``.
 
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default ``False``.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -230,7 +234,8 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                 log_file=False, cleanup_on_exit=False, log_apdl=None,
-                set_no_abort=True, remove_temp_files=False, **kwargs):
+                set_no_abort=True, remove_temp_files=False,
+                print_com = False, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
 
@@ -238,7 +243,7 @@ class MapdlGrpc(_MapdlCore):
         self._port = port
         self._ip = ip
         super().__init__(
-            loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, **kwargs
+            loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, print_com=print_com, **kwargs
         )
 
         check_valid_ip(ip)
