@@ -470,7 +470,6 @@ class FileTranslator:
         line = line.strip()
         line = line.replace('"', "'")
 
-
         if self._in_block:
             self._block_count += 1
 
