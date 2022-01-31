@@ -108,3 +108,9 @@ def test_logger(capsys):
         translator.translate_line(line)
     std = capsys.readouterr()
     assert all(['Converted' in each for each in std.err.split('\n')[:-1]]) # last one is an empty line.
+
+
+def test_print_com_in_converter():
+    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,") # Default
+    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,", print_com=True)
+    assert 'print_com=True' not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
