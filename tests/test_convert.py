@@ -298,3 +298,9 @@ return a + b"""
 def test_header_error():
     with pytest.raises(TypeError):
         convert_apdl_block("asdf", header=2)
+
+
+def test_print_com_in_converter():
+    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,") # Default
+    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,", print_com=True)
+    assert 'print_com=True' not in convert_apdl_block("/prep7\nN,,,,", print_com=False)

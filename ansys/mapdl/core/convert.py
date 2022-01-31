@@ -31,7 +31,8 @@ def convert_script(
     add_imports = True,
     comment_solve = False,
     format_output = True,
-    header = True
+    header = True,
+    print_com=True
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -86,6 +87,9 @@ def convert_script(
         If ``True``, the default header is written in the first line
         of the output. If a string is provided, this string will be
         used as header.
+    print_com : bool, optional
+        Print command ``/COM`` arguments to python console.
+        Defaults to ``True``.
 
     Returns
     -------
@@ -129,7 +133,8 @@ def convert_script(
                         add_imports = add_imports,
                         comment_solve = comment_solve,
                         format_output = format_output,
-                        header = header
+                        header = header,
+                        print_com=print_com
                           )
 
     translator.save(filename_out)
@@ -147,7 +152,8 @@ def convert_apdl_block(apdl_strings,
             add_imports = True,
             comment_solve = False,
             format_output = True,
-            header=True):
+            header=True,
+            print_com=True):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -206,6 +212,9 @@ def convert_apdl_block(apdl_strings,
         If ``True``, the default header is written in the first line
         of the output. If a string is provided, this string will be
         used as header.
+    print_com : bool, optional
+        Print command ``/COM`` arguments to python console.
+        Defaults to ``True``.
 
     Returns
     -------
@@ -241,25 +250,26 @@ def convert_apdl_block(apdl_strings,
     comment_solve = comment_solve,
     format_output = format_output,
     header = header)
+    print_com = print_com)
 
-    if isinstance(apdl_strings, str):
+        if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
-    return translator.lines
+        return translator.lines
 
 
 def _convert(apdl_strings,
-            loglevel="WARNING",
-            auto_exit=True,
-            line_ending=None,
-            exec_file=None,
-            macros_as_functions=True,
-            use_function_names=True,
-            show_log=False,
+            loglevel = "WARNING",
+            auto_exit = True,
+            line_ending = None,
+            exec_file = None,
+            macros_as_functions = True,
+            use_function_names = True,
+            show_log = False,
             add_imports = True,
             comment_solve = False,
             format_output = True,
             header = True,
-             ):
+            print_com = True):
 
     translator = FileTranslator(
         loglevel,
@@ -271,7 +281,8 @@ def _convert(apdl_strings,
         add_imports = add_imports,
         comment_solve = comment_solve,
         format_output = format_output,
-        header = header
+        header = header,
+        print_com=print_com
     )
 
     if isinstance(apdl_strings, str):
@@ -332,6 +343,7 @@ class FileTranslator:
         comment_solve = False,
         format_output = True,
         header = True,
+        print_com=True
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -348,6 +360,7 @@ class FileTranslator:
         self._comment_solve = comment_solve
         self.format_output = format_output
         self._header = header
+        self.print_com = print_com
 
         self.write_header()
         if self._add_imports:
@@ -433,7 +446,11 @@ class FileTranslator:
             exec_file_parameter = f'"{exec_file}", '
         else:
             exec_file_parameter = ""
-        line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")'
+
+        if self.print_com:
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)'
+        else:
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")'
         self.lines.append(line)
 
     @property
