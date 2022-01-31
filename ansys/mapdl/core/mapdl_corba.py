@@ -162,6 +162,9 @@ class MapdlCorba(_MapdlCore):
         Copy the log to a file called `logs.log` located where the
         python script is executed. Default ``True``.
 
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default ``False``.
     """
 
     def __init__(self, loglevel='INFO', log_apdl=None, use_vtk=True,
@@ -169,7 +172,8 @@ class MapdlCorba(_MapdlCore):
                  log_broadcast=False, verbose=False, **start_parm):
         """Open a connection to MAPDL via a CORBA interface"""
         super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
-                        log_file=log_file, log_broadcast=False, **start_parm)
+                        log_file=log_file, log_broadcast=False,
+                        print_com=print_com, **start_parm)
 
         self._broadcast_logger = None
         self._server = None

@@ -22,7 +22,8 @@ def convert_script(
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-    show_log = False
+    show_log = False,
+    print_com=True
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -57,6 +58,10 @@ def convert_script(
         Print the converted commands using a logger (from ``logging``
         Python module).
 
+    print_com : bool, optional
+        Print command ``/COM`` arguments to python console.
+        Defaults to ``True``.
+
     Returns
     -------
     list
@@ -78,7 +83,8 @@ def convert_script(
                                 exec_file=exec_file,
                                 macros_as_functions=macros_as_functions,
                                 use_function_names=use_function_names,
-                                show_log=show_log
+                                show_log=show_log,
+                                print_com=print_com
                           )
 
     translator.save(filename_out)
@@ -92,7 +98,8 @@ def convert_apdl_block(apdl_strings,
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
-        show_log=False):
+        show_log=False,
+        print_com=True):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -126,6 +133,10 @@ def convert_apdl_block(apdl_strings,
         Print the converted commands using a logger (from ``logging``
         Python module).
 
+    print_com : bool, optional
+        Print command ``/COM`` arguments to python console.
+        Defaults to ``True``.
+
     Returns
     -------
     list
@@ -140,7 +151,8 @@ def convert_apdl_block(apdl_strings,
     exec_file=exec_file,
     macros_as_functions=macros_as_functions,
     use_function_names=use_function_names,
-    show_log=show_log)
+    show_log=show_log,
+    print_com=print_com)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
@@ -154,7 +166,8 @@ def _convert(apdl_strings,
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-    show_log=False
+    show_log=False,
+    print_com=True
              ):
 
     translator = FileTranslator(
@@ -163,7 +176,8 @@ def _convert(apdl_strings,
         exec_file=exec_file,
         macros_as_functions=macros_as_functions,
         use_function_names=use_function_names,
-        show_log=show_log
+        show_log=show_log,
+        print_com=print_com
     )
 
     if isinstance(apdl_strings, str):
@@ -210,7 +224,8 @@ class FileTranslator:
         exec_file=None,
         macros_as_functions=True,
         use_function_names=True,
-        show_log=False
+        show_log=False,
+        print_com=True
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -223,6 +238,7 @@ class FileTranslator:
         self._infunction = False
         self.use_function_names = use_function_names
         self.comment = ""
+        self.print_com = print_com
 
         self.write_header()
         self.initialize_mapdl_object(loglevel, exec_file)
@@ -277,7 +293,11 @@ class FileTranslator:
             exec_file_parameter = f'"{exec_file}", '
         else:
             exec_file_parameter = ""
-        line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")'
+
+        if self.print_com:
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)'
+        else:
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")'
         self.lines.append(line)
 
     @property
