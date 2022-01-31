@@ -1049,4 +1049,4 @@ def test_tbft_not_found(mapdl):
 
 def test_rescontrol(mapdl):
     # Making sure we have the maximum number of arguments.
-    mapdl.rescontrol("DEFINE","","", "", "", "XNNN")  # This is default
+    mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
