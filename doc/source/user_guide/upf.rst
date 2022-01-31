@@ -2,20 +2,21 @@
 
 
 Using Python to Code UPF Subroutines
------------------------------------------------
+------------------------------------
 
-As an alternative to compiled languages like C and Fortran, you can use the Python
-language to code user programmable subroutines. A subset of the documented UPF subroutines
-support the Python UPF capability (see `Supported UPF Subroutines`_).
+As an alternative to compiled languages like C and Fortran, you can use the
+Python language to code user programmable subroutines. A subset of the
+documented UPF subroutines support the Python UPF capability (see `Supported UPF
+Subroutines`_).
 
-You must install a Python distribution before using this feature. Python 3.6 through
-Python 3.7 are supported.
+You must install a Python distribution before using this feature. Python 3.6
+through Python 3.7 are supported.
 
 Python UPFs are only supported on Linux.
 
-It is strongly recommended you start your code based on one of the examples in `Python UPF Examples`_. 
-In your Python code, you can make use of standard Python
-libraries like NumPy.
+It is strongly recommended you start your code based on one of the examples in
+`Python UPF Examples`_.  In your Python code, you can make use of standard
+Python libraries like NumPy.
 
 The following topics are available:
 
@@ -250,8 +251,8 @@ variable:
 Once the DB connection has been initialized, you can access the database of the
 Mechanical APDL instance in read/write mode. 
 
-A subset of the functions documented in _Accessing the Mechanical APDL Database_ have been
-exposed and can be called from the Python code. 
+A subset of the functions documented in _Accessing the Mechanical APDL Database
+have been exposed and can be called from the Python code.
 
 Below is a list of those functions:
 
