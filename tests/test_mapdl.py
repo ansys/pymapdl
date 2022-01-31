@@ -1051,7 +1051,7 @@ def test_rescontrol(mapdl):
     # Making sure we have the maximum number of arguments.
     mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
 
-    
+
 def test_print_com(mapdl, capfd):
     mapdl.print_com = True
     string_ = "Testing print"
@@ -1071,4 +1071,3 @@ def test_print_com(mapdl, capfd):
     for each in ['asdf', (1, 2), 2, []]:
         with pytest.raises(ValueError):
             mapdl.print_com = each
-
