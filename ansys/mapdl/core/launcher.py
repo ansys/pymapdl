@@ -760,6 +760,7 @@ def launch_mapdl(
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
+    print_com=False,
     **kwargs,
 ) -> _MapdlCore:
     """Start MAPDL locally in gRPC mode.
@@ -884,6 +885,10 @@ def launch_mapdl(
         also raise a warning. If it is not used (``None``), no specific license
         will be requested, being up to the license server to provide a specific
         license type. Default is ``None``.
+
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default ``False``.
 
     Returns
     -------
@@ -1124,6 +1129,7 @@ def launch_mapdl(
         "additional_switches": additional_switches,
         "jobname": jobname,
         "nproc": nproc,
+        "print_com": print_com,
     }
 
     if mode in ["console", "corba"]:
