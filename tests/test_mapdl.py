@@ -1047,6 +1047,27 @@ def test_tbft_not_found(mapdl):
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
 
 
+def test_get_with_gopr(mapdl):
+    """Get should work independently of the /gopr state."""
+
+    mapdl._run("/gopr")
+    assert mapdl.wrinqr(1) == 1
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/nopr")
+    assert mapdl.wrinqr(1) == 0
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/gopr") # Going back
+    assert mapdl.wrinqr(1) == 1
+
+
 def test_print_com(mapdl, capfd):
     mapdl.print_com = True
     string_ = "Testing print"
