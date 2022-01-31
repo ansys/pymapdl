@@ -1819,7 +1819,16 @@ class _MapdlCore(Commands):
         """
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         kwargs["mute"] = False
+
+        # Checking printout is not suppressed by checking "wrinqr" flag.
+        flag = 0
+        if self.wrinqr(1) != 1: # using wrinqr is more reliable than *get
+            flag = 1
+            self._run("/gopr")
         response = self.run(command, **kwargs)
+        if flag == 1:
+            self._run("/nopr")
+
         value = response.split("=")[-1].strip()
         try:  # always either a float or string
             return float(value)
