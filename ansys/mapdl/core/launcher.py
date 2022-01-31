@@ -191,6 +191,7 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
+    **kwargs
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -1183,6 +1184,7 @@ def launch_mapdl(
                 set_no_abort=set_no_abort,
                 remove_temp_files=kwargs.pop("remove_temp_files", False),
                 log_apdl=log_apdl,
+                print_com=print_com,
                 **start_parm,
             )
             if run_location is None:
