@@ -1045,3 +1045,8 @@ def test_tbft_not_found(mapdl):
         mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
         mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
+
+
+def test_rescontrol(mapdl):
+    # Making sure we have the maximum number of arguments.
+    mapdl.rescontrol("DEFINE","","", "", "", "XNNN")  # This is default
