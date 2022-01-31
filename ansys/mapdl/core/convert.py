@@ -452,6 +452,17 @@ class FileTranslator:
         original_line = line.replace('\r\n', '').replace('\n', '')  # It is needed for the nblock, eblock since they have spaces before the numbers
         line = line.strip()
         line = line.replace('"', "'")
+
+        # Cleaning ending empty arguments.
+        # Because of an extra comma added to toffst command when generating ds.dat.
+        line_ = line.split(',')[::-1] # inverting order
+        for ind, each in enumerate(line_):
+            if each:
+                break
+            else:
+                line_.pop(ind)
+        line = ','.join(line_[::-1])[:-1]
+
         if self._in_block:
             self._block_count += 1
 
