@@ -1048,9 +1048,9 @@ class MiscellaneousLoads:
                 Number that indicates how often the ``.Xnnn`` file is written.
 
                 Input a positive number to write the ``.Xnnn`` files at the substep ``Frequency``
-                indicated only for load step N.                
+                indicated only for load step N.
                 Other load steps will be written at the default substep frequency or at a frequency
-                defined by a previous ``RESCONTROL`` specification. 
+                defined by a previous ``RESCONTROL`` specification.
                 Load history information is written to the ``.LDHI`` file only for load steps N.
 
                 Specifying a negative number (-N) to write the ``.Xnnn`` files for every Nth load step

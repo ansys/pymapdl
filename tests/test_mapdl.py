@@ -10,7 +10,6 @@ from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.reader import examples
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
-from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
@@ -335,7 +334,7 @@ def test_kplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.kplot(vtk=False)  # make sure legacy still works
@@ -416,7 +415,7 @@ def test_lplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.lplot(vtk=False)  # make sure legacy still works
@@ -442,7 +441,7 @@ def test_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -469,7 +468,7 @@ def test_corba_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -1066,6 +1065,11 @@ def test_print_com(mapdl, capfd):
     for each in ['asdf', (1, 2), 2, []]:
         with pytest.raises(ValueError):
             mapdl.print_com = each
+
+
+def test_rescontrol(mapdl):
+    # Making sure we have the maximum number of arguments.
+    mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
 
 
 def test_get_with_gopr(mapdl):
