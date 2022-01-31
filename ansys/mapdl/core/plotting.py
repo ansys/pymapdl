@@ -43,7 +43,7 @@ def general_plotter(
     text_color=None,
     theme=None,
     return_plotter=False,
-    return_cpos = False
+    return_cpos=False,
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
