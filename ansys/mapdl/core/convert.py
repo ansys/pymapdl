@@ -239,22 +239,22 @@ def convert_apdl_block(apdl_strings,
     """
 
     translator = _convert(apdl_strings,
-    loglevel=loglevel,
-    auto_exit=auto_exit,
-    line_ending=line_ending,
-    exec_file=exec_file,
-    macros_as_functions=macros_as_functions,
-    use_function_names=use_function_names,
-    show_log=show_log,
-    add_imports = add_imports,
-    comment_solve = comment_solve,
-    format_output = format_output,
-    header = header)
-    print_com = print_com)
+                          loglevel=loglevel,
+                          auto_exit=auto_exit,
+                          line_ending=line_ending,
+                          exec_file=exec_file,
+                          macros_as_functions=macros_as_functions,
+                          use_function_names=use_function_names,
+                          show_log=show_log,
+                          add_imports = add_imports,
+                          comment_solve = comment_solve,
+                          format_output = format_output,
+                          header = header,
+                          print_com = print_com)
 
-        if isinstance(apdl_strings, str):
+    if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
-        return translator.lines
+    return translator.lines
 
 
 def _convert(apdl_strings,
