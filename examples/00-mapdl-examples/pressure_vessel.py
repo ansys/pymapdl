@@ -8,7 +8,7 @@ apply a pressure to it.
 
 Also shown here:
 - Various ways of accessing stress results from MAPDL.
-- Comparison between PRNSOL, *VGET (efficient wrapping), and the legacy reader.
+- Comparison between PRNSOL, VGET (efficient wrapping), and the legacy reader.
 - Notes regarding FULL vs. POWER graphics when using PRNSOL.
 
 """
@@ -99,7 +99,7 @@ mapdl.post1()
 mapdl.set(1, 1)
 
 # results directly from MAPDL's VGET command
-# *VGET, __VAR__, NODE, , S, EQV
+# VGET, __VAR__, NODE, , S, EQV
 nnum = mapdl.mesh.nnum
 von_mises_mapdl = mapdl.post_processing.nodal_eqv_stress()
 

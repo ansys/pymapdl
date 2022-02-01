@@ -10,7 +10,6 @@ from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.reader import examples
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
-from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
@@ -335,7 +334,7 @@ def test_kplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.kplot(vtk=False)  # make sure legacy still works
@@ -416,7 +415,7 @@ def test_lplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.lplot(vtk=False)  # make sure legacy still works
@@ -442,7 +441,7 @@ def test_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -469,7 +468,7 @@ def test_corba_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -1045,3 +1044,76 @@ def test_tbft_not_found(mapdl):
         mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
         mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
+
+
+def test_rescontrol(mapdl):
+    # Making sure we have the maximum number of arguments.
+    mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
+
+
+def test_get_with_gopr(mapdl):
+    """Get should work independently of the /gopr state."""
+
+    mapdl._run("/gopr")
+    assert mapdl.wrinqr(1) == 1
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/nopr")
+    assert mapdl.wrinqr(1) == 0
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/gopr") # Going back
+    assert mapdl.wrinqr(1) == 1
+
+
+def test_print_com(mapdl, capfd):
+    mapdl.print_com = True
+    string_ = "Testing print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    mapdl.print_com = False
+    string_ = "Testing disabling print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=False)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    # Not allowed type for mapdl.print_com
+    for each in ['asdf', (1, 2), 2, []]:
+        with pytest.raises(ValueError):
+            mapdl.print_com = each
+
+
+def test_extra_argument_in_get(mapdl, make_block):
+    assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)

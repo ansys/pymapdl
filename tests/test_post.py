@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from pyvista.plotting.renderer import CameraPosition
+from pyvista import Plotter
 
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
@@ -451,17 +452,15 @@ def test_disp_norm_all(mapdl, static_solve):
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z", "norm"])  # lowercase intentional
 def test_disp_plot(mapdl, static_solve, comp):
-    cpos = mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
 
 
 def test_disp_plot_subselection(mapdl, static_solve):
     mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
     mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
-    cpos = mapdl.post_processing.plot_nodal_displacement(
+    assert mapdl.post_processing.plot_nodal_displacement(
         "X", smooth_shading=True, show_node_numbering=True
-    )
-    assert isinstance(cpos, CameraPosition)
+    ) is None
     mapdl.allsel()
 
 
@@ -480,8 +479,7 @@ def test_nodal_eqv_stress(mapdl, static_solve):
 
 
 def test_plot_nodal_eqv_stress(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True) is None
 
 
 def test_node_selection(mapdl, static_solve):
@@ -518,8 +516,7 @@ def test_rot(mapdl, static_solve, comp):
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_plot_rot(mapdl, static_solve, comp):
-    cpos = mapdl.post_processing.plot_nodal_rotation(comp)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_rotation(comp) is None
 
 
 # TODO: add valid result
@@ -538,13 +535,11 @@ def test_element_temperature(mapdl, static_solve):
 
 def test_plot_element_temperature(mapdl, static_solve):
     mapdl.set(1, 1, mute=True)
-    cpos = mapdl.post_processing.plot_element_temperature()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_element_temperature() is None
 
 
 def test_plot_temperature(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_temperature()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_temperature() is None
 
 
 # TODO: add valid result
@@ -554,8 +549,7 @@ def test_pressure(mapdl, static_solve):
 
 
 def test_plot_pressure(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_pressure()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_pressure() is None
 
 
 # TODO: add valid result
@@ -565,8 +559,7 @@ def test_voltage(mapdl, static_solve):
 
 
 def test_plot_voltage(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_voltage()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_voltage() is None
 
 
 @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
@@ -587,8 +580,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_component_stress(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_component_stress("X")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
 
 @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
@@ -609,8 +601,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_principal_stress(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_principal_stress(1)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
 
 def test_nodal_stress_intensity(mapdl, static_solve):
@@ -628,8 +619,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
 
 
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_stress_intensity()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
 
 @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
@@ -650,8 +640,7 @@ def test_nodal_total_component_strain(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_total_component_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_total_component_strain("x")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_total_component_strain("x") is None
 
 
 @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
@@ -672,8 +661,7 @@ def test_nodal_principal_total_strain(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_principal_total_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_total_principal_strain(1)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_total_principal_strain(1) is None
 
 
 def test_nodal_total_strain_intensity(mapdl, static_solve):
@@ -691,8 +679,7 @@ def test_nodal_total_strain_intensity(mapdl, static_solve):
 
 
 def test_plot_nodal_total_strain_intensity(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_total_strain_intensity()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_total_strain_intensity() is None
 
 
 def test_nodal_total_eqv_strain(mapdl, static_solve):
@@ -710,8 +697,7 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
 
 
 def test_plot_nodal_total_eqv_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True) is None
 
 
 ###############################################################################
@@ -733,8 +719,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_component_stress(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_component_stress("X")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
 
 @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
@@ -754,8 +739,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_principal_stress(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_principal_stress(1)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
 
 def test_nodal_stress_intensity(mapdl, static_solve):
@@ -773,8 +757,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
 
 
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_stress_intensity()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
 
 @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
@@ -795,8 +778,7 @@ def test_nodal_elastic_component_strain(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_elastic_component_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_elastic_component_strain("x")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_elastic_component_strain("x") is None
 
 
 @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
@@ -817,8 +799,7 @@ def test_nodal_elastic_principal_strain(mapdl, static_solve, comp):
 
 
 def test_plot_nodal_elastic_principal_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_elastic_principal_strain(1)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_elastic_principal_strain(1) is None
 
 
 def test_nodal_elastic_strain_intensity(mapdl, static_solve):
@@ -836,8 +817,7 @@ def test_nodal_elastic_strain_intensity(mapdl, static_solve):
 
 
 def test_plot_nodal_elastic_strain_intensity(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_elastic_strain_intensity()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_elastic_strain_intensity() is None
 
 
 def test_nodal_elastic_eqv_strain(mapdl, static_solve):
@@ -855,8 +835,7 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
 
 
 def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
-    cpos = mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True) is None
 
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
@@ -907,8 +886,7 @@ def test_elem_disp_norm(mapdl, static_solve):
 def test_elem_disp_plot(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
-    cpos = mapdl.post_processing.plot_element_displacement(comp)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_element_displacement(comp) is None
 
 
 @pytest.mark.parametrize("component", STRESS_TYPES[::3])
@@ -931,15 +909,13 @@ def test_element_stress(mapdl, static_solve, component, option):
 def test_plot_element_stress(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
-    cpos = mapdl.post_processing.plot_element_stress(comp)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_element_stress(comp) is None
 
 
 def test_plot_element_values(mapdl, static_solve):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
-    cpos = mapdl.post_processing.plot_element_values("S", "X")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_element_values("S", "X") is None
 
 
 ###############################################################################
@@ -961,8 +937,7 @@ def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
 
 
 def test_plot_nodal_plastic_component_strain(mapdl, plastic_solve):
-    cpos = mapdl.post_processing.plot_nodal_plastic_component_strain("x")
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_plastic_component_strain("x") is None
 
 
 @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
@@ -982,8 +957,7 @@ def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
 
 
 def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
-    cpos = mapdl.post_processing.plot_nodal_plastic_principal_strain(1)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_plastic_principal_strain(1) is None
 
 
 def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
@@ -998,8 +972,7 @@ def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
 
 
 def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
-    cpos = mapdl.post_processing.plot_nodal_plastic_strain_intensity()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_plastic_strain_intensity() is None
 
 
 def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
@@ -1014,8 +987,7 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 
 
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
-    cpos = mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True) is None
 
 
 def test_nodal_contact_friction_stress(mapdl, contact_solve):
@@ -1038,20 +1010,31 @@ def test_nodal_contact_friction_stress(mapdl, contact_solve):
 
 
 def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
-    cpos = mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True) is None
 
 
 def test_plot_incomplete_element_selection(mapdl, contact_solve):
     mapdl.esel('S', 'ELEM', '', 1, mapdl.mesh.n_elem//2)
-    cpos = mapdl.post_processing.plot_element_displacement()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_element_displacement() is None
 
 
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
     mapdl.nsel('S', 'NODE', '', 1, mapdl.mesh.n_node//2)
-    cpos = mapdl.post_processing.plot_nodal_displacement()
-    assert isinstance(cpos, CameraPosition)
+    assert mapdl.post_processing.plot_nodal_displacement() is None
+
+
+def test_general_plotter_returns(mapdl, static_solve):
+    # Returns
+    assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True) is None
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True), CameraPosition)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_plotter=True), Plotter)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True, return_plotter=True), tuple)
+
+    # Returns + Save figure.
+    assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=False) is None
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=False), CameraPosition)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=True), Plotter)
+    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=True), tuple)
 
 
 ###############################################################################
@@ -1071,8 +1054,7 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 # def test_plot_nodal_thermal_component_strain(mapdl, thermal_solve):
-#     cpos = mapdl.post_processing.plot_nodal_thermal_component_strain('x')
-#     assert isinstance(cpos, CameraPosition)
+#     assert mapdl.post_processing.plot_nodal_thermal_component_strain('x') is None
 
 
 # @pytest.mark.parametrize('comp', PRINCIPAL_TYPE)
@@ -1092,8 +1074,7 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 # def test_plot_nodal_thermal_principal_strain(mapdl, thermal_solve):
-#     cpos = mapdl.post_processing.plot_nodal_thermal_principal_strain(1)
-#     assert isinstance(cpos, CameraPosition)
+#     assert mapdl.post_processing.plot_nodal_thermal_principal_strain(1) is None
 
 
 # def test_nodal_thermal_strain_intensity(mapdl, thermal_solve):
@@ -1108,8 +1089,7 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 # def test_plot_nodal_thermal_strain_intensity(mapdl, thermal_solve):
-#     cpos = mapdl.post_processing.plot_nodal_thermal_strain_intensity()
-#     assert isinstance(cpos, CameraPosition)
+#     assert mapdl.post_processing.plot_nodal_thermal_strain_intensity() is None
 
 
 # def test_nodal_thermal_eqv_strain(mapdl, thermal_solve):
@@ -1124,7 +1104,6 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 # def test_plot_nodal_thermal_eqv_strain(mapdl, thermal_solve):
-#     cpos = mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
-#     assert isinstance(cpos, CameraPosition)
+#     assert mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True) is None
 
 ###############################################################################

@@ -15,13 +15,13 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             node number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             key as to information needed about the node.
 
             * DB_SELECTED - return select status:
@@ -98,13 +98,13 @@ class inq_function:
 
         Parameters
         ----------
-        ielem  :  int
+        ielem : int
             Element number.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, ``DB_MAXRECLENG``,
             or 199
 
-        key  :  int
+        key : int
             information flag.
 
             * DB_SELECTED - return select status:  (1)
@@ -177,10 +177,10 @@ class inq_function:
 
         Parameters
         ----------
-        knmi :  int
+        knmi : int
             Keypoints for inquire. may be 0 for key=11 thru 15.
 
-        key  :  int
+        key : int
             Information flag.
 
             * 1 - return select
@@ -280,17 +280,17 @@ class inq_function:
 
         Parameters
         ----------
-        lnmi  :  int
+        lnmi : int
             Line segment for inquire. It should be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             key as to information needed about the ``lnmi``.
 
             * 1, return select
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12,return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length
@@ -369,10 +369,10 @@ class inq_function:
 
         Parameters
         ----------
-        anmi  :  int
+        anmi : int
             Area for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             Key as to information needed about the ``anmi``.
 
             * 1, return select
@@ -456,10 +456,10 @@ class inq_function:
 
         Parameters
         ----------
-        vnmi  :  int
+        vnmi : int
             Volume for inquire. may be 0 for key=11 thru 15.
 
-        key  :  float
+        key : float
             Key as to information needed about the ``vnmi``.
 
             * 1, return select
@@ -526,18 +526,18 @@ class inq_function:
 
         Parameters
         ----------
-        nreal  :  int
+        nreal : int
             Real constant table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             Information flag.
 
-            * 5 - return number of values stored for nreal.
+            * 5 - return number of values stored for ``nreal``.
               Return the REAL set width (number of fields)
-            * ``DB_SELECTED``  - return select status
+            * ``DB_SELECTED`` - return select status
 
               * 0 - real constant table is undefined.
               * -1 - real constant table is unselected.
@@ -572,10 +572,10 @@ class inq_function:
 
         Parameters
         ----------
-        ngap  :  int
+        ngap : int
             gap number for inquire (must be zero for now).
 
-        key  :  int
+        key : int
             key as to the information needed
 
             * 1, return select
@@ -610,10 +610,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number for inquire (must be zero for now).
 
-        key  :  int
+        key : int
             Key as to the information needed
 
             * 1, return select
@@ -648,16 +648,16 @@ class inq_function:
 
         Parameters
         ----------
-        nce  :  int
+        nce : int
             Constraint equation number
 
-        key  :  int
+        key : int
             Inquiry key.
             It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-            * DB_SELECTED  - return select status
+            * ``DB_SELECTED`` - return select status
 
               * 1 - equation is selected
               * 0 - equation is undefined
@@ -671,13 +671,13 @@ class inq_function:
               constraint equation defined.
             * ``DB_MAXRECLENG`` - return length of longest constraint
               equation set (max record length)
-            * 2  - return length (data units)
-            * 3  - return layer number
-            * 4  - address of first data word
-            * 5  - return number of values stored for nce
-            * 11  - return void percent (integer)
-            * 16  - return location of next record
-            * ``CE_NONLINEAR``  - return 1 if CE is nonlinear
+            * 2 - return length (data units)
+            * 3 - return layer number
+            * 4 - address of first data word
+            * 5 - return number of values stored for nce
+            * 11 - return void percent (integer)
+            * 16 - return location of next record
+            * ``CE_NONLINEAR`` - return 1 if CE is nonlinear
             * ``CE_ELEMNUMBER`` - return associated element number
 
         pname : str
@@ -689,7 +689,7 @@ class inq_function:
         Returns
         -------
         int or str
-            The returned value of ``ceinqr`` is based on setting of key
+            The returned value of ``ceinqr`` is based on setting of key.
         """
         return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
 
@@ -703,10 +703,10 @@ class inq_function:
 
         Parameters
         ----------
-        ncp  :  int
-            Coupled set number
+        ncp : int
+            Coupled set number.
 
-        key  :  int
+        key : int
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
@@ -722,10 +722,10 @@ class inq_function:
               coupled set
             * ``DB_MAXRECLENG`` - return length of largest coupled set record
               (max record length)
-            * 2  - return length (data units)
-            * 3  - return layer number
-            * 4  - return address of first data word
-            * 5  - return number of values stored for ncp
+            * 2 - return length (data units)
+            * 3 - return layer number
+            * 4 - return address of first data word
+            * 5 - return number of values stored for ncp
             * 11 - return void percent (integer)
             * 16 - return location of next record
             * \-1 - return master node for this eqn (this is currently only used by solution DB object)
@@ -754,12 +754,12 @@ class inq_function:
 
         Parameters
         ----------
-        ncsy  :  int
+        ncsy : int
             Coordinate system reference number
             should be zero for key= ``DB_NUMDEFINED``
             or ``DB_MAXDEFINED``
 
-        key  :  int
+        key : int
             Information flag.
 
             * ``DB_SELECTED`` - return status:
@@ -795,13 +795,13 @@ class inq_function:
 
         Parameters
         ----------
-        itype  :  int
+        itype : int
             Element type number.
             It should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-        key  :  int
+        key : int
             Information flag.
 
             * ``DB_SELECTED`` - return select status:
@@ -820,7 +820,7 @@ class inq_function:
               see ``elccmt`` for definitions of element characteristics.
 
               .. note:: This will not overwrite the current setting of
-                       ``etycom``.
+                        ``etycom``.
 
         pname : str
             Name of the variable where the queried value is stored.
@@ -845,17 +845,17 @@ class inq_function:
 
         Parameters
         ----------
-        node :  int
+        node : int
             Number of node being inquired about.
             should be 0 for key = ``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
-        key  :  float
+        key : float
             Key as to information needed
 
-            * 1  - return force mask for node
-            * ``DB_MAXDEFINED``, - return number of nodal loadings in model.
-            * ``DB_NUMDEFINED``. - return number of nodal loadings in model.
+            * 1 - return force mask for node
+            * ``DB_MAXDEFINED`` - return number of nodal loadings in model.
+            * ``DB_NUMDEFINED`` - return number of nodal loadings in model.
 
             .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the
                      same functionality.
@@ -883,13 +883,13 @@ class inq_function:
 
         Parameters
         ----------
-        nsect  :  int
+        nsect : int
             Section id table number
             should be 0 for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``.
 
-        key  :  int
+        key : int
             Information flag.
 
             * ``DB_SELECTED`` - return select status
@@ -951,7 +951,7 @@ class inq_function:
 
         Parameters
         ----------
-        mat  :  int
+        mat : int
             Material number
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
@@ -962,7 +962,7 @@ class inq_function:
             If iprop = 0, test for existence of any material property with this
             material number (with key = ``DB_SELECTED(1)``).
 
-        key  :  int
+        key : int
             Key as to the information needed about material property.
 
             * ``DB_SELECTED(1)`` - return select status:
@@ -1045,10 +1045,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number
 
-        idf  :  int
+        idf : int
             Pointer to the dof (1-32)
 
             * 1 = ux,
@@ -1074,7 +1074,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = SP01-SP06
 
-        kcmplx  :  int
+        kcmplx : int
 
             * 0 = real
             * 1 = imaginary
@@ -1102,10 +1102,10 @@ class inq_function:
 
         Parameters
         ----------
-        node  :  int
+        node : int
             Node number
 
-        idf  :  int
+        idf : int
             Pointer to the dof (1-32)
 
             * 1 = ux
@@ -1131,7 +1131,7 @@ class inq_function:
             * 26 = curr
             * 27-32 = spares
 
-        kcmplx  :  int
+        kcmplx : int
 
             * 0 = real
             * 1 = imaginary
@@ -1159,7 +1159,7 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int
+        key : int
             Item to be returned.
 
             * 1 = keyerr (``ER_ERRORFLAG``)
@@ -1345,10 +1345,10 @@ class inq_function:
 
         Parameters
         ----------
-        key  :  int
+        key : int
             Key.
 
-            * 1 kprint (WR_PRINT)
+            * 1 - kprint (WR_PRINT)
               Print flag.
 
               * 0 - no output

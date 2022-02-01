@@ -62,6 +62,13 @@ using :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` :
     FINISH"""
     pycode = convert_apdl_block(apdl_string) # apdl_string can be also a list of strings.
 
+
+The script conversion functions allows some interesting arguments which can be seen in
+their respective function documentation, :func:`convert_script() <ansys.mapdl.core.convert_script>`
+and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`.
+Especially interesting are they keyword arguments ``add_imports``, ``comment_solve`` or
+``print_com``.
+
 Of particular note in the following examples is how most of the
 commands can be called as a method to the ansys object rather than
 sending a string as a command.  Additionally, take note that some
