@@ -67,89 +67,124 @@ class Materials:
             the Element Reference.  See Linear Material Properties in the
             Material Reference for more complete property label definitions:
 
-            ALPD - Mass matrix multiplier for damping.
+            ALPD
+                Mass matrix multiplier for damping.
 
-            ALPX - Secant coefficients of thermal expansion (also ALPY, ALPZ).
+            ALPX
+                Secant coefficients of thermal expansion (also ``ALPY``, ``ALPZ``).
 
-            BETD - Stiffness matrix multiplier for damping.
+            BETD
+                Stiffness matrix multiplier for damping.
 
-            Note: If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high
-            frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain.
+                .. note:: If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high
+                   frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain.
 
-            BETX - Coefficient of diffusion expansion (also BETY, BETZ)
+            BETX
+                Coefficient of diffusion expansion (also ``BETY``, ``BETZ``)
 
-            BVIS - Bulk viscosity
+            BVIS
+                Bulk viscosity
 
-            C - Specific heat
+            C
+                Specific heat
 
-            CREF - Reference concentration (may not be temperature dependent)
+            CREF
+                Reference concentration (may not be temperature dependent)
 
-            CSAT - Saturated concentration
+            CSAT
+                Saturated concentration
 
-            CTEX - Instantaneous coefficients of thermal expansion (also CTEY, CTEZ)
+            CTEX
+                Instantaneous coefficients of thermal expansion (also ``CTEY``, ``CTEZ``)
 
-            CVH - Heat coefficient at constant volume per unit of mass
+            CVH
+                Heat coefficient at constant volume per unit of mass
 
-            DENS - Mass density.
+            DENS
+                Mass density.
 
-            DMPR - Constant structural damping coefficient in full harmonic analysis or damping ratio in mode-superposition
-                   analysis.
+            DMPR
+                Constant structural damping coefficient in full harmonic analysis or damping ratio in mode-superposition
+                analysis.
 
-            DXX - Diffusivity coefficients (also DYY, DZZ)
+            DXX
+                Diffusivity coefficients (also ``DYY``, ``DZZ``)
 
-            EMIS - Emissivity.
+            EMIS
+                Emissivity.
 
-            ENTH - Enthalpy.
+            ENTH
+                Enthalpy.
 
-            EX - Elastic moduli (also EY, EZ)
+            EX
+                Elastic moduli (also ``EY``, ``EZ``)
 
-            GXY - Shear moduli (also GYZ, GXZ)
+            GXY
+                Shear moduli (also ``GYZ``, ``GXZ``)
 
-            HF - Convection or film coefficient
+            HF
+                Convection or film coefficient
 
-            KXX - Thermal conductivities (also KYY, KZZ)
+            KXX
+                Thermal conductivities (also ``KYY``, ``KZZ``)
 
-            LSST - Electric loss tangent
+            LSST
+                Electric loss tangent
 
-            LSSM - Magnetic loss tangent
+            LSSM
+                Magnetic loss tangent
 
-            MGXX - Magnetic coercive forces (also MGYY, MGZZ)
+            MGXX
+                Magnetic coercive forces (also ``MGYY``, ``MGZZ``)
 
-            MURX - Magnetic relative permeabilities (also MURY, MURZ)
+            MURX
+                Magnetic relative permeabilities (also ``MURY``, ``MURZ``)
 
-            MU - Coefficient of friction
+            MU
+                Coefficient of friction
 
-            NUXY - Minor Poisson's ratios (also NUYZ, NUXZ) (NUXY = νyx, as described in Stress-Strain Relationships in the
-                   Mechanical APDL Theory Reference)
+            NUXY
+                Minor Poisson's ratios (also ``NUYZ``, ``NUXZ``) (``NUXY`` = νyx, as described in Stress-Strain Relationships in the
+                Mechanical APDL Theory Reference)
 
-            PERX - Electric relative permittivities (also PERY, PERZ)
+            PERX
+                Electric relative permittivities (also ``PERY``, ``PERZ``)
 
-            Note:  If you enter permittivity values less than 1 for SOLID5, PLANE13, or SOLID98, the program interprets
-            the values as absolute permittivity. Values input for PLANE223, SOLID226, or SOLID227 are always interpreted as
-            relative permittivity.
+                .. note::  If you enter permittivity values less than 1 for ``SOLID5``, ``PLANE13``, or ``SOLID98``, the program interprets
+                   the values as absolute permittivity. Values input for ``PLANE223``, ``SOLID226``, or ``SOLID227`` are always interpreted as
+                   relative permittivity.
 
-            PRXY - Major Poisson's ratios (also PRYZ, PRXZ) (PRXY = νxy, as described in Stress-
-                   Strain Relationships in the Mechanical APDL Theory
-                   Reference)
+            PRXY
+                Major Poisson's ratios (also ``PRYZ``, ``PRXZ``) (``PRXY`` = νxy, as described in Stress-
+                Strain Relationships in the Mechanical APDL Theory
+                Reference)
 
-            QRATE - Heat generation rate for thermal mass element MASS71. Fraction of plastic work
-                    converted to heat (Taylor-Quinney coefficient) for coupled-
-                    field elements PLANE223, SOLID226, and SOLID227.
+            QRATE
+                Heat generation rate for thermal mass element MASS71. Fraction of plastic work
+                converted to heat (Taylor-Quinney coefficient) for coupled-
+                field elements ``PLANE223``, ``SOLID226``, and ``SOLID227``.
 
-            REFT - Reference temperature.  Must be defined as a constant; C1 through C4 are
-                   ignored.
+            REFT
+                Reference temperature.  Must be defined as a constant; ``C1`` through ``C4`` are
+                ignored.
 
-            RH - Hall Coefficient.
+            RH
+                Hall Coefficient.
 
-            RSVX - Electrical resistivities (also RSVY, RSVZ).
+            RSVX
+                Electrical resistivities (also ``RSVY``, ``RSVZ``).
 
-            SBKX - Seebeck coefficients (also SBKY, SBKZ).
+            SBKX
+                Seebeck coefficients (also ``SBKY``, ``SBKZ``).
 
-            SONC - Sonic velocity.
+            SONC
+                Sonic velocity.
 
-            THSX - Thermal strain (also THSY, THSZ).
+            THSX
+                Thermal strain (also ``THSY``, ``THSZ``).
 
-            VISC - Viscosity.
+            VISC
+                Viscosity.
 
         mat
             Material reference number to be associated with the elements
@@ -158,8 +193,8 @@ class Materials:
         c0
             Material property value, or if a property-versus-temperature
             polynomial is being defined, the constant term in the polynomial.
-            C0 can also be a table name (%tabname%); if C0 is a table name, C1
-            through C4 are ignored.
+            ``C0`` can also be a table name (``%tabname%``); if ``C0`` is a table name, ``C1``
+            through ``C4`` are ignored.
 
         c1, c2, c3, c4
             Coefficients of the linear, quadratic, cubic, and quartic terms,
@@ -175,23 +210,28 @@ class Materials:
         nonlinear material properties require multiple substeps;  see Linear
         Material Properties in the Material Reference for details.
 
-        If the constants C1 - C4 are input, the polynomial
+        If the constants ``C1`` - ``C4`` are input, the polynomial
 
-        Property = C0 + C1(T) + C2(T)2 + C3(T)3 + C4(T)4
+        .. math::
+
+           Property = C_0 + C_1(T) + C_2(T)^2 + C_3(T)^3 + C_4(T)^4
 
         is evaluated at discrete temperature points with linear interpolation
         between points (that is, a piecewise linear representation) and a
         constant-valued extrapolation beyond the extreme points. First-order
-        properties use two discrete points (±9999°). The MPTEMP or MPTGEN
+        properties use two discrete points (±9999°).
+        The :meth:`MPTEMP <ansys.mapdl.core.Mapdl.mptemp>` or
+        :meth:`MPTGEN <ansys.mapdl.core.Mapdl.mptgen>`
         commands must be used for second and higher order properties to define
         appropriate temperature steps. To ensure that the number of
-        temperatures defined via the MPTEMP and MPTGEN commands is minimally
+        temperatures defined via the :meth:`MPTEMP <ansys.mapdl.core.Mapdl.mptemp>`
+        and :meth:`MPTGEN <ansys.mapdl.core.Mapdl.mptgen>` commands is minimally
         sufficient for a reasonable representation of the curve, ANSYS
-        generates an error message if the number is less than N, and a warning
-        message if the number is less than 2N. The value N represents the
-        highest coefficient used; for example, if C3 is nonzero and C4 is zero,
+        generates an error message if the number is less than ``N``, and a warning
+        message if the number is less than ``2N``. The value ``N`` represents the
+        highest coefficient used; for example, if ``C3`` is nonzero and ``C4`` is zero,
         a cubic curve is being used which is defined using 4 coefficients so
-        that N = 4.
+        that ``N`` = 4.
         """
         command = "MP,%s,%s,%s,%s,%s,%s,%s" % (
             str(lab),

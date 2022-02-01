@@ -24,37 +24,37 @@ class inq_function:
         key : int
             key as to information needed about the node.
 
-            *  DB_SELECTED    - return select status:
+            * DB_SELECTED - return select status:
 
-              *   0 - node is undefined.
-              *  -1 - node is unselected.
-              *   1 - node is selected.
+              * 0 - node is undefined.
+              * -1 - node is unselected.
+              * 1 - node is selected.
 
-            *  ``DB_NUMDEFINED``  - return number of defined nodes
-            *  ``DB_NUMSELECTED`` - return number of selected nodes
-            *  ``DB_MAXDEFINED``  - return highest node number defined
-            *  ``DB_MAXRECLENG``  - return maximum record length (dp words)
-            *    2, return length (dp words)
-            *    3,
-            *    4, pointer to first data word
-            *   11, return void percent (integer)
-            *   17, pointer to start of index
-            *  117, return the maximum number of DP contact data stored for any node
-            *   -1,
-            *   -2, superelement flag
-            *   -3, master dof bit pattern
-            *   -4, active dof bit pattern
-            *   -5, solid model attachment
-            *   -6, pack nodal line parametric value
-            *   -7, constraint bit pattern
-            *   -8, force bit pattern
-            *   -9, body force bit pattern
-            *  -10, internal node flag
-            *  -11, orientation node flag =1 is =0 is not
-            *  -11, contact node flag <0
-            *  -12, constraint bit pattern (for ``DSYM``)
-            *  -13, if dof constraint written to file.k (for ``LSDYNA`` only)
-            *  -14, nodal coordinate system number (set by ``NROTATE``)
+            * ``DB_NUMDEFINED`` - return number of defined nodes
+            * ``DB_NUMSELECTED`` - return number of selected nodes
+            * ``DB_MAXDEFINED`` - return highest node number defined
+            * ``DB_MAXRECLENG`` - return maximum record length (dp words)
+            * 2, return length (dp words)
+            * 3,
+            * 4, pointer to first data word
+            * 11, return void percent (integer)
+            * 17, pointer to start of index
+            * 117, return the maximum number of DP contact data stored for any node
+            * -1,
+            * -2, superelement flag
+            * -3, master dof bit pattern
+            * -4, active dof bit pattern
+            * -5, solid model attachment
+            * -6, pack nodal line parametric value
+            * -7, constraint bit pattern
+            * -8, force bit pattern
+            * -9, body force bit pattern
+            * -10, internal node flag
+            * -11, orientation node flag =1 is =0 is not
+            * -11, contact node flag <0
+            * -12, constraint bit pattern (for ``DSYM``)
+            * -13, if dof constraint written to file.k (for ``LSDYNA`` only)
+            * -14, nodal coordinate system number (set by ``NROTATE``)
             * -101, pointer to node data record
             * -102, pointer to angle record
             * -103,
@@ -76,7 +76,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -107,55 +107,55 @@ class inq_function:
         key : int
             information flag.
 
-            *  DB_SELECTED    - return select status:                (1)
+            * DB_SELECTED - return select status:  (1)
 
-              *  0 - element is undefined.
+              * 0 - element is undefined.
               * -1 - element is unselected.
-              *  1 - element is selected.
+              * 1 - element is selected.
 
-            *  ``DB_NUMDEFINED``  - return number of defined elements    (12)
-            *  ``DB_NUMSELECTED`` - return number of selected elements   (13)
-            *  ``DB_MAXDEFINED``  - return maximum element number used   (14)
-            *  ``DB_MAXRECLENG``  - return maximum record length         (15)
-            *  2 - return length (int words)
-            *  3 - return layer number (for cross reference files return number of entities)
-            *  4 - return address of first data word
-            *  5 - return length (in record type units)
-            *  6 - return compressed record number.
-            *  11 - return void percent (integer)
-            *  16 - return location of next record (this increments the next record count)
-            *  17 - pointer to start of index
-            *  18 - return type of file.
+            * ``DB_NUMDEFINED`` - return number of defined elements (12)
+            * ``DB_NUMSELECTED`` - return number of selected elements (13)
+            * ``DB_MAXDEFINED`` - return maximum element number used (14)
+            * ``DB_MAXRECLENG`` - return maximum record length (15)
+            * 2 - return length (int words)
+            * 3 - return layer number (for cross reference files return number of entities)
+            * 4 - return address of first data word
+            * 5 - return length (in record type units)
+            * 6 - return compressed record number.
+            * 11 - return void percent (integer)
+            * 16 - return location of next record (this increments the next record count)
+            * 17 - pointer to start of index
+            * 18 - return type of file.
 
-              *  0 - integer
-              *  1 - double precision
-              *  2 - real
-              *  3 - complex
-              *  4 - character\*8
-              *  7 - index
+              * 0 - integer
+              * 1 - double precision
+              * 2 - real
+              * 3 - complex
+              * 4 - character\*8
+              * 7 - index
 
-            *  19 - return virtual type of file.
+            * 19 - return virtual type of file.
 
-              *  0 - fixed length (4.4 form)
-              *  1 - indexed variable length (layer data)
-              *  2 - xref data tables
-              *  3 - bitmap data (for 32 data item packed records)
-              *  4 - data tables (three dimensional arrays)
+              * 0 - fixed length (4.4 form)
+              * 1 - indexed variable length (layer data)
+              * 2 - xref data tables
+              * 3 - bitmap data (for 32 data item packed records)
+              * 4 - data tables (three dimensional arrays)
 
-            *  111 - return the maximum number of nodes stored for any element
-            *  123 - return the maximum number of DP contact data stored for any element
-            *  -1 - material number           ( = -EL_MAT)
-            *  -2 - element type              ( = -EL_TYPE)
-            *  -3 - real constant number      ( = -EL_REAL)
-            *  -4 - element section ID number ( = -EL_SECT)
-            *  -5 - coordinate system number  ( = -EL_CSYS)
+            * 111 - return the maximum number of nodes stored for any element
+            * 123 - return the maximum number of DP contact data stored for any element
+            * -1 - material number ( ``= -EL_MAT``)
+            * -2 - element type ( ``= -EL_TYPE``)
+            * -3 - real constant number ( ``= -EL_REAL``)
+            * -4 - element section ID number ( ``= -EL_SECT``)
+            * -5 - coordinate system number ( ``= -EL_CSYS``)
             * -101 - pointer to element integers etc.
 
         pname : str
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -185,9 +185,9 @@ class inq_function:
 
             * 1 - return select
 
-              *  -1 - unselected
-              *   0 - undefined
-              *   1 - selected
+              * -1 - unselected
+              * 0 - undefined
+              * 1 - selected
 
             * 2 - return length (data units)
             * 3 - return layer number
@@ -254,7 +254,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -290,7 +290,7 @@ class inq_function:
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12  return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length
@@ -316,8 +316,8 @@ class inq_function:
             * -14, orientation kpb
             * -15, section id
             * -16, # of elem divs for next mesh
-            * -17, 0=hard / 1=soft NDIV
-            * -18, 0=hard / 1=soft SPACE
+            * -17, 0=hard / 1=soft ``NDIV``
+            * -18, 0=hard / 1=soft ``SPACE``
             * -101, pointer to line segment data
             * -102,
             * -103,
@@ -339,7 +339,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -379,7 +379,7 @@ class inq_function:
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12  return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length
@@ -427,16 +427,16 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
         int or str
-            For ``key=1``:
+          For key=1
 
-            * 0 = ``anmi`` is undefined.
-            * -1 = ``anmi`` is unselected.
-            * 1 = ``anmi`` is selected.
+          * 0 = ``anmi`` is undefined.
+          * -1 = ``anmi`` is unselected.
+          * 1 = ``anmi`` is selected.
 
           For key not equal to 1, the returned data is based
           on setting of key.
@@ -466,7 +466,7 @@ class inq_function:
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12  return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length (data units)
@@ -479,10 +479,10 @@ class inq_function:
             * -6, number of elements.
             * -7, pointer to volume in foreign db
             * -8, element shape.
-            * -9, (section id)\*10 + 2
+            * -9, (``section id``)\*10 + 2
             * -10, element coordinate system.
             * -11, KZ2 - 2nd kpt for elem Z
-            * -12, color and translucancy packed
+            * -12, color and transparency packed
             * -101, pointer volume data file.
             * -102,
             * -103,
@@ -500,7 +500,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -535,24 +535,24 @@ class inq_function:
         key : int
             Information flag.
 
-            * 5 - return number of values stored for nreal.
+            * 5 - return number of values stored for ``nreal``.
               Return the REAL set width (number of fields)
-            * ``DB_SELECTED``    - return select status
+            * ``DB_SELECTED`` - return select status
 
               * 0 - real constant table is undefined.
               * -1 - real constant table is unselected.
               * 1 - real constant table is selected
 
-            * ``DB_NUMDEFINED``  - return number of defined real constant tables
+            * ``DB_NUMDEFINED`` - return number of defined real constant tables
             * ``DB_NUMSELECTED`` - return number of selected real constant tables
-            * ``DB_MAXDEFINED``  - return highest real constant table defined
-            * ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            * ``DB_MAXDEFINED`` - return highest real constant table defined
+            * ``DB_MAXRECLENG`` - return maximum record length (dp words)
 
         pname : str
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -582,7 +582,7 @@ class inq_function:
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12  return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length (data units)
@@ -591,7 +591,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -620,7 +620,7 @@ class inq_function:
             * 2, return length (data units)
             * 3,
             * 11, return void percent (integer)
-            * 12  return number of defined
+            * 12, return number of defined
             * 13, return number of selected
             * 14, return highest number defined
             * 15, return maximum record length (data units)
@@ -629,11 +629,11 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
-        masiqr  int
+        int
             Returned data is based on setting of key.
         """
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
@@ -657,19 +657,19 @@ class inq_function:
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and
             ``DB_MAXRECLENG``
 
-            * DB_SELECTED - return select status
+            * ``DB_SELECTED`` - return select status
 
               * 1 - equation is selected
               * 0 - equation is undefined
               * -1 - equation is unselected
 
-            * ``DB_NUMDEFINED``  - return number of defined constraint
+            * ``DB_NUMDEFINED`` - return number of defined constraint
               equations.
             * ``DB_NUMSELECTED`` - return number of selected constraint
               equations.
-            * ``DB_MAXDEFINED``  - return number of highest numbered
+            * ``DB_MAXDEFINED`` - return number of highest numbered
               constraint equation defined.
-            * ``DB_MAXRECLENG``  - return length of longest constraint
+            * ``DB_MAXRECLENG`` - return length of longest constraint
               equation set (max record length)
             * 2 - return length (data units)
             * 3 - return layer number
@@ -677,14 +677,14 @@ class inq_function:
             * 5 - return number of values stored for nce
             * 11 - return void percent (integer)
             * 16 - return location of next record
-            * ``CE_NONLINEAR``   - return 1 if CE is nonlinear
-            * ``CE_ELEMNUMBER``  - return associated element number
+            * ``CE_NONLINEAR`` - return 1 if CE is nonlinear
+            * ``CE_ELEMNUMBER`` - return associated element number
 
         pname : str
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -710,7 +710,7 @@ class inq_function:
             Inquiry key. It should be zero for key=11, ``DB_NUMDEFINED``,
             ``DB_NUMSELECTED``, ``DB_MAXDEFINED``, and ``DB_MAXRECLENG``
 
-            * ``DB_SELECTED`` - return select status:
+            * ``DB_SELECTED`` - return select status
 
               * 1 - coupled set is selected
               * 0 - coupled set in undefined
@@ -728,14 +728,13 @@ class inq_function:
             * 5 - return number of values stored for ncp
             * 11 - return void percent (integer)
             * 16 - return location of next record
-            * -1 - return master node for this eqn (this is
-              currently only used by solution DB object)
+            * \-1 - return master node for this eqn (this is currently only used by solution DB object)
 
         pname : str
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -769,15 +768,15 @@ class inq_function:
               * -1 - coordinate system is not selected
               * 1 - coordinate system is selected
 
-            * ``DB_NUMDEFINED``  - number of defined coordinate systems
-            * ``DB_MAXDEFINED``  - maximum coordinate system reference
+            * ``DB_NUMDEFINED`` - number of defined coordinate systems
+            * ``DB_MAXDEFINED`` - maximum coordinate system reference
               number used.
 
         pname : str
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -805,20 +804,20 @@ class inq_function:
         key : int
             Information flag.
 
-            * DB_SELECTED    - return select status:
+            * ``DB_SELECTED`` - return select status:
 
               * 0 - element type is undefined.
               * -1 - element type is unselected.
               * 1 - element type is selected.
 
-            * ``DB_NUMDEFINED``  - return number of defined element types
+            * ``DB_NUMDEFINED`` - return number of defined element types
             * ``DB_NUMSELECTED`` - return number of selected element types
-            * ``DB_MAXDEFINED``  - return highest element type number defined
-            * ``DB_MAXRECLENG``  - return maximum record length (int words)
-            * ``-n``, return element characteristic n from ``etycom`` for
-              element type itype. ``n`` is correlated to the parameter names in
-              ``echprm``.  see ``elccmt`` for definitions of element
-              characteristics.
+            * ``DB_MAXDEFINED`` - return highest element type number defined
+            * ``DB_MAXRECLENG`` - return maximum record length (int words)
+            * ``-n``- return element characteristic n from ``etycom`` for element
+              type itype.
+              ``n`` is correlated to the parameter names in ``echprm``.
+              see ``elccmt`` for definitions of element characteristics.
 
               .. note:: This will not overwrite the current setting of
                         ``etycom``.
@@ -827,7 +826,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -848,15 +847,15 @@ class inq_function:
         ----------
         node : int
             Number of node being inquired about.
-            should be 0 for key=``DB_MAXDEFINED`` or
+            should be 0 for key = ``DB_MAXDEFINED`` or
             ``DB_NUMDEFINED``.
 
         key : float
             Key as to information needed
 
-            * 1              - return force mask for node
-            * ``DB_MAXDEFINED``, - return number of nodal loadings in model.
-            * ``DB_NUMDEFINED``.  - return number of nodal loadings in model.
+            * 1 - return force mask for node
+            * ``DB_MAXDEFINED`` - return number of nodal loadings in model.
+            * ``DB_NUMDEFINED`` - return number of nodal loadings in model.
 
             .. note:: Both ``DB_MAXDEFINED`` and ``DB_NUMDEFINED``, produce the
                      same functionality.
@@ -865,7 +864,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -892,16 +891,17 @@ class inq_function:
 
         key : int
             Information flag.
-            * DB_SELECTED - return select status
 
-              * 0 - section id table is undefined.
+            * ``DB_SELECTED`` - return select status
+
+              * 0 - ection id table is undefined.
               * -1 - section id table is unselected.
               * 1 - section id table is selected
 
-            * ``DB_NUMDEFINED``  - return number of defined section id tables
+            * ``DB_NUMDEFINED`` - return number of defined section id tables
             * ``DB_NUMSELECTED`` - return number of selected section id tables
-            * ``DB_MAXDEFINED``  - return highest section id table defined
-            * ``DB_MAXRECLENG``  - return maximum record length (dp words)
+            * ``DB_MAXDEFINED`` - return highest section id table defined
+            * ``DB_MAXRECLENG`` - return maximum record length (dp words)
             * 2 - return length (dp words)
             * 3 - return layer number (for cross reference files return number
               of entities)
@@ -912,13 +912,16 @@ class inq_function:
             * 16 - return location of next record (this increments the next
               record count)
             * 18 - return type of file.
+
               * 0 - integer
               * 1 - double precision
               * 2 - real
               * 3 - complex
               * 4 - character*8
               * 7 - index
+
             * 19 - return virtual type of file.
+
               * 0 - fixed length (4.4 form)
               * 1 - indexed variable length (layer data)
               * 2 - xref data tables
@@ -929,7 +932,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -938,7 +941,7 @@ class inq_function:
         """
         return self.run(f"{pname} = sectinqr({nsect}, {key})", **kwargs)
 
-    def mpinqr(self, mat,  iprop,  key, pname='__tmpvar__', **kwargs):
+    def mpinqr(self, mat, iprop, key, pname='__tmpvar__', **kwargs):
         """Get information about a material property.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -953,43 +956,16 @@ class inq_function:
             should be 0 for key=11, ``DB_NUMDEFINED(12)``,
             ``DB_MAXDEFINED(14)``, and ``DB_MAXRECLENG(15)``.
 
-        iprop : int
-            Property reference number (See notes).
+        iprop  :  int
+            Property reference number (See Table-1_ in the Notes section).
 
             If iprop = 0, test for existence of any material property with this
-            material number (with key = DB_SELECTED(1)).
-
-            .. seealso:: **MP command labels**
-
-                EX  = 1, EY  = 2, EZ  = 3, NUXY= 4, NUYZ= 5, NUXZ= 6, GXY = 7, GYZ = 8
-
-                GXZ = 9, ALPX=10, ALPY=11, ALPZ=12, DENS=13, MU  =14, DAMP=15, KXX =16
-
-                KYY =17, KZZ =18, RSVX=19, RSVY=20, RSVZ=21,     =22, HF  =23, VISC=24
-
-                EMIS=25, ENTH=26, LSST=27, PRXY=28, PRYZ=29, PRXZ=30, MURX=31, MURY=32
-
-                MURZ=33, PERX=34, PERY=35, PERZ=36, MGXX=37, MGYY=38, MGZZ=39, EGXX=40
-
-                EGYY=41, EGZZ=42, SBKX=43, SBKY=44, SBKZ=45, SONC=46, DMPS=47, ELIM=48
-
-                USR1=49, USR2=50, USR3=51, USR4=51, FLUI=53, ORTH=54, CABL=55, RIGI=56
-
-                HGLS=57, BVIS=58, QRAT=59, REFT=60, CTEX=61, CTEY=62, CTEZ=63, THSX=64,
-
-                THSY=65, THSZ=66, DMPR=67, LSSM=68, BETD=69, ALPD=70, RH  =71, DXX =72,
-
-                DYY =73, DZZ =74, BETX=75, BETY=76, BETZ=77, CSAT=78, CREF=79, CVH =80,
-
-                UMID=81, UVID=82
-
-
-                (see ``TB`` command for more information)
+            material number (with key = ``DB_SELECTED(1)``).
 
         key : int
             Key as to the information needed about material property.
 
-            * ``DB_SELECTED(1)``- return select status:
+            * ``DB_SELECTED(1)`` - return select status:
 
               * 0 - material prop is undefined.
               * 1 - material prop is selected.
@@ -1005,17 +981,61 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
         int or str
             Returned value of ``mpinqr`` is based on setting of key.
 
+        Notes
+        -----
+
+        The material properties are obtained from the :meth:`MP <ansys.mapdl.core.Mapdl.mp>` command labels,
+        which are detailed below:
+
+        **MP command labels**
+
+        .. _Table-1:
+
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | Property | Key | Property | Key | Property | Key | Property | Key | Property | Key | Property | Key |
+        +==========+=====+==========+=====+==========+=====+==========+=====+==========+=====+==========+=====+
+        | EX       | 1   | DAMP     | 15  | PRYZ     | 29  | SBKX     | 43  | HGLS     | 57  | RH       | 71  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | EY       | 2   | KXX      | 16  | PRXZ     | 30  | SBKY     | 44  | BVIS     | 58  | DXX      | 72  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | EZ       | 3   | KYY      | 17  | MURX     | 31  | SBKZ     | 45  | QRAT     | 59  | DYY      | 73  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | NUXY     | 4   | KZZ      | 18  | MURY     | 32  | SONC     | 46  | REFT     | 60  | DZZ      | 74  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | NUYZ     | 5   | RSVX     | 19  | MURZ     | 33  | DMPS     | 47  | CTEX     | 61  | BETX     | 75  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | NUXZ     | 6   | RSVY     | 20  | PERX     | 34  | ELIM     | 48  | CTEY     | 62  | BETY     | 76  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | GXY      | 7   | RSVZ     | 21  | PERY     | 35  | USR1     | 49  | CTEZ     | 63  | BETZ     | 77  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | GYZ      | 8   |          | 22  | PERZ     | 36  | USR2     | 50  | THSX     | 64  | CSAT     | 78  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | GXZ      | 9   | HF       | 23  | MGXX     | 37  | USR3     | 51  | THSY     | 65  | CREF     | 79  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | ALPX     | 10  | VISC     | 24  | MGYY     | 38  | USR4     | 51  | THSZ     | 66  | CVH      | 80  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | ALPY     | 11  | EMIS     | 25  | MGZZ     | 39  | FLUI     | 53  | DMPR     | 67  | UMID     | 81  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | ALPZ     | 12  | ENTH     | 26  | EGXX     | 40  | ORTH     | 54  | LSSM     | 68  | UVID     | 82  |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | DENS     | 13  | LSST     | 27  | EGYY     | 41  | CABL     | 55  | BETD     | 69  |          |     |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+        | MU       | 14  | PRXY     | 28  | EGZZ     | 42  | RIGI     | 56  | ALPD     | 70  |          |     |
+        +----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+----------+-----+
+
+        see :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command for more information.
+
         """
         return self.run(f"{pname} = mpinqr({mat}, {iprop}, {key})", **kwargs)
 
-    def dget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
+    def dget(self, node, idf, kcmplx, pname='__tmpvar__', **kwargs):
         """Get a constraint from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1063,7 +1083,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -1072,7 +1092,7 @@ class inq_function:
         """
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
 
-    def fget(self, node,  idf,  kcmplx, pname='__tmpvar__', **kwargs):
+    def fget(self, node, idf, kcmplx, pname='__tmpvar__', **kwargs):
         """Get a force load from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1120,14 +1140,14 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
         float
             Force value (high number if undefined)
         """
-        return self.run(f"{pname} = fget({node},  {idf}, {kcmplx})", **kwargs)
+        return self.run(f"{pname} = fget({node}, {idf}, {kcmplx})", **kwargs)
 
     def erinqr(self, key, pname='__tmpvar__', **kwargs):
         """Obtain information from common errors.
@@ -1142,31 +1162,51 @@ class inq_function:
         key : int
             Item to be returned.
 
-            * 1 = keyerr (ER_ERRORFLAG)
+            * 1 = keyerr (``ER_ERRORFLAG``)
+
               Master error flag.
-            * 2 = errfil (ER_ERRORFILE)
+
+            * 2 = errfil (``ER_ERRORFILE``)
+
               Errors file unit number.
-            * 3 = numnot (ER_NUMNOTE)
+
+            * 3 = numnot (``ER_NUMNOTE``)
+
               Total number of notes displayed.
-            * 4 = numwrn (ER_NUMWARNING)
+
+            * 4 = numwrn (``ER_NUMWARNING``)
+
               Total number of warnings displayed.
-            * 5 = numerr (ER_NUMERROR)
+
+            * 5 = numerr (``ER_NUMERROR``)
+
               Total number of errors displayed.
-            * 6 = numfat (ER_NUMFATAL)
+
+            * 6 = numfat (``ER_NUMFATAL``)
+
               Total number of fatals displayed.
-            * 7 = maxmsg (ER_MAXMESSAGE)
+
+            * 7 = maxmsg (``ER_MAXMESSAGE``)
+
               Max allowed number of displayed messages before abort.
-            * 8 = lvlerr (ER_ERRORLEVEL)
+
+            * 8 = lvlerr (``ER_ERRORLEVEL``)
+
               Used basically in solution (from ``cnvr`` command.)
 
               * -1 = do not set keyerr for notes/errors/warnings.
               * -2 = same as -1 but do not display message either.
 
-            * 9 = mxpcmd (ER_MAXCOMMAND)
+            * 9 = mxpcmd (``ER_MAXCOMMAND``)
+
               Maximum number of messages allowed per command.
-            * 10 = nercmd (ER_NUMCOMMAND)
+
+            * 10 = nercmd (``ER_NUMCOMMAND``)
+
               Number of messages displayed for any one command.
-            * 11 = nertim (ER_UICLEAR)
+
+            * 11 = nertim (``ER_UICLEAR``)
+
               Key as to how message cleared from u/i pop-up (only for "info"
               calls)
 
@@ -1174,93 +1214,106 @@ class inq_function:
               * 0 = message needs pick or keyboard before removal
               * 1 = message stays up until replaced by another message
 
-            * 12 = nomore  (ER_NOMOREMSG)
+            * 12 = nomore (``ER_NOMOREMSG``)
+
               Display no more messages
 
               * 0 = display messages
               * 1 = display discontinue message and stop displaying
 
-            * 13 = eropen   (ER_FILEOPEN)
+            * 13 = eropen (``ER_FILEOPEN``)
 
               * 0 = errors file is closed
               * 1 = errors file is opened
 
-            * 14 = ikserr (ER_INTERERROR)
+            * 14 = ikserr (``ER_INTERERROR``)
 
               * 0 = if interactive do not set keyerr.
               * -1 = if interactive set keyerr (used by mesher and tessalation)
 
-            * 15 = kystat (ER_KEYOPTTEST)
+            * 15 = kystat (``ER_KEYOPTTEST``)
+
               Flag to bypass keyopt tests in the elcxx routines associated with
               status/panel info inquiries.
 
               * 0 = do not bypass keyopt tests
               * 1 = perform all keyopt tests also flag to bypass setting of
-                _STATUS upon resume
+                ``_STATUS`` upon resume
 
-            * 16 = mxr4r5   (ER_MIXEDREV)
-              mixed rev4-rev5 input logic (\*do,\*if, \*go, \*if-go)
+            * 16 = mxr4r5 (``ER_MIXEDREV``)
 
-              * 1 = rev5 found (\*do,\*fi-then-\*endif)
-              * 2 = rev4 found (\*go,:xxx,\*if, ...., :xxx)
+              Mixed rev4-rev5 input logic (``*do``, ``*if`` , ``*go`` , ``*if-go``)
+
+              * 1 = rev5 found (``*do``, ``*fi-then-*endif``)
+              * 2 = rev4 found (``*go``, ``:xxx`` , ``*if``, ...., ``:xxx``)
               * 3 = warning printed. do not issue any more.
 
-            * 17 = mshkey    (ER_MESHING)
+            * 17 = mshkey (``ER_MESHING``)
+
               CPU intensive meshing etc.
-              This will cause "nertim (11)" to be set to -1 for "notes", 1 for
-              "warnings",and 0 for "errors".
-              Checking of this key is done in "anserr".
+              This will cause ``nertim (11)`` to be set to ``-1`` for "notes", ``1`` for
+              "warnings",and ``0`` for "errors".
+              Checking of this key is done in ``anserr``.
 
               * 0 = not meshing or cpu intensive
               * 1 = yes, meshing or cpu intensive
 
-            * 18 = syerro            (18)
-              systop error code. read by anserr if set.
-            * 19 = opterr (ER_OPTLOOPING)
+            * 18 = syerro (18)
+
+              Systop error code. read by anserr if set.
+
+            * 19 = opterr (``ER_OPTLOOPING``)
 
               * 0 = no error in main ansys during opt looping
               * 1 = an error has happened in main ansys during opt looping
 
-            * 20 = flowrn            (20)
+            * 20 = flowrn (20)
+
               Flag used by "floqa" as to list ``floqa.ans``.
 
               * 0 = list ``floqa.ans``
               * 1 = ``floqa.ans`` has been listed. do not list again.
 
             * 22 = noreport (22)
+
               Used in GUI for turning off errors due to strsub calls.
 
               * 0 = process errors as usual
-              * 1 = do NOT report errors
+              * 1 = do **NOT** report errors
 
-            * 23 = pdserr (ER_PDSLOOPING)
+            * 23 = pdserr (``ER_PDSLOOPING``)
 
               * 0 = no error in main ansys during pds looping
               * 1 = an error has happened in main ansys during pds looping
 
             * 24 = mxpcmdw (24)
+
               Number of messages written to file.err for any command
 
               * 0 = write all errors to file.err
               * 1 = only write displayed errors to file.err
 
             * 25 = kystop
+
               No information is provided.
 
             * 26 = icloads (26)
-              K key to forbid the ``iclist`` command from listing solution data
+
+              Key to forbid the ``iclist`` command from listing solution data
               instead of the input data.
 
               * 0 = ``iclist`` is OK
               * 1 = do not permit ``iclist``
 
-            * 27 = ifkey   error     (27)
-              key on whether or not to abort during ``/input`` on error.
+            * 27 = ifkey error (27)
+
+              key on whether or not to abort during :meth:`/input <ansys.mapdl.core.Mapdl.input>` on error.
 
               * 0 = do not abort
               * 1 = abort
 
-            * 28 = intrupt  (ER_INTERRUPT)
+            * 28 = intrupt (``ER_INTERRUPT``)
+
               Interrupt button, so executable returns no error.
 
             * spare - spare integer variables
@@ -1269,7 +1322,7 @@ class inq_function:
             Name of the variable where the queried value is stored.
 
         **kwargs
-            Extra arguments to be passed to ``Mapdl.run``.
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Returns
         -------
@@ -1327,7 +1380,7 @@ class inq_function:
               * 2 - using F format in output.
               * 3 - using G format in output.
 
-            * 15 -  (WR_TEMPLINEBATCH)
+            * 15 - (WR_TEMPLINEBATCH)
               Undocumented (50 default).
             * 16 - keyhed (WR_SUPTITLE)
               Tlabel suppress key.

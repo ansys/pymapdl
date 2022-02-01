@@ -26,92 +26,247 @@ class MaterialDataTables:
         lab
             Material model data table type:
 
-            AFDM - Acoustic frequency-dependent material.
+            AFDM
+                Acoustic frequency-dependent material.
 
-            AHYPER - Anisotropic hyperelasticity.
+            AHYPER
+                Anisotropic hyperelasticity.
 
-            ANEL - Anisotropic elasticity.
+            ANEL
+                Anisotropic elasticity.
 
-            ANISO - Anisotropic plasticity.
+            ANISO
+                Anisotropic plasticity.
 
-            BB - Bergstrom-Boyce.
+            BB
+                Bergstrom-Boyce.
 
-            BH - Magnetic field data.
+            BH
+                Magnetic field data.
 
-            BISO - Bilinear isotropic hardening using von Mises or Hill plasticity.
+            BISO
+                Bilinear isotropic hardening using von Mises or Hill plasticity.
 
-            BKIN - Bilinear kinematic hardening using von Mises or Hill plasticity.
+            BKIN
+                Bilinear kinematic hardening using von Mises or Hill plasticity.
 
-            CAST - Cast iron.
+            CAST
+                Cast iron.
 
-            CDM - Mullins effect (for isotropic hyperelasticity models).
+            CDM
+                Mullins effect (for isotropic hyperelasticity models).
 
-            CGCR - Fracture criterion for crack-growth simulation (CGROW).
+            CGCR
+                Fracture criterion for crack-growth simulation (``CGROW``).
 
-            CHABOCHE - Chaboche nonlinear kinematic hardening using von Mises or Hill plasticity.
+            CHABOCHE
+                Chaboche nonlinear kinematic hardening using von Mises or Hill plasticity.
 
-            COMP - Composite damage (explicit dynamic analysis).
+            COMP
+                Composite damage (explicit dynamic analysis).
 
-            CONCR - Concrete element data.
+            CONCR
+                Concrete element data.
 
-            CREEP - Creep. Pure creep, creep with isotropic hardening plasticity, or creep with
-                    kinematic hardening plasticity using both von Mises or Hill
-                    potentials.
+            CREEP
+                Creep. Pure creep, creep with isotropic hardening plasticity, or creep with
+                kinematic hardening plasticity using both von Mises or Hill
+                potentials.
 
-            CTE - Secant coefficient of thermal expansion.
+            CTE
+                Secant coefficient of thermal expansion.
 
-            CZM - Cohesive zone.
+            CZM
+                Cohesive zone.
 
-            DISCRETE - Explicit spring-damper (discrete).
+            DISCRETE
+                Explicit spring-damper (discrete).
 
-            DMGE - Damage evolution law.
+            DMGE
+                Damage evolution law.
 
-            DMGI - Damage initiation criteria.
+            DMGI
+                Damage initiation criteria.
 
-            DP - Classic Drucker-Prager plasticity.
+            DP
+                Classic Drucker-Prager plasticity.
 
-            DPER - Anisotropic electric permittivity.
+            DPER
+                Anisotropic electric permittivity.
 
-            EDP - Extended Drucker-Prager (for granular materials such as rock, concrete, soil,
-                  ceramics and other pressure-dependent materials).
+            EDP
+                Extended Drucker-Prager (for granular materials such as rock, concrete, soil,
+                ceramics and other pressure-dependent materials).
 
-            ELASTIC - Elasticity. For full harmonic analyses, properties can be defined as frequency-
-                      or temperature-dependent (TBFIELD).
+            ELASTIC
+                Elasticity. For full harmonic analyses, properties can be defined as frequency-
+                or temperature-dependent (:meth:`TBFIELD <ansys.mapdl.core.Mapdl.tbfield>`).
 
-            EOS - Equation of state (explicit dynamic analysis).
+            EOS
+                Equation of state (explicit dynamic analysis).
 
-            EVISC - Viscoelastic element data (explicit dynamic analysis).
+            EVISC
+                Viscoelastic element data (explicit dynamic analysis).
 
-            EXPE - Experimental data.
+            EXPE
+                Experimental data.
 
-            FCON - Fluid conductance data (explicit dynamic analysis).
+            FCON
+                Fluid conductance data (explicit dynamic analysis).
 
-            FCLI - Material strength limits for calculating failure criteria.
+            FCLI
+                Material strength limits for calculating failure criteria.
 
-            FLUID - Fluid.
+            FLUID
+                Fluid.
 
-            FOAM - Foam (explicit dynamic analysis).
+            FOAM
+                Foam (explicit dynamic analysis).
 
-            FRIC - Coefficient of friction based on Coulomb's Law or user-defined friction.
+            FRIC
+                Coefficient of friction based on Coulomb's Law or user-defined friction.
 
-            GASKET - Gasket.
+            GASKET
+                Gasket.
 
-            GCAP - Geological cap (explicit dynamic analysis).
+            GCAP
+                Geological cap (explicit dynamic analysis).
 
-            GURSON - Gurson pressure-dependent plasticity for porous metals.
+            GURSON
+                Gurson pressure-dependent plasticity for porous metals.
 
-            HFLM - Film coefficient data.
+            HFLM
+                Film coefficient data.
 
-            HILL - Hill anisotropy. When combined with other material options, simulates
-                   plasticity, viscoplasticity, and creep -- all with the Hill
-                   potential.
+            HILL
+                Hill anisotropy. When combined with other material options, simulates
+                plasticity, viscoplasticity, and creep -- all with the Hill
+                potential.
 
-            HONEY - Honeycomb (explicit dynamic analysis).
+            HONEY
+                Honeycomb (explicit dynamic analysis).
 
-            HYPER - Hyperelasticity material models (Arruda-Boyce, Blatz-Ko, Extended Tube, Gent,
-                    Mooney-Rivlin [default], Neo-Hookean, Ogden, Ogden Foam,
-                    Polynomial Form, Response Function, Yeoh, and user-
-                    defined).
+            HYPER
+                Hyperelasticity material models (Arruda-Boyce, Blatz-Ko, Extended Tube, Gent,
+                Mooney-Rivlin [default], Neo-Hookean, Ogden, Ogden Foam,
+                Polynomial Form, Response Function, Yeoh, and user-
+                defined).
+
+            INTER
+                Contact interaction.
+
+            JOIN
+                Joint (linear and nonlinear elastic stiffness, linear and nonlinear damping, and frictional behavior).
+
+            JROCK
+                Jointed rock.
+
+            MC
+                Mohr-Coulomb.
+
+            MELAS
+                Multilinear elasticity .
+
+            MIGR
+                Migration.
+
+            MPLANE
+                Microplane.
+
+            NLISO
+                Voce isotropic hardening law (or power law) for modeling nonlinear isotropic
+                hardening using von Mises or Hill plasticity.
+
+            PELAS
+                Porous elasticity.
+
+            PERF
+                Perforated material for acoustics; equivalent fluid model of perforated media,
+                poroelastic material model, and transfer admittance matrix.
+
+            PIEZ
+                Piezoelectric matrix.
+
+            PLASTIC
+                Nonlinear plasticity.
+
+            PM
+                Porous media. Coupled pore-fluid diffusion and structural model of porous media.
+
+            PRONY
+                Prony series constants for viscoelastic materials.
+
+            PZRS
+                Piezoresistivity.
+
+            RATE
+                Rate-dependent plasticity (viscoplasticity) when combined with the ``BISO``, ``NLISO`` or
+                ``PLASTIC`` material options, or rate-dependent anisotropic plasticity (anisotropic viscoplasticity)
+                when combined with the HILL and ``BISO``, ``NLISO`` or ``PLASTIC`` material options.
+
+                The exponential visco-hardening option includes an explicit function for directly defining
+                static yield stresses of materials.
+                The Anand unified plasticity option requires no combination with other material models.
+
+            SDAMP
+                Material damping coefficients.
+
+            SHIFT
+                Shift function for viscoelastic materials.
+
+            SMA
+                Shape memory alloy for simulating hysteresis superelastic behavior with no performance degradation.
+                Plane stress is not supported.
+
+            SOIL
+                Soil models.
+
+            STATE
+                User-defined state variables. Valid with ``TB,USER`` and used with either the UserMat
+                or UserMatTh subroutine. Also valid with ``TB,CREEP`` (when ``TBOPT`` = 100) and used with
+                the UserCreep subroutine.
+
+            SWELL
+                Swelling strain function.
+
+            TNM
+                Three-network model for viscoplastic materials.
+
+            THERM
+                Thermal properties.
+
+            USER
+                User-defined material model (general-purpose except for incompressible material
+                models) or thermal material model.
+
+            WEAR
+                Contact surface wear.
+
+            XTAL
+                Crystal plasticity for elasto-viscoplastic crystalline materials.
+
+        MATID
+            Material reference identification number. Valid value is any number ``n``, where 0 < ``n`` < 100,000. Default
+            = 1.
+
+        NTEMP
+            The number of temperatures for which data will be provided (if applicable). Specify temperatures
+            via the :meth:`TBTEMP <ansys.mapdl.core.Mapdl.tbtemp>` command.
+
+        NPTS
+            For most labels where ``NPTS`` is defined, the number of data points to be specified for a given
+            temperature. Define data points via the :meth:`TBDATA <ansys.mapdl.core.Mapdl.tbdata>` or :meth:`TBPT <ansys.mapdl.core.Mapdl.tbpt>`
+            commands.
+
+        FuncName
+            The name of the function to be used (entered as %tabname%, where tabname is the name of
+            the table created by the Function Tool). Valid only when Lab = ``JOIN`` (joint element material) and
+            nonlinear stiffness or damping are specified on the ``TBOPT`` field (see "JOIN -- Joint Element Specifications").
+            The function must be predefined via the Function Tool. To learn more about how
+            to create a function, see Using the Function Tool in the Basic Analysis Guide
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
         """
         command = "TB,%s,%s,%s,%s,%s,%s,%s" % (
             str(lab),
@@ -132,7 +287,7 @@ class MaterialDataTables:
         Parameters
         ----------
         lab
-            Data table label. See the TB command for valid labels, and see
+            Data table label. See the :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command for valid labels, and see
             "Notes" for Lab = ALL.
 
         matf
@@ -141,14 +296,17 @@ class MaterialDataTables:
         matt
             Material reference number where data table is to be copied to.
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
         The TBCOPY command, with Lab = ALL, copies all of the nonlinear data
-        defined by the TB command. If you copy a model that includes both yield
+        defined by the :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command. If you copy a model that includes both yield
         behavior constants and linear constants (for example, a BKIN model),
         TBCOPY,ALL and MPCOPY are used together to copy the entire model. All
         input data associated with the model is copied, that is, all data
-        defined through the TB and MP commands.
+        defined through the :meth:`TB <ansys.mapdl.core.Mapdl.tb>` and MP commands.
 
         Also, if you copy a material model using the Material Model Interface
         (Edit> Copy), both the commands TBCOPY,ALL and MPCOPY are issued,
@@ -169,24 +327,28 @@ class MaterialDataTables:
         ----------
         stloc
             Starting location in table for entering data.  For example, if
-            STLOC = 1, data input in the C1 field applies to the first table
-            constant, C2 applies to the second table constant, etc.  If
-            STLOC=5, data input in the C1 field applies to the fifth table
+            ``STLOC`` = 1, data input in the C1 field applies to the first table
+            constant, C2 applies to the second table constant, etc.  If ``STLOC`` = 5,
+            data input in the C1 field applies to the fifth table
             constant, etc.  Defaults to the last location filled + 1.  The last
-            location is reset to 1 with each TB or TBTEMP command.
+            location is reset to 1 with each :meth:`TB <ansys.mapdl.core.Mapdl.tb>` or
+            :meth:`TBTEMP <ansys.mapdl.core.Mapdl.tbtemp>` command.
 
         c1, c2, c3, . . . , c6
-            Data values assigned to six locations starting with STLOC.  If a
+            Data values assigned to six locations starting with ``STLOC``.  If a
             value is already in this location, it is redefined.  A blank value
             leaves the existing value unchanged.
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
-        Defines data for the table specified on the last TB command at the
-        temperature specified on the last TBTEMP command (if applicable). The
-        type of data table specified in the last TB command determines the
-        number of data values needed in TBDATA. Data values are linearly
-        interpolated for temperatures that fall between user defined TBTEMP
+        Defines data for the table specified on the last :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command at the
+        temperature specified on the last :meth:`TBTEMP <ansys.mapdl.core.Mapdl.tbtemp>`
+        command (if applicable). The type of data table specified in the last :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command determines the
+        number of data values needed in ``TBDATA``. Data values are linearly
+        interpolated for temperatures that fall between user defined :meth:`TBTEMP <ansys.mapdl.core.Mapdl.tbtemp>`
         values. See Material Models in the Material Reference for the number of
         data values required for different material behavior options.
 
@@ -211,13 +373,16 @@ class MaterialDataTables:
         Parameters
         ----------
         lab
-            Data table label. (See the TB command for valid labels.)  If ALL,
+            Data table label. (See the :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command for valid labels.)  If ALL,
             delete all data tables.
 
         mat1, mat2, inc
             Delete tables for materials MAT1 to (MAT2 defaults to MAT1) in
             steps of INC (defaults to 1).  If MAT1= ALL, ignore MAT2 and INC
             and delete data tables for all materials.
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
@@ -248,6 +413,9 @@ class MaterialDataTables:
 
             COMP - Use the compaction stress-state creep model with the Extended Drucker-Prager
                    model. Valid only when Par = CAPCREEPREG.
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
@@ -290,10 +458,13 @@ class MaterialDataTables:
             The field value to be referenced (use this command multiple times
             to enter values of different field variables).
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
         Define your data tables as field-variable-dependent (via the
-        appropriate TB command shown below), then issue the TBFIELD command to
+        appropriate :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command shown below), then issue the TBFIELD command to
         define the field values.
 
         Define data values in ascending order for all field quantities. If a
@@ -375,6 +546,9 @@ class MaterialDataTables:
             specified via Par2). Valid options are LINEAR (linear) or LOG
             (logarithmic).
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
         For a list of the supported material data tables (TB), see Logarithmic
@@ -397,12 +571,15 @@ class MaterialDataTables:
         Parameters
         ----------
         lab
-            Data table label. (See the TB command for valid labels.)  Defaults
+            Data table label. (See the :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command for valid labels.)  Defaults
             to the active table.  If ALL, list data for all labels.
 
         mat
             Material number to be listed (defaults to the active material).  If
             ALL, list data tables for all materials.
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
@@ -424,16 +601,19 @@ class MaterialDataTables:
         value
             The new value to be used in the ROW, COL location.
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
         The TBMODIF command modifies data for the table specified on the last
-        TB command.
+        :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command.
 
         For temperature-dependent data, the temperature specified on the last
         TBTEMP command is used.
 
         TBMODIF is a command generated by the Graphical User Interface (GUI).
-        It appears in the log file (Jobname.LOG) if a TB material data table is
+        It appears in the log file (Jobname.LOG) if a :meth:`TB <ansys.mapdl.core.Mapdl.tb>` material data table is
         graphically edited in spreadsheet fashion.
 
         The TBMODIF command is not intended to be typed in directly during an
@@ -487,6 +667,9 @@ class MaterialDataTables:
             YES - Segment number is added to plotted curve. This option is ignored if the number
                   of data points in a curve exceeds 20.
 
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
+
         Notes
         -----
         Only data for stress-strain, B-H, gasket curves, or joint element
@@ -526,14 +709,17 @@ class MaterialDataTables:
 
         x1, x2, ..., xn
             The N components of the point. N depends on the type of data table.
-            Except for TB,EXPE all other TB Tables support only 2 components.
+            Except for TB,EXPE all other :meth:`TB <ansys.mapdl.core.Mapdl.tb>` Tables support only 2 components.
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
         TBPT defines a point on a nonlinear data curve (such as a stress-strain
         curve, B-H curve, etc.) at the temperature specified on the last TBTEMP
         command. The meaning of the values depends on the type of data table
-        specified on the last TB command (MISO, BH, etc.).
+        specified on the last :meth:`TB <ansys.mapdl.core.Mapdl.tb>` command (MISO, BH, etc.).
 
         This command is also valid in SOLUTION.
         """
@@ -559,6 +745,9 @@ class MaterialDataTables:
         kmod
             If blank, TEMP defines a new temperature. (Issue TBLIST to list
             temperatures and data.)
+
+        **kwargs
+            Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
