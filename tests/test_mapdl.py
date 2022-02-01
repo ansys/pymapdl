@@ -1076,16 +1076,38 @@ def test_print_com(mapdl, capfd):
     mapdl.print_com = True
     string_ = "Testing print"
     mapdl.com(string_)
-
     out, err = capfd.readouterr()
     assert string_ in out
 
     mapdl.print_com = False
     string_ = "Testing disabling print"
     mapdl.com(string_)
-
     out, err = capfd.readouterr()
     assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=False)
+    out, err = capfd.readouterr()
+    assert string_ in out
 
     # Not allowed type for mapdl.print_com
     for each in ['asdf', (1, 2), 2, []]:
