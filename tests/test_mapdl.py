@@ -1091,3 +1091,7 @@ def test_print_com(mapdl, capfd):
     for each in ['asdf', (1, 2), 2, []]:
         with pytest.raises(ValueError):
             mapdl.print_com = each
+
+
+def test_extra_argument_in_get(mapdl, make_block):
+    assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
