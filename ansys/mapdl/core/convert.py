@@ -420,7 +420,7 @@ class FileTranslator:
             try:
                 import autopep8
             except ModuleNotFoundError:  # pragma: no cover
-                warnings.warn(
+                warn(
                     "Install `autopep8` to use this feature with\n"
                     "`pip install autopep8`"
                 )
