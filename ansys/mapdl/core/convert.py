@@ -27,11 +27,11 @@ def convert_script(
     exec_file=None,
     macros_as_functions=True,
     use_function_names=True,
-    show_log = False,
-    add_imports = True,
-    comment_solve = False,
-    format_output = True,
-    header = True,
+    show_log=False,
+    add_imports=True,
+    comment_solve=False,
+    format_output=True,
+    header=True,
     print_com=True
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
@@ -68,16 +68,15 @@ def convert_script(
         Python module).
 
     add_imports : bool, optional
-        If ``True``, it add the lines ``rom ansys.mapdl.core import launch_mapdl``
+        If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl``
         and ``mapdl = launch_mapdl(loglevel="WARNING")``to the beginning of the
-        output file.
-        This option is useful if you are planning to use the output
+        output file. This option is useful if you are planning to use the output
         script from another mapdl session. See examples section.
-        This option overrides ``'auto_exit'``.
+        This option overrides ``auto_exit``.
 
     comment_solve : bool, optional
-        If ``True``, it will pythonically comment the lines with
-        contains ``mapdl.solve`` or ``/EOF``.
+        If ``True``, it will pythonically comment the lines that
+        contain ``mapdl.solve`` or ``"/EOF"``.
 
     format_output : bool, optional
         If ``True`` the output is formatted using ``autopep8`` before
@@ -104,7 +103,7 @@ def convert_script(
 
     Converting a script and using it already in the same session.
     For this case, it is recommended to use ``convert_apdl_block``
-    from ``converter``module since you do not have to write the file.
+    from the ``converter`` module since you do not have to write the file.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
@@ -130,10 +129,10 @@ def convert_script(
                         macros_as_functions=macros_as_functions,
                         use_function_names=use_function_names,
                         show_log=show_log,
-                        add_imports = add_imports,
-                        comment_solve = comment_solve,
-                        format_output = format_output,
-                        header = header,
+                        add_imports=add_imports,
+                        comment_solve=comment_solve,
+                        format_output=format_output,
+                        header=header,
                         print_com=print_com
                           )
 
@@ -149,9 +148,9 @@ def convert_apdl_block(apdl_strings,
             macros_as_functions=True,
             use_function_names=True,
             show_log=False,
-            add_imports = True,
-            comment_solve = False,
-            format_output = True,
+            add_imports=True,
+            comment_solve=False,
+            format_output=True,
             header=True,
             print_com=True):
     """Converts an ANSYS input string to a python PyMAPDL string.
@@ -201,8 +200,8 @@ def convert_apdl_block(apdl_strings,
         This option overrides ``'auto_exit'``.
 
     comment_solve : bool, optional
-        If ``True``, it will pythonically comment the lines with
-        contains ``mapdl.solve`` or ``/EOF``.
+        If ``True``, pythonically comment the lines containing
+        ``mapdl.solve`` or ``"/EOF"``.
 
     format_output : bool, optional
         If ``True`` the output is formatted using ``autopep8`` before
@@ -223,10 +222,9 @@ def convert_apdl_block(apdl_strings,
 
     Examples
     --------
-    # Converting a script and using it already in the same session:
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> from ansys.mapdl.core import examples
-    >>> from ansys.mapdl.core import convert_apdl_block
+    Convert a script and use it in the same session.
+
+    >>> from ansys.mapdl.core import examples, launch_mapdl, convert_apdl_block
     >>> in_file = examples.vmfiles['vm10']
     >>> filename = in_file.split('\\')[-1]
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
@@ -246,11 +244,11 @@ def convert_apdl_block(apdl_strings,
                           macros_as_functions=macros_as_functions,
                           use_function_names=use_function_names,
                           show_log=show_log,
-                          add_imports = add_imports,
-                          comment_solve = comment_solve,
-                          format_output = format_output,
-                          header = header,
-                          print_com = print_com)
+                          add_imports=add_imports,
+                          comment_solve=comment_solve,
+                          format_output=format_output,
+                          header=header,
+                          print_com=print_com)
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
@@ -258,18 +256,18 @@ def convert_apdl_block(apdl_strings,
 
 
 def _convert(apdl_strings,
-            loglevel = "WARNING",
-            auto_exit = True,
-            line_ending = None,
-            exec_file = None,
-            macros_as_functions = True,
-            use_function_names = True,
-            show_log = False,
-            add_imports = True,
-            comment_solve = False,
-            format_output = True,
-            header = True,
-            print_com = True):
+            loglevel="WARNING",
+            auto_exit=True,
+            line_ending=None,
+            exec_file=None,
+            macros_as_functions=True,
+            use_function_names=True,
+            show_log=False,
+            add_imports=True,
+            comment_solve=False,
+            format_output=True,
+            header=True,
+            print_com=True):
 
     translator = FileTranslator(
         loglevel,
@@ -278,15 +276,15 @@ def _convert(apdl_strings,
         macros_as_functions=macros_as_functions,
         use_function_names=use_function_names,
         show_log=show_log,
-        add_imports = add_imports,
-        comment_solve = comment_solve,
-        format_output = format_output,
-        header = header,
+        add_imports=add_imports,
+        comment_solve=comment_solve,
+        format_output=format_output,
+        header=header,
         print_com=print_com
     )
 
     if isinstance(apdl_strings, str):
-        # os.linesep does not work very good, so we are making sure
+        # os.linesep does not work well, so we are making sure
         # the line separation is appropriate.
         regx =  f"[^\\r]({translator.line_ending})"
         if not re.search(regx, apdl_strings):
@@ -339,10 +337,10 @@ class FileTranslator:
         macros_as_functions=True,
         use_function_names=True,
         show_log=False,
-        add_imports = True,
-        comment_solve = False,
-        format_output = True,
-        header = True,
+        add_imports=True,
+        comment_solve=False,
+        format_output=True,
+        header=True,
         print_com=True
     ):
         self._non_interactive_level = 0
@@ -407,19 +405,28 @@ class FileTranslator:
         self.lines.append(f"{self.obj_name}.exit()")
 
     def format_using_autopep8(self, text=None):
+        """Format internal `self.lines` with autopep8.
+
+        Parameters
+        ----------
+        text : str, optional
+            Text to format instead of `self.lines`. For development use.
+
+        """
         if self.format_output:
 
             try:
                 import autopep8
-            except ModuleNotFoundError:
+            except ModuleNotFoundError:  # pragma: no cover
+                warnings.warn("Install `autopep8` to use this feature with `pip install autopep8`")
                 return
 
             if not text:
                 text = self.line_ending.join(self.lines)
                 self.lines = autopep8.fix_code(text).splitlines()
 
-            else:
-                # Developing purposes
+            else:  # pragma: no cover
+                # for development purposes
                 return autopep8.fix_code(text)
 
     def save(self, filename, format_autopep8=True):
@@ -431,7 +438,7 @@ class FileTranslator:
         # We are not expecting other type of unicode symbols.
         self.lines = [each_line.replace('\\', '\\\\') for each_line in self.lines]
 
-        #Trying to format the file using AutoPEP8
+        # Try to format the file using AutoPEP8
         self.format_using_autopep8()
 
         with open(filename, "w") as f:
@@ -506,13 +513,13 @@ class FileTranslator:
                 line_.pop(ind)
         line = ','.join(line_[::-1])
 
-        #removing trailing comma
+        # remove trailing comma
         line = line[:-1] if line[-1] == ',' else line
 
         cmd_ = line.split(',')[0].upper()
 
         if cmd_[:4] in ['SOLV', 'LSSO'] and self._comment_solve:
-            self.store_command('com', ["The following line has been commented on purpose:"])
+            self.store_command('com', ["The following line has been commented due to ` comment_solve`:"])
             self.store_command('com', [line])
             return
 
@@ -526,7 +533,7 @@ class FileTranslator:
             self.store_run_command(line)
             return
 
-        if cmd_ == '*ENDDO' or cmd_ == '*ENDIF':
+        if cmd_ in ['*ENDDO', '*ENDIF']:
             self.store_run_command(line)
             self.end_non_interactive()
             return
