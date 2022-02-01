@@ -1095,7 +1095,7 @@ def test_print_com(mapdl, capfd):
     mapdl.mute = False
     mapdl.com(string_, mute=True)
     out, err = capfd.readouterr()
-    assert string_ not in out    
+    assert string_ not in out
 
     mapdl.print_com = True
     mapdl.mute = True
