@@ -1092,6 +1092,6 @@ def test_get_with_gopr(mapdl):
     mapdl._run("/gopr") # Going back
     assert mapdl.wrinqr(1) == 1
 
-
+ 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
