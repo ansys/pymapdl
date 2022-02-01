@@ -1046,27 +1046,6 @@ def test_tbft_not_found(mapdl):
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
 
 
-def test_print_com(mapdl, capfd):
-    mapdl.print_com = True
-    string_ = "Testing print"
-    mapdl.com(string_)
-
-    out, err = capfd.readouterr()
-    assert string_ in out
-
-    mapdl.print_com = False
-    string_ = "Testing disabling print"
-    mapdl.com(string_)
-
-    out, err = capfd.readouterr()
-    assert string_ not in out
-
-    # Not allowed type for mapdl.print_com
-    for each in ['asdf', (1, 2), 2, []]:
-        with pytest.raises(ValueError):
-            mapdl.print_com = each
-
-
 def test_rescontrol(mapdl):
     # Making sure we have the maximum number of arguments.
     mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
@@ -1091,6 +1070,49 @@ def test_get_with_gopr(mapdl):
 
     mapdl._run("/gopr") # Going back
     assert mapdl.wrinqr(1) == 1
+
+
+def test_print_com(mapdl, capfd):
+    mapdl.print_com = True
+    string_ = "Testing print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    mapdl.print_com = False
+    string_ = "Testing disabling print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=False)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    # Not allowed type for mapdl.print_com
+    for each in ['asdf', (1, 2), 2, []]:
+        with pytest.raises(ValueError):
+            mapdl.print_com = each
 
 
 def test_extra_argument_in_get(mapdl, make_block):
