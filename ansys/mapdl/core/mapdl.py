@@ -1723,6 +1723,7 @@ class _MapdlCore(Commands):
         it1num="",
         item2="",
         it2num="",
+        item3="",
         **kwargs,
     ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
@@ -1796,6 +1797,11 @@ class _MapdlCore(Commands):
             the item for which data are to be retrieved. Most items do
             not require this level of information.
 
+        item3
+            A third set of item labels to further qualify
+            the item for which data are to be retrieved. Almost all items do
+            not require this level of information.
+
         Returns
         -------
         float
@@ -1817,7 +1823,7 @@ class _MapdlCore(Commands):
         3003
 
         """
-        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
         kwargs["mute"] = False
 
         # Checking printout is not suppressed by checking "wrinqr" flag.
@@ -1830,6 +1836,10 @@ class _MapdlCore(Commands):
             self._run("/nopr")
 
         value = response.split("=")[-1].strip()
+        if item3:
+            self._log.info(f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'")
+            value = value.splitlines()[0]
+
         try:  # always either a float or string
             return float(value)
         except ValueError:
