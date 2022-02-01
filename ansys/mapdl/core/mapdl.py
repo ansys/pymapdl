@@ -1837,8 +1837,8 @@ class _MapdlCore(Commands):
 
         value = response.split("=")[-1].strip()
         if item3:
-            value = value.splitlines()[0]
             self._log.info(f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'")
+            value = value.splitlines()[0]
 
         try:  # always either a float or string
             return float(value)
