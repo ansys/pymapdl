@@ -3,7 +3,11 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import convert_apdl_block, FileTranslator, COMMANDS_TO_NOT_BE_CONVERTED
+from ansys.mapdl.core.convert import (
+    convert_apdl_block,
+    FileTranslator,
+    COMMANDS_TO_NOT_BE_CONVERTED,
+)
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -68,7 +72,7 @@ pycmblock = """with mapdl.non_interactive:
     mapdl.run("      1805      1806      1807      1808      1809      1831      1832      1833")"""
 
 
-block_commands = ['nblock', 'eblock', 'cmblock']
+block_commands = ["nblock", "eblock", "cmblock"]
 
 apdl_input = dict(zip(block_commands, [nblock, eblock, cmblock]))
 pymapdl_output = dict(zip(block_commands, [pynblock, pyeblock, pycmblock]))
@@ -158,8 +162,8 @@ def test_convert(tmpdir):
 @pytest.mark.parametrize("cmd", block_commands)
 def test_convert_block_commands(tmpdir, cmd):
     apdl_block = apdl_input[cmd]
-    pyblock = convert_apdl_block(apdl_strings=apdl_block.split('\n'))
-    pyblock = '\n'.join(pyblock)
+    pyblock = convert_apdl_block(apdl_strings=apdl_block.split("\n"))
+    pyblock = "\n".join(pyblock)
     assert pymapdl_output[cmd] in pyblock
 
 
@@ -167,79 +171,114 @@ def test_logger(capsys):
 
     apdl_ = """FINISH
     /PREP7
-    """.split('\n')
+    """.split(
+        "\n"
+    )
 
-    translator = FileTranslator(line_ending='\n', show_log=True)
+    translator = FileTranslator(line_ending="\n", show_log=True)
     for line in apdl_:
         translator.translate_line(line)
     std = capsys.readouterr()
-    assert all(['Converted' in each for each in std.err.split('\n')[:-1]]) # last one is an empty line.
+    assert all(
+        ["Converted" in each for each in std.err.split("\n")[:-1]]
+    )  # last one is an empty line.
 
 
 def test_add_import():
-    assert 'launch_mapdl' in convert_apdl_block(APDL_CMDS, add_imports=True)
-    assert 'ansys.mapdl.core' in convert_apdl_block(APDL_CMDS, add_imports=True)
+    assert "launch_mapdl" in convert_apdl_block(APDL_CMDS, add_imports=True)
+    assert "ansys.mapdl.core" in convert_apdl_block(APDL_CMDS, add_imports=True)
 
-    assert 'launch_mapdl' not in convert_apdl_block(APDL_CMDS, add_imports=False)
-    assert 'ansys.mapdl.core' not in convert_apdl_block(APDL_CMDS, add_imports=False)
+    assert "launch_mapdl" not in convert_apdl_block(APDL_CMDS, add_imports=False)
+    assert "ansys.mapdl.core" not in convert_apdl_block(APDL_CMDS, add_imports=False)
 
 
 def test_auto_exit():
-    assert 'mapdl.exit' in convert_apdl_block(APDL_CMDS, auto_exit=True)
-    assert 'mapdl.exit' not in convert_apdl_block(APDL_CMDS, auto_exit=False)
+    assert "mapdl.exit" in convert_apdl_block(APDL_CMDS, auto_exit=True)
+    assert "mapdl.exit" not in convert_apdl_block(APDL_CMDS, auto_exit=False)
 
     # add_import overwrite
-    assert 'mapdl.exit' in convert_apdl_block(APDL_CMDS, auto_exit=True, add_imports=True)
-    assert 'mapdl.exit' not in convert_apdl_block(APDL_CMDS, auto_exit=False, add_imports= True)
+    assert "mapdl.exit" in convert_apdl_block(
+        APDL_CMDS, auto_exit=True, add_imports=True
+    )
+    assert "mapdl.exit" not in convert_apdl_block(
+        APDL_CMDS, auto_exit=False, add_imports=True
+    )
 
-    assert 'mapdl.exit' not in convert_apdl_block(APDL_CMDS, auto_exit=True, add_imports=False)
-    assert 'mapdl.exit' not in convert_apdl_block(APDL_CMDS, auto_exit=False, add_imports= False)
+    assert "mapdl.exit" not in convert_apdl_block(
+        APDL_CMDS, auto_exit=True, add_imports=False
+    )
+    assert "mapdl.exit" not in convert_apdl_block(
+        APDL_CMDS, auto_exit=False, add_imports=False
+    )
 
 
 def test_comment_solve():
-    assert 'MAPDL.COM("SOLVE' in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
-    assert 'MAPDL.COM("LSSOLVE' in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
-    assert 'THE FOLLOWING LINE HAS BEEN COMMENTED ON PURPOSE' in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
+    assert (
+        'MAPDL.COM("SOLVE' in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
+    )
+    assert (
+        'MAPDL.COM("LSSOLVE'
+        in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
+    )
+    assert (
+        "THE FOLLOWING LINE HAS BEEN COMMENTED DUE TO `COMMENT_SOLVE`"
+        in convert_apdl_block(APDL_CMDS, comment_solve=True).upper()
+    )
 
-    assert 'MAPDL.COM("SOLVE' not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
-    assert 'MAPDL.COM("LSSOLVE' not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
-    assert 'THE FOLLOWING LINE HAS BEEN COMMENTED ON PURPOSE' not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
+    assert (
+        'MAPDL.COM("SOLVE'
+        not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
+    )
+    assert (
+        'MAPDL.COM("LSSOLVE'
+        not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
+    )
+    assert (
+        "THE FOLLOWING LINE HAS BEEN COMMENTED DUE TO `COMMENT_SOLVE`"
+        not in convert_apdl_block(APDL_CMDS, comment_solve=False).upper()
+    )
 
-    assert 'mapdl.solve' in convert_apdl_block(APDL_CMDS, comment_solve=False)
-    assert 'mapdl.lssolve' in convert_apdl_block(APDL_CMDS, comment_solve=False)
+    assert "mapdl.solve" in convert_apdl_block(APDL_CMDS, comment_solve=False)
+    assert "mapdl.lssolve" in convert_apdl_block(APDL_CMDS, comment_solve=False)
 
 
 def test_macro_to_function():
-    assert 'def SLV(' in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert 'SLV()' in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert '\n\n\ndef SLV' in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert '\n\n\nSLV' in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "def SLV(" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "SLV()" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "\n\n\ndef SLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "\n\n\nSLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
 
 
 def test_out():
-    assert 'with mapdl.non_interactive' in convert_apdl_block('/OUT,file.txt')
-    assert 'with mapdl.non_interactive' not in convert_apdl_block('/OUT')
-    assert 'mapdl.run("/OUT")' in convert_apdl_block('/OUT')
-    assert 'mapdl.run("/GOPR")' in convert_apdl_block('/OUT')
+    assert "with mapdl.non_interactive" in convert_apdl_block("/OUT,file.txt")
+    assert "with mapdl.non_interactive" not in convert_apdl_block("/OUT")
+    assert 'mapdl.run("/OUT")' in convert_apdl_block("/OUT")
+    assert 'mapdl.run("/GOPR")' in convert_apdl_block("/OUT")
 
 
 def test_nopr():
-    assert 'mapdl._run' in convert_apdl_block("/NOPR")
+    assert "mapdl._run" in convert_apdl_block("/NOPR")
 
 
 def test_header():
-    assert 'Script generated by ansys-mapdl-core version' in convert_apdl_block('/com')
-    assert 'Script generated by ansys-mapdl-core version' in convert_apdl_block('/com', header=True)
-    assert 'Script generated by ansys-mapdl-core version' not in convert_apdl_block('/com', header=False)
-    assert '"""My header"""' in convert_apdl_block('/com', header='My header')
+    assert "Script generated by ansys-mapdl-core version" in convert_apdl_block("/com")
+    assert "Script generated by ansys-mapdl-core version" in convert_apdl_block(
+        "/com", header=True
+    )
+    assert "Script generated by ansys-mapdl-core version" not in convert_apdl_block(
+        "/com", header=False
+    )
+    assert '"""My header"""' in convert_apdl_block("/com", header="My header")
 
 
 def test_com():
-    converted_output =  convert_apdl_block('/com, this is a comment !inline comment!', header=False, add_imports=False)
+    converted_output = convert_apdl_block(
+        "/com, this is a comment !inline comment!", header=False, add_imports=False
+    )
 
     assert 'mapdl.com("this is a comment")' in converted_output
-    assert 'this is a comment' in converted_output
-    assert '# inline comment' in converted_output
+    assert "this is a comment" in converted_output
+    assert "# inline comment" in converted_output
 
 
 def test_do_loops():
@@ -250,46 +289,63 @@ def test_do_loops():
 """
     output = convert_apdl_block(cmd, add_imports=False, header=False)
 
-    assert 'with mapdl.non_interactive:\n    ' in output
+    assert "with mapdl.non_interactive:\n    " in output
     assert '    mapdl.run("*do,1,1,10")' in output
     assert '    mapdl.run("*enddo")' in output
     assert '("*enddo")\nmapdl' in output
 
 
 def test_empty_line():
-    assert '' == convert_apdl_block('', add_imports=False, header=False)
+    assert "" == convert_apdl_block("", add_imports=False, header=False)
 
 
 def test_repeat():
-    assert 'with mapdl.non_interactive:' in convert_apdl_block('/prep7\n*rep,', header=False, add_imports=False)
-    assert '    mapdl.prep7()' in convert_apdl_block('/prep7\n*rep,', header=False, add_imports=False)
-    assert '    mapdl.run("*rep' in convert_apdl_block('/prep7\n*rep, ', header = False, add_imports = False)
+    assert "with mapdl.non_interactive:" in convert_apdl_block(
+        "/prep7\n*rep,", header=False, add_imports=False
+    )
+    assert "    mapdl.prep7()" in convert_apdl_block(
+        "/prep7\n*rep,", header=False, add_imports=False
+    )
+    assert '    mapdl.run("*rep' in convert_apdl_block(
+        "/prep7\n*rep, ", header=False, add_imports=False
+    )
 
 
 @pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
 def test_commands_to_not_be_converted(cmd):
-    assert f'mapdl.run("{cmd}")' in convert_apdl_block(cmd, header=False, add_imports=False)
+    assert f'mapdl.run("{cmd}")' in convert_apdl_block(
+        cmd, header=False, add_imports=False
+    )
 
 
-@pytest.mark.parametrize("ending", ['\n', '\r\n'])
+@pytest.mark.parametrize("ending", ["\n", "\r\n"])
 def test_detect_line_ending(ending):
-    assert ending in convert_apdl_block(f'/com First line{ending}/com Second line', header=False, add_imports=False)
-    assert ending in convert_apdl_block(f'/com First line{ending}/com Second line', header=False, add_imports=False, line_ending='\r\n')
+    assert ending in convert_apdl_block(
+        f"/com First line{ending}/com Second line", header=False, add_imports=False
+    )
+    assert ending in convert_apdl_block(
+        f"/com First line{ending}/com Second line",
+        header=False,
+        add_imports=False,
+        line_ending="\r\n",
+    )
 
 
 def test_no_macro_as_functions():
-    output = convert_apdl_block(APDL_MACRO, macros_as_functions=False, add_imports=False, header=False)
-    assert 'with mapdl.non_interactive' in output
+    output = convert_apdl_block(
+        APDL_MACRO, macros_as_functions=False, add_imports=False, header=False
+    )
+    assert "with mapdl.non_interactive" in output
     assert '    mapdl.run("*CREATE,SLV")' in output
     assert '    mapdl.run("*END")' in output
 
 
 def test_format_ouput():
-    """Just testing it runs"""
-    non_formated = """def(a,b):
-return a + b"""
+    """Just testing it runs."""
+    non_formated = "def(a,b):return a + b"
     converted = FileTranslator().format_using_autopep8(non_formated)
     if converted:
+        assert converted == "def(a, b): return a + b\n"
         assert isinstance(converted, str)
     else:
         assert converted is None
@@ -301,6 +357,6 @@ def test_header_error():
 
 
 def test_print_com_in_converter():
-    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,") # Default
-    assert 'print_com=True' in convert_apdl_block("/prep7\nN,,,,", print_com=True)
-    assert 'print_com=True' not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
+    assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,")  # Default
+    assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,", print_com=True)
+    assert "print_com=True" not in convert_apdl_block("/prep7\nN,,,,", print_com=False)

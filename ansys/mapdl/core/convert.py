@@ -30,7 +30,7 @@ def convert_script(
     show_log=False,
     add_imports=True,
     comment_solve=False,
-    format_output=True,
+    cleanup_output=True,
     header=True,
     print_com=True
 ):
@@ -78,14 +78,16 @@ def convert_script(
         If ``True``, it will pythonically comment the lines that
         contain ``mapdl.solve`` or ``"/EOF"``.
 
-    format_output : bool, optional
-        If ``True`` the output is formatted using ``autopep8`` before
-        writing the file or returning the string.
+    cleanup_output : bool, optional
+        If ``True`` the output is formatted using ``autopep8`` before writing
+        the file or returning the string. This requires ``autopep8`` to be
+        installed.
 
     header : bool, optional
         If ``True``, the default header is written in the first line
         of the output. If a string is provided, this string will be
         used as header.
+
     print_com : bool, optional
         Print command ``/COM`` arguments to python console.
         Defaults to ``True``.
@@ -131,7 +133,7 @@ def convert_script(
                         show_log=show_log,
                         add_imports=add_imports,
                         comment_solve=comment_solve,
-                        format_output=format_output,
+                        cleanup_output=cleanup_output,
                         header=header,
                         print_com=print_com
                           )
@@ -150,7 +152,7 @@ def convert_apdl_block(apdl_strings,
             show_log=False,
             add_imports=True,
             comment_solve=False,
-            format_output=True,
+            cleanup_output=True,
             header=True,
             print_com=True):
     """Converts an ANSYS input string to a python PyMAPDL string.
@@ -203,7 +205,7 @@ def convert_apdl_block(apdl_strings,
         If ``True``, pythonically comment the lines containing
         ``mapdl.solve`` or ``"/EOF"``.
 
-    format_output : bool, optional
+    cleanup_output : bool, optional
         If ``True`` the output is formatted using ``autopep8`` before
         writing the file or returning the string.
 
@@ -246,7 +248,7 @@ def convert_apdl_block(apdl_strings,
                           show_log=show_log,
                           add_imports=add_imports,
                           comment_solve=comment_solve,
-                          format_output=format_output,
+                          cleanup_output=cleanup_output,
                           header=header,
                           print_com=print_com)
 
@@ -265,7 +267,7 @@ def _convert(apdl_strings,
             show_log=False,
             add_imports=True,
             comment_solve=False,
-            format_output=True,
+            cleanup_output=True,
             header=True,
             print_com=True):
 
@@ -278,7 +280,7 @@ def _convert(apdl_strings,
         show_log=show_log,
         add_imports=add_imports,
         comment_solve=comment_solve,
-        format_output=format_output,
+        cleanup_output=cleanup_output,
         header=header,
         print_com=print_com
     )
@@ -339,7 +341,7 @@ class FileTranslator:
         show_log=False,
         add_imports=True,
         comment_solve=False,
-        format_output=True,
+        cleanup_output=True,
         header=True,
         print_com=True
     ):
@@ -356,7 +358,7 @@ class FileTranslator:
         self.comment = ""
         self._add_imports = add_imports
         self._comment_solve = comment_solve
-        self.format_output = format_output
+        self.cleanup_output = cleanup_output
         self._header = header
         self.print_com = print_com
 
@@ -413,12 +415,15 @@ class FileTranslator:
             Text to format instead of `self.lines`. For development use.
 
         """
-        if self.format_output:
+        if self.cleanup_output:
 
             try:
                 import autopep8
             except ModuleNotFoundError:  # pragma: no cover
-                warnings.warn("Install `autopep8` to use this feature with `pip install autopep8`")
+                warnings.warn(
+                    "Install `autopep8` to use this feature with\n"
+                    "`pip install autopep8`"
+                )
                 return
 
             if not text:
@@ -519,7 +524,7 @@ class FileTranslator:
         cmd_ = line.split(',')[0].upper()
 
         if cmd_[:4] in ['SOLV', 'LSSO'] and self._comment_solve:
-            self.store_command('com', ["The following line has been commented due to ` comment_solve`:"])
+            self.store_command('com', ["The following line has been commented due to `comment_solve`:"])
             self.store_command('com', [line])
             return
 
