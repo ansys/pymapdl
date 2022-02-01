@@ -76,7 +76,7 @@ class Materials:
             BETD
                 Stiffness matrix multiplier for damping.
 
-                .. note:: If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high 
+                .. note:: If used in an explicit dynamic analysis, the value corresponds to the percentage of damping in the high
                    frequency domain. For example, 0.1 roughly corresponds to 10% damping in the high frequency domain.
 
             BETX

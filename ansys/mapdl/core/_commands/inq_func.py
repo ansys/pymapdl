@@ -316,8 +316,8 @@ class inq_function:
             * -14, orientation kpb
             * -15, section id
             * -16, # of elem divs for next mesh
-            * -17, 0=hard / 1=soft NDIV
-            * -18, 0=hard / 1=soft SPACE
+            * -17, 0=hard / 1=soft ``NDIV``
+            * -18, 0=hard / 1=soft ``SPACE``
             * -101, pointer to line segment data
             * -102,
             * -103,
