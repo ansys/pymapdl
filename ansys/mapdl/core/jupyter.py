@@ -36,7 +36,6 @@ def launch_mapdl_on_cluster(
         verbose=False,
         start_timeout=600,
         tag="latest",
-        **kwargs,
 ):
     """Start MAPDL on the ANSYS jupyter cluster in gRPC mode.
 
@@ -123,7 +122,13 @@ def launch_mapdl_on_cluster(
 
     additional_switches += f"-m -{memory} -np {nproc}"
     args = additional_switches.split()
-    ip, name = manager.spawn_mapdl(version=tag, args=args, verbose=verbose)
+    ip, name = manager.spawn_mapdl(
+        version=tag,
+        args=args,
+        verbose=verbose,
+        cpu=1000*nproc,
+        memory=memory,
+    )
 
     # connect to the pod instance
     from ansys.mapdl.core import Mapdl
