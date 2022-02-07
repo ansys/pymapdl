@@ -1117,3 +1117,42 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
+
+
+def test_apdl_log(mapdl):
+    file_name = 'tmp_log.log'
+
+    # Checking there is no apdl_logger
+    assert mapdl._apdl_log is None
+    assert file_name not in os.listdir()
+
+    # Setting logger
+    mapdl.open_apdl_log(file_name, 'w')
+    assert file_name in os.listdir()
+
+    # Testing
+    mapdl.prep7()
+    mapdl.com('This is a comment')
+
+    with open(file_name, 'r') as fid:
+        log = fid.read()
+
+    assert 'APDL' in log
+    assert 'ansys.mapdl.core' in log
+    assert 'PyMapdl' in log
+    assert '/COM' in log
+    assert 'This is a comment' in log
+
+    # Clossing
+    mapdl._close_apdl_log()
+    mapdl.com('This comment should not appear in the logger')
+
+    with open(file_name, 'r') as fid:
+        log = fid.read()
+
+    assert 'This comment should not appear in the logger' not in log
+    assert file_name in os.listdir()
+
+    # Cleaning up
+    os.remove(file_name)
+    assert file_name not in os.listdir()
