@@ -476,29 +476,48 @@ def test_corba_apdl_logging_start(tmpdir):
 
 
 def test_apdl_logging(mapdl, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
-    if mapdl._apdl_log is None:
-        mapdl.open_apdl_log(filename, mode="w")
-    mapdl._close_apdl_log()
+    tmp_dir = tmpdir.mkdir("tmpdir")
+    file_name = "tmp_logger.log"
+    file_path = str(tmp_dir.join(file_name))
 
-    # test append mode
-    mapdl.open_apdl_log(filename, mode="a")
+    # Checking there is no apdl_logger
+    if mapdl._apdl_log is not None:
+        mapdl._close_apdl_log()
 
-    # don't allow to double log
+    assert mapdl._apdl_log is None
+    assert file_name not in os.listdir()
+
+    # Setting logger
+    mapdl.open_apdl_log(file_path, 'w')
+    assert file_name in os.listdir(tmp_dir)
+
+    # don't allow double logger:
     with pytest.raises(RuntimeError):
-        mapdl.open_apdl_log(filename, mode="w")
+        mapdl.open_apdl_log(file_name, mode="w")
 
+    # Testing
     mapdl.prep7()
-    mapdl.k(1, 0, 0, 0)
-    mapdl.k(2, 1, 0, 0)
-    mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)
+    mapdl.com('This is a comment')
 
     mapdl._apdl_log.flush()
+    with open(file_path, 'r') as fid:
+        log = fid.read()
 
-    out = open(mapdl._apdl_log.name).read().strip().split()[-5:]
-    assert "PREP7" in out[0]
-    assert "K,4,0,1,0" in out[-1]
+    assert 'APDL' in log
+    assert 'ansys.mapdl.core' in log
+    assert 'PyMapdl' in log
+    assert '/COM' in log
+    assert 'This is a comment' in log
+
+    # Closing
+    mapdl._close_apdl_log()
+    mapdl.com('This comment should not appear in the logger')
+
+    with open(file_path, 'r') as fid:
+        log = fid.read()
+
+    assert 'This comment should not appear in the logger' not in log
+    assert file_name in os.listdir(tmp_dir)
 
 
 def test_nodes(tmpdir, cleared, mapdl):
@@ -1118,41 +1137,3 @@ def test_print_com(mapdl, capfd):
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
 
-
-def test_apdl_log(mapdl):
-    file_name = 'tmp_log.log'
-
-    # Checking there is no apdl_logger
-    assert mapdl._apdl_log is None
-    assert file_name not in os.listdir()
-
-    # Setting logger
-    mapdl.open_apdl_log(file_name, 'w')
-    assert file_name in os.listdir()
-
-    # Testing
-    mapdl.prep7()
-    mapdl.com('This is a comment')
-
-    with open(file_name, 'r') as fid:
-        log = fid.read()
-
-    assert 'APDL' in log
-    assert 'ansys.mapdl.core' in log
-    assert 'PyMapdl' in log
-    assert '/COM' in log
-    assert 'This is a comment' in log
-
-    # Closing
-    mapdl._close_apdl_log()
-    mapdl.com('This comment should not appear in the logger')
-
-    with open(file_name, 'r') as fid:
-        log = fid.read()
-
-    assert 'This comment should not appear in the logger' not in log
-    assert file_name in os.listdir()
-
-    # Cleaning up
-    os.remove(file_name)
-    assert file_name not in os.listdir()
