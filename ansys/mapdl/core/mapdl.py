@@ -755,7 +755,7 @@ class _MapdlCore(Commands):
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         self._apdl_log.write(
-            "! APDL script generated using ansys.mapdl.core {pymapdl.__version__}\n"
+            f"! APDL log script generated using PyMapdl (ansys.mapdl.core {pymapdl.__version__})\n"
         )
 
     @supress_logging
@@ -2246,13 +2246,13 @@ class _MapdlCore(Commands):
 
         if command[:3].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
-                'Invalid pymapdl command "%s"\n\n%s'
+                'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
-                'Invalid pymapdl command "%s"\n\n%s'
+                'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
             )
             raise exception
