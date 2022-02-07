@@ -1136,4 +1136,3 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
-
