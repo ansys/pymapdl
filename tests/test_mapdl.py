@@ -499,6 +499,12 @@ def test_apdl_logging(mapdl, tmpdir):
     mapdl.prep7()
     mapdl.com('This is a comment')
 
+    #Testing non-interactive
+    with mapdl.non_interactive:
+        mapdl.com('This is a non-interactive command')
+        mapdl.slashsolu()
+        mapdl.prep7()
+
     mapdl._apdl_log.flush()
     with open(file_path, 'r') as fid:
         log = fid.read()
@@ -508,6 +514,8 @@ def test_apdl_logging(mapdl, tmpdir):
     assert 'PyMapdl' in log
     assert '/COM' in log
     assert 'This is a comment' in log
+    assert 'This is a non-interactive command' in log
+    assert '/SOLU' in log
 
     # Closing
     mapdl._close_apdl_log()
