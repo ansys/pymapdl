@@ -1143,7 +1143,7 @@ def test_apdl_log(mapdl):
     assert '/COM' in log
     assert 'This is a comment' in log
 
-    # Clossing
+    # Closing
     mapdl._close_apdl_log()
     mapdl.com('This comment should not appear in the logger')
 
