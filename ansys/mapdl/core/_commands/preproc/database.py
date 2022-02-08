@@ -61,7 +61,8 @@ class Database:
             in this case, you can use all 248 characters for the file name.
 
         ext
-            Filename extension (eight-character maximum).
+            Filename extension (eight-character maximum). If there is an extension in
+            ``fname``, this option is ignored.
 
         fnamei
             Name of the IGES file and its directory path (248 characters
