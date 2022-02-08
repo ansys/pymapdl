@@ -11,19 +11,22 @@ If you like to work with Julia, you can use python libraries as they were Julia 
 Installing Julia
 =================
 
-To install Julia go to their website `<https://julialang.org/>`_ to the **Download** section and follow the instructions given there.
+To install Julia go to their website `<https://julialang.org/>`_ and follow the instructions given in the *Download* section.
 
+* `Windows <https://julialang.org/downloads/platform/#windows>`_
+* `Linux <https://julialang.org/downloads/platform/#linux_and_freebsd>`_
+* `MacOS <https://julialang.org/downloads/platform/#macos>`_
 
 Setting Julia Environment
 ==========================
 
 To have access to Python libraries, we need to install *PyCall* Julia package.
-To install it, run Julia and switch to the package manager by pressing ``]`` key.
+To install it, run Julia and switch to the package manager by pressing ``"]"`` key.
 
 It is beneficial to create a virtual environment in Julia, in order to work with different package versions or applications if needed.
 To create a virtual environment, use ``activate`` command with the name of the new environment you want to create or activate.
 
-.. code:: julia
+.. code-block:: julia
 
     (@1.7) pkg> activate julia_test
       Activating project at `C:\Users\USER\julia_test`
@@ -31,21 +34,21 @@ To create a virtual environment, use ``activate`` command with the name of the n
 
 It should show a message that the new package (``julia_test``) has been activated and that environment name will now precede the command line.
 
-.. code::
+.. code-block:: julia
 
     (julia_test) pkg>
 
 Then we proceed to install *PyCall* package by typing:
 
-.. code:: julia
+.. code-block:: julia
 
     (julia_test) pkg> add PyCall
 
 
-To use PyCall, we go first to the Julia command line by pressing the backspace key.
+To use *PyCall*, we go first to the Julia command line by pressing the backspace key.
 Then we can use the *PyCall* package as:
 
-.. code:: julia
+.. code-block:: julia
 
     julia> using PyCall
 
@@ -55,11 +58,10 @@ This should be enough to use packages included in a basic Python distribution.
 
 For example:
 
-.. code:: julia
+.. code-block:: julia
 
     julia> math = pyimport("math")
     math.sin(math.pi/4) # returns ≈ 1/√2 = 0.70710678..
-
 
 
 Installing PyMAPDL in Julia
@@ -71,11 +73,26 @@ However since it is a fully working Python environment, we can still use it from
 
 To install PyMAPDL we have first to locate the Python executable by typing:
 
-.. code:: julia
+.. code-block:: julia
 
     julia> PyCall.python
     "C:\\Users\\USER\\.julia\\conda\\3\\python.exe"
 
+In Linux, the above code prints the following:
+
+.. code-block:: julia
+    
+    julia> PyCall.python
+    "python3"
+
+Where ``python3`` is the Python3 installation by default in the operative system.
+
+.. note::
+
+    In Linux, there is no specific installation steps, it is just needed to add the Julia executable to the Path.
+    Hence  Julia's python installation path is highly dependent on each user.
+    If we uncompress the source files in for example in ``/home/USER/Julia``, Julia's path will be 
+    ``/home/USER/Julia/julia-1.7.2/bin``
 
 Now we will use that Python executable to install PyMAPDL:
 
@@ -83,9 +100,16 @@ Now we will use that Python executable to install PyMAPDL:
 
     C:\Users\USER\.julia\conda\3\python.exe -m pip install ansys-mapdl-core
 
-Finally we can import PyMAPDL using the same procedure as described above:
+In linux:
 
-.. code:: julia
+.. code:: bash
+
+    python3 -m pip install ansys-mapdl-core
+
+
+Finally, after restarting Julia, we can import PyMAPDL using the same procedure as described above:
+
+.. code-block:: julia
     
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")
@@ -95,6 +119,16 @@ Finally we can import PyMAPDL using the same procedure as described above:
     MAPDL Version:       21.2
     ansys.mapdl Version: 0.60.6
     
+.. note:: 
+    If you experience some errors regarding *PyCall*, you can try to rebuild the package by going to package manager (pressing ``"]"`` ) and typing:
+    
+    .. code::
+        
+        pkg> build PyCall
+
+
+Using PyMAPDL in Julia
+=======================
 
 A simple example can be shown below:
 
