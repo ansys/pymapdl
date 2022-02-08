@@ -1022,9 +1022,17 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.cdread)
     def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
         """Wraps CDREAD"""
-        if option == "ALL":
+        option = option.strip().upper()
+
+        if option not in ['DB', 'SOLID', 'COMB']:
             raise ValueError(
-                'Option "ALL" not supported in gRPC mode.  Please '
+                f'Option "{option}" is not supported.  Please '
+                "Input the geometry and mesh files separately "
+                r'with "\INPUT" or ``mapdl.input``'
+            )
+        if option == 'ALL':
+            raise ValueError(
+                f'Option "{option}" is not supported in gRPC mode.  Please '
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )

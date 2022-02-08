@@ -835,8 +835,13 @@ def test_cdread(mapdl, cleared):
     # Testing arguments
     mapdl.clear()
     mapdl.cdread('db', 'model2', extension='cdb')
-
     assert random_letters in mapdl.parameters['PARMTEST']
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('all', 'model2', 'cdb')
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('test', 'model2', 'cdb')
 
 
 @skip_in_cloud
