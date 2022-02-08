@@ -5,7 +5,7 @@
 Using PyMAPDL in Julia
 ***********************
 
-If you like to work with Julia, you can use python libraries as they were Julia packages.
+If you like to work with Julia, you can use Python libraries as if they were Julia packages.
 
 
 Installing Julia
@@ -20,11 +20,11 @@ To install Julia go to their website `<https://julialang.org/>`_ and follow the 
 Setting Julia Environment
 ==========================
 
-To have access to Python libraries, we need to install *PyCall* Julia package.
-To install it, run Julia and switch to the package manager by pressing ``"]"`` key.
+To have access to Python libraries, you must install the *PyCall* Julia package.
+To install it, run Julia and switch to the package manager by pressing  the``"]"`` key.
 
-It is beneficial to create a virtual environment in Julia, in order to work with different package versions or applications if needed.
-To create a virtual environment, use ``activate`` command with the name of the new environment you want to create or activate.
+If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
+To create a virtual environment, use the ``activate`` command with the name of the new environment that you want to create or activate.
 
 .. code-block:: julia
 
@@ -32,21 +32,21 @@ To create a virtual environment, use ``activate`` command with the name of the n
       Activating project at `C:\Users\USER\julia_test`
 
 
-It should show a message that the new package (``julia_test``) has been activated and that environment name will now precede the command line.
+A message should appear, indicating that the new package (``julia_test``) has been activated. This environment name will now precede the command line.
 
 .. code-block:: julia
 
     (julia_test) pkg>
 
-Then we proceed to install *PyCall* package by typing:
+Next install the *PyCall* package by typing:
 
 .. code-block:: julia
 
     (julia_test) pkg> add PyCall
 
 
-To use *PyCall*, we go first to the Julia command line by pressing the backspace key.
-Then we can use the *PyCall* package as:
+To use *PyCall*, press the backspace key to go to the Julia command line.
+Next use the *PyCall* package with:
 
 .. code-block:: julia
 
@@ -67,47 +67,46 @@ For example:
 Installing PyMAPDL in Julia
 ============================
 
-*PyCall* includes a lightweight Python environment which uses `Conda <https://conda.io>`_ to manage and access Python packages.
-This environment is based on Python 3.9.7 (at the moment of writing this article) and includes the standard basic Python libraries.
-However since it is a fully working Python environment, we can still use it from outside Julia command line and install Python packages using *pip*.
+*PyCall* includes a lightweight Python environment that uses `Conda <https://conda.io>`_ to manage and access Python packages.
+This environment, currently based on Python 3.9.7, includes the standard basic Python libraries.
+However, because it is a fully working Python environment, you can still use it from outside the Julia command line and install Python packages using ``pip``.
 
-To install PyMAPDL we have first to locate the Python executable by typing:
+To install PyMAPDL, first locate the Python executable with:
 
 .. code-block:: julia
 
     julia> PyCall.python
     "C:\\Users\\USER\\.julia\\conda\\3\\python.exe"
 
-In Linux, the above code prints the following:
+In Linux, the above code prints the following, where ``python3`` is the default Python3 installation for the operating system.
 
 .. code-block:: julia
     
     julia> PyCall.python
     "python3"
 
-Where ``python3`` is the Python3 installation by default in the operative system.
 
 .. note::
 
-    In Linux, there is no specific installation steps, it is just needed to add the Julia executable to the Path.
-    Hence  Julia's python installation path is highly dependent on each user.
-    If we uncompress the source files in for example in ``/home/USER/Julia``, Julia's path will be 
+    In Linux, there are no specific installation steps. You only need to add the Julia executable to the path.
+    Hence,  Julia's Python installation path can differ from user to user.
+    For example, if you uncompress the source files in ``/home/USER/Julia``, Julia's path will be 
     ``/home/USER/Julia/julia-1.7.2/bin``
 
-Now we will use that Python executable to install PyMAPDL:
+You would use this Python executable to install PyMAPDL:
 
 .. code:: bash
 
     C:\Users\USER\.julia\conda\3\python.exe -m pip install ansys-mapdl-core
 
-In linux:
+In Linux:, you would install with:
 
 .. code:: bash
 
     python3 -m pip install ansys-mapdl-core
 
 
-Finally, after restarting Julia, we can import PyMAPDL using the same procedure as described above:
+Finally, after restarting Julia, you can import PyMAPDL using the same procedure as described above:
 
 .. code-block:: julia
     
@@ -120,7 +119,7 @@ Finally, after restarting Julia, we can import PyMAPDL using the same procedure 
     ansys.mapdl Version: 0.60.6
     
 .. note:: 
-    If you experience some errors regarding *PyCall*, you can try to rebuild the package by going to package manager (pressing ``"]"`` ) and typing:
+    If you experience some errors regarding *PyCall*, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
     
     .. code::
         
@@ -130,7 +129,7 @@ Finally, after restarting Julia, we can import PyMAPDL using the same procedure 
 Using PyMAPDL in Julia
 =======================
 
-A simple example can be shown below:
+Here is a simple example of using PyMAPDL in Julia:
 
 .. code-block:: julia
 
