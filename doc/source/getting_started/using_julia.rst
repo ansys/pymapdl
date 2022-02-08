@@ -46,6 +46,12 @@ Next install the *PyCall* package by typing:
 
 
 To use *PyCall*, press the backspace key to go to the Julia command line.
+The command line will now be precede by the name ``Julia``. 
+
+.. code-block:: julia
+
+    julia>
+
 Next use the *PyCall* package with:
 
 .. code-block:: julia
@@ -188,4 +194,4 @@ Here is a simple example of using PyMAPDL in Julia:
     julia> mapdl.eplot()
 
 
-.. note:: Do notice the changes in the strings (only ``"`` strings are allowed) and the loops.
+.. note:: Do notice the changes in the strings (only ``""`` strings are allowed) and the loops.
