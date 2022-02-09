@@ -1020,27 +1020,33 @@ class MapdlGrpc(_MapdlCore):
             return resp.response
 
     @wraps(_MapdlCore.cdread)
-    def cdread(self, *args, **kwargs):
+    def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
         """Wraps CDREAD"""
-        option = kwargs.get("option", args[0])
-        if option == "ALL":
+        option = option.strip().upper()
+
+        if option not in ['DB', 'SOLID', 'COMB']:
             raise ValueError(
-                'Option "ALL" not supported in gRPC mode.  Please '
+                f'Option "{option}" is not supported.  Please '
+                "Input the geometry and mesh files separately "
+                r'with "\INPUT" or ``mapdl.input``'
+            )
+        if option == 'ALL':
+            raise ValueError(
+                f'Option "{option}" is not supported in gRPC mode.  Please '
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
         # the old behaviour is to supplied the name and the extension separatelly.
         # to make it easier let's going to allow names with extensions
-        fname = kwargs.get("fname", args[1])
         basename = os.path.basename(fname)
         if len(basename.split('.')) == 1:
             # there is no extension in the main name.
-            if len(args) > 2:
+            if ext:
                 # if extension is an input as an option (old APDL style)
-                fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+                fname = fname + '.' + ext
             else:
                 # Using default .db
-                fname = kwargs.get("fname", args[1])  + '.' + 'cdb'
+                fname = fname + '.' + 'cdb'
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)

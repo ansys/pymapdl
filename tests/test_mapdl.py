@@ -820,8 +820,28 @@ def test_cdread(mapdl, cleared):
 
     mapdl.clear()
     mapdl.cdread("db", 'model2', 'cdb')
-
     assert random_letters in mapdl.parameters['PARMTEST']
+
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread(option='db', fname='model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
+
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread('db', fname='model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
+
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread('db', 'model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('all', 'model2', 'cdb')
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('test', 'model2', 'cdb')
 
 
 @skip_in_cloud
@@ -921,6 +941,18 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = os.path.join(mapdl.directory, 'model')
     mapdl.cdread('db', fullpath)
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread(option='db', fname='model', ext='cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', fname='model', ext='cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model', ext='cdb')
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
