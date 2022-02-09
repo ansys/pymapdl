@@ -69,3 +69,15 @@ jobs:
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true
+
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `${workflow} failed.`, 
+            }"

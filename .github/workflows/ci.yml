@@ -284,3 +284,15 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*.pdf
+      
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `Release FAILED!`, 
+            }"
