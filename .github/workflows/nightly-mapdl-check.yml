@@ -1,4 +1,4 @@
-name: GitHub Actions
+name: Nightly MAPDL check
 
 on:
   workflow_dispatch:
@@ -56,4 +56,16 @@ jobs:
       - name: Display MAPDL Logs
         if: always()
         run: cat log.txt
+
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `${workflow} failed.`, 
+            }"
 
