@@ -549,7 +549,7 @@ class PostProcessing:
         if show_node_numbering:
             labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
 
-        return general_plotter(meshes, [], labels, **kwargs)
+        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
 
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
@@ -591,7 +591,7 @@ class PostProcessing:
             labels = [{"points": surf.cell_centers().points,
                        "labels": surf["ansys_elem_num"]}]
 
-        return general_plotter(meshes, [], labels, **kwargs)
+        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
 
     @property
     @supress_logging
