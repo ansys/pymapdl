@@ -2789,3 +2789,49 @@ class _MapdlCore(Commands):
                 warn('\n' + self._response)
 
         return returns_
+
+    def get_nodal_loads(self, label=None):
+        """
+        Get the applied nodal loads.
+
+        Uses ``FLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal loads are filtered to correspondent given label.
+            Example of labels are ``FX``, ``FZ``, ``CHRGS`` or ``CSGZ``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        loads = self.flist().to_list()
+        if label:
+            loads = np.array([list(each[0], each[2], each[3]) for each in loads if each[1] == label])
+        return loads
+
+    def get_nodal_constrains(self, label=None):
+        """
+        Get the applied nodal constrains:
+
+        Uses ``DLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal constrains are filtered to correspondent given label.
+            Example of labels are ``UX``, ``UZ``, ``VOLT`` or ``TEMP``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        constrains = self.dlist().to_list()
+        if label:
+            constrains = np.array([list(each[0], each[2], each[3]) for each in constrains if each[1] == label])
+        return constrains
