@@ -365,7 +365,10 @@ class Parameters:
 
         st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
         arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n")
-        return arr_flat.reshape(shape).squeeze()
+        if len(shape)>2:
+            return arr_flat.reshape(shape).squeeze(axis=2)
+        else:
+            return arr_flat.reshape(shape).squeeze()
 
     @supress_logging
     def _set_parameter_array(self, name, arr):
