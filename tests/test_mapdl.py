@@ -714,16 +714,31 @@ def test_cyclic_solve(mapdl, cleared):
     assert mapdl.post_processing.nsets == 16
 
 
-def test_load_table(mapdl):
-    dimx = 5
-    dimy = 8
 
-    my_conv = np.random.rand(dimx, dimy)
-    my_conv[:, 0] = np.arange(dimx)
-    my_conv[0, :] = np.arange(dimy)
+def test_load_table(mapdl):
+    # Two columns case
+    dim_rows = np.random.randint(2,100)
+    dim_cols = 2
+
+    my_conv = np.random.rand(dim_rows, dim_cols)
+    my_conv[:, 0] = np.arange(dim_rows)
+    my_conv[0, :] = np.arange(dim_cols)
 
     mapdl.load_table("my_conv", my_conv)
     assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
+
+    n_repetitions = 5
+    for i in range(n_repetitions):
+        # More than 2 columns case
+        dim_rows = np.random.randint(2,100)
+        dim_cols = np.random.randint(3,10)
+
+        my_conv = np.random.rand(dim_rows, dim_cols)
+        my_conv[:, 0] = np.arange(dim_rows)
+        my_conv[0, :] = np.arange(dim_cols)
+
+        mapdl.load_table("my_conv", my_conv)
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         my_conv1 = my_conv.copy()
