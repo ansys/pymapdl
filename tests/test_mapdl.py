@@ -714,10 +714,9 @@ def test_cyclic_solve(mapdl, cleared):
     assert mapdl.post_processing.nsets == 16
 
 
-
 def test_load_table(mapdl):
     # Two columns case
-    dim_rows = np.random.randint(2,100)
+    dim_rows = np.random.randint(2, 100)
     dim_cols = 2
 
     my_conv = np.random.rand(dim_rows, dim_cols)
@@ -730,8 +729,8 @@ def test_load_table(mapdl):
     n_repetitions = 5
     for i in range(n_repetitions):
         # More than 2 columns case
-        dim_rows = np.random.randint(2,100)
-        dim_cols = np.random.randint(3,10)
+        dim_rows = np.random.randint(2, 100)
+        dim_cols = np.random.randint(3, 10)
 
         my_conv = np.random.rand(dim_rows, dim_cols)
         my_conv[:, 0] = np.arange(dim_rows)
