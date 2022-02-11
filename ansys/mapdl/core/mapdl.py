@@ -2497,7 +2497,7 @@ class _MapdlCore(Commands):
 
         if array.shape[1] == 2:
             # two-columns bug.
-            # If there is two columns, the header is also readed as part of the table values,
+            # If there is two columns, the header is also read as part of the table values,
             # for this case, we are not going to write it to the file.
             array = array[1:, :]
 
