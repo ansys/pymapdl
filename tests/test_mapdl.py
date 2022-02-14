@@ -759,7 +759,7 @@ def test_load_array(mapdl, dimx, dimy):
     mapdl.load_array("my_conv", my_conv)
 
     # flatten as MAPDL returns flat arrays when one dimension is 1.
-    if dimx == 1 or dimx == 1:
+    if dimx == 1 or dimy == 1:
         my_conv = my_conv.ravel()
     assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
