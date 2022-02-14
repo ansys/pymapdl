@@ -716,15 +716,17 @@ def test_cyclic_solve(mapdl, cleared):
 
 def test_load_table(mapdl):
     # Two columns case
-    dim_rows = np.random.randint(2, 100)
-    dim_cols = 2
+    n_repetitions = 5
+    for i in range(n_repetitions):
+        dim_rows = np.random.randint(2, 100)
+        dim_cols = 2
 
-    my_conv = np.random.rand(dim_rows, dim_cols)
-    my_conv[:, 0] = np.arange(dim_rows)
-    my_conv[0, :] = np.arange(dim_cols)
+        my_conv = np.random.rand(dim_rows, dim_cols)
+        my_conv[:, 0] = np.arange(dim_rows)
+        my_conv[0, :] = np.arange(dim_cols)
 
-    mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
+        mapdl.load_table("my_conv", my_conv)
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1], 1E-7)
 
     n_repetitions = 5
     for i in range(n_repetitions):
@@ -757,8 +759,8 @@ def test_load_array(mapdl, dimx, dimy):
     mapdl.load_array("my_conv", my_conv)
 
     # flatten as MAPDL returns flat arrays when second dimension is 1.
-    if dimy == 1:
-        my_conv = my_conv.ravel()
+    # if dimy == 1:
+    #     my_conv = my_conv.ravel()
     assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
