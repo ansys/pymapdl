@@ -610,7 +610,6 @@ def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
 
-
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
     else:
@@ -729,20 +728,20 @@ def test_load_table(mapdl, dim_rows, dim_cols):
 
     mapdl.load_table("my_conv", my_conv)
     if dim_cols == 2: # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
-        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows-1,1)), 1E-7)
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows-1, 1)), 1E-7)
     else:
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
 
 def test_load_table_error_ascending_row(mapdl):
-    my_conv = np.ones((3,3))
+    my_conv = np.ones((3, 3))
     my_conv[0, 1] = 4
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
         mapdl.load_table("my_conv", my_conv)
 
 
 def test_load_table_error_ascending_row(mapdl):
-    my_conv = np.ones((3,3))
+    my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
     with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
         mapdl.load_table("my_conv", my_conv)
