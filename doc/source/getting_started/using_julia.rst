@@ -119,6 +119,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")
     PyObject <module 'ansys.mapdl.core' from 'C:\\Users\\USER\\.julia\\conda\\3\\lib\\site-packages\\ansys\\mapdl\\core\\__init__.py'>
+    julia> mapdl = pymapdl.launch_mapdl()
     julia> print(mapdl.__str__())
     Product:             Ansys Mechanical Enterprise
     MAPDL Version:       21.2
