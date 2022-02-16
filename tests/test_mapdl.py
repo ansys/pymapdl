@@ -610,14 +610,14 @@ def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
 
-    # For the cases where shape is (X,) # Empty second dimension
-    parm = np.array(parm)
-    if parm.ndim == 1:
-        parm = parm.reshape((parm.shape[0], 1))
 
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
     else:
+        # For the cases where shape is (X,) # Empty second dimension
+        parm = np.array(parm)
+        if parm.ndim == 1:
+            parm = parm.reshape((parm.shape[0], 1))
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
