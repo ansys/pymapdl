@@ -769,7 +769,7 @@ def test_load_array_types(mapdl, array):
 
 @pytest.mark.parametrize("array", [
     [1, 3, 10],
-    np.random.randint(1,20, size=(3,))
+    np.random.randint(1, 20, size=(3,))
     ])
 def test_load_array_failure_types(mapdl, array):
     mapdl.load_array("myarr", array)
