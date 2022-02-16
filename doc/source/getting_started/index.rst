@@ -16,6 +16,7 @@ getting a licensed copy of Ansys.
    running_mapdl
    versioning
    docker
+   using_julia
    faq
 
 
