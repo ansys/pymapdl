@@ -1,15 +1,80 @@
 """Plotting helper for MAPDL using pyvista"""
+from functools import wraps
 import pyvista as pv
 import numpy as np
 
-from ansys.mapdl.core.misc import unique_rows
+from ansys.mapdl.core.misc import unique_rows, approximate_minimum_distance_between_points
 from .theme import MapdlTheme
 
 
-def general_plotter(
+# Supported labels
+BC_D = ['TEMP', 'UX', 'UY', 'UZ', 'VOLT', 'MAG']
+BC_F = ['HEAT', 'FX', 'FY', 'FZ', 'AMPS', 'CHRGS', 'FLUX', 'CSGZ'] #TODO: Add moments MX, MY, MZ
+FIELDS = ['MECHANICAL', 'THERMAL', 'ELECTRICAL']
+
+# All boundary conditions:
+BCS = BC_D.copy()
+BCS.extend(BC_F)
+
+# Allowed entities to plot their boundary conditions
+ALLOWED_TARGETS = ['NODES']
+
+# Symbols for constrains
+TEMP = pv.Sphere(center=(0, 0, 0),
+                      radius=0.5)
+
+UX = pv.Arrow(start=(-1, 0, 0),
+                   direction=(1, 0, 0),
+                   tip_length=1,
+                   tip_radius=0.5,
+                   scale=1.)
+UY = pv.Arrow(start=(0, -1, 0),
+                   direction=(0, 1, 0),
+                   tip_length=1,
+                   tip_radius=0.5,
+                   scale=1.)
+
+UZ = pv.Arrow(start=(0, 0, -1),
+                   direction=(0, 0, 1),
+                   tip_length=1,
+                   tip_radius=0.5,
+                   scale=1.)
+
+VOLT = pv.Cube(center=(0, 0, 0),
+                    x_length=1.0,
+                    y_length=1.0,
+                    z_length=1.0)
+
+
+BC_plot_settings = {
+    'TEMP': {
+        'color': 'red',
+        'arrow': TEMP
+    },
+    'UX': {
+        'color': 'grey',
+        'arrow': UX
+    },
+    'UY': {
+        'color': 'grey',
+        'arrow': UY
+    },
+    'UZ': {
+        'color': 'grey',
+        'arrow': UZ
+    },
+    'VOLT': {
+        'color': 'yellow',
+        'arrow': VOLT
+    }
+}
+
+# Using * to force all the following arguments to be keyword only.
+def _general_plotter(
     meshes,
     points,
     labels,
+    *,
     title="",
     cpos=None,
     show_bounds=False,
@@ -44,6 +109,10 @@ def general_plotter(
     theme=None,
     return_plotter=False,
     return_cpos=False,
+    mapdl=None,
+    plot_BC = None,
+    BC_labels = None,
+    BC_target = None
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -304,3 +373,153 @@ def general_plotter(
         pl.show()
 
     return returns_parameter
+
+
+def general_plotter(*args, **kwargs):
+    """Wraps the general plotter, to add BC plots."""
+
+    mapdl = kwargs.get('mapdl', None)
+    plot_BC = kwargs.get('plot_BC', False)
+    BC_labels = kwargs.get('BC_labels', None)
+    BC_target = kwargs.get('BC_target', ['NODES'])
+
+    if not plot_BC:
+        return _general_plotter(*args, **kwargs)
+
+    # Getting the inputs values
+    return_plotter = kwargs.get('return_plotter', False)
+    return_cpos = kwargs.get('return_cpos', False)
+
+    # Overwritting the return plotter
+    kwargs['return_plotter'] = True
+
+    # Getting the plotter
+    pl, cpos = general_plotter(*args, **kwargs)
+
+    pl = bc_plotter(pl, **kwargs)
+
+    if not return_plotter and not return_cpos:
+        return
+    elif return_plotter and return_cpos:
+        return pl, cpos
+    else:
+        return pl if return_plotter else cpos
+
+
+def bc_plotter(pl, mapdl =None, BC_labels=None, BC_target=None, **kwargs):
+
+    BC_labels = _bc_labels_checker(BC_labels)
+    BC_target = _bc_target_checker(BC_target)
+
+    # We need to scale the glyphs, otherwise, they will be plot sized 1.
+    # We are going to calculate the distance between the closest points, so we will scaled to a percetange of this distance.
+    # This might create very small points in cases there are a concentration of points.
+    #
+    # Later can find a way to plot them and keep their size constant independent of the zoom.
+
+    min_dist = approximate_minimum_distance_between_points(mapdl.mesh.nodes)
+
+    if not BC_labels:
+        BC_labels = True
+
+    if not BC_target:
+        BC_target = ['NODES']
+
+    if 'NODES' in BC_target:
+        pl = bc_nodes_plotter(mapdl, pl, BC_labels, min_dist=min_dist)
+
+    return pl
+
+
+def bc_nodes_plotter(mapdl, pl, BC_labels, plot_labels=False, min_dist=1):
+    """Plot nodes BC given a list of labels"""
+    nodes_xyz = mapdl.mesh.nodes
+    nodes_num = mapdl.mesh.nnum
+
+    for each_label in BC_labels:
+        if each_label in BC_D:
+            bc = mapdl.get_nodal_constrains(each_label)
+
+            bc_num = bc[:, 0].astype(int)
+            bc_nodes = nodes_xyz[np.isin(nodes_num, bc_num), :]
+            bc_values = bc[:, 1:]
+            bc_scale = abs(bc_values[:, 0])
+
+            if bc_scale.max() != bc_scale.min():
+                bc_scale = (bc_scale - bc_scale.min()) / \
+                    (bc_scale.max() - bc_scale.min())+0.5  # Normalization around 0.5
+            else:
+                bc_scale = np.ones(bc_scale.shape)*0.5  # In case all the values are the same
+
+            pcloud = pv.PolyData(bc_nodes)
+            pcloud["scale"] = bc_scale*min_dist
+
+            glyphs = pcloud.glyph(scale="scale",
+                                tolerance=0.05,
+                                geom=BC_plot_settings[each_label]['arrow'])
+
+            pl.add_mesh(
+                glyphs, color=BC_plot_settings[each_label]['color'], style='surface')
+
+            if plot_labels:
+                bc_labels = [f"{id} ({each_label}: {values[0]:6.3f}, {values[1]:6.3f})" for id,
+                        values in zip(bc_num, bc_values)]
+                pcloud["labels"] = bc_labels
+                pl.add_point_labels(pcloud.points, pcloud["labels"])
+
+        elif each_label in BC_F:
+            # To implement later
+            raise Exception(f"The label '{each_label}' is not implemented yet.")
+        else:
+            raise Exception(f"The label '{each_label}' is not supported.")
+
+    return pl
+
+
+def _bc_labels_checker(BC_labels):
+    """Make sure we have allowed parameters and data types for ``BC_labels``"""
+
+    if not isinstance(BC_labels, (str, list, tuple)):
+        raise ValueError("The parameter 'BC_labels' can be only a string, a list of strings or tuple of strings.")
+
+    if isinstance(BC_labels, str):
+        if BC_labels not in BCS or BC_labels not in FIELDS:
+            raise ValueError(f"The parameter '{BC_labels}' in 'BC_labels' is not supported.\n"
+                             "Please use any of the following:\n"
+                             f"{FIELDS}\nor any combination of:\n{BCS}")
+        BC_labels = [BC_labels.upper()]
+
+    if isinstance(BC_labels, (list, tuple)):
+        if not all([each.upper() in BCS for each in BC_labels]):
+            raise ValueError("One or more parameters in 'BC_labels' are not supported.\n"
+                             f"Please use any combination of the following:\n{BCS}")
+        if not all([isinstance(each, str) for each in BC_labels]):
+            raise ValueError("The parameter 'BC_labels' can be a list or tuple, but it should only contain strings inside them.")
+
+        BC_labels = [each.upper() for each in BC_labels]
+
+    return BC_labels
+
+
+def _bc_target_checker(BC_target):
+    """Make sure we have allowed parameters and data types for ``BC_labels``"""
+
+    if not isinstance(BC_target, (str, list, tuple)):
+        raise ValueError("The parameter 'BC_target' can be only a string, a list of strings or tuple of strings.")
+
+    if isinstance(BC_target, str):
+        if BC_target not in ALLOWED_TARGETS:
+            raise ValueError(f"The parameter '{BC_target}' in 'BC_target' is not supported.\n"
+                             f"At the moments only the following are supported:\n{ALLOWED_TARGETS}")
+        BC_target = [BC_target.upper()]
+
+    if isinstance(BC_target, (list, tuple)):
+        if not all([each.upper() in ALLOWED_TARGETS for each in BC_target]):
+            raise ValueError("One or more parameters in 'BC_target' are not supported.\n"
+                             f"Please use any combination of the following:\n{ALLOWED_TARGETS}")
+        if not all([isinstance(each, str) for each in BC_target]):
+            raise ValueError("The parameter 'BC_target' can be a list or tuple, but it should only contain strings inside them.")
+
+        BC_target = [each.upper() for each in BC_target]
+
+    return BC_target
