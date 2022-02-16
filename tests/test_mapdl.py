@@ -757,6 +757,29 @@ def test_load_array(mapdl, dimx, dimy):
     assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
 
+@pytest.mark.parametrize("array", [
+    pytest.param([1, 3, 10], marks=pytest.mark.xfail),
+    pytest.param(np.zeros(3,), marks=pytest.mark.xfail),
+    np.zeros((3, 1)),
+    np.zeros((3, 3)),
+])
+def test_load_array_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    assert np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+
+@pytest.mark.parametrize("array", [
+    [1, 3, 10],
+    np.random.randint(1,20, size=(3,))
+    ])
+def test_load_array_failure_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    array = np.array(array)
+    assert not np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+    assert mapdl.parameters["myarr"].shape != array.shape
+    assert mapdl.parameters["myarr"].shape[0] == array.shape[0]
+    assert (mapdl.parameters["myarr"].ravel() == array.ravel()).all()
+    assert mapdl.parameters["myarr"].ndim == array.ndim + 1
+
 @pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
