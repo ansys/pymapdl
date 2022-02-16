@@ -20,7 +20,7 @@ To install Julia go to their website `<https://julialang.org/>`_ and follow the 
 Setting Julia Environment
 ==========================
 
-To have access to Python libraries, you must install the *PyCall* Julia package.
+To have access to Python libraries within Julia, you must install the [PyCall](https://github.com/JuliaPy/PyCall.jl) Julia package.
 To install it, run Julia and switch to the package manager by pressing  the``"]"`` key.
 
 If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
@@ -71,7 +71,7 @@ For example:
 
 
 Installing PyMAPDL in Julia
-============================
+===========================
 
 *PyCall* includes a lightweight Python environment that uses `Conda <https://conda.io>`_ to manage and access Python packages.
 This environment, currently based on Python 3.9.7, includes the standard basic Python libraries.
@@ -95,7 +95,7 @@ In Linux, the above code prints the following, where ``python3`` is the default 
 .. note::
 
     In Linux, there are no specific installation steps. You only need to add the Julia executable to the path.
-    Hence,  Julia's Python installation path can differ from user to user.
+    Hence, Julia's Python installation path can differ from user to user.
     For example, if you uncompress the source files in ``/home/USER/Julia``, Julia's path will be 
     ``/home/USER/Julia/julia-1.7.2/bin``
 
@@ -125,7 +125,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     ansys.mapdl Version: 0.60.6
     
 .. note:: 
-    If you experience some errors regarding *PyCall*, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
+    If you experience errors when using *PyCall*, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
     
     .. code::
         
@@ -133,7 +133,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
 
 
 Using PyMAPDL in Julia
-=======================
+======================
 
 Here is a simple example of using PyMAPDL in Julia:
 
