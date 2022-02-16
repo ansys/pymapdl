@@ -2359,21 +2359,20 @@ class _MapdlCore(Commands):
         """
         if not isinstance(array, np.ndarray):
             array = np.asarray(array)
-        if array.ndim != 2:
-            raise NotImplementedError("Only loading of 2D arrays is supported at the moment.")
 
-        imax = array.shape[0]
-        jmax = array.shape[1]
-        if array.ndim == 2:
-            kmax = ""
-        elif array.ndim == 3:
-            kmax = array.shape[2]
-        else:
-            raise ValueError(
-                f"Expecting only a 2D or 3D array, but input contains\n{array.ndim} dimensions."
-            )
+        if array.ndim > 2:
+            raise NotImplementedError("Only loading of 1D or 2D arrays is supported at the moment.")
 
-        self.dim(name, "ARRAY", imax=array.shape[0], jmax=array.shape[1], kmax="")
+        jmax = 1
+        kmax = ""
+
+        if array.ndim > 0:
+            imax = array.shape[0]
+
+        if array.ndim > 1:
+            jmax = array.shape[1]
+
+        self.dim(name, "ARRAY", imax=imax, jmax=jmax, kmax="")
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
