@@ -1,13 +1,13 @@
 .. _tech_demo_01:
 
-Tech Demo: Brake Squeal Analysis
---------------------------------
+Brake Squeal Analysis
+---------------------
 
-
-This example analysis shows how to solve a brake-squeal problem.  `1.6. Analysis and Solution Controls`_ are highlighted: linear
-non-prestressed modal, partial nonlinear perturbed modal, and full nonlinear perturbed
-modal. The problem demonstrates sliding frictional contact and uses complex eigensolvers to
-predict unstable modes.
+This example analysis shows how to solve a brake-squeal problem.
+`1.6. Analysis and Solution Controls`_ are highlighted: linear non-prestressed
+modal, partial nonlinear perturbed modal, and full nonlinear perturbed
+modal. The problem demonstrates sliding frictional contact and uses complex
+eigensolvers to predict unstable modes.
 
 The following topics are available:
 
