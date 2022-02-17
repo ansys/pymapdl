@@ -1,8 +1,8 @@
 .. _extended_example01:
 
 
-Example 01: Gmsh Example
-========================
+Gmsh Example
+============
 
 Objective
 ---------
