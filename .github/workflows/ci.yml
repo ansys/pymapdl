@@ -90,6 +90,7 @@ jobs:
 
       # used for documentation deployment
       - name: Get Bot Application Token
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         id: get_workflow_token
         uses: peter-murray/workflow-application-token-action@v1
         with:
