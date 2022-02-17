@@ -1,3 +1,9 @@
+ignore:
+  - "ansys/mapdl/core/_commands"
+  - "ansys/mapdl/core/jupyter.py"
+  - "ansys/mapdl/core/mapdl_console.py"
+  - "ansys/mapdl/core/mapdl_corba.py"
+
 comment:
   layout: "diff"
   behavior: default
