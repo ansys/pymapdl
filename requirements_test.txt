@@ -1,9 +1,8 @@
-autopep8
-matplotlib
-pandas
-pytest
-pytest
-pytest-cov
+autopep8==1.6.0
+matplotlib==3.5.1
+pandas==1.4.0
+pytest==6.2.5
+pytest-cov==3.0.0
 pyvista==0.32.1
-scipy
-vtk<9.1.0
+scipy==1.7.3
+vtk==9.0.3
