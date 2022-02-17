@@ -636,9 +636,14 @@ def test_elements(cleared, mapdl):
 def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
+
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
     else:
+        # For the cases where shape is (X,) # Empty second dimension
+        parm = np.array(parm)
+        if parm.ndim == 1:
+            parm = parm.reshape((parm.shape[0], 1))
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
@@ -740,27 +745,33 @@ def test_cyclic_solve(mapdl, cleared):
     mapdl.post1()
     assert mapdl.post_processing.nsets == 16
 
-
-def test_load_table(mapdl):
-    dimx = 5
-    dimy = 8
-
-    my_conv = np.random.rand(dimx, dimy)
-    my_conv[:, 0] = np.arange(dimx)
-    my_conv[0, :] = np.arange(dimy)
+# Using ``np.ones(5)*2`` to test specifically the case for two columns #883
+@pytest.mark.parametrize('dim_rows', np.random.randint(2, 100, size=4, dtype=int))
+@pytest.mark.parametrize('dim_cols', np.concatenate((np.ones(2, dtype=int)*2, np.random.randint(2, 100, size=2, dtype=int))))
+def test_load_table(mapdl, dim_rows, dim_cols):
+    my_conv = np.random.rand(dim_rows, dim_cols)
+    my_conv[:, 0] = np.arange(dim_rows)
+    my_conv[0, :] = np.arange(dim_cols)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
+    if dim_cols == 2: # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows-1, 1)), 1E-7)
+    else:
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
+
+def test_load_table_error_ascending_row(mapdl):
+    my_conv = np.ones((3, 3))
+    my_conv[0, 1] = 4
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
-        my_conv1 = my_conv.copy()
-        my_conv1[0, 1] = 4
-        mapdl.load_table("my_conv", my_conv1)
+        mapdl.load_table("my_conv", my_conv)
 
+
+def test_load_table_error_ascending_row(mapdl):
+    my_conv = np.ones((3, 3))
+    my_conv[1, 0] = 4
     with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
-        my_conv1 = my_conv.copy()
-        my_conv1[1, 0] = 4
-        mapdl.load_table("my_conv", my_conv1)
+        mapdl.load_table("my_conv", my_conv)
 
 
 @pytest.mark.parametrize("dimx", [1, 3, 10])
@@ -769,11 +780,32 @@ def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
     mapdl.load_array("my_conv", my_conv)
 
-    # flatten as MAPDL returns flat arrays when second dimension is 1.
-    if dimy == 1:
-        my_conv = my_conv.ravel()
+    # flatten as MAPDL returns flat arrays when one dimension is 1.
     assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
+
+@pytest.mark.parametrize("array", [
+    pytest.param([1, 3, 10], marks=pytest.mark.xfail),
+    pytest.param(np.zeros(3,), marks=pytest.mark.xfail),
+    np.zeros((3, 1)),
+    np.zeros((3, 3)),
+])
+def test_load_array_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    assert np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+
+@pytest.mark.parametrize("array", [
+    [1, 3, 10],
+    np.random.randint(1, 20, size=(3,))
+    ])
+def test_load_array_failure_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    array = np.array(array)
+    assert not np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+    assert mapdl.parameters["myarr"].shape != array.shape
+    assert mapdl.parameters["myarr"].shape[0] == array.shape[0]
+    assert (mapdl.parameters["myarr"].ravel() == array.ravel()).all()
+    assert mapdl.parameters["myarr"].ndim == array.ndim + 1
 
 @pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
