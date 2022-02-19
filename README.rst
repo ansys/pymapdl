@@ -1,19 +1,30 @@
 PyMAPDL
 =======
-.. image:: https://img.shields.io/pypi/v/ansys-mapdl-core.svg
-    :target: https://pypi.org/project/ansys-mapdl-core/
+|pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black|
 
-.. image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
+
+.. |pypi| image:: https://img.shields.io/pypi/v/ansys-mapdl-core.svg?logo=python&logoColor=white
+   :target: https://pypi.org/project/ansys-mapdl-core/
+
+.. |PyPIact| https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
+   :target: https://pypi.org/project/ansys-mapdl-core/
+
+.. |codecov| image:: https://codecov.io/gh/pyansys/pymapdl/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/pyansys/pymapdl
+
+.. |GH-CI| image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml
 
-.. image:: https://zenodo.org/badge/70696039.svg
+.. |zenodo| image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
 
-.. image:: https://img.shields.io/badge/License-MIT-yellow.svg
+.. |MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :target: https://opensource.org/licenses/MIT
 
-.. image:: https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
-   :target: https://pypi.org/project/ansys-mapdl-core/
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=flat
+  :target: https://github.com/psf/black
+  :alt: black
+
 
 Overview
 --------
