@@ -2819,7 +2819,7 @@ class _MapdlCore(Commands):
         #invalid parameter (using ARGXX or ARXX)
         match_reserved_leading_underscored_parameter_name = r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
         # If it also ends in undescore, this wont be triggered.
-        if re.search(match_reserved_leading_underscored_parameter_name, param_name): 
+        if re.search(match_reserved_leading_underscored_parameter_name, param_name):
             raise ValueError(f"It is discouraged the use of parameters starting with underscore ('_'). "
                     "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros.")
 
