@@ -1823,6 +1823,23 @@ class _MapdlCore(Commands):
         3003
 
         """
+        def ends_with_two_ints(param_name):
+            ends_ = True
+            try:
+                int(param_name[-1])
+                int(param_name[-2])
+            except ValueError:
+                ends_ = False
+            return ends_
+
+        def starts_with_ar_arg(param_name):
+            return param_name.upper().startswith('AR') or param_name.upper().startswith('ARG')
+
+        if starts_with_ar_arg(par) and ends_with_two_ints(par):
+            warn(f"The parameter name {par} is reserved for functions and macros local parameters."
+                 "Hence its use is not recomended outside them."
+                 "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
+
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
         kwargs["mute"] = False
 
@@ -2263,6 +2280,24 @@ class _MapdlCore(Commands):
         if command[:4].upper() == "/LIS":
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
+
+        if '=' in command:
+            # We are storing a parameter.
+            param_name = command.split('=')[0].strip()
+
+            if "'" not in param_name or '"' not in param_name:
+                # Edge case. `\title, 'par=1234' `
+
+                match_valid_parameter_name = r"^[^\d][a-zA-Z\d_]*$"
+                if not re.search(match_valid_parameter_name, param_name):
+                    raise ValueError(f"The parameter name `{param_name}` is an invalid parameter name."
+                                     "Only letters, numbers and `_` are permitted.")
+
+                match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
+                if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
+                    warn(f"The parameter name {param_name} is reserved for functions and macros local parameters."
+                    "Hence its use is not recomended outside them."
+                    "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
 
         text = self._run(command, mute=mute, **kwargs)
 
