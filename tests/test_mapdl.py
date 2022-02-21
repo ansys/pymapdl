@@ -1208,3 +1208,59 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(mapdl.get("_MAXNODENUM", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
+
+
+@pytest.mark.parametrize("par_name", [
+    'asdf124',
+    'asd',
+    'a12345',
+    'a12345_',
+    '_a12345',
+    '_a12345_',
+    pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
+    pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
+    pytest.param('asa12df+', marks=pytest.mark.xfail, id="Invalid symbol in parameter name."),
+    # function args
+    pytest.param('AR0', marks=pytest.mark.xfail, id="Using `AR0` with is reserved for functions/macros"),
+    pytest.param('AR1', marks=pytest.mark.xfail, id="Using `AR1` with is reserved for functions/macros"),
+    pytest.param('AR10', marks=pytest.mark.xfail, id="Using `AR10` with is reserved for functions/macros"),
+    pytest.param('AR99', marks=pytest.mark.xfail, id="Using `AR99` with is reserved for functions/macros"),
+    pytest.param('AR111', marks=pytest.mark.xfail, id="Using `AR111` with is reserved for functions/macros"),
+    pytest.param('AR999', marks=pytest.mark.xfail, id="Using `AR999` with is reserved for functions/macros"),
+    pytest.param('ARG0', marks=pytest.mark.xfail, id="Using `ARG0` with is reserved for functions/macros"),
+    pytest.param('ARG1', marks=pytest.mark.xfail, id="Using `ARG1` with is reserved for functions/macros"),
+    pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
+    pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
+    pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros")
+])
+def test_parameters_name(mapdl, par_name):
+    mapdl.run(f"{par_name} = 123")
+
+
+@pytest.mark.parametrize("par_name", [
+    'asdf124',
+    'asd',
+    'a12345',
+    'a12345_',
+    '_a12345',
+    '_a12345_',
+    pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
+    pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
+    pytest.param('asa12df+', marks=pytest.mark.xfail, id="Invalid symbol in parameter name."),
+    # function args
+    pytest.param('AR0', marks=pytest.mark.xfail, id="Using `AR0` with is reserved for functions/macros"),
+    pytest.param('AR1', marks=pytest.mark.xfail, id="Using `AR1` with is reserved for functions/macros"),
+    pytest.param('AR10', marks=pytest.mark.xfail, id="Using `AR10` with is reserved for functions/macros"),
+    pytest.param('AR99', marks=pytest.mark.xfail, id="Using `AR99` with is reserved for functions/macros"),
+    pytest.param('AR111', marks=pytest.mark.xfail, id="Using `AR111` with is reserved for functions/macros"),
+    pytest.param('AR999', marks=pytest.mark.xfail, id="Using `AR999` with is reserved for functions/macros"),
+    pytest.param('ARG0', marks=pytest.mark.xfail, id="Using `ARG0` with is reserved for functions/macros"),
+    pytest.param('ARG1', marks=pytest.mark.xfail, id="Using `ARG1` with is reserved for functions/macros"),
+    pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
+    pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
+    pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros")
+])
+def test_parameters_name_in_get(mapdl, par_name):
+    mapdl.get(par=par_name, entity='node', item1='count')
