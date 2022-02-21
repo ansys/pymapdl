@@ -1824,12 +1824,6 @@ class _MapdlCore(Commands):
 
         """
 
-        match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
-        if re.search(match_reserved_arg_parameter_name, par): #invalid parameter (using ARGXX or ARXX)
-            warn(f"The parameter name {par} is reserved for functions and macros local parameters."
-            "Hence its use is not recommended outside them."
-            "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
-        
         self._check_parameter_name(par)
 
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
@@ -2817,19 +2811,20 @@ class _MapdlCore(Commands):
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
 
-        # Checking 
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(f"The parameter name `{param_name}` is an invalid parameter name."
                                 "Only letters, numbers and `_` are permitted.")
 
-        match_reserved_arg_parameter_name = r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$" # If it also ends in undescore, this wont be triggered.
-        if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
+        #invalid parameter (using ARGXX or ARXX)
+        match_reserved_leading_underscored_parameter_name = r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+        # If it also ends in undescore, this wont be triggered.
+        if re.search(match_reserved_leading_underscored_parameter_name, param_name): 
             raise ValueError(f"It is discouraged the use of parameters starting with underscore ('_'). "
                     "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros.")
 
-        match_reserved_leading_underscored_parameter_name = r"^(AR|ARG)(\d{1,3})$"
-        if re.search(match_reserved_leading_underscored_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
+        match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
+        if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
             raise ValueError(f"The parameter name {param_name} is reserved for functions and macros local parameters."
             "Hence its use is not recommended outside them."
             "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
