@@ -6,7 +6,7 @@ PyMAPDL
 .. |pypi| image:: https://img.shields.io/pypi/v/ansys-mapdl-core.svg?logo=python&logoColor=white
    :target: https://pypi.org/project/ansys-mapdl-core/
 
-.. |PyPIact| https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
+.. |PyPIact| image:: https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
    :target: https://pypi.org/project/ansys-mapdl-core/
 
 .. |codecov| image:: https://codecov.io/gh/pyansys/pymapdl/branch/main/graph/badge.svg
