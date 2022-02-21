@@ -1232,7 +1232,9 @@ def test_extra_argument_in_get(mapdl, make_block):
     pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
     pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
     pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
-    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros")
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros"),
+    #length
+    pytest.param('a23456789012345678901234567890123', marks=pytest.mark.xfail, id="Name too long")
 ])
 def test_parameters_name(mapdl, par_name):
     mapdl.run(f"{par_name} = 123")
@@ -1260,10 +1262,9 @@ def test_parameters_name(mapdl, par_name):
     pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
     pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
     pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
-    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros")
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros"),
     #length
     pytest.param('a23456789012345678901234567890123', marks=pytest.mark.xfail, id="Name too long")
-
 ])
 def test_parameters_name_in_get(mapdl, par_name):
     mapdl.get(par=par_name, entity='node', item1='count')
