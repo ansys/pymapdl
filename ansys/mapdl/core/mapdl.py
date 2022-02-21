@@ -1837,7 +1837,7 @@ class _MapdlCore(Commands):
 
         if starts_with_ar_arg(par) and ends_with_two_ints(par):
             warn(f"The parameter name {par} is reserved for functions and macros local parameters."
-                 "Hence its use is not recomended outside them."
+                 "Hence its use is not recommended outside them."
                  "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
 
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
@@ -2296,7 +2296,7 @@ class _MapdlCore(Commands):
                 match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
                 if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
                     warn(f"The parameter name {param_name} is reserved for functions and macros local parameters."
-                    "Hence its use is not recomended outside them."
+                    "Hence its use is not recommended outside them."
                     "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
 
         text = self._run(command, mute=mute, **kwargs)
