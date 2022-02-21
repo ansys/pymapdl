@@ -1215,7 +1215,7 @@ def test_extra_argument_in_get(mapdl, make_block):
     'asd',
     'a12345',
     'a12345_',
-    '_a12345',
+    pytest.param('_a12345', marks=pytest.mark.xfail, id="Starting by underscore, but not ending"),
     '_a12345_',
     pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
     pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
@@ -1243,7 +1243,7 @@ def test_parameters_name(mapdl, par_name):
     'asd',
     'a12345',
     'a12345_',
-    '_a12345',
+    pytest.param('_a12345', marks=pytest.mark.xfail, id="Starting by underscore, but not ending"),
     '_a12345_',
     pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
     pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
@@ -1261,6 +1261,9 @@ def test_parameters_name(mapdl, par_name):
     pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
     pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
     pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros")
+    #length
+    pytest.param('a23456789012345678901234567890123', marks=pytest.mark.xfail, id="Name too long")
+
 ])
 def test_parameters_name_in_get(mapdl, par_name):
     mapdl.get(par=par_name, entity='node', item1='count')
