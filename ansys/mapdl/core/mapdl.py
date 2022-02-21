@@ -2814,7 +2814,8 @@ class _MapdlCore(Commands):
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(f"The parameter name `{param_name}` is an invalid parameter name."
-                                "Only letters, numbers and `_` are permitted.")
+                               "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                               "It cannot start with a number either.")
 
         #invalid parameter (using ARGXX or ARXX)
         match_reserved_leading_underscored_parameter_name = r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
@@ -2825,6 +2826,6 @@ class _MapdlCore(Commands):
 
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
         if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
-            raise ValueError(f"The parameter name {param_name} is reserved for functions and macros local parameters."
+            raise ValueError(f"The parameters 'ARGXX' and 'ARXX' where 'XX' are integers, are reserved for functions and macros local parameters."
             "Hence its use is not recommended outside them."
             "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")
