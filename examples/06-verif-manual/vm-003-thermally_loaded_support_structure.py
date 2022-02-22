@@ -181,3 +181,7 @@ message = f"""
 
 """
 print(message)
+
+
+# stop mapdl
+mapdl.exit()

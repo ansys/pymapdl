@@ -117,3 +117,7 @@ D | {rotations[3][0]:11.6f},{rotations[3][1]:11.6f},{rotations[3][2]:11.6f}
 """
 
 print(message)
+
+
+# stop mapdl
+mapdl.exit()

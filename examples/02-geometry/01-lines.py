@@ -307,3 +307,7 @@ mapdl.lplot(
     cpos="xy",
     font_size=26,
 )
+
+
+# stop mapdl
+mapdl.exit()

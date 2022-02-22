@@ -469,3 +469,6 @@ if RUN_BATCH:
     plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
     plt.legend()
     plt.show()
+
+# stop mapdl
+mapdl.exit()

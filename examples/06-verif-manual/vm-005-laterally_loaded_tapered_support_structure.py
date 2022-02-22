@@ -216,3 +216,7 @@ results_183 = f"""
 """
 print(results_182)
 print(results_183)
+
+
+# stop mapdl
+mapdl.exit()

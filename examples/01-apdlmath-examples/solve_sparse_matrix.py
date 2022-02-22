@@ -93,3 +93,7 @@ mm.status()
 # Delete all APDLMath Objects
 #
 mm.free()
+
+
+# stop mapdl
+mapdl.exit()

@@ -105,3 +105,7 @@ print(un)
 ###############################################################################
 # Close an opened file
 print(xpl.close())
+
+
+# stop mapdl
+mapdl.exit()

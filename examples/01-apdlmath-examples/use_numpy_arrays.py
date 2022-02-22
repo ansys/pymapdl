@@ -100,3 +100,7 @@ print(ans_mat.id)
 # Load this matrix from APDL and verify it is identical
 from_ans = ans_mat.asarray()
 print(np.allclose(from_ans, np_rand))
+
+
+# stop mapdl
+mapdl.exit()

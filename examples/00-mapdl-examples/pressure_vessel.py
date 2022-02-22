@@ -158,3 +158,6 @@ print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.min()}')
 print()
 print(f'LEGACY Reader and MAPDL VGET Min: {max_von_mises}')
 print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.max()}')
+
+# stop mapdl
+mapdl.exit()
