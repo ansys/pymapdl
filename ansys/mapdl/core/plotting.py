@@ -37,7 +37,7 @@ def general_plotter(
     scalar_bar_args={},
     smooth_shading=None,
     split_sharp_edges=None,
-    feature_angle=None,
+    feature_angle=30.0,
     show_scalar_bar=None,
     # labels kwargs
     font_size=None,
@@ -164,7 +164,7 @@ def general_plotter(
         the input mesh within the plotter.
 
     feature_angle : float, optional
-        Angle to consider an edge a sharp edge.
+        Angle to consider an edge a sharp edge. Default 30 degrees.
 
     theme : pyvista.DefaultTheme, optional
         PyVista theme.  Defaults to PyMAPDL theme.
