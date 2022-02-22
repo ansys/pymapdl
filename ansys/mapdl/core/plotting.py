@@ -36,6 +36,8 @@ def general_plotter(
     render_lines_as_tubes=False,
     scalar_bar_args={},
     smooth_shading=None,
+    split_sharp_edges=None,
+    feature_angle=30.0,
     show_scalar_bar=None,
     # labels kwargs
     font_size=None,
@@ -152,6 +154,18 @@ def general_plotter(
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
 
+    split_sharp_edge : bool, optional
+        Split sharp edges exceeding 30 degrees when plotting with
+        smooth shading.  Control the angle with the optional
+        keyword argument ``feature_angle``.
+        By default this is ``False``.
+
+        .. note:: Note that enabling this will create a copy of
+        the input mesh within the plotter.
+
+    feature_angle : float, optional
+        Angle to consider an edge a sharp edge. Default 30 degrees.
+
     theme : pyvista.DefaultTheme, optional
         PyVista theme.  Defaults to PyMAPDL theme.
 
@@ -233,6 +247,8 @@ def general_plotter(
             show_edges=show_edges,
             edge_color=edge_color,
             smooth_shading=smooth_shading,
+            split_sharp_edges=split_sharp_edges,
+            feature_angle=feature_angle,
             point_size=point_size,
             line_width=line_width,
             show_scalar_bar=show_scalar_bar,
