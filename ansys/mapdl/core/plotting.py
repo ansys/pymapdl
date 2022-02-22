@@ -272,19 +272,23 @@ def general_plotter(
     if title:
         pl.add_title(title)
 
-    returns_parameter = []
-    if return_plotter:
-        returns_parameter.append(pl)
-    if return_cpos:
-        returns_parameter.append(pl.camera_position)
+    def return_from_plotter():
+        returns_parameter = []
+        if return_plotter:
+            returns_parameter.append(pl)
+        if return_cpos:
+            returns_parameter.append(pl.camera_position)
 
-    if not returns_parameter:
-        returns_parameter = None
-    else:
-        if len(returns_parameter) == 1:
-            returns_parameter = returns_parameter[0]
+        if not returns_parameter:
+            returns_parameter = None
         else:
-            returns_parameter = tuple(returns_parameter)
+            if len(returns_parameter) == 1:
+                returns_parameter = returns_parameter[0]
+            else:
+                returns_parameter = tuple(returns_parameter)
+        return returns_parameter
+
+    returns_parameter = return_from_plotter()
 
     # permit user to save the figure as a screenshot
     if savefig:
@@ -292,15 +296,16 @@ def general_plotter(
         pl.screenshot(savefig)
 
         # return unclosed plotter
-        if return_plotter:
+        if returns_parameter:
             return returns_parameter
 
         # if not returning plotter, close right away
         pl.close()
 
-    elif return_plotter:
-        return returns_parameter
     else:
         pl.show()
+
+    # Recreating "returns" to update cpos
+    returns_parameter = return_from_plotter()
 
     return returns_parameter
