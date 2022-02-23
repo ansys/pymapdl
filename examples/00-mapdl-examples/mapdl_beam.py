@@ -85,5 +85,6 @@ mapdl.run("/solu")
 mapdl.antype("static")
 print(mapdl.solve())
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

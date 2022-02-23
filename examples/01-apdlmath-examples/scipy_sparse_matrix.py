@@ -90,5 +90,6 @@ print("name(my_mat)=" + my_mat.id)
 print("name(msub)=" + msub.id)
 
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

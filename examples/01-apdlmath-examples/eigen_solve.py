@@ -172,5 +172,6 @@ plt.ylabel("Errors (%)")
 ax.bar(x, mapdl_acc, label="MAPDL Results")
 
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

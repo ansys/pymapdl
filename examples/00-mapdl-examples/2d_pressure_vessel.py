@@ -183,5 +183,6 @@ mapdl.post_processing.plot_nodal_displacement(
 # Plot nodal equivalent stress
 mapdl.post_processing.plot_nodal_eqv_stress(cpos="xy", cmap="magma")
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

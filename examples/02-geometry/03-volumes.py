@@ -275,5 +275,6 @@ mapdl.vsymm("Y", "ALL")
 mapdl.vplot(show_bounds=True, show_lines=False, quality=5)
 
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

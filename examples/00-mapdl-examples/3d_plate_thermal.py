@@ -71,5 +71,6 @@ nnum, temp = result.nodal_temperature(0)
 # this is the same as pyansys.read_binary(mapdl._result_file)
 print(nnum, temp)
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

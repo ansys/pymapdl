@@ -86,5 +86,6 @@ result.animate_nodal_displacement(
     movie_filename="plane_vib.gif",
 )
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

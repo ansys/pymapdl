@@ -113,5 +113,6 @@ for node in [node1, node2]:
     print(message)
 
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

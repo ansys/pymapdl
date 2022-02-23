@@ -270,5 +270,6 @@ plt.xlabel("Time (seconds)")
 plt.ylabel("Temperature ($^\circ$F)")
 plt.show()
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

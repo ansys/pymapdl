@@ -188,5 +188,6 @@ pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
 _ = pl.show()
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

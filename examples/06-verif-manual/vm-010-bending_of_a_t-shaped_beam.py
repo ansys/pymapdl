@@ -285,5 +285,6 @@ df2 = pd.DataFrame(main_columns, index=row_names).round(1)
 # Apply settings for the dataframe.
 df2.head()
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

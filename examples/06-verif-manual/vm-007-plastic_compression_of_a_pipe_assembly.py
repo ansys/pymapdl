@@ -580,5 +580,6 @@ df.style.set_caption('Results Comparison',
     "border-style": "solid",
     "text-align": "center"}).format("{:.3f}")
 
+###############################################################################
 # stop mapdl
 mapdl.exit()

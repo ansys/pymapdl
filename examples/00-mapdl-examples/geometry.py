@@ -156,5 +156,6 @@ grid.plot(
 #     >>> import pyvista
 #     >>> imported_mesh = pyvista.read('my_mesh.vtk')
 
+###############################################################################
 # stop mapdl
 mapdl.exit()
