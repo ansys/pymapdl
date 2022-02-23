@@ -881,3 +881,8 @@ print(stiffness_scaled)
 
 if np.allclose(stiffnes_mapdl_scaled, stiffness_scaled):
     print('Both matrices are the equal within tolerance.')
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

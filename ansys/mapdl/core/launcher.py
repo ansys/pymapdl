@@ -248,11 +248,16 @@ def launch_grpc(
 
     Returns
     -------
-    port : int
+    int
         Returns the port number that the gRPC instance started on.
 
     Notes
     -----
+    If ``PYMAPDL_START_INSTANCE`` is set to FALSE, this ``launch_mapdl`` will
+    look for an existing instance of MAPDL at ``PYMAPDL_IP`` on port
+    ``PYMAPDL_PORT``, with defaults 127.0.0.1 and 50052 if unset. This is
+    typically used for automated documentation and testing.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
@@ -491,7 +496,27 @@ def launch_grpc(
 
 
 def get_start_instance(start_instance_default=True):
-    """Check if the environment variable PYMAPDL_START_INSTANCE exists and is valid."""
+    """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
+
+    Parameters
+    ----------
+    start_instance_default : bool
+        Value to return when ``PYMAPDL_START_INSTANCE`` is unset.
+
+    Returns
+    -------
+    bool
+        ``True`` when the ``PYMAPDL_START_INSTANCE`` environment variable is
+        true, ``False`` when PYMAPDL_START_INSTANCE is false. If unset,
+        returns ``start_instance_default``.
+
+    Raises
+    ------
+    OSError
+        Raised when ``PYMAPDL_START_INSTANCE`` is not either true or false
+        (case independent).
+
+    """
     if "PYMAPDL_START_INSTANCE" in os.environ:
         if os.environ["PYMAPDL_START_INSTANCE"].lower() not in ["true", "false"]:
             val = os.environ["PYMAPDL_START_INSTANCE"]

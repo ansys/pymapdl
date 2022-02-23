@@ -197,3 +197,7 @@ Displacement [in]     -0.12          {displacement:.2f}                 {abs(dis
 """
 
 print(results)
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

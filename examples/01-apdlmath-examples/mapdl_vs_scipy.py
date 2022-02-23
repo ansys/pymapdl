@@ -214,3 +214,7 @@ plt.show()
 #
 ratio = scipy_elapsed_time / mapdl_elapsed_time
 print(f"Mapdl is {ratio:.3} times faster")
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

@@ -143,7 +143,7 @@ print('All close:', np.allclose(von_mises, von_mises_mapdl))
 # That these results are equivalent to results from PRNSOL.
 #
 # .. note::
-#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER') will
+#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER')`` will
 #    change the averaging scheme.
 
 mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
@@ -158,3 +158,7 @@ print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.min()}')
 print()
 print(f'LEGACY Reader and MAPDL VGET Min: {max_von_mises}')
 print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.max()}')
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

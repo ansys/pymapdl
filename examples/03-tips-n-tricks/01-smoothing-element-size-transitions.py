@@ -105,3 +105,8 @@ mapdl.amesh("ALL")
 _ = mapdl.eplot(
     vtk=True, show_edges=True, show_axes=False, line_width=2, background="w"
 )
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

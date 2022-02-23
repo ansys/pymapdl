@@ -183,3 +183,7 @@ print(items)
 # - 'zy' - ZY Plane view
 
 mapdl.aplot(quality=1, show_bounds=True, cpos="iso", show_lines=True)
+
+###############################################################################
+# stop mapdl
+mapdl.exit()
