@@ -10,7 +10,6 @@ from ansys.mapdl.core.misc import random_string
 from ansys.mapdl.reader import examples
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
-from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
@@ -178,7 +177,7 @@ def test_server_version(mapdl):
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
-    assert mapdl.prep7() == ""
+    assert mapdl.prep7() is None
 
     # commands like /INQUIRE must always return something
     jobname = "file"
@@ -210,24 +209,33 @@ def test_empty(mapdl):
 
 
 def test_multiline_fail(mapdl):
-    with pytest.raises(ValueError, match="Use ``run_multiline``"):
+    with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
 
 def test_multiline_fail(mapdl, cleared):
-    resp = mapdl.run_multiline(CMD_BLOCK)
+    with pytest.warns(DeprecationWarning):
+        resp = mapdl.run_multiline(CMD_BLOCK)
+        assert "IS SOLID186" in resp, "not capturing the beginning of the block"
+        assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
+
+
+def test_input_strings_fail(mapdl, cleared):
+    resp = mapdl.input_strings(CMD_BLOCK)
     assert "IS SOLID186" in resp, "not capturing the beginning of the block"
     assert "GENERATE NODES AND ELEMENTS" in resp, "not capturing the end of the block"
+
+
+def test_input_strings(mapdl, cleared):
+    assert isinstance(mapdl.input_strings(CMD_BLOCK), str)
+    assert isinstance(mapdl.input_strings(CMD_BLOCK.splitlines()), str)
 
 
 def test_str(mapdl):
     mapdl_str = str(mapdl)
     assert "Product:" in mapdl_str
     assert "MAPDL Version" in mapdl_str
-    try:
-        assert str(mapdl.version) in mapdl_str
-    except:
-        breakpoint()
+    assert str(mapdl.version) in mapdl_str
 
 
 def test_version(mapdl):
@@ -289,6 +297,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_errors is True
 
     # verify that an error is not raised
+    mapdl.prep7(mute=True)
     out = mapdl._run("A, 0, 0, 0")
     assert "*** ERROR ***" in out
 
@@ -325,7 +334,7 @@ def test_kplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.kplot(vtk=False)  # make sure legacy still works
@@ -406,7 +415,7 @@ def test_lplot(cleared, mapdl, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl.lplot(vtk=False)  # make sure legacy still works
@@ -432,7 +441,7 @@ def test_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -459,7 +468,7 @@ def test_corba_apdl_logging_start(tmpdir):
         text = ''.join(fid.readlines())
 
     assert 'PREP7' in text
-    assert '!comment test'
+    assert '!comment test' in text
     assert 'K,1,0,0,0' in text
     assert 'K,2,1,0,0' in text
     assert 'K,3,1,1,0' in text
@@ -467,29 +476,56 @@ def test_corba_apdl_logging_start(tmpdir):
 
 
 def test_apdl_logging(mapdl, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
-    if mapdl._apdl_log is None:
-        mapdl.open_apdl_log(filename, mode="w")
-    mapdl._close_apdl_log()
+    tmp_dir = tmpdir.mkdir("tmpdir")
+    file_name = "tmp_logger.log"
+    file_path = str(tmp_dir.join(file_name))
 
-    # test append mode
-    mapdl.open_apdl_log(filename, mode="a")
+    # Checking there is no apdl_logger
+    if mapdl._apdl_log is not None:
+        mapdl._close_apdl_log()
 
-    # don't allow to double log
+    assert mapdl._apdl_log is None
+    assert file_name not in os.listdir()
+
+    # Setting logger
+    mapdl.open_apdl_log(file_path, 'w')
+    assert file_name in os.listdir(tmp_dir)
+
+    # don't allow double logger:
     with pytest.raises(RuntimeError):
-        mapdl.open_apdl_log(filename, mode="w")
+        mapdl.open_apdl_log(file_name, mode="w")
 
+    # Testing
     mapdl.prep7()
-    mapdl.k(1, 0, 0, 0)
-    mapdl.k(2, 1, 0, 0)
-    mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)
+    mapdl.com('This is a comment')
+
+    #Testing non-interactive
+    with mapdl.non_interactive:
+        mapdl.com('This is a non-interactive command')
+        mapdl.slashsolu()
+        mapdl.prep7()
 
     mapdl._apdl_log.flush()
+    with open(file_path, 'r') as fid:
+        log = fid.read()
 
-    out = open(mapdl._apdl_log.name).read().strip().split()[-5:]
-    assert "PREP7" in out[0]
-    assert "K,4,0,1,0" in out[-1]
+    assert 'APDL' in log
+    assert 'ansys.mapdl.core' in log
+    assert 'PyMapdl' in log
+    assert '/COM' in log
+    assert 'This is a comment' in log
+    assert 'This is a non-interactive command' in log
+    assert '/SOLU' in log
+
+    # Closing
+    mapdl._close_apdl_log()
+    mapdl.com('This comment should not appear in the logger')
+
+    with open(file_path, 'r') as fid:
+        log = fid.read()
+
+    assert 'This comment should not appear in the logger' not in log
+    assert file_name in os.listdir(tmp_dir)
 
 
 def test_nodes(tmpdir, cleared, mapdl):
@@ -600,9 +636,14 @@ def test_elements(cleared, mapdl):
 def test_set_get_parameters(mapdl, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl.parameters[parm_name] = parm
+
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
     else:
+        # For the cases where shape is (X,) # Empty second dimension
+        parm = np.array(parm)
+        if parm.ndim == 1:
+            parm = parm.reshape((parm.shape[0], 1))
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
@@ -704,27 +745,33 @@ def test_cyclic_solve(mapdl, cleared):
     mapdl.post1()
     assert mapdl.post_processing.nsets == 16
 
-
-def test_load_table(mapdl):
-    dimx = 5
-    dimy = 8
-
-    my_conv = np.random.rand(dimx, dimy)
-    my_conv[:, 0] = np.arange(dimx)
-    my_conv[0, :] = np.arange(dimy)
+# Using ``np.ones(5)*2`` to test specifically the case for two columns #883
+@pytest.mark.parametrize('dim_rows', np.random.randint(2, 100, size=4, dtype=int))
+@pytest.mark.parametrize('dim_cols', np.concatenate((np.ones(2, dtype=int)*2, np.random.randint(2, 100, size=2, dtype=int))))
+def test_load_table(mapdl, dim_rows, dim_cols):
+    my_conv = np.random.rand(dim_rows, dim_cols)
+    my_conv[:, 0] = np.arange(dim_rows)
+    my_conv[0, :] = np.arange(dim_cols)
 
     mapdl.load_table("my_conv", my_conv)
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
+    if dim_cols == 2: # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows-1, 1)), 1E-7)
+    else:
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1E-7)
 
+
+def test_load_table_error_ascending_row(mapdl):
+    my_conv = np.ones((3, 3))
+    my_conv[0, 1] = 4
     with pytest.raises(ValueError, match='requires that the axis 0 is in ascending order.'):
-        my_conv1 = my_conv.copy()
-        my_conv1[0, 1] = 4
-        mapdl.load_table("my_conv", my_conv1)
+        mapdl.load_table("my_conv", my_conv)
 
+
+def test_load_table_error_ascending_row(mapdl):
+    my_conv = np.ones((3, 3))
+    my_conv[1, 0] = 4
     with pytest.raises(ValueError, match='requires that the axis 1 is in ascending order.'):
-        my_conv1 = my_conv.copy()
-        my_conv1[1, 0] = 4
-        mapdl.load_table("my_conv", my_conv1)
+        mapdl.load_table("my_conv", my_conv)
 
 
 @pytest.mark.parametrize("dimx", [1, 3, 10])
@@ -733,11 +780,32 @@ def test_load_array(mapdl, dimx, dimy):
     my_conv = np.random.rand(dimx, dimy)
     mapdl.load_array("my_conv", my_conv)
 
-    # flatten as MAPDL returns flat arrays when second dimension is 1.
-    if dimy == 1:
-        my_conv = my_conv.ravel()
+    # flatten as MAPDL returns flat arrays when one dimension is 1.
     assert np.allclose(mapdl.parameters["my_conv"], my_conv, rtol=1E-7)
 
+
+@pytest.mark.parametrize("array", [
+    pytest.param([1, 3, 10], marks=pytest.mark.xfail),
+    pytest.param(np.zeros(3,), marks=pytest.mark.xfail),
+    np.zeros((3, 1)),
+    np.zeros((3, 3)),
+])
+def test_load_array_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    assert np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+
+@pytest.mark.parametrize("array", [
+    [1, 3, 10],
+    np.random.randint(1, 20, size=(3,))
+    ])
+def test_load_array_failure_types(mapdl, array):
+    mapdl.load_array("myarr", array)
+    array = np.array(array)
+    assert not np.allclose(mapdl.parameters["myarr"], array, rtol = 1E-7)
+    assert mapdl.parameters["myarr"].shape != array.shape
+    assert mapdl.parameters["myarr"].shape[0] == array.shape[0]
+    assert (mapdl.parameters["myarr"].ravel() == array.ravel()).all()
+    assert mapdl.parameters["myarr"].ndim == array.ndim + 1
 
 @pytest.mark.skip_grpc
 def test_lssolve(mapdl, cleared):
@@ -811,11 +879,30 @@ def test_cdread(mapdl, cleared):
 
     mapdl.clear()
     mapdl.cdread("db", 'model2', 'cdb')
-
     assert random_letters in mapdl.parameters['PARMTEST']
 
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread(option='db', fname='model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
 
-# CDREAD tests are actually a good way to test 'input' command.
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread('db', fname='model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
+
+    # Testing arguments
+    mapdl.clear()
+    mapdl.cdread('db', 'model2', extension='cdb')
+    assert random_letters in mapdl.parameters['PARMTEST']
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('all', 'model2', 'cdb')
+
+    with pytest.raises(ValueError):
+        mapdl.cdread('test', 'model2', 'cdb')
+
+
 @skip_in_cloud
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split('/')[0][-3:0]
@@ -915,6 +1002,18 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     mapdl.cdread('db', fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread(option='db', fname='model', ext='cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', fname='model', ext='cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
+    clearing_cdread_cdwrite_tests(mapdl)
+    mapdl.cdread('db', 'model', ext='cdb')
+    assert asserting_cdread_cdwrite_tests(mapdl)
+
 
 def test_inval_commands(mapdl, cleared):
     """Test the output of invalid commands"""
@@ -938,25 +1037,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
     resp = mapdl.cwd(path_tests.path_without_spaces)
-    assert 'WARNING' not in resp
+    assert resp is None
 
 
 @skip_in_cloud
 def test_path_with_spaces(mapdl, path_tests):
     resp = mapdl.cwd(path_tests.path_with_spaces)
-    assert 'WARNING' not in resp
+    assert resp is None
 
 
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(RuntimeError):
         resp = mapdl.cwd(path_tests.path_with_single_quote)
-        assert 'WARNING' not in resp
-
 
 @skip_in_cloud
 def test_cwd_directory(mapdl, tmpdir):
-
     mapdl.directory = str(tmpdir)
     assert mapdl.directory == str(tmpdir).replace('\\', '/')
 
@@ -1039,3 +1135,136 @@ def test_tbft_not_found(mapdl):
         mat_id = mapdl.get_value('MAT', 0, 'NUM', 'MAX') + 1
         mapdl.tbft('FADD', mat_id, 'HYPER', 'MOONEY', '3', mute=True)
         mapdl.tbft('EADD', mat_id, 'UNIA', 'non_existing.file', '', '', mute=True)
+
+
+def test_rescontrol(mapdl):
+    # Making sure we have the maximum number of arguments.
+    mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
+
+
+def test_get_with_gopr(mapdl):
+    """Get should work independently of the /gopr state."""
+
+    mapdl._run("/gopr")
+    assert mapdl.wrinqr(1) == 1
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/nopr")
+    assert mapdl.wrinqr(1) == 0
+    par = mapdl.get("__par__", "ACTIVE", "", "TIME", "WALL")
+    assert mapdl.scalar_param('__par__') is not None
+    assert par is not None
+    assert np.allclose(mapdl.scalar_param('__par__'), par)
+
+    mapdl._run("/gopr") # Going back
+    assert mapdl.wrinqr(1) == 1
+
+
+def test_print_com(mapdl, capfd):
+    mapdl.print_com = True
+    string_ = "Testing print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    mapdl.print_com = False
+    string_ = "Testing disabling print"
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = True
+    mapdl.com(string_, mute=True)
+    out, err = capfd.readouterr()
+    assert string_ not in out
+
+    mapdl.print_com = True
+    mapdl.mute = False
+    mapdl.com(string_, mute=False)
+    out, err = capfd.readouterr()
+    assert string_ in out
+
+    # Not allowed type for mapdl.print_com
+    for each in ['asdf', (1, 2), 2, []]:
+        with pytest.raises(ValueError):
+            mapdl.print_com = each
+
+
+def test_extra_argument_in_get(mapdl, make_block):
+    assert isinstance(mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float)
+
+
+@pytest.mark.parametrize("par_name", [
+    'asdf124',
+    'asd',
+    'a12345',
+    'a12345_',
+    pytest.param('_a12345', marks=pytest.mark.xfail, id="Starting by underscore, but not ending"),
+    '_a12345_',
+    pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
+    pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
+    pytest.param('asa12df+', marks=pytest.mark.xfail, id="Invalid symbol in parameter name."),
+    # function args
+    pytest.param('AR0', marks=pytest.mark.xfail, id="Using `AR0` with is reserved for functions/macros"),
+    pytest.param('AR1', marks=pytest.mark.xfail, id="Using `AR1` with is reserved for functions/macros"),
+    pytest.param('AR10', marks=pytest.mark.xfail, id="Using `AR10` with is reserved for functions/macros"),
+    pytest.param('AR99', marks=pytest.mark.xfail, id="Using `AR99` with is reserved for functions/macros"),
+    pytest.param('AR111', marks=pytest.mark.xfail, id="Using `AR111` with is reserved for functions/macros"),
+    pytest.param('AR999', marks=pytest.mark.xfail, id="Using `AR999` with is reserved for functions/macros"),
+    pytest.param('ARG0', marks=pytest.mark.xfail, id="Using `ARG0` with is reserved for functions/macros"),
+    pytest.param('ARG1', marks=pytest.mark.xfail, id="Using `ARG1` with is reserved for functions/macros"),
+    pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
+    pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
+    pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros"),
+    #length
+    pytest.param('a23456789012345678901234567890123', marks=pytest.mark.xfail, id="Name too long")
+])
+def test_parameters_name(mapdl, par_name):
+    mapdl.run(f"{par_name} = 123")
+
+
+@pytest.mark.parametrize("par_name", [
+    'asdf124',
+    'asd',
+    'a12345',
+    'a12345_',
+    pytest.param('_a12345', marks=pytest.mark.xfail, id="Starting by underscore, but not ending"),
+    '_a12345_',
+    pytest.param('1asdf', marks=pytest.mark.xfail, id="Starting by number"),
+    pytest.param('123asdf', marks=pytest.mark.xfail, id="Starting by several numbers"),
+    pytest.param('asa12df+', marks=pytest.mark.xfail, id="Invalid symbol in parameter name."),
+    # function args
+    pytest.param('AR0', marks=pytest.mark.xfail, id="Using `AR0` with is reserved for functions/macros"),
+    pytest.param('AR1', marks=pytest.mark.xfail, id="Using `AR1` with is reserved for functions/macros"),
+    pytest.param('AR10', marks=pytest.mark.xfail, id="Using `AR10` with is reserved for functions/macros"),
+    pytest.param('AR99', marks=pytest.mark.xfail, id="Using `AR99` with is reserved for functions/macros"),
+    pytest.param('AR111', marks=pytest.mark.xfail, id="Using `AR111` with is reserved for functions/macros"),
+    pytest.param('AR999', marks=pytest.mark.xfail, id="Using `AR999` with is reserved for functions/macros"),
+    pytest.param('ARG0', marks=pytest.mark.xfail, id="Using `ARG0` with is reserved for functions/macros"),
+    pytest.param('ARG1', marks=pytest.mark.xfail, id="Using `ARG1` with is reserved for functions/macros"),
+    pytest.param('ARG10', marks=pytest.mark.xfail, id="Using `ARG10` with is reserved for functions/macros"),
+    pytest.param('ARG99', marks=pytest.mark.xfail, id="Using `ARG99` with is reserved for functions/macros"),
+    pytest.param('ARG111', marks=pytest.mark.xfail, id="Using `ARG111` with is reserved for functions/macros"),
+    pytest.param('ARG999', marks=pytest.mark.xfail, id="Using `ARG999` with is reserved for functions/macros"),
+    #length
+    pytest.param('a23456789012345678901234567890123', marks=pytest.mark.xfail, id="Name too long")
+])
+def test_parameters_name_in_get(mapdl, par_name):
+    mapdl.get(par=par_name, entity='node', item1='count')

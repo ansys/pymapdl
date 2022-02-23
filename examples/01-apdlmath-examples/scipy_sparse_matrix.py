@@ -88,3 +88,8 @@ mm.status()
 print("name(k)=" + k.id)
 print("name(my_mat)=" + my_mat.id)
 print("name(msub)=" + msub.id)
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

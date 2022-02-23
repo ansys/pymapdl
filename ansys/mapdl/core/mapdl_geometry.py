@@ -404,6 +404,7 @@ class Geometry:
     @property
     def anum(self):
         """Array of area numbers.
+
         Examples
         --------
         >>> mapdl.block(0, 1, 0, 1, 0, 1)

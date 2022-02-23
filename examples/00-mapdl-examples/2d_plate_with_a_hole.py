@@ -369,3 +369,7 @@ plt.legend()
 plt.xlabel("Ratio of Hole Diameter to Width of Plate")
 plt.ylabel("Stress Concentration")
 plt.show()
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

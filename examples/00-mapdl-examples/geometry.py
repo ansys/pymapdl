@@ -118,15 +118,15 @@ grid.cells
 ###############################################################################
 # Obtain node numbers of the grid
 
-grid.point_arrays["ansys_node_num"]
+grid.point_data["ansys_node_num"]
 
 
 ###############################################################################
 # Save arbitrary data to the grid
 
 # must be sized to the number of points
-grid.point_arrays["my_data"] = np.arange(grid.n_points)
-grid.point_arrays
+grid.point_data["my_data"] = np.arange(grid.n_points)
+grid.point_data
 
 
 ###############################################################################
@@ -155,3 +155,7 @@ grid.plot(
 #     >>> grid.save('my_mesh.vtk')
 #     >>> import pyvista
 #     >>> imported_mesh = pyvista.read('my_mesh.vtk')
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

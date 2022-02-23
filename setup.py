@@ -18,7 +18,7 @@ with io_open(version_file, mode="r") as fd:
 install_requires = [
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0",
-    "pyvista>=0.32.0",  # using new data attributes
+    "pyvista>=0.33.0",
     "appdirs>=1.4.0",
     "tqdm>=4.45.0",
     "pyiges>=0.1.4",
@@ -66,6 +66,7 @@ setup(
     version=__version__,
     description="Python interface to MAPDL Service",
     long_description=open("README.rst").read(),
+    long_description_content_type="text/x-rst",
     license="MIT",
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -81,7 +82,7 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     url="https://github.com/pyansys/pymapdl",
-    python_requires=">=3.6.*",
+    python_requires=">=3.7.*",
     keywords="ANSYS MAPDL gRPC",
     package_data={"ansys.mapdl.core.examples": ["verif/*.dat", "wing.dat"]},
     install_requires=install_requires,

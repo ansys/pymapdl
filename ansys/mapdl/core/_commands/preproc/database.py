@@ -30,34 +30,39 @@ class Database:
         option
             Selects which data to read:
 
-            ALL - Read all geometry, material property, load, and
-            component data (default).  Solid model geometry and loads
-            will be read from the file Fnamei.Exti.  All other data
-            will be read from the file Fname.Ext.
+            ALL
+                Read all geometry, material property, load, and
+                component data (default).  Solid model geometry and loads
+                will be read from the file ``Fnamei.Exti``.  All other data
+                will be read from the file ``Fname.Ext``.
 
-            DB - Read all database information contained in file
-            Fname.Ext. This file should contain all information
-            mentioned above except the solid model loads. If reading a
-            .CDB file written with the GEOM option of the CDWRITE
-            command, element types [ET] compatible with the
-            connectivity of the elements on the file must be defined
-            prior to reading.
+            DB
+                Read all database information contained in file
+                ``Fname.Ext``. This file should contain all information
+                mentioned above except the solid model loads.
+                If reading a ``.CDB`` file written with the ``GEOM`` option
+                of the ``CDWRITE`` command, element types [``ET``] compatible with the
+                connectivity of the elements on the file must be defined
+                prior to reading.
 
-            SOLID - Read the solid model geometry and solid model
-            loads from the file Fnamei.Exti.  This file could have
-            been written by the CDWRITE or IGESOUT command.
+            SOLID
+                Read the solid model geometry and solid model
+                loads from the file ``Fnamei.Exti``.
+                This file could have been written by the ``CDWRITE`` or ``IGESOUT`` command.
 
-            COMB - Read the combined solid model and database
-            information from the file Fname.Ext.
+            COMB
+                Read the combined solid model and database
+                information from the file ``Fname.Ext``.
 
         fname
             File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
+            characters needed for the directory path).
+            An unspecified directory path defaults to the working directory;
+            in this case, you can use all 248 characters for the file name.
 
         ext
-            Filename extension (eight-character maximum).
+            Filename extension (eight-character maximum). If there is an extension in
+            ``fname``, this option is ignored.
 
         fnamei
             Name of the IGES file and its directory path (248 characters
@@ -72,25 +77,25 @@ class Database:
         -----
         This command causes coded files of solid model (in IGES format) and
         database (in command format) information to be read.  These files are
-        normally written by the CDWRITE or IGESOUT command.  Note that the
+        normally written by the ``CDWRITE`` or ``IGESOUT`` command.  Note that the
         active coordinate system in these files has been reset to Cartesian
-        (CSYS,0).
+        (``CSYS,0``).
 
-        If a set of data exists prior to the CDREAD operation, that data set is
+        If a set of data exists prior to the ``CDREAD`` operation, that data set is
         offset upward to allow the new data to fit without overlap. The
-        NOOFFSET command allows this offset to be ignored on a set-by-set
+        ``NOOFFSET`` command allows this offset to be ignored on a set-by-set
         basis, causing the existing data set to be overwritten with the new
         data set.
 
-        When you write the geometry data using the CDWRITE,GEOM option, you use
-        the CDREAD,DB option to read the geometry information.
+        When you write the geometry data using the ``CDWRITE,GEOM`` option, you use
+        the ``CDREAD,DB`` option to read the geometry information.
 
-        Using the CDREAD,COMB option will not write NUMOFF commands to offset
+        Using the ``CDREAD,COMB`` option will not write ``NUMOFF`` commands to offset
         entity ID numbers if there is no solid model in the database.
 
         Multiple CDB file imports cannot have elements with real constants in
         one file and section definitions in another. The section attributes
-        will override the real constant attributes.  If you use CDREAD to
+        will override the real constant attributes.  If you use ``CDREAD`` to
         import multiple CDB files, define all of the elements using only real
         constants, or using only section definitions.  Combining real constants
         and section definitions is not recommended.

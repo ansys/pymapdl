@@ -8,7 +8,7 @@ apply a pressure to it.
 
 Also shown here:
 - Various ways of accessing stress results from MAPDL.
-- Comparison between PRNSOL, *VGET (efficient wrapping), and the legacy reader.
+- Comparison between PRNSOL, VGET (efficient wrapping), and the legacy reader.
 - Notes regarding FULL vs. POWER graphics when using PRNSOL.
 
 """
@@ -99,7 +99,7 @@ mapdl.post1()
 mapdl.set(1, 1)
 
 # results directly from MAPDL's VGET command
-# *VGET, __VAR__, NODE, , S, EQV
+# VGET, __VAR__, NODE, , S, EQV
 nnum = mapdl.mesh.nnum
 von_mises_mapdl = mapdl.post_processing.nodal_eqv_stress()
 
@@ -143,7 +143,7 @@ print('All close:', np.allclose(von_mises, von_mises_mapdl))
 # That these results are equivalent to results from PRNSOL.
 #
 # .. note::
-#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER') will
+#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER')`` will
 #    change the averaging scheme.
 
 mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
@@ -158,3 +158,7 @@ print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.min()}')
 print()
 print(f'LEGACY Reader and MAPDL VGET Min: {max_von_mises}')
 print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.max()}')
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

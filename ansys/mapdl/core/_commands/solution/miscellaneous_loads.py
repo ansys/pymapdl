@@ -969,7 +969,8 @@ class MiscellaneousLoads:
         command = f"OUTRES,{item},{freq},{cname},{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
-    def rescontrol(self, action="", ldstep="", frequency="", maxfiles="", **kwargs):
+    def rescontrol(self, action="", ldstep="", frequency="", maxfiles="", maxtotalfiles="",
+                    filetype="", ** kwargs):
         """Controls file writing for multiframe restarts.
 
         APDL Command: RESCONTROL
@@ -977,111 +978,261 @@ class MiscellaneousLoads:
         Parameters
         ----------
         action
-             Command action. Valid options are:
+            Command action. Valid options are:
 
-            DEFINE - Issuing the command specifies how frequently the .Xnnn restart files are
-                     written for a load step (default).
+            DEFINE
+                Issuing the command specifies how frequently the ``.Xnnn`` restart files are
+                written for a load step (default).
 
-            FILE_SUMMARY - Issuing the command prints the substep and load step information for all .Xnnn
-                           files for the current jobname in the current
-                           directory. If this option is specified, all other
-                           arguments are ignored.
+            FILE_SUMMARY
+                Issuing the command prints the substep and load step information for all ``.Xnnn``
+                files for the current jobname in the current
+                directory. If this option is specified, all other
+                arguments are ignored.
 
-            STATUS - Issuing the command lists the current status in the tables of restart controls
-                     specified previously by RESCONTROL. If this option is
-                     specified, all other arguments are ignored.
+            STATUS
+                Issuing the command lists the current status in the tables of restart controls
+                specified previously by RESCONTROL. If this option is
+                specified, all other arguments are ignored.
 
-            NORESTART - Issuing the command cleans up some of the restart files after a Distributed
-                        ANSYS solution. The host process will not have the
-                        following files in the working directory at the end of
-                        the run: .ESAV, .OSAV, .Xnnn, .RDB,  .LDHI. The slave
-                        processes will not have the following files in the
-                        working directory at the end of the run: .ESAV, .OSAV,
-                        .Xnnn, .RST (or .RTH, etc.). Some of the restart files
-                        are never written, some are removed upon leaving /SOLU
-                        (for example, upon FINISH), and some are removed upon
-                        exiting the program.
+            NORESTART
+                Issuing the command cleans up some of the restart files after a Distributed
+                ANSYS solution. The host process will not have the
+                following files in the working directory at the end of
+                the run: ``.ESAV``, ``.OSAV``, ``.Xnnn``, ```, `.LDHI``. The slave
+                processes will not have the following files in the
+                working directory at the end of the run: ``.ESAV``, ``.OSAV``,
+                ``.Xnnn``, ``.RST`` (or ``.RTH``, etc.). Some of the restart files
+                are never written, some are removed upon leaving ``/SOLU``
+                (for example, upon FINISH), and some are removed upon
+                exiting the program.
 
-            This option is useful for cleaning up files written by all of the Distributed ANSYS processes, particularly when you know that these restart files will not be needed later on. If this option is specified, all other arguments are ignored. - If this option is used in shared-memory parallel ANSYS, most of the restart
-                              files in the working directory are removed. It
-                              has the same effect as issuing RESCONTROL,,NONE.
+                This option is useful for cleaning up files written by all of the Distributed
+                ANSYS processes, particularly when you know that these restart files will not
+                be needed later on. If this option is specified, all other arguments are ignored.
 
-            LINEAR - Issuing the command specifies the same actions as Action = DEFINE. However,
-                     this option is intended for linear static applications.
-                     For a linear static analysis, the restart capability is
-                     normally not needed. However, it is typically needed when
-                     a subsequent linear perturbation analysis is desired. By
-                     default, none of the restart files are written for a
-                     linear static analysis.
+                If this option is used in shared-memory parallel ANSYS, most of the restart
+                files in the working directory are removed. It
+                has the same effect as issuing ``RESCONTROL,,NONE``.
 
-            DELETE - Delete the restart control specification corresponding to the Ldstep label on a
-                     previous RESCONTROL,DEFINE command.
+            LINEAR
+                Issuing the command specifies the same actions as Action = DEFINE. However,
+                this option is intended for linear static applications.
+                For a linear static analysis, the restart capability is
+                normally not needed. However, it is typically needed when
+                a subsequent linear perturbation analysis is desired. By
+                default, none of the restart files are written for a
+                linear static analysis.
+
+            DELETE
+                Delete the restart control specification corresponding to the ``Ldstep`` label on a
+                previous ``RESCONTROL,DEFINE`` command.
 
         ldstep
-            Specifies how the .Xnnn files are written for the specified load
+            Specifies how the ``.Xnnn`` files are written for the specified load
             steps. This option also affects how often the load history
-            information is written to the .LDHI file.
+            information is written to the ``.LDHI`` file.
 
-            ALL - Write the .Xnnn files at the same substep Frequency for all load steps; write
-                  the load history information to the .LDHI file for all load
-                  steps.
+            ALL
+                Write the ``.Xnnn`` files at the same substep Frequency for all load steps; write
+                the load history information to the ``.LDHI`` file for all load
+                steps.
 
-            LAST - Write the .Xnnn files for the last load step only; write load history
-                   information to the .LDHI file for the last load step only.
-                   This option is the default for nonlinear static and full
-                   transient analyses. The remaining arguments are ignored.
+            LAST
+                Write the ``.Xnnn`` files for the last load step only; write load history
+                information to the ``.LDHI`` file for the last load step only.
+                This option is the default for nonlinear static and full
+                transient analyses. The remaining arguments are ignored.
 
-            N - Number that indicates how often the .Xnnn file is written.
+            N
+                Number that indicates how often the ``.Xnnn`` file is written.
 
-             Input a positive number to write the .Xnnn files at the substep Frequency indicated only for load step N. Other load steps will be written at the default substep frequency or at a frequency defined by a previous RESCONTROL specification. Load history information is written to the .LDHI file only for load steps N. - Input a negative number (-N) to write the .Xnnn files for every Nth load step
-                              at the specified substep Frequency. The load
-                              history information is written to the .LDHI file
-                              every Nth load step. This option is suitable for
-                              restart applications in which more than a few
-                              hundred load steps are required. Compared to the
-                              ALL and positive N options, it can save disk
-                              space since the .LDHI file is smaller and fewer
-                              .Xnnn files are written.
+                Input a positive number to write the ``.Xnnn`` files at the substep ``Frequency``
+                indicated only for load step N.
+                Other load steps will be written at the default substep frequency or at a frequency
+                defined by a previous ``RESCONTROL`` specification.
+                Load history information is written to the ``.LDHI`` file only for load steps N.
 
-            If Ldstep = -N, all other Ldstep options specified by RESCONTROL are ignored and the program follows the -N option (write load history information every Nth load step). If you want to change this pattern, issue RESCONTROL,DELETE, -N and then issue another RESCONTROL command with the desired Ldstep option. - NONE
+                Specifying a negative number (-N) to write the ``.Xnnn`` files for every Nth load step
+                at the specified substep Frequency. The load
+                history information is written to the ``.LDHI`` file
+                every Nth load step. This option is suitable for
+                restart applications in which more than a few
+                hundred load steps are required. Compared to the
+                ALL and positive N options, it can save disk
+                space since the ``.LDHI`` file is smaller and fewer
+                ``.Xnnn`` files are written.
 
-            No multiframe restart files (.RDB [restart database file], .LDHI [load history file], .Xnnn) are created. This option is the default for mode-superposition analyses. The remaining arguments are ignored.  - For nonlinear static, linear static, and full transient analyses, this option
-                              allows a restart to be done at the last or abort
-                              point using the same procedure as in ANSYS 5.5 or
-                              earlier (using the .EMAT, .ESAV or .OSAV, and .DB
-                              files).
+                If Ldstep = -N, all other Ldstep options specified by ``RESCONTROL`` are
+                ignored and the program follows the -N option (write load history information every Nth load step).
+                If you want to change this pattern, issue ``RESCONTROL,DELETE, -N`` and then issue another
+                ``RESCONTROL`` command with the desired Ldstep option.
+
+            NONE
+                No multiframe restart files (``.RDB`` [restart database file], ``.LDHI`` [load history file],
+                ``.Xnnn``) are created. This option is the default for mode-superposition analyses.
+                The remaining arguments are ignored.
+
+                For nonlinear static, linear static, and full transient analyses, this option
+                allows a restart to be done at the last or abort
+                point using the same procedure as in ANSYS 5.5 or
+                earlier (using the ``.EMAT``, ``.ESAV`` or ``.OSAV``, and ``.DB``
+                files).
 
         frequency
-            Frequency at which the .Xnnn files are written at the substep
+            Frequency at which the ``.Xnnn`` files are written at the substep
             level.
 
-            NONE - Do not write any .Xnnn files for this load step.
+            NONE
+                Do not write any ``.Xnnn`` files for this load step.
 
-            LAST - Write the .Xnnn files for the last substep of the load step only (default for
-                   nonlinear static and full transient analyses).
+            LAST
+                Write the ``.Xnnn`` files for the last substep of the load step only (default for
+                nonlinear static and full transient analyses).
 
-            N - If N is positive, write the .Xnnn file every Nth substep of a load step. If N
-                is negative, write N equally spaced .Xnnn files within a load
-                step.
+            N
+                If ``N`` is positive, write the ``.Xnnn`` file every Nth substep of a load step. If ``N``
+                is negative, write ``N`` equally spaced ``.Xnnn`` files within a load step.
 
-            In nonlinear static and full transient analyses, negative N is valid only when AUTOTS,ON. - In mode-superposition analyses, negative N is always valid.
+                In nonlinear static and full transient analyses, negative ``N`` is valid only when ``AUTOTS,ON``.
+                In mode-superposition analyses, negative ``N`` is always valid.
 
         maxfiles
-            Maximum number of .Xnnn files to save for Ldstep.
+            Maximum number of ``.Xnnn`` files to save for Ldstep.
 
-            -1 - Overwrite existing .Xnnn files (default). The total maximum number of .Xnnn
-                 files for one run is 999. If this number is reached before the
-                 analysis is complete, the program will reset the .Xnnn file
-                 numbering back to 1 and continue to write .Xnnn files; the
-                 program keeps the newest 999 restart files and overwrites the
-                 oldest restart files.
+            \-1
+                Overwrite existing ``.Xnnn`` files (default). The total maximum number of ``.Xnnn``
+                files for one run is 999. If this number is reached before the analysis is complete,
+                the program will reset the ``.Xnnn`` file numbering back to 1 and continue to write
+                ``.Xnnn`` files; the program keeps the newest 999 restart files and overwrites the
+                oldest restart files.
 
-            0 - Do not overwrite any existing .Xnnn files. The total maximum number of .Xnnn
+            0
+                Do not overwrite any existing ``.Xnnn`` files. The total maximum number of ``.Xnnn``
                 files for one run is 999. If this number is reached before the
                 analysis is complete, the analysis continues but no longer
-                writes any .Xnnn files.
+                writes any ``.Xnnn`` files.
+
+            N
+                Maximum number of ``.xnnn`` files to keep for each load step. When ``N.xnnn`` files have
+                been written for a load step, the program overwrites the first ``.xnnn`` file of that load step
+                for subsequent substeps.
+
+                .. warning:: ``N`` must be <= 999. If a total of 999 restart files is reached before
+                   the analysis is complete, the analysis continues but writes no additional ``.xnnn`` files.
+
+        maxtotalfiles
+            Total number of restart files to keep. ``Default = 999`` for ``.xnnn`` files and 99 for ``.rdnn`` files. This
+            option is valid only when ``MAXFILES`` = -1 (default).
+            Valid ``maxtotalfiles`` values are 1 through 999 for ``.xnnn`` files, and 1 through 99 for ``.rdnn`` files.
+
+            When the total number of restart files written exceeds ``maxtotalfiles``, the program resets the
+            ``.xnnn`` or ``.rdnn`` file numbering back to 1 and continues to write ``.xnnn`` or ``.rdnn`` files. The
+            newest files are retained and the oldest files are overwritten.
+
+            The ``maxtotalfiles`` value specified applies to all subsequent load steps. To reset it to the default,
+            reissue the command with ``maxtotalfiles`` = 0 or some negative value.
+
+            If ``maxtotalfiles`` is set to different values at different load steps, and if the value of ``maxtotalfiles``
+            specified in the prior load step is larger than that of the current load step, the program can
+            only overwrite the current number of maximum restart files up to the number ``maxtotalfiles``
+            currently specified (which is smaller than the previous number).
+
+            The recommended way to control the maximum number of restart files is to specify ``maxtotalfiles``
+            at the first load step and not vary it in subsequent load steps. Also, ``maxtotalfiles`` is best used
+            when Ldstep = -N or ALL.
+
+        filetype
+            The type of restart file to be controlled by this command. Valid only when Action = DEFINE:
+
+            * **XNNN**: Control ``.xnnn`` files (default).
+            * **RDNN**: Control ``.rdnn`` remeshing database files. Needed only for a nonlinear mesh adaptivity analysis.
+
+        Notes
+        -----
+
+        **COMMAND DEFAULT**
+
+        If the ``RESCONTROL`` command is not issued during a structural analysis, the ``.RDB`` and ``.LDHI`` files are
+        written as described in Restarting an Analysis.
+
+        **For nonlinear static and full transient analysis:**
+
+        The default behavior is multiframe restart: ``RESCONTROL,DEFINE,LAST,LAST``
+        The ``.xnnn`` file is written at the last substep of the last load step. An ``.rnnn`` file is also written at
+        the iteration prior to the abort point of the run if a ``jobname.abt`` file was used (or the **Stop** button
+        was pressed in the GUI), or if the job terminated because of a failure to reach convergence or some
+        other solution error. No information at the aborted substep is saved to the ``.xnnn`` file.
+
+        **For nonlinear mesh adaptivity analysis:**
+
+        The default behavior for ``.rdnn`` files written is: ``RESCONTROL,DEFINE,ALL,LAST,,,,RDNN``
+        The ``.rdnn`` file is written at the last remesh of every load step by default.
+        The ``.rdnn`` and ``.rnnn`` files interact with each other. Generally, ``.rdnn`` file writing is superior to
+        that of ``.rnnn`` file writing. For example, if no RESCONTROL,DEFINE command is issued, the default
+        behavior is that both ``.rdnn`` and ``.rnnn`` files are written at the last occurrence of every load step
+        (equivalent to ``RESCONTROL,DEFINE,ALL,LAST`` and ``RESCONTROL,DEFINE,ALL,LAST,,,,RDNN``)
+
+
+        **NOTES**
+
+        ``RESCONTROL`` sets up the restart parameters for a multiframe restart, enabling you to restart an analysis
+        from any load step and substep for which there is an ``.xnnn`` file. You can perform a multiframe restart
+        for static and transient (full or mode-superposition method) analyses only. For more information about
+        multiframe restarts and descriptions of the contents of the files used, see *Restarting an Analysis* in the
+        *Basic Analysis Guide*.
+
+        **Syntax**
+
+        Multiframe restart files are generically indicated here as ``.xnnn`` files. They correspond to .rnnn
+        files for nonlinear static and full transient analyses, and ``.mnnn`` files for mode-superposition
+        analyses.
+        Remeshing database files are indicated as ``.rdnn`` files. This type of restart file is needed only
+        after remeshing during a *nonlinear mesh adaptivity* analysis.
+        When ``Action = DEFINE``, the specified Filetype determines the type of file (``.xnnn`` or
+        ``.rdnn``) controlled by this command.
+
+        **Number of Restart Files Allowed**
+
+        The total number of restart files for any analysis cannot exceed 999 (for example, ``jobname.r001``
+        to ``jobname.r999``).
+        The total number of remeshing database files cannot exceed 99 (for example, ``jobname.rd01``
+        to ``jobname.rd99``).
+
+        **Considerations for Nonlinear Mesh Adaptivity Analysis**
+
+        To control both ``.xnnn`` and ``.rdnn`` file writing (``Filetype = XNNN`` and ``Filetype = RDNN``,
+        respectively), separate ``RESCONTROL`` commands are necessary.
+        ``Action = NORESTART`` and ``Ldstep = NONE`` are not valid and will cause the analysis to fail.
+        ``Ldstep = -N`` is not valid for controlling ``.xnnn`` files.
+
+        **Limiting the Number of Files Saved**
+
+        If you have many substeps for each load step and are writing ``.xnnn`` files frequently, you may
+        want to set ``maxfiles`` to limit the number of ``.xnnn`` files saved, as they can fill your disk
+        quickly.
+        You can specify ``maxfiles`` and ``Frequency`` for individual load steps. These arguments take
+        on the default value or the value defined by ``RESCONTROL,,ALL,Frequency,maxfiles`` if they
+        are not explicitly defined for a specific load step.
+        When ``.xnnn`` files are written over many load steps, you may want to further limit the number
+        of ``.xnnn`` files by setting ``maxtotalfiles``.
+
+        **Maximum Number of Load Steps**
+
+        You can specify a maximum of ten load steps; that is, you can issue the ``RESCONTROL,,N``
+        command a maximum of ten times. Specified load steps cannot be changed in a restart.
+
+        **Specifying Ldstep = LAST or Ldstep = -N**
+
+        The program accepts only one occurrence of ``RESCONTROL`` with ``Ldstep = LAST``. If you issue
+        ``RESCONTROL,,LAST,Frequency,maxfiles`` multiple times, the last specification overwrites
+        the previous one.
+        The program accepts only one occurrence of ``RESCONTROL`` with a negative ``Ldstep`` value
+        (``RESCONTROL,,N`` where ``N`` is a negative number). If you issue ``RESCONTROL`` multiple times
+        with a negative ``Ldstep`` value, the last specification overwrites the previous one.
+
         """
-        command = f"RESCONTROL,{action},{ldstep},{frequency},{maxfiles}"
+        command = f"RESCONTROL, {action}, {ldstep}, {frequency}, {maxfiles}, , {maxtotalfiles}, {filetype}"
         return self.run(command, **kwargs)
 
     def sbclist(self, **kwargs):

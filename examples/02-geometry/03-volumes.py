@@ -273,3 +273,8 @@ mapdl.vsymm("Y", "ALL")
 
 # Plot while showing bounds and disabling extra line plotting.
 mapdl.vplot(show_bounds=True, show_lines=False, quality=5)
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

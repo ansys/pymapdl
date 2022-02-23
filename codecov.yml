@@ -1,0 +1,28 @@
+ignore:
+  - "ansys/mapdl/core/_commands"
+  - "ansys/mapdl/core/jupyter.py"
+  - "ansys/mapdl/core/mapdl_console.py"
+  - "ansys/mapdl/core/mapdl_corba.py"
+
+comment:
+  layout: "diff"
+  behavior: default
+
+coverage:
+  status:
+    project:
+      default:
+        # basic
+        # target: 50%
+        threshold: 0%
+        # advanced
+        if_not_found: success
+        if_ci_failed: error
+        if_no_uploads: error
+    patch:
+      default:
+        # basic
+        target: 90%
+        if_not_found: success
+        if_ci_failed: error
+        if_no_uploads: error

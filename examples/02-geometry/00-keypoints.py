@@ -139,3 +139,7 @@ print(items)
 mapdl.kplot(
     show_keypoint_numbering=True, background="black", show_bounds=True, font_size=26
 )
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

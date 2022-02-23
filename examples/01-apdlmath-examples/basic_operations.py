@@ -219,3 +219,7 @@ print(np.max(apdl_mat))
 apdl_arr = mm.rand(5, 5)
 np_array = apdl_mat.asarray()
 print(np.allclose(apdl_mat, np_array))
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

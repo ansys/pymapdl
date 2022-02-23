@@ -207,6 +207,10 @@ class MapdlGrpc(_MapdlCore):
         Copy the log to a file called `logs.log` located where the
         python script is executed. Default ``True``.
 
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default ``False``.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -230,7 +234,8 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
                 log_file=False, cleanup_on_exit=False, log_apdl=None,
-                set_no_abort=True, remove_temp_files=False, **kwargs):
+                set_no_abort=True, remove_temp_files=False,
+                print_com = False, **kwargs):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
 
@@ -238,7 +243,7 @@ class MapdlGrpc(_MapdlCore):
         self._port = port
         self._ip = ip
         super().__init__(
-            loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, **kwargs
+            loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, print_com=print_com, **kwargs
         )
 
         check_valid_ip(ip)
@@ -624,6 +629,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             response = self._send_command(cmd, mute=mute)
         self._busy = False
+
         return response.strip()
 
     @property
@@ -678,18 +684,37 @@ class MapdlGrpc(_MapdlCore):
             except Exception:
                 continue
 
-    def exit(self, save=False):
+    def exit(self, save=False, force=False):  # pragma: no cover
         """Exit MAPDL.
 
         Parameters
         ----------
         save : bool, optional
             Save the database on exit.  Default ``False``.
+        force : bool, optional
+            Override any environment variables that may inhibit exiting MAPDL.
+
+        Notes
+        -----
+        If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
+        remote testing or documentation build), then this will be
+        ignored. Override this behavior with ``force=True`` to always force
+        exiting MAPDL regardless of your local environment.
 
         Examples
         --------
         >>> mapdl.exit()
         """
+        # check if permitted to start (and hence exit) instances
+        if not force:
+            # lazy import here to avoid circular import
+            from ansys.mapdl.core.launcher import get_start_instance
+
+            # ignore this method if PYMAPDL_START_INSTANCE=False
+            if not get_start_instance():
+                self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
+                return
+
         if self._exited:
             return
 
@@ -1014,27 +1039,33 @@ class MapdlGrpc(_MapdlCore):
             return resp.response
 
     @wraps(_MapdlCore.cdread)
-    def cdread(self, *args, **kwargs):
+    def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
         """Wraps CDREAD"""
-        option = kwargs.get("option", args[0])
-        if option == "ALL":
+        option = option.strip().upper()
+
+        if option not in ['DB', 'SOLID', 'COMB']:
             raise ValueError(
-                'Option "ALL" not supported in gRPC mode.  Please '
+                f'Option "{option}" is not supported.  Please '
+                "Input the geometry and mesh files separately "
+                r'with "\INPUT" or ``mapdl.input``'
+            )
+        if option == 'ALL':
+            raise ValueError(
+                f'Option "{option}" is not supported in gRPC mode.  Please '
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
         # the old behaviour is to supplied the name and the extension separatelly.
         # to make it easier let's going to allow names with extensions
-        fname = kwargs.get("fname", args[1])
         basename = os.path.basename(fname)
         if len(basename.split('.')) == 1:
             # there is no extension in the main name.
-            if len(args) > 2:
+            if ext:
                 # if extension is an input as an option (old APDL style)
-                fname = kwargs.get("fname", args[1])  + '.' + kwargs.get("ext", args[2])
+                fname = fname + '.' + ext
             else:
                 # Using default .db
-                fname = kwargs.get("fname", args[1])  + '.' + 'cdb'
+                fname = fname + '.' + 'cdb'
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)

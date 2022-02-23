@@ -36,6 +36,8 @@ def general_plotter(
     render_lines_as_tubes=False,
     scalar_bar_args={},
     smooth_shading=None,
+    split_sharp_edges=None,
+    feature_angle=30.0,
     show_scalar_bar=None,
     # labels kwargs
     font_size=None,
@@ -43,6 +45,7 @@ def general_plotter(
     text_color=None,
     theme=None,
     return_plotter=False,
+    return_cpos=False,
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -151,12 +154,27 @@ def general_plotter(
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
 
+    split_sharp_edge : bool, optional
+        Split sharp edges exceeding 30 degrees when plotting with
+        smooth shading.  Control the angle with the optional
+        keyword argument ``feature_angle``.
+        By default this is ``False``.
+
+        .. note:: Note that enabling this will create a copy of
+        the input mesh within the plotter.
+
+    feature_angle : float, optional
+        Angle to consider an edge a sharp edge. Default 30 degrees.
+
     theme : pyvista.DefaultTheme, optional
         PyVista theme.  Defaults to PyMAPDL theme.
 
     return_plotter : bool, optional
         Return the plotting object rather than showing the plot and
         returning the camera position.  Default ``False``.
+
+    return_cpos : bool, optional
+        Returns the camera position as an array. Default ``False``.
 
     Returns
     -------
@@ -229,6 +247,8 @@ def general_plotter(
             show_edges=show_edges,
             edge_color=edge_color,
             smooth_shading=smooth_shading,
+            split_sharp_edges=split_sharp_edges,
+            feature_angle=feature_angle,
             point_size=point_size,
             line_width=line_width,
             show_scalar_bar=show_scalar_bar,
@@ -268,21 +288,40 @@ def general_plotter(
     if title:
         pl.add_title(title)
 
+    def return_from_plotter():
+        returns_parameter = []
+        if return_plotter:
+            returns_parameter.append(pl)
+        if return_cpos:
+            returns_parameter.append(pl.camera_position)
+
+        if not returns_parameter:
+            returns_parameter = None
+        else:
+            if len(returns_parameter) == 1:
+                returns_parameter = returns_parameter[0]
+            else:
+                returns_parameter = tuple(returns_parameter)
+        return returns_parameter
+
+    returns_parameter = return_from_plotter()
+
     # permit user to save the figure as a screenshot
     if savefig:
         pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
         pl.screenshot(savefig)
 
         # return unclosed plotter
-        if return_plotter:
-            return pl
+        if returns_parameter:
+            return returns_parameter
 
         # if not returning plotter, close right away
         pl.close()
 
-    elif return_plotter:
-        return pl
     else:
         pl.show()
 
-    return pl.camera_position
+    # Recreating "returns" to update cpos
+    returns_parameter = return_from_plotter()
+
+    return returns_parameter

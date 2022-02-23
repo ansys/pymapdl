@@ -25,7 +25,7 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlInvalidRoutineError
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
-from ansys.mapdl.core.commands import Commands
+from ansys.mapdl.core.commands import Commands, CommandListingOutput, BoundaryConditionsListingOutput, CMD_LISTING, CMD_BC_LISTING, inject_docs
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.reader.rst import Result
@@ -123,7 +123,8 @@ class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(self, loglevel='DEBUG', use_vtk=True, log_apdl=None,
-                log_file=False, local=True, **start_parm):
+                log_file=False, local=True,
+                print_com=False, **start_parm):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -143,6 +144,7 @@ class _MapdlCore(Commands):
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
+        self._print_com = print_com # print the command /COM input.
 
         # Setting up loggers
         self._log = logger.add_instance_logger(self._name, self, level=loglevel) # instance logger
@@ -164,6 +166,48 @@ class _MapdlCore(Commands):
             self.open_apdl_log(log_apdl, mode='w')
 
         self._post = PostProcessing(self)
+
+        self._wrap_listing_functions()
+
+    @property
+    def print_com(self):
+        return self._print_com
+
+    @print_com.setter
+    def print_com(self, value):
+        if isinstance(value, bool):
+            status = "activated" if value else "deactivated"
+            self._log.debug(f"The print of '/COM' commands has been {status}.")
+            self._print_com = value
+        else:
+            raise ValueError(f"The property ``print_com`` only allows booleans, but type {type(value)} was supplied.")
+
+    def _wrap_listing_functions(self):
+        # Wrapping LISTING FUNCTIONS.
+        def wrap_listing_function(func):
+            # Injecting doc string modification
+            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return CommandListingOutput(func(*args, **kwargs))
+            return inner_wrapper
+
+        def wrap_BC_listing_function(func):
+            # Injecting doc string modification
+            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return BoundaryConditionsListingOutput(func(*args, **kwargs))
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_LISTING and name in dir(Commands): # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+                func = self.__getattribute__(name)
+                setattr(self, name, wrap_listing_function(func))
+
+            if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
+                func = self.__getattribute__(name)
+                setattr(self, name, wrap_BC_listing_function(func))
 
     @property
     def _name(self):  # pragma: no cover
@@ -419,7 +463,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
 
     class _chain_commands:
@@ -711,7 +755,7 @@ class _MapdlCore(Commands):
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         self._apdl_log.write(
-            "! APDL script generated using ansys.mapdl.core {pymapdl.__version__}\n"
+            f"! APDL log script generated using PyMapdl (ansys.mapdl.core {pymapdl.__version__})\n"
         )
 
     @supress_logging
@@ -1679,6 +1723,7 @@ class _MapdlCore(Commands):
         it1num="",
         item2="",
         it2num="",
+        item3="",
         **kwargs,
     ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
@@ -1752,6 +1797,11 @@ class _MapdlCore(Commands):
             the item for which data are to be retrieved. Most items do
             not require this level of information.
 
+        item3
+            A third set of item labels to further qualify
+            the item for which data are to be retrieved. Almost all items do
+            not require this level of information.
+
         Returns
         -------
         float
@@ -1773,10 +1823,26 @@ class _MapdlCore(Commands):
         3003
 
         """
-        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+
+        self._check_parameter_name(par)
+
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
         kwargs["mute"] = False
+
+        # Checking printout is not suppressed by checking "wrinqr" flag.
+        flag = 0
+        if self.wrinqr(1) != 1: # using wrinqr is more reliable than *get
+            flag = 1
+            self._run("/gopr")
         response = self.run(command, **kwargs)
+        if flag == 1:
+            self._run("/nopr")
+
         value = response.split("=")[-1].strip()
+        if item3:
+            self._log.info(f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'")
+            value = value.splitlines()[0]
+
         try:  # always either a float or string
             return float(value)
         except ValueError:
@@ -1983,6 +2049,8 @@ class _MapdlCore(Commands):
     def run_multiline(self, commands):
         """Run several commands as a single block
 
+        .. warning:: This function is being deprecated. Please use `input_strings` instead.
+
         Parameters
         ----------
         commands : str
@@ -2039,14 +2107,68 @@ class _MapdlCore(Commands):
         output continues...
 
         """
-        self._stored_commands = commands.splitlines()
+
+        warnings.warn("'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
+                      DeprecationWarning)
+        return self.input_strings(commands=commands)
+
+    def input_strings(self, commands):
+        """Run several commands as a single block.
+        These commands are all in a single string or in list of strings.
+
+        Parameters
+        ----------
+        commands : str or list of str
+            Commands separated by new lines, or a list of commands strings.
+            See example.
+
+        Returns
+        -------
+        str
+            Command output from MAPDL.  Includes the output from
+            running every command, as if it was an input file.
+
+        Examples
+        --------
+        Run several commands from Python multi-line string.
+
+        >>> cmd = '''/prep7
+        ! Mat
+        MP,EX,1,200000
+        MP,NUXY,1,0.3
+        MP,DENS,1,7.85e-09
+        ! Elements
+        et,1,186
+        et,2,154
+        ! Geometry
+        BLC4,0,0,1000,100,10
+        ! Mesh
+        esize,5
+        vmesh,all
+        '''
+        >>> resp = mapdl.input_strings(cmd)
+        >>> resp
+        MATERIAL          1     EX   =   200000.0
+        MATERIAL          1     NUXY =  0.3000000
+        MATERIAL          1     DENS =  0.7850000E-08
+        ELEMENT TYPE          1 IS SOLID186     3-D 20-NODE STRUCTURAL SOLID
+         KEYOPT( 1- 6)=        0      0      0        0      0      0
+         KEYOPT( 7-12)=        0      0      0        0      0      0
+         KEYOPT(13-18)=        0      0      0        0      0      0
+        output continues...
+
+        """
+        if isinstance(commands, str):
+            commands = commands.splitlines()
+
+        self._stored_commands = commands
         self._flush_stored()
         return self._response
 
-    def run(self, command, write_to_log=True, **kwargs):
+    def run(self, command, write_to_log=True, mute=None, **kwargs):
         """Run single APDL command.
 
-        For multiple commands, use ``run_multiline``.
+        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
@@ -2077,7 +2199,7 @@ class _MapdlCore(Commands):
 
         Alternatively, you can simply run a block of commands with:
 
-        >>> mapdl.run_multiline(cmd)
+        >>> mapdl.input_strings(cmd)
 
         Examples
         --------
@@ -2088,10 +2210,22 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
-        command = command.strip()
+        if mute is None:
+            if hasattr(self, 'mute'):
+                mute = self.mute
+            else: # if not gRPC
+                mute = False
+
         # check if multiline
         if "\n" in command or "\r" in command:
-            raise ValueError("Use ``run_multiline`` for multi-line commands")
+            raise ValueError("Use ``input_strings`` for multi-line commands")
+
+        if self._store_commands:
+            # If we are using NBLOCK on input, we should not strip the string
+            self._stored_commands.append(command)
+            return
+
+        command = command.strip()
 
         # always reset the cache
         self._reset_cache()
@@ -2113,18 +2247,15 @@ class _MapdlCore(Commands):
             # But just in case, I'm adding info as /com
             command = f"/com, PyAnsys: {msg}" # Using '!' makes the output of '_run' empty
 
-        if self._store_commands:
-            self._stored_commands.append(command)
-            return
-        elif command[:3].upper() in INVAL_COMMANDS:
+        if command[:3].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
-                'Invalid pymapdl command "%s"\n\n%s'
+                'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
             exception = RuntimeError(
-                'Invalid pymapdl command "%s"\n\n%s'
+                'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
             )
             raise exception
@@ -2136,13 +2267,25 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        text = self._run(command, **kwargs)
+        if '=' in command:
+            # We are storing a parameter.
+            param_name = command.split('=')[0].strip()
+
+            if "'" not in param_name or '"' not in param_name:
+                # Edge case. `\title, 'par=1234' `
+                self._check_parameter_name(param_name)
+
+        text = self._run(command, mute=mute, **kwargs)
+
+        if mute:
+            return
+
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = text.strip()
             self._log.info(self._response)
         else:
-            self._response = ""
+            self._response = None
             return self._response
 
         if "is not a recognized" in text:
@@ -2227,21 +2370,20 @@ class _MapdlCore(Commands):
         """
         if not isinstance(array, np.ndarray):
             array = np.asarray(array)
-        if array.ndim != 2:
-            raise NotImplementedError("Only loading of 2D arrays is supported at the moment.")
 
-        imax = array.shape[0]
-        jmax = array.shape[1]
-        if array.ndim == 2:
-            kmax = ""
-        elif array.ndim == 3:
-            kmax = array.shape[2]
-        else:
-            raise ValueError(
-                f"Expecting only a 2D or 3D array, but input contains\n{array.ndim} dimensions."
-            )
+        if array.ndim > 2:
+            raise NotImplementedError("Only loading of 1D or 2D arrays is supported at the moment.")
 
-        self.dim(name, "ARRAY", imax=array.shape[0], jmax=array.shape[1], kmax="")
+        jmax = 1
+        kmax = ""
+
+        if array.ndim > 0:
+            imax = array.shape[0]
+
+        if array.ndim > 1:
+            jmax = array.shape[1]
+
+        self.dim(name, "ARRAY", imax=imax, jmax=jmax, kmax="")
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
@@ -2343,15 +2485,16 @@ class _MapdlCore(Commands):
             raise ValueError("The table should be a Numpy array")
         if array.shape[0] < 2 or array.shape[1] < 2:
             raise ValueError("One or two of the array dimensions are too small to create a table.")
+
         if array.ndim == 2:
-            self.dim(name, "TABLE", imax=array.shape[0]-1, jmax=array.shape[1] - 1, kmax="",
-                     var1=var1, var2=var2, var3=var3, csysid=csysid)
-        elif array.ndim == 3:
-            self.dim(name, "TABLE", imax=array.shape[0] - 1, jmax=array.shape[1] - 1, kmax=array.shape[2],
+            self.dim(name, "TABLE",
+                     imax=array.shape[0]-1,
+                     jmax=array.shape[1]-1,
+                     kmax="",
                      var1=var1, var2=var2, var3=var3, csysid=csysid)
         else:
             raise ValueError(
-                f"Expecting only a 2D or 3D table, but input contains\n{array.ndim} dimensions"
+                f"Expecting only a 2D table, but input contains\n{array.ndim} dimensions"
             )
 
         if not np.all(array[0, :-1] <= array[0, 1:]):
@@ -2361,6 +2504,13 @@ class _MapdlCore(Commands):
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
+
+        if array.shape[1] == 2:
+            # two-columns bug.
+            # If there is two columns, the header is also read as part of the table values,
+            # for this case, we are not going to write it to the file.
+            array = array[1:, :]
+
         np.savetxt(filename, array,
                    header='File generated by PyMAPDL:load_table')
 
@@ -2369,7 +2519,7 @@ class _MapdlCore(Commands):
             filename = base_name
         self.tread(name, filename, nskip=1, mute=True)
 
-        if self._local:
+        if self._local:  # pragma: no cover
             os.remove(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
@@ -2652,7 +2802,30 @@ class _MapdlCore(Commands):
         """Wraps cwd"""
         returns_ = super().cwd( *args, **kwargs)
 
-        if '*** WARNING ***' in self._response:
-            warn('\n' + self._response)
+        if returns_: # if successful, it should be none.
+            if '*** WARNING ***' in self._response:
+                warn('\n' + self._response)
 
         return returns_
+
+    def _check_parameter_name(self, param_name):
+        """Checks if a parameter name is allowed or not."""
+
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
+        if not re.search(match_valid_parameter_name, param_name):
+            raise ValueError(f"The parameter name `{param_name}` is an invalid parameter name."
+                               "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                               "It cannot start with a number either.")
+
+        #invalid parameter (using ARGXX or ARXX)
+        match_reserved_leading_underscored_parameter_name = r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+        # If it also ends in undescore, this won't be triggered.
+        if re.search(match_reserved_leading_underscored_parameter_name, param_name):
+            raise ValueError(f"It is discouraged the use of parameters starting with underscore ('_'). "
+                    "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros.")
+
+        match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
+        if re.search(match_reserved_arg_parameter_name, param_name): #invalid parameter (using ARGXX or ARXX)
+            raise ValueError(f"The parameters 'ARGXX' and 'ARXX' where 'XX' are integers, are reserved for functions and macros local parameters."
+            "Hence its use is not recommended outside them."
+            "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`.")

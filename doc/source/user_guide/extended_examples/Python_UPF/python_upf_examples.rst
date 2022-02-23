@@ -1,8 +1,8 @@
 .. _python_upf_examples:
 
 
-Python UPF Examples
-^^^^^^^^^^^^^^^^^^^
+UPF in PyMAPDL
+^^^^^^^^^^^^^^
 
 The following Python UPF Examples are available:
 

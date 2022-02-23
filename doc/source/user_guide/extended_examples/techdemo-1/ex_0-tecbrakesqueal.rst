@@ -1,13 +1,13 @@
 .. _tech_demo_01:
 
-Tech Demo: Brake Squeal Analysis
---------------------------------
+Brake Squeal Analysis
+---------------------
 
-
-This example analysis shows how to solve a brake-squeal problem.  `1.6. Analysis and Solution Controls`_ are highlighted: linear
-non-prestressed modal, partial nonlinear perturbed modal, and full nonlinear perturbed
-modal. The problem demonstrates sliding frictional contact and uses complex eigensolvers to
-predict unstable modes.
+This example analysis shows how to solve a brake-squeal problem.
+`1.6. Analysis and Solution Controls`_ are highlighted: linear non-prestressed
+modal, partial nonlinear perturbed modal, and full nonlinear perturbed
+modal. The problem demonstrates sliding frictional contact and uses complex
+eigensolvers to predict unstable modes.
 
 The following topics are available:
 
@@ -208,6 +208,9 @@ Start this example by launching MAPDL and loading the model.
    :hide-code:
 
    # jupyterlab boilerplate setup
+   import numpy as np
+   import plotly.graph_objects as go
+   import pandas as pd
    import pyvista
 
    pyvista.set_jupyter_backend('pythreejs')
@@ -809,12 +812,55 @@ step.
 The following plot suggests that modes with similar characteristics approach each
 other and couple as the coefficient of friction increases:
 
-.. figure:: gtecbrakesqueal_fig10.gif
-    :align: center
-    :alt: Effect of Friction Coefficient on Unstable Modes
-    :figclass: align-center
 
-    **Figure 1.11: Effect of Friction Coefficient on Unstable Modes**
+.. _Table-1:
+
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['x', 'mode 21', 'mode 22']
+   values = np.array(
+   [[0.0 ,  860.933 , 6320.512],
+   [0.05 , 1774.363 , 5438.580],
+   [0.10 , 3653.717 , 3653.717],
+   [0.15 , 3632.719 , 3632.719],
+   [0.20 , 3685.215 , 3685.215],
+   [0.25 , 3779.708 , 3779.708],
+   [0.30 , 3842.703 , 3842.703]])
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['x'], y=df['mode 21'], name='Mode 21', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['x'], y=df['mode 22'], name='Mode 22',
+                       mode='markers+lines',
+                       marker=dict(color='red', size=10),
+                       line=dict(color='red', width=3),
+                       showlegend=True
+                       )
+       ]
+   )
+   
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Friction coefficient</b>',
+       yaxis_title='<b>Imaginary Eigenvalue (Hz)</b>',
+       title='<b>Effect of friction coefficient on Mode coupling</b>',
+       title_x=0.5,
+       legend_title='Modes',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
+
+**Figure 1.11: Effect of Friction Coefficient on Unstable Modes**
 
 1.8. Recommendations
 --------------------
@@ -825,15 +871,19 @@ use for a brake-squeal problem:
 
 **Table 1.3: Analysis comparison**
 
-+-----------------------------------+------------------------------------------------------------------------------------+----------------------------------------------+
-| Analysis Method                   | Benefits                                                                           | Costs                                        |
-+===================================+====================================================================================+==============================================+
-| Linear non-prestressed modal      | Fast run time No convergence issues. Good method for performing parametric studies | Accuracy. Does not include prestress effects |
-+-----------------------------------+------------------------------------------------------------------------------------+----------------------------------------------+
-| Partial nonlinear perturbed modal | No convergence issues. Includes prestress effects                                  | Accuracy                                     |
-+-----------------------------------+------------------------------------------------------------------------------------+----------------------------------------------+
-| Full nonlinear perturbed modal    | Accurate. Includes prestress effects                                               | Longer run time. Convergence issues          |
-+-----------------------------------+------------------------------------------------------------------------------------+----------------------------------------------+
++-----------------------------------+----------------------------------------------------------+----------------------------------------------+
+| Analysis Method                   | Benefits                                                 | Costs                                        |
++===================================+==========================================================+==============================================+
+| Linear non-prestressed modal      | * Fast run time.                                         | * Accuracy.                                  |
+|                                   | * No convergence issues.                                 | * Does not include prestress effects         |
+|                                   | * Good method for performing parametric studies          |                                              |
++-----------------------------------+----------------------------------------------------------+----------------------------------------------+
+| Partial nonlinear perturbed modal | * No convergence issues.                                 | * Accuracy                                   |
+|                                   | * Includes prestress effects                             |                                              |
++-----------------------------------+----------------------------------------------------------+----------------------------------------------+
+| Full nonlinear perturbed modal    | * Accurate.                                              | * Longer run time.                           |
+|                                   | * Includes prestress effects                             | * Convergence issues                         |
++-----------------------------------+----------------------------------------------------------+----------------------------------------------+
 
 The following table provides guidelines for selecting the optimal eigensolver
 (**MODOPT**) for obtaining the brake-squeal solution:
@@ -842,13 +892,14 @@ The following table provides guidelines for selecting the optimal eigensolver
 
 **Table 1.4: Solver comparison**
 
-+---------------+-----------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Eigensolver   | Benefits                                                                          | Costs                                                                                                                                                                                                                   |
-+===============+===================================================================================+=========================================================================================================================================================================================================================+
-| QRDAMP        | Fast run time. An excellent solver for performing parametric studies              | Accuracy, as it approximates the unsymmetric stiffness matrix. Not recommended when the number of elements contributing to unsymmetric stiffness matrix exceeds 10 percent of the total number of elements in the model |
-+---------------+-----------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| UNSYM         | Accuracy, as it uses the full unsymmetric stiffness matrix to solve the problem   | Long run time when many modes are extracted                                                                                                                                                                             |
-+---------------+-----------------------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++---------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Eigensolver   | Benefits                                                                          | Costs                                                                                                                                                        |
++===============+===================================================================================+==============================================================================================================================================================+
+| QRDAMP        | * Fast run time.                                                                  | * Accuracy, as it approximates the unsymmetric stiffness matrix.                                                                                             |
+|               | * An excellent solver for performing parametric studies                           | * Not recommended when the number of elements contributing to unsymmetric stiffness matrix exceeds 10 percent of the total number of elements in the model.  |
++---------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| UNSYM         | * Accuracy, as it uses the full unsymmetric stiffness matrix to solve the problem | * Long run time when many modes are extracted                                                                                                                |
++---------------+-----------------------------------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 For further information, see Brake-Squeal (Prestressed Modal) Analysis in the *Structural Analysis Guide*.
 
@@ -884,11 +935,12 @@ The following input files were used for this problem:
 * **disc\_pad\_model.cdb** -- Common database file used for the linear non-prestressed modal analysis, the partial prestressed modal analysis,
   and the full nonlinear prestressed modal analysis (called by the **linear\_non\_prestressed.dat**, **partial\_prestressed.dat**,
   **full\_non\_linear.html** and **linear\_non\_prestressed\_par.html** files, respectively).
+  :download:`Download file: disc_pad_model.cdb <https://github.com/pyansys/example-data/blob/master/tech_demos/td-1/disc_pad_model.cdb>`.
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download the zipped td-1 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-1-DLU-N2a />`_            |
+| `Download the zipped td-1 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-1-DLU-N2a>`_              |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a />`_           |
+| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a>`_             |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
 
-For more information, see `Obtaining the Input Files. <https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html />`_
+For more information, see `Obtaining the Input Files. <https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html>`_

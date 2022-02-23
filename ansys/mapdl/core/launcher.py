@@ -191,6 +191,7 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
+    **kwargs
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -241,92 +242,118 @@ def launch_grpc(
         recommended unless debugging the MAPDL start.  Default
         ``False``.
 
+    kwargs : dict
+        Not used. Added to keep compatibility between Mapdl_grpc and
+        launcher_grpc ``start_parm``s.
+
     Returns
     -------
-    port : int
+    int
         Returns the port number that the gRPC instance started on.
 
     Notes
     -----
+    If ``PYMAPDL_START_INSTANCE`` is set to FALSE, this ``launch_mapdl`` will
+    look for an existing instance of MAPDL at ``PYMAPDL_IP`` on port
+    ``PYMAPDL_PORT``, with defaults 127.0.0.1 and 50052 if unset. This is
+    typically used for automated documentation and testing.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
 
-    -acc <device> : Enables the use of GPU hardware.  See GPU
-     Accelerator Capability in the Parallel Processing Guide for more
-     information.
+    -acc <device>
+        Enables the use of GPU hardware.  See GPU
+        Accelerator Capability in the Parallel Processing Guide for more
+        information.
 
-    -amfg : Enables the additive manufacturing capability.  Requires
-     an additive manufacturing license. For general information about
-     this feature, see AM Process Simulation in ANSYS Workbench.
+    -amfg
+        Enables the additive manufacturing capability.  Requires
+        an additive manufacturing license. For general information about
+        this feature, see AM Process Simulation in ANSYS Workbench.
 
-    -ansexe <executable> :  Activates a custom mechanical APDL executable.
-     In the ANSYS Workbench environment, activates a custom
-     Mechanical APDL executable.
+    -ansexe <executable>
+         Activates a custom mechanical APDL executable.
+        In the ANSYS Workbench environment, activates a custom
+        Mechanical APDL executable.
 
-    -custom <executable> : Calls a custom Mechanical APDL executable
-     See Running Your Custom Executable in the Programmer's Reference
-     for more information.
+    -custom <executable>
+        Calls a custom Mechanical APDL executable
+        See Running Your Custom Executable in the Programmer's Reference
+        for more information.
 
-    -db value : Initial memory allocation
-     Defines the portion of workspace (memory) to be used as the
-     initial allocation for the database. The default is 1024
-     MB. Specify a negative number to force a fixed size throughout
-     the run; useful on small memory systems.
+    -db value
+        Initial memory allocation
+        Defines the portion of workspace (memory) to be used as the
+        initial allocation for the database. The default is 1024
+        MB. Specify a negative number to force a fixed size throughout
+        the run; useful on small memory systems.
 
-    -dis : Enables Distributed ANSYS
-     See the Parallel Processing Guide for more information.
+    -dis
+        Enables Distributed ANSYS
+        See the Parallel Processing Guide for more information.
 
-    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
-     Requires DesignXplorer.
+    -dvt
+        Enables ANSYS DesignXplorer advanced task (add-on).
+        Requires DesignXplorer.
 
-    -l <language> : Specifies a language file to use other than English
-     This option is valid only if you have a translated message file
-     in an appropriately named subdirectory in
-     ``/ansys_inc/v201/ansys/docu`` or
-     ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
+    -l <language>
+        Specifies a language file to use other than English
+        This option is valid only if you have a translated message file
+        in an appropriately named subdirectory in
+        ``/ansys_inc/v201/ansys/docu`` or
+        ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
 
-    -m <workspace> : Specifies the total size of the workspace
-     Workspace (memory) in megabytes used for the initial
-     allocation. If you omit the ``-m`` option, the default is 2 GB
-     (2048 MB). Specify a negative number to force a fixed size
-     throughout the run.
+    -m <workspace>
+        Specifies the total size of the workspace
+        Workspace (memory) in megabytes used for the initial
+        allocation. If you omit the ``-m`` option, the default is 2 GB
+        (2048 MB). Specify a negative number to force a fixed size
+        throughout the run.
 
-    -machines <IP> : Specifies the distributed machines
-     Machines on which to run a Distributed ANSYS analysis. See
-     Starting Distributed ANSYS in the Parallel Processing Guide for
-     more information.
+    -machines <IP>
+        Specifies the distributed machines
+        Machines on which to run a Distributed ANSYS analysis. See
+        Starting Distributed ANSYS in the Parallel Processing Guide for
+        more information.
 
-    -mpi <value> : Specifies the type of MPI to use.
-     See the Parallel Processing Guide for more information.
+    -mpi <value>
+        Specifies the type of MPI to use.
+        See the Parallel Processing Guide for more information.
 
-    -mpifile <appfile> : Specifies an existing MPI file
-     Specifies an existing MPI file (appfile) to be used in a
-     Distributed ANSYS run. See Using MPI Files in the Parallel
-     Processing Guide for more information.
+    -mpifile <appfile>
+        Specifies an existing MPI file
+        Specifies an existing MPI file (appfile) to be used in a
+        Distributed ANSYS run. See Using MPI Files in the Parallel
+        Processing Guide for more information.
 
-    -na <value>: Specifies the number of GPU accelerator devices
-     Number of GPU devices per machine or compute node when running
-     with the GPU accelerator feature. See GPU Accelerator Capability
-     in the Parallel Processing Guide for more information.
+    -na <value>
+        Specifies the number of GPU accelerator devices
+        Number of GPU devices per machine or compute node when running
+        with the GPU accelerator feature. See GPU Accelerator Capability
+        in the Parallel Processing Guide for more information.
 
-    -name <value> : Defines Mechanical APDL parameters
-     Set mechanical APDL parameters at program start-up. The parameter
-     name must be at least two characters long. For details about
-     parameters, see the ANSYS Parametric Design Language Guide.
+    -name <value>
+        Defines Mechanical APDL parameters
+        Set mechanical APDL parameters at program start-up. The parameter
+        name must be at least two characters long. For details about
+        parameters, see the ANSYS Parametric Design Language Guide.
 
-    -p <productname> : ANSYS session product
-     Defines the ANSYS session product that will run during the
-     session. For more detailed information about the ``-p`` option,
-     see Selecting an ANSYS Product via the Command Line.
+    -p <productname>
+        ANSYS session product
+        Defines the ANSYS session product that will run during the
+        session. For more detailed information about the ``-p`` option,
+        see Selecting an ANSYS Product via the Command Line.
 
-    -ppf <license feature name> : HPC license
-     Specifies which HPC license to use during a parallel processing
-     run. See HPC Licensing in the Parallel Processing Guide for more
-     information.
+    -ppf <license feature name>
+        HPC license
+        Specifies which HPC license to use during a parallel processing
+        run. See HPC Licensing in the Parallel Processing Guide for more
+        information.
 
-    -smp : Enables shared-memory parallelism.
-     See the Parallel Processing Guide for more information.
+    -smp
+        Enables shared-memory parallelism.
+        See the Parallel Processing Guide for more information.
 
     Examples
     --------
@@ -469,7 +496,27 @@ def launch_grpc(
 
 
 def get_start_instance(start_instance_default=True):
-    """Check if the environment variable PYMAPDL_START_INSTANCE exists and is valid."""
+    """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
+
+    Parameters
+    ----------
+    start_instance_default : bool
+        Value to return when ``PYMAPDL_START_INSTANCE`` is unset.
+
+    Returns
+    -------
+    bool
+        ``True`` when the ``PYMAPDL_START_INSTANCE`` environment variable is
+        true, ``False`` when PYMAPDL_START_INSTANCE is false. If unset,
+        returns ``start_instance_default``.
+
+    Raises
+    ------
+    OSError
+        Raised when ``PYMAPDL_START_INSTANCE`` is not either true or false
+        (case independent).
+
+    """
     if "PYMAPDL_START_INSTANCE" in os.environ:
         if os.environ["PYMAPDL_START_INSTANCE"].lower() not in ["true", "false"]:
             val = os.environ["PYMAPDL_START_INSTANCE"]
@@ -760,6 +807,7 @@ def launch_mapdl(
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
+    print_com=False,
     **kwargs,
 ) -> _MapdlCore:
     """Start MAPDL locally in gRPC mode.
@@ -885,6 +933,10 @@ def launch_mapdl(
         will be requested, being up to the license server to provide a specific
         license type. Default is ``None``.
 
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default ``False``.
+
     Returns
     -------
     ansys.mapdl.core.mapdl._MapdlCore
@@ -896,81 +948,98 @@ def launch_mapdl(
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
 
-    -acc <device> : Enables the use of GPU hardware.  See GPU
-     Accelerator Capability in the Parallel Processing Guide for more
-     information.
+    \-acc <device>
+        Enables the use of GPU hardware.  See GPU
+        Accelerator Capability in the Parallel Processing Guide for more
+        information.
 
-    -amfg : Enables the additive manufacturing capability.  Requires
-     an additive manufacturing license. For general information about
-     this feature, see AM Process Simulation in ANSYS Workbench.
+    \-amfg
+        Enables the additive manufacturing capability.  Requires
+        an additive manufacturing license. For general information about
+        this feature, see AM Process Simulation in ANSYS Workbench.
 
-    -ansexe <executable> :  Activates a custom mechanical APDL executable.
-     In the ANSYS Workbench environment, activates a custom
-     Mechanical APDL executable.
+    \-ansexe <executable>
+        Activates a custom mechanical APDL executable.
+        In the ANSYS Workbench environment, activates a custom
+        Mechanical APDL executable.
 
-    -custom <executable> : Calls a custom Mechanical APDL executable
-     See Running Your Custom Executable in the Programmer's Reference
-     for more information.
+    \-custom <executable>
+        Calls a custom Mechanical APDL executable
+        See Running Your Custom Executable in the Programmer's Reference
+        for more information.
 
-    -db value : Initial memory allocation
-     Defines the portion of workspace (memory) to be used as the
-     initial allocation for the database. The default is 1024
-     MB. Specify a negative number to force a fixed size throughout
-     the run; useful on small memory systems.
+    \-db value
+        Initial memory allocation
+        Defines the portion of workspace (memory) to be used as the
+        initial allocation for the database. The default is 1024
+        MB. Specify a negative number to force a fixed size throughout
+        the run; useful on small memory systems.
 
-    -dis : Enables Distributed ANSYS
-     See the Parallel Processing Guide for more information.
+    \-dis
+        Enables Distributed ANSYS
+        See the Parallel Processing Guide for more information.
 
-    -dvt : Enables ANSYS DesignXplorer advanced task (add-on).
-     Requires DesignXplorer.
+    \-dvt
+        Enables ANSYS DesignXplorer advanced task (add-on).
+        Requires DesignXplorer.
 
-    -l <language> : Specifies a language file to use other than English
-     This option is valid only if you have a translated message file
-     in an appropriately named subdirectory in
-     ``/ansys_inc/v201/ansys/docu`` or
-     ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
+    \-l <language>
+        Specifies a language file to use other than English
+        This option is valid only if you have a translated message file
+        in an appropriately named subdirectory in
+        ``/ansys_inc/v201/ansys/docu`` or
+        ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
 
-    -m <workspace> : Specifies the total size of the workspace
-     Workspace (memory) in megabytes used for the initial
-     allocation. If you omit the ``-m`` option, the default is 2 GB
-     (2048 MB). Specify a negative number to force a fixed size
-     throughout the run.
+    \-m <workspace>
+        Specifies the total size of the workspace
+        Workspace (memory) in megabytes used for the initial
+        allocation. If you omit the ``-m`` option, the default is 2 GB
+        (2048 MB). Specify a negative number to force a fixed size
+        throughout the run.
 
-    -machines <IP> : Specifies the distributed machines
-     Machines on which to run a Distributed ANSYS analysis. See
-     Starting Distributed ANSYS in the Parallel Processing Guide for
-     more information.
+    \-machines <IP>
+        Specifies the distributed machines
+        Machines on which to run a Distributed ANSYS analysis. See
+        Starting Distributed ANSYS in the Parallel Processing Guide for
+        more information.
 
-    -mpi <value> : Specifies the type of MPI to use.
-     See the Parallel Processing Guide for more information.
+    \-mpi <value>
+        Specifies the type of MPI to use.
+        See the Parallel Processing Guide for more information.
 
-    -mpifile <appfile> : Specifies an existing MPI file
-     Specifies an existing MPI file (appfile) to be used in a
-     Distributed ANSYS run. See Using MPI Files in the Parallel
-     Processing Guide for more information.
+    \-mpifile <appfile>
+        Specifies an existing MPI file
+        Specifies an existing MPI file (appfile) to be used in a
+        Distributed ANSYS run. See Using MPI Files in the Parallel
+        Processing Guide for more information.
 
-    -na <value>: Specifies the number of GPU accelerator devices
-     Number of GPU devices per machine or compute node when running
-     with the GPU accelerator feature. See GPU Accelerator Capability
-     in the Parallel Processing Guide for more information.
+    \-na <value>
+        Specifies the number of GPU accelerator devices
+        Number of GPU devices per machine or compute node when running
+        with the GPU accelerator feature. See GPU Accelerator Capability
+        in the Parallel Processing Guide for more information.
 
-    -name <value> : Defines Mechanical APDL parameters
-     Set mechanical APDL parameters at program start-up. The parameter
-     name must be at least two characters long. For details about
-     parameters, see the ANSYS Parametric Design Language Guide.
+    \-name <value>
+        Defines Mechanical APDL parameters
+        Set mechanical APDL parameters at program start-up. The parameter
+        name must be at least two characters long. For details about
+        parameters, see the ANSYS Parametric Design Language Guide.
 
-    -p <productname> : ANSYS session product
-     Defines the ANSYS session product that will run during the
-     session. For more detailed information about the ``-p`` option,
-     see Selecting an ANSYS Product via the Command Line.
+    \-p <productname>
+        ANSYS session product
+        Defines the ANSYS session product that will run during the
+        session. For more detailed information about the ``-p`` option,
+        see Selecting an ANSYS Product via the Command Line.
 
-    -ppf <license feature name> : HPC license
-     Specifies which HPC license to use during a parallel processing
-     run. See HPC Licensing in the Parallel Processing Guide for more
-     information.
+    \-ppf <license feature name>
+        HPC license
+        Specifies which HPC license to use during a parallel processing
+        run. See HPC Licensing in the Parallel Processing Guide for more
+        information.
 
-    -smp : Enables shared-memory parallelism.
-     See the Parallel Processing Guide for more information.
+    \-smp
+        Enables shared-memory parallelism.
+        See the Parallel Processing Guide for more information.
 
     Examples
     --------
@@ -1124,6 +1193,7 @@ def launch_mapdl(
         "additional_switches": additional_switches,
         "jobname": jobname,
         "nproc": nproc,
+        "print_com": print_com,
     }
 
     if mode in ["console", "corba"]:

@@ -1,8 +1,6 @@
-name: GitHub Actions
+name: Nightly MAPDL check
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
   schedule:  # UTC at 0400
     - cron:  '0 4 * * *'
@@ -53,10 +51,21 @@ jobs:
       - name: Unit Testing
         run: |
           pip install -r requirements_test.txt
-          pip install pytest-azurepipelines
-          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display MAPDL Logs
         if: always()
         run: cat log.txt
+
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `${workflow} failed.`, 
+            }"
 

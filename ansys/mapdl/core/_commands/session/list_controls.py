@@ -27,6 +27,8 @@ class ListControls:
         This command is valid anywhere.
         """
         command = "/COM,%s" % (str(comment))
+        if self.print_com and not self.mute and not kwargs.get('mute', False):
+            print(command)
         return self.run(command, **kwargs)
 
     def golist(self, **kwargs):
