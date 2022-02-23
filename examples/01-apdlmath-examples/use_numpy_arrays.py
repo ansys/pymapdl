@@ -49,7 +49,7 @@ print(np.max(apdl_vec))
 print(np.linalg.norm(apdl_vec))
 
 ###############################################################################
-# Note that some methods have APDL correlaries, and these methods are
+# Note that some methods have APDL corollaries, and these methods are
 # more efficient if performed within MAPDL.
 #
 # For example, the norm method can be performed within MAPDL
@@ -102,7 +102,6 @@ from_ans = ans_mat.asarray()
 print(np.allclose(from_ans, np_rand))
 
 
-###############################################################################
 ###############################################################################
 # stop mapdl
 mapdl.exit()

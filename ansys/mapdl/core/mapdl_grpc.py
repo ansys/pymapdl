@@ -684,7 +684,7 @@ class MapdlGrpc(_MapdlCore):
             except Exception:
                 continue
 
-    def exit(self, save=False, force=False):
+    def exit(self, save=False, force=False):  # pragma: no cover
         """Exit MAPDL.
 
         Parameters
