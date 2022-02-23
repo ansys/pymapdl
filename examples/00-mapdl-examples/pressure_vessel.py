@@ -143,7 +143,7 @@ print('All close:', np.allclose(von_mises, von_mises_mapdl))
 # That these results are equivalent to results from PRNSOL.
 #
 # .. note::
-#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER') will
+#    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER')`` will
 #    change the averaging scheme.
 
 mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
