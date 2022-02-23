@@ -684,18 +684,37 @@ class MapdlGrpc(_MapdlCore):
             except Exception:
                 continue
 
-    def exit(self, save=False):
+    def exit(self, save=False, force=False):
         """Exit MAPDL.
 
         Parameters
         ----------
         save : bool, optional
             Save the database on exit.  Default ``False``.
+        force : bool, optional
+            Override any environment variables that may inhibit exiting MAPDL.
+
+        Notes
+        -----
+        If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
+        remote testing or documentation build), then this will be
+        ignored. Override this behavior with ``force=True`` to always force
+        exiting MAPDL regardless of your local environment.
 
         Examples
         --------
         >>> mapdl.exit()
         """
+        # check if permitted to start (and hence exit) instances
+        if not force:
+            # lazy import here to avoid circular import
+            from ansys.mapdl.core.launcher import get_start_instance
+
+            # ignore this method if PYMAPDL_START_INSTANCE=False
+            if not get_start_instance():
+                self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
+                return
+
         if self._exited:
             return
 
