@@ -6,6 +6,8 @@ import pytest
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
 from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
+
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,6 +19,14 @@ skip_launch_mapdl = pytest.mark.skipif(
     reason="Must be able to launch MAPDL locally"
 )
 
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+"""
+)
 
 @pytest.fixture(scope="function")
 def setup_for_cmatrix(mapdl, cleared):
@@ -211,3 +221,58 @@ def test_no_get_value_non_interactive(mapdl):
     with pytest.raises(RuntimeError, match="Cannot use gRPC enabled ``GET``"):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
+
+
+def test__download(mapdl, tmpdir):
+    # Creating temp file 
+    with mapdl.non_interactive:
+        mapdl.cfopen('myfile0', 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+    file_name = "myfile0.txt"
+    assert file_name in mapdl.list_files()
+
+    mapdl._download(file_name, out_file_name='out_' + file_name)
+    assert os.path.exists('out_' + file_name)
+
+    # just to make sure it does not fail
+    mapdl._download(file_name, out_file_name='out1_' + file_name, progress_bar=True)
+    assert os.path.exists('out1_' + file_name)
+
+    # just to make sure it does not fail
+    mapdl._download(file_name, out_file_name='out2_' + file_name, chunk_size=DEFAULT_CHUNKSIZE/2)
+    assert os.path.exists('out2_' + file_name)
+
+    # just to make sure it does not fail
+    mapdl._download(file_name, out_file_name='out3_' + file_name, chunk_size=DEFAULT_CHUNKSIZE*2)
+    assert os.path.exists('out3_' + file_name)
+
+
+@skip_in_cloud
+def test_download(mapdl):
+    options = [
+        ['all', ['file0.err', 'file0.log', 'file1.log']],
+        ['everYThing', ['myfile0.txt', 'file0.err', 'file0.log', 'file1.log', '.__tmp__.inp', '.__tmp__.out', 'file.lock']],
+        ['myfile0.txt', ['myfile0.txt']],
+        [['myfile0.txt', 'myfile1.txt'], ['myfile0.txt', 'myfile1.txt']],
+        ['myfile*', ['myfile0.txt', 'myfile1.txt']],
+    ]
+
+    with mapdl.non_interactive:
+        mapdl.cfopen('myfile0', 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+        mapdl.cfopen('myfile1', 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+    for each_option, additional_file_to_check in options:
+        mapdl.download(each_option)
+        for each_additional_file in additional_file_to_check:
+            assert os.path.exists(os.path.join(os.getcwd(), each_additional_file))
+            os.remove(each_additional_file)
