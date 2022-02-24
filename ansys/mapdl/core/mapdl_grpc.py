@@ -1379,7 +1379,7 @@ class MapdlGrpc(_MapdlCore):
 
             * `'ALL'`
                 Download all the files ending in: 'out', 'full', 'rst', 'cdb',
-                'err', 'db', or 'log', in the MAPDL working directory 
+                'err', 'db', or 'log', in the MAPDL working directory
                 (:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`).
 
             * `'EVERYTHING'`
@@ -1403,12 +1403,12 @@ class MapdlGrpc(_MapdlCore):
         .. note::
 
             * The global pattern search does not search recursively.
-            * If you are in local and provide a file path, downloading files 
+            * If you are in local and provide a file path, downloading files
               from a different folder is allowed.
               However it is not a recommended approach.
 
         Examples
-        --------        
+        --------
         Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
 
         >>> mapdl.download('all')

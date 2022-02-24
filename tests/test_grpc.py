@@ -224,7 +224,7 @@ def test_no_get_value_non_interactive(mapdl):
 
 
 def test__download(mapdl, tmpdir):
-    # Creating temp file 
+    # Creating temp file
     with mapdl.non_interactive:
         mapdl.cfopen('myfile0', 'txt')
         mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
