@@ -1446,7 +1446,7 @@ class MapdlGrpc(_MapdlCore):
                     elif '*' in files:
                         list_files = glob.glob(files)  # using filter
                         if not list_files:
-                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expresions in the local client.")
+                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expressions in the local client.")
                     else:
                         raise ValueError(f"The files parameter ('{files}') does not match a file or a pattern.")
 
@@ -1457,7 +1457,7 @@ class MapdlGrpc(_MapdlCore):
                         # try filter on the list_files
                         list_files = fnmatch.filter(self_files, files)
                         if not list_files:
-                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expresion in the remote server.")
+                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expressions in the remote server.")
                     else:
                         raise ValueError(f"The `'files'` parameter ('{files}') does not match a file or a pattern.")
 
@@ -1473,9 +1473,11 @@ class MapdlGrpc(_MapdlCore):
             try:
                 self._download(each_file, chunk_size=chunk_size, progress_bar=progress_bar)
             except FileNotFoundError:
-                # So far the grpc interface returns size of the file equal zero, if the file does not exists or
-                # its size is zero, but they are two differen things!
-                # In theory, since we are obtaining the files name from `mapdl.list_files()` they do exist, so
+                # So far the grpc interface returns size of the file equal
+                # zero, if the file does not exists or its size is zero,
+                # but they are two different things!
+                # In theory, since we are obtaining the files name from
+                # `mapdl.list_files()` they do exist, so
                 # if there is any error, it means their size is zero.
                 pass  # this is not the best.
 
