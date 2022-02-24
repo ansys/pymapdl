@@ -160,10 +160,10 @@ def test_large_output(mapdl, cleared):
     assert len(msg) > 4 * 1024 ** 2
 
 
-def test_download_missing_file(mapdl, tmpdir):
+def test__download_missing_file(mapdl, tmpdir):
     target = tmpdir.join("tmp")
     with pytest.raises(FileNotFoundError):
-        mapdl.download("__notafile__", target)
+        mapdl._download("__notafile__", target)
 
 
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
