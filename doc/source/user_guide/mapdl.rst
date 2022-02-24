@@ -646,6 +646,22 @@ example, to list the remote files and download one of them:
 
    This feature is only available for MAPDL 2021R1 or newer.
 
+Alternatively, you can download several files at once using the following arguments
+on :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`:
+
+* `'ALL'`
+    Download all the files ending in: 'out', 'full', 'rst', 'cdb',
+    'err', 'db', or 'log', in the MAPDL working directory 
+    (:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`).
+
+* `'EVERYTHING'`
+    Download every single file in the MAPDL working directory.
+
+* `'file*'`
+    Global expressions can be used to match file names.
+
+* List or tuple containing the file names.
+
 
 Uploading a Local MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
