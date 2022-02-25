@@ -1363,6 +1363,22 @@ class MapdlGrpc(_MapdlCore):
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
     def download_project(self, extensions=None, target_dir=None):
+        """Download all the project files located in the MAPDL working directory.
+
+        Parameters
+        ----------
+        extensions : List[Str], Tuple[Str], optional
+            List of extensions to filter the files before downloading,
+            by default None.
+
+        target_dir : Str, optional
+            Path where the downloaded files will be located, by default None.
+
+        Returns
+        -------
+        List[Str]
+            List of downloaded files.
+        """
         if not extensions:
             files = self.list_files()
             list_of_files = self.download(files, target_dir=target_dir)
@@ -1398,9 +1414,13 @@ class MapdlGrpc(_MapdlCore):
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
 
-        progress_bar : bool, optional Display a progress bar using
+        progress_bar : bool, optional 
+            Display a progress bar using
             ``tqdm`` when ``True``.  Helpful for showing download
             progress.
+
+        recursive : bool
+            Use recursion when using glob pattern.
 
         .. warning::
             This feature is only available for MAPDL 2021R1 or newer.
