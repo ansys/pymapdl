@@ -1362,7 +1362,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):
+    def download_project(self, extensions=None, target_dir=None): # pragma: no cover
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1396,7 +1396,7 @@ class MapdlGrpc(_MapdlCore):
                  target_dir = None,
                  chunk_size=DEFAULT_CHUNKSIZE,
                  progress_bar=True,
-                 recursive=False):  # pragma: no cover
+                 recursive=False): # pragma: no cover
         """Download files from the gRPC instance workind directory
 
         Parameters

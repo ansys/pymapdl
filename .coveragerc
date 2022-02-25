@@ -8,9 +8,3 @@ omit =
     ansys/mapdl/core/mapdl_corba.py
     ansys/mapdl/core/jupyter.py
 
-
-
-[report]
-exclude_lines =
-    @skip_in_cloud
-    pragma: no cover
