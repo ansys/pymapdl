@@ -42,10 +42,10 @@ try:
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
-except ImportError:
+except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -263,7 +263,7 @@ class MapdlGrpc(_MapdlCore):
         self._busy = False  # used to check if running a command on the server
         self._channel_str = None
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        if "local" in kwargs:  # allow this to be overridden
+        if "local" in kwargs:   # pragma: no cover  # allow this to be overridden
             self._local = kwargs["local"]
         self._health_response_queue = None
         self._exiting = False
@@ -1362,33 +1362,38 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
+    def download_project(self, extensions=None, target_dir=None):
+        if not extensions:
+            files = self.list_files()
+            list_of_files = self.download(files, target_dir=target_dir)
+
+        else:
+            list_of_files = []
+            for each_extension in extensions:
+                list_of_files.extend(self.download(files=f"*.{each_extension}",
+                                                   target_dir=target_dir))
+
+        return list_of_files
+
     def download(self,
-                 files=None,
+                 files,
+                 target_dir = None,
                  chunk_size=DEFAULT_CHUNKSIZE,
-                 progress_bar=True): # pragma: no cover
+                 progress_bar=True,
+                 recursive=False):  # pragma: no cover
         """Download files from the gRPC instance workind directory
 
         Parameters
         ----------
         files : str or List[str] or Tuple(str)
             Name of the file on the server. File must be in the same
-            directory as the mapdl instance.  List current files with
-            :func:`Mapdl.directory <ansys.mapdl.core.Mapdl.list_files>`.
+            directory as the mapdl instance. A list of string names or
+            tuples of string names can also be used.
+            List current files with :func:`Mapdl.directory <ansys.mapdl.core.Mapdl.list_files>`.
 
-            Alternatively, you can also specify the following options:
-
-            * `'ALL'`
-                Download all the files ending in: 'out', 'full', 'rst', 'cdb',
-                'err', 'db', or 'log', in the MAPDL working directory
-                (:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`).
-
-            * `'EVERYTHING'`
-                Download every single file in the MAPDL working directory.
-
-            * `'file*'`
-                Global expressions can be used to match file names.
-
-            * List or tuple containing the file names.
+            Alternatively, you can also specify **glob expressions** to
+            match file names. For example: `'file*'` to match every file whose
+            name starts with `'file'`.
 
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
@@ -1401,8 +1406,9 @@ class MapdlGrpc(_MapdlCore):
             This feature is only available for MAPDL 2021R1 or newer.
 
         .. note::
-
-            * The global pattern search does not search recursively.
+            * The glob pattern search does not search recursively in remote instances.
+            * In a remote instance, it is not possible to list or download files in different
+              locations than the MAPDL working directory.
             * If you are in local and provide a file path, downloading files
               from a different folder is allowed.
               However it is not a recommended approach.
@@ -1427,39 +1433,33 @@ class MapdlGrpc(_MapdlCore):
 
         """
 
-        extensions_all = ['OUT', 'FULL', 'RST', 'CDB', 'ERR', 'DB', 'LOG']
-        if files is None:
-            files = 'all'
-
         self_files = self.list_files()  # to avoid calling it too much
-        if isinstance(files, str):
-            if files.upper() == 'ALL':
-                list_files = [each for each in self_files if each.upper().split('.')[-1] in extensions_all]
-            elif files.upper() == 'EVERYTHING':
-                list_files = self_files
-            else:
-                if self._local and ('\\' in files or '//' in files):  # pragma: no cover
-                    # in local mode
-                    if os.path.exists(files):
-                        # file exist
-                        list_files = [files]
-                    elif '*' in files:
-                        list_files = glob.glob(files)  # using filter
-                        if not list_files:
-                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expressions in the local client.")
-                    else:
-                        raise ValueError(f"The files parameter ('{files}') does not match a file or a pattern.")
 
-                else:  # Remote or looking into MAPDL working directory
-                    if files in self_files:
-                        list_files = [files]
-                    elif '*' in files:
-                        # try filter on the list_files
-                        list_files = fnmatch.filter(self_files, files)
-                        if not list_files:
-                            raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using global expressions in the remote server.")
-                    else:
-                        raise ValueError(f"The `'files'` parameter ('{files}') does not match a file or a pattern.")
+        if isinstance(files, str):
+            if self._local:  # pragma: no cover
+                # in local mode
+                if os.path.exists(files):
+                    # file exist
+                    list_files = [files]
+                elif '*' in files:
+                    list_files = glob.glob(files, recursive=recursive)  # using filter
+                    if not list_files:
+                        raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client.")
+                else:
+                    raise ValueError(f"The files parameter ('{files}') does not match any file or pattern.")
+
+            else:  # Remote or looking into MAPDL working directory
+                if files in self_files:
+                    list_files = [files]
+                elif '*' in files:
+                    # try filter on the list_files
+                    if recursive:
+                        warn("The 'recursive' keyword argument does not work with remote instances. So it is ignored.")
+                    list_files = fnmatch.filter(self_files, files)
+                    if not list_files:
+                        raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server.")
+                else:
+                    raise ValueError(f"The `'files'` parameter ('{files}') does not match any file or pattern.")
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -1469,9 +1469,25 @@ class MapdlGrpc(_MapdlCore):
             raise ValueError(f"The `file` parameter type ({type(files)}) is not supported."
                              "Only strings, tuple of strings or list of strings are allowed.")
 
+        if target_dir:
+            try:
+                os.mkdir(target_dir)
+            except FileExistsError:
+                pass
+        else:
+            target_dir = os.getcwd()
+
         for each_file in list_files:
             try:
-                self._download(each_file, chunk_size=chunk_size, progress_bar=progress_bar)
+                file_name = os.path.basename(each_file)  # Getting only the name of the file.
+                #  We try to avoid that when the full path is supplied, it will crash when trying
+                # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
+                # This will produce the file structure to flat out, but it is find, because recursive
+                # does not work in remote.
+                self._download(each_file,
+                               out_file_name=os.path.join(target_dir, file_name),
+                               chunk_size=chunk_size,
+                               progress_bar=progress_bar)
             except FileNotFoundError:
                 # So far the grpc interface returns size of the file equal
                 # zero, if the file does not exists or its size is zero,
@@ -1480,6 +1496,8 @@ class MapdlGrpc(_MapdlCore):
                 # `mapdl.list_files()` they do exist, so
                 # if there is any error, it means their size is zero.
                 pass  # this is not the best.
+
+        return list_files
 
     @protect_grpc
     def _download(
