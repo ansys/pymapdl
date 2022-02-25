@@ -251,15 +251,13 @@ def test__download(mapdl, tmpdir):
 
 
 @skip_in_cloud
-def test_download(mapdl):
-    options = [
-        ['all', ['file0.err', 'file0.log', 'file1.log']],
-        ['everYThing', ['myfile0.txt', 'file0.err', 'file0.log', 'file1.log', '.__tmp__.inp', '.__tmp__.out', 'file.lock']],
+@pytest.mark.parametrize("option,expected_files", [
         ['myfile0.txt', ['myfile0.txt']],
         [['myfile0.txt', 'myfile1.txt'], ['myfile0.txt', 'myfile1.txt']],
         ['myfile*', ['myfile0.txt', 'myfile1.txt']],
-    ]
-
+])
+def test_download(mapdl, tmpdir, option, expected_files):
+    target_dir = tmpdir.mkdir('temporary')
     with mapdl.non_interactive:
         mapdl.cfopen('myfile0', 'txt')
         mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
@@ -271,8 +269,85 @@ def test_download(mapdl):
         mapdl.run("(A10)")
         mapdl.cfclos()
 
-    for each_option, additional_file_to_check in options:
-        mapdl.download(each_option)
-        for each_additional_file in additional_file_to_check:
-            assert os.path.exists(os.path.join(os.getcwd(), each_additional_file))
-            os.remove(each_additional_file)
+    mapdl.download(option, target_dir=target_dir)
+    for file_to_check in expected_files:
+        assert os.path.exists(os.path.join(target_dir, file_to_check))
+        os.remove(file_to_check)
+
+
+@skip_in_cloud
+def test_download_without_target_dir(mapdl):
+    with mapdl.non_interactive:
+        mapdl.cfopen('myfile0', 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+        mapdl.cfopen('myfile1', 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+    mapdl.download('myfile0.txt')
+    assert os.path.exists('myfile0.txt')
+    os.remove('myfile0.txt')
+
+    mapdl.download(['myfile0.txt', 'myfile1.txt'])
+    assert os.path.exists('myfile0.txt')
+    assert os.path.exists('myfile1.txt')
+    os.remove('myfile0.txt')
+    os.remove('myfile1.txt')
+
+    mapdl.download('myfile*')
+    assert os.path.exists('myfile0.txt')
+    assert os.path.exists('myfile1.txt')
+    os.remove('myfile0.txt')
+    os.remove('myfile1.txt')
+
+
+@skip_in_cloud  # This is going to run only in local
+def test_download_recursive(mapdl, tmpdir):
+    if mapdl._local: # mapdl._local = True
+        dir_ = tmpdir.mkdir('temp00')
+        file1 = dir_.join('file0.txt')
+        file2 = dir_.join('file1.txt')
+        with open(file1, 'w') as fid:
+            fid.write('dummy')
+        with open(file2, 'w') as fid:
+            fid.write('dummy')
+
+        mapdl.download(os.path.join(dir_, '*'), recursive=True)  # This is referenced to os.getcwd
+        assert os.path.exists('file0.txt')
+        assert os.path.exists('file1.txt')
+        os.remove('file0.txt')
+        os.remove('file1.txt')
+
+        mapdl.download(os.path.join(dir_, '*'), target_dir='new_dir', recursive=True)
+        assert os.path.exists(os.path.join('new_dir', 'file0.txt'))
+        assert os.path.exists(os.path.join('new_dir', 'file1.txt'))
+        os.remove(os.path.join('new_dir', 'file0.txt'))
+        os.remove(os.path.join('new_dir', 'file1.txt'))
+
+
+@skip_in_cloud
+def test_download_project(mapdl, tmpdir):
+    target_dir = tmpdir.mkdir('temporary')
+    mapdl.download_project(target_dir=target_dir)
+    files_extensions = [each.split('.')[-1] for each in os.listdir(target_dir)]
+
+    assert 'log' in files_extensions
+    assert 'out' in files_extensions
+    assert 'err' in files_extensions
+    assert 'lock' in files_extensions
+
+
+@skip_in_cloud
+def test_download_project_extensions(mapdl, tmpdir):
+    target_dir = tmpdir.mkdir('temp')
+    mapdl.download_project(extensions=['log', 'out'], target_dir=target_dir)
+    files_extensions = [each.split('.')[-1] for each in os.listdir(target_dir)]
+
+    assert 'log' in files_extensions
+    assert 'out' in files_extensions
+    assert 'err' not in files_extensions
+    assert 'lock' not in files_extensions
