@@ -1414,7 +1414,7 @@ class MapdlGrpc(_MapdlCore):
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
 
-        progress_bar : bool, optional 
+        progress_bar : bool, optional
             Display a progress bar using
             ``tqdm`` when ``True``.  Helpful for showing download
             progress.
