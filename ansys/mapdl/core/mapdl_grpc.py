@@ -919,7 +919,7 @@ class MapdlGrpc(_MapdlCore):
         def _download(targets):
             for target in targets:
                 save_name = os.path.join(path, target)
-                self.download(target, save_name, progress_bar=progress_bar)
+                self._download(target, save_name, progress_bar=progress_bar)
 
         if preference:
             if preference not in ["rst", "rth"]:
@@ -947,7 +947,7 @@ class MapdlGrpc(_MapdlCore):
 
         if result_file:  # found non-distributed result
             save_name = os.path.join(path, result_file)
-            self.download(result_file, save_name, progress_bar=progress_bar)
+            self._download(result_file, save_name, progress_bar=progress_bar)
             return save_name
 
         # otherwise, download all the distributed result files
@@ -1620,7 +1620,7 @@ class MapdlGrpc(_MapdlCore):
 
         temp_dir = tempfile.gettempdir()
         save_name = os.path.join(temp_dir, "tmp.png")
-        self.download(filename, out_file_name=save_name)
+        self._download(filename, out_file_name=save_name)
         return save_name
 
     @protect_grpc
@@ -1809,7 +1809,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             self.igesout(basename, att=1)
             filename = os.path.join(tempfile.gettempdir(), basename)
-            self.download(basename, filename, progress_bar=False)
+            self._download(basename, filename, progress_bar=False)
         return filename
 
     @property
