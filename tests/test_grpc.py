@@ -272,7 +272,6 @@ def test_download(mapdl, tmpdir, option, expected_files):
     mapdl.download(option, target_dir=target_dir)
     for file_to_check in expected_files:
         assert os.path.exists(os.path.join(target_dir, file_to_check))
-        os.remove(file_to_check)
 
 
 @skip_in_cloud
