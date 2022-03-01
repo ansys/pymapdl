@@ -28,6 +28,16 @@ directory creation.
 """
 )
 
+def write_tmp(mapdl, filename, ext="txt"):
+    """Write a temporary file from MAPDL."""
+    with mapdl.non_interactive:
+        mapdl.cfopen(filename, 'txt')
+        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
+
+
+
 @pytest.fixture(scope="function")
 def setup_for_cmatrix(mapdl, cleared):
     mapdl.prep7()
@@ -225,83 +235,63 @@ def test_no_get_value_non_interactive(mapdl):
 
 def test__download(mapdl, tmpdir):
     # Creating temp file
-    with mapdl.non_interactive:
-        mapdl.cfopen('myfile0', 'txt')
-        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
-        mapdl.run("(A10)")
-        mapdl.cfclos()
+    write_tmp(mapdl, 'myfile0')
 
     file_name = "myfile0.txt"
     assert file_name in mapdl.list_files()
 
-    mapdl._download(file_name, out_file_name='out_' + file_name)
-    assert os.path.exists('out_' + file_name)
+    out_file = tmpdir.join('out_' + file_name)
+    mapdl._download(file_name, out_file_name=out_file)
+    assert out_file.exists()
 
-    # just to make sure it does not fail
-    mapdl._download(file_name, out_file_name='out1_' + file_name, progress_bar=True)
-    assert os.path.exists('out1_' + file_name)
+    out_file = tmpdir.join('out1_' + file_name)
+    mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    assert out_file.exists()
 
-    # just to make sure it does not fail
-    mapdl._download(file_name, out_file_name='out2_' + file_name, chunk_size=DEFAULT_CHUNKSIZE/2)
-    assert os.path.exists('out2_' + file_name)
+    out_file = tmpdir.join('out2_' + file_name)
+    mapdl._download(file_name, out_file_name=out_file, chunk_size=DEFAULT_CHUNKSIZE/2)
+    assert out_file.exists()
 
-    # just to make sure it does not fail
-    mapdl._download(file_name, out_file_name='out3_' + file_name, chunk_size=DEFAULT_CHUNKSIZE*2)
-    assert os.path.exists('out3_' + file_name)
+    out_file = tmpdir.join('out3_' + file_name)
+    mapdl._download(file_name, out_file_name=out_file, chunk_size=DEFAULT_CHUNKSIZE*2)
+    assert out_file.exists()
 
 
-@skip_in_cloud
 @pytest.mark.parametrize("option,expected_files", [
         ['myfile0.txt', ['myfile0.txt']],
         [['myfile0.txt', 'myfile1.txt'], ['myfile0.txt', 'myfile1.txt']],
         ['myfile*', ['myfile0.txt', 'myfile1.txt']],
 ])
 def test_download(mapdl, tmpdir, option, expected_files):
-    target_dir = tmpdir.mkdir('temporary')
-    with mapdl.non_interactive:
-        mapdl.cfopen('myfile0', 'txt')
-        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
-        mapdl.run("(A10)")
-        mapdl.cfclos()
+    write_tmp(mapdl, 'myfile0')
+    write_tmp(mapdl, 'myfile1')
 
-        mapdl.cfopen('myfile1', 'txt')
-        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
-        mapdl.run("(A10)")
-        mapdl.cfclos()
-
-    mapdl.download(option, target_dir=target_dir)
+    mapdl.download(option, target_dir=tmpdir)
     for file_to_check in expected_files:
-        assert os.path.exists(os.path.join(target_dir, file_to_check))
+        assert os.path.exists(tmpdir.join(file_to_check))
 
 
-@skip_in_cloud
-def test_download_without_target_dir(mapdl):
-    with mapdl.non_interactive:
-        mapdl.cfopen('myfile0', 'txt')
-        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
-        mapdl.run("(A10)")
-        mapdl.cfclos()
+def test_download_without_target_dir(mapdl, tmpdir):
+    write_tmp(mapdl, 'myfile0')
+    write_tmp(mapdl, 'myfile1')
 
-        mapdl.cfopen('myfile1', 'txt')
-        mapdl.vwrite('dummy_file')  # Needs to write something, File cannot be empty.
-        mapdl.run("(A10)")
-        mapdl.cfclos()
+    old_cwd = os.getcwd()
+    try:
+        # must use try/finally block as we change the cwd here
+        os.chdir(str(tmpdir))
 
-    mapdl.download('myfile0.txt')
-    assert os.path.exists('myfile0.txt')
-    os.remove('myfile0.txt')
+        mapdl.download('myfile0.txt')
+        assert os.path.exists('myfile0.txt')
 
-    mapdl.download(['myfile0.txt', 'myfile1.txt'])
-    assert os.path.exists('myfile0.txt')
-    assert os.path.exists('myfile1.txt')
-    os.remove('myfile0.txt')
-    os.remove('myfile1.txt')
+        mapdl.download(['myfile0.txt', 'myfile1.txt'])
+        assert os.path.exists('myfile0.txt')
+        assert os.path.exists('myfile1.txt')
 
-    mapdl.download('myfile*')
-    assert os.path.exists('myfile0.txt')
-    assert os.path.exists('myfile1.txt')
-    os.remove('myfile0.txt')
-    os.remove('myfile1.txt')
+        mapdl.download('myfile*')
+        assert os.path.exists('myfile0.txt')
+        assert os.path.exists('myfile1.txt')
+    finally:
+        os.chdir(old_cwd)
 
 
 @skip_in_cloud  # This is going to run only in local
@@ -328,9 +318,8 @@ def test_download_recursive(mapdl, tmpdir):
         os.remove(os.path.join('new_dir', 'file1.txt'))
 
 
-@skip_in_cloud
 def test_download_project(mapdl, tmpdir):
-    target_dir = tmpdir.mkdir('temporary')
+    target_dir = tmpdir.mkdir('tmp')
     mapdl.download_project(target_dir=target_dir)
     files_extensions = [each.split('.')[-1] for each in os.listdir(target_dir)]
 
@@ -340,9 +329,8 @@ def test_download_project(mapdl, tmpdir):
     assert 'lock' in files_extensions
 
 
-@skip_in_cloud
 def test_download_project_extensions(mapdl, tmpdir):
-    target_dir = tmpdir.mkdir('temp')
+    target_dir = tmpdir.mkdir('tmp')
     mapdl.download_project(extensions=['log', 'out'], target_dir=target_dir)
     files_extensions = [each.split('.')[-1] for each in os.listdir(target_dir)]
 
