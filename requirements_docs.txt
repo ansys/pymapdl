@@ -1,7 +1,7 @@
 Sphinx==4.4.0
 ansys-mapdl-reader==0.51.3  # newer breaks doc build
 imageio-ffmpeg==0.4.5
-imageio==2.16.0
+imageio==2.16.1
 jupyter_sphinx==0.3.2
 jupyterlab>=3.2.8
 matplotlib==3.5.1
