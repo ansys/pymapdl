@@ -347,3 +347,10 @@ def approximate_minimum_distance_between_points(nodes_xyz):
                     dist = sum((each0-each1)**2)**0.5
                     min_dist = np.min((dist, min_dist))
     return min_dist
+
+
+def get_bounding_box(nodes_xyz):
+    min_ = np.min(nodes_xyz, axis=0)
+    max_ = np.max(nodes_xyz, axis=0)
+
+    return max_-min_
