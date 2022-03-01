@@ -37,7 +37,6 @@ def write_tmp(mapdl, filename, ext="txt"):
         mapdl.cfclos()
 
 
-
 @pytest.fixture(scope="function")
 def setup_for_cmatrix(mapdl, cleared):
     mapdl.prep7()
