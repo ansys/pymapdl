@@ -7,3 +7,4 @@ omit =
     ansys/mapdl/core/mapdl_console.py
     ansys/mapdl/core/mapdl_corba.py
     ansys/mapdl/core/jupyter.py
+
