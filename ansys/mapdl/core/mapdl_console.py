@@ -3,12 +3,13 @@
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
 import os
-import time
 import re
+import time
+
+from ansys.mapdl.core.errors import MapdlExitedError
 
 # from ansys.mapdl.core.misc import kill_process
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.errors import MapdlExitedError
 
 ready_items = [
     rb"BEGIN:",
@@ -78,14 +79,25 @@ class MapdlConsole(_MapdlCore):
     Only works on Linux.
     """
 
-    def __init__(self, loglevel="INFO", log_apdl=None, use_vtk=True, print_com=False, **start_parm):
+    def __init__(
+        self,
+        loglevel="INFO",
+        log_apdl=None,
+        use_vtk=True,
+        print_com=False,
+        **start_parm,
+    ):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
         self._continue_on_error = False
         self._process = None
         self._launch(start_parm)
         super().__init__(
-            loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl, print_com=print_com, **start_parm
+            loglevel=loglevel,
+            use_vtk=use_vtk,
+            log_apdl=log_apdl,
+            print_com=print_com,
+            **start_parm,
         )
 
     def _launch(self, start_parm):

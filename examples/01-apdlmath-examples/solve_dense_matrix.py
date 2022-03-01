@@ -6,7 +6,9 @@ Use the APDLMath module to solve a Dense Matrix Linear System.
 """
 
 import time
+
 import numpy.linalg as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service and create an APDLMath object.

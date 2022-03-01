@@ -2,7 +2,6 @@
 import re
 from typing import Optional
 
-
 NUMERIC_CONST_PATTERN = r"""
 [-+]? # optional sign
 (?:
@@ -99,6 +98,7 @@ def parse_output_volume_area(msg):
         res = re.search(r"OUTPUT (AREA|VOLUME|AREAS) =\s*([0-9]+)", msg)
         if res is not None:
             return int(res.group(2))
+
 
 def parse_ndist(msg):
     """Parse the node value from a node message"""

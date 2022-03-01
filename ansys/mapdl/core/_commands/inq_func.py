@@ -1,8 +1,8 @@
 """Inquire undocumented functions"""
 
-class inq_function:
 
-    def ndinqr(self, node, key, pname='__tmpvar__', **kwargs):
+class inq_function:
+    def ndinqr(self, node, key, pname="__tmpvar__", **kwargs):
         """Get information about a node.
 
         **Secondary Functions:**
@@ -85,7 +85,7 @@ class inq_function:
         """
         return self.run(f"{pname} = ndinqr({node}, {key})", **kwargs)
 
-    def elmiqr(self, ielem, key, pname='__tmpvar__', **kwargs):
+    def elmiqr(self, ielem, key, pname="__tmpvar__", **kwargs):
         """Get information about an element.
 
         **Secondary Functions:**
@@ -164,7 +164,7 @@ class inq_function:
         """
         return self.run(f"{pname} = elmiqr({ielem}, {key})", **kwargs)
 
-    def kpinqr(self, knmi, key, pname='__tmpvar__', **kwargs):
+    def kpinqr(self, knmi, key, pname="__tmpvar__", **kwargs):
         """Get information about a keypoints.
 
         **Secondary Functions:**
@@ -270,7 +270,7 @@ class inq_function:
         """
         return self.run(f"{pname} = kpinqr({knmi}, {key})", **kwargs)
 
-    def lsinqr(self, line, key, pname='__tmpvar__', **kwargs):
+    def lsinqr(self, line, key, pname="__tmpvar__", **kwargs):
         """Get information about a line segment.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -356,7 +356,7 @@ class inq_function:
         """
         return self.run(f"{pname} = lsinqr({line}, {key})", **kwargs)
 
-    def arinqr(self, anmi, key, pname='__tmpvar__', **kwargs):
+    def arinqr(self, anmi, key, pname="__tmpvar__", **kwargs):
         """Get information about a area.
 
         **Secondary Functions:**
@@ -443,7 +443,7 @@ class inq_function:
         """
         return self.run(f"{pname} = arinqr({anmi}, {key})", **kwargs)
 
-    def vlinqr(self, vnmi, key, pname='__tmpvar__', **kwargs):
+    def vlinqr(self, vnmi, key, pname="__tmpvar__", **kwargs):
         """Get information about a volume.
 
         **Secondary Functions:**
@@ -516,7 +516,7 @@ class inq_function:
         """
         return self.run(f"{pname} = vlinqr({vnmi}, {key})", **kwargs)
 
-    def rlinqr(self, nreal, key, pname='__tmpvar__', **kwargs):
+    def rlinqr(self, nreal, key, pname="__tmpvar__", **kwargs):
         """Get information about a real constant set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -562,7 +562,7 @@ class inq_function:
         """
         return self.run(f"{pname} = rlinqr({nreal}, {key})", **kwargs)
 
-    def gapiqr(self, ngap, key, pname='__tmpvar__', **kwargs):
+    def gapiqr(self, ngap, key, pname="__tmpvar__", **kwargs):
         """Get information about a dynamic gap set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -600,7 +600,7 @@ class inq_function:
         """
         return self.run(f"{pname} = gapiqr({ngap}, {key})", **kwargs)
 
-    def masiqr(self, node, key, pname='__tmpvar__', **kwargs):
+    def masiqr(self, node, key, pname="__tmpvar__", **kwargs):
         """Get information about masters nodes.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -638,7 +638,7 @@ class inq_function:
         """
         return self.run(f"{pname} = masiqr({node}, {key})", **kwargs)
 
-    def ceinqr(self, nce, key, pname='__tmpvar__', **kwargs):
+    def ceinqr(self, nce, key, pname="__tmpvar__", **kwargs):
         """Get information about a constraint equation set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -693,7 +693,7 @@ class inq_function:
         """
         return self.run(f"{pname} = ceinqr({nce}, {key})", **kwargs)
 
-    def cpinqr(self, ncp, key, pname='__tmpvar__', **kwargs):
+    def cpinqr(self, ncp, key, pname="__tmpvar__", **kwargs):
         """Get information about a coupled set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -744,7 +744,7 @@ class inq_function:
         """
         return self.run(f"{pname} = cpinqr({ncp}, {key})", **kwargs)
 
-    def csyiqr(self, ncsy, key, pname='__tmpvar__', **kwargs):
+    def csyiqr(self, ncsy, key, pname="__tmpvar__", **kwargs):
         """Get information about a coordinate system.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -785,7 +785,7 @@ class inq_function:
         """
         return self.run(f"{pname} = csyiqr({ncsy}, {key})", **kwargs)
 
-    def etyiqr(self, itype, key, pname='__tmpvar__', **kwargs):
+    def etyiqr(self, itype, key, pname="__tmpvar__", **kwargs):
         """Get information about an element type.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -835,7 +835,7 @@ class inq_function:
         """
         return self.run(f"{pname} = etyiqr({itype}, {key})", **kwargs)
 
-    def foriqr(self, node, key, pname='__tmpvar__', **kwargs):
+    def foriqr(self, node, key, pname="__tmpvar__", **kwargs):
         """Get information about nodal loads.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -873,7 +873,7 @@ class inq_function:
         """
         return self.run(f"{pname} = foriqr({node}, {key})", **kwargs)
 
-    def sectinqr(self, nsect, key, pname='__tmpvar__', **kwargs):
+    def sectinqr(self, nsect, key, pname="__tmpvar__", **kwargs):
         """Get information about a section id set.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -941,7 +941,7 @@ class inq_function:
         """
         return self.run(f"{pname} = sectinqr({nsect}, {key})", **kwargs)
 
-    def mpinqr(self, mat, iprop, key, pname='__tmpvar__', **kwargs):
+    def mpinqr(self, mat, iprop, key, pname="__tmpvar__", **kwargs):
         """Get information about a material property.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1035,7 +1035,7 @@ class inq_function:
         """
         return self.run(f"{pname} = mpinqr({mat}, {iprop}, {key})", **kwargs)
 
-    def dget(self, node, idf, kcmplx, pname='__tmpvar__', **kwargs):
+    def dget(self, node, idf, kcmplx, pname="__tmpvar__", **kwargs):
         """Get a constraint from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1092,7 +1092,7 @@ class inq_function:
         """
         return self.run(f"{pname} = dget({node}, {idf}, {kcmplx})", **kwargs)
 
-    def fget(self, node, idf, kcmplx, pname='__tmpvar__', **kwargs):
+    def fget(self, node, idf, kcmplx, pname="__tmpvar__", **kwargs):
         """Get a force load from the data base.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1149,7 +1149,7 @@ class inq_function:
         """
         return self.run(f"{pname} = fget({node}, {idf}, {kcmplx})", **kwargs)
 
-    def erinqr(self, key, pname='__tmpvar__', **kwargs):
+    def erinqr(self, key, pname="__tmpvar__", **kwargs):
         """Obtain information from common errors.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the
@@ -1332,7 +1332,7 @@ class inq_function:
         """
         return self.run(f"{pname} = erinqr({key})", **kwargs)
 
-    def wrinqr(self, key, pname='__tmpvar__', **kwargs):
+    def wrinqr(self, key, pname="__tmpvar__", **kwargs):
         """Obtain information about output.
 
         .. warning:: **DISCLAIMER**: This function is un-documented in the

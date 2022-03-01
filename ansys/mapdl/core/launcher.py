@@ -1,26 +1,29 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
-import platform
 from glob import glob
-import re
-import warnings
 import os
-import appdirs
-import tempfile
+import platform
+import re
 import socket
-import time
 import subprocess
+import tempfile
+import time
+import warnings
+
+import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.misc import is_float, random_string, create_temp_dir, threaded
-from ansys.mapdl.core.errors import (
-    LockFileException,
-    VersionError,
-)
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.licensing import LicenseChecker, ALLOWABLE_LICENSES
-from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core.errors import LockFileException, VersionError
+from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
+from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.misc import (
+    create_temp_dir,
+    is_float,
+    random_string,
+    threaded,
+)
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
@@ -64,7 +67,7 @@ def _is_ubuntu():
 
     # gcc is installed by default
     proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
-    if 'ubuntu' in proc.stdout.read().decode().lower():
+    if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
     # try lsb_release as this is more reliable
@@ -132,7 +135,7 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port, name='Closing mapdl thread.'):
+    def close_mapdl(port, name="Closing mapdl thread."):
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
@@ -191,7 +194,7 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
-    **kwargs
+    **kwargs,
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
@@ -472,12 +475,14 @@ def launch_grpc(
         print(f"Running {command}")
         subprocess.Popen(command, shell=os.name != "nt", cwd=run_location)
     else:
-        subprocess.Popen(command,
-                         shell=os.name != 'nt',
-                         cwd=run_location,
-                         stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL)
+        subprocess.Popen(
+            command,
+            shell=os.name != "nt",
+            cwd=run_location,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -703,9 +708,9 @@ def save_ansys_path(exe_loc=""):
             return exe_loc
 
     # otherwise, query user for the location
-    with open(CONFIG_FILE, 'w') as f:
-        print('Cached ANSYS executable not found')
-        exe_loc = input('Enter location of ANSYS executable: ')
+    with open(CONFIG_FILE, "w") as f:
+        print("Cached ANSYS executable not found")
+        exe_loc = input("Enter location of ANSYS executable: ")
         if not os.path.isfile(exe_loc):
             raise FileNotFoundError(
                 "ANSYS executable not found at this location:\n%s" % exe_loc
@@ -1075,7 +1080,7 @@ def launch_mapdl(
     set_no_abort = kwargs.get("set_no_abort", True)
     ip = os.environ.get("PYMAPDL_IP", ip)
     if "PYMAPDL_PORT" in os.environ:
-        port = int(os.environ.get("PYMAPDL_PORT", '50052'))
+        port = int(os.environ.get("PYMAPDL_PORT", "50052"))
     if port is None:
         port = MAPDL_DEFAULT_PORT
 
@@ -1146,43 +1151,51 @@ def launch_mapdl(
         # In older versions probably it might raise an error. But not sure.
         license_type = license_type.lower().strip()
 
-        if 'enterprise' in license_type and 'solver' not in license_type:
-            license_type = 'ansys'
+        if "enterprise" in license_type and "solver" not in license_type:
+            license_type = "ansys"
 
-        elif 'enterprise' in license_type and 'solver' in license_type:
-            license_type = 'meba'
+        elif "enterprise" in license_type and "solver" in license_type:
+            license_type = "meba"
 
-        elif 'premium' in license_type:
-            license_type = 'mech_2'
+        elif "premium" in license_type:
+            license_type = "mech_2"
 
-        elif 'pro' in license_type:
-            license_type = 'mech_1'
+        elif "pro" in license_type:
+            license_type = "mech_1"
 
         elif license_type not in ALLOWABLE_LICENSES:
             allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = \
-                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n" + \
-                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
-                f"Recognized license names: {' '.join(allow_lics)}"
+            warn_text = (
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n"
+                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
+                + f"Recognized license names: {' '.join(allow_lics)}"
+            )
             warnings.warn(warn_text, UserWarning)
 
-        additional_switches += ' -p ' + license_type
-        LOG.debug(f"Using specified license name '{license_type}' in the 'license_type' keyword argument.")
+        additional_switches += " -p " + license_type
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
+        )
 
-    elif '-p ' in additional_switches:
+    elif "-p " in additional_switches:
         # There is already a license request in additional switches.
-        license_type = re.findall(r'-p \b(\w*)', additional_switches)[0]  # getting only the first product license.
+        license_type = re.findall(r"-p \b(\w*)", additional_switches)[
+            0
+        ]  # getting only the first product license.
 
         if license_type not in ALLOWABLE_LICENSES:
             allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = \
-                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n" + \
-                "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n" + \
-                f"Recognized license names: {' '.join(allow_lics)}"
+            warn_text = (
+                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n"
+                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
+                + f"Recognized license names: {' '.join(allow_lics)}"
+            )
             warnings.warn(warn_text, UserWarning)
             LOG.warning(warn_text)
 
-        LOG.debug(f"Using specified license name '{license_type}' in the additional switches parameter.")
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the additional switches parameter."
+        )
 
     elif license_type is not None:
         raise TypeError("The argument 'license_type' does only accept str or None.")
@@ -1207,9 +1220,7 @@ def launch_mapdl(
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
-        lic_check = LicenseChecker(
-            timeout=start_timeout*0.9, verbose=verbose_mapdl
-        )
+        lic_check = LicenseChecker(timeout=start_timeout * 0.9, verbose=verbose_mapdl)
         lic_check.start()
 
     try:

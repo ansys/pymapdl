@@ -1,7 +1,8 @@
-import pytest
 from collections import namedtuple
-from math import pi, isclose, sqrt
 from itertools import combinations
+from math import isclose, pi, sqrt
+
+import pytest
 
 PointTrioAngle = namedtuple("PointTrioAngle", ["point1", "point2", "vertex", "angle"])
 Triangle = namedtuple("Triangle", ["point1", "point2", "point3", "area"])

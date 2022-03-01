@@ -104,7 +104,7 @@ _ = mapdl.keyopt(1, 9, 3)
 # ~~~~~~~~~~~~~~~
 # Set up the material.
 
-mapdl.mp("EX", 1, 30E6)
+mapdl.mp("EX", 1, 30e6)
 mapdl.mp("PRXY", 1, 0.3)
 print(mapdl.mplist())
 
@@ -204,10 +204,10 @@ mapdl.post1()
 mapdl.set(1)
 
 # Get the maximum stress at the middle of the beam.
-s_eqv_max = mapdl.get_value('secr', 2, 's', 'eqv', 'max')
+s_eqv_max = mapdl.get_value("secr", 2, "s", "eqv", "max")
 
 # Get the deflection at the middle of the beam.
-mid_node_uy = mapdl.get_value(entity='NODE', entnum=3, item1='u', it1num='y')
+mid_node_uy = mapdl.get_value(entity="NODE", entnum=3, item1="u", it1num="y")
 
 
 ###############################################################################

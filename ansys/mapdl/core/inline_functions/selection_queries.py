@@ -1,4 +1,4 @@
-from .core import _QueryExecution, SelectionStatus
+from .core import SelectionStatus, _QueryExecution
 
 
 class _SelectionStatusQueries(_QueryExecution):

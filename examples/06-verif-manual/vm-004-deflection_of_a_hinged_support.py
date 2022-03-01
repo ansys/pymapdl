@@ -60,7 +60,8 @@ Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
-from math import sin, cos, pi
+from math import cos, pi, sin
+
 from ansys.mapdl.core import launch_mapdl
 
 # start mapdl and clear it

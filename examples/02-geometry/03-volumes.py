@@ -9,6 +9,7 @@ using Pythonic PREP7 volume commands.
 """
 
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine

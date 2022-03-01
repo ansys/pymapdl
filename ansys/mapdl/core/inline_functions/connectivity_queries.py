@@ -40,7 +40,7 @@ class _ConnectivityQueries(_QueryExecution):
         >>> positions
         [2, 14, 17, 5, 53, 63, 99, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         """
-        return self._run_query(f'NELEM({e},{npos})', integer=True)
+        return self._run_query(f"NELEM({e},{npos})", integer=True)
 
     def enextn(self, n, loc) -> int:
         """Returns the ``loc`` element connected to node ``n``.
@@ -79,4 +79,4 @@ class _ConnectivityQueries(_QueryExecution):
         >>> elements
         [61, 71]
         """
-        return self._run_query(f'ENEXTN({n},{loc})', integer=True)
+        return self._run_query(f"ENEXTN({n},{loc})", integer=True)

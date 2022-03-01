@@ -1,21 +1,20 @@
+from logging import Logger, StreamHandler
 import os
 import re
 from warnings import warn
-from logging import Logger, StreamHandler
 
 from ansys.mapdl.core import __version__
-from ansys.mapdl.core.misc import is_float
 from ansys.mapdl.core.commands import Commands
-
+from ansys.mapdl.core.misc import is_float
 
 # Because the APDL version has empty arguments, whereas the PyMAPDL
 # doesn't have them. Hence the order of arguments is messed up.
-COMMANDS_TO_NOT_BE_CONVERTED = {
-    'INT1'
-}
+COMMANDS_TO_NOT_BE_CONVERTED = {"INT1"}
 
-FORMAT_OPTIONS = {'select': 'W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403',
-'max-line-length': 100}
+FORMAT_OPTIONS = {
+    "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
+    "max-line-length": 100,
+}
 
 
 def convert_script(
@@ -32,7 +31,7 @@ def convert_script(
     comment_solve=False,
     cleanup_output=True,
     header=True,
-    print_com=True
+    print_com=True,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -120,41 +119,44 @@ def convert_script(
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
 
     """
-    with open(filename_in, 'r') as fid:
+    with open(filename_in, "r") as fid:
         apdl_strings = fid.readlines()
 
-    translator = _convert(apdl_strings=apdl_strings,
-                        loglevel=loglevel,
-                        auto_exit=auto_exit,
-                        line_ending=line_ending,
-                        exec_file=exec_file,
-                        macros_as_functions=macros_as_functions,
-                        use_function_names=use_function_names,
-                        show_log=show_log,
-                        add_imports=add_imports,
-                        comment_solve=comment_solve,
-                        cleanup_output=cleanup_output,
-                        header=header,
-                        print_com=print_com
-                          )
+    translator = _convert(
+        apdl_strings=apdl_strings,
+        loglevel=loglevel,
+        auto_exit=auto_exit,
+        line_ending=line_ending,
+        exec_file=exec_file,
+        macros_as_functions=macros_as_functions,
+        use_function_names=use_function_names,
+        show_log=show_log,
+        add_imports=add_imports,
+        comment_solve=comment_solve,
+        cleanup_output=cleanup_output,
+        header=header,
+        print_com=print_com,
+    )
 
     translator.save(filename_out)
     return translator.lines
 
 
-def convert_apdl_block(apdl_strings,
-            loglevel="WARNING",
-            auto_exit=True,
-            line_ending=None,
-            exec_file=None,
-            macros_as_functions=True,
-            use_function_names=True,
-            show_log=False,
-            add_imports=True,
-            comment_solve=False,
-            cleanup_output=True,
-            header=True,
-            print_com=True):
+def convert_apdl_block(
+    apdl_strings,
+    loglevel="WARNING",
+    auto_exit=True,
+    line_ending=None,
+    exec_file=None,
+    macros_as_functions=True,
+    use_function_names=True,
+    show_log=False,
+    add_imports=True,
+    comment_solve=False,
+    cleanup_output=True,
+    header=True,
+    print_com=True,
+):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -238,38 +240,42 @@ def convert_apdl_block(apdl_strings,
 
     """
 
-    translator = _convert(apdl_strings,
-                          loglevel=loglevel,
-                          auto_exit=auto_exit,
-                          line_ending=line_ending,
-                          exec_file=exec_file,
-                          macros_as_functions=macros_as_functions,
-                          use_function_names=use_function_names,
-                          show_log=show_log,
-                          add_imports=add_imports,
-                          comment_solve=comment_solve,
-                          cleanup_output=cleanup_output,
-                          header=header,
-                          print_com=print_com)
+    translator = _convert(
+        apdl_strings,
+        loglevel=loglevel,
+        auto_exit=auto_exit,
+        line_ending=line_ending,
+        exec_file=exec_file,
+        macros_as_functions=macros_as_functions,
+        use_function_names=use_function_names,
+        show_log=show_log,
+        add_imports=add_imports,
+        comment_solve=comment_solve,
+        cleanup_output=cleanup_output,
+        header=header,
+        print_com=print_com,
+    )
 
     if isinstance(apdl_strings, str):
         return translator.line_ending.join(translator.lines)
     return translator.lines
 
 
-def _convert(apdl_strings,
-            loglevel="WARNING",
-            auto_exit=True,
-            line_ending=None,
-            exec_file=None,
-            macros_as_functions=True,
-            use_function_names=True,
-            show_log=False,
-            add_imports=True,
-            comment_solve=False,
-            cleanup_output=True,
-            header=True,
-            print_com=True):
+def _convert(
+    apdl_strings,
+    loglevel="WARNING",
+    auto_exit=True,
+    line_ending=None,
+    exec_file=None,
+    macros_as_functions=True,
+    use_function_names=True,
+    show_log=False,
+    add_imports=True,
+    comment_solve=False,
+    cleanup_output=True,
+    header=True,
+    print_com=True,
+):
 
     translator = FileTranslator(
         loglevel,
@@ -282,18 +288,18 @@ def _convert(apdl_strings,
         comment_solve=comment_solve,
         cleanup_output=cleanup_output,
         header=header,
-        print_com=print_com
+        print_com=print_com,
     )
 
     if isinstance(apdl_strings, str):
         # os.linesep does not work well, so we are making sure
         # the line separation is appropriate.
-        regx =  f"[^\\r]({translator.line_ending})"
+        regx = f"[^\\r]({translator.line_ending})"
         if not re.search(regx, apdl_strings):
-            if '\r\n' in apdl_strings:
-                translator.line_ending = '\r\n'
-            elif '\n' in apdl_strings:
-                translator.line_ending = '\n'
+            if "\r\n" in apdl_strings:
+                translator.line_ending = "\r\n"
+            elif "\n" in apdl_strings:
+                translator.line_ending = "\n"
 
         apdl_strings = apdl_strings.split(translator.line_ending)
 
@@ -307,7 +313,7 @@ def _convert(apdl_strings,
 
 class Lines(list):
     def __init__(self, mute):
-        self._log = Logger('convert_logger')
+        self._log = Logger("convert_logger")
         self._setup_logger()
         self._mute = mute
         super().__init__()
@@ -321,7 +327,7 @@ class Lines(list):
     def _setup_logger(self):
         stdhdl = StreamHandler()
         stdhdl.setLevel(10)
-        stdhdl.set_name('stdout')
+        stdhdl.set_name("stdout")
         self._log.addHandler(stdhdl)
         self._log.propagate = True
 
@@ -343,7 +349,7 @@ class FileTranslator:
         comment_solve=False,
         cleanup_output=True,
         header=True,
-        print_com=True
+        print_com=True,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -373,19 +379,24 @@ class FileTranslator:
             "BFBL": "BFBLOCK",
             "BFEB": "BFEBLOCK",
             "PREA": "PREAD",
-            "SFEB": "SFEBLOCK"} #Way out: '-1' , 'END PREAD'
+            "SFEB": "SFEBLOCK",
+        }  # Way out: '-1' , 'END PREAD'
 
         self._enum_block_commands = {
             "CMBL": "CMBLOCK",
-        } # Commands where you need to count the number of lines.
+        }  # Commands where you need to count the number of lines.
 
         _NON_INTERACTIVE_COMMANDS = {
-            "*CRE" : "*CREATE",
-            "*VWR" : "*VWRITE",
-            "*VRE" : "*VREAD"
+            "*CRE": "*CREATE",
+            "*VWR": "*VWRITE",
+            "*VRE": "*VREAD",
         }
 
-        self._non_interactive_commands = list(_NON_INTERACTIVE_COMMANDS) + list(self._block_commands) + list(self._enum_block_commands)
+        self._non_interactive_commands = (
+            list(_NON_INTERACTIVE_COMMANDS)
+            + list(self._block_commands)
+            + list(self._enum_block_commands)
+        )
 
         self._block_count = 0
         self._block_count_target = 0
@@ -395,13 +406,17 @@ class FileTranslator:
     def write_header(self):
         if isinstance(self._header, bool):
             if self._header:
-                header = f'"""Script generated by ansys-mapdl-core version {__version__}"""'
+                header = (
+                    f'"""Script generated by ansys-mapdl-core version {__version__}"""'
+                )
                 self.lines.append(header)
         elif isinstance(self._header, str):
             self.lines.append(f'"""{self._header}"""')
 
         else:
-            raise TypeError("The keyword argument 'header' should be a string or a boolean.")
+            raise TypeError(
+                "The keyword argument 'header' should be a string or a boolean."
+            )
 
     def write_exit(self):
         self.lines.append(f"{self.obj_name}.exit()")
@@ -441,7 +456,7 @@ class FileTranslator:
 
         # Making sure we write python string with double slash.
         # We are not expecting other type of unicode symbols.
-        self.lines = [each_line.replace('\\', '\\\\') for each_line in self.lines]
+        self.lines = [each_line.replace("\\", "\\\\") for each_line in self.lines]
 
         # Try to format the file using AutoPEP8
         self.format_using_autopep8()
@@ -478,14 +493,20 @@ class FileTranslator:
     def translate_line(self, line):
         """Converts a single line from an ANSYS APDL script"""
         self.comment = ""
-        original_line = line.replace('\r\n', '').replace('\n', '')  # It is needed for the nblock, eblock since they have spaces before the numbers
+        original_line = line.replace("\r\n", "").replace(
+            "\n", ""
+        )  # It is needed for the nblock, eblock since they have spaces before the numbers
         line = line.strip()
         line = line.replace('"', "'")
 
         if self._in_block:
             self._block_count += 1
 
-        if self._in_block and self._block_count >= self._block_count_target and self._block_count_target:
+        if (
+            self._in_block
+            and self._block_count >= self._block_count_target
+            and self._block_count_target
+        ):
             self._in_block = False
             self.end_non_interactive()
             self._block_count = 0
@@ -510,35 +531,37 @@ class FileTranslator:
 
         # Cleaning ending empty arguments.
         # Because of an extra comma added to toffst command when generating ds.dat.
-        line_ = line.split(',')[::-1] # inverting order
+        line_ = line.split(",")[::-1]  # inverting order
         for ind, each in enumerate(line_):
             if each:
                 break
             else:
                 line_.pop(ind)
-        line = ','.join(line_[::-1])
+        line = ",".join(line_[::-1])
 
         # remove trailing comma
-        line = line[:-1] if line[-1] == ',' else line
+        line = line[:-1] if line[-1] == "," else line
 
-        cmd_ = line.split(',')[0].upper()
+        cmd_ = line.split(",")[0].upper()
 
-        if cmd_[:4] in ['SOLV', 'LSSO'] and self._comment_solve:
-            self.store_command('com', ["The following line has been commented due to `comment_solve`:"])
-            self.store_command('com', [line])
+        if cmd_[:4] in ["SOLV", "LSSO"] and self._comment_solve:
+            self.store_command(
+                "com", ["The following line has been commented due to `comment_solve`:"]
+            )
+            self.store_command("com", [line])
             return
 
-        if cmd_[:4] == '/COM':
+        if cmd_[:4] == "/COM":
             # It is a comment
-            self.store_command('com', [line[5:]])
+            self.store_command("com", [line[5:]])
             return
 
-        if cmd_ == '*DO':
+        if cmd_ == "*DO":
             self.start_non_interactive()
             self.store_run_command(line)
             return
 
-        if cmd_ in ['*ENDDO', '*ENDIF']:
+        if cmd_ in ["*ENDDO", "*ENDIF"]:
             self.store_run_command(line)
             self.end_non_interactive()
             return
@@ -550,11 +573,11 @@ class FileTranslator:
 
         if self.output_to_default(line):
             self.store_run_command(line)
-            self.store_run_command('/GOPR') # Adding gopr to ensure printing out
+            self.store_run_command("/GOPR")  # Adding gopr to ensure printing out
             self.end_non_interactive()
             return
 
-        if cmd_ == '/VERIFY':
+        if cmd_ == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
             self.store_run_command("/PREP7")
@@ -564,9 +587,13 @@ class FileTranslator:
             if not self.non_interactive:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
-                new_prev_cmd = '    ' + prev_cmd  # Since we are writing in self.lines we need to add the indentation by ourselves.
+                new_prev_cmd = (
+                    "    " + prev_cmd
+                )  # Since we are writing in self.lines we need to add the indentation by ourselves.
                 self.lines.append(new_prev_cmd)
-                self.store_run_command(line)  # Using run but it could be `store_command`
+                self.store_run_command(
+                    line
+                )  # Using run but it could be `store_command`
                 self.end_non_interactive()
                 return
 
@@ -579,7 +606,7 @@ class FileTranslator:
             return self.store_command("title", ["".join(parameters).strip()])
 
         if line[:4].upper() == "*GET":
-            if self.non_interactive: # gives error
+            if self.non_interactive:  # gives error
                 self.store_run_command(line)
                 return
             else:
@@ -587,7 +614,9 @@ class FileTranslator:
                 return self.store_command("get", parameters)
 
         if line[:4].upper() == "/NOP":
-            self.comment = "It is not recommended to use '/NOPR' in a normal PyMAPDL session."
+            self.comment = (
+                "It is not recommended to use '/NOPR' in a normal PyMAPDL session."
+            )
             self.store_under_scored_run_command(line)
             return
 
@@ -624,7 +653,9 @@ class FileTranslator:
                     + "The previous line is: \n%s\n\n" % self.lines[-1]
                 )
             self.store_run_command(line)
-            if not self._in_block:  # To escape cmds that require (XX) but they are not in block
+            if (
+                not self._in_block
+            ):  # To escape cmds that require (XX) but they are not in block
                 self.end_non_interactive()
             return
         elif line[:4] == "*USE" and self.macros_as_functions:
@@ -647,7 +678,7 @@ class FileTranslator:
             self.store_empty_line()
             return
 
-        if line == '-1' or line == 'END PREAD':  # End of block commands
+        if line == "-1" or line == "END PREAD":  # End of block commands
             self.store_run_command(line)
             self._in_block = False
             self.end_non_interactive()
@@ -672,11 +703,15 @@ class FileTranslator:
                 elif cmd in self._enum_block_commands:
                     self._in_block = True
                     self._block_count = 0
-                    if cmd == 'CMBL': # In cmblock
+                    if cmd == "CMBL":  # In cmblock
                         # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
-                        numitems = int(line.split(',')[3])
-                        _block_count_target = numitems//8 + 1 if numitems%8 != 0 else numitems//8
-                        self._block_count_target = _block_count_target + 2 # because the cmd line and option line.
+                        numitems = int(line.split(",")[3])
+                        _block_count_target = (
+                            numitems // 8 + 1 if numitems % 8 != 0 else numitems // 8
+                        )
+                        self._block_count_target = (
+                            _block_count_target + 2
+                        )  # because the cmd line and option line.
 
                 self._block_current_cmd = cmd
                 self.start_non_interactive()
@@ -707,16 +742,16 @@ class FileTranslator:
         self.indent = self.indent + "    "
 
     def store_under_scored_run_command(self, command):
-        self.store_run_command(command, run_underscored = True)
+        self.store_run_command(command, run_underscored=True)
 
     def store_run_command(self, command, run_underscored=False):
         """Stores pyansys.ANSYS command that cannot be broken down
         into a function and parameters.
         """
         if run_underscored:
-            underscore = '_'
+            underscore = "_"
         else:
-            underscore = ''
+            underscore = ""
 
         if self._infunction and "ARG" in command:
             args = []
@@ -745,7 +780,12 @@ class FileTranslator:
                 self.comment,
             )
         else:
-            line = '%s%s.%srun("%s")' % (self.indent, self.obj_name, underscore, command)
+            line = '%s%s.%srun("%s")' % (
+                self.indent,
+                self.obj_name,
+                underscore,
+                command,
+            )
         self.lines.append(line)
 
     def store_comment(self):
@@ -805,37 +845,39 @@ class FileTranslator:
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
-        if line[:4].upper() == '/OUT':
+        if line[:4].upper() == "/OUT":
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().upper().split(',')
+            output_cmd = line.strip().upper().split(",")
             if len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
-                if opt1 != 'TERM':
+                if opt1 != "TERM":
                     # A file is supplied.
                     return True
 
-        if line[:4].upper() == '*CFO':  # any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
+        if (
+            line[:4].upper() == "*CFO"
+        ):  # any([each[0:4] in '*CFOPEN' for each in dir(Commands)])
             # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
             return True
 
         return False
 
     def output_to_default(self, line):
-        if line[:4].upper() == '/OUT':
+        if line[:4].upper() == "/OUT":
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
             # this in non_interactive mode.
-            output_cmd = line.strip().upper().split(',')
+            output_cmd = line.strip().upper().split(",")
             if len(output_cmd) == 1:
                 return True
             elif len(output_cmd) > 1:
                 opt1 = output_cmd[1].strip().upper()
-                if opt1 == 'TERM':
+                if opt1 == "TERM":
                     # A file is supplied.
                     return True
-        if line[:4].upper() in '*CFCLOSE':
+        if line[:4].upper() in "*CFCLOSE":
             # We might not need going into interactive mode for *CFOPEN/*CFCLOSE
             return True
 

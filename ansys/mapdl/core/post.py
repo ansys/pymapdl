@@ -4,10 +4,9 @@ import weakref
 import numpy as np
 from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
-
+from ansys.mapdl.core.plotting import general_plotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -420,11 +419,11 @@ class PostProcessing:
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[self.selected_elements]
+        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[
+            self.selected_elements
+        ]
 
-    def plot_nodal_values(
-        self, item, comp, show_elem_numbering=False, **kwargs
-    ):
+    def plot_nodal_values(self, item, comp, show_elem_numbering=False, **kwargs):
         """Plot nodal values
 
         Displays solution results as continuous element contours.
@@ -459,13 +458,15 @@ class PostProcessing:
         """
 
         values = self.nodal_values(self, item, comp="")
-        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
+        )
         return self._plot_point_scalars(
             values, show_node_numbering=show_elem_numbering, **kwargs
         )
 
     def plot_element_values(
-            self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
+        self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
     ) -> CameraPosition:
         """Plot element values.
 
@@ -512,10 +513,13 @@ class PostProcessing:
         ... )
 
         """
-        kwargs.setdefault("scalar_bar_args", {'title': f"item: {item}\nComponent: {comp}"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
+        )
         return self._plot_cell_scalars(
             self.element_values(item, comp, option),
-            show_elem_numbering=show_elem_numbering, **kwargs
+            show_elem_numbering=show_elem_numbering,
+            **kwargs,
         )
 
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
@@ -588,8 +592,9 @@ class PostProcessing:
 
         labels = []
         if show_elem_numbering:
-            labels = [{"points": surf.cell_centers().points,
-                       "labels": surf["ansys_elem_num"]}]
+            labels = [
+                {"points": surf.cell_centers().points, "labels": surf["ansys_elem_num"]}
+            ]
 
         return general_plotter(meshes, [], labels, **kwargs)
 
@@ -760,7 +765,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_temperature(smooth_shading=True)
         """
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nTemperature"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nTemperature"})
         return self._plot_point_scalars(
             self.nodal_temperature(), show_node_numbering=show_node_numbering, **kwargs
         )
@@ -874,7 +879,7 @@ class PostProcessing:
                 )
 
         disp = self.nodal_displacement(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Displacement" % component})
+        kwargs.setdefault("scalar_bar_args", {"title": "%s Displacement" % component})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -977,14 +982,12 @@ class PostProcessing:
                 )
 
         disp = self.nodal_rotation(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Rotation"})
+        kwargs.setdefault("scalar_bar_args", {"title": f"{component} Rotation"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
 
-    def element_displacement(
-            self, component="ALL", option="AVG"
-    ) -> np.ndarray:
+    def element_displacement(self, component="ALL", option="AVG") -> np.ndarray:
         """Return element displacement.
 
         One value per element.  Either minimum, maximum, or average of
@@ -1034,11 +1037,13 @@ class PostProcessing:
         check_comp(component, DISP_TYPE)
 
         if component in ["ALL", "NORM"]:
-            disp = np.vstack((
-                self.element_values("U", "X", option),
-                self.element_values("U", "Y", option),
-                self.element_values("U", "Z", option)
-            )).T
+            disp = np.vstack(
+                (
+                    self.element_values("U", "X", option),
+                    self.element_values("U", "Y", option),
+                    self.element_values("U", "Z", option),
+                )
+            ).T
             if component == "NORM":
                 return np.linalg.norm(disp, axis=1)
             return disp
@@ -1101,12 +1106,14 @@ class PostProcessing:
             disp = np.linalg.norm(self.element_displacement("ALL"), axis=1)
         else:
             disp = self.element_displacement(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Element Displacement"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"{component} Element Displacement"}
+        )
         return self._plot_cell_scalars(
             disp, show_elem_numbering=show_elem_numbering, **kwargs
         )
 
-    def element_stress(self, component, option='AVG') -> np.ndarray:
+    def element_stress(self, component, option="AVG") -> np.ndarray:
         """Return element component or principal stress.
 
         One value per element.  Either minimum, maximum, or average of
@@ -1164,11 +1171,7 @@ class PostProcessing:
         return self.element_values("S", component, option)
 
     def plot_element_stress(
-            self,
-            component,
-            option='AVG',
-            show_elem_numbering=False,
-            **kwargs
+        self, component, option="AVG", show_elem_numbering=False, **kwargs
     ) -> CameraPosition:
         """Plot element component or principal stress.
 
@@ -1219,19 +1222,23 @@ class PostProcessing:
         stress = self.element_stress(component, option=option)
 
         if component in COMPONENT_STRESS_TYPE:
-            kwargs.setdefault("scalar_bar_args", {'title': f"{component} Component Element Stress"})
+            kwargs.setdefault(
+                "scalar_bar_args", {"title": f"{component} Component Element Stress"}
+            )
         elif component in ["1", "2", "3"]:
-            kwargs.setdefault("scalar_bar_args", {'title': f"{component} Principal Element Stress"})
+            kwargs.setdefault(
+                "scalar_bar_args", {"title": f"{component} Principal Element Stress"}
+            )
         elif component == "INT":
-            kwargs.setdefault("scalar_bar_args", {'title': "Element Stress Intensity"})
+            kwargs.setdefault("scalar_bar_args", {"title": "Element Stress Intensity"})
         elif component == "EQV":
-            kwargs.setdefault("scalar_bar_args", {'title': "Element Equivalent Stress"})
+            kwargs.setdefault("scalar_bar_args", {"title": "Element Equivalent Stress"})
 
         return self._plot_cell_scalars(
             stress, show_elem_numbering=show_elem_numbering, **kwargs
         )
 
-    def element_temperature(self, option='AVG') -> np.ndarray:
+    def element_temperature(self, option="AVG") -> np.ndarray:
         """Return element temperature.
 
         One value per element.  Either minimum, maximum, or average of
@@ -1269,10 +1276,7 @@ class PostProcessing:
         return self.element_values("TEMP", option=option)
 
     def plot_element_temperature(
-            self,
-            option='AVG',
-            show_elem_numbering=False,
-            **kwargs
+        self, option="AVG", show_elem_numbering=False, **kwargs
     ) -> CameraPosition:
         """Plot element temperature.
 
@@ -1373,7 +1377,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_pressure(smooth_shading=True)
         """
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nPressure"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nPressure"})
         return self._plot_point_scalars(
             self.nodal_pressure(), show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1446,7 +1450,7 @@ class PostProcessing:
         >>> mapdl.esel('S', 'TYPE', vmin=1)
         >>> mapdl.post_processing.plot_nodal_voltage(smooth_shading=True)
         """
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal\nVoltage"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nVoltage"})
         return self._plot_point_scalars(
             self.nodal_voltage(), show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1530,7 +1534,7 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_component_stress('X')
         """
         disp = self.nodal_component_stress(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Nodal\nStress"})
+        kwargs.setdefault("scalar_bar_args", {"title": f"{component} Nodal\nStress"})
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1613,7 +1617,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_principal_stress('1')
         """
         disp = self.nodal_principal_stress(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Nodal\nPrincipal Stress"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"{component} Nodal\nPrincipal Stress"}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1685,7 +1691,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_stress_intensity()
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Stress\nIntensity"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Nodal Stress\nIntensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1767,7 +1773,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_eqv_stress()
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Equivalent\nStress"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Nodal Equivalent\nStress"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1855,7 +1861,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_total_component_strain('X')
         """
         disp = self.nodal_total_component_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Total Nodal\nComponent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"{component} Total Nodal\nComponent Strain"}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -1942,7 +1950,9 @@ class PostProcessing:
         >>> mapdl.post_processing.nodal_total_principal_strain('1')
         """
         disp = self.nodal_total_principal_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2014,7 +2024,7 @@ class PostProcessing:
 
         """
         scalars = self.nodal_total_strain_intensity()
-        kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nStrain Intensity"})
+        kwargs.setdefault("scalar_bar_args", {"title": "Total Nodal\nStrain Intensity"})
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2093,7 +2103,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_total_eqv_strain()
-        kwargs.setdefault("scalar_bar_args", {'title': "Total Nodal\nEquivalent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Total Nodal\nEquivalent Strain"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2170,7 +2182,10 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_component_strain('1')
         """
         disp = self.nodal_elastic_component_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Elastic Nodal\nComponent Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args",
+            {"title": "%s Elastic Nodal\nComponent Strain" % component},
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2253,7 +2268,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_elastic_principal_strain('1')
         """
         disp = self.nodal_elastic_principal_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2331,7 +2348,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_elastic_strain_intensity()
-        kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\nStrain Intensity"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Elastic Nodal\nStrain Intensity"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2409,7 +2428,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_elastic_eqv_strain()
-        kwargs.setdefault("scalar_bar_args", {'title': "Elastic Nodal\n Equivalent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Elastic Nodal\n Equivalent Strain"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2491,7 +2512,10 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_component_strain('1')
         """
         disp = self.nodal_plastic_component_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Plastic Nodal\nComponent Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args",
+            {"title": "%s Plastic Nodal\nComponent Strain" % component},
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2568,7 +2592,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_plastic_principal_strain('1')
         """
         disp = self.nodal_plastic_principal_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2647,7 +2673,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_plastic_strain_intensity()
-        kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\nStrain Intensity"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Plastic Nodal\nStrain Intensity"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2732,7 +2760,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_plastic_eqv_strain()
-        kwargs.setdefault("scalar_bar_args", {'title': "Plastic Nodal\n Equivalent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Plastic Nodal\n Equivalent Strain"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2815,7 +2845,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_component_strain('1')
         """
         disp = self.nodal_thermal_component_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': f"{component} Thermal Nodal\nComponent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": f"{component} Thermal Nodal\nComponent Strain"}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2898,7 +2930,9 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_thermal_principal_strain('1')
         """
         disp = self.nodal_thermal_principal_strain(component)
-        kwargs.setdefault("scalar_bar_args", {'title': "%s Nodal\nPrincipal Strain" % component})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+        )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -2974,7 +3008,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_thermal_strain_intensity()
-        kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\nStrain Intensity"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Thermal Nodal\nStrain Intensity"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -3059,7 +3095,9 @@ class PostProcessing:
 
         """
         scalars = self.nodal_thermal_eqv_strain()
-        kwargs.setdefault("scalar_bar_args", {'title': "Thermal Nodal\n Equivalent Strain"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Thermal Nodal\n Equivalent Strain"}
+        )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
         )
@@ -3133,7 +3171,11 @@ class PostProcessing:
         >>> mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
 
         """
-        kwargs.setdefault("scalar_bar_args", {'title': "Nodal Contact\n Friction Stress"})
+        kwargs.setdefault(
+            "scalar_bar_args", {"title": "Nodal Contact\n Friction Stress"}
+        )
         return self._plot_point_scalars(
-            self.nodal_contact_friction_stress(), show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_contact_friction_stress(),
+            show_node_numbering=show_node_numbering,
+            **kwargs,
         )

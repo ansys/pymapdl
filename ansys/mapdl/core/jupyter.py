@@ -29,13 +29,13 @@ def check_manager():
 
 
 def launch_mapdl_on_cluster(
-        nproc=2,
-        memory=4,
-        loglevel="ERROR",
-        additional_switches="",
-        verbose=False,
-        start_timeout=600,
-        tag="latest",
+    nproc=2,
+    memory=4,
+    loglevel="ERROR",
+    additional_switches="",
+    verbose=False,
+    start_timeout=600,
+    tag="latest",
 ):
     """Start MAPDL on the ANSYS jupyter cluster in gRPC mode.
 
@@ -126,10 +126,11 @@ def launch_mapdl_on_cluster(
         version=tag,
         args=args,
         verbose=verbose,
-        cpu=1000*nproc,
+        cpu=1000 * nproc,
         memory=memory,
     )
 
     # connect to the pod instance
     from ansys.mapdl.core import Mapdl
+
     return Mapdl(ip, loglevel=loglevel)

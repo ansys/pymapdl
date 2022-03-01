@@ -9,10 +9,12 @@ Run a modal analysis on a mesh generated from pyvista within MAPDL.
 """
 # sphinx_gallery_thumbnail_number = 2
 
-import tempfile
 import os
-import pyvista as pv
+import tempfile
+
 from ansys.mapdl.reader import save_as_archive
+import pyvista as pv
+
 from ansys.mapdl.core import launch_mapdl
 
 # launch MAPDL as a service

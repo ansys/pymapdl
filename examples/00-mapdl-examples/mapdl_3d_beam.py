@@ -12,6 +12,7 @@ First, start by launching MAPDL as a service.
 """
 
 from ansys.mapdl.reader import examples
+
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()

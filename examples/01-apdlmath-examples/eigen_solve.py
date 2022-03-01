@@ -9,12 +9,13 @@ This example uses a verification manual input file, but you can use
 your own sparse or dense matrices and solve those.
 
 """
-import matplotlib.pylab as plt
 import time
+
+import matplotlib.pylab as plt
 import numpy as np
 
-from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.examples import vmfiles
 
 # Start MAPDL as a service and create an APDLMath object
 mapdl = launch_mapdl(loglevel="ERROR")

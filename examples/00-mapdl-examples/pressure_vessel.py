@@ -13,6 +13,7 @@ Also shown here:
 
 """
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start mapdl, enter the preprocessor, and set the units
@@ -22,7 +23,7 @@ mapdl.clear()
 mapdl.prep7()
 
 # US Customary system using inches (in, lbf*s2/in, s, °F).
-mapdl.units('BIN')
+mapdl.units("BIN")
 
 
 ###############################################################################
@@ -47,11 +48,11 @@ mapdl.cyl4(0, height, inner_width, 0, outer_width, 90)
 
 # combine areas
 a_comb = mapdl.aadd(1, 2)
-mapdl.aplot(color='grey', background='w', show_area_numbering=True)
+mapdl.aplot(color="grey", background="w", show_area_numbering=True)
 
 # Generate a cylindrical volume by rotating an area pattern about an axis
 mapdl.vrotat(a_comb, pax1=6, arc=90)
-mapdl.vplot(color='grey', background='w', show_area_numbering=True, cpos='zy')
+mapdl.vplot(color="grey", background="w", show_area_numbering=True, cpos="zy")
 
 
 ###############################################################################
@@ -61,7 +62,7 @@ mapdl.esize(0.25, 0)
 mapdl.mshape(1, "3D")
 mapdl.mshkey(0)
 mapdl.vmesh("ALL")
-mapdl.eplot(color='grey', background='w')
+mapdl.eplot(color="grey", background="w")
 
 
 ###############################################################################
@@ -105,23 +106,23 @@ von_mises_mapdl = mapdl.post_processing.nodal_eqv_stress()
 
 # we could print out the solution for each node with:
 
-print(f'\nNode  Stress (psi)')
+print(f"\nNode  Stress (psi)")
 for node_num, stress_value in zip(nnum[:5], von_mises_mapdl[:5]):
-    print(f'{node_num:<5d} {stress_value:.3f}')
-print('...')
+    print(f"{node_num:<5d} {stress_value:.3f}")
+print("...")
 
 # or simply get the maximum stress value and corresponding node
 idx = np.argmax(von_mises_mapdl)
 node_num = nnum[idx]
 stress_value = von_mises_mapdl[idx]
-print(f'\nMaximum Stress')
-print(f'Node  Stress (psi)')
-print(f'{node_num:<5d} {stress_value:.3f}')
+print(f"\nMaximum Stress")
+print(f"Node  Stress (psi)")
+print(f"{node_num:<5d} {stress_value:.3f}")
 
 ###############################################################################
 # Plot the results
 
-mapdl.post_processing.plot_nodal_eqv_stress(cpos='zy')
+mapdl.post_processing.plot_nodal_eqv_stress(cpos="zy")
 
 
 ###############################################################################
@@ -137,7 +138,7 @@ result = mapdl.result
 nnum, stress = result.principal_nodal_stress(0)
 von_mises = stress[:, -1]  # von-Mises stress is the right most column
 min_von_mises, max_von_mises = np.min(von_mises), np.max(von_mises)
-print('All close:', np.allclose(von_mises, von_mises_mapdl))
+print("All close:", np.allclose(von_mises, von_mises_mapdl))
 
 ###############################################################################
 # That these results are equivalent to results from PRNSOL.
@@ -146,18 +147,18 @@ print('All close:', np.allclose(von_mises, von_mises_mapdl))
 #    Enabling POWER GRAPHICS with ``mapdl.graphics('POWER')`` will
 #    change the averaging scheme.
 
-mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
-table = mapdl.prnsol('S', 'PRIN').splitlines()[1:]
+mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
+table = mapdl.prnsol("S", "PRIN").splitlines()[1:]
 prnsol_eqv = np.genfromtxt(table)[:, -1]  # eqv is the last column
 
 # show these are equivalent (RTOL due to rounding within PRNSOL)
-print('All close:', np.allclose(von_mises, prnsol_eqv, rtol=1E-4))
+print("All close:", np.allclose(von_mises, prnsol_eqv, rtol=1e-4))
 
-print(f'LEGACY Reader and MAPDL VGET Min: {min_von_mises}')
-print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.min()}')
+print(f"LEGACY Reader and MAPDL VGET Min: {min_von_mises}")
+print(f"PRNSOL MAPDL Min:                 {prnsol_eqv.min()}")
 print()
-print(f'LEGACY Reader and MAPDL VGET Min: {max_von_mises}')
-print(f'PRNSOL MAPDL Min:                 {prnsol_eqv.max()}')
+print(f"LEGACY Reader and MAPDL VGET Min: {max_von_mises}")
+print(f"PRNSOL MAPDL Min:                 {prnsol_eqv.max()}")
 
 ###############################################################################
 # stop mapdl

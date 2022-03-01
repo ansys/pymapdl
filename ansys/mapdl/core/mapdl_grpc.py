@@ -1,24 +1,24 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
 
-import re
-from warnings import warn
-import shutil
-import threading
-import weakref
-import io
-import time
-import os
-import glob, fnmatch
-import socket
+import fnmatch
 from functools import wraps
-import tempfile
+import glob
+import io
+import os
+import re
+import shutil
+import socket
 import subprocess
+import tempfile
+import threading
+import time
+from warnings import warn
+import weakref
 
 import grpc
+from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
 from tqdm import tqdm
-from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
-
 
 MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
 Please make sure you have the latest updated version using:
@@ -38,9 +38,11 @@ If this does not solve it, please reinstall 'ansys.mapdl.core'.
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
 try:
-    from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
-    from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-    from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+    from ansys.api.mapdl.v0 import (
+        ansys_kernel_pb2 as anskernel,
+        mapdl_pb2 as pb_types,
+        mapdl_pb2_grpc as mapdl_grpc,
+    )
 
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
@@ -48,29 +50,32 @@ except ImportError:  # pragma: no cover
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
-from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.errors import MapdlExitedError, protect_grpc, MapdlRuntimeError
-from ansys.mapdl.core.misc import (
-    supress_logging,
-    run_as_prep7,
-    last_created,
-    random_string,
-)
-from ansys.mapdl.core.post import PostProcessing
+from ansys.mapdl.core import _LOCAL_PORTS, __version__, check_version
 from ansys.mapdl.core.common_grpc import (
-    parse_chunks,
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
     DEFAULT_FILE_CHUNK_SIZE,
+    parse_chunks,
 )
-from ansys.mapdl.core import __version__, _LOCAL_PORTS
-from ansys.mapdl.core import check_version
+from ansys.mapdl.core.errors import (
+    MapdlExitedError,
+    MapdlRuntimeError,
+    protect_grpc,
+)
+from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.misc import (
+    last_created,
+    random_string,
+    run_as_prep7,
+    supress_logging,
+)
+from ansys.mapdl.core.post import PostProcessing
 
-TMP_VAR = '__tmpvar__'
+TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
 # Default 256 MB message length
-MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024 ** 2))
+MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
 
 def chunk_raw(raw, save_as):
@@ -233,10 +238,20 @@ class MapdlGrpc(_MapdlCore):
     _ip = None
     _port = None
 
-    def __init__(self, ip='127.0.0.1', port=None, timeout=15, loglevel='WARNING',
-                log_file=False, cleanup_on_exit=False, log_apdl=None,
-                set_no_abort=True, remove_temp_files=False,
-                print_com = False, **kwargs):
+    def __init__(
+        self,
+        ip="127.0.0.1",
+        port=None,
+        timeout=15,
+        loglevel="WARNING",
+        log_file=False,
+        cleanup_on_exit=False,
+        log_apdl=None,
+        set_no_abort=True,
+        remove_temp_files=False,
+        print_com=False,
+        **kwargs,
+    ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
 
@@ -244,7 +259,11 @@ class MapdlGrpc(_MapdlCore):
         self._port = port
         self._ip = ip
         super().__init__(
-            loglevel=loglevel, log_apdl=log_apdl, log_file=log_file, print_com=print_com, **kwargs
+            loglevel=loglevel,
+            log_apdl=log_apdl,
+            log_file=log_file,
+            print_com=print_com,
+            **kwargs,
         )
 
         check_valid_ip(ip)
@@ -263,7 +282,7 @@ class MapdlGrpc(_MapdlCore):
         self._busy = False  # used to check if running a command on the server
         self._channel_str = None
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        if "local" in kwargs:   # pragma: no cover  # allow this to be overridden
+        if "local" in kwargs:  # pragma: no cover  # allow this to be overridden
             self._local = kwargs["local"]
         self._health_response_queue = None
         self._exiting = False
@@ -301,7 +320,9 @@ class MapdlGrpc(_MapdlCore):
                 self._log.debug("Connected")
                 break
         else:
-            self._log.debug(f'Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s).')
+            self._log.debug(
+                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
+            )
 
         if not connected:
             raise IOError(
@@ -1044,13 +1065,13 @@ class MapdlGrpc(_MapdlCore):
         """Wraps CDREAD"""
         option = option.strip().upper()
 
-        if option not in ['DB', 'SOLID', 'COMB']:
+        if option not in ["DB", "SOLID", "COMB"]:
             raise ValueError(
                 f'Option "{option}" is not supported.  Please '
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        if option == 'ALL':
+        if option == "ALL":
             raise ValueError(
                 f'Option "{option}" is not supported in gRPC mode.  Please '
                 "Input the geometry and mesh files separately "
@@ -1059,30 +1080,42 @@ class MapdlGrpc(_MapdlCore):
         # the old behaviour is to supplied the name and the extension separatelly.
         # to make it easier let's going to allow names with extensions
         basename = os.path.basename(fname)
-        if len(basename.split('.')) == 1:
+        if len(basename.split(".")) == 1:
             # there is no extension in the main name.
             if ext:
                 # if extension is an input as an option (old APDL style)
-                fname = fname + '.' + ext
+                fname = fname + "." + ext
             else:
                 # Using default .db
-                fname = fname + '.' + 'cdb'
+                fname = fname + "." + "cdb"
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
-        kwargs.setdefault("orig_cmd", 'CDREAD')
+        kwargs.setdefault("orig_cmd", "CDREAD")
         kwargs.setdefault("cd_read_option", option.upper())
 
         self.input(fname, **kwargs)
 
     @wraps(_MapdlCore.tbft)
-    def tbft(self, oper='', id_='', option1='', option2='', option3='', option4='', option5='', option6='', option7='', **kwargs):
+    def tbft(
+        self,
+        oper="",
+        id_="",
+        option1="",
+        option2="",
+        option3="",
+        option4="",
+        option5="",
+        option6="",
+        option7="",
+        **kwargs,
+    ):
         """Wraps ``_MapdlCore.tbft``."""
-        if oper.lower() == 'eadd':
+        if oper.lower() == "eadd":
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
-            option3 = option3.replace('.', '')
-            fname = option2 if not option3 else option2 + '.' + option3
+            option3 = option3.replace(".", "")
+            fname = option2 if not option3 else option2 + "." + option3
             filename = os.path.join(option4, fname)
 
             if self._local:
@@ -1091,14 +1124,25 @@ class MapdlGrpc(_MapdlCore):
             else:
                 if os.path.exists(filename):
                     self.upload(filename)
-                    option4 = ''  # You don't need the directory if you upload it.
+                    option4 = ""  # You don't need the directory if you upload it.
                 elif filename in self.list_files():
-                    option4 = ''  # You don't need the directory if the file is in WDIR
+                    option4 = ""  # You don't need the directory if the file is in WDIR
                     pass
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            return super().tbft(oper, id_, option1, option2, option3, option4, option5, option6, option7, **kwargs)
+            return super().tbft(
+                oper,
+                id_,
+                option1,
+                option2,
+                option3,
+                option4,
+                option5,
+                option6,
+                option7,
+                **kwargs,
+            )
 
     @protect_grpc
     def input(
@@ -1108,7 +1152,7 @@ class MapdlGrpc(_MapdlCore):
         progress_bar=False,
         time_step_stream=None,
         chunk_size=512,
-        orig_cmd='/INP',
+        orig_cmd="/INP",
         **kwargs,
     ):
         """Stream a local input file to a remote mapdl instance.
@@ -1198,9 +1242,9 @@ class MapdlGrpc(_MapdlCore):
         # file.
         tmp_name = "_input_tmp_.inp"
         tmp_out = "_input_tmp_.out"
-        if 'CDRE' in orig_cmd.upper():
+        if "CDRE" in orig_cmd.upper():
             # Using CDREAD
-            option = kwargs.get("cd_read_option", 'COMB')
+            option = kwargs.get("cd_read_option", "COMB")
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
         else:
             # Using default INPUT
@@ -1239,11 +1283,13 @@ class MapdlGrpc(_MapdlCore):
         """
 
         if os.path.isdir(fname):
-            raise ValueError(f"`fname` should be a full file path or name, not the directory '{fname}'.")
+            raise ValueError(
+                f"`fname` should be a full file path or name, not the directory '{fname}'."
+            )
 
         fpath = os.path.dirname(fname)
         fname = os.path.basename(fname)
-        fext = fname.split('.')[-1]
+        fext = fname.split(".")[-1]
         ffullpath = os.path.join(fpath, fname)
 
         if os.path.exists(ffullpath) and self._local:
@@ -1260,7 +1306,7 @@ class MapdlGrpc(_MapdlCore):
                 # Finally
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
-        else: # Non-local
+        else:  # Non-local
             # upload the file if it exists locally
             if os.path.isfile(ffullpath):
                 self.upload(ffullpath, progress_bar=progress_bar)
@@ -1362,7 +1408,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None): # pragma: no cover
+    def download_project(self, extensions=None, target_dir=None):  # pragma: no cover
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1386,17 +1432,20 @@ class MapdlGrpc(_MapdlCore):
         else:
             list_of_files = []
             for each_extension in extensions:
-                list_of_files.extend(self.download(files=f"*.{each_extension}",
-                                                   target_dir=target_dir))
+                list_of_files.extend(
+                    self.download(files=f"*.{each_extension}", target_dir=target_dir)
+                )
 
         return list_of_files
 
-    def download(self,
-                 files,
-                 target_dir = None,
-                 chunk_size=DEFAULT_CHUNKSIZE,
-                 progress_bar=True,
-                 recursive=False): # pragma: no cover
+    def download(
+        self,
+        files,
+        target_dir=None,
+        chunk_size=DEFAULT_CHUNKSIZE,
+        progress_bar=True,
+        recursive=False,
+    ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
 
         Parameters
@@ -1461,33 +1510,47 @@ class MapdlGrpc(_MapdlCore):
                 if os.path.exists(files):
                     # file exist
                     list_files = [files]
-                elif '*' in files:
+                elif "*" in files:
                     list_files = glob.glob(files, recursive=recursive)  # using filter
                     if not list_files:
-                        raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client.")
+                        raise ValueError(
+                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client."
+                        )
                 else:
-                    raise ValueError(f"The files parameter ('{files}') does not match any file or pattern.")
+                    raise ValueError(
+                        f"The files parameter ('{files}') does not match any file or pattern."
+                    )
 
             else:  # Remote or looking into MAPDL working directory
                 if files in self_files:
                     list_files = [files]
-                elif '*' in files:
+                elif "*" in files:
                     # try filter on the list_files
                     if recursive:
-                        warn("The 'recursive' keyword argument does not work with remote instances. So it is ignored.")
+                        warn(
+                            "The 'recursive' keyword argument does not work with remote instances. So it is ignored."
+                        )
                     list_files = fnmatch.filter(self_files, files)
                     if not list_files:
-                        raise ValueError(f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server.")
+                        raise ValueError(
+                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server."
+                        )
                 else:
-                    raise ValueError(f"The `'files'` parameter ('{files}') does not match any file or pattern.")
+                    raise ValueError(
+                        f"The `'files'` parameter ('{files}') does not match any file or pattern."
+                    )
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
-                raise ValueError("The parameter `'files'` can be a list or tuple, but it should only contain strings.")
+                raise ValueError(
+                    "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                )
             list_files = files
         else:
-            raise ValueError(f"The `file` parameter type ({type(files)}) is not supported."
-                             "Only strings, tuple of strings or list of strings are allowed.")
+            raise ValueError(
+                f"The `file` parameter type ({type(files)}) is not supported."
+                "Only strings, tuple of strings or list of strings are allowed."
+            )
 
         if target_dir:
             try:
@@ -1499,15 +1562,19 @@ class MapdlGrpc(_MapdlCore):
 
         for each_file in list_files:
             try:
-                file_name = os.path.basename(each_file)  # Getting only the name of the file.
+                file_name = os.path.basename(
+                    each_file
+                )  # Getting only the name of the file.
                 #  We try to avoid that when the full path is supplied, it will crash when trying
                 # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
                 # This will produce the file structure to flat out, but it is find, because recursive
                 # does not work in remote.
-                self._download(each_file,
-                               out_file_name=os.path.join(target_dir, file_name),
-                               chunk_size=chunk_size,
-                               progress_bar=progress_bar)
+                self._download(
+                    each_file,
+                    out_file_name=os.path.join(target_dir, file_name),
+                    chunk_size=chunk_size,
+                    progress_bar=progress_bar,
+                )
             except FileNotFoundError:
                 # So far the grpc interface returns size of the file equal
                 # zero, if the file does not exists or its size is zero,
@@ -2165,21 +2232,21 @@ class MapdlGrpc(_MapdlCore):
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.mpinqr)
-    def mpinqr(self, mat,  iprop,  key, **kwargs):
+    def mpinqr(self, mat, iprop, key, **kwargs):
         """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
-        super().mpinqr(mat,  iprop,  key, pname=TMP_VAR, mute=True, **kwargs)
+        super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.dget)
-    def dget(self, node,  idf,  kcmplx, **kwargs):
+    def dget(self, node, idf, kcmplx, **kwargs):
         """Wrap the ``dget`` method to take advantage of the gRPC methods."""
-        super().dget(node,  idf,  kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.fget)
-    def fget(self, node,  idf,  kcmplx, **kwargs):
+    def fget(self, node, idf, kcmplx, **kwargs):
         """Wrap the ``fget`` method to take advantage of the gRPC methods."""
-        super().fget(node,  idf,  kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.erinqr)

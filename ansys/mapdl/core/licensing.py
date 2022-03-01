@@ -2,9 +2,9 @@
 
 import logging
 import os
-import time
 import socket
 import subprocess
+import time
 
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
@@ -13,13 +13,13 @@ LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
 APP_NAME = "FEAT_ANSYS"  # TODO: We need to make sure this is the type of feature we need to checkout.
-LIC_TO_CHECK =  ["mech_1"]
+LIC_TO_CHECK = ["mech_1"]
 
 LICENSES = {
     "ansys": "Ansys Mechanical Enterprise",
     "meba": "Ansys Mechanical Enterprise Solver",
     "mech_2": "Ansys Mechanical Premium",
-    "mech_1": "Ansys Mechanical Pro"
+    "mech_1": "Ansys Mechanical Pro",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 
@@ -199,7 +199,7 @@ def get_licdebug_tail(licdebug_file, start_timeout=10):
         # Going to the end of the file.
         fid.seek(0, 2)
         while True:
-            lines = ''.join(fid.readlines())
+            lines = "".join(fid.readlines())
             yield lines
 
 
@@ -343,7 +343,7 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
     output = process.stdout.read().decode()
     if verbose:
         t_elap = time.time() - tstart
-        print(f'License check complete in {t_elap:.2} seconds.\n')
+        print(f"License check complete in {t_elap:.2} seconds.\n")
         print(output)
     return output
 

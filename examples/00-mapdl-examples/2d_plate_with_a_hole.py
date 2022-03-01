@@ -361,7 +361,7 @@ for ratio in ratios:
 # height and width of the plate.
 
 # where ratio is (d/h)
-k_t_anl = 3 - 3.14 * ratios + 3.667 * ratios ** 2 - 1.527 * ratios ** 3
+k_t_anl = 3 - 3.14 * ratios + 3.667 * ratios**2 - 1.527 * ratios**3
 
 plt.plot(ratios, k_t_anl, label=r"$K_t$ Analytical")
 plt.plot(ratios, k_t_exp, label=r"$K_t$ ANSYS")

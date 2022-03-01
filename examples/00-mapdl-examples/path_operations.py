@@ -12,9 +12,9 @@ First, start MAPDL as a service and disable all but error messages.
 """
 # sphinx_gallery_thumbnail_number = 3
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -177,13 +177,21 @@ stress_slice = rst.grid.slice("z", pl_start)
 
 # good camera position (determined manually using pl.camera_position)
 cpos = [(3.2, 4, 8), (0.25, 1.0, 5.0), (0.0, 0.0, 1.0)]
-max_ = np.max((out["Stress YZ"].max(), stress_slice['Stress YZ'].max()))
-min_ = np.min((out["Stress YZ"].min(), stress_slice['Stress YZ'].min()))
+max_ = np.max((out["Stress YZ"].max(), stress_slice["Stress YZ"].max()))
+min_ = np.min((out["Stress YZ"].min(), stress_slice["Stress YZ"].min()))
 clim = [min_, max_]
 
 pl = pv.Plotter()
-pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10, clim=clim, scalar_bar_args={'title': 'Stress YZ'})
-pl.add_mesh(stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False)
+pl.add_mesh(
+    out,
+    scalars=out["Stress YZ"],
+    line_width=10,
+    clim=clim,
+    scalar_bar_args={"title": "Stress YZ"},
+)
+pl.add_mesh(
+    stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False
+)
 pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
 _ = pl.show()

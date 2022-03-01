@@ -39,7 +39,7 @@ class _LineFractionCoordinateQueries(_QueryExecution):
         >>> q.lx(l0, 0.5)
         0.5
         """
-        return self._run_query(f'LX({n}, {lfrac})', integer=False)
+        return self._run_query(f"LX({n}, {lfrac})", integer=False)
 
     def ly(self, n: int, lfrac: float) -> float:
         """Y-coordinate of line ``n`` at length fraction ``lfrac``.
@@ -76,7 +76,7 @@ class _LineFractionCoordinateQueries(_QueryExecution):
         >>> q.ly(l0, 0.5)
         1.0
         """
-        return self._run_query(f'LY({n}, {lfrac})', integer=False)
+        return self._run_query(f"LY({n}, {lfrac})", integer=False)
 
     def lz(self, n: int, lfrac: float) -> float:
         """Z-coordinate of line ``n`` at length fraction ``lfrac``.
@@ -113,7 +113,7 @@ class _LineFractionCoordinateQueries(_QueryExecution):
         >>> q.lz(l0, 0.5)
         1.5
         """
-        return self._run_query(f'LZ({n}, {lfrac})', integer=False)
+        return self._run_query(f"LZ({n}, {lfrac})", integer=False)
 
 
 class _LineFractionSlopeQueries(_QueryExecution):
@@ -155,7 +155,7 @@ class _LineFractionSlopeQueries(_QueryExecution):
         >>> q.lsx(l0, 0.5)
         0.3333333333
         """
-        return self._run_query(f'LSX({n}, {lfrac})', integer=False)
+        return self._run_query(f"LSX({n}, {lfrac})", integer=False)
 
     def lsy(self, n: int, lfrac: float) -> float:
         """Y-slope of line ``n`` at length fraction ``lfrac``.
@@ -193,7 +193,7 @@ class _LineFractionSlopeQueries(_QueryExecution):
         >>> q.lsy(l0, 0.5)
         0.6666666667
         """
-        return self._run_query(f'LSY({n}, {lfrac})', integer=False)
+        return self._run_query(f"LSY({n}, {lfrac})", integer=False)
 
     def lsz(self, n: int, lfrac: float) -> float:
         """Z-slope of line ``n`` at length fraction ``lfrac``.
@@ -231,4 +231,4 @@ class _LineFractionSlopeQueries(_QueryExecution):
         >>> q.lsz(l0, 0.5)
         0.6666666667
         """
-        return self._run_query(f'LSZ({n}, {lfrac})', integer=False)
+        return self._run_query(f"LSZ({n}, {lfrac})", integer=False)

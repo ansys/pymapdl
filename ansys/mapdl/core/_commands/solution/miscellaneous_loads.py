@@ -969,8 +969,16 @@ class MiscellaneousLoads:
         command = f"OUTRES,{item},{freq},{cname},{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
-    def rescontrol(self, action="", ldstep="", frequency="", maxfiles="", maxtotalfiles="",
-                    filetype="", ** kwargs):
+    def rescontrol(
+        self,
+        action="",
+        ldstep="",
+        frequency="",
+        maxfiles="",
+        maxtotalfiles="",
+        filetype="",
+        **kwargs,
+    ):
         """Controls file writing for multiframe restarts.
 
         APDL Command: RESCONTROL

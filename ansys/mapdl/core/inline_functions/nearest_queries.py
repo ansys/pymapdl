@@ -37,7 +37,7 @@ class _EntityNearestEntityQueries(_QueryExecution):
         >>> node_number, nearest_node
         (112, 103)
         """
-        return self._run_query(f'NNEAR({n})', integer=True)
+        return self._run_query(f"NNEAR({n})", integer=True)
 
     def knear(self, k: int) -> int:
         """Returns the selected keypoint nearest keypoint `k`.
@@ -69,7 +69,7 @@ class _EntityNearestEntityQueries(_QueryExecution):
         >>> q.knear(k1) == k2
         True
         """
-        return self._run_query(f'KNEAR({k})', integer=True)
+        return self._run_query(f"KNEAR({k})", integer=True)
 
     def enearn(self, n: int) -> int:
         """Returns the selected element nearest node `n`.
@@ -106,4 +106,4 @@ class _EntityNearestEntityQueries(_QueryExecution):
         >>> node_number, nearest_element
         (112, 22)
         """
-        return self._run_query(f'ENEARN({n})', integer=True)
+        return self._run_query(f"ENEARN({n})", integer=True)

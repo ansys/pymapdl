@@ -1,17 +1,16 @@
 """Module for miscellaneous functions and methods"""
-import sys
-import tempfile
+from functools import wraps
 import inspect
-import platform
 import os
-from threading import Thread
+import platform
 import random
 import string
-from functools import wraps
+import sys
+import tempfile
+from threading import Thread
 
-import scooby
 import numpy as np
-
+import scooby
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -226,7 +225,7 @@ def threaded(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.get('name', f'Threaded `{func.__name__}` function')
+        name = kwargs.get("name", f"Threaded `{func.__name__}` function")
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.start()
         return thread
@@ -239,7 +238,7 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.get('name', f'Threaded (with Daemon) `{func.__name__}` function')
+        name = kwargs.get("name", f"Threaded (with Daemon) `{func.__name__}` function")
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()

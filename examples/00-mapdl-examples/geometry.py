@@ -18,8 +18,8 @@ PyMAPDL including direct mesh access through VTK.
 
 import numpy as np
 
-from ansys.mapdl.core import examples
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import examples
 
 mapdl = pymapdl.launch_mapdl()
 

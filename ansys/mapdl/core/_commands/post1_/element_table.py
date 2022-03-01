@@ -430,7 +430,8 @@ class ElementTable:
 
         """
         return self.run(
-            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}", **kwargs
+            f"PRETAB,{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9}",
+            **kwargs,
         )
 
     def sabs(self, key="", **kwargs):

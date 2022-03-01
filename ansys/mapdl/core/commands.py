@@ -1,27 +1,29 @@
+from functools import wraps
+import re
+
+import numpy as np
+
 from ._commands import (
-    hidden,
-    session,
-    database,
-    preproc,
-    aux15_,
-    map_cmd,
+    apdl,
     aux2_,
     aux3_,
     aux12_,
-    reduced,
-    apdl,
-    post26_,
-    solution,
-    post1_,
-    graphics_,
-    display_,
+    aux15_,
     conn,
+    database,
+    display_,
+    graphics_,
+    hidden,
+    inq_func,
+    map_cmd,
     misc,
-    inq_func
+    post1_,
+    post26_,
+    preproc,
+    reduced,
+    session,
+    solution,
 )
-from functools import wraps
-import re
-import numpy as np
 
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
@@ -44,7 +46,7 @@ Please use 'to_list' or 'to_dataframe' instead."""
 
 
 # Identify where the data start in the output
-GROUP_DATA_START = ['NODE', 'ELEM']
+GROUP_DATA_START = ["NODE", "ELEM"]
 
 # Allowed commands to get output as array or dataframe.
 # In theory, these commands should follow the same format.
@@ -52,35 +54,35 @@ GROUP_DATA_START = ['NODE', 'ELEM']
 # So they are not in the Mapdl class,
 # so they won't be wrapped.
 CMD_LISTING = [
-    'NLIN', # not documented
-    'PRCI',
-    'PRDI', # Not documented.
-    'PREF', # Not documented.
-    'PREN',
-    'PRER',
-    'PRES',
-    'PRET',
-    'PRGS', # Not documented.
-    'PRIN',
-    'PRIT',
-    'PRJS',
-    'PRNL',
-    'PRNM', # Not documented.
-    'PRNS',
-    'PROR',
-    'PRPA',
-    'PRRF',
-    'PRRS',
-    'PRSE',
-    'PRSS', # Not documented.
-    'PRST', # Not documented.
-    'PRVE',
-    'PRXF', # Not documented.
-    'STAT',
-    'SWLI'
+    "NLIN",  # not documented
+    "PRCI",
+    "PRDI",  # Not documented.
+    "PREF",  # Not documented.
+    "PREN",
+    "PRER",
+    "PRES",
+    "PRET",
+    "PRGS",  # Not documented.
+    "PRIN",
+    "PRIT",
+    "PRJS",
+    "PRNL",
+    "PRNM",  # Not documented.
+    "PRNS",
+    "PROR",
+    "PRPA",
+    "PRRF",
+    "PRRS",
+    "PRSE",
+    "PRSS",  # Not documented.
+    "PRST",  # Not documented.
+    "PRVE",
+    "PRXF",  # Not documented.
+    "STAT",
+    "SWLI",
 ]
 
-CMD_BC_LISTING = ['FLIS', 'DLIS']
+CMD_BC_LISTING = ["FLIS", "DLIS"]
 
 # Adding empty lines to match current format.
 docstring_injection = """
@@ -104,47 +106,69 @@ str
 
 
 def get_indentation(indentation_regx, docstring):
-    return re.findall(indentation_regx, docstring, flags=re.DOTALL|re.IGNORECASE)[0][0]
+    return re.findall(indentation_regx, docstring, flags=re.DOTALL | re.IGNORECASE)[0][
+        0
+    ]
 
 
 def indent_text(indentation, docstring_injection):
-    return '\n'.join([indentation + each for each in docstring_injection.splitlines() if each.strip()])
+    return "\n".join(
+        [
+            indentation + each
+            for each in docstring_injection.splitlines()
+            if each.strip()
+        ]
+    )
     # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
 
 
 def get_docstring_indentation(docstring):
-    indentation_regx = r'\n(\s*)\n'
+    indentation_regx = r"\n(\s*)\n"
     return get_indentation(indentation_regx, docstring)
 
 
 def get_sections(docstring):
-    return [each.strip().lower() for each in re.findall(r'\n\s*(\S*)\n\s*-+\n', docstring)]
+    return [
+        each.strip().lower() for each in re.findall(r"\n\s*(\S*)\n\s*-+\n", docstring)
+    ]
 
 
 def get_section_indentation(section_name, docstring):
     sections = get_sections(docstring)
     if section_name.lower().strip() not in sections:
-        raise ValueError(f"This section '{section_name.lower().strip()}' does not exist in the docstring.")
-    section_match = section_name + r'\n\s*-*'
-    indent_match = r'\n(\s*)(\S)'
+        raise ValueError(
+            f"This section '{section_name.lower().strip()}' does not exist in the docstring."
+        )
+    section_match = section_name + r"\n\s*-*"
+    indent_match = r"\n(\s*)(\S)"
     indentation_regx = section_match + indent_match
     return get_indentation(indentation_regx, docstring)
 
 
 def inject_before(section, indentation, indented_doc_inject, docstring):
-    return re.sub(section + r'\n\s*-*', f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>", docstring, flags=re.IGNORECASE)
+    return re.sub(
+        section + r"\n\s*-*",
+        f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>",
+        docstring,
+        flags=re.IGNORECASE,
+    )
 
 
 def inject_after_return_section(indented_doc_inject, docstring):
-    return re.sub('Returns' + r'\n\s*-*', f"{indented_doc_inject.strip()}\n", docstring, flags=re.IGNORECASE)
+    return re.sub(
+        "Returns" + r"\n\s*-*",
+        f"{indented_doc_inject.strip()}\n",
+        docstring,
+        flags=re.IGNORECASE,
+    )
 
 
 def inject_docs(docstring):
     """Inject a string in a docstring"""
-    return_header = r'Returns\n\s*-*'
+    return_header = r"Returns\n\s*-*"
     if re.search(return_header, docstring):
         # There is a return block already, probably it should not.
-        indentation = get_section_indentation('Returns', docstring)
+        indentation = get_section_indentation("Returns", docstring)
         indented_doc_inject = indent_text(indentation, docstring_injection)
         return inject_after_return_section(indented_doc_inject, docstring)
     else:
@@ -152,29 +176,31 @@ def inject_docs(docstring):
         # find sections
         sections = get_sections(docstring)
 
-        if 'parameters' in sections:
-            ind = sections.index('parameters')
+        if "parameters" in sections:
+            ind = sections.index("parameters")
             if ind == len(sections) - 1:
                 # The parameters is the last bit. Just append it.
-                indentation = get_section_indentation('Parameters', docstring)
+                indentation = get_section_indentation("Parameters", docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
-                return docstring + '\n' + indented_doc_inject
+                return docstring + "\n" + indented_doc_inject
             else:
                 # inject it right before the section after 'parameter'
                 sect_after_parameter = sections[ind + 1]
                 indentation = get_section_indentation(sect_after_parameter, docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
-                return inject_before(sect_after_parameter, indentation, indented_doc_inject, docstring)
+                return inject_before(
+                    sect_after_parameter, indentation, indented_doc_inject, docstring
+                )
 
-        elif 'notes' in sections:
-            indentation = get_section_indentation('Notes', docstring)
+        elif "notes" in sections:
+            indentation = get_section_indentation("Notes", docstring)
             indented_doc_inject = indent_text(indentation, docstring_injection)
-            return inject_before('Notes', indentation, indented_doc_inject, docstring)
+            return inject_before("Notes", indentation, indented_doc_inject, docstring)
 
         else:
             indentation = get_docstring_indentation(docstring)
             indented_doc_inject = indent_text(indentation, docstring_injection)
-            return docstring + '\n' + indented_doc_inject
+            return docstring + "\n" + indented_doc_inject
 
 
 def check_valid_output(func):
@@ -183,12 +209,17 @@ def check_valid_output(func):
     @wraps(func)
     def func_wrapper(self, *args, **kwargs):
         output = self.__str__()
-        if '*** WARNING ***' in output or '*** ERROR ***' in output: # Error should be caught in mapdl.run.
-            err_type = re.findall('\*\*\* (.*) \*\*\*', output)[0]
-            msg = f'Unable to parse because of next {err_type.title()}' + '\n'.join(output.splitlines()[-2:])
+        if (
+            "*** WARNING ***" in output or "*** ERROR ***" in output
+        ):  # Error should be caught in mapdl.run.
+            err_type = re.findall("\*\*\* (.*) \*\*\*", output)[0]
+            msg = f"Unable to parse because of next {err_type.title()}" + "\n".join(
+                output.splitlines()[-2:]
+            )
             raise ValueError(msg)
         else:
             return func(self, *args, **kwargs)
+
     return func_wrapper
 
 
@@ -359,10 +390,10 @@ class SolutionCommands(
 ):
     pass
 
-class InqFunctions(
-    inq_func.inq_function
-):
+
+class InqFunctions(inq_func.inq_function):
     pass
+
 
 class Commands(
     APDLCommands,
@@ -383,10 +414,11 @@ class Commands(
     conn.Conn,
     hidden._Hidden,
     map_cmd.MapCommand,
-    InqFunctions
+    InqFunctions,
 ):
 
     """Wrapped MAPDL commands"""
+
 
 def _requires_pandas(func):
     """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
@@ -396,6 +428,7 @@ def _requires_pandas(func):
             return func(self, *args, **kwargs)
         else:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
+
     return func_wrapper
 
 
@@ -421,7 +454,7 @@ class CommandOutput(str):
     @property
     def cmd(self):
         """Cached original command to generate this command output."""
-        return self._cmd.split(',')[0]
+        return self._cmd.split(",")[0]
 
     @cmd.setter
     def cmd(self, cmd):
@@ -497,7 +530,7 @@ class CommandListingOutput(CommandOutput):
 
     def _format(self):
         """Perform some formatting (replacing mainly) in the raw text."""
-        return re.sub(r'[^E](-)', ' -', self.__str__())
+        return re.sub(r"[^E](-)", " -", self.__str__())
 
     def _get_body(self, trail_header=None):
         """Get command body text.
@@ -509,7 +542,7 @@ class CommandListingOutput(CommandOutput):
         body = self._format().splitlines()
 
         if not trail_header:
-            trail_header = ['MAXIMUM ABSOLUTE VALUES', 'TOTAL VALUES']
+            trail_header = ["MAXIMUM ABSOLUTE VALUES", "TOTAL VALUES"]
 
         if not isinstance(trail_header, list):
             trail_header = list(trail_header)
@@ -526,14 +559,20 @@ class CommandListingOutput(CommandOutput):
 
     def _get_data_group_indexes(self, body, magicword=None):
         """Return the indexes of the start and end of the data groups."""
-        if '*****ANSYS VERIFICATION RUN ONLY*****' in str(self[:1000]):
+        if "*****ANSYS VERIFICATION RUN ONLY*****" in str(self[:1000]):
             shift = 2
         else:
             shift = 0
 
         # Getting pairs of starting end
-        start_idxs = [ind for ind, each in enumerate(body) if self._is_data_start(each, magicword=magicword)]
-        end_idxs = [ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)]
+        start_idxs = [
+            ind
+            for ind, each in enumerate(body)
+            if self._is_data_start(each, magicword=magicword)
+        ]
+        end_idxs = [
+            ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)
+        ]
 
         indexes = [*start_idxs, *end_idxs]
         indexes.sort()
@@ -698,16 +737,16 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         """
         df = super().to_dataframe(data=self.to_list())
-        if 'NODE' in df.columns:
-            df['NODE'] = df['NODE'].astype(np.int32, copy=False)
+        if "NODE" in df.columns:
+            df["NODE"] = df["NODE"].astype(np.int32, copy=False)
 
-        if 'LABEL' in df.columns:
-            df['LABEL'] = df['LABEL'].astype(str, copy=False)
+        if "LABEL" in df.columns:
+            df["LABEL"] = df["LABEL"].astype(str, copy=False)
 
-        if 'REAL' in df.columns:
-            df['REAL'] = df['REAL'].astype(np.float64, copy=False)
+        if "REAL" in df.columns:
+            df["REAL"] = df["REAL"].astype(np.float64, copy=False)
 
-        if 'IMAG' in df.columns:
-            df['IMAG'] = df['IMAG'].astype(np.float64, copy=False)
+        if "IMAG" in df.columns:
+            df["IMAG"] = df["IMAG"].astype(np.float64, copy=False)
 
         return df
