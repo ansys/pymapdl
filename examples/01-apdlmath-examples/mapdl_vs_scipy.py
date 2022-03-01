@@ -14,18 +14,18 @@ This example shows:
 - How MAPDL is really faster than SciPy :)
 """
 
+import math
+
 ###############################################################################
 # First load python packages we need for this example
 import time
-import math
 
 import matplotlib.pylab as plt
 import numpy as np
 import scipy
 from scipy.sparse.linalg import eigsh
 
-from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core import examples
+from ansys.mapdl.core import examples, launch_mapdl
 
 ###############################################################################
 # Next:
@@ -94,7 +94,7 @@ mapdl_acc = np.empty(nev)
 for i in range(nev):
     f = ev[i]  # Eigenfrequency (Hz)
     omega = 2 * np.pi * f  # omega = 2.pi.Frequency
-    lam = omega ** 2  # lambda = omega^2
+    lam = omega**2  # lambda = omega^2
 
     phi = A[i]  # i-th eigenshape
     kphi = k.dot(phi)  # K.Phi

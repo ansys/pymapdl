@@ -1,4 +1,5 @@
 import weakref
+
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 

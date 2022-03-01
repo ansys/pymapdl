@@ -1,7 +1,7 @@
 """Functions to download sample datasets from the pyansys data repository.
 """
-import shutil
 import os
+import shutil
 import urllib.request
 import zipfile
 
@@ -75,7 +75,7 @@ def download_bracket():
 
 def download_tech_demo_data(example, filename):
     """Download Tech Demos external data."""
-    example = 'tech_demos/' + example
+    example = "tech_demos/" + example
     return _download_file(filename=filename, directory=example)[0]
 
 

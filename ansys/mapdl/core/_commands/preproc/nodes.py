@@ -2,6 +2,7 @@ import re
 
 from ansys.mapdl.core._commands import parse
 
+
 class Nodes:
     def center(self, node="", node1="", node2="", node3="", radius="", **kwargs):
         """Defines a node at the center of curvature of 2 or 3 nodes.

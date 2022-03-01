@@ -83,9 +83,9 @@ Analysis Assumptions and Modeling Notes:
 
 # sphinx_gallery_thumbnail_path = '_static/vm7_setup.png'
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -159,7 +159,7 @@ print(mapdl.etlist())
 
 # Steel material model.
 # Define Young's moulus and Poisson ratio for Steel.
-mapdl.mp("EX", 1, 26.875E6)
+mapdl.mp("EX", 1, 26.875e6)
 mapdl.mp("PRXY", 1, 0.3)
 
 # Define non-linear material properties for Steel.
@@ -169,7 +169,7 @@ mapdl.tbdata(1, 86000, 0)
 
 # Aluminum material model.
 # Define Young's moulus and Poisson ratio for Aluminum.
-mapdl.mp("EX", 2, 11E6)
+mapdl.mp("EX", 2, 11e6)
 mapdl.mp("PRXY", 2, 0.3)
 
 # Define non-linear material properties for Aluminum.
@@ -187,42 +187,60 @@ print(mapdl.mplist())
 # Use Matplotlib library to plot material model curves of steel and aluminum.
 
 # Define stress - strain properties of the steel.
-steel = {"stress_s": [0, 86000, 86000, 86000],
-         "strain_s": [0, 0.032, 0.1, 0.2]}
+steel = {"stress_s": [0, 86000, 86000, 86000], "strain_s": [0, 0.032, 0.1, 0.2]}
 
 # Define yielding strength point of the steel on the curve.
 xp = steel["strain_s"][1]
 yp = steel["stress_s"][1]
 
 # Set up the settings of the steel curve.
-plt.plot(steel["strain_s"], steel["stress_s"],
-         label="1020 CR STEEL", linewidth=2,
-         color='steelblue', linestyle="-", marker="o")
-plt.plot(xp, yp, marker='o')
+plt.plot(
+    steel["strain_s"],
+    steel["stress_s"],
+    label="1020 CR STEEL",
+    linewidth=2,
+    color="steelblue",
+    linestyle="-",
+    marker="o",
+)
+plt.plot(xp, yp, marker="o")
 
 # Annotation settings
-plt.annotate(r'${(\sigma_{yp})_s}$', xy=(xp, yp), xytext=(0.05, 75000),
-             arrowprops=dict(facecolor='steelblue', shrink=0.05),
-             bbox=dict(facecolor='steelblue', edgecolor='black', boxstyle='round, pad=1'))
+plt.annotate(
+    r"${(\sigma_{yp})_s}$",
+    xy=(xp, yp),
+    xytext=(0.05, 75000),
+    arrowprops=dict(facecolor="steelblue", shrink=0.05),
+    bbox=dict(facecolor="steelblue", edgecolor="black", boxstyle="round, pad=1"),
+)
 
 # Define stress - strain properties of the aluminum.
-aluminum = {"stress_a": [0, 55000, 55000, 55000],
-            "strain_a": [0, 0.05, 0.1, 0.2]}
+aluminum = {"stress_a": [0, 55000, 55000, 55000], "strain_a": [0, 0.05, 0.1, 0.2]}
 
 # Define yielding strength point of the Aluminum on the curve.
 xp = aluminum["strain_a"][1]
 yp = aluminum["stress_a"][1]
 
 # Set up the settings of the aluminum curve.
-plt.plot(aluminum["strain_a"], aluminum["stress_a"],
-         label="2024-T4 Aluminum", linewidth=2,
-         color='sandybrown', linestyle="-", marker="o")
-plt.plot(xp, yp, marker='o')
+plt.plot(
+    aluminum["strain_a"],
+    aluminum["stress_a"],
+    label="2024-T4 Aluminum",
+    linewidth=2,
+    color="sandybrown",
+    linestyle="-",
+    marker="o",
+)
+plt.plot(xp, yp, marker="o")
 
 # Annotation settings
-plt.annotate(r'${(\sigma_{yp})_a}$', xy=(xp, yp), xytext=(0.07, 45000),
-             arrowprops=dict(facecolor='sandybrown', shrink=0.05),
-             bbox=dict(facecolor='sandybrown', edgecolor='black', boxstyle='round, pad=1'))
+plt.annotate(
+    r"${(\sigma_{yp})_a}$",
+    xy=(xp, yp),
+    xytext=(0.07, 45000),
+    arrowprops=dict(facecolor="sandybrown", shrink=0.05),
+    bbox=dict(facecolor="sandybrown", edgecolor="black", boxstyle="round, pad=1"),
+)
 
 plt.grid(True)
 plt.legend()
@@ -330,9 +348,11 @@ mapdl.secnum(2)
 mapdl.e(204, 202, 206, 208)
 
 # Plot element model to demonstrate the axisymmetric element model.
-cpos = [(19.67899462804619, 17.856836088414664, 22.644135378046194),
-        (2.03485925, 0.21270071036846988, 5.0),
-        (0.0, 0.0, 1.0)]
+cpos = [
+    (19.67899462804619, 17.856836088414664, 22.644135378046194),
+    (2.03485925, 0.21270071036846988, 5.0),
+    (0.0, 0.0, 1.0),
+]
 _ = mapdl.eplot(cpos=cpos)
 
 
@@ -434,6 +454,7 @@ _ = mapdl.post1()
 # Set up the function to get load values of each load step of the simplified
 # axisymmetric model and convert it to the full model.
 
+
 def getload():
 
     # Select the nodes in the PIPE288 element model.
@@ -471,9 +492,7 @@ def getload():
     load_181 = load_181_theta * 360 / theta
 
     # Return load results of each element model.
-    return abs(round(load_288, 0)), \
-           abs(round(load_185, 0)), \
-           abs(round(load_181, 0))
+    return abs(round(load_288, 0)), abs(round(load_185, 0)), abs(round(load_181, 0))
 
 
 ###############################################################################
@@ -505,80 +524,93 @@ pipe288_ls3, solid185_ls3, shell181_ls3 = getload()
 # - 2nd Load Step with deflection :math:`\delta = 0.05 (in)` has :math:`load_2 = 1262000\,(lb)`.
 # - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
 
-target_res = np.asarray([1024400, 1262000, 1262000,
-                         1024400, 1262000, 1262000,
-                         1024400, 1262000, 1262000])
+target_res = np.asarray(
+    [1024400, 1262000, 1262000, 1024400, 1262000, 1262000, 1024400, 1262000, 1262000]
+)
 
-simulation_res = np.asarray([pipe288_ls1, pipe288_ls2, pipe288_ls2,
-                             solid185_ls1, solid185_ls2, solid185_ls3,
-                             shell181_ls1, shell181_ls2, shell181_ls3])
+simulation_res = np.asarray(
+    [
+        pipe288_ls1,
+        pipe288_ls2,
+        pipe288_ls2,
+        solid185_ls1,
+        solid185_ls2,
+        solid185_ls3,
+        shell181_ls1,
+        shell181_ls2,
+        shell181_ls3,
+    ]
+)
 
 main_columns = {
     "Target": target_res,
     "Mechanical APDL": simulation_res,
-    "Ratio": list(np.divide(simulation_res, target_res))
+    "Ratio": list(np.divide(simulation_res, target_res)),
 }
 
-row_tuple = [("PIPE288", "Load, lb for Deflection = 0.032 in"),
-             ("PIPE288", "Load, lb for Deflection = 0.05 in"),
-             ("PIPE288", "Load, lb for Deflection = 0.1 in"),
-
-             ("SOLID185", "Load, lb for Deflection = 0.032 in"),
-             ("SOLID185", "Load, lb for Deflection = 0.05 in"),
-             ("SOLID185", "Load, lb for Deflection = 0.1 in"),
-
-             ("SHELL181", "Load, lb for Deflection = 0.032 in"),
-             ("SHELL181", "Load, lb for Deflection = 0.05 in"),
-             ("SHELL181", "Load, lb for Deflection = 0.1 in")]
+row_tuple = [
+    ("PIPE288", "Load, lb for Deflection = 0.032 in"),
+    ("PIPE288", "Load, lb for Deflection = 0.05 in"),
+    ("PIPE288", "Load, lb for Deflection = 0.1 in"),
+    ("SOLID185", "Load, lb for Deflection = 0.032 in"),
+    ("SOLID185", "Load, lb for Deflection = 0.05 in"),
+    ("SOLID185", "Load, lb for Deflection = 0.1 in"),
+    ("SHELL181", "Load, lb for Deflection = 0.032 in"),
+    ("SHELL181", "Load, lb for Deflection = 0.05 in"),
+    ("SHELL181", "Load, lb for Deflection = 0.1 in"),
+]
 
 index_names = ["Element Type", "Load Step"]
 row_indexing = pd.MultiIndex.from_tuples(row_tuple)
 df = pd.DataFrame(main_columns, index=row_indexing)
 
-df.style.set_caption('Results Comparison',
-                     ).set_table_styles([
-                        {
-                            "selector": "th.col_heading",
-                            "props": [("background-color", "#FFEFD5"),
-                                      ("color", "black"),
-                                      ("border", "0.5px solid black"),
-                                      ("font-style", "italic"),
-                                      ("text-align", "center")]
-                        },
-                        {
-                            "selector": "th.row_heading",
-                            "props": [("background-color", "#FFEFD5"),
-                                      ("color", "black"),
-                                      ("border", "0.5px solid black"),
-                                      ("font-style", "italic"),
-                                      ("text-align", "center")]
-                        },
-                        {
-                            "selector": "td:hover",
-                            "props": [("background-color", "#FFF8DC")]
-                        },
-                        {
-                            "selector": "th",
-                            "props": [("max-width", '120px')]
-                        },
-                        {
-                            "selector": "",
-                            "props": [('border', '0.5px solid black')]
-                        },
-                        {
-                            'selector': 'caption',
-                            'props': [('color', 'black'),
-                                      ("font-style", "italic"),
-                                      ('font-size', '24px'),
-                                      ("text-align", "center")]
-                        }],
-).set_properties(**{
-    "background-color": "#FFFAFA",
-    "color": "black",
-    "border-color": "black",
-    "border-width": "0.5px",
-    "border-style": "solid",
-    "text-align": "center"}).format("{:.3f}")
+df.style.set_caption("Results Comparison",).set_table_styles(
+    [
+        {
+            "selector": "th.col_heading",
+            "props": [
+                ("background-color", "#FFEFD5"),
+                ("color", "black"),
+                ("border", "0.5px solid black"),
+                ("font-style", "italic"),
+                ("text-align", "center"),
+            ],
+        },
+        {
+            "selector": "th.row_heading",
+            "props": [
+                ("background-color", "#FFEFD5"),
+                ("color", "black"),
+                ("border", "0.5px solid black"),
+                ("font-style", "italic"),
+                ("text-align", "center"),
+            ],
+        },
+        {"selector": "td:hover", "props": [("background-color", "#FFF8DC")]},
+        {"selector": "th", "props": [("max-width", "120px")]},
+        {"selector": "", "props": [("border", "0.5px solid black")]},
+        {
+            "selector": "caption",
+            "props": [
+                ("color", "black"),
+                ("font-style", "italic"),
+                ("font-size", "24px"),
+                ("text-align", "center"),
+            ],
+        },
+    ],
+).set_properties(
+    **{
+        "background-color": "#FFFAFA",
+        "color": "black",
+        "border-color": "black",
+        "border-width": "0.5px",
+        "border-style": "solid",
+        "text-align": "center",
+    }
+).format(
+    "{:.3f}"
+)
 
 ###############################################################################
 # stop mapdl

@@ -108,7 +108,7 @@ print(mapdl.etlist())
 
 # Steel material model.
 # Define Young's moulus and Poisson ratio for Steel.
-mapdl.mp("EX", 1, 30E6)
+mapdl.mp("EX", 1, 30e6)
 mapdl.mp("PRXY", 1, 0.3)
 
 # Print the list of material properties.
@@ -166,14 +166,13 @@ mapdl.e(1, 2, 3)
 print(mapdl.elist())
 
 # Display elements with their nodes numbers.
-cpos = [(162.20508123980457, 109.41124535475498, 112.95887397446565),
-        (50.0, 0.0, 0.0),
-        (-0.4135015240403764, -0.4134577015789461, 0.8112146563156641)]
+cpos = [
+    (162.20508123980457, 109.41124535475498, 112.95887397446565),
+    (50.0, 0.0, 0.0),
+    (-0.4135015240403764, -0.4134577015789461, 0.8112146563156641),
+]
 
-_ = mapdl.eplot(show_node_numbering=True,
-                line_width=5,
-                cpos=cpos,
-                font_size=40)
+_ = mapdl.eplot(show_node_numbering=True, line_width=5, cpos=cpos, font_size=40)
 
 
 ###############################################################################
@@ -232,16 +231,12 @@ mapdl.etable(lab="STRS_B", item="LS", comp=1)
 mapdl.etable(lab="STRS_T", item="LS", comp=31)
 
 # Get the value of the maximum compressive stress.
-strss_top_compr = mapdl.get_value(entity="ELEM",
-                                  entnum=1,
-                                  item1="ETAB",
-                                  it1num="STRS_T")
+strss_top_compr = mapdl.get_value(
+    entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_T"
+)
 
 # Get the value of the maximum tensile bending stress.
-strss_bot_tens = mapdl.get_value(entity="ELEM",
-                                 entnum=1,
-                                 item1="ETAB",
-                                 it1num="STRS_B")
+strss_bot_tens = mapdl.get_value(entity="ELEM", entnum=1, item1="ETAB", it1num="STRS_B")
 
 
 ###############################################################################
@@ -258,13 +253,13 @@ strss_bot_tens = mapdl.get_value(entity="ELEM",
 # with following settings below:
 
 # Define the names of the rows.
-row_names = ['$$Stress - \sigma_{\mathrm{(B,Bot)}},\,psi$$',
-             '$$Stress - \sigma_{\mathrm{(B,Top)}},\,psi$$']
+row_names = [
+    "$$Stress - \sigma_{\mathrm{(B,Bot)}},\,psi$$",
+    "$$Stress - \sigma_{\mathrm{(B,Top)}},\,psi$$",
+]
 
 # Define the names of the columns.
-col_names = ['Target',
-             'Mechanical APDL',
-             'RATIO']
+col_names = ["Target", "Mechanical APDL", "RATIO"]
 
 # Define the values of the target results.
 target_res = np.asarray([300, -700])
@@ -276,7 +271,7 @@ simulation_res = np.asarray([strss_bot_tens, strss_top_compr])
 main_columns = {
     "Target": target_res,
     "Mechanical APDL": simulation_res,
-    "Ratio": list(np.divide(simulation_res, target_res))
+    "Ratio": list(np.divide(simulation_res, target_res)),
 }
 
 # Create and fill the output dataframe with pandas.

@@ -1,3 +1,1 @@
-from . import general_radiation
-from . import radiation_mat
-from . import radiosity_solver
+from . import general_radiation, radiation_mat, radiosity_solver

@@ -1,6 +1,7 @@
 """Small or misc tests that don't fit in other test modules"""
-from ansys.mapdl import core as pymapdl
 from pyvista.plotting import system_supports_plotting
+
+from ansys.mapdl import core as pymapdl
 
 
 def test_report():

@@ -15,8 +15,9 @@ Element Method (2nd Ed., PWS Publishing 1993).
 """
 # sphinx_gallery_thumbnail_number = 2
 import itertools
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 np.set_printoptions(linewidth=120)
 
@@ -555,7 +556,7 @@ class Isotropic:
             [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
         )
 
-        return d * (self.ex / (1 - self.nu ** 2))
+        return d * (self.ex / (1 - self.nu**2))
 
 
 isotropic = Isotropic(30e6, 0.25)
@@ -668,6 +669,7 @@ print(stiffness_scaled)
 # Creating `Elem2D` class.
 #
 
+
 class Elem2D:
     gauss_pts = (
         np.array([[-1, -1], [1, -1], [1, 1], [-1, 1]], dtype=float) * 0.57735026918962
@@ -762,6 +764,7 @@ class Elem2D:
 ###############################################################################
 # Isotropic class definition
 
+
 class Isotropic:
     def __init__(self, ex, nu):
         self.nu = nu
@@ -772,7 +775,7 @@ class Isotropic:
             [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
         )
 
-        return d * (self.ex / (1 - self.nu ** 2))
+        return d * (self.ex / (1 - self.nu**2))
 
 
 ###############################################################################
@@ -852,7 +855,7 @@ results = []
 for i, _ in enumerate(dof_list):
     mapdl.post1()
     mapdl.set(i + 1)
-    prrsol_f = mapdl.prrsol("f").to_array()[:, 1:] # Omitting node column (0)
+    prrsol_f = mapdl.prrsol("f").to_array()[:, 1:]  # Omitting node column (0)
     results.append(prrsol_f)
 
 for txt in results:
@@ -880,7 +883,7 @@ print(stiffness_scaled)
 # Show that the stiffness matrix in MAPDL matches what we derived.
 
 if np.allclose(stiffnes_mapdl_scaled, stiffness_scaled):
-    print('Both matrices are the equal within tolerance.')
+    print("Both matrices are the equal within tolerance.")
 
 
 ###############################################################################

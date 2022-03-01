@@ -1,15 +1,15 @@
 """CORBA implementation of the MAPDL interface."""
-import sys
 import atexit
-import subprocess
-import time
-import re
 import os
+import re
+import subprocess
+import sys
+import time
 import weakref
 
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.misc import threaded, random_string
-from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlExitedError
+from ansys.mapdl.core.misc import random_string, threaded
 
 if sys.version_info[1] > 8:
     raise ImportError(
@@ -167,13 +167,26 @@ class MapdlCorba(_MapdlCore):
         Default ``False``.
     """
 
-    def __init__(self, loglevel='INFO', log_apdl=None, use_vtk=True,
-                log_file = True,
-                 log_broadcast=False, verbose=False, **start_parm):
+    def __init__(
+        self,
+        loglevel="INFO",
+        log_apdl=None,
+        use_vtk=True,
+        log_file=True,
+        log_broadcast=False,
+        verbose=False,
+        **start_parm,
+    ):
         """Open a connection to MAPDL via a CORBA interface"""
-        super().__init__(loglevel=loglevel, use_vtk=use_vtk, log_apdl=log_apdl,
-                        log_file=log_file, log_broadcast=False,
-                        print_com=print_com, **start_parm)
+        super().__init__(
+            loglevel=loglevel,
+            use_vtk=use_vtk,
+            log_apdl=log_apdl,
+            log_file=log_file,
+            log_broadcast=False,
+            print_com=print_com,
+            **start_parm,
+        )
 
         self._broadcast_logger = None
         self._server = None

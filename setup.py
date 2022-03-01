@@ -1,11 +1,10 @@
 """Installation file for ansys-mapdl-core"""
-import sys
-import struct
-import os
 from io import open as io_open
+import os
+import struct
+import sys
 
-from setuptools import setup, find_namespace_packages
-
+from setuptools import find_namespace_packages, setup
 
 # Get version from version info
 __version__ = None

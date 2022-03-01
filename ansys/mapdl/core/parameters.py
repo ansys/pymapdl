@@ -2,10 +2,11 @@ import os
 import tempfile
 import weakref
 
+from ansys.mapdl.reader._reader import write_array
 import numpy as np
+
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
-from ansys.mapdl.reader._reader import write_array
 
 ROUTINE_MAP = {
     0: "Begin level",
@@ -364,7 +365,9 @@ class Parameters:
             self._mapdl.run(format_str)
 
         st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
-        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(shape)
+        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(
+            shape
+        )
 
         if len(shape) == 3:
             if shape[2] == 1:

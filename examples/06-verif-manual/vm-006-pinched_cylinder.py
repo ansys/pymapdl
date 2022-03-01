@@ -61,6 +61,7 @@ mapdl = launch_mapdl()
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # Enter verification example mode and the pre-processing routine.
 
+
 def start_prep7():
     mapdl.clear()
     mapdl.verify()
@@ -102,10 +103,13 @@ def define_element(elem_type):
 
     return elem_type, mapdl.etlist()
 
+
 # Return the number of the element type.
 elem_type, elem_type_list = define_element(elem_type="SHELL181")
-print(f"Selected element type is: {elem_type},\n"
-      f"Printout the element list with its own properties:\n {elem_type_list}")
+print(
+    f"Selected element type is: {elem_type},\n"
+    f"Printout the element list with its own properties:\n {elem_type_list}"
+)
 
 
 ###############################################################################
@@ -121,9 +125,10 @@ mat_num = 1
 # Define material properties.
 def define_material():
     # Define material properties.
-    mapdl.mp("EX", mat_num, 10.5E6)
+    mapdl.mp("EX", mat_num, 10.5e6)
     mapdl.mp("NUXY", mat_num, 0.3125)
     return mapdl.mplist()
+
 
 material_list = define_material()
 print(material_list)
@@ -144,6 +149,7 @@ def define_section():
     mapdl.sectype(secid=sec_num, type_="SHELL", name="shell181")
     mapdl.secdata(t, mat_num, 0, 5)
     return mapdl.slist()
+
 
 section_list = define_section()
 print(section_list)
@@ -172,16 +178,19 @@ def define_geometry():
 
     if elem_type == "SHELL181":
         # Plot the lines.
-        mapdl.lplot(color_lines=True, cpos='iso')
+        mapdl.lplot(color_lines=True, cpos="iso")
 
         # Plot the area using PyVista parameters.
-        mapdl.aplot(title="Display the selected area",
-                    cpos="iso",
-                    vtk=True,
-                    color="#06C2AC",
-                    show_line_numbering=True,
-                    show_area_numbering=True,
-                    show_lines=True)
+        mapdl.aplot(
+            title="Display the selected area",
+            cpos="iso",
+            vtk=True,
+            color="#06C2AC",
+            show_line_numbering=True,
+            show_area_numbering=True,
+            show_lines=True,
+        )
+
 
 define_geometry()
 
@@ -190,6 +199,7 @@ define_geometry()
 def keypoint_number(mapdl):
     keypoint_num = mapdl.queries.kp(4.953, 90, 0)
     return keypoint_num
+
 
 # Call the function to get the number of keypoint.
 top_keypoint = keypoint_number(mapdl)
@@ -204,7 +214,7 @@ print(f"The number of the keypoint where F is applied: {top_keypoint}")
 # Define mesh properties and create the mesh with shell elements.
 def meshing():
     # Specify the default number of line divisions.
-    mapdl.esize(size='', ndiv=8)
+    mapdl.esize(size="", ndiv=8)
 
     # Mesh the area.
     mapdl.amesh(1)
@@ -214,27 +224,27 @@ def meshing():
 
     if elem_type == "SHELL181":
         # Plot the mesh.
-        mapdl.eplot(title="Plot of the currently selected elements",
-                    vtk=True,
-                    cpos="iso",
-                    show_edges=True,
-                    edge_color="white",
-                    show_node_numbering=True,
-                    color="purple")
+        mapdl.eplot(
+            title="Plot of the currently selected elements",
+            vtk=True,
+            cpos="iso",
+            show_edges=True,
+            edge_color="white",
+            show_node_numbering=True,
+            color="purple",
+        )
 
     # Print the list of elements.
     print(mapdl.elist())
 
     # Plot the nodes using VTK.
-    mapdl.nplot(vtk=True,
-                nnum=True,
-                background="",
-                cpos="iso",
-                show_bounds=True,
-                point_size=10)
+    mapdl.nplot(
+        vtk=True, nnum=True, background="", cpos="iso", show_bounds=True, point_size=10
+    )
 
     # Print the list of nodes.
     print(mapdl.nlist())
+
 
 meshing()
 
@@ -255,6 +265,7 @@ def define_bc():
     mapdl.dsym("SYMM", "Z", 0)
     mapdl.nsel("ALL")
 
+
 define_bc()
 
 
@@ -272,6 +283,7 @@ def define_loads():
     mapdl.fk(top_keypoint, "FY", -force)
     mapdl.finish()
 
+
 define_loads()
 
 
@@ -280,11 +292,13 @@ define_loads()
 # ~~~~~
 # Enter solution mode and solve the system. Print the solver output.
 
+
 def solve_procedure():
     mapdl.run("/solu")
     out = mapdl.solve()
     mapdl.finish()
     return out
+
 
 simulation_info = solve_procedure()
 print(simulation_info)
@@ -301,6 +315,7 @@ def post_processing():
     mapdl.post1()
     mapdl.set(1)
 
+
 post_processing()
 
 
@@ -308,6 +323,7 @@ post_processing()
 # Plotting
 # ~~~~~~~~
 # Plot nodal displacement using PyVista.
+
 
 def plot_nodal_disp():
     mapdl.post_processing.plot_nodal_displacement(
@@ -317,8 +333,9 @@ def plot_nodal_disp():
         scalar_bar_args={"title": "Nodal Displacements", "vertical": True},
         show_node_numbering=True,
         show_axes=True,
-        show_edges=True
+        show_edges=True,
     )
+
 
 plot_nodal_disp()
 
@@ -328,6 +345,7 @@ plot_nodal_disp()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # To determine the radial displacement :math:`\delta` at the point
 # where F is applied, we can use :meth:`Mapdl.get_value <ansys.mapdl.core.Mapdl.get_value>`.
+
 
 def get_displacements():
     # Select keypoint by its number ``top_keypoint``.
@@ -340,17 +358,19 @@ def get_displacements():
     top_node = int(mapdl.get("_", "node", 0, "num", "max"))
 
     # Define radial displacement at the node where F is applied.
-    deflect_shell = mapdl.get_value(entity='node',
-                                    entnum=top_node,
-                                    item1='u',
-                                    it1num='y')
+    deflect_shell = mapdl.get_value(
+        entity="node", entnum=top_node, item1="u", it1num="y"
+    )
 
     return top_node, deflect_shell
 
+
 # Call the function and get the value of the deflection.
 top_node_181, deflect_shell_181 = get_displacements()
-print(f"Number of the node attached to the top keypoint: {top_node_181},\n"
-      f"Radial displacement: {(round(deflect_shell_181, 4))}")
+print(
+    f"Number of the node attached to the top keypoint: {top_node_181},\n"
+    f"Radial displacement: {(round(deflect_shell_181, 4))}"
+)
 
 
 ###############################################################################

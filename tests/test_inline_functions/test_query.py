@@ -60,8 +60,7 @@ class TestParseParameter:
 
 
 class TestRunQuery:
-
-    @pytest.mark.parametrize('command', [('KX(1)', float), ('KP(1,1,1)', int)])
+    @pytest.mark.parametrize("command", [("KX(1)", float), ("KP(1,1,1)", int)])
     def test_run_query_returned_type(self, line_geometry, command):
         q, kps, l0 = line_geometry
         cmd, type_ = command
@@ -79,7 +78,7 @@ class TestRunQuery:
     def test_nopr_mode(self, mapdl, line_geometry):
         try:
             # enter no printout mode
-            mapdl._run('/NOPR', mute=True)
+            mapdl._run("/NOPR", mute=True)
             assert mapdl.prep7() is None
 
             # verify that queries still work
@@ -87,4 +86,4 @@ class TestRunQuery:
             assert q.kx(2) == 1.0
         finally:
             # always return printing
-            mapdl._run('/GOPR', mute=True)
+            mapdl._run("/GOPR", mute=True)

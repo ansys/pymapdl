@@ -1,25 +1,27 @@
-from . import areas
-from . import artificially_matched_layers
-from . import booleans
-from . import constraint_equations
-from . import coupled_dof
-from . import database
-from . import digitizing
-from . import elements
-from . import element_type
-from . import explicit_dynamics
-from . import hard_points
-from . import keypoints
-from . import lines
-from . import material_data_tables
-from . import materials
-from . import meshing
-from . import morphing
-from . import nodes
-from . import primitives
-from . import real_constants
-from . import sections
-from . import special_purpose
-from . import status
-from . import superelements
-from . import volumes
+from . import (
+    areas,
+    artificially_matched_layers,
+    booleans,
+    constraint_equations,
+    coupled_dof,
+    database,
+    digitizing,
+    element_type,
+    elements,
+    explicit_dynamics,
+    hard_points,
+    keypoints,
+    lines,
+    material_data_tables,
+    materials,
+    meshing,
+    morphing,
+    nodes,
+    primitives,
+    real_constants,
+    sections,
+    special_purpose,
+    status,
+    superelements,
+    volumes,
+)

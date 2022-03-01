@@ -1,20 +1,25 @@
 """Contains the MapdlMath classes, allowing for math operations within
 MAPDL from Python.  """
-import os
-import weakref
-import string
-import random
 from enum import Enum
+import os
+import random
+import string
+import weakref
 
+from ansys.api.mapdl.v0 import (
+    ansys_kernel_pb2 as anskernel,
+    mapdl_pb2 as pb_types,
+)
 import numpy as np
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
-from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 
+from .check_version import VersionError, meets_version, version_requires
+from .common_grpc import (
+    ANSYS_VALUE_TYPE,
+    DEFAULT_CHUNKSIZE,
+    DEFAULT_FILE_CHUNK_SIZE,
+)
 from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc
-from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
-from .check_version import version_requires, meets_version, VersionError
-
 
 MYCTYPE = {
     np.int32: "I",

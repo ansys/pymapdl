@@ -3,10 +3,10 @@ from datetime import datetime
 import os
 import warnings
 
-import pyvista
 import numpy as np
-from sphinx_gallery.sorting import FileNameSortKey
 from pyansys_sphinx_theme import pyansys_logo_black
+import pyvista
+from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl.core import __version__
 
@@ -59,7 +59,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
-    'sphinxemoji.sphinxemoji',
+    "sphinxemoji.sphinxemoji",
 ]
 
 # Intersphinx mapping
@@ -183,8 +183,13 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, f"pymapdl-Documentation-{__version__}.tex",
-     "ansys.mapdl.core Documentation", author, "manual"),
+    (
+        master_doc,
+        f"pymapdl-Documentation-{__version__}.tex",
+        "ansys.mapdl.core Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 

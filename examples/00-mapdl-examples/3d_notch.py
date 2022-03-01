@@ -11,9 +11,11 @@ notches in a finite width thin plate
 
 First, start MAPDL as a service and disable all but error messages.
 """
+from matplotlib import pyplot as plt
+
 # sphinx_gallery_thumbnail_number = 3
 import numpy as np
-from matplotlib import pyplot as plt
+
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl(loglevel="ERROR")
@@ -269,9 +271,10 @@ RUN_BATCH = False
 
 # The function to compute the batch analysis is the following:
 
+
 def compute_stress_con(ratio):
 
-    notch_depth = ratio*width/2
+    notch_depth = ratio * width / 2
 
     mapdl.clear()
     mapdl.prep7()
@@ -310,10 +313,15 @@ def compute_stress_con(ratio):
     for line in [7, 8, 20, 21]:
         mapdl.lsel("A", "LINE", vmin=line, vmax=line)
 
-    mapdl.ksel('NONE')
-    mapdl.ksel('S', 'LOC', 'X', length/2 - notch_radius * 1.1,
-               length/2 + notch_radius*1.1)
-    mapdl.lslk('S', 1)
+    mapdl.ksel("NONE")
+    mapdl.ksel(
+        "S",
+        "LOC",
+        "X",
+        length / 2 - notch_radius * 1.1,
+        length / 2 + notch_radius * 1.1,
+    )
+    mapdl.lslk("S", 1)
     mapdl.lesize("ALL", notch_esize, kforc=1)
     mapdl.lsel("ALL")
 
@@ -381,10 +389,10 @@ def compute_stress_con(ratio):
 if RUN_BATCH:
     k_t_exp = []
     ratios = np.linspace(0.05, 0.75, 9)
-    print('    Ratio  : Stress Concentration (K_t)')
+    print("    Ratio  : Stress Concentration (K_t)")
     for ratio in ratios:
         stress_con = compute_stress_con(ratio)
-        print('%10.4f : %10.4f' % (ratio, stress_con))
+        print("%10.4f : %10.4f" % (ratio, stress_con))
         k_t_exp.append(stress_con)
 
 
@@ -423,35 +431,36 @@ if RUN_BATCH:
 #
 # These formulas are converted in the following function:
 
+
 def calc_teor_notch(ratio):
-    notch_depth = ratio*width/2
+    notch_depth = ratio * width / 2
     h = notch_depth
     r = notch_radius
     D = width
 
-    if 0.1 <= h/r <= 2.0:
-        c1 = 0.85 + 2.628*(h/r)**0.5 - 0.413*h/r
-        c2 = -1.119 - 4.826*(h/r)**0.5 + 2.575*h/r
-        c3 = 3.563 - 0.514*(h/r)**0.5 - 2.402*h/r
-        c4 = -2.294 + 2.713*(h/r)**0.5 + 0.240*h/r
-    elif 2.0 <= h/r <= 50.0:
-        c1 = 0.833 + 2.069*(h/r)**0.5 - 0.009*h/r
-        c2 = 2.732 - 4.157 * (h/r)**0.5 + 0.176*h/r
-        c3 = -8.859 + 5.327*(h/r)**0.5 - 0.32*h/r
-        c4 = 6.294 - 3.239*(h/r)**0.5 + 0.154*h/r
+    if 0.1 <= h / r <= 2.0:
+        c1 = 0.85 + 2.628 * (h / r) ** 0.5 - 0.413 * h / r
+        c2 = -1.119 - 4.826 * (h / r) ** 0.5 + 2.575 * h / r
+        c3 = 3.563 - 0.514 * (h / r) ** 0.5 - 2.402 * h / r
+        c4 = -2.294 + 2.713 * (h / r) ** 0.5 + 0.240 * h / r
+    elif 2.0 <= h / r <= 50.0:
+        c1 = 0.833 + 2.069 * (h / r) ** 0.5 - 0.009 * h / r
+        c2 = 2.732 - 4.157 * (h / r) ** 0.5 + 0.176 * h / r
+        c3 = -8.859 + 5.327 * (h / r) ** 0.5 - 0.32 * h / r
+        c4 = 6.294 - 3.239 * (h / r) ** 0.5 + 0.154 * h / r
 
-    return c1 + c2*(2*h/D) + c3*(2*h/D)**2 + c4*(2*h/D)**3
+    return c1 + c2 * (2 * h / D) + c3 * (2 * h / D) ** 2 + c4 * (2 * h / D) ** 3
 
 
 ###############################################################################
 # which is used later to calculate the concentration factor for the given ratios:
 
 if RUN_BATCH:
-    print('    Ratio  : Stress Concentration (K_t)')
+    print("    Ratio  : Stress Concentration (K_t)")
     k_t_anl = []
     for ratio in ratios:
         stress_con = calc_teor_notch(ratio)
-        print('%10.4f : %10.4f' % (ratio, stress_con))
+        print("%10.4f : %10.4f" % (ratio, stress_con))
         k_t_anl.append(stress_con)
 
 
@@ -465,8 +474,8 @@ if RUN_BATCH:
 # height and width of the plate.
 
 if RUN_BATCH:
-    plt.plot(ratios, k_t_anl, label=r'$K_t$ Analytical')
-    plt.plot(ratios, k_t_exp, label=r'$K_t$ ANSYS')
+    plt.plot(ratios, k_t_anl, label=r"$K_t$ Analytical")
+    plt.plot(ratios, k_t_exp, label=r"$K_t$ ANSYS")
     plt.legend()
     plt.show()
 

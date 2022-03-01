@@ -33,11 +33,13 @@ Problem Figure
 
 """
 
+import matplotlib.pyplot as plt
+
 ###############################################################################
 # Launch MAPDL
 # ~~~~~~~~~~~~
 import numpy as np
-import matplotlib.pyplot as plt
+
 from ansys.mapdl.core import launch_mapdl
 
 # start mapdl
@@ -144,7 +146,7 @@ for esize in esizes:
     dof, eqv_stress = pipe_plane_strain(e, nu, rad1, rad2, pressure, esize)
     num_dof.append(dof)
     max_stress.append(eqv_stress)
-    print(f'DOF: {dof:5d}   Stress: {eqv_stress:.2f} MPa')
+    print(f"DOF: {dof:5d}   Stress: {eqv_stress:.2f} MPa")
 
 
 ###############################################################################
@@ -152,20 +154,23 @@ for esize in esizes:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Draw a dotted line showing the convergence value
 
-plt.plot(num_dof, max_stress, 'b-o')
-plt.plot([num_dof[0], num_dof[-1]], [max_stress[-1], max_stress[-1]], 'r:')
-plt.title('Mesh Convergence Study')
-plt.xlabel('Number of DOF')
-plt.ylabel('Maximum eqv. Stress (MPa)')
+plt.plot(num_dof, max_stress, "b-o")
+plt.plot([num_dof[0], num_dof[-1]], [max_stress[-1], max_stress[-1]], "r:")
+plt.title("Mesh Convergence Study")
+plt.xlabel("Number of DOF")
+plt.ylabel("Maximum eqv. Stress (MPa)")
 plt.show()
 
 ###############################################################################
 # Resume results from last analysis from mesh convergence study
 
 # Plot the final mesh used
-mapdl.allsel('ALL')
+mapdl.allsel("ALL")
 mapdl.eplot(
-    title='Element Plot', line_width=1, show_bounds=True, cpos="xy",
+    title="Element Plot",
+    line_width=1,
+    show_bounds=True,
+    cpos="xy",
 )
 
 ###############################################################################
@@ -176,7 +181,9 @@ mapdl.post1()
 mapdl.set(1, 1)
 
 mapdl.post_processing.plot_nodal_displacement(
-    'NORM', cpos="xy", cmap="magma",
+    "NORM",
+    cpos="xy",
+    cmap="magma",
 )
 
 ###############################################################################

@@ -1,8 +1,8 @@
 """loads a list of verification files
 """
 import glob
-import os
 import inspect
+import os
 
 module_path = os.path.dirname(inspect.getfile(inspect.currentframe()))
 

@@ -1,15 +1,15 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+import os
 import time
 import weakref
-import os
-import numpy as np
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.reader.mesh import Mesh
+import numpy as np
 
-from ansys.mapdl.core.misc import threaded, supress_logging
+from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.common_grpc import parse_chunks, DEFAULT_CHUNKSIZE
+from ansys.mapdl.core.misc import supress_logging, threaded
 
 TMP_NODE_CM = "__NODE__"
 

@@ -83,6 +83,7 @@ mapdl.prep7(mute=True)
 # ``create_node_method`` to calculate and plot the distances between keypoints
 # and nodes.
 
+
 class Create:
     def __init__(self, p1, p2):
         # Points Attributes.
@@ -99,11 +100,13 @@ class Create:
         dist_kp, kx, ky, kz = mapdl.kdist(kp1, kp2)
 
         # Plot keypoints.
-        mapdl.kplot(show_keypoint_numbering=True,
-                    vtk=True,
-                    background="grey",
-                    show_bounds=True,
-                    font_size=26)
+        mapdl.kplot(
+            show_keypoint_numbering=True,
+            vtk=True,
+            background="grey",
+            show_bounds=True,
+            font_size=26,
+        )
         return dist_kp
 
     def node_distances(self):
@@ -116,11 +119,7 @@ class Create:
         dist_node, node_x, node_y, node_z = mapdl.ndist(node1, node2)
 
         # Plot nodes.
-        mapdl.nplot(nnum=True,
-                    vtk=True,
-                    color="grey",
-                    show_bounds=True,
-                    font_size=26)
+        mapdl.nplot(nnum=True, vtk=True, color="grey", show_bounds=True, font_size=26)
         return dist_node
 
     @property
@@ -135,7 +134,9 @@ class Create:
             raise ValueError("The coordinates should be implemented by the list!")
         # Check the quantity of items:
         if len(new_value) != 3:
-            raise ValueError("The coordinates should have three items in the list as [X, Y, Z]")
+            raise ValueError(
+                "The coordinates should have three items in the list as [X, Y, Z]"
+            )
         self._p1 = new_value
 
     @property
@@ -149,7 +150,9 @@ class Create:
             raise ValueError("The coordinates should be implemented by the list!")
         # Check the quantity of items:
         if len(new_value) != 3:
-            raise ValueError("The coordinates should have three items in the list as [X, Y, Z]")
+            raise ValueError(
+                "The coordinates should have three items in the list as [X, Y, Z]"
+            )
         self._p2 = new_value
 
 
@@ -204,13 +207,10 @@ print(mapdl.nlist())
 # with following settings below:
 
 # Define the names of the rows.
-row_names = ["N1 - N2 distance (LEN2)",
-             "K3 - K4 distance (LEN1)"]
+row_names = ["N1 - N2 distance (LEN2)", "K3 - K4 distance (LEN1)"]
 
 # Define the names of the columns.
-col_names = ['Target',
-             'Mechanical APDL',
-             'RATIO']
+col_names = ["Target", "Mechanical APDL", "RATIO"]
 
 # Define the values of the target results.
 target_res = np.asarray([8.5849, 305.16])
@@ -222,7 +222,7 @@ simulation_res = np.asarray([node_dist, kp_dist])
 main_columns = {
     "Target": target_res,
     "Mechanical APDL": simulation_res,
-    "Ratio": list(np.divide(simulation_res, target_res))
+    "Ratio": list(np.divide(simulation_res, target_res)),
 }
 
 # Create and fill the output dataframe with pandas.

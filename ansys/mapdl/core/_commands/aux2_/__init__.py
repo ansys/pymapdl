@@ -1,2 +1,1 @@
-from . import bin_dump
-from . import bin_manip
+from . import bin_dump, bin_manip

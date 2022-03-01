@@ -1,9 +1,9 @@
 """Contains the ansXpl class"""
-import weakref
 import json
+import weakref
 
-import numpy as np
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 

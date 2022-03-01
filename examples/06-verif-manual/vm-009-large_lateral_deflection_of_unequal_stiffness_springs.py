@@ -195,7 +195,7 @@ node_y_coord = [0, 10, 20, 10, 9]
 
 # Create nodes.
 for i in range(0, 5):
-    mapdl.n(node=i+1, x=node_x_coord[i], y=node_y_coord[i])
+    mapdl.n(node=i + 1, x=node_x_coord[i], y=node_y_coord[i])
 
 # Print the list of the created nodes.
 print(mapdl.nlist())
@@ -319,26 +319,17 @@ mapdl.etable("SENE", "SENE")
 mapdl.ssum()
 
 # Get the value of the stain energy of the spring elements.
-strain_energy = mapdl.get_value(entity="SSUM",
-                                entnum=0,
-                                item1="ITEM",
-                                it1num="SENE")
+strain_energy = mapdl.get_value(entity="SSUM", entnum=0, item1="ITEM", it1num="SENE")
 
 # Prints nodal solution results of the X, Y, and Z structural displacements
 # and vector sum.
 print(mapdl.prnsol("U", "COMP"))
 
 # Get the value of the displacements in X-direction.
-disp_x = mapdl.get_value(entity="NODE",
-                         entnum=2,
-                         item1="U",
-                         it1num="X")
+disp_x = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="X")
 
 # Get the value of the displacements in Y-direction.
-disp_y = mapdl.get_value(entity="NODE",
-                         entnum=2,
-                         item1="U",
-                         it1num="Y")
+disp_y = mapdl.get_value(entity="NODE", entnum=2, item1="U", it1num="Y")
 
 
 ###############################################################################
@@ -356,14 +347,10 @@ disp_y = mapdl.get_value(entity="NODE",
 # with following settings below:
 
 # Define the names of the rows.
-row_names = ["Strain Energy, N-cm",
-             "Deflection-x , cm",
-             "Deflection-y , cm"]
+row_names = ["Strain Energy, N-cm", "Deflection-x , cm", "Deflection-y , cm"]
 
 # Define the names of the columns.
-col_names = ['Target',
-             'Mechanical APDL',
-             'RATIO']
+col_names = ["Target", "Mechanical APDL", "RATIO"]
 
 # Define the values of the target results.
 target_res = np.asarray([24.01, 8.631, 4.533])
@@ -375,7 +362,7 @@ simulation_res = np.asarray([strain_energy, disp_x, disp_y])
 main_columns = {
     "Target": target_res,
     "Mechanical APDL": simulation_res,
-    "Ratio": list(np.divide(simulation_res, target_res))
+    "Ratio": list(np.divide(simulation_res, target_res)),
 }
 
 # Create and fill the output dataframe with pandas.

@@ -108,15 +108,15 @@ these loggers.
 
 """
 
-import weakref
-import logging
-from datetime import datetime
-import sys
 from copy import copy
+from datetime import datetime
+import logging
+import sys
+import weakref
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
-FILE_NAME = 'pymapdl.log'
+FILE_NAME = "pymapdl.log"
 
 # For convenience
 DEBUG = logging.DEBUG
@@ -127,7 +127,9 @@ CRITICAL = logging.CRITICAL
 
 ## Formatting
 
-STDOUT_MSG_FORMAT = '%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s'
+STDOUT_MSG_FORMAT = (
+    "%(levelname)s - %(instance_name)s -  %(module)s - %(funcName)s - %(message)s"
+)
 
 FILE_MSG_FORMAT = STDOUT_MSG_FORMAT
 
@@ -142,12 +144,12 @@ NEW_SESSION_HEADER = f"""
 ==============================================================================="""
 
 string_to_loglevel = {
-    'DEBUG': DEBUG,
-    'INFO': INFO,
-    'WARN': WARN,
-    'WARNING': WARN,
-    'ERROR': ERROR,
-    'CRITICAL': CRITICAL,
+    "DEBUG": DEBUG,
+    "INFO": INFO,
+    "WARN": WARN,
+    "WARNING": WARN,
+    "ERROR": ERROR,
+    "CRITICAL": CRITICAL,
 }
 
 
@@ -176,9 +178,13 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         self.std_out_handler = logger.std_out_handler
 
     def process(self, msg, kwargs):
-        kwargs['extra'] = {}
+        kwargs["extra"] = {}
         # This are the extra parameters sent to log
-        kwargs['extra']['instance_name'] = self.extra.get_name()  # here self.extra is the argument pass to the log records.
+        kwargs["extra"][
+            "instance_name"
+        ] = (
+            self.extra.get_name()
+        )  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
@@ -192,7 +198,9 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
             Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
         """
 
-        self.logger = addfile_handler(self.logger, filename=filename, level=level, write_headers=True)
+        self.logger = addfile_handler(
+            self.logger, filename=filename, level=level, write_headers=True
+        )
         self.file_handler = self.logger.file_handler
 
     def log_to_stdout(self, level=LOG_LEVEL):
@@ -204,12 +212,12 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
             Level of logging record. By default LOG_LEVEL
         """
         if self.std_out_handler:
-            raise Exception('Stdout logger already defined.')
+            raise Exception("Stdout logger already defined.")
 
         self.logger = add_stdout_handler(self.logger, level=level)
         self.std_out_handler = self.logger.std_out_handler
 
-    def setLevel(self, level='DEBUG'):
+    def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
@@ -218,7 +226,6 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
 
 class PymapdlPercentStyle(logging.PercentStyle):
-
     def __init__(self, fmt, *, defaults=None):
         self._fmt = fmt or self.default_format
         self._defaults = defaults
@@ -238,7 +245,7 @@ class PymapdlPercentStyle(logging.PercentStyle):
         # the same MSG_FORMAT for all of them.
 
         # For the case of logging exceptions to the logger.
-        values.setdefault('instance_name', '')
+        values.setdefault("instance_name", "")
 
         return STDOUT_MSG_FORMAT % values
 
@@ -246,8 +253,14 @@ class PymapdlPercentStyle(logging.PercentStyle):
 class PymapdlFormatter(logging.Formatter):
     """Customized ``Formatter`` class used to overwrite the defaults format styles."""
 
-    def __init__(self, fmt=STDOUT_MSG_FORMAT, datefmt=None, style='%',
-                 validate=True, defaults=None):
+    def __init__(
+        self,
+        fmt=STDOUT_MSG_FORMAT,
+        datefmt=None,
+        style="%",
+        validate=True,
+        defaults=None,
+    ):
         if sys.version_info[1] < 8:
             super().__init__(fmt, datefmt, style)
         else:
@@ -260,12 +273,12 @@ class InstanceFilter(logging.Filter):
     """Ensures that instance_name record always exists."""
 
     def filter(self, record):
-        if not hasattr(record, 'instance_name'):
-            record.instance_name = ''
+        if not hasattr(record, "instance_name"):
+            record.instance_name = ""
         return True
 
 
-class Logger():
+class Logger:
     """Logger used for each Pymapdl session.
 
     This class allows you to add handlers to the logger to output to a file or
@@ -309,8 +322,9 @@ class Logger():
     _level = logging.DEBUG
     _instances = {}
 
-    def __init__(self, level=logging.DEBUG, to_file=False,
-                 to_stdout=True, filename=FILE_NAME):
+    def __init__(
+        self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME
+    ):
         """Customized logger class for Pymapdl.
 
         Parameters
@@ -327,11 +341,11 @@ class Logger():
         """
 
         # create default main logger
-        self.logger = logging.getLogger('pymapdl_global')
+        self.logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
         self.logger.setLevel(level)
         self.logger.propagate = True
-        self.level = self.logger.level # TODO: TO REMOVE
+        self.level = self.logger.level  # TODO: TO REMOVE
 
         # Writing logging methods.
         self.debug = self.logger.debug
@@ -386,7 +400,7 @@ class Logger():
 
         self = add_stdout_handler(self, level=level)
 
-    def setLevel(self, level='DEBUG'):
+    def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
@@ -453,7 +467,7 @@ class Logger():
         logging.logger
             Logger class.
         """
-        name = self.logger.name + '.' + sufix
+        name = self.logger.name + "." + sufix
         self._instances[name] = self._make_child_logger(self, name, level)
         return self._instances[name]
 
@@ -502,7 +516,7 @@ class Logger():
         new_name = name
         while new_name in logging.root.manager.__dict__.keys():
             count_ += 1
-            new_name = name + '_' + str(count_)
+            new_name = name + "_" + str(count_)
 
         self._instances[new_name] = self._add_mapdl_instance_logger(
             new_name, mapdl_instance, level
@@ -517,11 +531,15 @@ class Logger():
 
     def add_handling_uncaught_expections(self, logger):
         """This just redirect the output of an exception to the logger."""
+
         def handle_exception(exc_type, exc_value, exc_traceback):
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
-            logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+            logger.critical(
+                "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+            )
+
         sys.excepthook = handle_exception
 
 
