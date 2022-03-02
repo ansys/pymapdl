@@ -3,20 +3,28 @@ repos:
   rev: 22.1.0
   hooks:
   - id: black
-    exclude: "^({{cookiecutter.project_slug}}/)"
+
 - repo: https://github.com/pycqa/isort
   rev: 5.10.1
   hooks:
   - id: isort
+    args: [
+    "--profile", "black",
+    "--force-sort-within-sections",
+    "--skip-glob", "femorph/__init__.py",
+    ]
+
 - repo: https://gitlab.com/PyCQA/flake8
   rev: 3.9.2
   hooks:
   - id: flake8
-    exclude: "^({{cookiecutter.project_slug}}/)"
+
 - repo: https://github.com/codespell-project/codespell
   rev: v2.1.0
   hooks:
   - id: codespell
+
+# add this eventually
 # - repo: https://github.com/pycqa/pydocstyle
 #   rev: 6.1.1
 #   hooks:
