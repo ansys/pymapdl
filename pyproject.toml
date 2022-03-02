@@ -25,7 +25,7 @@ dependencies = [
     "importlib-metadata >=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0",
-    "pexpect>=4.8.0 ; platform_system=='Linux;",
+    "pexpect>=4.8.0 ; platform_system=='Linux'",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "pyiges>=0.1.4",
     "pyvista>=0.33.0",
@@ -43,7 +43,7 @@ classifiers = [
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.10",  # requires custom VTK wheels
 ]
 
 [tool.flit.module]

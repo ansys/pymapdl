@@ -1,4 +1,0 @@
-codespell==2.1.0
-flake8==4.0.1
-
-

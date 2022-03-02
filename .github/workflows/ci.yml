@@ -16,27 +16,20 @@ env:
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
 
 jobs:
-  stylecheck:
-    name: Style Check
-    runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
+  steps:
+    - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2.1.4
-        with:
-          python-version: 3.8
+    - name: Setup Python
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: 3.9
 
-      - name: Style
-        run: |
-          pip install -r requirements_style.txt --disable-pip-version-check
-          make
+    - name: Install pre-commit
+      run: pip install pre-commit
 
-      - name: flake8
-        if: always()
-        run: |
-          make flake8
+    - name: Run pre-commit
+      run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
 
   testimport:
     name: Smoke Tests
@@ -59,7 +52,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -68,7 +61,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         with:
           path: ~\AppData\Local\pip\Cache
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests*.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -111,7 +104,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -122,10 +115,9 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py bdist_wheel
+          pip install build
+          python -m build
           pip install dist/ansys*.whl
-          cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
@@ -138,7 +130,7 @@ jobs:
   
       - name: Build Documentation
         run: |
-          pip install -r requirements_docs.txt
+          pip install -r requirements/requirements_docs.txt
           xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       # Verify that sphinx generates no warnings
@@ -203,7 +195,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -214,9 +206,8 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py sdist
-          python setup.py bdist_wheel
+          pip install build
+          python -m build
           pip install dist/*.whl
           cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"

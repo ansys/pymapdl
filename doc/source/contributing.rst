@@ -20,6 +20,7 @@ Run this code to clone and install the latest version of PyMAPDL in development 
 
     git clone https://github.com/pyansys/pymapdl
     cd pymapdl
+    pip install pip -U
     pip install -e .
 
 

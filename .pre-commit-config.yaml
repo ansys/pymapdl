@@ -11,9 +11,8 @@ repos:
     args: [
     "--profile", "black",
     "--force-sort-within-sections",
-    "--skip-glob", "femorph/__init__.py",
+    "--skip-glob", "*__init__.py",
     ]
-
 - repo: https://gitlab.com/PyCQA/flake8
   rev: 3.9.2
   hooks:
