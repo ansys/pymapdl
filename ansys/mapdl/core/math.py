@@ -1337,7 +1337,21 @@ class AnsMat(ApdlMathObj):
 
     def sym(self):  # BUG this is not always true
         """Return if matrix is symmetric."""
-        return True
+
+        info = self._mapdl._data_info(self.id)
+
+        if version_requires((0, 4, 2)):
+             if   info.mattype == 0: # UPPER
+                 return True
+             elif info.mattype == 1: # LOWER
+                 return True
+             elif info.mattype == 2: # DIAG
+                 return True
+
+             return False
+        else:
+            warnings.warn("Call to sym() function may return a bad value.")
+            return True
 
     def asarray(self) -> np.ndarray:
         """Returns vector as a numpy array.
