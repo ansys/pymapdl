@@ -18,12 +18,7 @@ from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import (
-    create_temp_dir,
-    is_float,
-    random_string,
-    threaded,
-)
+from ansys.mapdl.core.misc import create_temp_dir, is_float, random_string, threaded
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")

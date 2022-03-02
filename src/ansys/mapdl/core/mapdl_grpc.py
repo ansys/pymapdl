@@ -38,11 +38,9 @@ If this does not solve it, please reinstall 'ansys.mapdl.core'.
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
 try:
-    from ansys.api.mapdl.v0 import (
-        ansys_kernel_pb2 as anskernel,
-        mapdl_pb2 as pb_types,
-        mapdl_pb2_grpc as mapdl_grpc,
-    )
+    from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+    from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+    from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
 
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
@@ -57,11 +55,7 @@ from ansys.mapdl.core.common_grpc import (
     DEFAULT_FILE_CHUNK_SIZE,
     parse_chunks,
 )
-from ansys.mapdl.core.errors import (
-    MapdlExitedError,
-    MapdlRuntimeError,
-    protect_grpc,
-)
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import (
     last_created,
