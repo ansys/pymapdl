@@ -5,11 +5,7 @@ from pyvista import Plotter
 from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.post import (
-    COMPONENT_STRESS_TYPE,
-    PRINCIPAL_TYPE,
-    STRESS_TYPES,
-)
+from ansys.mapdl.core.post import COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
 
 # must be run first before loading a result
 # since MAPDL may be on a remote windows machine, cannot test

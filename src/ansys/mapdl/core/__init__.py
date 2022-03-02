@@ -14,8 +14,14 @@ _LOCAL_PORTS = []
 # Per contract with Sphinx-Gallery, this method must be available at top level
 from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
 
+try:
+    import importlib.metadata as importlib_metadata
+except ModuleNotFoundError:  # pragma: no cover
+    import importlib_metadata
+
+__version__ = importlib_metadata.version(__name__.replace(".", "-"))
+
 from ansys.mapdl.core import examples
-from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import (
     change_default_ansys_path,
