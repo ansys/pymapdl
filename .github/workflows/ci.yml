@@ -17,19 +17,18 @@ env:
 
 jobs:
 
-  steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup Python
-      uses: actions/setup-python@v2.2.2
-      with:
-        python-version: 3.9
-
-    - name: Install pre-commit
-      run: pip install pre-commit
-
-    - name: Run pre-commit
-      run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
+  stylecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: 3.9
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
 
   testimport:
     name: Smoke Tests
@@ -209,7 +208,6 @@ jobs:
           pip install build
           python -m build
           pip install dist/*.whl
-          cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
@@ -222,7 +220,7 @@ jobs:
 
       - name: Unit Testing
         run: |
-          pip install -r requirements_test.txt
+          pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v2
