@@ -1,5 +1,4 @@
-"""
-.. _ref_dynamic_simulation_printed_circuit_board:
+""".. _ref_dynamic_simulation_printed_circuit_board:
 
 Dynamic simulation of a printed circuit board assembly
 --------------------------------------------
@@ -177,7 +176,7 @@ mapdl.psdres("velo", "abs")
 # write the absolute acceleration solution to the results file from the PSD analysis
 mapdl.psdres("acel", "abs")
 # combine only those modes whose significance level exceeds 0.0001
-mapdl.psdcom
+mapdl.psdcom()
 mapdl.solve()
 
 
