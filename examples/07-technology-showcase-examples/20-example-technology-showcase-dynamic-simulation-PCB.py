@@ -211,7 +211,7 @@ mapdl.gropt('logy', 1)
 mapdl.plvar(3)
 mapdl.show('close')
 
-# Using python librairies to construct plots
+# Using python libraries to construct plots
 # store MAPDL results to python variables
 mapdl.dim('frequencies', 'array', 4000, 1)
 mapdl.dim('response', 'array', 4000, 1)
