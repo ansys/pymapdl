@@ -945,7 +945,7 @@ class _MapdlCore(Commands):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            return general_plotter([], points, labels, **kwargs)
+            return general_plotter([], points, labels, mapdl=self, **kwargs)
 
         # otherwise, use the built-in nplot
         if isinstance(nnum, bool):
@@ -2810,7 +2810,7 @@ class _MapdlCore(Commands):
         """
         loads = self.flist().to_list()
         if label:
-            loads = np.array([list(each[0], each[2], each[3]) for each in loads if each[1] == label])
+            loads = np.array([[each[0], each[2], each[3]] for each in loads if each[1] == label])
         return loads
 
     def get_nodal_constrains(self, label=None):
@@ -2833,5 +2833,5 @@ class _MapdlCore(Commands):
         """
         constrains = self.dlist().to_list()
         if label:
-            constrains = np.array([list(each[0], each[2], each[3]) for each in constrains if each[1] == label])
+            constrains = np.array([[each[0], each[2], each[3]] for each in constrains if each[1] == label])
         return constrains
