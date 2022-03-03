@@ -1,5 +1,6 @@
-from ansys.mapdl.core.inline_functions import SelectionStatus
 import pytest
+
+from ansys.mapdl.core.inline_functions import SelectionStatus
 
 
 class TestSelectionStatus:

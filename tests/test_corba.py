@@ -6,14 +6,14 @@ This has been copied from test_mapdl.py
 import os
 import time
 
+from ansys.mapdl.reader import examples
 import numpy as np
 import pytest
 import pyvista
+from pyvista.plotting import system_supports_plotting
+
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.reader import examples
-from pyvista.plotting import system_supports_plotting
-from pyvista.plotting.renderer import CameraPosition
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -209,7 +209,7 @@ def test_kplot(cleared, mapdl_corba, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_corba.kplot(savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl_corba.kplot(knum=True, vtk=False)  # make sure legacy still works
@@ -292,7 +292,7 @@ def test_lplot(cleared, mapdl_corba, tmpdir):
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl_corba.lplot(show_keypoint_numbering=True, savefig=filename)
-    assert isinstance(cpos, CameraPosition)
+    assert cpos is None
     assert os.path.isfile(filename)
 
     mapdl_corba.lplot(vtk=False)  # make sure legacy still works

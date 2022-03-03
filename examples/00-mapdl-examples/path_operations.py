@@ -12,9 +12,9 @@ First, start MAPDL as a service and disable all but error messages.
 """
 # sphinx_gallery_thumbnail_number = 3
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -26,9 +26,9 @@ mapdl = launch_mapdl(loglevel="ERROR")
 # Create a beam, apply a load, and solve for the static solution.
 
 # beam dimensions
-_width = 0.5
-_height = 2
-_length = 10
+width_ = 0.5
+height_ = 2
+length_ = 10
 
 # simple 3D beam
 mapdl.clear()
@@ -36,7 +36,7 @@ mapdl.prep7()
 mapdl.mp("EX", 1, 70000)
 mapdl.mp("NUXY", 1, 0.3)
 mapdl.csys(0)
-mapdl.blc4(0, 0, 0.5, 2, _length)
+mapdl.blc4(0, 0, 0.5, 2, length_)
 mapdl.et(1, "SOLID186")
 mapdl.type(1)
 mapdl.keyopt(1, 2, 1)
@@ -52,7 +52,7 @@ mapdl.d("all", "uy", 0)
 mapdl.d("all", "uz", 0)
 
 # arbitrary non-uniform load
-mapdl.nsel("s", "loc", "z", _length)
+mapdl.nsel("s", "loc", "z", length_)
 mapdl.f("all", "fz", 1)
 mapdl.f("all", "fy", 10)
 mapdl.nsel("r", "loc", "y", 0)
@@ -76,15 +76,15 @@ mapdl.set(1, 1)
 # mapdl.plesol("s", "int")
 
 # path definition
-pl_end = (0.5 * _width, _height, 0.5 * _length)
-pl_start = (0.5 * _width, 0, 0.5 * _length)
+pl_end = (0.5 * width_, height_, 0.5 * length_)
+pl_start = (0.5 * width_, 0, 0.5 * length_)
 
-mapdl.run("_width = %f" % _width)
-mapdl.run("_height = %f" % _height)
-mapdl.run("_length = %f" % _length)
+mapdl.run("width_ = %f" % width_)
+mapdl.run("height_ = %f" % height_)
+mapdl.run("length_ = %f" % length_)
 
-mapdl.run("pl_end = node(0.5*_width, _height, 0.5*_length)")
-mapdl.run("pl_start = node(0.5*_width, 0, 0.5*_length)")
+mapdl.run("pl_end = node(0.5*width_, height_, 0.5*length_)")
+mapdl.run("pl_start = node(0.5*width_, 0, 0.5*length_)")
 mapdl.path("my_path", 2, ndiv=100)
 mapdl.ppath(1, "pl_start")
 mapdl.ppath(2, "pl_end")
@@ -177,13 +177,25 @@ stress_slice = rst.grid.slice("z", pl_start)
 
 # good camera position (determined manually using pl.camera_position)
 cpos = [(3.2, 4, 8), (0.25, 1.0, 5.0), (0.0, 0.0, 1.0)]
-max_ = np.max((out["Stress YZ"].max(), stress_slice['Stress YZ'].max()))
-min_ = np.min((out["Stress YZ"].min(), stress_slice['Stress YZ'].min()))
+max_ = np.max((out["Stress YZ"].max(), stress_slice["Stress YZ"].max()))
+min_ = np.min((out["Stress YZ"].min(), stress_slice["Stress YZ"].min()))
 clim = [min_, max_]
 
 pl = pv.Plotter()
-pl.add_mesh(out, scalars=out["Stress YZ"], line_width=10, clim=clim, scalar_bar_args={'title': 'Stress YZ'})
-pl.add_mesh(stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False)
+pl.add_mesh(
+    out,
+    scalars=out["Stress YZ"],
+    line_width=10,
+    clim=clim,
+    scalar_bar_args={"title": "Stress YZ"},
+)
+pl.add_mesh(
+    stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False
+)
 pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
 _ = pl.show()
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

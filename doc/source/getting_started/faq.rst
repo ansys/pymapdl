@@ -30,17 +30,17 @@ vary those parameters and batch your solutions.
 
 The main advantages that PyAnsys has over Ansys ACT are:
 
- * Tight integration with python tools and open source modules
-   alongside Ansys software.
- * Scripts are written in python. ACT uses .net and you can call
-   IronPython, and potentially other tools available within Ansys
-   Mechanical.
- * Being outside of Ansys Mechanical means that you can call our
-   application workflow without opening up the GUI for user
-   interaction. Should you desire a GUI, you can create your own via
-   PyQt, or just output plots via matplotlib or vtk.
- * It is compatible with modern Python (3), whereas ACT is only
-   compatible with IronPython (Python 2)
+* Tight integration with python tools and open source modules
+  alongside Ansys software.
+* Scripts are written in python. ACT uses .net and you can call
+  IronPython, and potentially other tools available within Ansys
+  Mechanical.
+* Being outside of Ansys Mechanical means that you can call our
+  application workflow without opening up the GUI for user
+  interaction. Should you desire a GUI, you can create your own via
+  PyQt, or just output plots via matplotlib or vtk.
+* It is compatible with modern Python (3), whereas ACT is only
+  compatible with IronPython (Python 2)
 
 The best approach will depend on your workflow needs and how you'd
 like to develop software.

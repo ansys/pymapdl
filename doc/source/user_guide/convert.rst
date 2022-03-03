@@ -39,8 +39,7 @@ using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` with:
 
 Script Translation
 ~~~~~~~~~~~~~~~~~~
-Existing ANSYS scripts can be translated using :func:`convert_script()
-<ansys.mapdl.core.convert_script>`
+Existing ANSYS scripts can be translated using :func:`convert_script() <ansys.mapdl.core.convert_script>`
 
 .. code:: python
 
@@ -50,7 +49,7 @@ Existing ANSYS scripts can be translated using :func:`convert_script()
     pymapdl.convert_script(inputfile, pyscript)
 
 Or additionally, you can convert code in form of strings for later processing
-using :func:`convert_apdl_block() <ansys.mapdl.core.convert.convert_apdl_block>`:
+using :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` :
 
 .. code:: python
 
@@ -62,6 +61,13 @@ using :func:`convert_apdl_block() <ansys.mapdl.core.convert.convert_apdl_block>`
     N,,0,0,1
     FINISH"""
     pycode = convert_apdl_block(apdl_string) # apdl_string can be also a list of strings.
+
+
+The script conversion functions allows some interesting arguments which can be seen in
+their respective function documentation, :func:`convert_script() <ansys.mapdl.core.convert_script>`
+and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`.
+Especially interesting are they keyword arguments ``add_imports``, ``comment_solve`` or
+``print_com``.
 
 Of particular note in the following examples is how most of the
 commands can be called as a method to the ansys object rather than

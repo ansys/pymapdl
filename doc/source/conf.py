@@ -1,10 +1,12 @@
+"""Sphinx documentation configuration file."""
+from datetime import datetime
 import os
 import warnings
 
-import pyvista
 import numpy as np
-from sphinx_gallery.sorting import FileNameSortKey
 from pyansys_sphinx_theme import pyansys_logo_black
+import pyvista
+from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl.core import __version__
 
@@ -36,7 +38,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = "ansys.mapdl.core"
-copyright = "(c) 2021 ANSYS, Inc. All rights reserved"
+copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
 # The short X.Y version
@@ -57,6 +59,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "sphinxemoji.sphinxemoji",
 ]
 
 # Intersphinx mapping
@@ -155,11 +158,16 @@ sphinx_gallery_conf = {
 
 
 # -- Options for HTML output -------------------------------------------------
+html_short_title = html_title = "PyMAPDL"
 html_theme = "pyansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
+    "show_breadcrumbs": True,
+    "additional_breadcrumbs": [
+        ("PyAnsys", "https://docs.pyansys.com/"),
+    ],
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -175,8 +183,13 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, f"pymapdl-Documentation-{__version__}.tex",
-     "ansys.mapdl.core Documentation", author, "manual"),
+    (
+        master_doc,
+        f"pymapdl-Documentation-{__version__}.tex",
+        "ansys.mapdl.core Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 
