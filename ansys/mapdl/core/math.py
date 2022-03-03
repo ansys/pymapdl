@@ -1340,7 +1340,7 @@ class AnsMat(ApdlMathObj):
 
         info = self._mapdl._data_info(self.id)
 
-        if version_requires((0, 4, 2)):
+        if version_requires((0, 5, 0)):
              if   info.mattype == 0: # UPPER
                  return True
              elif info.mattype == 1: # LOWER
