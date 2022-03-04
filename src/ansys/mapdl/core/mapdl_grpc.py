@@ -1246,25 +1246,10 @@ class MapdlGrpc(_MapdlCore):
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
 
         if self._local:
-            # delete the files to avoid overwriting:
-            try:
-                os.remove(tmp_name)
-            except OSError:  # pragma: no cover
-                pass
-
-            try:
-                os.remove(tmp_out)  # pragma: no cover
-            except OSError:
-                pass
-
             local_path = self.directory
             with open(os.path.join(local_path, tmp_name), "w") as f:
                 f.write(tmp_dat)
         else:
-            # Deleting the previous files
-            self.slashdelete(tmp_name)
-            self.slashdelete(tmp_out)
-
             self._upload_raw(tmp_dat.encode(), tmp_name)
 
         request = pb_types.InputFileRequest(filename=tmp_name)
@@ -1278,10 +1263,28 @@ class MapdlGrpc(_MapdlCore):
         # all output (unless redirected) has been written to a temp output
         if self._local:
             with open(os.path.join(local_path, tmp_out)) as f:
-                return f.read()
+                output = f.read()
+
+            # delete the files to avoid overwriting:
+            try:
+                os.remove(tmp_name)
+            except OSError:  # pragma: no cover
+                pass
+
+            try:
+                os.remove(tmp_out)  # pragma: no cover
+            except OSError:
+                pass
 
         # otherwise, read remote file
-        return self._download_as_raw(tmp_out).decode("latin-1")
+        else:
+            output = self._download_as_raw(tmp_out).decode("latin-1")
+
+            # Deleting the previous files
+            self.slashdelete(tmp_name)
+            self.slashdelete(tmp_out)
+
+        return output
 
     def _get_file_path(self, fname, progress_bar=False):
         """Find files in the Python and MAPDL working directories.
