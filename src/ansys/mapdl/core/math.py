@@ -458,6 +458,31 @@ class MapdlMath:
             return self._mapdl._mat_data(ans_sparse_mat.id)
         return ans_sparse_mat
 
+    def _load_file(self, fname):
+        """Provide file to MAPDL instance.
+
+        If in local:
+            Checks if the file exists, if not, it raises a FileNotFound exception
+
+        If in not-local:
+            Check if the file exists locally or in the working directory, if not, it will raise a FileNotFound exception.
+            If the file is local, it will be uploaded.
+
+        """
+        if self._mapdl._local:
+            if not os.path.exists(fname):
+                raise FileNotFoundError(f"The file {fname} could not be found.")
+        else:
+            if not os.path.exists(fname) or fname not in self._mapdl.list_files():
+                raise FileNotFoundError(
+                    f"The file {fname} could not be found in the local client or remote working directory."
+                )
+            elif os.path.exists(fname):
+                self._mapdl.upload(fname)
+                fname = os.path.basename(fname)
+
+        return fname
+
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
 
@@ -488,6 +513,7 @@ class MapdlMath:
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "STIFF", asarray)
 
     def mass(self, dtype=np.double, fname="file.full", asarray=False):
@@ -522,6 +548,7 @@ class MapdlMath:
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "MASS", asarray)
 
     def damp(self, dtype=np.double, fname="file.full", asarray=False):
@@ -557,6 +584,7 @@ class MapdlMath:
             with 1734 stored elements in Compressed Sparse Row format>
 
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
     def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
@@ -596,6 +624,8 @@ class MapdlMath:
         self._mapdl._log.info(
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
+
+        fname = self._load_file(fname)
         self._mapdl.run(
             f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
@@ -658,6 +688,7 @@ class MapdlMath:
         APDLMath Vector Size 126
 
         """
+        fname = self._load_file(fname)
         return self.get_vec(dtype, fname, "RHS", asarray)
 
     def svd(self, mat, thresh="", sig="", v="", **kwargs):
