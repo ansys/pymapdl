@@ -1261,18 +1261,18 @@ class MapdlGrpc(_MapdlCore):
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
-        if self._local:
+        if self._local:  # pragma: no cover
             with open(os.path.join(local_path, tmp_out)) as f:
                 output = f.read()
 
             # delete the files to avoid overwriting:
             try:
                 os.remove(tmp_name)
-            except OSError:  # pragma: no cover
+            except OSError:
                 pass
 
             try:
-                os.remove(tmp_out)  # pragma: no cover
+                os.remove(tmp_out)
             except OSError:
                 pass
 
