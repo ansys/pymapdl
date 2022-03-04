@@ -1236,6 +1236,7 @@ class MapdlGrpc(_MapdlCore):
         # file.
         tmp_name = "_input_tmp_.inp"
         tmp_out = "_input_tmp_.out"
+
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
@@ -1245,11 +1246,27 @@ class MapdlGrpc(_MapdlCore):
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
 
         if self._local:
+            # delete the files to avoid overwriting:
+            try:
+                os.remove(tmp_name)
+            except OSError:  # pragma: no cover
+                pass
+
+            try:
+                os.remove(tmp_out)  # pragma: no cover
+            except OSError:
+                pass
+
             local_path = self.directory
             with open(os.path.join(local_path, tmp_name), "w") as f:
                 f.write(tmp_dat)
         else:
+            # Deleting the previous files
+            self.slashdelete(tmp_name)
+            self.slashdelete(tmp_out)
+
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
         request = pb_types.InputFileRequest(filename=tmp_name)
 
         # even though we don't care about the output, we still
