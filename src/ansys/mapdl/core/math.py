@@ -4,6 +4,7 @@ from enum import Enum
 import os
 import random
 import string
+from warnings import warn
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -1339,17 +1340,20 @@ class AnsMat(ApdlMathObj):
 
         info = self._mapdl._data_info(self.id)
 
-        if version_requires((0, 5, 0)):
-             if   info.mattype == 0: # UPPER
-                 return True
-             elif info.mattype == 1: # LOWER
-                 return True
-             elif info.mattype == 2: # DIAG
-                 return True
+        if meets_version(self._mapdl._server_version, (0, 5, 0)):
+            if info.mattype == 0:  # UPPER
+                return True
+            elif info.mattype == 1:  # LOWER
+                return True
+            elif info.mattype == 2:  # DIAG
+                return True
 
-             return False
+            return False
         else:
-            warnings.warn("Call to sym() function may return a bad value.")
+            warn(
+                "Call to sym() function cannot evaluate if"
+                "it is symmetric or not in this MAPDL version."
+            )
             return True
 
     def asarray(self) -> np.ndarray:
