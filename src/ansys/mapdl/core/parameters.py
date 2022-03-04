@@ -359,7 +359,7 @@ class Parameters:
         array : np.ndarray
             Numpy array.
         """
-        format_str = "(1F20.12)"
+        format_str = "(1F64.12)"
         with self._mapdl.non_interactive:
             self._mapdl.mwrite(parm_name.upper(), label="kji")  # use C ordering
             self._mapdl.run(format_str)
