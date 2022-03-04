@@ -8,8 +8,12 @@ and to run a modal and PSD analysis. PyDPF modules are also used for
 post-processing.
 This example is inspired from the model and analysis defined in
 Chapter 20 of the Mechanical APDL Technology Showcase Manual.
-"""
 
+Additional Packages Used
+~~~~~~~~~~~~~~~~~~~~~~~~
+* `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
+
+"""
 
 ###############################################################################
 # Starting MAPDL as a service and importing an external model
@@ -24,14 +28,15 @@ Chapter 20 of the Mechanical APDL Technology Showcase Manual.
 # start MAPDL as a service
 import os
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import examples, launch_mapdl
 
 mapdl = launch_mapdl(run_location=os.getcwd())
 print(mapdl)
 
 # read model of single circuit board
+pcb_mesh_file = examples.download_pcb_mesh_file()
 mapdl.prep7()
-mapdl.cdread("COMB", "Electronics_PCB", "cdb")
+mapdl.cdread("COMB", "pcb_mesh_file", "cdb")
 mapdl.allsel()
 mapdl.eplot()
 mapdl.cmsel("all")

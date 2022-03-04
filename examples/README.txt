@@ -18,3 +18,4 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
    02-geometry\README.txt
    03-tips-n-tricks\README.txt
    05-Tech_demos\README.txt
+   07-technology-showcase-examples\README.txt

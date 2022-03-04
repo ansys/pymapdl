@@ -87,3 +87,17 @@ def download_vtk_rotor():
 def _download_rotor_tech_demo_plot():
     """Download rotor surface vtk file."""
     return _download_file("rotor2.vtk", "geometry")[0]
+
+
+def download_pcb_mesh_file():
+    """Download a cdb file of a Printed Circuit Board.
+
+    Examples
+    --------
+    >>> from ansys.mapdl.core import examples
+    >>> filename = examples.download_pcb_mesh_file()
+    >>> filename
+    '/home/user/.local/share/ansys_mapdl_core/examples/pcb_mesh_file.cdb'
+
+    """
+    return _download_file("pcb_mesh_file.cdb", "mesh")[0]
