@@ -459,7 +459,8 @@ class MapdlMath:
         return ans_sparse_mat
 
     def _load_file(self, fname):
-        """Provide file to MAPDL instance.
+        """
+        Provide file to MAPDL instance.
 
         If in local:
             Checks if the file exists, if not, it raises a FileNotFound exception
