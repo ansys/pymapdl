@@ -39,9 +39,9 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements/requirements_build.txt
-          python setup.py bdist_wheel
-          pip install dist/ansys*.whl
+          pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
