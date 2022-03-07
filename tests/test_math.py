@@ -189,7 +189,12 @@ def test_load_stiff_mass(mm, cube_solve, tmpdir):
 
 
 def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
-    copy(os.path.join(mm._mapdl.directory, "file.full"), tmpdir)
+    mapdl_dir = mm._mapdl.directory
+    if mapdl_dir:
+        full_path = os.path.join(mapdl_dir, "file.full")
+    else:
+        full_path = "file.full"
+    copy(full_path, tmpdir)
     fname_ = os.path.join(tmpdir, "file.full")
     k = mm.stiff(fname=fname_)
     m = mm.mass(fname=fname_)
