@@ -1,5 +1,7 @@
 """Test APDL Math functionality"""
+import os
 import re
+from shutil import copy
 
 import numpy as np
 import pytest
@@ -180,10 +182,70 @@ def test_getitem(mm):
             assert vec[j] == np_mat[j, i]
 
 
-def test_load_stiff_mass(mm, cube_solve):
+def test_load_stiff_mass(mm, cube_solve, tmpdir):
     k = mm.stiff()
     m = mm.mass()
     assert k.shape == m.shape
+
+
+def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
+    copy(os.path.join(mm._mapdl.directory, "file.full"), tmpdir)
+    fname_ = os.path.join(tmpdir, "file.full")
+    k = mm.stiff(fname=fname_)
+    m = mm.mass(fname=fname_)
+    assert k.shape == m.shape
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_load_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff(asarray=True)
+    m = mm.mass(asarray=True)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff()
+    m = mm.mass()
+
+    k = k.asarray()
+    m = m.asarray()
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+@pytest.mark.parametrize("dtype_", [np.int64, np.double])
+def test_load_stiff_mass_different_type(mm, cube_solve, dtype_):
+    # AnsMat object do not support dtype assignment, you need to convert them to array first.
+    k = mm.stiff(asarray=True, dtype=dtype_)
+    m = mm.mass(asarray=True, dtype=dtype_)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
+
+    k = mm.stiff(dtype=dtype_)
+    m = mm.mass(dtype=dtype_)
+
+    k = k.asarray(dtype=dtype_)
+    m = m.asarray(dtype=dtype_)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
 
 
 def test_mat_from_name(mm):
@@ -429,3 +491,7 @@ def test_free(mm):
 
 def test_repr(mm):
     assert mm._status == repr(mm)
+
+
+def test_status(mm):
+    mm.status()
