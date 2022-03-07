@@ -28,13 +28,15 @@ Additional Packages Used
 # start MAPDL as a service
 import os
 
-from ansys.mapdl.core import examples, launch_mapdl
+from ansys.mapdl.core import download_tech_demo_data, launch_mapdl
 
 mapdl = launch_mapdl(run_location=os.getcwd())
 print(mapdl)
 
 # read model of single circuit board
-pcb_mesh_file = examples.download_pcb_mesh_file()
+# download the cdb file
+pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file")
+# enter preprocessor and read in cdb
 mapdl.prep7()
 mapdl.cdread("COMB", "pcb_mesh_file", "cdb")
 mapdl.allsel()
