@@ -450,12 +450,41 @@ class MapdlMath:
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s", mat_id, fname
         )
+        if isinstance(dtype, str):
+            if dtype.lower() not in ("complex", "double"):
+                raise ValueError(
+                    f"Data type ({dtype}) not allowed as a string."
+                    "Use either: 'double' or 'complex', or a valid numpy data type."
+                )
+            if dtype.lower() == "complex":
+                dtype_ = "Z"
+                dtype = np.complex64
+            else:
+                dtype_ = "D"
+                dtype = np.double
+        else:
+            if dtype not in ANSYS_VALUE_TYPE.values():
+                allowables_np_dtypes = ", ".join(
+                    [
+                        str(each).split("'")[1]
+                        for each in ANSYS_VALUE_TYPE.values()
+                        if each
+                    ]
+                )
+                raise ValueError(
+                    f"Numpy data type not allowed. Only: {allowables_np_dtypes}"
+                )
+            if "complex" in str(dtype):
+                dtype_ = "Z"
+            else:
+                dtype_ = "D"
+
         self._mapdl.run(
-            f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
+            f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
-            return self._mapdl._mat_data(ans_sparse_mat.id)
+            return self._mapdl._mat_data(ans_sparse_mat.id).astype(dtype)
         return ans_sparse_mat
 
     def _load_file(self, fname):
@@ -1370,8 +1399,18 @@ class AnsMat(ApdlMathObj):
         """Return if matrix is symmetric."""
         return True
 
-    def asarray(self) -> np.ndarray:
+    def asarray(self, dtype=None) -> np.ndarray:
         """Returns vector as a numpy array.
+
+        Parameters
+        ----------
+        dtype : numpy.dtype, optional
+            Numpy data type
+
+        Returns
+        -------
+        np.ndarray
+            Numpy array with the defined data type
 
         Examples
         --------
@@ -1381,9 +1420,14 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+        >>> v.asarray(dtype=np.int)
+        [1 1 1 1 1 1 1 1 1 1]
 
         """
-        return self._mapdl._mat_data(self.id)
+        if dtype:
+            return self._mapdl._mat_data(self.id).astype(dtype)
+        else:
+            return self._mapdl._mat_data(self.id)
 
     def __mul__(self, vec):
         raise AttributeError(
