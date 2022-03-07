@@ -429,3 +429,42 @@ def test_free(mm):
 
 def test_repr(mm):
     assert mm._status == repr(mm)
+
+
+def test_damp_matrix(mm, cube_solve):
+    mm._mapdl.prep7()
+    mm._mapdl.dmprat(0.01)
+    mm._mapdl.finish()
+    d = mm.damp()
+    m = mm.mass()
+
+    assert d.shape == m.shape
+    assert isinstance(d, apdl_math.AnsMat)
+
+
+def test_damp_matrix_as_array(mm, cube_solve):
+    d = mm.damp()
+    d = d.asarray()
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+
+    d = mm.damp(asarray=True)
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+
+
+@pytest.mark.parametrize("dtype_", [np.int64, np.double])
+def test_damp_matrix_dtype(mm, cube_solve, dtype_):
+    d = mm.stiff(asarray=True, dtype=dtype_)
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+    assert d.dtype == dtype_
+
+    d = mm.stiff(dtype=dtype_)
+    d = d.asarray(dtype=dtype_)
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+    assert d.dtype == dtype_
