@@ -1,0 +1,24 @@
+Sphinx==4.4.0
+ansys-mapdl-reader==0.51.3  # newer breaks doc build
+imageio-ffmpeg==0.4.5
+imageio==2.16.1
+jupyter_sphinx==0.3.2
+jupyterlab>=3.2.8
+matplotlib==3.5.1
+numpydoc==1.2
+pandas==1.4.1
+plotly==5.6.0
+pyansys_sphinx_theme==0.2.3
+pypandoc==1.7.2
+pytest-sphinx==0.3.1
+pythreejs==2.3.0
+pyvista==0.33.3
+sphinx-autobuild==2021.3.14
+sphinx-autodoc-typehints==1.17.0
+sphinx-copybutton==0.5.0
+sphinx-gallery==0.10.1
+sphinx-notfound-page==0.8
+sphinxcontrib-websupport==1.2.4
+sphinxemoji==0.2.0
+vtk==9.0.3
+grpcio==1.43.0

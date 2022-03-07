@@ -1,13 +1,12 @@
 """Test APDL Math functionality"""
 import re
 
-import pytest
 import numpy as np
+import pytest
 from scipy import sparse
 
-import ansys.mapdl.core.math as apdl_math
 from ansys.mapdl.core.errors import ANSYSDataTypeError
-
+import ansys.mapdl.core.math as apdl_math
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -64,7 +63,7 @@ def test_set_vec_large(mm):
     # send a vector larger than the gRPC size limit of 4 MB
     sz = 1000000
     a = np.random.random(1000000)  # 7.62 MB (as FLOAT64)
-    assert a.nbytes > 4 * 1024 ** 2
+    assert a.nbytes > 4 * 1024**2
     ans_vec = mm.set_vec(a)
     assert a[sz - 1] == ans_vec[sz - 1]
     assert np.allclose(a, ans_vec.asarray())
@@ -120,7 +119,7 @@ def test_shape(mm):
 def test_matrix(mm):
     sz = 5000
     mat = sparse.random(sz, sz, density=0.05, format="csr")
-    assert mat.data.nbytes // 1024 ** 2 > 4, "Must test over gRPC message limit"
+    assert mat.data.nbytes // 1024**2 > 4, "Must test over gRPC message limit"
 
     name = "TMP_MATRIX"
     ans_mat = mm.matrix(mat, name)

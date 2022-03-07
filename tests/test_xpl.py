@@ -1,6 +1,6 @@
 """Test xpl functionality"""
-import pytest
 import numpy as np
+import pytest
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc

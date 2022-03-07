@@ -1,15 +1,11 @@
 """Test post-processing module for ansys.mapdl.core"""
 import numpy as np
 import pytest
-
-from pyvista.plotting.renderer import CameraPosition
 from pyvista import Plotter
+from pyvista.plotting.renderer import CameraPosition
 
-from ansys.mapdl.core.post import (
-    COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
-)
 from ansys.mapdl.core import examples
-
+from ansys.mapdl.core.post import COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
 
 # must be run first before loading a result
 # since MAPDL may be on a remote windows machine, cannot test
@@ -125,20 +121,20 @@ def contact_solve(mapdl):
     # Based on tech demo 28.
     mapdl.prep7()
     # ***** Problem parameters ********
-    l = 76.2e-03/3     # Length of each plate,m
-    w = 31.75e-03/2    # Width of each plate,m
-    t = 3.18e-03     # Tickness of each plate,m
-    r1 = 7.62e-03    # Shoulder radius of tool,m
-    h = 15.24e-03    # Height of tool, m
-    l1 = r1          # Starting location of tool on weldline
-    l2 = l-l1
-    tcc1 = 2e06      # Thermal contact conductance b/w plates,W/m^2'C
-    tcc2 = 10        # Thermal contact conductance b/w tool &
+    l = 76.2e-03 / 3  # Length of each plate,m
+    w = 31.75e-03 / 2  # Width of each plate,m
+    t = 3.18e-03  # Tickness of each plate,m
+    r1 = 7.62e-03  # Shoulder radius of tool,m
+    h = 15.24e-03  # Height of tool, m
+    l1 = r1  # Starting location of tool on weldline
+    l2 = l - l1
+    tcc1 = 2e06  # Thermal contact conductance b/w plates,W/m^2'C
+    tcc2 = 10  # Thermal contact conductance b/w tool &
     # workpiece,W/m^2'C
-    fwgt = 0.95      # weight factor for distribution of heat b/w tool
+    fwgt = 0.95  # weight factor for distribution of heat b/w tool
     # & workpiece
-    fplw = 0.8       # Fraction of plastic work converted to heat
-    uz1 = t/4000     # Depth of penetration,m
+    fplw = 0.8  # Fraction of plastic work converted to heat
+    uz1 = t / 4000  # Depth of penetration,m
     # ==========================================================
     # * Material properties
     # ==========================================================
@@ -152,7 +148,7 @@ def contact_solve(mapdl):
     # *BISO material model
     EX = 193e9
     ET = 2.8e9
-    EP = EX*ET/(EX-ET)
+    EP = EX * ET / (EX - ET)
     mapdl.tb("plas", 1, 1, "", "biso")  # Bilinear isotropic material
     mapdl.tbdata(1, 290e6, EP)  # Yield stress & plastic tangent modulus
     mapdl.mptemp(1, 0, 200, 400, 600, 800, 1000)
@@ -353,8 +349,8 @@ def contact_solve(mapdl):
 
     # Mechanical Boundary Conditions
     # 20% ends of the each plate is constraint
-    mapdl.nsel("s", "loc", "x", -0.8*w, -w)
-    mapdl.nsel("a", "loc", "x", 0.8*w, w)
+    mapdl.nsel("s", "loc", "x", -0.8 * w, -w)
+    mapdl.nsel("a", "loc", "x", 0.8 * w, w)
     mapdl.d("all", "uz", 0)  # Displacement constraint in x-direction
     mapdl.d("all", "uy", 0)  # Displacement constraint in y-direction
     mapdl.d("all", "ux", 0)  # Displacement constraint in z-direction
@@ -399,14 +395,14 @@ def contact_solve(mapdl):
     # ==========================================================
     # * Solution
     # ==========================================================
-    mapdl.run('/solu')
+    mapdl.run("/solu")
     mapdl.antype(4)  # Transient analysis
-    mapdl.lnsrch('on')
-    mapdl.cutcontrol('plslimit', 0.15)
+    mapdl.lnsrch("on")
+    mapdl.cutcontrol("plslimit", 0.15)
     mapdl.kbc(0)  # Ramped loading within a load step
     mapdl.nlgeom("on")  # Turn on large deformation effects
     mapdl.timint("off", "struc")  # Structural dynamic effects are turned off.
-    mapdl.nropt('unsym')
+    mapdl.nropt("unsym")
 
     # Load Step1
     mapdl.time(1)
@@ -418,8 +414,9 @@ def contact_solve(mapdl):
 
     mapdl.post1()
     mapdl.allsel()
-    mapdl.set('last')
+    mapdl.set("last")
     mapdl.mute = False
+
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_disp(mapdl, static_solve, comp):
@@ -452,15 +449,20 @@ def test_disp_norm_all(mapdl, static_solve):
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z", "norm"])  # lowercase intentional
 def test_disp_plot(mapdl, static_solve, comp):
-    assert mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
+    )
 
 
 def test_disp_plot_subselection(mapdl, static_solve):
     mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
     mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
-    assert mapdl.post_processing.plot_nodal_displacement(
-        "X", smooth_shading=True, show_node_numbering=True
-    ) is None
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "X", smooth_shading=True, show_node_numbering=True
+        )
+        is None
+    )
     mapdl.allsel()
 
 
@@ -697,7 +699,9 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
 
 
 def test_plot_nodal_total_eqv_strain(mapdl, static_solve):
-    assert mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True) is None
+    assert (
+        mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True) is None
+    )
 
 
 ###############################################################################
@@ -835,7 +839,9 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
 
 
 def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
-    assert mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True) is None
+    assert (
+        mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True) is None
+    )
 
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
@@ -863,12 +869,10 @@ def test_elem_disp_all(mapdl, static_solve, option):
 
     # use pretab to get the data
     arrays = []
-    for comp in ['x', 'y', 'z']:
+    for comp in ["x", "y", "z"]:
         table_name = "values" + comp
         mapdl.etable(table_name, "U", comp, option=option, mute=True)
-        arrays.append(
-            np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
-        )
+        arrays.append(np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1])
     array = np.vstack(arrays).T
     assert np.allclose(array, disp_from_grpc)
 
@@ -899,9 +903,7 @@ def test_element_stress(mapdl, static_solve, component, option):
     # use pretab to get the data
     table_name = "values" + component
     mapdl.etable(table_name, "S", component, option=option, mute=True)
-    from_pretab = np.genfromtxt(
-        mapdl.pretab(table_name).splitlines()[1:]
-    )[:, 1]
+    from_pretab = np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
     assert np.allclose(stress, from_pretab)
 
 
@@ -987,19 +989,21 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
 
 
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
-    assert mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True) is None
+    assert (
+        mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True) is None
+    )
 
 
 def test_nodal_contact_friction_stress(mapdl, contact_solve):
     # Format tables.
     mapdl.post1()
-    mapdl.header('OFF', 'OFF', 'OFF', 'OFF', 'OFF', 'OFF')
+    mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
     nsigfig = 10
-    mapdl.format('', 'E', nsigfig + 9, nsigfig)
-    mapdl.page(1E9, '', -1, 240)
+    mapdl.format("", "E", nsigfig + 9, nsigfig)
+    mapdl.page(1e9, "", -1, 240)
 
-    prnsol = mapdl.prnsol('CONT')
-    array = np.genfromtxt(prnsol.splitlines() , skip_header=1)
+    prnsol = mapdl.prnsol("CONT")
+    array = np.genfromtxt(prnsol.splitlines(), skip_header=1)
     sfric_prn = array[:, 4]
     nodes = array[:, 0]
 
@@ -1010,31 +1014,87 @@ def test_nodal_contact_friction_stress(mapdl, contact_solve):
 
 
 def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
-    assert mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True) is None
+    assert (
+        mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
+        is None
+    )
 
 
 def test_plot_incomplete_element_selection(mapdl, contact_solve):
-    mapdl.esel('S', 'ELEM', '', 1, mapdl.mesh.n_elem//2)
+    mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
     assert mapdl.post_processing.plot_element_displacement() is None
 
 
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
-    mapdl.nsel('S', 'NODE', '', 1, mapdl.mesh.n_node//2)
+    mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
     assert mapdl.post_processing.plot_nodal_displacement() is None
 
 
 def test_general_plotter_returns(mapdl, static_solve):
     # Returns
-    assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True) is None
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True), CameraPosition)
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_plotter=True), Plotter)
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, return_cpos=True, return_plotter=True), tuple)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement("X", smooth_shading=True) is None
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X", smooth_shading=True, return_cpos=True
+        ),
+        CameraPosition,
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X", smooth_shading=True, return_plotter=True
+        ),
+        Plotter,
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X", smooth_shading=True, return_cpos=True, return_plotter=True
+        ),
+        tuple,
+    )
 
     # Returns + Save figure.
-    assert mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=False) is None
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=False), CameraPosition)
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=False, return_plotter=True), Plotter)
-    assert isinstance(mapdl.post_processing.plot_nodal_displacement('X', smooth_shading=True, savefig=True, return_cpos=True, return_plotter=True), tuple)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            savefig=True,
+            return_cpos=False,
+            return_plotter=False,
+        )
+        is None
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            savefig=True,
+            return_cpos=True,
+            return_plotter=False,
+        ),
+        CameraPosition,
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            savefig=True,
+            return_cpos=False,
+            return_plotter=True,
+        ),
+        Plotter,
+    )
+    assert isinstance(
+        mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            savefig=True,
+            return_cpos=True,
+            return_plotter=True,
+        ),
+        tuple,
+    )
 
 
 ###############################################################################

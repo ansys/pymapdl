@@ -1,9 +1,0 @@
-autopep8
-matplotlib
-pandas
-pytest
-pytest
-pytest-cov
-pyvista==0.32.1
-scipy
-vtk<9.1.0

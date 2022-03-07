@@ -18,8 +18,8 @@ PyMAPDL including direct mesh access through VTK.
 
 import numpy as np
 
-from ansys.mapdl.core import examples
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import examples
 
 mapdl = pymapdl.launch_mapdl()
 
@@ -155,3 +155,7 @@ grid.plot(
 #     >>> grid.save('my_mesh.vtk')
 #     >>> import pyvista
 #     >>> imported_mesh = pyvista.read('my_mesh.vtk')
+
+###############################################################################
+# stop mapdl
+mapdl.exit()
