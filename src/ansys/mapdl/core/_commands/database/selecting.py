@@ -1554,5 +1554,5 @@ class Selecting:
         if toler:
             cmd = f"SELTOL,{toler}"
         else:
-            cmd = "SELTOL,"
+            cmd = "SELTOL"
         return self.run(cmd, **kwargs)
