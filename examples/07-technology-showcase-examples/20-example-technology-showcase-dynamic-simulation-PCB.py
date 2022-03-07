@@ -28,7 +28,8 @@ Additional Packages Used
 # start MAPDL as a service
 import os
 
-from ansys.mapdl.core import download_tech_demo_data, launch_mapdl
+from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.examples import download_tech_demo_data
 
 mapdl = launch_mapdl(run_location=os.getcwd())
 print(mapdl)
