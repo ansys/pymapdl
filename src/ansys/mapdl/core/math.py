@@ -478,7 +478,7 @@ class MapdlMath:
                 raise FileNotFoundError(
                     f"The file {fname} could not be found in the local client or remote working directory."
                 )
-            elif os.path.exists(fname):
+            if os.path.exists(fname):
                 self._mapdl.upload(fname)
                 fname = os.path.basename(fname)
 
