@@ -473,7 +473,7 @@ class MapdlMath:
             if not os.path.exists(fname):
                 raise FileNotFoundError(f"The file {fname} could not be found.")
         else:
-            if not os.path.exists(fname) or fname not in self._mapdl.list_files():
+            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
                 raise FileNotFoundError(
                     f"The file {fname} could not be found in the local client or remote working directory."
                 )
