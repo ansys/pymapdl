@@ -1866,7 +1866,9 @@ class MapdlGrpc(_MapdlCore):
             if raw:  # for debug
                 return vals, indices, indptr, shape
             else:
-                return sparse.csr_matrix((vals, indices, indptr), shape=shape)
+                return sparse.csr_matrix(
+                    (vals, indices, indptr), dtype=stype, shape=shape
+                )
 
         raise ValueError(f'Invalid matrix type "{mtype}"')
 
