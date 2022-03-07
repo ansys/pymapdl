@@ -36,7 +36,7 @@ print(mapdl)
 
 # read model of single circuit board
 # download the cdb file
-pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file")
+pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file.cdb")
 # enter preprocessor and read in cdb
 mapdl.prep7()
 mapdl.cdread("COMB", "pcb_mesh_file", "cdb")
