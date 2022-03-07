@@ -192,7 +192,7 @@ def test_read_input_file_verbose(mapdl):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+    assert "*****  MAPDL SOLUTION ROUTINE  *****" in response
 
 
 test_files = ["full26.dat", "static.dat"]
@@ -204,7 +204,7 @@ def test_read_input_file(mapdl, file_name):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+    assert "*****  MAPDL SOLUTION ROUTINE  *****" in response
 
 
 def test_no_get_value_non_interactive(mapdl):

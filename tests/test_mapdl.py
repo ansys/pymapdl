@@ -288,6 +288,7 @@ def test_chaining(mapdl, cleared):
 
 def test_error(mapdl):
     with pytest.raises(MapdlRuntimeError):
+        mapdl.prep7()
         mapdl.a(0, 0, 0, 0)
 
 
