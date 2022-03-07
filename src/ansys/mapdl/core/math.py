@@ -469,7 +469,7 @@ class MapdlMath:
             If the file is local, it will be uploaded.
 
         """
-        if self._mapdl._local:
+        if self._mapdl._local:  # pragma: no cover
             if not os.path.exists(fname):
                 raise FileNotFoundError(f"The file {fname} could not be found.")
         else:
