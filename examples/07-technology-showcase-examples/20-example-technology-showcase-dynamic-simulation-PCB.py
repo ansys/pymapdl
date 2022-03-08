@@ -17,7 +17,7 @@ Additional Packages Used
 
 ###############################################################################
 # Starting MAPDL as a service and importing an external model
-# ~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The original FE model is given in the Ansys Mechanical APDL Technology Showcase Manual.
 # The .cdb contains a FE model of a single circuit board. The model is meshed
 # with SOLID186, SHELL181 and BEAM188 elements. All components of the PCB
@@ -46,7 +46,7 @@ mapdl.cmsel("all")
 
 ###############################################################################
 # Creating the complete layered model
-# ~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The original model will be duplicated to create a layered PCB of three layers
 # that are binded together
 
@@ -103,14 +103,15 @@ mapdl.eplot(vtk=True)
 
 ###############################################################################
 # Run a modal analysis
-# ~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~
 #
 
 # enter solution processor and define analysis settings
 mapdl.slashsolu()
 mapdl.antype("modal")
 # set number of modes to extract
-nb_modes = 300
+# using a higher number of modes is recommended
+nb_modes = 10
 # use Block Lanzos to extract specified number of modes
 mapdl.modopt("lanb", nb_modes)
 mapdl.mxpand(nb_modes)
@@ -120,7 +121,7 @@ print(output)
 
 ###############################################################################
 # Post-processing the modal results
-# ~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This sections illustrates different methods to post-process the results of the
 # modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
 # and PyDPF-Core. All methods lead to the same result and are just given as an
