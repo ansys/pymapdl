@@ -211,8 +211,7 @@ def test_read_input_file_verbose(mapdl):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
-    breakpoint()
-    assert re.match(r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
 test_files = ["full26.dat", "static.dat"]
