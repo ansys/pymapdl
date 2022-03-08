@@ -191,6 +191,7 @@ def test_load_stiff_mass(mm, cube_solve, tmpdir):
 def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
     mapdl_dir = mm._mapdl.directory
     full_file = mm._mapdl.jobname + ".full"
+    print(mm._mapdl.list_files)
     if mapdl_dir != "/":
         full_path = os.path.join(mapdl_dir, full_file)
     else:
