@@ -77,7 +77,7 @@ def general_plotter(
     notebook : bool, optional
         When True, the resulting plot is placed inline a jupyter
         notebook.  Assumes a jupyter console is active.  Automatically
-        enables off_screen.
+        enables ``off_screen``.
 
     show_bounds : bool, optional
         Shows mesh bounds when ``True``.
@@ -111,7 +111,7 @@ def general_plotter(
 
     point_size : float, optional
         Point size of any nodes in the dataset plotted. Also applicable
-        when style='points'. Default ``5.0``
+        when ``style='points'``. Default ``5.0``
 
     line_width : float, optional
         Thickness of lines.  Only valid for wireframe and surface
@@ -119,10 +119,11 @@ def general_plotter(
 
     opacity : float, str, array-like
         Opacity of the mesh. If a single float value is given, it will be
-        the global opacity of the mesh and uniformly applied everywhere -
+        the global opacity of the mesh and uniformly applied everywhere
         should be between 0 and 1. A string can also be specified to map
         the scalars range to a predefined opacity transfer function
-        (options include: 'linear', 'linear_r', 'geom', 'geom_r').
+        (options include: ``'linear'``, ``'linear_r'``, ``'geom'``, or
+        ``'geom_r'``).
         A string could also be used to map a scalars array from the mesh to
         the opacity (must have same number of elements as the
         ``scalars`` argument). Or you can pass a custom made transfer
@@ -140,10 +141,10 @@ def general_plotter(
        this. If ``colorcet`` or ``cmocean`` are installed, their
        colormaps can be specified by name.
 
-        You can also specify a list of colors to override an
-        existing colormap with a custom one.  For example, to
-        create a three color colormap you might specify
-        ``['green', 'red', 'blue']``
+       You can also specify a list of colors to override an
+       existing colormap with a custom one.  For example, to
+       create a three color colormap you might specify
+       ``['green', 'red', 'blue']``
 
     render_points_as_spheres : bool, optional
         Render points as spheres.
@@ -162,13 +163,14 @@ def general_plotter(
         By default this is ``False``.
 
         .. note:: Note that enabling this will create a copy of
-        the input mesh within the plotter.
+           the input mesh within the plotter.
 
     feature_angle : float, optional
         Angle to consider an edge a sharp edge. Default 30 degrees.
 
     theme : pyvista.DefaultTheme, optional
-        PyVista theme.  Defaults to PyMAPDL theme.
+        PyVista theme. Defaults to `PyMAPDL theme <https://github
+        .com/pyansys/pyansys-sphinx-theme>`_.
 
     return_plotter : bool, optional
         Return the plotting object rather than showing the plot and
