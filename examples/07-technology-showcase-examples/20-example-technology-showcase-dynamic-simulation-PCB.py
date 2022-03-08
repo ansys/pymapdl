@@ -39,7 +39,7 @@ print(mapdl)
 pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file.cdb")
 # enter preprocessor and read in cdb
 mapdl.prep7()
-file_path = os.path.join(mapdl.directory, "pcb_mesh_file.cdb")
+file_path = os.path.join(os.getcwd(), "pcb_mesh_file.cdb")
 mapdl.cdread("COMB", file_path)
 mapdl.allsel()
 mapdl.eplot()
