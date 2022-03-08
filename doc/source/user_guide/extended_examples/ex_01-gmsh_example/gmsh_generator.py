@@ -8,7 +8,7 @@ gmsh.model.add("t20")
 
 # Load a STEP file (using `importShapes' instead of `merge' allows to directly
 # retrieve the tags of the highest dimensional imported entities):
-filename = 'pf_coil_case_1.stp'
+filename = "pf_coil_case_1.stp"
 v = gmsh.model.occ.importShapes(filename)
 
 

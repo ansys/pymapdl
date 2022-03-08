@@ -646,6 +646,31 @@ example, to list the remote files and download one of them:
 
    This feature is only available for MAPDL 2021R1 or newer.
 
+Alternatively, you can download several files at once using the glob pattern 
+or list of file names in :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`.
+For example:
+
+.. code:: python
+
+    # Using a list of file names
+    mapdl.download(['file0.log', 'file1.out'])
+
+    # Using glob pattern to match the list_files
+    mapdl.download('file*')
+
+You can also download all the files in the MAPDL working directory
+(:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`), using:
+
+.. code:: python
+
+    mapdl.download_project()
+
+Or filter by extensions, for example:
+
+.. code:: python
+
+    mapdl.download_project(['log', 'out'], target_dir='myfiles')  # Download the files to 'myfiles' directory
+
 
 Uploading a Local MAPDL File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

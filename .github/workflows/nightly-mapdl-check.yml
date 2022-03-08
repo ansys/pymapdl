@@ -1,4 +1,4 @@
-name: GitHub Actions
+name: Nightly MAPDL check
 
 on:
   workflow_dispatch:

@@ -9,6 +9,7 @@ using Pythonic PREP7 area commands.
 """
 
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine
@@ -183,3 +184,7 @@ print(items)
 # - 'zy' - ZY Plane view
 
 mapdl.aplot(quality=1, show_bounds=True, cpos="iso", show_lines=True)
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

@@ -16,27 +16,20 @@ env:
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
 
 jobs:
+
   stylecheck:
     name: Style Check
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Python
-        uses: actions/setup-python@v2.1.4
+        uses: actions/setup-python@v2.2.2
         with:
-          python-version: 3.8
-
-      - name: Style
-        run: |
-          pip install -r requirements_style.txt --disable-pip-version-check
-          make
-
-      - name: flake8
-        if: always()
-        run: |
-          make flake8
+          python-version: 3.9
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
 
   testimport:
     name: Smoke Tests
@@ -44,7 +37,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9']
 
     steps:
       - uses: actions/checkout@v2
@@ -59,7 +52,7 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -68,7 +61,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         with:
           path: ~\AppData\Local\pip\Cache
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests*.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -90,6 +83,7 @@ jobs:
 
       # used for documentation deployment
       - name: Get Bot Application Token
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         id: get_workflow_token
         uses: peter-murray/workflow-application-token-action@v1
         with:
@@ -110,7 +104,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -121,10 +115,9 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py bdist_wheel
+          pip install build
+          python -m build
           pip install dist/ansys*.whl
-          cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
@@ -137,7 +130,7 @@ jobs:
   
       - name: Build Documentation
         run: |
-          pip install -r requirements_docs.txt
+          pip install -r requirements/requirements_docs.txt
           xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       # Verify that sphinx generates no warnings
@@ -202,7 +195,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -213,11 +206,9 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py sdist
-          python setup.py bdist_wheel
+          pip install build
+          python -m build
           pip install dist/*.whl
-          cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
@@ -230,7 +221,7 @@ jobs:
 
       - name: Unit Testing
         run: |
-          pip install -r requirements_test.txt
+          pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v2
@@ -284,3 +275,15 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*.pdf
+      
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `Release FAILED!`, 
+            }"
