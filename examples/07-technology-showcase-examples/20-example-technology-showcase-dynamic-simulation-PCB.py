@@ -26,21 +26,20 @@ Additional Packages Used
 # between the IC packages and the circuit board.
 
 # start MAPDL as a service
-import os
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples import download_tech_demo_data
 
-mapdl = launch_mapdl(run_location=os.getcwd())
+mapdl = launch_mapdl()
 print(mapdl)
 
 # read model of single circuit board
 # download the cdb file
 pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file.cdb")
+
 # enter preprocessor and read in cdb
 mapdl.prep7()
-file_path = os.path.join(os.getcwd(), "pcb_mesh_file.cdb")
-mapdl.cdread("COMB", file_path)
+mapdl.cdread("COMB", pcb_mesh_file)
 mapdl.allsel()
 mapdl.eplot()
 mapdl.cmsel("all")
@@ -138,7 +137,7 @@ mapdl_result.plot_nodal_displacement(0)
 
 # using DPF-Post
 # from ansys.dpf import post
-# solution_path = os.path.join(os.getcwd(), 'file.rst')
+# solution_path = 'file.rst'
 # solution = post.load_solution(solution_path)
 # print(solution)
 # displacement = solution.displacement(time_scoping=1)
