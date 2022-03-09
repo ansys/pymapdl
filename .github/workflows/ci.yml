@@ -111,7 +111,7 @@ jobs:
       - name: Cache examples
         uses: actions/cache@v2
         with:
-          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/examples/
+          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/examples
           key: Examples-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/examples/*') }}
           restore-keys: |
             Examples-
@@ -119,7 +119,7 @@ jobs:
       - name: Cache docs build directory
         uses: actions/cache@v2
         with:
-          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/build/
+          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/build
           key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/*') }}
 
       - name: Cache autosummary
