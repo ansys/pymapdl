@@ -1,5 +1,7 @@
 """Test APDL Math functionality"""
+import os
 import re
+from shutil import copy
 
 import numpy as np
 import pytest
@@ -180,10 +182,99 @@ def test_getitem(mm):
             assert vec[j] == np_mat[j, i]
 
 
-def test_load_stiff_mass(mm, cube_solve):
+def test_load_stiff_mass(mm, cube_solve, tmpdir):
     k = mm.stiff()
     m = mm.mass()
     assert k.shape == m.shape
+
+
+def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
+    full_files = mm._mapdl.download("*.full")
+    assert os.path.exists(full_files[0])
+    full_path = os.path.join(os.getcwd(), full_files[0])
+    copy(full_path, tmpdir)
+    fname_ = os.path.join(tmpdir, full_files[0])
+    assert os.path.exists(fname_)
+
+    k = mm.stiff(fname=fname_)
+    m = mm.mass(fname=fname_)
+    assert k.shape == m.shape
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_load_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff(asarray=True)
+    m = mm.mass(asarray=True)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff()
+    m = mm.mass()
+
+    k = k.asarray()
+    m = m.asarray()
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+@pytest.mark.parametrize(
+    "dtype_",
+    [
+        np.int64,
+        np.double,
+        pytest.param(np.complex64, marks=pytest.mark.xfail),
+        pytest.param("Z", marks=pytest.mark.xfail),
+        "D",
+        pytest.param("dummy", marks=pytest.mark.xfail),
+        pytest.param(np.int8, marks=pytest.mark.xfail),
+    ],
+)
+def test_load_stiff_mass_different_dtype(mm, cube_solve, dtype_):
+    # AnsMat object do not support dtype assignment, you need to convert them to array first.
+    k = mm.stiff(asarray=True, dtype=dtype_)
+    m = mm.mass(asarray=True, dtype=dtype_)
+
+    if isinstance(dtype_, str):
+        if dtype_ == "Z":
+            dtype_ = np.complex_
+        else:
+            dtype_ = np.double
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
+
+    k = mm.stiff(dtype=dtype_)
+    m = mm.mass(dtype=dtype_)
+
+    k = k.asarray(dtype=dtype_)
+    m = m.asarray(dtype=dtype_)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
+
+
+def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
+    with pytest.raises(
+        ValueError, match=r"The 'mat_id' parameter supplied.*is not allowed."
+    ):
+        mm.load_matrix_from_file(fname="file.full", mat_id="DUMMY")
 
 
 def test_mat_from_name(mm):
@@ -429,3 +520,7 @@ def test_free(mm):
 
 def test_repr(mm):
     assert mm._status == repr(mm)
+
+
+def test_status(mm):
+    mm.status()

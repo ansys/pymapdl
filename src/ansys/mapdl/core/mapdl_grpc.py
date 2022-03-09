@@ -1236,6 +1236,7 @@ class MapdlGrpc(_MapdlCore):
         # file.
         tmp_name = "_input_tmp_.inp"
         tmp_out = "_input_tmp_.out"
+
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
@@ -1250,6 +1251,7 @@ class MapdlGrpc(_MapdlCore):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
         request = pb_types.InputFileRequest(filename=tmp_name)
 
         # even though we don't care about the output, we still
@@ -1259,12 +1261,30 @@ class MapdlGrpc(_MapdlCore):
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
-        if self._local:
+        if self._local:  # pragma: no cover
             with open(os.path.join(local_path, tmp_out)) as f:
-                return f.read()
+                output = f.read()
+
+            # delete the files to avoid overwriting:
+            try:
+                os.remove(tmp_name)
+            except OSError:
+                pass
+
+            try:
+                os.remove(tmp_out)
+            except OSError:
+                pass
 
         # otherwise, read remote file
-        return self._download_as_raw(tmp_out).decode("latin-1")
+        else:
+            output = self._download_as_raw(tmp_out).decode("latin-1")
+
+            # Deleting the previous files
+            self.slashdelete(tmp_name)
+            self.slashdelete(tmp_out)
+
+        return output
 
     def _get_file_path(self, fname, progress_bar=False):
         """Find files in the Python and MAPDL working directories.
@@ -1866,7 +1886,9 @@ class MapdlGrpc(_MapdlCore):
             if raw:  # for debug
                 return vals, indices, indptr, shape
             else:
-                return sparse.csr_matrix((vals, indices, indptr), shape=shape)
+                return sparse.csr_matrix(
+                    (vals, indices, indptr), dtype=stype, shape=shape
+                )
 
         raise ValueError(f'Invalid matrix type "{mtype}"')
 

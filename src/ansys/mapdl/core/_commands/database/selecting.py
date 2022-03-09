@@ -1518,7 +1518,7 @@ class Selecting:
         Parameters
         ----------
         toler
-            Tolerance value. If blank, restores the default tolerance
+            Tolerance value. If blank or None, restores the default tolerance
             logic.
 
         Notes
@@ -1551,4 +1551,8 @@ class Selecting:
         >>> seltol(1E-5)
 
         """
-        return self.run(f"SELTOL{toler}", **kwargs)
+        if toler:
+            cmd = f"SELTOL,{toler}"
+        else:
+            cmd = "SELTOL"
+        return self.run(cmd, **kwargs)

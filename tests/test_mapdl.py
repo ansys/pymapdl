@@ -295,6 +295,7 @@ def test_chaining(mapdl, cleared):
 
 def test_error(mapdl):
     with pytest.raises(MapdlRuntimeError):
+        mapdl.prep7()
         mapdl.a(0, 0, 0, 0)
 
 
@@ -1445,3 +1446,11 @@ def test_parameters_name(mapdl, par_name):
 )
 def test_parameters_name_in_get(mapdl, par_name):
     mapdl.get(par=par_name, entity="node", item1="count")
+
+
+@pytest.mark.parametrize("value", [1e-6, 1e-5, 1e-3, None])
+def test_seltol(mapdl, value):
+    if value:
+        assert "SELECT TOLERANCE=" in mapdl.seltol(value)
+    else:
+        assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
