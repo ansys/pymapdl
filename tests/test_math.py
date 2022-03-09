@@ -226,11 +226,28 @@ def test_stiff_mass_as_array(mm, cube_solve):
     assert all([each > 0 for each in m.shape])
 
 
-@pytest.mark.parametrize("dtype_", [np.int64, np.double])
-def test_load_stiff_mass_different_type(mm, cube_solve, dtype_):
+@pytest.mark.parametrize(
+    "dtype_",
+    [
+        np.int64,
+        np.double,
+        pytest.param(np.complex64, marks=pytest.mark.xfail),
+        pytest.param("Z", marks=pytest.mark.xfail),
+        "D",
+        pytest.param("dummy", marks=pytest.mark.xfail),
+        pytest.param(np.int8, marks=pytest.mark.xfail),
+    ],
+)
+def test_load_stiff_mass_different_dtype(mm, cube_solve, dtype_):
     # AnsMat object do not support dtype assignment, you need to convert them to array first.
     k = mm.stiff(asarray=True, dtype=dtype_)
     m = mm.mass(asarray=True, dtype=dtype_)
+
+    if isinstance(dtype_, str):
+        if dtype_ == "Z":
+            dtype_ = np.complex_
+        else:
+            dtype_ = np.double
 
     assert sparse.issparse(k)
     assert sparse.issparse(m)
@@ -251,6 +268,13 @@ def test_load_stiff_mass_different_type(mm, cube_solve, dtype_):
     assert all([each > 0 for each in m.shape])
     assert k.dtype == dtype_
     assert m.dtype == dtype_
+
+
+def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
+    with pytest.raises(
+        ValueError, match=r"The 'mat_id' parameter supplied.*is not allowed."
+    ):
+        mm.load_matrix_from_file(fname="file.full", mat_id="DUMMY")
 
 
 def test_mat_from_name(mm):
