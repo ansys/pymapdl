@@ -111,22 +111,22 @@ jobs:
       - name: Cache examples
         uses: actions/cache@v2
         with:
-          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/examples
-          key: Examples-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/examples/*') }}
+          path: ~/doc/examples
+          key: Examples-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/examples/*') }}
           restore-keys: |
             Examples-
 
-      - name: Cache docs build directory
-        uses: actions/cache@v2
-        with:
-          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/build
-          key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/*') }}
+      # - name: Cache docs build directory
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/build
+      #     key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/*') }}
 
-      - name: Cache autosummary
-        uses: actions/cache@v2
-        with:
-          path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst
-          key: autosummary-rst-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst') }}
+      # - name: Cache autosummary
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst
+      #     key: autosummary-rst-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst') }}
 
       - name: Test virtual framebuffer
         run: |
