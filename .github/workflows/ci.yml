@@ -116,17 +116,17 @@ jobs:
           restore-keys: |
             Examples-
 
-      # - name: Cache docs build directory
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/build
-      #     key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/*') }}
+      - name: Cache docs build directory
+        uses: actions/cache@v2
+        with:
+          path: ~/doc/build
+          key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/build/*') }}
 
-      # - name: Cache autosummary
-      #   uses: actions/cache@v2
-      #   with:
-      #     path: ${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst
-      #     key: autosummary-rst-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('${{ env:GITHUB_WORKSPACE }}/pymapdl/doc/**/_autosummary/*.rst') }}
+      - name: Cache autosummary
+        uses: actions/cache@v2
+        with:
+          path: ~/doc/**/_autosummary/*.rst
+          key: autosummary-rst-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('~/doc/**/_autosummary/*.rst') }}
 
       - name: Test virtual framebuffer
         run: |
