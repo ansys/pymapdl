@@ -1341,7 +1341,7 @@ class AnsMat(ApdlMathObj):
         info = self._mapdl._data_info(self.id)
 
         if meets_version(self._mapdl._server_version, (0, 5, 0)):  # pragma: no cover
-            return info.mattype in [0, 1, 2]:  # [UPPER, LOWER, DIAG] respectively
+            return info.mattype in [0, 1, 2]  # [UPPER, LOWER, DIAG] respectively
         else:
             warn(
                 "Call to sym() function cannot evaluate if"
