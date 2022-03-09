@@ -1,13 +1,13 @@
 """.. _ref_dynamic_simulation_printed_circuit_board:
 
 Dynamic simulation of a printed circuit board assembly
---------------------------------------------
+------------------------------------------------------
 
-This examples shows how to use PyMAPDL to import an existing FE model
-and to run a modal and PSD analysis. PyDPF modules are also used for
-post-processing.
-This example is inspired from the model and analysis defined in
-Chapter 20 of the Mechanical APDL Technology Showcase Manual.
+This examples shows how to use PyMAPDL to import an existing FE model and to
+run a modal and PSD analysis. PyDPF modules are also used for post-processing.
+
+This example is inspired from the model and analysis defined in Chapter 20 of
+the Mechanical APDL Technology Showcase Manual.
 
 Additional Packages Used
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -25,11 +25,13 @@ Additional Packages Used
 # flexible surface-to-surface contact pairs are used to define the contact
 # between the IC packages and the circuit board.
 
-# start MAPDL as a service
+
+import matplotlib.pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples import download_tech_demo_data
 
+# start MAPDL as a service
 mapdl = launch_mapdl()
 print(mapdl)
 
@@ -41,7 +43,7 @@ pcb_mesh_file = download_tech_demo_data("td-20", "pcb_mesh_file.cdb")
 mapdl.prep7()
 mapdl.cdread("COMB", pcb_mesh_file)
 mapdl.allsel()
-mapdl.eplot()
+mapdl.eplot(background="w")
 mapdl.cmsel("all")
 
 ###############################################################################
@@ -53,8 +55,9 @@ mapdl.cmsel("all")
 # duplicate single PCB to get three layers
 #  get the maximum node number for the single layers PCB in the input file
 max_nodenum = mapdl.get("max_nodenum", "node", " ", "num", "max")
+
 # generate additional PCBs offset by 20 mm in the -y direction
-mapdl.egen("3", max_nodenum, "all", " ", " ", " ", " ", " ", " ", " ", "0", "-20", "0")
+mapdl.egen("3", max_nodenum, "all", dy="-20")
 
 
 # bind the three layers together
@@ -62,10 +65,12 @@ mapdl.egen("3", max_nodenum, "all", " ", " ", " ", " ", " ", " ", " ", "0", "-20
 mapdl.cmsel("s", "N_JOINT_BOARD")
 mapdl.cmsel("a", "N_JOINT_LEGS")
 mapdl.cmsel("a", "N_BASE")
+
 # get number of currently selected nodes
 nb_selected_nodes = mapdl.mesh.n_node
 current_node = 0
 queries = mapdl.queries
+
 # also select similar nodes for copies of the single PCB
 # and couple all dofs at the interface
 for node_id in range(1, nb_selected_nodes + 1):
@@ -77,14 +82,17 @@ mapdl.cpintf("all")
 # define fixed support boundary condition
 # get max coupled set number
 cp_max = mapdl.get("cp_max", "cp", "0", "max")
+
 # unselect nodes scoped in CP equations
 mapdl.nsel("u", "cp", " ", "1", "cp_max")
+
 # create named selection for base excitation
 mapdl.cm("n_base_excite", "node")
+
 # fix displacement for base excitation nodes
 mapdl.d("all", "all")
 
-# select all and plot model
+# select all and plot the model using MAPDL's plotter and VTK's
 mapdl.allsel("all")
 mapdl.cmsel("all")
 mapdl.graphics("power")
@@ -121,7 +129,7 @@ print(output)
 
 ###############################################################################
 # Post-processing the modal results
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This sections illustrates different methods to post-process the results of the
 # modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
 # and PyDPF-Core. All methods lead to the same result and are just given as an
@@ -136,7 +144,9 @@ mapdl.plnsol("u", "sum")
 mapdl_result = mapdl.result
 mapdl_result.plot_nodal_displacement(0)
 
-# using DPF-Post
+###############################################################################
+# Using DPF-Post
+# ~~~~~~~~~~~~~~
 # from ansys.dpf import post
 # solution_path = 'file.rst'
 # solution = post.load_solution(solution_path)
@@ -164,32 +174,45 @@ mapdl_result.plot_nodal_displacement(0)
 # define PSD analysis with input spectrum
 mapdl.slashsolu()
 mapdl.antype("spectr")
+
 # power spectral density
 mapdl.spopt("psd")
+
 # use input table 1 with acceleration spectrum in terms of acceleration due to gravity
 mapdl.psdunit(1, "accg", 9.81 * 1000)
+
 # define the frequency points in the input table 1
 mapdl.psdfrq(1, " ", 1, 40, 50, 70.71678, 100, 700, 900)
+
 # define the PSD values in the input table 1
 mapdl.psdval(1, 0.01, 0.01, 0.1, 1, 10, 10, 1)
+
 # set the damping ratio as 5%
 mapdl.dmprat(0.05)
+
 # apply base excitation on the set of nodes N_BASE_EXCITE in the y-direction from table 1
 mapdl.d("N_BASE_EXCITE", "uy", 1)
+
 # calculate the participation factor for PSD with base excitation from input table 1
 mapdl.pfact(1, "base")
+
 # write the displacent solution relative to the base excitation to the results file from the PSD analysis
 mapdl.psdres("disp", "rel")
+
 # write the absolute velocity solution to the results file from the PSD analysis
 mapdl.psdres("velo", "abs")
+
 # write the absolute acceleration solution to the results file from the PSD analysis
 mapdl.psdres("acel", "abs")
+
 # combine only those modes whose significance level exceeds 0.0001
 mapdl.psdcom()
-mapdl.solve()
+output = mapdl.solve()
+print(output)
 
-
-# post-process PSD analysis
+###############################################################################
+# Post-process PSD analysis
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
 # Using MAPDL methods in POST1
 mapdl.post1()
 mapdl.set(1, 1)
@@ -199,29 +222,39 @@ mapdl.plnsol("u", "sum")
 
 # Using MAPDL methods in POST26 (time-history post-processing)
 mapdl.post26()
+
 # allow storage for 200 variables
 mapdl.numvar(200)
 mapdl.cmsel("s", "MY_MONITOR")
 monitored_node = mapdl.queries.ndnext(0)
 mapdl.store("psd")
+
 # store the psd analysis u_y data for the node MYMONITOR as the reference no 2
 mapdl.nsol(2, monitored_node, "u", "y")
+
 # compute the response power spectral density for displacement associated with variable 2
 mapdl.rpsd(3, 2)
 mapdl.show("png")
+
 # plot the variable 3
 mapdl.plvar(3)
+
 # print the variable 3
 mapdl.prvar(3)
+
 # x-axis is set for Log X scale
 mapdl.gropt("logx", 1)
+
 # y-axis is set for Log X scale
 mapdl.gropt("logy", 1)
+
 # plot the variable 3
 mapdl.plvar(3)
 mapdl.show("close")
 
-# Using python libraries to construct plots
+###############################################################################
+# Plot using python libraries
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)
 mapdl.dim("response", "array", 4000, 1)
@@ -231,7 +264,6 @@ frequencies = mapdl.parameters["frequencies"]
 response = mapdl.parameters["response"]
 
 # use Matplotlib to create graph
-import matplotlib.pyplot as plt
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -241,5 +273,6 @@ ax.plot(frequencies, response)
 ax.set_xlabel("Frequencies")
 ax.set_ylabel("Response power spectral density")
 
-# exit MAPDL
+###############################################################################
+# Exit MAPDL
 mapdl.exit()
