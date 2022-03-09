@@ -418,8 +418,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. You can use double ("DOUBLE" or "D"),
+            or complex numbers ("COMPLEX" or "Z"). Alternatively you can also supply a
+            numpy data type. Defaults to ``np.double``.
         fname : str, optional
             Filename to read the matrix from.  Defaults to ``"file.full"``.
         mat_id : str, optional
@@ -450,13 +451,90 @@ class MapdlMath:
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s", mat_id, fname
         )
+        quotes = "'"
+        allowed_mat_id = (
+            "STIFF",
+            "MASS",
+            "DAMP",
+            "NOD2BCS",
+            "USR2BCS",
+            "GMAT",
+            "K_RE",
+            "K_IM",
+        )
+        if mat_id.upper() not in allowed_mat_id:
+            raise ValueError(
+                f"The 'mat_id' parameter supplied ('{mat_id}') is not allowed. "
+                f"Only the following are allowed: \n{', '.join([quotes + each + quotes for each in allowed_mat_id])}"
+            )
+
+        if isinstance(dtype, str):
+            if dtype.lower() not in ("complex", "double", "d", "z"):
+                raise ValueError(
+                    f"Data type ({dtype}) not allowed as a string."
+                    "Use either: 'double' or 'complex', or a valid numpy data type."
+                )
+            if dtype.lower() in ("complex", "z"):
+                dtype_ = "'Z'"
+                dtype = np.complex64
+            else:
+                dtype_ = "'D'"
+                dtype = np.double
+        else:
+            if dtype not in ANSYS_VALUE_TYPE.values():
+                allowables_np_dtypes = ", ".join(
+                    [
+                        str(each).split("'")[1]
+                        for each in ANSYS_VALUE_TYPE.values()
+                        if each
+                    ]
+                )
+                raise ValueError(
+                    f"Numpy data type not allowed. Only: {allowables_np_dtypes}"
+                )
+            if "complex" in str(dtype):
+                dtype_ = "'Z'"
+            else:
+                dtype_ = "'D'"
+
+        if dtype_ == "'Z'" and mat_id.upper() in ("STIFF", "MASS", "DAMP"):
+            raise ValueError(
+                "Reading the stiffness, mass or damping matrices to a complex array is not supported."
+            )
+
         self._mapdl.run(
-            f"*SMAT,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
+            f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
-            return self._mapdl._mat_data(ans_sparse_mat.id)
+            return self._mapdl._mat_data(ans_sparse_mat.id).astype(dtype)
         return ans_sparse_mat
+
+    def _load_file(self, fname):
+        """
+        Provide file to MAPDL instance.
+
+        If in local:
+            Checks if the file exists, if not, it raises a FileNotFound exception
+
+        If in not-local:
+            Check if the file exists locally or in the working directory, if not, it will raise a FileNotFound exception.
+            If the file is local, it will be uploaded.
+
+        """
+        if self._mapdl._local:  # pragma: no cover
+            if not os.path.exists(fname):
+                raise FileNotFoundError(f"The file {fname} could not be found.")
+        else:
+            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
+                raise FileNotFoundError(
+                    f"The file {fname} could not be found in the local client or remote working directory."
+                )
+            if os.path.exists(fname):
+                self._mapdl.upload(fname)
+                fname = os.path.basename(fname)
+
+        return fname
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
@@ -464,7 +542,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to ``np.double``
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -488,6 +568,7 @@ class MapdlMath:
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "STIFF", asarray)
 
     def mass(self, dtype=np.double, fname="file.full", asarray=False):
@@ -496,8 +577,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -522,6 +604,7 @@ class MapdlMath:
         <60x60 sparse matrix of type '<class 'numpy.float64'>'
             with 1734 stored elements in Compressed Sparse Row format>
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "MASS", asarray)
 
     def damp(self, dtype=np.double, fname="file.full", asarray=False):
@@ -530,8 +613,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -557,6 +641,7 @@ class MapdlMath:
             with 1734 stored elements in Compressed Sparse Row format>
 
         """
+        fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
     def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
@@ -596,6 +681,8 @@ class MapdlMath:
         self._mapdl._log.info(
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
+
+        fname = self._load_file(fname)
         self._mapdl.run(
             f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
@@ -658,6 +745,7 @@ class MapdlMath:
         APDLMath Vector Size 126
 
         """
+        fname = self._load_file(fname)
         return self.get_vec(dtype, fname, "RHS", asarray)
 
     def svd(self, mat, thresh="", sig="", v="", **kwargs):
@@ -1338,8 +1426,18 @@ class AnsMat(ApdlMathObj):
         """Return if matrix is symmetric."""
         return True
 
-    def asarray(self) -> np.ndarray:
+    def asarray(self, dtype=None) -> np.ndarray:
         """Returns vector as a numpy array.
+
+        Parameters
+        ----------
+        dtype : numpy.dtype, optional
+            Numpy data type
+
+        Returns
+        -------
+        np.ndarray
+            Numpy array with the defined data type
 
         Examples
         --------
@@ -1349,9 +1447,14 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
+        >>> v.asarray(dtype=np.int)
+        [1 1 1 1 1 1 1 1 1 1]
 
         """
-        return self._mapdl._mat_data(self.id)
+        if dtype:
+            return self._mapdl._mat_data(self.id).astype(dtype)
+        else:
+            return self._mapdl._mat_data(self.id)
 
     def __mul__(self, vec):
         raise AttributeError(
