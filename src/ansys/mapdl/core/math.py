@@ -418,8 +418,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. You can use double ("DOUBLE" or "D"),
+            or complex numbers ("COMPLEX" or "Z"). Alternatively you can also supply a
+            numpy data type. Defaults to ``np.double``.
         fname : str, optional
             Filename to read the matrix from.  Defaults to ``"file.full"``.
         mat_id : str, optional
@@ -450,17 +451,34 @@ class MapdlMath:
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s", mat_id, fname
         )
+        quotes = "'"
+        allowed_mat_id = (
+            "STIFF",
+            "MASS",
+            "DAMP",
+            "NOD2BCS",
+            "USR2BCS",
+            "GMAT",
+            "K_RE",
+            "K_IM",
+        )
+        if mat_id.upper() not in ():
+            raise ValueError(
+                f"The 'mat_id' parameter supplied ('{mat_id}') is not allowed. "
+                f"Only the following are allowed: \n{', '.join([quotes + each + quotes for each in allowed_mat_id])}"
+            )
+
         if isinstance(dtype, str):
-            if dtype.lower() not in ("complex", "double"):
+            if dtype.lower() not in ("complex", "double", "d", "z"):
                 raise ValueError(
                     f"Data type ({dtype}) not allowed as a string."
                     "Use either: 'double' or 'complex', or a valid numpy data type."
                 )
-            if dtype.lower() == "complex":
-                dtype_ = "Z"
+            if dtype.lower() in ("complex", "z"):
+                dtype_ = "'Z'"
                 dtype = np.complex64
             else:
-                dtype_ = "D"
+                dtype_ = "'D'"
                 dtype = np.double
         else:
             if dtype not in ANSYS_VALUE_TYPE.values():
@@ -475,9 +493,14 @@ class MapdlMath:
                     f"Numpy data type not allowed. Only: {allowables_np_dtypes}"
                 )
             if "complex" in str(dtype):
-                dtype_ = "Z"
+                dtype_ = "'Z'"
             else:
-                dtype_ = "D"
+                dtype_ = "'D'"
+
+        if dtype_ == "'Z'" and mat_id.upper() in ("STIFF", "MASS", "DAMP"):
+            raise ValueError(
+                "Reading the stiffness, mass or damping matrices to a complex array is not supported."
+            )
 
         self._mapdl.run(
             f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}", mute=True
@@ -519,7 +542,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to ``np.double``
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -552,8 +577,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -587,8 +613,9 @@ class MapdlMath:
         Parameters
         ----------
         dtype : numpy.dtype, optional
-            Numpy data type to store the vector as.  Defaults to
-            ``np.double``.
+            Numpy data type to store the vector as. Only applicable if
+            ``asarray=True``, otherwise the returned matrix contains
+            double float numbers. Defaults to ``np.double``
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
