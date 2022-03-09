@@ -462,7 +462,7 @@ class MapdlMath:
             "K_RE",
             "K_IM",
         )
-        if mat_id.upper() not in ():
+        if mat_id.upper() not in allowed_mat_id:
             raise ValueError(
                 f"The 'mat_id' parameter supplied ('{mat_id}') is not allowed. "
                 f"Only the following are allowed: \n{', '.join([quotes + each + quotes for each in allowed_mat_id])}"
