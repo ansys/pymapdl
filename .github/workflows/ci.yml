@@ -100,19 +100,24 @@ jobs:
           sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
+      - name: Retrieve PyMAPDL version
+        run: |
+          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+        id: version
+
       - name: Cache pip
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
           key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
           restore-keys: |
-            Python-${{ runner.os }}-${{ matrix.python-version }}
+            Python-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache examples
         uses: actions/cache@v2
         with:
           path: ~/doc/examples
-          key: Examples-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/examples/*') }}
+          key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
           restore-keys: |
             Examples-
 
@@ -120,13 +125,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/doc/build
-          key: doc-build-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('doc/build/*') }}
+          key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
           path: ~/doc/**/_autosummary/*.rst
-          key: autosummary-rst-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('~/doc/**/_autosummary/*.rst') }}
+          key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Test virtual framebuffer
         run: |
