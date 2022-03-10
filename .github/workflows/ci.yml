@@ -140,24 +140,24 @@ jobs:
         with:
           path: doc/source/examples
           key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          # restore-keys: |
-          #   Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
+          restore-keys: |
+            Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache docs build directory
         uses: actions/cache@v2
         with:
           path: doc/build
           key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          # restore-keys: |
-          #   doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
+          restore-keys: |
+            doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          # restore-keys: |
-          #   autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
+          restore-keys: |
+            autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Install Docs Build Requirements
         run: |
