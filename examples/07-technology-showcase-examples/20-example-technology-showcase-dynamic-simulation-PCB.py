@@ -54,10 +54,10 @@ mapdl.cmsel("all")
 
 # duplicate single PCB to get three layers
 #  get the maximum node number for the single layers PCB in the input file
-max_nodenum = mapdl.get("max_nodenum", "node", " ", "num", "max")
+max_nodenum = mapdl.get("max_nodenum", "node", "", "num", "max")
 
 # generate additional PCBs offset by 20 mm in the -y direction
-mapdl.egen("3", max_nodenum, "all", dy="-20")
+mapdl.egen(3, max_nodenum, "all", dy=-20)
 
 
 # bind the three layers together
@@ -75,16 +75,16 @@ queries = mapdl.queries
 # and couple all dofs at the interface
 for node_id in range(1, nb_selected_nodes + 1):
     current_node = queries.ndnext(current_node)
-    mapdl.nsel("a", "node", " ", current_node + max_nodenum)
-    mapdl.nsel("a", "node", " ", current_node + 2 * max_nodenum)
+    mapdl.nsel("a", "node", "", current_node + max_nodenum)
+    mapdl.nsel("a", "node", "", current_node + 2 * max_nodenum)
 mapdl.cpintf("all")
 
 # define fixed support boundary condition
 # get max coupled set number
-cp_max = mapdl.get("cp_max", "cp", "0", "max")
+cp_max = mapdl.get("cp_max", "cp", 0, "max")
 
 # unselect nodes scoped in CP equations
-mapdl.nsel("u", "cp", " ", "1", "cp_max")
+mapdl.nsel("u", "cp", "", 1, "cp_max")
 
 # create named selection for base excitation
 mapdl.cm("n_base_excite", "node")
@@ -96,15 +96,15 @@ mapdl.d("all", "all")
 mapdl.allsel("all")
 mapdl.cmsel("all")
 mapdl.graphics("power")
-mapdl.rgb("index", "100", "100", "100", "0")
-mapdl.rgb("index", "80", "80", "80", "13")
-mapdl.rgb("index", "60", "60", "60", "14")
-mapdl.rgb("index", "0", "0", "0", "15")
+mapdl.rgb("index", 100, 100, 100, 0)
+mapdl.rgb("index", 80, 80, 80, 13)
+mapdl.rgb("index", 60, 60, 60, 14)
+mapdl.rgb("index", 0, 0, 0, 15)
 mapdl.triad("rbot")
-mapdl.pnum("type", "1")
-mapdl.number("1")
-mapdl.hbc("1", "on")
-mapdl.pbc("all", " ", "1")
+mapdl.pnum("type", 1)
+mapdl.number(1)
+mapdl.hbc(1, "on")
+mapdl.pbc("all", "", 1)
 mapdl.view(1, 1, 1, 1)
 mapdl.eplot(vtk=False)
 mapdl.eplot(vtk=True)
@@ -182,7 +182,7 @@ mapdl.spopt("psd")
 mapdl.psdunit(1, "accg", 9.81 * 1000)
 
 # define the frequency points in the input table 1
-mapdl.psdfrq(1, " ", 1, 40, 50, 70.71678, 100, 700, 900)
+mapdl.psdfrq(1, "", 1, 40, 50, 70.71678, 100, 700, 900)
 
 # define the PSD values in the input table 1
 mapdl.psdval(1, 0.01, 0.01, 0.1, 1, 10, 10, 1)
