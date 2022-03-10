@@ -156,8 +156,6 @@ jobs:
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Install Docs Build Requirements
         run: |
