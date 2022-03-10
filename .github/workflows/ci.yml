@@ -14,6 +14,7 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
 
 jobs:
 
@@ -100,6 +101,26 @@ jobs:
           sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install build
+          python -m build
+          pip install dist/ansys*.whl
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+
       - name: Retrieve PyMAPDL version
         run: |
           echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
@@ -132,26 +153,6 @@ jobs:
         with:
           path: ~/doc/**/_autosummary/*.rst
           key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
-
-      - name: Test virtual framebuffer
-        run: |
-          pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
-
-      - name: Install ansys-mapdl-core
-        run: |
-          pip install build
-          python -m build
-          pip install dist/ansys*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:v21.2.1'
   
       - name: Build Documentation
         run: |
