@@ -138,7 +138,7 @@ jobs:
       - name: Cache examples
         uses: actions/cache@v2
         with:
-          path: doc/examples
+          path: doc/source/examples
           key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -154,7 +154,7 @@ jobs:
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
-          path: doc/**/_autosummary/*.rst
+          path: doc/source/**/_autosummary/*.rst
           key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
