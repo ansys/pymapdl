@@ -132,13 +132,13 @@ jobs:
       - name: Retrieve PyMAPDL version
         run: |
           echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
-          echo "PyMAPDL version is: ${{ steps.version.outputs.PYMAPDL_VERSION }}"
+          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
 
       - name: Cache examples
         uses: actions/cache@v2
         with:
-          path: ~/doc/examples
+          path: doc/examples
           key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -146,7 +146,7 @@ jobs:
       - name: Cache docs build directory
         uses: actions/cache@v2
         with:
-          path: ~/doc/build
+          path: doc/build
           key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -154,7 +154,7 @@ jobs:
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
-          path: ~/doc/**/_autosummary/*.rst
+          path: doc/**/_autosummary/*.rst
           key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
