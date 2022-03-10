@@ -139,23 +139,32 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/doc/examples
-          key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
+          key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache docs build directory
         uses: actions/cache@v2
         with:
           path: ~/doc/build
-          key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
+          key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
           path: ~/doc/**/_autosummary/*.rst
-          key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
-  
-      - name: Build Documentation
+          key: autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            autosummary-rst-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: Install Docs Build Requirements
         run: |
           pip install -r requirements/requirements_docs.txt
+
+      - name: Build Documentation
+        run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
 
       # Verify that sphinx generates no warnings
