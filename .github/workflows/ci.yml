@@ -101,6 +101,14 @@ jobs:
           sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
       - name: Test virtual framebuffer
         run: |
           pip install -r .ci/requirements_test_xvfb.txt
@@ -124,23 +132,14 @@ jobs:
       - name: Retrieve PyMAPDL version
         run: |
           echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "PyMAPDL version is: ${{ steps.version.outputs.PYMAPDL_VERSION }}"
         id: version
-
-      - name: Cache pip
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
-          restore-keys: |
-            Python-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache examples
         uses: actions/cache@v2
         with:
           path: ~/doc/examples
           key: Examples-${{ steps.version.outputs.PYMAPDL_VERSION }}
-          restore-keys: |
-            Examples-
 
       - name: Cache docs build directory
         uses: actions/cache@v2
