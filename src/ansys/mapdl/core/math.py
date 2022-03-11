@@ -533,10 +533,10 @@ class MapdlMath:
 
             elif os.path.exists(fname) and base_fname in self._mapdl.list_files():
                 warn(
-                    f"The file '{base_fname} is present in both, the python working directory and in the MAPDL working directory. "
+                    f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
+                    "and in the MAPDL working directory ('{self._mapdl.directory}'). "
                     "Using the one in the MAPDL directory.\n"
-                    "If you want to overwrite the file in the MAPDL working directory, use 'mapdl.upload()' to upload the "
-                    "file in the Python working directory."
+                    "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
                 )
 
             elif os.path.exists(fname) and base_fname not in self._mapdl.list_files():
