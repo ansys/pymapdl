@@ -247,7 +247,20 @@ def test_str(mapdl):
 
 
 def test_version(mapdl):
-    assert isinstance(mapdl.version, float)
+    assert isinstance(mapdl.version, float)  # Checking MAPDL version
+    assert 20.0 < mapdl.version < 24.0  # Some upper bound.
+
+
+def test_pymapdl_version():
+    from ansys.mapdl.core._version import __version__ as pymapdl_version
+
+    assert isinstance(pymapdl_version, str)
+    version_ = pymapdl_version.split(".")
+
+    assert len(version_) == 3
+    assert version_[0].isnumeric()
+    assert version_[1].isnumeric()
+    assert version_[2].isnumeric() or "dev" in version_[2]
 
 
 def test_comment(cleared, mapdl):
