@@ -14,6 +14,14 @@ from ansys.mapdl.core.misc import random_string
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
 
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+""",
+)
+
 
 @pytest.fixture(scope="module")
 def mm(mapdl):
@@ -528,7 +536,7 @@ def test_status(mm):
 
 
 @skip_in_cloud
-def test__load_file(mm):
+def test__load_file(mm):  # pragma: no cover
     # generating dummy file
     # mm._mapdl._local = True
     if not mm._mapdl._local:
