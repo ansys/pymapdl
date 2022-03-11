@@ -50,10 +50,10 @@ mapdl.cmsel("all")
 # Creating the complete layered model
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The original model will be duplicated to create a layered PCB of three layers
-# that are binded together
+# that are binded together.
 
 # duplicate single PCB to get three layers
-#  get the maximum node number for the single layers PCB in the input file
+# get the maximum node number for the single layers PCB in the input file
 max_nodenum = mapdl.get("max_nodenum", "node", "", "num", "max")
 
 # generate additional PCBs offset by 20 mm in the -y direction
@@ -110,8 +110,11 @@ mapdl.eplot(vtk=False)
 mapdl.eplot(vtk=True)
 
 ###############################################################################
-# Run a modal analysis
+# Run modal analysis
 # ~~~~~~~~~~~~~~~~~~~~~~~
+# A modal analysis is run using Block Lanzos.
+# Only 10 modes are extracted for the sake of run times, but using a higher
+# number of nodes is recommended (suggestion: 300 modes).
 #
 
 # enter solution processor and define analysis settings
@@ -134,6 +137,8 @@ print(output)
 # modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
 # and PyDPF-Core. All methods lead to the same result and are just given as an
 # example of how each module can be used.
+# The methods using DPF modules are commented in the code due to CI/CD issues
+# but will run locally if uncommented.
 
 # using MAPDL methods
 mapdl.post1()
@@ -144,9 +149,8 @@ mapdl.plnsol("u", "sum")
 mapdl_result = mapdl.result
 mapdl_result.plot_nodal_displacement(0)
 
-###############################################################################
 # Using DPF-Post
-# ~~~~~~~~~~~~~~
+
 # from ansys.dpf import post
 # solution_path = 'file.rst'
 # solution = post.load_solution(solution_path)
@@ -155,7 +159,8 @@ mapdl_result.plot_nodal_displacement(0)
 # total_deformation = displacement.norm
 # total_deformation.plot_contour(show_edges=True)
 
-# using DPF-Core
+# Using DPF-Core
+
 # from ansys.dpf import core
 # model = core.Model(solution_path)
 # results = model.results
@@ -167,9 +172,9 @@ mapdl_result.plot_nodal_displacement(0)
 # mesh.plot(total_def_container.get_field_by_time_id(1))
 
 ###############################################################################
-# PSD analysis
-# ~~~~~~~~~~~~~
-# The response spectrum analysis is defined, solved and post-processed
+# Run PSD analysis
+# ~~~~~~~~~~~~~~~~~
+# The response spectrum analysis is defined, solved and post-processed.
 
 # define PSD analysis with input spectrum
 mapdl.slashsolu()
@@ -213,14 +218,30 @@ print(output)
 ###############################################################################
 # Post-process PSD analysis
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
-# Using MAPDL methods in POST1
+# The response spectrum analysis is post-processed. First, the standard
+# MAPDL POST1 postprocessor is used. Then, the MAPDL time-history
+# POST26 postprocessor is used to generate the response power spectral
+# density.
+# density.
+# .. note:: The graph generated through POST26 is exported as a picture
+#    in the working directory. Finally, the results from POST26 are saved to Python
+#    variables to be plotted in the Python environment with the use of Matplotlib library.
+
+
+###############################################################################
+# Post-process PSD analysis in POST1
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 mapdl.post1()
 mapdl.set(1, 1)
 mapdl.plnsol("u", "sum")
 mapdl.set("last")
 mapdl.plnsol("u", "sum")
 
-# Using MAPDL methods in POST26 (time-history post-processing)
+###############################################################################
+# Post-process PSD analysis in POST26 (time-history post-processing)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 mapdl.post26()
 
 # allow storage for 200 variables
@@ -253,8 +274,9 @@ mapdl.plvar(3)
 mapdl.show("close")
 
 ###############################################################################
-# Plot using python libraries
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Post-process PSD analysis using Matplotlib
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)
 mapdl.dim("response", "array", 4000, 1)
@@ -264,7 +286,6 @@ frequencies = mapdl.parameters["frequencies"]
 response = mapdl.parameters["response"]
 
 # use Matplotlib to create graph
-
 fig = plt.figure()
 ax = fig.add_subplot(111)
 plt.xscale("log")
