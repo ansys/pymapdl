@@ -221,9 +221,11 @@ print(output)
 # The response spectrum analysis is post-processed. First, the standard
 # MAPDL POST1 postprocessor is used. Then, the MAPDL time-history
 # POST26 postprocessor is used to generate the response power spectral
-# # density. Note - the graph generated through POST26 is exported as a picture
-# in the working directory. Finally, the results from POST26 are saved to Python
-# variables to be plotted in the Python environment with the use of Matplotlib library.
+# density.
+# density.
+# .. note:: The graph generated through POST26 is exported as a picture
+#    in the working directory. Finally, the results from POST26 are saved to Python
+#    variables to be plotted in the Python environment with the use of Matplotlib library.
 
 
 ###############################################################################
@@ -241,31 +243,39 @@ mapdl.plnsol("u", "sum")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mapdl.post26()
+
 # allow storage for 200 variables
 mapdl.numvar(200)
 mapdl.cmsel("s", "MY_MONITOR")
 monitored_node = mapdl.queries.ndnext(0)
 mapdl.store("psd")
+
 # store the psd analysis u_y data for the node MYMONITOR as the reference no 2
 mapdl.nsol(2, monitored_node, "u", "y")
+
 # compute the response power spectral density for displacement associated with variable 2
 mapdl.rpsd(3, 2)
 mapdl.show("png")
+
 # plot the variable 3
 mapdl.plvar(3)
+
 # print the variable 3
 mapdl.prvar(3)
+
 # x-axis is set for Log X scale
 mapdl.gropt("logx", 1)
+
 # y-axis is set for Log X scale
 mapdl.gropt("logy", 1)
+
 # plot the variable 3
 mapdl.plvar(3)
 mapdl.show("close")
 
 ###############################################################################
-# Post-process PSD analysis using Matplotlib library
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Post-process PSD analysis using Matplotlib
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)
