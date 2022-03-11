@@ -97,6 +97,10 @@ numpydoc_validation_exclude = {  # set of regex
     r"\.*MeshGrpc\.*",
 }
 
+# notfound.extension
+notfound_template = "404.html"
+notfound_urls_prefix = "/mapdldocs.pyansys/"
+
 # static path
 html_static_path = ["_static"]
 
