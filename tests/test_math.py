@@ -527,9 +527,18 @@ def test_status(mm):
     mm.status()
 
 
+@skip_in_cloud
 def test__load_file(mm):
     # generating dummy file
+    # mm._mapdl._local = True
+    if not mm._mapdl._local:
+        return True
+
     fname = random_string() + ".file"
+
+    ## Checking non-exists
+    with pytest.raises(FileNotFoundError):
+        assert fname == mm._load_file(fname)
 
     with open(fname, "w") as fid:
         fid.write("# Dummy")
@@ -541,3 +550,7 @@ def test__load_file(mm):
     ## Checking case where the file is in both.
     with pytest.warns():
         assert fname == mm._load_file(fname)
+
+    ## Checking the case where the file is only in the MAPDL folder
+    os.remove(fname)
+    assert fname == mm._load_file(fname)
