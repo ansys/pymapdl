@@ -9,6 +9,7 @@ from scipy import sparse
 
 from ansys.mapdl.core.errors import ANSYSDataTypeError
 import ansys.mapdl.core.math as apdl_math
+from ansys.mapdl.core.misc import random_string
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -524,3 +525,19 @@ def test_repr(mm):
 
 def test_status(mm):
     mm.status()
+
+
+def test__load_file(mm):
+    # generating dummy file
+    fname = random_string() + ".file"
+
+    with open(fname, "w") as fid:
+        fid.write("# Dummy")
+
+    ## Checking case where the file is only in python folder
+    assert fname == mm._load_file(fname)
+    assert fname in mm._mapdl.list_files()
+
+    ## Checking case where the file is in both.
+    with pytest.warns():
+        assert fname == mm._load_file(fname)
