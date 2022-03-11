@@ -525,7 +525,7 @@ class MapdlMath:
         """
         if self._mapdl._local:  # pragma: no cover
             base_fname = os.path.basename(fname)
-            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
+            if not os.path.exists(fname) and base_fname not in self._mapdl.list_files():
                 raise FileNotFoundError(
                     f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
                     f"nor in the MAPDL working directory ('{self._mapdl.directory}')."

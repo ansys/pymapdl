@@ -8,6 +8,7 @@ import pytest
 from scipy import sparse
 
 from ansys.mapdl.core.errors import ANSYSDataTypeError
+from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
 from ansys.mapdl.core.misc import random_string
 
@@ -535,30 +536,35 @@ def test_status(mm):
     mm.status()
 
 
-@skip_in_cloud
-def test__load_file(mm):  # pragma: no cover
+# @skip_in_cloud
+def test__load_file(mm, tmpdir):  # pragma: no cover
     # generating dummy file
-    # mm._mapdl._local = True
+    mm._mapdl._local = True
     if not mm._mapdl._local:
         return True
 
-    fname = random_string() + ".file"
+    fname_ = random_string() + ".file"
+    fname = str(tmpdir.mkdir("tmpdir").join(fname_))
 
     ## Checking non-exists
     with pytest.raises(FileNotFoundError):
-        assert fname == mm._load_file(fname)
+        assert fname_ == mm._load_file(fname)
 
     with open(fname, "w") as fid:
         fid.write("# Dummy")
 
     ## Checking case where the file is only in python folder
-    assert fname == mm._load_file(fname)
-    assert fname in mm._mapdl.list_files()
+    assert fname_ not in mm._mapdl.list_files()
+    assert fname_ == mm._load_file(fname)
+    assert fname_ in mm._mapdl.list_files()
 
     ## Checking case where the file is in both.
     with pytest.warns():
-        assert fname == mm._load_file(fname)
+        assert fname_ == mm._load_file(fname)
 
     ## Checking the case where the file is only in the MAPDL folder
     os.remove(fname)
-    assert fname == mm._load_file(fname)
+    assert fname_ == mm._load_file(fname)
+    assert not os.path.exists(fname)
+    assert fname_ in mm._mapdl.list_files()
+    mm._mapdl._local = False
