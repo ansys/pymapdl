@@ -10,7 +10,7 @@ version_info = 0, 58, 'dev0'
 
 try:
     import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     import importlib_metadata
 
 # Read from the pyproject.toml
