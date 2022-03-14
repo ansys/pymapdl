@@ -329,7 +329,7 @@ class Geometry:
 
         Examples
         --------
-        >>> mapdl.n_area
+        >>> mapdl.n_volu
         1
         """
         return self._item_count("VOLU")
@@ -382,6 +382,9 @@ class Geometry:
         >>> mapdl.knum
         array([1, 2, 3, 4, 5, 6, 7, 8], dtype=int32)
         """
+        if self._mapdl.geometry.n_keypoint == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("KP", item1="KLIST").astype(np.int32)
 
     @property
@@ -394,6 +397,10 @@ class Geometry:
         >>> mapdl.lnum
         array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12], dtype=int32)
         """
+        # For clean exit when there is no lines.
+        if self._mapdl.geometry.n_line == 0:
+            return np.array([], dtype=np.int32)
+
         # this (weirdly) sometimes fails
         for _ in range(5):
             lnum = self._mapdl.get_array("LINES", item1="LLIST")
@@ -411,6 +418,10 @@ class Geometry:
         >>> mapdl.anum
         array([1, 2, 3, 4, 5, 6], dtype=int32)
         """
+        # Clean exit
+        if self._mapdl.geometry.n_area == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("AREA", item1="ALIST").astype(np.int32)
 
     @property
@@ -423,6 +434,9 @@ class Geometry:
         >>> mapdl.vnum
         array([1], dtype=int32)
         """
+        if self._mapdl.geometry.n_volu == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
@@ -437,6 +451,10 @@ class Geometry:
         self._mapdl.lsel("ALL", mute=True)
         self._mapdl.asel("ALL", mute=True)
         self._mapdl.vsel("NONE", mute=True)
+
+        # Clean exit if there is no lines.
+        if self._mapdl.geometry._item_count("LINE") == 0:
+            return pv.PolyData()
 
         iges = self._load_iges()
 
@@ -873,6 +891,8 @@ class Geometry:
         # FLST,5,76,4,ORDE,74
         # FITEM,5,2
         # LSEL, , , ,P51X
+        if self._item_count(item_type) == 0:
+            return
 
         # unordered option
         with self._mapdl.non_interactive:
