@@ -202,6 +202,10 @@ def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
     assert all([each > 0 for each in k.shape])
     assert all([each > 0 for each in m.shape])
 
+    # deleting temp files
+    for each_file in full_files:
+        os.remove(each_file)
+
 
 def test_load_stiff_mass_as_array(mm, cube_solve):
     k = mm.stiff(asarray=True)
