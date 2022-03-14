@@ -201,7 +201,12 @@ class MeshGrpc(Mesh):
         array([    1,     2,     3, ...,  9998,  9999, 10000])
         """
         if self._enum is None:
-            self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
+            if self._mapdl.mesh.n_elem == 0:
+                return np.array([], dtype=np.int32)  #
+            else:
+                self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(
+                    np.int32
+                )
         return self._enum
 
     @threaded
