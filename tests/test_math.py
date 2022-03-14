@@ -522,5 +522,16 @@ def test_repr(mm):
     assert mm._status == repr(mm)
 
 
-def test_status(mm):
-    mm.status()
+def test_status(mm, capsys):
+    assert mm.status() is None
+    captured = capsys.readouterr()
+    printed_output = captured.out
+
+    assert "APDLMATH PARAMETER STATUS-" in printed_output
+    assert all(
+        [each in printed_output for each in ["Name", "Type", "Dims", "Workspace"]]
+    )
+
+    # Checking also _status property
+    assert "APDLMATH PARAMETER STATUS-" in mm._status
+    assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])
