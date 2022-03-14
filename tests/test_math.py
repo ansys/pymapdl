@@ -532,7 +532,6 @@ def test_repr(mm):
     assert mm._status == repr(mm)
 
 
-# @skip_in_cloud
 def test__load_file(mm, tmpdir):  # pragma: no cover
     # generating dummy file
     # mm._mapdl._local = True  # Uncomment to test locally.
