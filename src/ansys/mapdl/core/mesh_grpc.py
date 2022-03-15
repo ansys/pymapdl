@@ -202,7 +202,7 @@ class MeshGrpc(Mesh):
         """
         if self._enum is None:
             if self._mapdl.mesh.n_elem == 0:
-                return np.array([], dtype=np.int32)  #
+                return np.array([], dtype=np.int32)
             else:
                 self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(
                     np.int32
