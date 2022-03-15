@@ -524,8 +524,27 @@ class MapdlMath:
 
         """
         if self._mapdl._local:  # pragma: no cover
-            if not os.path.exists(fname):
-                raise FileNotFoundError(f"The file {fname} could not be found.")
+            base_fname = os.path.basename(fname)
+            if not os.path.exists(fname) and base_fname not in self._mapdl.list_files():
+                raise FileNotFoundError(
+                    f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+                    f"nor in the MAPDL working directory ('{self._mapdl.directory}')."
+                )
+
+            elif os.path.exists(fname) and base_fname in self._mapdl.list_files():
+                warn(
+                    f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
+                    "and in the MAPDL working directory ('{self._mapdl.directory}'). "
+                    "Using the one in the MAPDL directory.\n"
+                    "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
+                )
+
+            elif os.path.exists(fname) and base_fname not in self._mapdl.list_files():
+                self._mapdl.upload(fname)
+
+            elif not os.path.exists(fname) and base_fname in self._mapdl.list_files():
+                pass
+
         else:
             if not os.path.exists(fname) and fname not in self._mapdl.list_files():
                 raise FileNotFoundError(
@@ -533,9 +552,9 @@ class MapdlMath:
                 )
             if os.path.exists(fname):
                 self._mapdl.upload(fname)
-                fname = os.path.basename(fname)
 
-        return fname
+        # Simplifying name for MAPDL reads it.
+        return os.path.basename(fname)
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
