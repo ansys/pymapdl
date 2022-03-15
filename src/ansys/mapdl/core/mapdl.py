@@ -2903,33 +2903,3 @@ class _MapdlCore(Commands):
         fname = load_file(self, fname_)
         self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
         return self.input(fname)
-
-    @wraps(Commands.mpwrite)
-    def mpwrite(
-        self,
-        fname="",
-        ext="",
-        lib="",
-        mat="",
-        download_file=False,
-        progress_bar=True,
-        **kwargs,
-    ):
-        fname_ = fname + "." + ext
-        if not self._local:
-            if os.path.dirname(fname_):
-                raise IOError(
-                    "Only writing files to the MAPDL working directory is allowed. "
-                    f"The supplied path {fname_} is not allowed."
-                )
-
-        output = super().mpwrite(fname, ext, lib, mat, **kwargs)
-        if download_file:
-            if self._local:
-                raise RuntimeError(
-                    "Downloading the file written by 'MPWRITE' is only allowed "
-                    "when the MAPDL instance is not remote."
-                )
-            self.download(os.path.basename(fname_), progress_bar=progress_bar)
-
-        return output
