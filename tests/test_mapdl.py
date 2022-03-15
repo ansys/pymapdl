@@ -1482,56 +1482,14 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     )
     assert f"{fname}.{ext}" in mapdl.list_files()
 
-    # asserting downloading
-    ext = "mp2"
-    assert (
-        f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE= {fname}.{ext}"
-        in mapdl.mpwrite(fname, ext, download_file=True)
-    )
-    assert f"{fname}.{ext}" in mapdl.list_files()
-    assert os.path.exists(f"{fname}.{ext}")
-
-    ## Checking reading
-    # Uploading a local file
-    with open(f"{fname}.{ext}", "r") as fid:
-        text = fid.read()
-
-    os.remove(f"{fname}.{ext}")  # remove temp file
-
-    ext = ext + "2"
-    fname_ = f"{fname}.{ext}"
-    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
-    nuxy = float(new_nuxy.split(",")[4])
+    nuxy = 0.3
     ex = 0.2100000e12
 
-    with open(fname_, "w") as fid:
-        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
-
-    assert fname_ not in mapdl.list_files()
-    mapdl.clear()
-    mapdl.prep7()
-    captured = capsys.readouterr()  # To flush it
-    output = mapdl.mpread(fname, ext)
-    captured = capsys.readouterr()
-    assert f"Uploading {fname}.{ext}:" in captured.err
-    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
-    assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
-    assert fname_ in mapdl.list_files()
-    # check if materials are read into the db
-    assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
-    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
-
     # Reding file in remote
-    fname_ = f"{fname}.{ext}"
-    os.remove(fname_)
-    assert not os.path.exists(fname_)
-    assert f"{fname}.{ext}" in mapdl.list_files()
     mapdl.clear()
     mapdl.prep7()
     output = mapdl.mpread(fname, ext)
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
-    assert "0.4000000" in output
-    assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
+    assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
