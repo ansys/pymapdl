@@ -1620,7 +1620,7 @@ class _MapdlCore(Commands):
         if isinstance(level, str):
             level = level.upper()
         self._log_filehandler.setLevel(level)
-        self._log.addHandler(self._log_filehandler)
+        self._log.logger.addHandler(self._log_filehandler)
         self._log.info("Added file handler at %s", filepath)
 
     def remove_file_handler(self):
