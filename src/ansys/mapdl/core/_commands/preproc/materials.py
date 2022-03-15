@@ -691,12 +691,12 @@ class Materials:
         ----------
         fname
             File name and directory path (248 characters maximum,
-            including directory). If you do not specify the LIB
+            including directory). If you do not specify the ``LIB``
             option, the default directory is the current working
-            directory. If you specify the LIB option, the default is
+            directory. If you specify the ``LIB`` option, the default is
             the following search path: the current working directory,
-            the user's home directory, MPLIB_DIR (as specified by the
-            /MPLIB,READ,PATH command) and /ansys_dir/matlib (as
+            the user's home directory, ``MPLIB_DIR`` (as specified by the
+            ``/MPLIB,READ,PATH`` command) and ``/ansys_dir/matlib`` (as
             defined by installation). If you use the default for your
             directory, you can use all 248 characters for the file
             name.
@@ -706,25 +706,25 @@ class Materials:
 
         lib
             Reads material library files previously written with the
-            MPWRITE command.  (See the description of the LIB option
-            for the MPWRITE command.)  The only allowed value for LIB
-            is LIB.
+            MPWRITE command.  (See the description of the ``LIB`` option
+            for the ``MPWRITE`` command.)  The only allowed value for ``LIB``
+            is ``LIB``.
 
         Notes
         -----
-        Material properties written to a file without the LIB option
+        Material properties written to a file without the ``LIB`` option
         do not support nonlinear properties.  Also, properties written
-        to a file without the LIB option are restored in the same
+        to a file without the ``LIB`` option are restored in the same
         material number as originally defined.  To avoid errors, use
-        MPREAD with the LIB option only when reading files written
-        using MPWRITE with the LIB option.
+        ``MPREAD`` with the ``LIB`` option only when reading files written
+        using MPWRITE with the ``LIB`` option.
 
-        If you omit the LIB option for MPREAD, this command supports
+        If you omit the ``LIB`` option for ``MPREAD``, this command supports
         only linear properties.
 
         Material numbers are hardcoded.  If you write a material file
-        without specifying the LIB option, then read that file in
-        using the MPREAD command with the LIB option, the ANSYS
+        without specifying the ``LIB`` option, then read that file in
+        using the ``MPREAD`` command with the ``LIB`` option, the ANSYS
         program will not write the file to a new material number.
         Instead, it will write the file to the "old" material number
         (the number specified on the MPWRITE command that created the
