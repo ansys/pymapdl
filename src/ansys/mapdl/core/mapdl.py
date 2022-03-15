@@ -1618,7 +1618,7 @@ class _MapdlCore(Commands):
         self._log_filehandler = logging.FileHandler(filepath, mode=mode)
         self._log_filehandler.setFormatter(logging.Formatter(formatstr))
         if isinstance(level, str):
-            level = level.uppder()
+            level = level.upper()
         self._log_filehandler.setLevel(level)
         self._log.addHandler(self._log_filehandler)
         self._log.info("Added file handler at %s", filepath)
