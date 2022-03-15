@@ -1442,19 +1442,26 @@ class AnsMat(ApdlMathObj):
         """
         return (self.nrow, self.ncol)
 
-    def sym(self):  # BUG this is not always true
-        """Return if matrix is symmetric."""
+    def sym(self) -> bool:
+        """Return if matrix is symmetric.
+
+        Returns
+        -------
+        bool
+            ``True`` when this matrix is symmetric.
+
+        """
 
         info = self._mapdl._data_info(self.id)
 
         if meets_version(self._mapdl._server_version, (0, 5, 0)):  # pragma: no cover
             return info.mattype in [0, 1, 2]  # [UPPER, LOWER, DIAG] respectively
-        else:
-            warn(
-                "Call to sym() function cannot evaluate if"
-                "it is symmetric or not in this MAPDL version."
-            )
-            return True
+
+        warn(
+            "Call to ``sym`` cannot evaluate if this matrix "
+            "is symmetric with this version of MAPDL."
+        )
+        return True
 
     def asarray(self, dtype=None) -> np.ndarray:
         """Returns vector as a numpy array.
