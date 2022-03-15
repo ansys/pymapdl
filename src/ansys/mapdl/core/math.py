@@ -11,6 +11,8 @@ from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import numpy as np
 
+from ansys.mapdl.core.misc import load_file
+
 from .check_version import VersionError, meets_version, version_requires
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .errors import ANSYSDataTypeError, protect_grpc
@@ -523,38 +525,7 @@ class MapdlMath:
             If the file is local, it will be uploaded.
 
         """
-        if self._mapdl._local:  # pragma: no cover
-            base_fname = os.path.basename(fname)
-            if not os.path.exists(fname) and base_fname not in self._mapdl.list_files():
-                raise FileNotFoundError(
-                    f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
-                    f"nor in the MAPDL working directory ('{self._mapdl.directory}')."
-                )
-
-            elif os.path.exists(fname) and base_fname in self._mapdl.list_files():
-                warn(
-                    f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
-                    "and in the MAPDL working directory ('{self._mapdl.directory}'). "
-                    "Using the one in the MAPDL directory.\n"
-                    "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
-                )
-
-            elif os.path.exists(fname) and base_fname not in self._mapdl.list_files():
-                self._mapdl.upload(fname)
-
-            elif not os.path.exists(fname) and base_fname in self._mapdl.list_files():
-                pass
-
-        else:
-            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
-                raise FileNotFoundError(
-                    f"The file {fname} could not be found in the local client or remote working directory."
-                )
-            if os.path.exists(fname):
-                self._mapdl.upload(fname)
-
-        # Simplifying name for MAPDL reads it.
-        return os.path.basename(fname)
+        return load_file(self._mapdl, fname)
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
