@@ -2894,9 +2894,15 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.mpread)
     def mpread(self, fname="", ext="", lib="", **kwargs):
+        if lib:
+            raise NotImplemented(
+                "The option 'lib' is not supported by the MAPDL gRPC server."
+            )
+
         fname_ = fname + "." + ext
         fname = load_file(self, fname_)
-        return super().mpread(fname, "", lib, **kwargs)
+        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
+        return self.input(fname)
 
     @wraps(Commands.mpwrite)
     def mpwrite(
