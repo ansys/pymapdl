@@ -452,9 +452,9 @@ class Geometry:
         self._mapdl.asel("ALL", mute=True)
         self._mapdl.vsel("NONE", mute=True)
 
-        # Clean exit if there is no lines.
-        if self._mapdl.geometry._item_count("LINE") == 0:
-            return pv.PolyData()
+        # # Clean exit if there is no lines.
+        # if self._mapdl.geometry._item_count("LINE") == 0:
+        #     return pv.PolyData()
 
         iges = self._load_iges()
 
@@ -891,8 +891,8 @@ class Geometry:
         # FLST,5,76,4,ORDE,74
         # FITEM,5,2
         # LSEL, , , ,P51X
-        if self._item_count(item_type) == 0:
-            return
+        # if self._item_count(item_type) == 0:
+        #     return
 
         # unordered option
         with self._mapdl.non_interactive:
