@@ -1476,17 +1476,13 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     fname = "test"
     ext = "mp1"
 
-    assert (
-        f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE= {fname}.{ext}"
-        in mapdl.mpwrite(fname, ext)
-    )
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
     assert f"{fname}.{ext}" in mapdl.list_files()
 
     # asserting downloading
     ext = "mp2"
-    assert (
-        f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE= {fname}.{ext}"
-        in mapdl.mpwrite(fname, ext, download_file=True)
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(
+        fname, ext, download_file=True
     )
     assert f"{fname}.{ext}" in mapdl.list_files()
     assert os.path.exists(f"{fname}.{ext}")
