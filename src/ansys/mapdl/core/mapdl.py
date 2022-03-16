@@ -2895,7 +2895,7 @@ class _MapdlCore(Commands):
     @wraps(Commands.mpread)
     def mpread(self, fname="", ext="", lib="", **kwargs):
         if lib:
-            raise NotImplemented(
+            raise NotImplementedError(
                 "The option 'lib' is not supported by the MAPDL gRPC server."
             )
 
