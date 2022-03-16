@@ -1490,3 +1490,11 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert "TEMPERATURE TABLE ERASED." in output
     assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Test non-existing file
+    with pytest.raises(FileNotFoundError):
+        mapdl.mpread(fname="dummy", ext="dummy")
+
+    # Test not implemented error
+    with pytest.raises(NotImplementedError):
+        mapdl.mpread(fname="dummy", ext="dummy", lib="something")
