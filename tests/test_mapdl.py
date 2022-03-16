@@ -1476,10 +1476,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     fname = "test"
     ext = "mp1"
 
-    assert (
-        f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE= {fname}.{ext}"
-        in mapdl.mpwrite(fname, ext)
-    )
+    mapdl.mpwrite(fname, ext)
     assert f"{fname}.{ext}" in mapdl.list_files()
 
     nuxy = 0.3
