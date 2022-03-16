@@ -332,3 +332,49 @@ def no_return(func):
         func(*args, **kwargs)
 
     return wrapper
+
+
+def load_file(mapdl, fname):
+    """
+    Provide a file to the MAPDL instance.
+
+    If in local:
+        Checks if the file exists, if not, it raises a ``FileNotFound`` exception
+
+    If in not-local:
+        Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
+        If the file is local, it will be uploaded.
+
+    """
+    if mapdl._local:  # pragma: no cover
+        base_fname = os.path.basename(fname)
+        if not os.path.exists(fname) and base_fname not in mapdl.list_files():
+            raise FileNotFoundError(
+                f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+                f"nor in the MAPDL working directory ('{mapdl.directory}')."
+            )
+
+        elif os.path.exists(fname) and base_fname in mapdl.list_files():
+            warn(
+                f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
+                f"and in the MAPDL working directory ('{mapdl.directory}'). "
+                "Using the one in the MAPDL directory.\n"
+                "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
+            )
+
+        elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+            mapdl.upload(fname)
+
+        elif not os.path.exists(fname) and base_fname in mapdl.list_files():
+            pass
+
+    else:
+        if not os.path.exists(fname) and fname not in mapdl.list_files():
+            raise FileNotFoundError(
+                f"The file {fname} could not be found in the local client or remote working directory."
+            )
+        if os.path.exists(fname):
+            mapdl.upload(fname)
+
+    # Simplifying name for MAPDL reads it.
+    return os.path.basename(fname)

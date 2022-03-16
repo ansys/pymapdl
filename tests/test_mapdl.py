@@ -1467,3 +1467,34 @@ def test_seltol(mapdl, value):
         assert "SELECT TOLERANCE=" in mapdl.seltol(value)
     else:
         assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
+
+
+def test_mpfunctions(mapdl, cube_solve, capsys):
+    mapdl.prep7()
+
+    # check writing to file
+    fname = "test"
+    ext = "mp1"
+
+    mapdl.mpwrite(fname, ext)
+    assert f"{fname}.{ext}" in mapdl.list_files()
+
+    nuxy = 0.3
+    ex = 0.2100000e12
+
+    # Reding file in remote
+    mapdl.clear()
+    mapdl.prep7()
+    output = mapdl.mpread(fname, ext)
+    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
+    assert "TEMPERATURE TABLE ERASED." in output
+    assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
+    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Test non-existing file
+    with pytest.raises(FileNotFoundError):
+        mapdl.mpread(fname="dummy", ext="dummy")
+
+    # Test not implemented error
+    with pytest.raises(NotImplementedError):
+        mapdl.mpread(fname="dummy", ext="dummy", lib="something")
