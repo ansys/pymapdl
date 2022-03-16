@@ -30,6 +30,7 @@ from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     last_created,
+    load_file,
     random_string,
     run_as_prep7,
     supress_logging,
@@ -2890,3 +2891,15 @@ class _MapdlCore(Commands):
                 "Hence its use is not recommended outside them."
                 "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`."
             )
+
+    @wraps(Commands.mpread)
+    def mpread(self, fname="", ext="", lib="", **kwargs):
+        if lib:
+            raise NotImplementedError(
+                "The option 'lib' is not supported by the MAPDL gRPC server."
+            )
+
+        fname_ = fname + "." + ext
+        fname = load_file(self, fname_)
+        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
+        return self.input(fname)

@@ -691,12 +691,12 @@ class Materials:
         ----------
         fname
             File name and directory path (248 characters maximum,
-            including directory). If you do not specify the LIB
+            including directory). If you do not specify the ``LIB``
             option, the default directory is the current working
-            directory. If you specify the LIB option, the default is
+            directory. If you specify the ``LIB`` option, the default is
             the following search path: the current working directory,
-            the user's home directory, MPLIB_DIR (as specified by the
-            /MPLIB,READ,PATH command) and /ansys_dir/matlib (as
+            the user's home directory, ``MPLIB_DIR`` (as specified by the
+            ``/MPLIB,READ,PATH`` command) and ``/ansys_dir/matlib`` (as
             defined by installation). If you use the default for your
             directory, you can use all 248 characters for the file
             name.
@@ -706,25 +706,25 @@ class Materials:
 
         lib
             Reads material library files previously written with the
-            MPWRITE command.  (See the description of the LIB option
-            for the MPWRITE command.)  The only allowed value for LIB
-            is LIB.
+            MPWRITE command.  (See the description of the ``LIB`` option
+            for the ``MPWRITE`` command.)  The only allowed value for ``LIB``
+            is ``LIB``.
 
         Notes
         -----
-        Material properties written to a file without the LIB option
+        Material properties written to a file without the ``LIB`` option
         do not support nonlinear properties.  Also, properties written
-        to a file without the LIB option are restored in the same
+        to a file without the ``LIB`` option are restored in the same
         material number as originally defined.  To avoid errors, use
-        MPREAD with the LIB option only when reading files written
-        using MPWRITE with the LIB option.
+        ``MPREAD`` with the ``LIB`` option only when reading files written
+        using MPWRITE with the ``LIB`` option.
 
-        If you omit the LIB option for MPREAD, this command supports
+        If you omit the ``LIB`` option for ``MPREAD``, this command supports
         only linear properties.
 
         Material numbers are hardcoded.  If you write a material file
-        without specifying the LIB option, then read that file in
-        using the MPREAD command with the LIB option, the ANSYS
+        without specifying the ``LIB`` option, then read that file in
+        using the ``MPREAD`` command with the ``LIB`` option, the ANSYS
         program will not write the file to a new material number.
         Instead, it will write the file to the "old" material number
         (the number specified on the MPWRITE command that created the
@@ -855,9 +855,9 @@ class Materials:
         ----------
         fname
             File name and directory path (248 characters maximum, including
-            directory). If you do not specify the LIB option, the default
-            directory is the current working directory. If you specify LIB and
-            you have specified a material library directory (via the /MPLIB
+            directory). If you do not specify the ``LIB`` option, the default
+            directory is the current working directory. If you specify ``LIB`` and
+            you have specified a material library directory (via the ``/MPLIB``
             command), that directory is the default. Otherwise, the default is
             the current working directory. If you use the default for your
             directory, you can use all 248 characters for the file name.
@@ -867,18 +867,18 @@ class Materials:
         ext
             Filename extension (eight-character maximum).
 
-            If you omit the LIB option, the default extension is
-            MP. If you specify the LIB option, the default extension
+            If you omit the ``LIB`` option, the default extension is
+            MP. If you specify the ``LIB`` option, the default extension
             is units_MPL, where units is the system of units currently
-            in use. (See the description of the /UNITS command.) For
-            example, if /UNITS is set to BIN, the extension defaults
+            in use. (See the description of the ``/UNITS`` command.) For
+            example, if ``/UNITS`` is set to BIN, the extension defaults
             to BIN_MPL.
 
         lib
-            The only value allowed for this field is the string "LIB."
+            The only value allowed for this field is the string ``"LIB"``.
 
-            The LIB option indicates that you wish to have properties
-            associated with the material (MAT) written to the
+            The ``LIB`` option indicates that you wish to have properties
+            associated with the material (``MAT``) written to the
             specified material library file using the material library
             file format. The material library file format is
             ASCII-text-based ANSYS command input. Certain commands
@@ -888,15 +888,15 @@ class Materials:
             file independent of the material number in effect when the
             file was written; this enables you to restore the
             properties into the ANSYS database using the material
-            number of your choice. The LIB option also enables you to
+            number of your choice. The ``LIB`` option also enables you to
             save both linear and nonlinear properties. If you omit the
-            LIB option, you can save linear properties only.
+            ``LIB`` option, you can save linear properties only.
 
         mat
             Specifies the material to be written to the named material library
             file.  There is no default; you must either specify a material or
-            omit the MAT argument.  Even if you specify a MAT value, the ANSYS
-            program ignores it if the LIB argument is not specified.
+            omit the ``MAT`` argument.  Even if you specify a ``MAT`` value, the ANSYS
+            program ignores it if the ``LIB`` argument is not specified.
 
         Notes
         -----
