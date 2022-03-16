@@ -99,7 +99,7 @@ numpydoc_validation_exclude = {  # set of regex
 
 # notfound.extension
 notfound_template = "404.rst"
-notfound_urls_prefix = "/mapdldocs.pyansys.com/"
+notfound_urls_prefix = "/../"
 
 # static path
 html_static_path = ["_static"]
