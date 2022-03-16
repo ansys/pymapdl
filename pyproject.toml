@@ -19,7 +19,7 @@ maintainers = [
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
     "ansys-corba; python_version < '3.9'",
-    "ansys-mapdl-reader>=0.50.15",
+    "ansys-mapdl-reader>=0.51.6",
     "appdirs>=1.4.0",
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata >=4.0",
