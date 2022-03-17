@@ -1523,13 +1523,14 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     os.remove(fname_)
     assert not os.path.exists(fname_)
     assert f"{fname}.{ext}" in mapdl.list_files()
+
     mapdl.clear()
     mapdl.prep7()
     output = mapdl.mpread(fname, ext)
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
-    assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
+    assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
     # Test non-existing file
