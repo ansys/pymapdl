@@ -2925,11 +2925,6 @@ class _MapdlCore(Commands):
 
         output = super().mpwrite(fname, ext, lib, mat, **kwargs)
         if download_file:
-            if self._local:
-                raise RuntimeError(
-                    "Downloading the file written by 'MPWRITE' is only allowed "
-                    "when the MAPDL instance is not remote."
-                )
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
