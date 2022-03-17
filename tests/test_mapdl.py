@@ -1539,3 +1539,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     # Test not implemented error
     with pytest.raises(NotImplementedError):
         mapdl.mpread(fname="dummy", ext="dummy", lib="something")
+
+    # Test suppliying a dir path when in remote
+    with pytest.raises(IOError):
+        mapdl.mpwrite("/test_dir/test", "mp")
