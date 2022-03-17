@@ -97,6 +97,9 @@ numpydoc_validation_exclude = {  # set of regex
     r"\.*MeshGrpc\.*",
 }
 
+# Favicon
+html_favicon = "favicon.png"
+
 # notfound.extension
 notfound_template = "404.rst"
 notfound_urls_prefix = "/mapdldocs.pyansys.com/"
