@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.61.0"
+version = "0.61.1"
 description = "A Python wrapper for Ansys mapdl core"
 readme = "README.rst"
 requires-python = ">=3.7"
@@ -17,9 +17,9 @@ maintainers = [
     {name = "PyAnsys developers", email = "pyansys.support@ansys.com"},
 ]
 dependencies = [
-    "ansys-api-mapdl-v0==0.4.1",  # supports at least 2020R2 - 2021R2
+    "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
     "ansys-corba; python_version < '3.9'",
-    "ansys-mapdl-reader>=0.50.15",
+    "ansys-mapdl-reader>=0.51.7",
     "appdirs>=1.4.0",
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata >=4.0",
