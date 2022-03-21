@@ -1,6 +1,7 @@
 from typing import Dict, List
+
+from .common import FLOAT_VALUE_REGEX, MP_MATERIAL_HEADER_REGEX, model_type, np
 from .property_codes import PropertyCode
-from .common import model_type, MP_MATERIAL_HEADER_REGEX, FLOAT_VALUE_REGEX, np
 
 
 class _MaterialDataParser:

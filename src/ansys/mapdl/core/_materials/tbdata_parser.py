@@ -1,4 +1,5 @@
-from typing import Dict, List, Set
+from typing import Dict, List
+
 from ._nonlinear_models import _BaseModel
 from .common import TB_MATERIAL_HEADER_REGEX
 

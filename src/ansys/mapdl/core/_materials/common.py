@@ -1,6 +1,6 @@
 from itertools import islice
-from typing import Iterable, Union, List, Generator
 import re
+from typing import Generator, Iterable, List, Union
 
 import numpy as np
 

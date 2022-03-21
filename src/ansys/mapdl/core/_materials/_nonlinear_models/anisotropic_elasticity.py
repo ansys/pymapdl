@@ -1,13 +1,13 @@
-from typing import Union, List, Tuple, Iterable
+from enum import Enum
 from numbers import Number
+from typing import List, Tuple, Union
 
 import numpy as np
-from enum import Enum
 
 from ..common import (
-    _chunk_lower_triangular_matrix,
     FLOAT_VALUE_REGEX,
     MATRIX_LABEL_REGEX,
+    _chunk_lower_triangular_matrix,
     fill_lower_triangular_matrix,
 )
 from ._base import _BaseModel
@@ -26,7 +26,7 @@ class ElasticityMode(Enum):
 
 class AnisotropicElasticity(_BaseModel):
     """
-    Anisotropic elasticity model defines different elastic coefficients for each co-ordinate axis. This model can be
+    Anisotropic elasticity model defines different elastic coefficients for each coordinate axis. This model can be
     used with plane and solid elements. The elastic coefficient matrix (D) is specified as one or up to six NumPy
     arrays, allowing temperature dependence to be modelled.
 

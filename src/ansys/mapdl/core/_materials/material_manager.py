@@ -3,10 +3,11 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 import ansys.mapdl.core._materials._nonlinear_models as models
+
 from .common import MP_MATERIAL_HEADER_REGEX, _chunk_data, model_type, np
-from .property_codes import PropertyCode
-from .mpdata_parser import _MaterialDataParser
 from .material import Material
+from .mpdata_parser import _MaterialDataParser
+from .property_codes import PropertyCode
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:

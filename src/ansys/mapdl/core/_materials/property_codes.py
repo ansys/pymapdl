@@ -1,7 +1,5 @@
 from enum import Enum, auto
 
-import ansys.mapdl.core.mapdl_grpc
-
 
 class PropertyCode(Enum):
     """

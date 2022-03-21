@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, List
+from typing import List, Tuple
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from ..material import Material
-    from .exceptions import ModelValidationException
     from ansys.mapdl.core.mapdl import _MapdlCore
+
+    from ..material import Material
 
 
 class _BaseModel(metaclass=ABCMeta):

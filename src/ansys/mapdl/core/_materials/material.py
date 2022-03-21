@@ -1,7 +1,7 @@
 from typing import Dict, Union
 
-from .property_codes import PropertyCode
 from .common import model_type
+from .property_codes import PropertyCode
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
