@@ -14,7 +14,7 @@ MATRIX_LABEL_REGEX = re.compile(r"(\w\s?\d{1,2})")
 model_type = Union[float, np.ndarray]
 
 
-def _chunk_data(data: Iterable) -> Generator[List]:
+def _chunk_data(data: Iterable) -> Generator[List, None, None]:
     """
     Splits an iterable into chunks of size six lazily.
 
@@ -35,7 +35,7 @@ def _chunk_data(data: Iterable) -> Generator[List]:
         piece = list(islice(data_iterator, 6))
 
 
-def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Generator[Iterable[float]]:
+def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Generator[Iterable[float], None, None]:
     """
     Helper function to convert a lower-triangular square matrix into a chunked vector. This is intended for use with
     symmetric matrices, where the upper half can be ignored.

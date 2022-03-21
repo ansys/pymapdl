@@ -1,11 +1,10 @@
-from typing import Dict, Union
+from typing import Dict, Union, Optional
+
+import numpy as np
 
 from .common import model_type
 from .property_codes import PropertyCode
-
-TYPE_CHECKING = False
-if TYPE_CHECKING:
-    from _nonlinear_models import _BaseModel
+from ._nonlinear_models import _BaseModel
 
 
 class Material:
@@ -18,15 +17,15 @@ class Material:
     """
 
     _properties: Dict[PropertyCode, model_type]
-    _nonlinear_models: "Dict[str, _BaseModel]"
-    _id: int
+    _nonlinear_models: Dict[str, _BaseModel]
+    _id: Optional[int]
     _reference_temperature: float
 
     def __init__(
         self,
         material_id: int = None,
         properties: Union[
-            Dict[PropertyCode, model_type], Dict[str, "_BaseModel"]
+            Dict[PropertyCode, model_type], Dict[str, _BaseModel]
         ] = None,
         reference_temperature: float = 0.0,
     ):
@@ -53,7 +52,7 @@ class Material:
         self._reference_temperature = reference_temperature
 
     @property
-    def material_id(self) -> int:
+    def material_id(self) -> Optional[int]:
         """
         Return the material ID
         """
@@ -66,23 +65,24 @@ class Material:
     @property
     def properties(
         self,
-    ) -> Union[Dict[PropertyCode, model_type], Dict[str, "_BaseModel"]]:
+    ) -> Union[Dict[PropertyCode, model_type], Dict[str, _BaseModel]]:
         """
         Return the currently assigned linear properties and nonlinear models.
         """
-        return {**self._properties, **self._nonlinear_models}
+        return {**self._properties, **self._nonlinear_models}  # type: ignore
 
     @properties.setter
     def properties(
-        self, properties: Union[Dict[PropertyCode, model_type], Dict[str, "_BaseModel"]]
+        self, properties: Union[Dict[PropertyCode, model_type], Dict[str, _BaseModel]]
     ) -> None:
         for k, v in properties.items():
             if isinstance(k, str):
                 assert isinstance(
                     v, _BaseModel
-                ), "Nonlinear models must inherit from '_BaseModel', linear models should be set with the 'PropertyCode' enum"
+                ), "Nonlinear models must inherit from '_BaseModel', linear models should be set with the 'PropertyCode' enum."
                 self._nonlinear_models[k] = v
             else:
+                assert isinstance(v, (float, np.ndarray)), "Linear material properties must be either floats or numpy arrays."
                 self._properties[k] = v
 
     @property
@@ -91,7 +91,7 @@ class Material:
         Return the current reference temperature for the model.
         """
         if PropertyCode.REFT in self._properties:
-            return self._properties[PropertyCode.REFT]
+            return float(self._properties[PropertyCode.REFT])
         else:
             self._properties[PropertyCode.REFT] = self._reference_temperature
             return self._reference_temperature

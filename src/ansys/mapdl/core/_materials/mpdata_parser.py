@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .common import FLOAT_VALUE_REGEX, MP_MATERIAL_HEADER_REGEX, model_type, np
 from .property_codes import PropertyCode
@@ -74,7 +74,8 @@ class _MaterialDataParser:
         Dict[PropertyCode, Union[float, np.ndarray]]
             Dictionary of material properties, indexed by property code
         """
-        property_data = {}
+        property_data: Dict[PropertyCode, model_type] = {}
+        property_lines: Dict[PropertyCode, List[str]] = {}
         reference_temperature = None
         current_property_code = None
         lines = [line.strip() for line in material_data if line.strip()]
@@ -83,14 +84,16 @@ class _MaterialDataParser:
                 current_property_code = _MaterialDataParser._process_property_header(
                     line
                 )
-                property_data[current_property_code] = []
+                property_lines[current_property_code] = []
             elif line.startswith("REFT"):
                 temp_string = line.split("=")[1]
-                temp_val = FLOAT_VALUE_REGEX.search(temp_string).group(0)
-                reference_temperature = float(temp_val)
+                temp_val_match = FLOAT_VALUE_REGEX.search(temp_string)
+                assert temp_val_match is not None, "Invalid material input"
+                reference_temperature = float(temp_val_match.group(0))
             else:
-                property_data[current_property_code].append(line)
-        for k, v in property_data.items():
+                assert current_property_code is not None, "Invalid material input"
+                property_lines[current_property_code].append(line)
+        for k, v in property_lines.items():
             property_data[k] = _MaterialDataParser._process_property(v)
         if reference_temperature is not None:
             property_data[PropertyCode.REFT] = reference_temperature
@@ -146,7 +149,7 @@ class _MaterialDataParser:
             Deserialized model, either a single float, or a NumPy array if the property is temperature-dependent.
         """
 
-        property_value = None
+        property_value: Optional[model_type] = None
         if len(property_data) == 2:
             match = FLOAT_VALUE_REGEX.search(property_data[1])
             if match:
@@ -158,4 +161,5 @@ class _MaterialDataParser:
                 property_value = np.vstack(
                     [property_value, [float(match[0]) for match in line_values]]
                 )
+        assert property_value is not None, "Invalid property data input"
         return property_value

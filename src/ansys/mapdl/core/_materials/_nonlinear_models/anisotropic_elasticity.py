@@ -1,5 +1,4 @@
 from enum import Enum
-from numbers import Number
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -85,7 +84,7 @@ class AnisotropicElasticity(_BaseModel):
         self._n_dimensions = n_dimensions
         self._coefficient_type = coefficient_type
         if temperature is not None:
-            if isinstance(temperature, Number):
+            if isinstance(temperature, float):
                 self._temperature = np.array([temperature], dtype=float)
             else:
                 self._temperature = temperature
@@ -103,7 +102,7 @@ class AnisotropicElasticity(_BaseModel):
         return self._coefficients
 
     @coefficients.setter
-    def coefficients(self, value: np.array):
+    def coefficients(self, value: np.ndarray):
         self._coefficients = value
 
     @property
@@ -115,7 +114,7 @@ class AnisotropicElasticity(_BaseModel):
 
     @temperature.setter
     def temperature(self, value: Union[float, np.ndarray]):
-        if isinstance(value, Number):
+        if isinstance(value, float):
             self._temperature = np.array([value], dtype=float)
         else:
             self._temperature = value
@@ -148,7 +147,7 @@ class AnisotropicElasticity(_BaseModel):
         assert (
             model_code in cls.model_codes
         ), f"Invalid model_code ({model_code}) provided."
-        header_row_index = None
+        header_row_index = 0
         for index, line in enumerate(model_data):
             if line.strip().startswith("Temps"):
                 header_row_index = index
@@ -288,9 +287,9 @@ class AnisotropicElasticity(_BaseModel):
             ntemp = self._temperature.size
             lab = "ANEL"
             if self._coefficient_type == ElasticityMode.STIFFNESS:
-                tbopt = 0
+                tbopt = "0"
             else:
-                tbopt = 1
+                tbopt = "1"
 
             # Ensure temperatures and coefficients are sorted
             sort_order = np.argsort(self._temperature)

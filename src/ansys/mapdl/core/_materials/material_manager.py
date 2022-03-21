@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 import ansys.mapdl.core._materials._nonlinear_models as models
 
+from ._nonlinear_models import _BaseModel
 from .common import MP_MATERIAL_HEADER_REGEX, _chunk_data, model_type, np
 from .material import Material
 from .mpdata_parser import _MaterialDataParser
@@ -76,7 +77,7 @@ class MaterialManager:
         for material_id in material_ids:
             material_properties = _MaterialDataParser.parse_material(data, material_id)
             materials.append(Material(material_id, material_properties))
-        return {material.material_id: material for material in materials}
+        return {material.material_id: material for material in materials if material.material_id is not None}
 
     def get_material(self, id_: int) -> "Material":
         """
@@ -128,11 +129,13 @@ class MaterialManager:
         if material.material_id is None:
             ids = self._get_current_ids()
             material.material_id = min(set(range(max(ids) + 2)) - set(ids))
-        for property_code, value in material.properties:
+        for property_code, value in material.properties.items():
             if isinstance(property_code, PropertyCode):
+                assert isinstance(value, (float, np.ndarray)), f"Invalid data type for property {property_code.name} '{type(value)}'"
                 self._write_property(material.material_id, property_code, value)
             else:
-                value.write_model(self.mapdl, self)
+                assert isinstance(value, _BaseModel)
+                value.write_model(self.mapdl, material)
         return self.get_material(material.material_id)
 
     def load_material_card(
@@ -177,7 +180,7 @@ class MaterialManager:
                 material_id = min(set(range(max(ids) + 2)) - set(ids))
             self.mapdl.mat(material_id)
         else:
-            lib = None
+            lib = ""
         self.mapdl.mpread(path, extension, lib=lib)
         material_dict = self.get_materials()
         return {
@@ -213,7 +216,7 @@ class MaterialManager:
         if write_nonlinear:
             lib = "LIB"
         else:
-            lib = None
+            lib = ""
         self.mapdl.mpwrite(fname, ext, lib, material.material_id)
 
     def _get_current_ids(self) -> List[int]:
