@@ -1871,7 +1871,7 @@ class MapdlGrpc(_MapdlCore):
         >>>
         """
 
-        from ansys.mapdl.core.mapdl_db import MapdlDb
+        from ansys.mapdl.core.database import MapdlDb
 
         return MapdlDb(self)
 
