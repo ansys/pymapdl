@@ -1,11 +1,12 @@
 """gRPC service specific tests"""
 import os
+import re
 
 import pytest
 
-from ansys.mapdl.core import examples
-from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import examples, launch_mapdl
+from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
+from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,8 +15,26 @@ pytestmark = pytest.mark.skip_grpc
 
 skip_launch_mapdl = pytest.mark.skipif(
     not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally"
+    reason="Must be able to launch MAPDL locally",
 )
+
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+""",
+)
+
+
+def write_tmp(mapdl, filename, ext="txt"):
+    """Write a temporary file from MAPDL."""
+    with mapdl.non_interactive:
+        mapdl.cfopen(filename, "txt")
+        mapdl.vwrite("dummy_file")  # Needs to write something, File cannot be empty.
+        mapdl.run("(A10)")
+        mapdl.cfclos()
 
 
 @pytest.fixture(scope="function")
@@ -147,18 +166,18 @@ def test_large_output(mapdl, cleared):
     mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
-    assert len(msg) > 4 * 1024 ** 2
+    assert len(msg) > 4 * 1024**2
 
 
-def test_download_missing_file(mapdl, tmpdir):
+def test__download_missing_file(mapdl, tmpdir):
     target = tmpdir.join("tmp")
     with pytest.raises(FileNotFoundError):
-        mapdl.download("__notafile__", target)
+        mapdl._download("__notafile__", target)
 
 
 @skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
 def test_grpc_custom_ip():
-    ip = '127.0.0.2'
+    ip = "127.0.0.2"
     mapdl = launch_mapdl(ip=ip)
     assert mapdl._ip == ip
 
@@ -192,7 +211,7 @@ def test_read_input_file_verbose(mapdl):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
 test_files = ["full26.dat", "static.dat"]
@@ -204,10 +223,122 @@ def test_read_input_file(mapdl, file_name):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
 def test_no_get_value_non_interactive(mapdl):
     with pytest.raises(RuntimeError, match="Cannot use gRPC enabled ``GET``"):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
+
+
+def test__download(mapdl, tmpdir):
+    # Creating temp file
+    write_tmp(mapdl, "myfile0")
+
+    file_name = "myfile0.txt"
+    assert file_name in mapdl.list_files()
+
+    out_file = tmpdir.join("out_" + file_name)
+    mapdl._download(file_name, out_file_name=out_file)
+    assert out_file.exists()
+
+    out_file = tmpdir.join("out1_" + file_name)
+    mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    assert out_file.exists()
+
+    out_file = tmpdir.join("out2_" + file_name)
+    mapdl._download(file_name, out_file_name=out_file, chunk_size=DEFAULT_CHUNKSIZE / 2)
+    assert out_file.exists()
+
+    out_file = tmpdir.join("out3_" + file_name)
+    mapdl._download(file_name, out_file_name=out_file, chunk_size=DEFAULT_CHUNKSIZE * 2)
+    assert out_file.exists()
+
+
+@pytest.mark.parametrize(
+    "option,expected_files",
+    [
+        ["myfile0.txt", ["myfile0.txt"]],
+        [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
+        ["myfile*", ["myfile0.txt", "myfile1.txt"]],
+    ],
+)
+def test_download(mapdl, tmpdir, option, expected_files):
+    write_tmp(mapdl, "myfile0")
+    write_tmp(mapdl, "myfile1")
+
+    mapdl.download(option, target_dir=tmpdir)
+    for file_to_check in expected_files:
+        assert os.path.exists(tmpdir.join(file_to_check))
+
+
+def test_download_without_target_dir(mapdl, tmpdir):
+    write_tmp(mapdl, "myfile0")
+    write_tmp(mapdl, "myfile1")
+
+    old_cwd = os.getcwd()
+    try:
+        # must use try/finally block as we change the cwd here
+        os.chdir(str(tmpdir))
+
+        mapdl.download("myfile0.txt")
+        assert os.path.exists("myfile0.txt")
+
+        mapdl.download(["myfile0.txt", "myfile1.txt"])
+        assert os.path.exists("myfile0.txt")
+        assert os.path.exists("myfile1.txt")
+
+        mapdl.download("myfile*")
+        assert os.path.exists("myfile0.txt")
+        assert os.path.exists("myfile1.txt")
+    finally:
+        os.chdir(old_cwd)
+
+
+@skip_in_cloud  # This is going to run only in local
+def test_download_recursive(mapdl, tmpdir):
+    if mapdl._local:  # mapdl._local = True
+        dir_ = tmpdir.mkdir("temp00")
+        file1 = dir_.join("file0.txt")
+        file2 = dir_.join("file1.txt")
+        with open(file1, "w") as fid:
+            fid.write("dummy")
+        with open(file2, "w") as fid:
+            fid.write("dummy")
+
+        mapdl.download(
+            os.path.join(dir_, "*"), recursive=True
+        )  # This is referenced to os.getcwd
+        assert os.path.exists("file0.txt")
+        assert os.path.exists("file1.txt")
+        os.remove("file0.txt")
+        os.remove("file1.txt")
+
+        mapdl.download(os.path.join(dir_, "*"), target_dir="new_dir", recursive=True)
+        assert os.path.exists(os.path.join("new_dir", "file0.txt"))
+        assert os.path.exists(os.path.join("new_dir", "file1.txt"))
+        os.remove(os.path.join("new_dir", "file0.txt"))
+        os.remove(os.path.join("new_dir", "file1.txt"))
+
+
+def test_download_project(mapdl, tmpdir):
+    target_dir = tmpdir.mkdir("tmp")
+    mapdl.download_project(target_dir=target_dir)
+    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+
+    assert "log" in files_extensions
+    assert "out" in files_extensions
+    assert "err" in files_extensions
+    assert "lock" in files_extensions
+
+
+def test_download_project_extensions(mapdl, tmpdir):
+    target_dir = tmpdir.mkdir("tmp")
+    mapdl.download_project(extensions=["log", "out"], target_dir=target_dir)
+    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+
+    assert "log" in files_extensions
+    assert "out" in files_extensions
+    assert "err" not in files_extensions
+    assert "lock" not in files_extensions

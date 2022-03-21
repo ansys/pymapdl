@@ -9,8 +9,8 @@ Sparse Matrices.
 """
 import matplotlib.pylab as plt
 
-from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.examples import vmfiles
 
 mapdl = launch_mapdl()
 mm = mapdl.math
@@ -88,3 +88,8 @@ mm.status()
 print("name(k)=" + k.id)
 print("name(my_mat)=" + my_mat.id)
 print("name(msub)=" + msub.id)
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()
