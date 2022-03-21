@@ -1,7 +1,14 @@
 from enum import Enum, auto
 
+import ansys.mapdl.core.mapdl_grpc
+
 
 class PropertyCode(Enum):
+    """
+    Enum representing all the linear material properties that can be assigned. For more details see
+    :meth:`~ansys.mapdl.core._commands._preproc.materials.mplist`.
+    """
+
     EX = auto()
     EY = auto()
     EZ = auto()

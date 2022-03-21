@@ -1,5 +1,5 @@
 from itertools import islice
-from typing import Iterable, Union, List
+from typing import Iterable, Union, List, Generator
 import re
 
 import numpy as np
@@ -14,7 +14,20 @@ MATRIX_LABEL_REGEX = re.compile(r"(\w\s?\d{1,2})")
 model_type = Union[float, np.ndarray]
 
 
-def _chunk_data(data: Iterable):
+def _chunk_data(data: Iterable) -> Generator[List]:
+    """
+    Splits an iterable into chunks of size six lazily.
+
+    Parameters
+    ----------
+    data: Iterable
+        Input data
+
+    Returns
+    -------
+    Generator[List]
+        Generator that will return the input data in lists of length 6 or less.
+    """
     data_iterator = iter(data)
     piece = list(islice(data_iterator, 6))
     while piece:
@@ -22,7 +35,25 @@ def _chunk_data(data: Iterable):
         piece = list(islice(data_iterator, 6))
 
 
-def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Iterable[Iterable[float]]:
+def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Generator[Iterable[float]]:
+    """
+    Helper function to convert a lower-triangular square matrix into a chunked vector. This is intended for use with
+    symmetric matrices, where the upper half can be ignored.
+
+    Parameters
+    ----------
+    matrix: np.ndarray
+        Input square matrix
+
+    Returns
+    -------
+    Generator[Iterable[float]]
+        Chunked vector with coefficients in the lower half-matrix. E.g. D11, D12, D22, etc.
+
+    Notes
+    -----
+    If the input matrix is non-symmetric then the upper half-matrix will be lost.
+    """
     vals = []
     for row_index in range(0, matrix.shape[0]):
         for col_index in range(0, row_index + 1):
@@ -31,6 +62,24 @@ def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Iterable[Iterable[floa
 
 
 def fill_lower_triangular_matrix(vector: List[float]) -> np.ndarray:
+    """
+    Helper function to convert a vector of coefficients into a full matrix. Generates a symmetric, square matrix.
+
+    Parameters
+    ----------
+    vector: List[float]
+        Coefficients of the lower half-matrix. E.g. D11, D12, D22, etc.
+
+    Returns
+    -------
+    np.ndarray
+        Square symmetric matrix
+
+    Raises
+    ------
+    ValueError
+        If the length of the input vector is not a triangular number
+    """
     size_x = (np.sqrt(8 * len(vector) + 1) - 1) / 2
     if not np.isclose(int(size_x), size_x):
         raise ValueError(

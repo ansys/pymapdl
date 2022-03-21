@@ -5,14 +5,36 @@ from .common import model_type, MP_MATERIAL_HEADER_REGEX, FLOAT_VALUE_REGEX, np
 
 class _MaterialDataParser:
     @staticmethod
-    def parse_material(data: str, id_) -> Dict[PropertyCode, model_type]:
+    def parse_material(data: str, id_: int) -> Dict[PropertyCode, model_type]:
+        """
+        Parse the response from an `MPLIST` command into a set of material properties and nonlinear material models.
+
+        Parameters
+        ----------
+        data: str
+            String response from the `MPLIST` command.
+        id_: int
+            Material identity to be parsed
+        """
         data_section = _MaterialDataParser._get_mp_section_with_id(data, id_)
         return _MaterialDataParser._process_material(data_section)
 
     @staticmethod
     def _get_mp_section_with_id(data: str, id_: int) -> List[str]:
         """
-        Throws indexerror if material ID doesn't exist in the file
+        Extract material property information for the specified material identity.
+
+        Parameters
+        ----------
+        data: str
+            String response from the `MPLIST` command
+        id_: int
+            Material identity to be extracted
+
+        Returns
+        -------
+        List[str]
+            Relevant section of the data input, split on newlines
         """
 
         material_ids = map(int, MP_MATERIAL_HEADER_REGEX.findall(data))
@@ -37,7 +59,20 @@ class _MaterialDataParser:
         return relevant_lines
 
     @staticmethod
-    def _process_material(material_data: List[str]):
+    def _process_material(material_data: List[str]) -> Dict[PropertyCode, model_type]:
+        """
+        Deserialize a material into a property dictionary
+
+        Parameters
+        ----------
+        material_data: List[str]
+            List of lines containing property data for one material
+
+        Returns
+        -------
+        Dict[PropertyCode, Union[float, np.ndarray]]
+            Dictionary of material properties, indexed by property code
+        """
         property_data = {}
         reference_temperature = None
         current_property_code = None
@@ -62,6 +97,26 @@ class _MaterialDataParser:
 
     @staticmethod
     def _process_property_header(header_line: str) -> PropertyCode:
+        """
+        Deserialize a property header line into the relevant property code
+
+        Parameters
+        ----------
+        header_line: str
+            Material property header line
+
+        Returns
+        -------
+        PropertyCode
+            Corresponding property code object
+
+        Raises
+        ------
+        KeyError
+            If the header line specifies an unknown property code
+        IndexError
+            If the header line does not match the expected format
+        """
         stripped_header_line = header_line.strip()
         try:
             property_name = stripped_header_line[4:].strip().split(" ")[0]
@@ -75,14 +130,19 @@ class _MaterialDataParser:
     @staticmethod
     def _process_property(property_data: List[str]) -> model_type:
         """
-        Data format should be
-          TEMP         EX
-         231.34       0.23E12
-         ...          ...
+        Deserialize the property data into a python object. Single values are deserialized into floats, arrays are
+        deserialized into NumPy arrays, where the first column contains temperature values and the second contains
+        property values at those temperatures.
 
-        OR
-          TEMP         DENS
-                      0.32E4
+        Parameters
+        ----------
+        property_data: List[str]
+            Property data section to be deserialized
+
+        Returns
+        -------
+        Union[float, np.ndarray]
+            Deserialized model, either a single float, or a NumPy array if the property is temperature-dependent.
         """
 
         property_value = None
