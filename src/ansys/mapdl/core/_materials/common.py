@@ -35,7 +35,9 @@ def _chunk_data(data: Iterable) -> Generator[List, None, None]:
         piece = list(islice(data_iterator, 6))
 
 
-def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Generator[Iterable[float], None, None]:
+def _chunk_lower_triangular_matrix(
+    matrix: np.ndarray,
+) -> Generator[Iterable[float], None, None]:
     """
     Helper function to convert a lower-triangular square matrix into a chunked vector. This is intended for use with
     symmetric matrices, where the upper half can be ignored.

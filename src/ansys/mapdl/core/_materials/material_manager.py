@@ -77,7 +77,11 @@ class MaterialManager:
         for material_id in material_ids:
             material_properties = _MaterialDataParser.parse_material(data, material_id)
             materials.append(Material(material_id, material_properties))
-        return {material.material_id: material for material in materials if material.material_id is not None}
+        return {
+            material.material_id: material
+            for material in materials
+            if material.material_id is not None
+        }
 
     def get_material(self, id_: int) -> "Material":
         """
@@ -131,7 +135,9 @@ class MaterialManager:
             material.material_id = min(set(range(max(ids) + 2)) - set(ids))
         for property_code, value in material.properties.items():
             if isinstance(property_code, PropertyCode):
-                assert isinstance(value, (float, np.ndarray)), f"Invalid data type for property {property_code.name} '{type(value)}'"
+                assert isinstance(
+                    value, (float, np.ndarray)
+                ), f"Invalid data type for property {property_code.name} '{type(value)}'"
                 self._write_property(material.material_id, property_code, value)
             else:
                 assert isinstance(value, _BaseModel)

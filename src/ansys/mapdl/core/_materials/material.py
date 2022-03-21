@@ -1,10 +1,10 @@
-from typing import Dict, Union, Optional
+from typing import Dict, Optional, Union
 
 import numpy as np
 
+from ._nonlinear_models import _BaseModel
 from .common import model_type
 from .property_codes import PropertyCode
-from ._nonlinear_models import _BaseModel
 
 
 class Material:
@@ -24,9 +24,7 @@ class Material:
     def __init__(
         self,
         material_id: int = None,
-        properties: Union[
-            Dict[PropertyCode, model_type], Dict[str, _BaseModel]
-        ] = None,
+        properties: Union[Dict[PropertyCode, model_type], Dict[str, _BaseModel]] = None,
         reference_temperature: float = 0.0,
     ):
         """
@@ -82,7 +80,9 @@ class Material:
                 ), "Nonlinear models must inherit from '_BaseModel', linear models should be set with the 'PropertyCode' enum."
                 self._nonlinear_models[k] = v
             else:
-                assert isinstance(v, (float, np.ndarray)), "Linear material properties must be either floats or numpy arrays."
+                assert isinstance(
+                    v, (float, np.ndarray)
+                ), "Linear material properties must be either floats or numpy arrays."
                 self._properties[k] = v
 
     @property
