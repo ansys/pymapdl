@@ -40,6 +40,8 @@ class TableDataParser:
 
     def deserialize_model(self, model_code: str, model_data: List[str]) -> _BaseModel:
         if model_code not in self.models.keys():
-            raise NotImplementedError(f"Model with key '{model_code}' is not implemented yet.")
+            raise NotImplementedError(
+                f"Model with key '{model_code}' is not implemented yet."
+            )
         target_model = self.models[model_code]
         return target_model.deserialize_model(model_code, model_data)

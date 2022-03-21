@@ -44,7 +44,9 @@ class _MaterialDataParser:
         lines = [line.strip() for line in material_data if line.strip()]
         for line in lines:
             if line.startswith("TEMP"):
-                current_property_code = _MaterialDataParser._process_property_header(line)
+                current_property_code = _MaterialDataParser._process_property_header(
+                    line
+                )
                 property_data[current_property_code] = []
             elif line.startswith("REFT"):
                 temp_string = line.split("=")[1]
@@ -62,7 +64,7 @@ class _MaterialDataParser:
     def _process_property_header(header_line: str) -> PropertyCode:
         stripped_header_line = header_line.strip()
         try:
-            property_name = stripped_header_line[4:].strip().split(' ')[0]
+            property_name = stripped_header_line[4:].strip().split(" ")[0]
         except IndexError:
             raise IndexError("Invalid property header line")
         try:
@@ -92,5 +94,7 @@ class _MaterialDataParser:
             property_value = np.ndarray((0, 2), dtype=float)
             for data_line in property_data[1:]:
                 line_values = FLOAT_VALUE_REGEX.findall(data_line)
-                property_value = np.vstack([property_value, [float(match[0]) for match in line_values]])
+                property_value = np.vstack(
+                    [property_value, [float(match[0]) for match in line_values]]
+                )
         return property_value

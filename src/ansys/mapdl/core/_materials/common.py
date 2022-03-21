@@ -5,7 +5,9 @@ import re
 import numpy as np
 
 MP_MATERIAL_HEADER_REGEX = re.compile(r"MATERIAL NUMBER\s+([\d]+)")
-TB_MATERIAL_HEADER_REGEX = re.compile(r"\(([A-Z]+)\) Table For Material\s+([\d]+)[^\n]*")
+TB_MATERIAL_HEADER_REGEX = re.compile(
+    r"\(([A-Z]+)\) Table For Material\s+([\d]+)[^\n]*"
+)
 FLOAT_VALUE_REGEX = re.compile(r"(-?\d+\.\d*([Ee][+-]\d+)?)")
 MATRIX_LABEL_REGEX = re.compile(r"(\w\s?\d{1,2})")
 
@@ -31,7 +33,9 @@ def _chunk_lower_triangular_matrix(matrix: np.ndarray) -> Iterable[Iterable[floa
 def fill_lower_triangular_matrix(vector: List[float]) -> np.ndarray:
     size_x = (np.sqrt(8 * len(vector) + 1) - 1) / 2
     if not np.isclose(int(size_x), size_x):
-        raise ValueError(f"vector does not appear to be a valid lower-triangular matrix in flat form (size {len(vector)}) is not a triangular number")
+        raise ValueError(
+            f"vector does not appear to be a valid lower-triangular matrix in flat form (size {len(vector)}) is not a triangular number"
+        )
     size_x = int(size_x)
     output = np.zeros((size_x, size_x))
     output[np.triu_indices(output.shape[0], k=0)] = vector

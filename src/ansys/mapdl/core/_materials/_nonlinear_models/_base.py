@@ -12,11 +12,11 @@ class _BaseModel(metaclass=ABCMeta):
     model_codes: Tuple
 
     @abstractmethod
-    def write_model(self, mapdl: '_MapdlCore', material: 'Material') -> None:
+    def write_model(self, mapdl: "_MapdlCore", material: "Material") -> None:
         ...
 
     @abstractmethod
-    def validate_model(self) -> 'Tuple[bool, List[ModelValidationException]]':
+    def validate_model(self) -> "Tuple[bool, List[ModelValidationException]]":
         ...
 
     @classmethod
