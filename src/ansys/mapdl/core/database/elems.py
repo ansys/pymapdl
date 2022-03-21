@@ -1,22 +1,12 @@
-"""Contains the Elems section of the  MapdlDb class, allowing the access 
-to the Elems in the MAPDL DB from Python.  """
-from enum import Enum
-import os
-import random
-import string
+"""Contains the Elems section of the MapdlDb class
+
+This allows the access to the elements in the MAPDL DB from Python.
+
+"""
 import weakref
 
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
-from ansys.grpc.mapdl import mapdl_pb2 as pb_types
-import grpc
-import numpy as np
+from ansys.api.mapdl import mapdl_db_pb2
 
-from ansys.mapdl.core import mapdl_db_pb2, mapdl_db_pb2_grpc
-from ansys.mapdl.core.common_grpc import parse_chunks
-
-from .check_version import VersionError, meets_version, version_requires
-from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
-from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_db import DBDef, MapdlDb
 
 
@@ -31,7 +21,6 @@ class DbElems:
     >>> mapdl = launch_mapdl()
     >>> db = mapdl.db
     >>> elems = db.elems
-
 
     """
 

@@ -1,27 +1,13 @@
-"""Contains the Node section of the  MapdlDb class, allowing the access 
+"""Contains the Node section of the  MapdlDb class, allowing the access
 to the Nodes in the MAPDL DB from Python.  """
-from enum import Enum
-import os
-import random
-import string
 import weakref
 
-from ansys.grpc.mapdl import ansys_kernel_pb2 as anskernel
-from ansys.grpc.mapdl import mapdl_pb2 as pb_types
-import grpc
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_db_pb2
 import numpy as np
 
-from ansys.mapdl.core import mapdl_db_pb2, mapdl_db_pb2_grpc
-
-from .check_version import VersionError, meets_version, version_requires
-from .common_grpc import (
-    ANSYS_VALUE_TYPE,
-    DEFAULT_CHUNKSIZE,
-    DEFAULT_FILE_CHUNK_SIZE,
-    parse_chunks,
-)
-from .errors import ANSYSDataTypeError, protect_grpc
-from .mapdl_db import DBDef, MapdlDb
+from ..common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
+from .database import DBDef, MapdlDb
 
 
 class DbNodes:

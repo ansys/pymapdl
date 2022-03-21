@@ -1,13 +1,29 @@
-"""Contains the MapdlDb classes, allowing the access to MAPDL DB
-from Python.  """
+"""Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
 from enum import Enum
+import time
+from warnings import warn
 import weakref
 
+from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
 import grpc
 
-from ansys.api.mapdl.v0 import mapdl_db_pb2, mapdl_db_pb2_grpc
-
 from ..mapdl_grpc import MapdlGrpc
+
+
+class WithinBeginLevel:
+    """Context manager to run MAPDL within the being level."""
+
+    def __init__(self, mapdl):
+        self._mapdl = mapdl
+
+    def __enter__(self):
+        self._mapdl._cache_routine()
+        if "BEGIN" not in self._mapdl._cached_routine.upper():
+            self._mapdl.finish()
+
+    def __exit__(self, type, value, traceback):
+        if "BEGIN" not in self._mapdl._cached_routine.upper():
+            self._mapdl._resume_routine
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
@@ -50,10 +66,19 @@ class MapdlDb:
         self._mapdl_weakref = weakref.ref(mapdl)
         self._stub = None
         self._channel = None
-        self._itele = -1
+        # self._itele = -1
+        self._ip = None
+        self._server = {}
+        self._channel_str = None
+        self._state = None
+        self._nodes = None
+        self._elems = None
 
-    # def __repr__(self):
-    #     return 
+    def __str__(self):
+        if self.active:
+            return f"MAPDL database server active at {self._channel_str}"
+        else:
+            return f"MAPDL database server not active"
 
     @property
     def _mapdl(self):
@@ -65,36 +90,63 @@ class MapdlDb:
         """Return the version of MAPDL"""
         return self._mapdl._server_version
 
-    def start(self):
-        """Start the gRPC MAPDL DB Server
+    def _start(self) -> int:
+        """Start the database server.
+
+        Returns
+        -------
+        int
+            Port of the database server.
+
+        """
+        self._mapdl._log.debug("Starting MAPDL server")
+
+        # database server must be run from the "BEGIN" level
+        self._mapdl._cache_routine()
+        with WithinBeginLevel(self._mapdl):
+            self._mapdl.run("/DBS,SERVER,START")
+
+        # Scan the DBServer.info file to get the Port Number
+
+        # Default is 50055
+        status = self._mapdl._download_as_raw("DBServer.info").decode()
+
+        try:
+            # expected of the form 'Port : 50055'
+            port = int(status.split(":")[1])
+        except Exception as e:  # pragma: no cover
+            self._mapdl._log.error(
+                "Unable to read port number from '%s' due to\n%s", status, str(e)
+            )
+            port = 50055
+
+        self._mapdl._log.debug("MAPDL database server started on port %d", port)
+        return port
+
+    @property
+    def active(self) -> bool:
+        """Return if the database server is active."""
+        return "NOT" not in self._status()
+
+    def start(self, timeout=10):
+        """Start the gRPC MAPDL database server.
+
+        Parameters
+        ----------
+        timeout : float, optional
+            Timeout to start the service.
 
         Examples
         --------
         >>> db.start()
         """
 
-        # check if DB Server is running
-        self._mapdl._log.debug("Checking database server status...")
-        is_running = "NOT" not in self._mapdl.run("/DBS,SERVER,STATUS")
-        self._mapdl._log.error("MAPDL DB server running: %s", str(is_running))
-
-        # Scan the DBServer.info file to get the Port Number
-
-        # Default is 50055
-        status = self._mapdl._download_as_raw("DBServer.info")
-
-        db_port = "50055"  # Default Port Number Value
-
-        try:
-            with open("DBServer.info", "rt") as f:
-                for line in f:
-                    if line.startswith("Port"):
-                        iPort = line[-5:]
-                        break
-        except IOError:
-            iPort = "50055"  # useless, but for clarity
-
-        db_port = int(db_port)
+        # only start if not already running
+        is_running = self.active
+        self._mapdl._log.debug("MAPDL DB server running: %s", str(is_running))
+        if is_running:
+            return
+        db_port = self._start()
 
         self._ip = self._mapdl._ip
         self._server = {"ip": self._ip, "port": db_port}
@@ -104,98 +156,109 @@ class MapdlDb:
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_db_pb2_grpc.MapdlDbServiceStub(self._channel)
 
-        self._mapdl._log("MAPDL database server started on port %d", db_port)
+        # wait until the channel matures
+        tstart = time.time()
+        while ((time.time() - tstart) < timeout) and not self._state._matured:
+            time.sleep(0.01)
 
-    def stop(self, server=False):
-        """Shutdown the MAPDL database service.
+        if not self._state._matured:  # pragma: no cover
+            raise RuntimeError(
+                "Unable to establish connection to MAPDL database server"
+            )
+        self._mapdl._log.debug("Established connection to MAPDL database server")
+
+    def _stop(self):
+        """Stop the MAPDL database service."""
+        with WithinBeginLevel(self._mapdl):
+            return self._mapdl.run("/DBS,SERVER,STOP")
+
+    def stop(self):
+        """Shutdown the MAPDL database service and close the connection.
+
+        Examples
+        --------
+        Stop the database service.
+
+        >>> mapdl.db.stop()
+        """
+        if not self.active:
+            warn("Server is already shutdown")
+            return
+
+        self._mapdl._log.debug("Closing the connection with the MAPDL DB Server")
+        self._stop()
+        self._channel.close()
+        self._channel = None
+        self._stub = None
+        self._state = None
+
+    def _status(self):
+        """Return the status of the MADPL DB Server.
+
+        Examples
+        --------
+        >>> output = mapdl.db._status()
+        >>> print(output)
+        >ENTERING THE SERVER MODE: STATUS
+
+         DB Server is NOT currently running ..
+        """
+        # Need to use the health check here
+        with WithinBeginLevel(self._mapdl):
+            return self._mapdl.run("/DBS,SERVER,STATUS")
+
+    def load(self, fname, progress_bar=False):
+        """Load a MAPDL database file in memory.
 
         Parameters
         ----------
-        server : bool, optional
-            Shutdown the MAPDL DB Server. Default is ``False``.
-
-        Examples
-        --------
-        >>> db.stop()
-        """
-
-        if server:
-            # Shutdown the MAPDL DB Server
-            print(self._mapdl.run("/DBS,SERVER,STOP"))
-
-        if self._channel != 0:
-            print(">> Shutdown the connection with the MAPDL DB Server")
-            self._channel.close()
-            self._channel = 0
-            self._stub = 0
-        else:
-            print(">> MAPDL DB Client is not active. Command is ignored.")
-
-        return
-
-    def status(self):
-        """Print out the status of the MADPL DB Server
-
-        Examples
-        --------
-        >>> db.status()
-        >>> Bla Bla Bla
-        >>> Bla Bla Bla
-        >>> ....
-        """
-        # Need to use the health check here
-
-        return self._mapdl.run("/DBS,SERVER,STATUS")
-
-    def load(self, fname):
-        """Load a DB File in memory
-
-        Parameters
-
         fname : str
-                The file name we want to create
+            The file name of the database to load.
 
-        Example
+        Examples
         --------
-        >>> db.load('file.db')
+        >>> mapdl.db.load('file.db')
         """
-
-        self._mapdl.upload(fname, progress_bar=False)
-        print(self._mapdl.run("resume," + fname, mute=False))
-        return
+        self._mapdl._get_file_path(fname, progress_bar=progress_bar)
+        return self._mapdl.resume(fname)
 
     def save(self, fname, option="ALL"):
-        """Save DB to a File
+        """Save a MAPDL database to disk.
 
         Parameters
-
+        ----------
         fname : str
-                The file name we want to create
+            Filename to save the database to.
 
         option : str
-                The mode for saving the database (ALL,MODEL,SOLU)
+            The mode for saving the database, either:
 
-        Example
-        --------
-        >>> db.save('model.db')
-        """
-
-        print(self._mapdl.run("save," + fname + ",,," + option, mute=False))
-        return
-
-    def clear(self):
-        """Delete everything in the MAPDL DB
+            * "ALL" - Both the model and the solution
+            * "MODEL" - Just the model
+            * "SOLU" - Just the solution
 
         Examples
         --------
-        >>> db.clear()
+        >>> mapdl.db.save('model.db', option=)
         """
-        print(self._mapdl.run("/CLEAR,ALL", mute=False))
-        return
+        allowed = ["ALL", "MODEL", "SOLU"]
+        if option.upper() not in allowed:
+            raise ValueError(f"Option must be one of the following: {allowed}")
+
+        return self._mapdl.run(f"SAVE,{fname},,,{option}")
+
+    def clear(self, **kwargs):
+        """Delete everything in the MAPDL DB.
+
+        Examples
+        --------
+        >>> mapdl.db.clear()
+        """
+        return self._mapdl.run("/CLEAR,ALL")
 
     @property
     def nodes(self):
-        """DB Nodes interface
+        """MAPDL database nodes interface.
 
         Returns
         -------
@@ -214,14 +277,15 @@ class MapdlDb:
         >>> nodes.set(...)
         >>>
         """
+        if self._nodes is None:
+            from .nodes import DbNodes  # here to avoid circular import
 
-        from ansys.mapdl.core.mapdl_db_nodes import DbNodes
-
-        return DbNodes(self)
+            self._nodes = DbNodes(self)
+        return self._nodes
 
     @property
     def elems(self):
-        """DB Elems interface
+        """MAPDL database element interface.
 
         Returns
         -------
@@ -240,7 +304,8 @@ class MapdlDb:
         >>> elems.set(...)
         >>>
         """
+        if self._elems is None:
+            from .elems import DbElems  # here to avoid circular import
 
-        from ansys.mapdl.core.mapdl_db_elems import DbElems
-
-        return DbElems(self)
+            self._elems = DbElems(self)
+        return self._elems
