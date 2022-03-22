@@ -1,5 +1,6 @@
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
 from enum import Enum
+import os
 import time
 from warnings import warn
 import weakref

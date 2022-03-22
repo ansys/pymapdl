@@ -340,8 +340,8 @@ class ansXpl:
     def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
         """Import a Matrix/Vector from a MAPDL result file.
 
-        This allows the reading of a matrix of any MADPL file, once it's
-        visible through the XPL listing.
+        At the moment, this only supports reading the displacement vectors from
+        a result file.
 
         Parameters
         ----------
