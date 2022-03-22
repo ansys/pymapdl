@@ -53,7 +53,7 @@ class ansXpl:
         return self._mapdl_weakref()
 
     def open(self, filename, option=""):
-        """Open an MAPDL file to explore
+        """Open an MAPDL file to explore.
 
         Parameters
         ----------
@@ -67,10 +67,16 @@ class ansXpl:
 
         Examples
         --------
-        >>> xpl.open('file.full')
+        >>> xpl.open('file.mode')
+        ===============================================
+        =====      ANSYS File Xplorer            ======
+        ===============================================
+
+        Opening the file.mode ANSYS File
+
         """
         self._filename = filename
-        out = self._mapdl.run("*XPL,OPEN,%s,,%s" % (filename, option))
+        out = self._mapdl.run(f"*XPL,OPEN,{filename},,{option}")
         self._open = True
         return out
 
@@ -84,7 +90,9 @@ class ansXpl:
 
         Examples
         --------
+        >>> xpl.open("file.mode")
         >>> xpl.close()
+        =====      ANSYS File Xplorer : Close the file.mode ANSYS File
         """
         response = self._mapdl.run("*XPL,CLOSE")
         self._check_ignored(response)
@@ -102,13 +110,35 @@ class ansXpl:
         Returns
         -------
         str
-            Response from MAPDL.
+            Listing of records from the current level.
 
         Examples
         --------
-        >>> xpl.list(1)
+        Open a full file and list the current records.
+
+        >>> xpl.open("file.full")
+        >>> xpl.list()
+        =====      ANSYS File Xplorer : List Blocks in File file.full
+         ::FULL::HEADER         Size =        652  B     Total  Size =    180.297 KB
+         ::FULL::DOFSBYNOD            Size =         24  B
+         ::FULL::BACK                 Size =        336  B
+
+         ::FULL::STIFF::HEADER        Size =    117.316 KB
+         ::FULL::RHS                  Size =      1.910 KB
+         ::FULL::DIAGK                Size =      1.910 KB
+         ::FULL::SCLK                 Size =      1.910 KB
+         ::FULL::MRK                  Size =        984  B
+         ::FULL::NODEEXT              Size =        336  B
+         ::FULL::PCGDOFS              Size =        984  B
+         ::FULL::BCDOFS               Size =        984  B
+         ::FULL::BCVALUES             Size =         12  B
+
+         ::FULL::MASS::HEADER         Size =     50.801 KB
+         ::FULL::DIAGM                Size =      1.910 KB
+         ::FULL::NGPH                 Size =        336  B
+
         """
-        response = self._mapdl.run("*XPL,LIST,%d" % nlev)
+        response = self._mapdl.run(f"*XPL,LIST,{nlev}")
         self._check_ignored(response)
         return response
 
@@ -118,7 +148,7 @@ class ansXpl:
             raise MapdlRuntimeError(response)
 
     def help(self):
-        """XPL help message
+        """XPL help message.
 
         Examples
         --------
@@ -154,8 +184,7 @@ class ansXpl:
         return response
 
     def info(self, recname, option=""):
-        """Gives details on a specific record, or all records (using
-        ``"*"``)
+        """Gives details on a specific record, or all records (using ``"*"``)
 
         Parameters
         ----------
@@ -182,8 +211,7 @@ class ansXpl:
         return self._mapdl.run("*XPL,INFO," + recname + "," + option)
 
     def print(self, recname):
-        """Print values of a given records, or all records (using
-        ``"*"``)
+        """Print values of a given records, or all records (using ``"*"``).
 
         Parameters
         ----------
@@ -301,7 +329,7 @@ class ansXpl:
          =====      ANSYS File Xplorer : Copy file.full ANSYS file to file tmpfile.full
             >>      Remove existing output file tmpfile.full
         """
-        return self._mapdl.run("*XPL,COPY,%s,%s" % (newfile, option))
+        return self._mapdl.run(f"*XPL,COPY,{newfile},{option}")
 
     def save(self):
         """Save the current file, ignoring the marked records"""
@@ -309,8 +337,68 @@ class ansXpl:
         self._check_ignored(response)
         return response
 
-    def extract(self, recordname, sets="ALL", asarray=False):
-        """Import a Matrix/Vector from a MAPDL File"""
+    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
+        """Import a Matrix/Vector from a MAPDL result file.
+
+        This allows the reading of a matrix of any MADPL file, once it's
+        visible through the XPL listing.
+
+        Parameters
+        ----------
+        recordname : str
+            Record name. Currently only supports the ``"NSL"`` record,
+            displacement vectors.
+
+        sets : str or int
+            Number of sets. Can be ``"ALL"`` or the number of sets to load.
+
+        asarray : bool, optional
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
+            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+
+        Returns
+        -------
+        numpy.ndarray or ansys.mapdl.core.math.AnsMat
+            A :class:`numpy.ndarray` or :class:`AnsMat
+            <ansys.mapdl.core.math.AnsMat>` of the displacement vectors,
+            depending on the value of ``asarray``.
+
+        Notes
+        -----
+        This only works on the ``"NSL"`` record of MAPDL result files.
+
+        Examples
+        --------
+        First, open a result file and extract the displacement vectors for all
+        sets.
+
+        >>> xpl.open("file.rst")
+        >>> mat = xpl.extract("NSL")
+        >>> mat
+        Dense APDLMath Matrix (243, 10)
+
+        Convert to a dense numpy array
+
+        >>> arr = mat.asarray()
+        >>> arr
+        array([[-9.30806802e-03, -2.39600770e-02, -5.37856729e-03, ...,
+                -5.61188243e-03, -7.17686067e-11,  3.71893252e-03],
+               [-1.60960014e-02,  2.00410618e-02,  8.05822565e-03, ...,
+                -1.26917511e-02, -5.14133724e-11, -1.38783485e-03],
+               [ 2.54040694e-02,  3.91901513e-03, -2.67965796e-03, ...,
+                -1.46365178e-02,  8.31735188e-11, -2.33109771e-03],
+               ...,
+               [-2.80679551e-03, -1.45686692e-02,  8.05466291e-03, ...,
+                 5.88196684e-03,  1.72211103e-02,  6.10079082e-03],
+               [-7.06675717e-03,  1.30455037e-02, -6.31685295e-03, ...,
+                 1.08619340e-02, -1.72211102e-02,  2.52199472e-03],
+               [ 2.29726170e-02,  3.54392176e-03, -1.87020162e-03, ...,
+                 1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
+
+        """
+        if recordname.upper() != "NSL":
+            raise ValueError("Currently, the only supported recordname is 'NSL'")
+
         rand_name = id_generator()
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s", recordname, self._filename
@@ -322,14 +410,17 @@ class ansXpl:
 
         dtype = np.double
         file_extension = pathlib.Path(self._filename).suffix[1:]
+        if file_extension.lower() != "rst":
+            raise RuntimeError(
+                "This method only supports extracting records from result files"
+            )
 
-        self._mapdl.run(
-            f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},{num_first},{num_last},{recordname}",
+        output = self._mapdl.run(
+            f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},"
+            f"{num_first},{num_last},{recordname}",
             mute=False,
         )
-
-        mm = self._mapdl.math
-        return mm.mat(dtype=dtype, name=rand_name)
+        return self._mapdl.math.mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname):
         """Read a given record and fill an APDLMath array.

@@ -149,6 +149,17 @@ class MapdlDb:
         db_port = self._start()
 
         self._ip = self._mapdl._ip
+
+        # permit overriding db_port via env var for CI
+        if "PYMAPDL_DB_PORT" in os.environ:
+            db_port_str = os.environ.get("PYMAPDL_DB_PORT")
+            try:
+                db_port = int(db_port_str)
+            except ValueError:
+                raise ValueError(
+                    f"Invalid port '{db_port_str}' specified in the env var PYMAPDL_DB_PORT"
+                )
+
         self._server = {"ip": self._ip, "port": db_port}
         self._channel_str = f"{self._ip}:{db_port}"
 

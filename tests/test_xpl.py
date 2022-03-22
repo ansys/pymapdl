@@ -43,7 +43,6 @@ def test_save(xpl):
         xpl.list()
 
 
-# @pytest.mark.skipif(no_scheduler, reason='Cannot create instance outside of vnet')
 def test_copy(mapdl, xpl):
     filename = "tmpfile.full"
     xpl.copy(filename)
@@ -92,3 +91,18 @@ def test_up(xpl):
 def test_goto(xpl):
     xpl.goto("MASS")
     assert "Current Location : FULL::MASS" in xpl.where()
+
+
+def test_extract(xpl):
+    # expecting fixture to already have a non-result file open
+    assert xpl._filename[-3:] != "rst"
+    with pytest.raises(RuntimeError, match="result files"):
+        mat = xpl.extract("NSL")
+
+    xpl.open("file.rst")
+
+    with pytest.raises(ValueError, match="the only supported recordname is 'NSL'"):
+        xpl.extract("NOD")
+
+    mat = xpl.extract("NSL")
+    assert mat.shape == (243, 10)
