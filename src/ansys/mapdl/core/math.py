@@ -181,13 +181,16 @@ class MapdlMath:
             or ``"rand"``.
 
         name : str, optional
-            Give the vector a name.  Otherwise one will be
-            automatically generated.
+            Give the vector a name.  Otherwise one will be automatically
+            generated.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
-            APDLMath Vector.
+        ansys.mapdl.math.AnsVec or numpy.ndarray
+            APDLMath Vector or :class:`numpy.ndarray`.
         """
         if dtype not in MYCTYPE:
             raise ANSYSDataTypeError

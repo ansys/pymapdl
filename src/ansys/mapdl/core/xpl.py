@@ -178,7 +178,7 @@ class ansXpl:
          Current Location : FULL::MASS
             File Location : 7644
         """
-        response = self._mapdl.run("*XPL,STEP,%s" % where)
+        response = self._mapdl.run(f"*XPL,STEP,{where}")
         if "Not Found" in response:
             raise RuntimeError(response.strip())
         return response
@@ -208,7 +208,7 @@ class ansXpl:
                  - Record Size   : 81
                  - Data type     : integer values
         """
-        return self._mapdl.run("*XPL,INFO," + recname + "," + option)
+        return self._mapdl.run(f"*XPL,INFO,{recname},{option}")
 
     def print(self, recname):
         """Print values of a given records, or all records (using ``"*"``).
@@ -236,7 +236,7 @@ class ansXpl:
                1         2         3
 
         """
-        return self._mapdl.run("*XPL,PRINT,%s" % recname)
+        return self._mapdl.run(f"*XPL,PRINT,{recname}")
 
     def json(self):
         """Create a JSON representation of the tree or records.
@@ -294,7 +294,7 @@ class ansXpl:
         """
         if str(nlev).upper().strip() == "TOP":
             return self._mapdl.run("*XPL,UP,TOP")
-        return self._mapdl.run("*XPL,UP,%d" % nlev)
+        return self._mapdl.run(f"*XPL,UP,{nlev}")
 
     def goto(self, path):
         """Go directly to a new location in the file.
@@ -310,7 +310,7 @@ class ansXpl:
          =====      ANSYS File Xplorer : Go up to top level(s)
          =====      ANSYS File Xplorer : Step into Block MASS
         """
-        return self._mapdl.run("*XPL,GOTO,%s" % path)
+        return self._mapdl.run(f"*XPL,GOTO,{path}")
 
     def copy(self, newfile, option=""):
         """Copy the current opened as a new file.
@@ -423,7 +423,7 @@ class ansXpl:
         return self._mapdl.math.mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname):
-        """Read a given record and fill an APDLMath array.
+        """Read a record and return either an Ansys matrix or an Ansys vector
 
         Returns
         -------
@@ -455,22 +455,22 @@ class ansXpl:
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
     def write(self, recordname, vecname):
-        """Write a given record back to an MAPDL File
-        Use the write function at your own risk, you may corrupt
-        an existing file by changing the size of a record in the
-        file.
-        This function must be used only on a non-compressed file
+        """Write a given record back to an MAPDL file.
+
+        Use the write function at your own risk, you may corrupt an existing
+        file by changing the size of a record in the file.  This method must be
+        used only on a non-compressed file.
 
         Parameters
         ----------
         recordname : str
             Name of the record you want to overwrite. Your position
             in the file must be set accordingly to this record location
-            ( same as if you want to read it)
+            (same as if you want to read it).
 
         vecname : str
             Name of the APDLMath vector you want to write in the MAPDL
-            file. Its size must be consistent with the existing record
+            file. Its size must be consistent with the existing record.
 
         Returns
         -------

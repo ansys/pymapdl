@@ -6,8 +6,8 @@ from ansys.mapdl.core.misc import random_string
 
 @pytest.fixture(scope="module")
 def check_supports_database(mapdl):
-    if mapdl._server_version < (0, 4, 0):  # 2021R2
-        pytest.skip("command not supported")
+    if mapdl._server_version < (0, 4, 1):  # 2021R2
+        pytest.skip("Database service not supported")
 
 
 @pytest.fixture(scope="session")
