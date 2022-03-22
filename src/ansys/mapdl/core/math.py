@@ -256,11 +256,12 @@ class MapdlMath:
                 raise ValueError(f"Invalid init method '{init}'")
         else:
             info = self._mapdl._data_info(name)
-            mtype = info.objtype
-            if mtype == 2:
+            if info.objtype == pb_types.DataType.DMAT:
                 return AnsDenseMat(name, self._mapdl)
-            else:
+            elif info.objtype == pb_types.DataType.SMAT:
                 return AnsSparseMat(name, self._mapdl)
+            else:  # pragma: no cover
+                raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
         return mat
 

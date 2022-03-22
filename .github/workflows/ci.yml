@@ -10,7 +10,8 @@ on:
       - main
 
 env:
-  PYMAPDL_PORT: 21000  # default won't work on azure
+  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl

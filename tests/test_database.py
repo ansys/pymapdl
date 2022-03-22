@@ -47,10 +47,10 @@ def test_save(db):
 
     filename = f"{random_string()}.db"
     db.save(filename)
-    assert filename in db._mapdl.list_files()
 
+    assert filename in db._mapdl.list_files()
     output = db.load(filename)
-    assert f"NAME={filename}" in output
+    assert f"RESUME ANSYS" in output
 
 
 def test_clear(db):
@@ -61,4 +61,4 @@ def test_clear(db):
 
 
 def test_nodes_repr(nodes):
-    breakpoint()
+    pass

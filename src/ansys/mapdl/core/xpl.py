@@ -5,10 +5,11 @@ import random
 import string
 import weakref
 
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_pb2
 import numpy as np
 
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from .common_grpc import ANSYS_VALUE_TYPE
+from .errors import MapdlRuntimeError
 
 
 def id_generator(size=6, chars=string.ascii_uppercase):
@@ -335,8 +336,8 @@ class ansXpl:
 
         Returns
         -------
-        arr : ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
-            a handle to the APDLMath object.
+        ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+            A handle to the APDLMath object.
 
         Examples
         --------
@@ -346,31 +347,21 @@ class ansXpl:
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
         rand_name = id_generator()
-        response = self._mapdl.run("*XPL,READ,%s,rand_name" % recordname)
+        response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
-        response = self._mapdl._data_info(rand_name)
+        data_info = self._mapdl._data_info(rand_name)
 
-        if response.stype == anskernel.INTEGER:
-            dtype = np.int32
-        elif response.stype == anskernel.HYPER:
-            dtype = np.int64
-        elif response.stype == anskernel.FLOAT:
-            dtype = np.single
-        elif response.stype == anskernel.DOUBLE:
-            dtype = np.double
-        elif response.stype == anskernel.FCPLX:
-            dtype = np.complex64
-        elif response.stype == anskernel.DCPLX:
-            dtype = np.complex128
-        else:
-            raise TypeError("Unhandled ANSYS type %s" % response.stype)
+        dtype = ANSYS_VALUE_TYPE[data_info.stype]
+        if dtype is None:
+            raise TypeError("Unknown MAPDL data type")
 
-        mm = self._mapdl.math
-        mtype = response.objtype
-        if mtype == 2:
-            return mm.vec(dtype=dtype, name=rand_name)
-
-        return mm.mat(dtype=dtype, name=rand_name)
+        # return either vector or matrix type
+        if data_info.objtype == mapdl_pb2.DataType.VEC:
+            return self._mapdl.math.vec(dtype=dtype, name=rand_name)
+        elif data_info.objtype in [mapdl_pb2.DataType.DMAT, mapdl_pb2.DataType.SMAT]:
+            return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+        else:  # pragma: no cover
+            raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
     def write(self, recordname, vecname):
         """Write a given record back to an MAPDL File
