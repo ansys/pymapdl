@@ -6,6 +6,12 @@ import pytest
 pytestmark = pytest.mark.skip_grpc
 
 
+@pytest.fixture(scope="module")
+def check_supports_extract(mapdl):
+    if mapdl._server_version < (0, 4, 1):  # 2022R1
+        pytest.skip("command not supported")
+
+
 @pytest.fixture(scope="function")
 def xpl(mapdl, cube_solve):
     xpl = mapdl.xpl
@@ -93,6 +99,7 @@ def test_goto(xpl):
     assert "Current Location : FULL::MASS" in xpl.where()
 
 
+@pytest.mark.usefixtures("check_supports_extract")
 def test_extract(xpl):
     # expecting fixture to already have a non-result file open
     assert xpl._filename[-3:] != "rst"
