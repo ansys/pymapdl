@@ -38,76 +38,88 @@ class DbNodes:
         """Return the weakly referenced instance of db."""
         return self._db_weakref()
 
-    def first(self, inod=0, defined=False):
+    def first(self, inod=0):
         """Get the number of the first node.
 
-           starting at inod ( default = first  node in the model)
-        By default, we loop over the selected nodes. If you wish
-        to loop over all defined nodes, you need to set defined=True
-
+        This starts at ``inod``, defaults to the first node in the model.
+        By default, loops over the selected nodes.
         Parameters
         ----------
         inod : int, optional
-                the last node number used
-                = 0 - use for initial value
-        defined : bool, optional
-                Set of nodes to loop over
-                False: loop over selected nodes
-                True: loop over all defined nodes
+            The first node number to consider as the "first node".
+
         Returns
         -------
-        first : int
-        The first node number
-        = 0 - no nodes
-        """
+        int
+            The first node number within either selected or all nodes.
 
+        Examples
+        --------
+        Return the first selected node.
+
+        >>> nodes.first()
+        1
+
+        Return the first node of after node 10.
+
+        >>> nodes.first(inod=10)
+        11
+
+        """
         self._itnod = inod
-        if defined:
-            return self.next_defined()
-        else:
-            return self.next()
+        return self.next()
 
     def next(self):
-        """get the number of the next selected node
-        You first have to call first()
+        """Return the number of the next selected node.
+
+        You must first call :func:`DbNodes.first`.
 
         Returns
         -------
-        next : int
-        The next selected node number
-        = 0 - no more nodes
-        """
+        int
+            The next selected node number. Returns 0 if there are no more nodes.
 
+        Examples
+        --------
+        Call :func:`DbNodes.first` first.
+
+        >>> nodes.first()
+        1
+
+        Then get the next node.
+
+        >>> nodes.next()
+        2
+
+        """
         if self._itnod == -1:
-            raise TypeError(
-                "``db.next_node`` you first have to call first_node function"
-            )
+            raise RuntimeError("You first have to call the `DbNodes.first` method.")
 
         request = mapdl_db_pb2.NodRequest(next=self._itnod)
         result = self._db._stub.NodNext(request)
         self._itnod = result.inum
         return self._itnod
 
-    def next_defined(self):
-        """get the number of the next defined node
-        You first have to call first)_
+    # def next_defined(self):
+    #     """get the number of the next defined node
+    #     You first have to call first)_
 
-        Returns
-        -------
-        next_defined : int
-        The next defined node number
-        = 0 - no more nodes
-        """
+    #     Returns
+    #     -------
+    #     next_defined : int
+    #     The next defined node number
+    #     = 0 - no more nodes
+    #     """
 
-        if self._itnod == -1:
-            raise TypeError(
-                "``db.next_node`` you first have to call first_node function"
-            )
-
-        request = mapdl_db_pb2.NodRequest(next=self._itnod)
-        result = self._db._stub.NodNextDefined(request)
-        self._itnod = result.inum
-        return self._itnod
+    #     if self._itnod == -1:
+    #         raise TypeError(
+    #             "``db.next_node`` you first have to call first_node function"
+    #         )
+    #     breakpoint()
+    #     request = mapdl_db_pb2.NodRequest(next=self._itnod)
+    #     result = self._db._stub.NodNextDefined(request)
+    #     self._itnod = result.inum
+    #     return self._itnod
 
     def info(self, ind, ikey):
         """get information about a node
@@ -175,11 +187,10 @@ class DbNodes:
         inqr = result.ret
         return inqr
 
-    def howmany(self, defined=False):
-        if defined:
+    def num(self, selected=False):
+        if selected:
             return self.info(0, DBDef.DB_NUMSELECTED.value)
-        else:
-            return self.info(0, DBDef.DB_NUMDEFINED.value)
+        return self.info(0, DBDef.DB_NUMDEFINED.value)
 
     def maxnumber(self):
         return self.info(0, DBDef.DB_MAXDEFINED.value)

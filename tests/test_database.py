@@ -4,14 +4,10 @@ from ansys.mapdl.core.database import MapdlDb
 from ansys.mapdl.core.misc import random_string
 
 
-@pytest.fixture(scope="module")
-def check_supports_database(mapdl):
-    if mapdl._server_version < (0, 4, 1):  # 2021R2
-        pytest.skip("Database service not supported")
-
-
 @pytest.fixture(scope="session")
 def db(mapdl):
+    if mapdl._server_version < (0, 4, 1):  # 2021R2
+        pytest.skip("requires 2021R2 or newer")
     return mapdl.db
 
 
@@ -36,8 +32,9 @@ def elems(db):
     return db.elems
 
 
-@pytest.mark.usefixtures("check_supports_database")
 def test_database_start_stop(mapdl):
+    if mapdl._server_version < (0, 4, 1):  # 2021R2
+        pytest.skip("requires 2021R2 or newer")
 
     # verify it can be created twice
     mapdl.prep7()
@@ -55,12 +52,10 @@ def test_database_start_stop(mapdl):
         database.stop()
 
 
-@pytest.mark.usefixtures("check_supports_database")
 def test_database_repr(db):
     assert db._channel_str in str(db)
 
 
-@pytest.mark.usefixtures("check_supports_database")
 def test_save(db):
     with pytest.raises(ValueError, match="Option must be one of the"):
         db.save("file.db", "not_an_option")
@@ -73,7 +68,6 @@ def test_save(db):
     assert f"RESUME ANSYS" in output
 
 
-@pytest.mark.usefixtures("check_supports_database")
 def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
@@ -81,7 +75,18 @@ def test_clear(db):
     assert db._mapdl.geometry.n_keypoint == 0
 
 
-@pytest.mark.usefixtures("check_supports_database")
-def test_nodes_repr(nodes):
-    pass
-    # nodes
+def test_nodes_first(nodes):
+    assert nodes.first() == 1
+    assert nodes.first(inod=10) == 11
+
+
+def test_nodes_next(nodes):
+    nodes._itnod = -1  # resets nodes state
+
+    with pytest.raises(
+        RuntimeError, match="You first have to call the `DbNodes.first` method"
+    ):
+        nodes.next()
+
+    nodes.first()
+    assert nodes.next() == 2
