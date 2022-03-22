@@ -83,5 +83,5 @@ def test_clear(db):
 
 @pytest.mark.usefixtures("check_supports_database")
 def test_nodes_repr(nodes):
-    breakpoint()
+    pass
     # nodes
