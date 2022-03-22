@@ -62,12 +62,11 @@ class MapdlDb:
     """
 
     def __init__(self, mapdl):
-        if not isinstance(mapdl, MapdlGrpc):
+        if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self._stub = None
         self._channel = None
-        # self._itele = -1
         self._ip = None
         self._server = {}
         self._channel_str = None

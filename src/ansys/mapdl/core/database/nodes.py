@@ -1,5 +1,8 @@
-"""Contains the Node section of the  MapdlDb class, allowing the access
-to the Nodes in the MAPDL DB from Python.  """
+"""Contains the Node implementation of the MapdlDb class.
+
+This allows access to the Nodes in the MAPDL DB from Python.
+
+"""
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -22,22 +25,22 @@ class DbNodes:
     >>> db = mapdl.db
     >>> nodes = db.nodes
 
-
     """
 
     def __init__(self, db):
-        if not isinstance(db, MapdlDb):
+        if not isinstance(db, MapdlDb):  # pragma: no cover
             raise TypeError("``db`` must be a MapdlDb instance")
         self._db_weakref = weakref.ref(db)
         self._itnod = -1
 
     @property
     def _db(self):
-        """Return the weakly referenced instance of db"""
+        """Return the weakly referenced instance of db."""
         return self._db_weakref()
 
     def first(self, inod=0, defined=False):
-        """get the number of the first node,
+        """Get the number of the first node.
+
            starting at inod ( default = first  node in the model)
         By default, we loop over the selected nodes. If you wish
         to loop over all defined nodes, you need to set defined=True
