@@ -1,6 +1,6 @@
 import pytest
 
-from ansys.mapdl.core.database import MapdlDb
+from ansys.mapdl.core.database import DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
 
 
@@ -90,3 +90,22 @@ def test_nodes_next(nodes):
 
     nodes.first()
     assert nodes.next() == 2
+
+
+def test_nodes_info(nodes):
+    assert nodes.info(1, DBDef.DB_SELECTED) == 1
+
+
+@pytest.mark.parametrize("selected", [True, False])
+def test_nodes_num(nodes, selected):
+    assert nodes.num(selected=selected) == 425
+
+
+def test_nodes_max_num(nodes):
+    assert nodes.max_num == 425
+
+
+def test_nodes_coord(nodes):
+    sel, coord = nodes.coord(22)
+    assert sel == 0  # selected
+    assert coord == (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)

@@ -22,8 +22,7 @@ class DbNodes:
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> db = mapdl.db
-    >>> nodes = db.nodes
+    >>> nodes = mapdl.db.nodes
 
     """
 
@@ -125,111 +124,170 @@ class DbNodes:
         """get information about a node
 
         Parameters
-        ind     int       - node number
-                Should be 0 for key=11, DB_NUMDEFINED,
-                DB_NUMSELECTED, DB_MAXDEFINED, and
-                DB_MAXRECLENG
+        ----------
+        ind : int
+            Node number. Should be 0 for key=11 for the following:
 
-        ikey    int       - key as to information needed about the node.
-                 = DB_SELECTED    - return select status:
-                     ndinqr  =  0 - node is undefined.
-                             = -1 - node is unselected.
-                             =  1 - node is selected.
-                 = DB_NUMDEFINED  - return number of defined nodes
-                 = DB_NUMSELECTED - return number of selected nodes
-                 = DB_MAXDEFINED  - return highest node number defined
-                 = DB_MAXRECLENG  - return maximum record length (dp words)
-                 =   2, return length (dp words)
-                 =   3,
-                 =   4, pointer to first data word
-                 =  11, return void percent (integer)
-                 =  17, pointer to start of index
-                 = 117, return the maximum number of DP contact data stored for any node
-                 =  -1,
-                 =  -2, superelement flag
-                 =  -3, master dof bit pattern
-                 =  -4, active dof bit pattern
-                 =  -5, solid model attachment
-                 =  -6, pack nodal line parametric value
-                 =  -7, constraint bit pattern
-                 =  -8, force bit pattern
-                 =  -9, body force bit pattern
-                 = -10, internal node flag
-                 = -11, orientation node flag =1 is =0 isnot
-                 = -11, contact node flag <0
-                 = -12, constraint bit pattern (for DSYM)
-                 = -13, if dof constraint written to file.k (for LSDYNA only)
-                 = -14, nodal coordinate system number (set by NROTATE)
-                 =-101, pointer to node data record
-                 =-102, pointer to angle record
-                 =-103,
-                 =-104, pointer to attached couplings
-                 =-105, pointer to attacted constraint equations
-                 =-106, pointer to nodal stresses
-                 =-107, pointer to specified disp'S
-                 =-108, pointer to specified forces
-                 =-109, pointer to x/y/z record
-                 =-110,
-                 =-111,
-                 =-112, pointer to nodal temperatures
-                 =-113, pointer to nodal heat generations
-                 =-114,
-                 =-115, pointer to calculated displacements
-                 =-116,
+            * ``DB_NUMDEFINED``
+            * ``DB_NUMSELECTED``
+            * ``DB_MAXDEFINED``
+            * ``DB_MAXRECLENG``
+
+        ikey : int
+            Key as to information needed about the node. One of the following:
+
+            * DB_SELECTED : return select status
+
+                * 0 - node is undefined.
+                * -1 - node is unselected.
+                *  1 - node is selected.
+
+            * DB_NUMDEFINED - return number of defined nodes
+            * DB_NUMSELECTED - return number of selected nodes
+            * DB_MAXDEFINED - return highest node number defined
+            * DB_MAXRECLENG - return maximum record length (dp words)
+            * 2 - length (dp words)
+            * 3 -
+            * 4 - pointer to first data word
+            * 11 - return void percent (integer)
+            * 17 - pointer to start of index
+            * 117 - return the maximum number of DP contact data stored for any node
+            * -1 -
+            * -2 - superelement flag
+            * -3 - master dof bit pattern
+            * -4 - active dof bit pattern
+            * -5 - solid model attachment
+            * -6 - pack nodal line parametric value
+            * -7 - constraint bit pattern
+            * -8 - force bit pattern
+            * -9 - body force bit pattern
+            * -10 - internal node flag
+            * -11 - orientation node flag =1 is =0 isnot
+            * -11 - contact node flag <0
+            * -12 - constraint bit pattern (for DSYM)
+            * -13 - if dof constraint written to file. (for LSDYNA only)
+            * -14 - nodal coordinate system number (set by NROTATE)
+            * -101 - pointer to node data record
+            * -102 - pointer to angle record
+            * -103 -
+            * -104 - pointer to attached couplings
+            * -105 - pointer to attacted constraint equations
+            * -106 - pointer to nodal stresses
+            * -107 - pointer to specified disp'S
+            * -108 - pointer to specified forces
+            * -109 - pointer to x/y/z record
+            * -110 -
+            * -111 -
+            * -112 - pointer to nodal temperatures
+            * -113 - pointer to nodal heat generations
+            * -114 -
+            * -115 - pointer to calculated displacements
+            * -116 -
 
         Returns
         -------
-        info : int
-        the returned value of info_node is based on setting of key
+        int
+            The returned value of info_node is based on setting of key.
+
+        Examples
+        --------
+        Query if a node is selected.
+
+        >>> from ansys.mapdl.core.database import DBDef
+        >>> nodes = mapdl.db.nodes
+        >>> nodes.info(1, DBDef.DB_SELECTED)
+        1
+
         """
+        if isinstance(ikey, DBDef):
+            ikey = ikey.value
         request = mapdl_db_pb2.NodInqrRequest(node=ind, key=ikey)
         result = self._db._stub.NodInqr(request)
-        inqr = result.ret
-        return inqr
+        return result.ret
 
-    def num(self, selected=False):
+    def num(self, selected=False) -> int:
+        """Number of nodes.
+
+        Parameters
+        ----------
+        selected : bool, optional
+            Return either the number of selected nodes of the total number of
+            nodes.
+
+        Returns
+        -------
+        int
+            Number of nodes.
+
+        Examples
+        --------
+        Get the number of selected nodes.
+
+        >>> from ansys.mapdl.core.database import DBDef
+        >>> nodes = mapdl.db.nodes
+        >>> nodes.num(selected=True)
+        425
+
+        """
         if selected:
             return self.info(0, DBDef.DB_NUMSELECTED.value)
         return self.info(0, DBDef.DB_NUMDEFINED.value)
 
-    def maxnumber(self):
+    @property
+    def max_num(self) -> int:
+        """Maximum number of nodes."""
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
-    def get(self, inod):
-        """get a nodal point
+    def coord(self, inod):
+        """The location of a node.
 
         Parameters
-        inod    (int)       - node number
+        ----------
+        inod : int
+            Node number.
 
         Returns
         -------
-        result      (getnodResponse)
-                This structure has two members:
-                  - kerr (int) select status
-                      = 0 - node is selected
-                      = 1 - node is not defined
-                      =-1 - node is unselected
-                  - v (double[]) Coordinates ( first 3 values) and rotation angles ( last 3 values)
+        int
+            Selection status:
+
+            * 0 - node is selected
+            * 1 - node is not defined
+            * -1 - node is unselected
+
+        tuple
+            Coordinates (first 3 values) and rotation angles (last 3 values).
+
+        Examples
+        --------
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
         """
 
         request = mapdl_db_pb2.getnodRequest(node=inod)
-        result = self._db._stub.getNod(request)
-        return result
+        node = self._db._stub.getNod(request)
+        return node.kerr, tuple(node.v)
 
-    def get_all(self):
-        request = anskernel.EmptyRequest()
-        stream = self._db._stub.getAllNod(request)
-        nodes = []
-        for nod in stream:
-            nodes.append(nod.v)
-        return nodes
+    # def get_all(self):
+    #     request = anskernel.EmptyRequest()
+    #     stream = self._db._stub.getAllNod(request)
+    #     nodes = []
+    #     for nod in stream:
+    #         nodes.append(nod.v)
+    #     return nodes
 
     def get_all_asarray(self):
         chunk_size = DEFAULT_CHUNKSIZE
         metadata = [("chunk_size", str(chunk_size))]
         request = anskernel.EmptyRequest()
         chunks = self._db._stub.getAllNodC(request, metadata=metadata)
-        nodes = parse_chunks(chunks, np.int32).reshape(-1, 7)
+        nodes = parse_chunks(chunks, np.int32)
+        breakpoint()
         nodes_nb = nodes[:, 0]
         nodes = np.delete(nodes, 0, 1)
         coords = np.frombuffer(nodes, np.double).reshape(-1, 3)
