@@ -12,7 +12,7 @@ from .property_codes import PropertyCode
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import _MapdlCore  # noqa: F401
 
 
 class MaterialManager:

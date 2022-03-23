@@ -14,8 +14,8 @@ from .exceptions import ModelValidationException
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from ..material import Material
-    from ._base import _MapdlCore
+    from ..material import Material  # noqa: F401
+    from ._base import _MapdlCore  # noqa: F401
 
 
 class ElasticityMode(Enum):

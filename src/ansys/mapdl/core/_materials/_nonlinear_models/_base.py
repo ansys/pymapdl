@@ -3,9 +3,9 @@ from typing import List, Tuple
 
 TYPE_CHECKING = False
 if TYPE_CHECKING:
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import _MapdlCore  # noqa: F401
 
-    from ..material import Material
+    from ..material import Material  # noqa: F401
 
 
 class _BaseModel(metaclass=ABCMeta):
