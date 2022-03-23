@@ -901,7 +901,7 @@ class _MapdlCore(Commands):
         """Resume the cached routine."""
         if self._cached_routine is not None:
             if "BEGIN" not in self._cached_routine:
-                self.run(f"/{prior_processor}", mute=True)
+                self.run(f"/{self._cached_routine}", mute=True)
             else:
                 self.finish(mute=True)
             self._cached_routine = None

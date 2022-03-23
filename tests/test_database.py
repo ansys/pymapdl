@@ -29,7 +29,7 @@ def nodes(gen_block, db):
 
 
 @pytest.fixture(scope="session")
-def elems(db):
+def elems(gen_block, db):
     return db.elems
 
 
@@ -44,6 +44,11 @@ def test_database_start_stop(mapdl):
         assert not database.active
         database.start()
         assert database.active
+
+        # verify a double start does not lead to an error
+        database.start()
+        assert database.active
+
         database.stop()
         assert not database.active
         assert "not active" in str(database)
@@ -134,3 +139,55 @@ def test_nodes_push(nodes):
 
     with pytest.raises(ValueError, match="X and Y angles must be input"):
         nodes.push(nnum, x, y, z, zang=1)
+
+
+def test_elems(elems):
+    assert elems.first() == 1
+    assert elems.first(ielm=10) == 11
+
+
+def test_elems_next(elems):
+    elems._itelm = -1  # resets elems state
+
+    with pytest.raises(
+        RuntimeError, match="You first have to call the `DbElems.first` method"
+    ):
+        elems.next()
+
+    elems.first()
+    assert elems.next() == 2
+
+
+def test_elems_info(elems):
+    assert elems.info(1, DBDef.DB_SELECTED) == 1
+
+
+@pytest.mark.parametrize("selected", [True, False])
+def test_elems_num(elems, selected):
+    assert elems.num(selected=selected) == 64
+
+
+def test_elems_max_num(elems):
+    assert elems.max_num == 64
+
+
+def test_elems_info(elems):
+    ielm = 1
+    elem_info = elems.get(ielm)
+
+    assert len(elem_info.nodes) == elem_info.nnod
+    assert len(elem_info.elmdat) == 10
+    assert elem_info.ielem == ielm
+
+
+def test_elems_push(elems):
+    ielm = 1
+    elem_info = elems.get(ielm)
+
+    ielm_new = 10000
+    elems.push(ielm_new, elem_info.elmdat, elem_info.nodes)
+
+    elem_info_new = elems.get(ielm_new)
+    assert elem_info.elmdat == elem_info_new.elmdat
+    assert elem_info.nnod == elem_info_new.nnod
+    assert elem_info.nodes == elem_info_new.nodes

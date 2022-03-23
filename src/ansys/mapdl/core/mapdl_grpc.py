@@ -1859,18 +1859,33 @@ class MapdlGrpc(_MapdlCore):
 
         Examples
         --------
-        Get the number of nodes in the MAPDL DB
+        Create a nodes instance.
 
-        >>> db = mapdl.db
-        >>>
-        >>>
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> # create nodes...
+        >>> nodes = mapdl.db.nodes
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 270641
+            Maximum node number:      270641
 
-        Push a new node into MAPDL
+        >>> mapdl.nsel("NONE")
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 0
+            Maximum node number:      270641
 
-        >>>
-        >>>
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
         """
-
         from ansys.mapdl.core.database import MapdlDb
 
         if self._db is None:

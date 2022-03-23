@@ -19,11 +19,56 @@ class DbNodes:
 
     Examples
     --------
-    Create an instance.
+    Create a nodes instance.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
+    >>> # create nodes...
     >>> nodes = mapdl.db.nodes
+    >>> print(nodes)
+    MAPDL Database Nodes
+        Number of nodes:          270641
+        Number of selected nodes: 270641
+        Maximum node number:      270641
+
+    >>> mapdl.nsel("NONE")
+    >>> print(nodes)
+    MAPDL Database Nodes
+        Number of nodes:          270641
+        Number of selected nodes: 0
+        Maximum node number:      270641
+
+    Return the selection status and the coordinates of node 22.
+
+    >>> nodes = mapdl.db.nodes
+    >>> sel, coord = nodes.coord(22)
+    >>> coord
+    (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+    Return all the node indices, coordinates, and angles of all the nodes.
+
+    >>> nodes = mapdl.db.nodes
+    >>> ind, coords, angles = nodes.all_asarray()
+    >>> ind
+    array([     1,      2,      3, ..., 270639, 270640, 270641], dtype=int32)
+
+    >>> coords
+    array([[0.    , 1.    , 0.    ],
+           [0.    , 0.    , 0.    ],
+           [0.    , 0.9875, 0.    ],
+           ...,
+           [0.9875, 0.975 , 0.925 ],
+           [0.9875, 0.975 , 0.95  ],
+           [0.9875, 0.975 , 0.975 ]])
+
+    >>> angles
+    array([[0., 0., 0.],
+           [0., 0., 0.],
+           [0., 0., 0.],
+           ...,
+           [0., 0., 0.],
+           [0., 0., 0.],
+           [0., 0., 0.]])
 
     """
 
@@ -32,6 +77,13 @@ class DbNodes:
             raise TypeError("``db`` must be a MapdlDb instance")
         self._db_weakref = weakref.ref(db)
         self._itnod = -1
+
+    def __str__(self):
+        lines = ["MAPDL Database Nodes"]
+        lines.append(f"    Number of nodes:          {self.num()}")
+        lines.append(f"    Number of selected nodes: {self.num(selected=True)}")
+        lines.append(f"    Maximum node number:      {self.max_num}")
+        return "\n".join(lines)
 
     @property
     def _db(self):
@@ -42,7 +94,7 @@ class DbNodes:
         """Get the number of the first node.
 
         This starts at ``inod``, defaults to the first node in the model.
-        By default, loops over the selected nodes.
+
         Parameters
         ----------
         inod : int, optional
@@ -60,7 +112,7 @@ class DbNodes:
         >>> nodes.first()
         1
 
-        Return the first node of after node 10.
+        Return the first node after node 10.
 
         >>> nodes.first(inod=10)
         11
@@ -121,12 +173,12 @@ class DbNodes:
     #     self._itnod = result.inum
     #     return self._itnod
 
-    def info(self, ind, ikey):
-        """get information about a node
+    def info(self, inod, ikey):
+        """Return information about a node.
 
         Parameters
         ----------
-        ind : int
+        inod : int
             Node number. Should be 0 for key=11 for the following:
 
             * ``DB_NUMDEFINED``
@@ -135,7 +187,7 @@ class DbNodes:
             * ``DB_MAXRECLENG``
 
         ikey : int
-            Key as to information needed about the node. One of the following:
+            Key of the information needed about the node. One of the following:
 
             * DB_SELECTED : return select status
 
@@ -188,7 +240,7 @@ class DbNodes:
         Returns
         -------
         int
-            The returned value of info_node is based on setting of key.
+            Information from the query based on ``ikey``.
 
         Examples
         --------
@@ -202,7 +254,7 @@ class DbNodes:
         """
         if isinstance(ikey, DBDef):
             ikey = ikey.value
-        request = mapdl_db_pb2.NodInqrRequest(node=ind, key=ikey)
+        request = mapdl_db_pb2.NodInqrRequest(node=inod, key=ikey)
         result = self._db._stub.NodInqr(request)
         return result.ret
 
@@ -224,7 +276,6 @@ class DbNodes:
         --------
         Get the number of selected nodes.
 
-        >>> from ansys.mapdl.core.database import DBDef
         >>> nodes = mapdl.db.nodes
         >>> nodes.num(selected=True)
         425
@@ -236,7 +287,17 @@ class DbNodes:
 
     @property
     def max_num(self) -> int:
-        """Maximum number of nodes."""
+        """Maximum node number.
+
+        Examples
+        --------
+        Return the maximum node number.
+
+        >>> nodes = mapdl.db.nodes
+        >>> nodes.max_num
+        425
+
+        """
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
     def coord(self, inod):
@@ -276,6 +337,9 @@ class DbNodes:
     def all_asarray(self):
         """Return all node indices, coordinates, and angles as arrays.
 
+        .. note::
+           This only returns data of the selected nodes.
+
         Returns
         -------
         np.ndarray
@@ -287,8 +351,30 @@ class DbNodes:
 
         Examples
         --------
+        Return all the node indices, coordinates, and angles of all the nodes.
+
         >>> nodes = mapdl.db.nodes
         >>> ind, coords, angles = nodes.all_asarray()
+        >>> ind
+        array([     1,      2,      3, ..., 270639, 270640, 270641], dtype=int32)
+
+        >>> coords
+        array([[0.    , 1.    , 0.    ],
+               [0.    , 0.    , 0.    ],
+               [0.    , 0.9875, 0.    ],
+               ...,
+               [0.9875, 0.975 , 0.925 ],
+               [0.9875, 0.975 , 0.95  ],
+               [0.9875, 0.975 , 0.975 ]])
+
+        >>> angles
+        array([[0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.],
+               ...,
+               [0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.]])
 
         """
         chunk_size = DEFAULT_CHUNKSIZE
@@ -367,7 +453,6 @@ class DbNodes:
         Examples
         --------
         Update node 1 to have coordinates ``(10.0, 20.0, 30.0)``.
-
 
         >>> nodes = mapdl.db.nodes
         >>> nodes.push(1, 10, 20, 30)

@@ -87,10 +87,21 @@ def test_invalid_dtype(mm):
         mm.vec(10, dtype=np.uint8)
 
 
+def test_vec(mm):
+    vec = mm.vec(10, asarray=False)
+    assert isinstance(vec, apdl_math.AnsVec)
+
+    arr = mm.vec(10, asarray=True)
+    assert isinstance(arr, np.ndarray)
+
+
 def test_vec_from_name(mm):
     vec0 = mm.vec(10)
     vec1 = mm.vec(name=vec0.id)
     assert np.allclose(vec0, vec1)
+
+    vec1 = mm.vec(name=vec0.id, asarray=False)
+    assert isinstance(vec1, apdl_math.AnsVec)
 
 
 def test_vec__mul__(mm):

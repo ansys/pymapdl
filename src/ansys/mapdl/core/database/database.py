@@ -22,9 +22,9 @@ class WithinBeginLevel:
         if "BEGIN" not in self._mapdl._cached_routine.upper():
             self._mapdl.finish()
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, *args, **kwargs):
         if "BEGIN" not in self._mapdl._cached_routine.upper():
-            self._mapdl._resume_routine
+            self._mapdl._resume_routine()
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
@@ -43,21 +43,35 @@ class DBDef(Enum):  # From MAPDL ansysdef.inc include file
 
 
 class MapdlDb:
-    """Abstract mapdl db class.  Created from a ``Mapdl`` instance.
+    """Abstract mapdl database class.  Created from a ``Mapdl`` instance.
 
     Examples
     --------
-    Create an instance.
+    Create a nodes instance.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> db = mapdl.db
+    >>> # create nodes...
+    >>> nodes = mapdl.db.nodes
+    >>> print(nodes)
+    MAPDL Database Nodes
+        Number of nodes:          270641
+        Number of selected nodes: 270641
+        Maximum node number:      270641
 
-    Get the number of nodes
+    >>> mapdl.nsel("NONE")
+    >>> print(nodes)
+    MAPDL Database Nodes
+        Number of nodes:          270641
+        Number of selected nodes: 0
+        Maximum node number:      270641
 
-    Get a given node
+    Return the selection status and the coordinates of node 22.
 
-    Set a new node into MAPDL DB
+    >>> nodes = mapdl.db.nodes
+    >>> sel, coord = nodes.coord(22)
+    >>> coord
+    (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
 
     """
 
@@ -85,11 +99,6 @@ class MapdlDb:
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
-    @property
-    def _server_version(self):
-        """Return the version of MAPDL"""
-        return self._mapdl._server_version
-
     def _start(self) -> int:
         """Start the database server.
 
@@ -116,7 +125,7 @@ class MapdlDb:
         while status == "":
             status = self._mapdl._download_as_raw("DBServer.info").decode()
             time.sleep(0.05)
-            if time.time() - tstart > timeout:
+            if time.time() - tstart > timeout:  # pragma: no cover
                 raise TimeoutError(
                     f"Unable to start database server in {timeout} second(s)"
                 )
@@ -165,7 +174,7 @@ class MapdlDb:
             db_port_str = os.environ.get("PYMAPDL_DB_PORT")
             try:
                 db_port = int(db_port_str)
-            except ValueError:
+            except ValueError:  # pragma: no cover
                 raise ValueError(
                     f"Invalid port '{db_port_str}' specified in the env var PYMAPDL_DB_PORT"
                 )

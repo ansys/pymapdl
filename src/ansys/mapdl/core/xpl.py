@@ -415,7 +415,7 @@ class ansXpl:
                 "This method only supports extracting records from result files"
             )
 
-        output = self._mapdl.run(
+        self._mapdl.run(
             f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},"
             f"{num_first},{num_last},{recordname}",
             mute=False,
@@ -423,7 +423,7 @@ class ansXpl:
         return self._mapdl.math.mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname):
-        """Read a record and return either an Ansys matrix or an Ansys vector
+        """Read a record and return either an APDL math matrix or an APDL math vector.
 
         Returns
         -------
@@ -443,8 +443,8 @@ class ansXpl:
         data_info = self._mapdl._data_info(rand_name)
 
         dtype = ANSYS_VALUE_TYPE[data_info.stype]
-        if dtype is None:
-            raise TypeError("Unknown MAPDL data type")
+        if dtype is None:  # pragma: no cover
+            raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type
         if data_info.objtype == mapdl_pb2.DataType.VEC:
