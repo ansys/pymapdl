@@ -159,7 +159,7 @@ Next, connect to the instance of MAPDL from python with:
 
     >>> from ansys.mapdl.core import Mapdl
     >>> ip = '127.0.0.1'
-    >>> mapdl = Mapdl(ip=ip, port=50052, request_instance=False)
+    >>> mapdl = Mapdl(ip=ip, port=50052, start_instance=False)
     >>> print(mapdl)
 
 

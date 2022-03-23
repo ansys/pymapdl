@@ -9,6 +9,7 @@ env:
   PYMAPDL_PORT: 21000  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
+  MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
 
 jobs:
 
@@ -17,6 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
 
       - name: Install OS packages
         run: |
@@ -27,14 +33,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install ansys-mapdl-core
         run: |
+          python -m pip install --upgrade pip
           pip install .
-          cd tests
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Log in to github registry
@@ -42,7 +48,7 @@ jobs:
 
       - name: Pull image
         run: |
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 ghcr.io/pyansys/mapdl -smp > log.txt &
+          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
           grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
           python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
         env:
@@ -50,7 +56,8 @@ jobs:
 
       - name: Unit Testing
         run: |
-          pip install -r requirements_test.txt
+          pip install -r requirements/requirements_tests.txt
+          cd tests
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display MAPDL Logs
@@ -66,6 +73,5 @@ jobs:
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}
           overwrite: "{
-            title: `${workflow} failed.`, 
+            title: `Nightly MAPDL check (${workflow}) failed.`, 
             }"
-

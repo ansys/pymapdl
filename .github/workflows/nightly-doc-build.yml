@@ -39,9 +39,9 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py bdist_wheel
-          pip install dist/ansys*.whl
+          python -m pip install --upgrade pip
+          pip install -r requirements/requirements_build.txt
+          pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Pull, launch, and validate MAPDL service
@@ -58,7 +58,7 @@ jobs:
   
       - name: Build Documentation
         run: |
-          pip install -r requirements_docs.txt
+          pip install -r requirements/requirements_docs.txt
           xvfb-run make -C doc html
 
       - name: Deploy

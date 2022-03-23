@@ -359,12 +359,26 @@ class Parameters:
         array : np.ndarray
             Numpy array.
         """
-        format_str = "(1F20.12)"
-        with self._mapdl.non_interactive:
-            self._mapdl.mwrite(parm_name.upper(), label="kji")  # use C ordering
-            self._mapdl.run(format_str)
+        escaped = False
+        for each_format_number in [20, 30, 40, 64, 100]:
+            format_str = f"(1F{each_format_number}.12)"
+            with self._mapdl.non_interactive:
+                # use C ordering
+                self._mapdl.mwrite(parm_name.upper(), label="kji")
+                self._mapdl.run(format_str)
 
-        st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+            st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+
+            if "**" not in self._mapdl.last_response[st:]:
+                escaped = True
+                break
+
+        if not escaped:  # pragma: no cover
+            raise RuntimeError(
+                f"The array '{parm_name}' has a number format "
+                "that could not be read using '{format_str}'."
+            )
+
         arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(
             shape
         )
