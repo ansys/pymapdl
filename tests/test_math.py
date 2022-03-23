@@ -1,7 +1,6 @@
 """Test APDL Math functionality"""
 import os
 import re
-from shutil import copy
 
 import numpy as np
 import pytest
@@ -200,10 +199,7 @@ def test_load_stiff_mass(mm, cube_solve, tmpdir):
 
 
 def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
-    full_files = mm._mapdl.download("*.full")
-    assert os.path.exists(full_files[0])
-    full_path = os.path.join(os.getcwd(), full_files[0])
-    copy(full_path, tmpdir)
+    full_files = mm._mapdl.download("*.full", target_dir=tmpdir)
     fname_ = os.path.join(tmpdir, full_files[0])
     assert os.path.exists(fname_)
 
