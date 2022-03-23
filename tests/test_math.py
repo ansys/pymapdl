@@ -109,8 +109,8 @@ def test_vec_from_name(mm):
     vec1 = mm.vec(name=vec0.id)
     assert np.allclose(vec0, vec1)
 
-    vec1 = mm.vec(name=vec0.id, asarray=False)
-    assert isinstance(vec1, apdl_math.AnsVec)
+    vec1 = mm.vec(name=vec0.id, asarray=True)
+    assert isinstance(vec1, np.ndarray)
 
 
 def test_vec__mul__(mm):

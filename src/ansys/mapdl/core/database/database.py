@@ -133,10 +133,10 @@ class MapdlDb:
         tstart = time.time()
         timeout = 1
         status = self._mapdl._download_as_raw("DBServer.info").decode()
-        while status == "":
+        while status == "":  # pragma: no cover
             status = self._mapdl._download_as_raw("DBServer.info").decode()
             time.sleep(0.05)
-            if time.time() - tstart > timeout:  # pragma: no cover
+            if time.time() - tstart > timeout:
                 raise TimeoutError(
                     f"Unable to start database server in {timeout} second(s)"
                 )

@@ -81,6 +81,11 @@ def test_clear(db):
     assert db._mapdl.geometry.n_keypoint == 0
 
 
+def test_nodes_repr(nodes):
+    assert "425" in str(nodes)
+    assert "Number of nodes" in str(nodes)
+
+
 def test_nodes_first(nodes):
     assert nodes.first() == 1
     assert nodes.first(inod=10) == 11
@@ -141,7 +146,12 @@ def test_nodes_push(nodes):
         nodes.push(nnum, x, y, z, zang=1)
 
 
-def test_elems(elems):
+def test_elems_repr(elems):
+    assert "64" in str(elems)
+    assert "Number of elements" in str(elems)
+
+
+def test_elems_first(elems):
     assert elems.first() == 1
     assert elems.first(ielm=10) == 11
 
@@ -191,3 +201,6 @@ def test_elems_push(elems):
     assert elem_info.elmdat == elem_info_new.elmdat
     assert elem_info.nnod == elem_info_new.nnod
     assert elem_info.nodes == elem_info_new.nodes
+
+    with pytest.raises(ValueError, match="`elmdat` must be length 10"):
+        elems.push(ielm_new, [1, 2, 3], elem_info.nodes)
