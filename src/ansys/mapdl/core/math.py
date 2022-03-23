@@ -11,6 +11,8 @@ from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import numpy as np
 
+from ansys.mapdl.core.misc import load_file
+
 from .check_version import VersionError, meets_version, version_requires
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .errors import ANSYSDataTypeError, protect_grpc
@@ -536,19 +538,7 @@ class MapdlMath:
             If the file is local, it will be uploaded.
 
         """
-        if self._mapdl._local:  # pragma: no cover
-            if not os.path.exists(fname):
-                raise FileNotFoundError(f"The file {fname} could not be found.")
-        else:
-            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
-                raise FileNotFoundError(
-                    f"The file {fname} could not be found in the local client or remote working directory."
-                )
-            if os.path.exists(fname):
-                self._mapdl.upload(fname)
-                fname = os.path.basename(fname)
-
-        return fname
+        return load_file(self._mapdl, fname)
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
@@ -1436,19 +1426,26 @@ class AnsMat(ApdlMathObj):
         """
         return (self.nrow, self.ncol)
 
-    def sym(self):  # BUG this is not always true
-        """Return if matrix is symmetric."""
+    def sym(self) -> bool:
+        """Return if matrix is symmetric.
+
+        Returns
+        -------
+        bool
+            ``True`` when this matrix is symmetric.
+
+        """
 
         info = self._mapdl._data_info(self.id)
 
         if meets_version(self._mapdl._server_version, (0, 5, 0)):  # pragma: no cover
             return info.mattype in [0, 1, 2]  # [UPPER, LOWER, DIAG] respectively
-        else:
-            warn(
-                "Call to sym() function cannot evaluate if"
-                "it is symmetric or not in this MAPDL version."
-            )
-            return True
+
+        warn(
+            "Call to ``sym`` cannot evaluate if this matrix "
+            "is symmetric with this version of MAPDL."
+        )
+        return True
 
     def asarray(self, dtype=None) -> np.ndarray:
         """Returns vector as a numpy array.

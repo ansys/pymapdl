@@ -1468,3 +1468,80 @@ def test_seltol(mapdl, value):
         assert "SELECT TOLERANCE=" in mapdl.seltol(value)
     else:
         assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
+
+
+def test_mpfunctions(mapdl, cube_solve, capsys):
+    mapdl.prep7()
+
+    # check writing to file
+    fname = "test"
+    ext = "mp1"
+
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
+    assert f"{fname}.{ext}" in mapdl.list_files()
+
+    # asserting downloading
+    ext = "mp2"
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(
+        fname, ext, download_file=True
+    )
+    assert f"{fname}.{ext}" in mapdl.list_files()
+    assert os.path.exists(f"{fname}.{ext}")
+
+    ## Checking reading
+    # Uploading a local file
+    with open(f"{fname}.{ext}", "r") as fid:
+        text = fid.read()
+
+    os.remove(f"{fname}.{ext}")  # remove temp file
+
+    ext = ext + "2"
+    fname_ = f"{fname}.{ext}"
+    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
+    nuxy = float(new_nuxy.split(",")[4])
+    ex = 0.2100000e12
+
+    with open(fname_, "w") as fid:
+        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
+
+    assert fname_ not in mapdl.list_files()
+    mapdl.clear()
+    mapdl.prep7()
+    captured = capsys.readouterr()  # To flush it
+    output = mapdl.mpread(fname, ext)
+    captured = capsys.readouterr()
+    assert f"Uploading {fname}.{ext}:" in captured.err
+    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
+    assert "TEMPERATURE TABLE ERASED." in output
+    assert "0.4000000" in output
+    assert fname_ in mapdl.list_files()
+    # check if materials are read into the db
+    assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
+    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Reding file in remote
+    fname_ = f"{fname}.{ext}"
+    os.remove(fname_)
+    assert not os.path.exists(fname_)
+    assert f"{fname}.{ext}" in mapdl.list_files()
+
+    mapdl.clear()
+    mapdl.prep7()
+    output = mapdl.mpread(fname, ext)
+    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
+    assert "TEMPERATURE TABLE ERASED." in output
+    assert "0.4000000" in output
+    assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
+    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Test non-existing file
+    with pytest.raises(FileNotFoundError):
+        mapdl.mpread(fname="dummy", ext="dummy")
+
+    # Test not implemented error
+    with pytest.raises(NotImplementedError):
+        mapdl.mpread(fname="dummy", ext="dummy", lib="something")
+
+    # Test suppliying a dir path when in remote
+    with pytest.raises(IOError):
+        mapdl.mpwrite("/test_dir/test", "mp")
