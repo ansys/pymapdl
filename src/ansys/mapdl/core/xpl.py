@@ -1,4 +1,4 @@
-"""Contains the ansXpl class"""
+"""Contains the ansXpl class."""
 import json
 import pathlib
 import random
@@ -13,7 +13,7 @@ from .errors import MapdlRuntimeError
 
 
 def id_generator(size=6, chars=string.ascii_uppercase):
-    """Generate a random string"""
+    """Generate a random string using only uppercase letters."""
     return "".join(random.choice(chars) for _ in range(size))
 
 
@@ -28,16 +28,27 @@ MYCTYPE = {
 
 
 class ansXpl:
-    """ANSYS database explorer class.
+    """
+    ANSYS database explorer.
 
     Examples
     --------
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
     >>> xpl = mapdl.xpl
+
+    Open a mode file and extract a vector.
+
+    >>> xpl.open('file.mode')
+    >>> vec = xpl.read('MASS')
+    >>> vec.asarray()
+    array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
+            46, 49, 52, 55, 58,  1], dtype=int32)
+
     """
 
     def __init__(self, mapdl):
+        """Initialize the class."""
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
@@ -49,11 +60,12 @@ class ansXpl:
 
     @property
     def _mapdl(self):
-        """Return the weakly referenced instance of mapdl"""
+        """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
     def open(self, filename, option=""):
-        """Open an MAPDL file to explore.
+        """
+        Open an MAPDL file to explore.
 
         Parameters
         ----------
@@ -81,7 +93,8 @@ class ansXpl:
         return out
 
     def close(self):
-        """Close the MAPDL file after opening.
+        """
+        Close the MAPDL file after opening.
 
         Returns
         -------
@@ -100,7 +113,8 @@ class ansXpl:
         return response
 
     def list(self, nlev=1):
-        """List the records at the current level.
+        """
+        List the records at the current level.
 
         Parameters
         ----------
@@ -143,12 +157,13 @@ class ansXpl:
         return response
 
     def _check_ignored(self, response):
-        """Check for ignored in response"""
+        """Check for ignored in response."""
         if "ignored" in response:
             raise MapdlRuntimeError(response)
 
     def help(self):
-        """XPL help message.
+        """
+        XPL help message.
 
         Examples
         --------
@@ -157,7 +172,8 @@ class ansXpl:
         return self._mapdl.run("*XPL,HELP")
 
     def step(self, where):
-        """Go down in the tree of records
+        """
+        Go down in the tree of records
 
         Parameters
         ----------
@@ -184,7 +200,8 @@ class ansXpl:
         return response
 
     def info(self, recname, option=""):
-        """Gives details on a specific record, or all records (using ``"*"``)
+        """
+        Gives details on a specific record, or all records (using ``"*"``)
 
         Parameters
         ----------
@@ -211,7 +228,8 @@ class ansXpl:
         return self._mapdl.run(f"*XPL,INFO,{recname},{option}")
 
     def print(self, recname):
-        """Print values of a given records, or all records (using ``"*"``).
+        """
+        Print values of a given records, or all records (using ``"*"``).
 
         Parameters
         ----------
@@ -239,7 +257,8 @@ class ansXpl:
         return self._mapdl.run(f"*XPL,PRINT,{recname}")
 
     def json(self):
-        """Create a JSON representation of the tree or records.
+        """
+        Return a JSON representation of the tree or records.
 
         Examples
         --------
@@ -264,7 +283,8 @@ class ansXpl:
         return json.loads(text)
 
     def where(self):
-        """Prints the current location in the MAPDL FIle
+        """
+        Returns the current location in the MAPDL file.
 
         Returns
         -------
@@ -281,7 +301,8 @@ class ansXpl:
         return self._mapdl.run("*XPL,WHERE")
 
     def up(self, nlev=1):
-        """Go up in the tree.
+        """
+        Go up in the tree.
 
         nlev : int
             Number of levels to recursively go up, or TOP
@@ -297,7 +318,8 @@ class ansXpl:
         return self._mapdl.run(f"*XPL,UP,{nlev}")
 
     def goto(self, path):
-        """Go directly to a new location in the file.
+        """
+        Go directly to a new location in the file.
 
         Parameters
         ----------
@@ -313,7 +335,8 @@ class ansXpl:
         return self._mapdl.run(f"*XPL,GOTO,{path}")
 
     def copy(self, newfile, option=""):
-        """Copy the current opened as a new file.
+        """
+        Copy the current opened as a new file.
 
         Parameters
         ----------
@@ -332,13 +355,14 @@ class ansXpl:
         return self._mapdl.run(f"*XPL,COPY,{newfile},{option}")
 
     def save(self):
-        """Save the current file, ignoring the marked records"""
+        """Save the current file, ignoring the marked records."""
         response = self._mapdl.run("*XPL,SAVE").strip()
         self._check_ignored(response)
         return response
 
     def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
-        """Import a Matrix/Vector from a MAPDL result file.
+        """
+        Import a Matrix/Vector from a MAPDL result file.
 
         At the moment, this only supports reading the displacement vectors from
         a result file.
@@ -423,7 +447,8 @@ class ansXpl:
         return self._mapdl.math.mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname):
-        """Read a record and return either an APDL math matrix or an APDL math vector.
+        """
+        Read a record and return either an APDL math matrix or an APDL math vector.
 
         Returns
         -------
@@ -455,7 +480,8 @@ class ansXpl:
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
     def write(self, recordname, vecname):
-        """Write a given record back to an MAPDL file.
+        """
+        Write a given record back to an MAPDL file.
 
         Use the write function at your own risk, you may corrupt an existing
         file by changing the size of a record in the file.  This method must be

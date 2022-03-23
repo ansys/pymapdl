@@ -1851,7 +1851,8 @@ class MapdlGrpc(_MapdlCore):
     @property
     @check_version.version_requires((0, 4, 1))
     def db(self):
-        """MAPDL database interface.
+        """
+        MAPDL database interface.
 
         Returns
         -------

@@ -12,22 +12,29 @@ from ..mapdl_grpc import MapdlGrpc
 
 
 class WithinBeginLevel:
+
     """Context manager to run MAPDL within the being level."""
 
     def __init__(self, mapdl):
+        """Initialize this context manager."""
         self._mapdl = mapdl
 
     def __enter__(self):
+        """Enter the begin level and cache the current routine."""
         self._mapdl._cache_routine()
         if "BEGIN" not in self._mapdl._cached_routine.upper():
             self._mapdl.finish()
 
     def __exit__(self, *args, **kwargs):
+        """Exit the begin level and reload the previous routine."""
         if "BEGIN" not in self._mapdl._cached_routine.upper():
             self._mapdl._resume_routine()
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
+
+    """Database type definitions."""
+
     DB_SELECTED = 1
     DB_NUMDEFINED = 12
     DB_NUMSELECTED = 13
@@ -43,7 +50,9 @@ class DBDef(Enum):  # From MAPDL ansysdef.inc include file
 
 
 class MapdlDb:
-    """Abstract mapdl database class.  Created from a ``Mapdl`` instance.
+
+    """
+    Abstract mapdl database class.  Created from a ``Mapdl`` instance.
 
     Examples
     --------
@@ -76,6 +85,7 @@ class MapdlDb:
     """
 
     def __init__(self, mapdl):
+        """Initialize this class."""
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -89,18 +99,19 @@ class MapdlDb:
         self._elems = None
 
     def __str__(self):
+        """Return the string representation of this class."""
         if self.active:
             return f"MAPDL database server active at {self._channel_str}"
-        else:
-            return f"MAPDL database server not active"
+        return f"MAPDL database server not active"
 
     @property
     def _mapdl(self):
-        """Return the weakly referenced instance of mapdl"""
+        """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
     def _start(self) -> int:
-        """Start the database server.
+        """
+        Lower level start of the database server.
 
         Returns
         -------
@@ -148,7 +159,8 @@ class MapdlDb:
         return "NOT" not in self._status()
 
     def start(self, timeout=10):
-        """Start the gRPC MAPDL database server.
+        """
+        Start the gRPC MAPDL database server.
 
         Parameters
         ----------
@@ -157,7 +169,7 @@ class MapdlDb:
 
         Examples
         --------
-        >>> db.start()
+        >>> mapdl.db.start()
         """
 
         # only start if not already running
@@ -203,7 +215,8 @@ class MapdlDb:
             return self._mapdl.run("/DBS,SERVER,STOP")
 
     def stop(self):
-        """Shutdown the MAPDL database service and close the connection.
+        """
+        Shutdown the MAPDL database service and close the connection.
 
         Examples
         --------
@@ -223,7 +236,8 @@ class MapdlDb:
         self._state = None
 
     def _status(self):
-        """Return the status of the MADPL DB Server.
+        """
+        Return the status of the MADPL DB Server.
 
         Examples
         --------
@@ -238,7 +252,8 @@ class MapdlDb:
             return self._mapdl.run("/DBS,SERVER,STATUS")
 
     def load(self, fname, progress_bar=False):
-        """Load a MAPDL database file in memory.
+        """
+        Load a MAPDL database file in memory.
 
         Parameters
         ----------
@@ -253,7 +268,8 @@ class MapdlDb:
         return self._mapdl.resume(fname)
 
     def save(self, fname, option="ALL"):
-        """Save a MAPDL database to disk.
+        """
+        Save the MAPDL database to disk.
 
         Parameters
         ----------
@@ -278,7 +294,8 @@ class MapdlDb:
         return self._mapdl.run(f"SAVE,{fname},,,{option}")
 
     def clear(self, **kwargs):
-        """Delete everything in the MAPDL DB.
+        """
+        Delete everything in the MAPDL database.
 
         Examples
         --------
@@ -288,24 +305,66 @@ class MapdlDb:
 
     @property
     def nodes(self):
-        """MAPDL database nodes interface.
+        """
+        MAPDL database nodes interface.
 
         Returns
         -------
-        :class:`DbNodes <ansys.mapdl.core.DbNodes>`
+        :class:`DbNodes <ansys.mapdl.core.database.nodes.DbNodes>`
 
         Examples
         --------
-        Get the number of nodes in the MAPDL DB
+        Create a nodes instance.
 
-        >>> db = mapdl.db
-        >>> nodes = db.nodes
-        >>> nodes.num()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> # create nodes...
+        >>> nodes = mapdl.db.nodes
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 270641
+            Maximum node number:      270641
 
-        Push a new node into MAPDL
+        >>> mapdl.nsel("NONE")
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 0
+            Maximum node number:      270641
 
-        >>> nodes.set(...)
-        >>>
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+        Return all the node indices, coordinates, and angles of all the nodes.
+
+        >>> nodes = mapdl.db.nodes
+        >>> ind, coords, angles = nodes.all_asarray()
+        >>> ind
+        array([     1,      2,      3, ..., 270639, 270640, 270641], dtype=int32)
+
+        >>> coords
+        array([[0.    , 1.    , 0.    ],
+               [0.    , 0.    , 0.    ],
+               [0.    , 0.9875, 0.    ],
+               ...,
+               [0.9875, 0.975 , 0.925 ],
+               [0.9875, 0.975 , 0.95  ],
+               [0.9875, 0.975 , 0.975 ]])
+
+        >>> angles
+        array([[0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.],
+               ...,
+               [0., 0., 0.],
+               [0., 0., 0.],
+               [0., 0., 0.]])
+
         """
         if self._nodes is None:
             from .nodes import DbNodes  # here to avoid circular import
@@ -315,24 +374,41 @@ class MapdlDb:
 
     @property
     def elems(self):
-        """MAPDL database element interface.
+        """
+        MAPDL database element interface.
 
         Returns
         -------
-        :class:`DbElems <ansys.mapdl.core.DbElems>`
+        :class:`DbElems <ansys.mapdl.core.database.elems.DbElems>`
 
         Examples
         --------
-        Get the number of elems in the MAPDL DB
+        Create a MAPDL database element instance.
 
-        >>> db = mapdl.db
-        >>> elems = db.elems
-        >>> elems.num()
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> elems = mapdl.db.elems
+        >>> print(elems)
+        MAPDL Database Elements
+            Number of elements:          64
+            Number of selected elements: 64
+            Maximum element number:      64
 
-        Push a new elem into MAPDL
+        Return the element information of element 1.
 
-        >>> elems.set(...)
-        >>>
+        >>> elems = mapdl.db.elems
+        >>> elem_info = elems.get(1)
+
+        Return the nodes belonging to the element.
+
+        >>> elem_info.nodes
+        [2, 27, 37, 8]
+
+        Return the element data.
+
+        >>> elem_info.elmdat
+        [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
+
         """
         if self._elems is None:
             from .elems import DbElems  # here to avoid circular import

@@ -1,6 +1,7 @@
-"""Contains the element implement of the MAPDL database service.
+"""
+Contains the element implement of the MAPDL database service.
 
-This allows the access to the elements in the MAPDL database.
+This allows lower level the access to the elements in the MAPDL database.
 
 """
 import weakref
@@ -11,11 +12,13 @@ from . import DBDef, MapdlDb
 
 
 class DbElems:
-    """Abstract mapdl db elems class.  Created from a ``MapdlDb`` instance.
+
+    """
+    Abstract mapdl database element class.
 
     Examples
     --------
-    Create an instance.
+    Create a MAPDL database element instance.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -44,6 +47,7 @@ class DbElems:
     """
 
     def __init__(self, db):
+        """Initialize this class."""
         if not isinstance(db, MapdlDb):  # pragma: no cover
             raise TypeError("``db`` must be a MapdlDb instance")
         self._db_weakref = weakref.ref(db)
@@ -55,6 +59,7 @@ class DbElems:
         return self._db_weakref()
 
     def __str__(self):
+        """Return the string representation of this class."""
         lines = ["MAPDL Database Elements"]
         lines.append(f"    Number of elements:          {self.num()}")
         lines.append(f"    Number of selected elements: {self.num(selected=True)}")
@@ -62,7 +67,8 @@ class DbElems:
         return "\n".join(lines)
 
     def first(self, ielm=0):
-        """Get the number of the first element.
+        """
+        Get the number of the first element.
 
         This starts at ``inod``, defaults to the first element in the model.
 
@@ -94,7 +100,8 @@ class DbElems:
         return self.next()
 
     def next(self):
-        """Return the number of the next selected element.
+        """
+        Return the number of the next selected element.
 
         You must first call :func:`DbElems.first`.
 
@@ -148,7 +155,8 @@ class DbElems:
     ###########################################################################
 
     def info(self, ielm, ikey):
-        """Get information about a element
+        """
+        Get information about a element
 
         Parameters
         ----------
@@ -233,7 +241,8 @@ class DbElems:
         return result.elmiqr
 
     def num(self, selected=False):
-        """Number of elements.
+        """
+        Number of elements.
 
         Parameters
         ----------
@@ -262,7 +271,8 @@ class DbElems:
 
     @property
     def max_num(self) -> int:
-        """Maximum element number.
+        """
+        Maximum element number.
 
         Examples
         --------
@@ -276,7 +286,8 @@ class DbElems:
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
     def get(self, ielm):
-        """Get element attributes and nodes.
+        """
+        Get element attributes and nodes.
 
         Parameters
         ----------
@@ -327,7 +338,8 @@ class DbElems:
         return self._db._stub.getElm(request)
 
     def push(self, ielm, elmdat, nodes):
-        """Push an element into the database.
+        """
+        Push an element into the database.
 
         Examples
         --------

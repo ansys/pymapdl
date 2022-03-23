@@ -247,12 +247,6 @@ def mapdl(request, tmpdir_factory):
             for pid in mapdl._pids:
                 assert not check_pid(pid)
 
-    if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
-        for item in items:
-            if "skip_grpc" in item.keywords:
-                item.add_marker(skip_grpc)
-
 
 @pytest.fixture
 def path_tests(tmpdir):

@@ -71,7 +71,7 @@ def test_save(db):
 
     assert filename in db._mapdl.list_files()
     output = db.load(filename)
-    assert f"RESUME ANSYS" in output
+    assert "RESUME ANSYS" in output
 
 
 def test_clear(db):

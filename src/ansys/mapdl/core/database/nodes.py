@@ -1,4 +1,5 @@
-"""Contains the Node implementation of the MapdlDb class.
+"""
+Contains the Node implementation of the MapdlDb class.
 
 This allows access to the Nodes in the MAPDL DB from Python.
 
@@ -15,7 +16,9 @@ from .database import DBDef, MapdlDb
 
 
 class DbNodes:
-    """Abstract mapdl db nodes class.  Created from a ``MapdlDb`` instance.
+
+    """
+    Abstract mapdl db nodes class.
 
     Examples
     --------
@@ -73,12 +76,14 @@ class DbNodes:
     """
 
     def __init__(self, db):
+        """Initialize this class."""
         if not isinstance(db, MapdlDb):  # pragma: no cover
             raise TypeError("``db`` must be a MapdlDb instance")
         self._db_weakref = weakref.ref(db)
         self._itnod = -1
 
     def __str__(self):
+        """Return the string representation of this class."""
         lines = ["MAPDL Database Nodes"]
         lines.append(f"    Number of nodes:          {self.num()}")
         lines.append(f"    Number of selected nodes: {self.num(selected=True)}")
@@ -91,7 +96,8 @@ class DbNodes:
         return self._db_weakref()
 
     def first(self, inod=0):
-        """Get the number of the first node.
+        """
+        Return the number of the first node.
 
         This starts at ``inod``, defaults to the first node in the model.
 
@@ -122,7 +128,8 @@ class DbNodes:
         return self.next()
 
     def next(self):
-        """Return the number of the next selected node.
+        """
+        Return the number of the next selected node.
 
         You must first call :func:`DbNodes.first`.
 
@@ -174,7 +181,8 @@ class DbNodes:
     #     return self._itnod
 
     def info(self, inod, ikey):
-        """Return information about a node.
+        """
+        Return information about a node.
 
         Parameters
         ----------
@@ -259,7 +267,8 @@ class DbNodes:
         return result.ret
 
     def num(self, selected=False) -> int:
-        """Number of nodes.
+        """
+        Return the number of nodes, either selected or all.
 
         Parameters
         ----------
@@ -287,7 +296,8 @@ class DbNodes:
 
     @property
     def max_num(self) -> int:
-        """Maximum node number.
+        """
+        Return the maximum node number.
 
         Examples
         --------
@@ -301,7 +311,8 @@ class DbNodes:
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
     def coord(self, inod):
-        """The location of a node.
+        """
+        Return the location of a node.
 
         Parameters
         ----------
@@ -335,7 +346,8 @@ class DbNodes:
         return node.kerr, tuple(node.v)
 
     def all_asarray(self):
-        """Return all node indices, coordinates, and angles as arrays.
+        """
+        Return all node indices, coordinates, and angles as arrays.
 
         .. note::
            This only returns data of the selected nodes.
@@ -431,7 +443,8 @@ class DbNodes:
         return ind, coord, angle
 
     def push(self, inod, x, y, z, xang=None, yang=None, zang=None):
-        """Push a single node into the DB.
+        """
+        Push a single node into the DB.
 
         Parameters
         ----------
