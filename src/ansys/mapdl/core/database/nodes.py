@@ -8,8 +8,9 @@ import weakref
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_db_pb2
 import numpy as np
+from numpy.lib import recfunctions
 
-from ..common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
+from ..common_grpc import DEFAULT_CHUNKSIZE
 from .database import DBDef, MapdlDb
 
 
@@ -268,114 +269,213 @@ class DbNodes:
         (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
 
         """
-
         request = mapdl_db_pb2.getnodRequest(node=inod)
         node = self._db._stub.getNod(request)
         return node.kerr, tuple(node.v)
 
-    # def get_all(self):
-    #     request = anskernel.EmptyRequest()
-    #     stream = self._db._stub.getAllNod(request)
-    #     nodes = []
-    #     for nod in stream:
-    #         nodes.append(nod.v)
-    #     return nodes
+    def all_asarray(self):
+        """Return all node indices, coordinates, and angles as arrays.
 
-    def get_all_asarray(self):
+        Returns
+        -------
+        np.ndarray
+            Numpy.int32 array of node numbers with shape ``(n_node,)``.
+        np.ndarray
+            Numpy.double array of node coordinates with shape ``(n_node, 3)``.
+        np.ndarray
+            Numpy.double array of node angles with shape ``(n_node, 3)``.
+
+        Examples
+        --------
+        >>> nodes = mapdl.db.nodes
+        >>> ind, coords, angles = nodes.all_asarray()
+
+        """
         chunk_size = DEFAULT_CHUNKSIZE
         metadata = [("chunk_size", str(chunk_size))]
         request = anskernel.EmptyRequest()
         chunks = self._db._stub.getAllNodC(request, metadata=metadata)
-        nodes = parse_chunks(chunks, np.int32)
-        breakpoint()
-        nodes_nb = nodes[:, 0]
-        nodes = np.delete(nodes, 0, 1)
-        coords = np.frombuffer(nodes, np.double).reshape(-1, 3)
-        return coords, nodes_nb
 
-    def put(self, inod, x, y, z):
-        """push a node into the DB
+        n_nodes = int(chunks.initial_metadata()[0][1])
+
+        ind = np.empty(n_nodes, np.int32)
+        coord = np.empty((n_nodes, 3), np.double)
+        angle = np.empty((n_nodes, 3), np.double)
+
+        # each "chunk" from MAPDL is organized as:
+        # n_nodes, node, node ... last_node
+        #
+        # where each node is
+        # INT32, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE
+
+        # first, just interpert as int32 and extract node numbering
+        # ignore the first int as this is n_nodes
+        # data = parse_chunks(chunks, np.int32)
+        c = 0
+        for chunk in chunks:
+            parsed_chunk = np.frombuffer(chunk.payload, np.int32)
+            n_node = parsed_chunk[0]
+            data = parsed_chunk[1:].view(
+                [
+                    ("ind", np.int32),
+                    ("x", np.double),
+                    ("y", np.double),
+                    ("z", np.double),
+                    ("xang", np.double),
+                    ("yang", np.double),
+                    ("zang", np.double),
+                ]
+            )
+
+            ind_chunk = recfunctions.structured_to_unstructured(data[["ind"]]).ravel()
+
+            coord_chunk = recfunctions.structured_to_unstructured(
+                data[["x", "y", "z"]]
+            ).reshape((-1, 3))
+
+            angle_chunk = recfunctions.structured_to_unstructured(
+                data[["xang", "yang", "zang"]]
+            ).reshape((-1, 3))
+
+            ind[c : c + n_node] = ind_chunk
+            coord[c : c + n_node] = coord_chunk
+            angle[c : c + n_node] = angle_chunk
+            c += n_node
+
+        return ind, coord, angle
+
+    def push(self, inod, x, y, z, xang=None, yang=None, zang=None):
+        """Push a single node into the DB.
 
         Parameters
-        inod    (int)           - node number
-        x,y,z   (double)        - nodal coordinates
+        ----------
+        inod : int
+            Node number.
+        x : float
+            X coordinate.
+        y : float
+            X coordinate.
+        z : float
+            Z coordinate.
+        xang : float, optional
+            X angle.
+        yang : float, optional
+            X angle.
+        zang : float, optional
+            Z angle.
 
-        Returns
-        -------
-        none
+        Examples
+        --------
+        Update node 1 to have coordinates ``(10.0, 20.0, 30.0)``.
+
+
+        >>> nodes = mapdl.db.nodes
+        >>> nodes.push(1, 10, 20, 30)
+        >>> sel, coord = nodes.coord(1)
+        >>> coord
+        (10.0, 20.0, 30.0, 0.0, 0.0, 0.0)
+
         """
-
         request = mapdl_db_pb2.putnodRequest()
         request.node = inod
-        request.vctn.extend([x])
-        request.vctn.extend([y])
-        request.vctn.extend([z])
-        result = self._db._stub.putNod(request)
-        return
+        request.vctn.extend([x, y, z])
+        if xang:
+            request.vctn.extend([xang])
+        if yang:
+            if xang is None:
+                raise ValueError("X angle must be input as well when inputing Y angle")
+            request.vctn.extend([yang])
+        if zang:
+            if xang is None or yang is None:
+                raise ValueError(
+                    "X and Y angles must be input as well when inputing Z angle"
+                )
+            request.vctn.extend([zang])
 
-    def _select(self, inod, sel=1):
-        """select/unselect/delete a node in the DB
+        self._db._stub.putNod(request)
 
-        Parameters
-        inod    (int) - node number
-        sel     (int) - action to take:
-                        0: delete the node
-                        1: select a node
-                       -1: unselect a node
-                        2: switch the exist select status
-        Returns
-        -------
-        none
-        """
+    ###############################################################################
+    # unimplemented
 
-        request = mapdl_db_pb2.NodSelRequest(inum=inod, ksel=sel)
-        self._db._stub.NodSel(request)
-        return
+    # def _select(self, inod, sel=1):
+    #     """Select, unselect, or delete a node in the database.
 
-    def delete(self, inod):
-        """delete a node from the DB
+    #     Parameters
+    #     ----------
+    #     inod : int
+    #         Node number.
+    #     sel : int
+    #         Action to take. One of the following:
 
-        Parameters
-        inod    (int)           - node number
+    #         * ``0`` - Delete the node.
+    #         * ``1`` - Select a node.
+    #         * ``-1`` - Unselect a node.
+    #         * ``2`` - Switch the exist select status.
 
-        Returns
-        -------
-        none
-        """
-        return self._select(inod, 0)
+    #     """
+    #     request = mapdl_db_pb2.NodSelRequest(inum=inod, ksel=sel)
+    #     self._db._stub.NodSel(request)
 
-    def select(self, inod):
-        """select a node in the DB
+    # def delete(self, inod):
+    #     """Delete a node from the database.
 
-        Parameters
-        inod    (int)           - node number
+    #     Parameters
+    #     ----------
+    #     inod : int
+    #         Node number.
 
-        Returns
-        -------
-        none
-        """
-        return self._select(inod, 1)
+    #     Examples
+    #     --------
+    #     Push and then delete a node.
 
-    def unselect(self, inod):
-        """unselect a node in the DB
+    #     >>> nodes = mapdl.db.nodes
+    #     >>> nodes.push(1, 10, 20, 30)
+    #     >>> sel, coord = nodes.coord(1)
+    #     >>> nodes.delete(1)
 
-        Parameters
-        inod    (int)           - node number
+    #     """
+    #     return self._select(inod, 0)
 
-        Returns
-        -------
-        none
-        """
-        return self._select(inod, -1)
+    # def select(self, inod):
+    #     """select a node in the database.
 
-    def invselect(self, inod):
-        """inverse the select status of a node in the DB
+    #     Parameters
+    #     ----------
+    #     inod : int
+    #         Node number.
 
-        Parameters
-        inod    (int)           - node number
+    #     Examples
+    #     --------
 
-        Returns
-        -------
-        none
-        """
-        return self._select(inod, 2)
+    #     """
+    #     self._select(inod, 1)
+
+    # def unselect(self, inod):
+    #     """Unselect a node in the database.
+
+    #     Parameters
+    #     ----------
+    #     inod : int
+    #         Node number.
+
+    #     Examples
+    #     --------
+
+    #     """
+    #     self._select(inod, -1)
+
+    # def invselect(self, inod):
+    #     """Inverse the select status of a node in the database.
+
+    #     Parameters
+    #     ----------
+    #     inod : int
+    #         Node number.
+
+    #     Examples
+    #     --------
+
+    #     """
+    #     self._select(inod, 2)
+
+    ###############################################################################

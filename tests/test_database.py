@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from ansys.mapdl.core.database import DBDef, MapdlDb
@@ -109,3 +110,27 @@ def test_nodes_coord(nodes):
     sel, coord = nodes.coord(22)
     assert sel == 0  # selected
     assert coord == (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+
+def test_nodes_asarray(nodes):
+    ind, coords, angles = nodes.all_asarray()
+    assert np.allclose(ind, np.arange(1, 426))
+
+    assert np.allclose(coords, nodes._db._mapdl.mesh.nodes)
+    assert np.allclose(angles, 0)
+
+
+def test_nodes_push(nodes):
+    nnum = 100000
+    x, y, z, xang, yang, zang = 1, 5, 10, 30, 40, 50
+    nodes.push(nnum, x, y, z, xang, yang, zang)
+
+    selected, coord = nodes.coord(nnum)
+    assert selected == 0
+    assert coord == (x, y, z, xang, yang, zang)
+
+    with pytest.raises(ValueError, match="X angle must be input"):
+        nodes.push(nnum, x, y, z, yang=1)
+
+    with pytest.raises(ValueError, match="X and Y angles must be input"):
+        nodes.push(nnum, x, y, z, zang=1)

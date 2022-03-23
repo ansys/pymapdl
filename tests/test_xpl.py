@@ -8,7 +8,7 @@ pytestmark = pytest.mark.skip_grpc
 
 @pytest.fixture(scope="module")
 def check_supports_extract(mapdl):
-    if mapdl._server_version < (0, 4, 1):  # 2022R1
+    if mapdl._server_version < (0, 5, 0):  # 2022R1
         pytest.skip("command not supported")
 
 

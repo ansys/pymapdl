@@ -109,7 +109,17 @@ class MapdlDb:
         # Scan the DBServer.info file to get the Port Number
 
         # Default is 50055
+        # wait for start
+        tstart = time.time()
+        timeout = 1
         status = self._mapdl._download_as_raw("DBServer.info").decode()
+        while status == "":
+            status = self._mapdl._download_as_raw("DBServer.info").decode()
+            time.sleep(0.05)
+            if time.time() - tstart > timeout:
+                raise TimeoutError(
+                    f"Unable to start database server in {timeout} second(s)"
+                )
 
         try:
             # expected of the form 'Port : 50055'
