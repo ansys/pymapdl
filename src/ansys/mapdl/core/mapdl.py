@@ -160,6 +160,7 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
+        self._cached_routine = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -854,7 +855,7 @@ class _MapdlCore(Commands):
         # cache result file, version, and routine before closing
         resultfile = self._result_file
         version = self.version
-        prior_processor = self.parameters.routine
+        self._cache_routine()
 
         # finish, save and exit the server
         self.finish(mute=True)
@@ -892,9 +893,19 @@ class _MapdlCore(Commands):
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(tmp_database, mute=True)
-        if prior_processor is not None:
-            if "BEGIN" not in prior_processor.upper():
-                self.run(f"/{prior_processor}", mute=True)
+
+    def _cache_routine(self):
+        """Cache the current routine."""
+        self._cached_routine = self.parameters.routine
+
+    def _resume_routine(self):
+        """Resume the cached routine."""
+        if self._cached_routine is not None:
+            if "BEGIN" not in self._cached_routine:
+                self.run(f"/{self._cached_routine}", mute=True)
+            else:
+                self.finish(mute=True)
+            self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")

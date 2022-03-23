@@ -20,19 +20,19 @@ from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
 from tqdm import tqdm
 
-MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
-MSG_MODULE = """ANSYS API module (ansys.api.mapdl) could not be found.
+MSG_MODULE = """ANSYS API module `ansys.api.mapdl` could not be found.
 This might be due to a faulty installation or obsolete API module version.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'.
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
@@ -41,10 +41,8 @@ try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
     from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
-
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
@@ -282,6 +280,7 @@ class MapdlGrpc(_MapdlCore):
         self._exiting = False
         self._exited = None
         self._mute = False
+        self._db = None
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -1848,6 +1847,53 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.math import MapdlMath
 
         return MapdlMath(self)
+
+    @property
+    @check_version.version_requires((0, 4, 1))
+    def db(self):
+        """
+        MAPDL database interface.
+
+        Returns
+        -------
+        :class:`MapdlDb <ansys.mapdl.core.database.MapdlDb>`
+
+        Examples
+        --------
+        Create a nodes instance.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> # create nodes...
+        >>> nodes = mapdl.db.nodes
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 270641
+            Maximum node number:      270641
+
+        >>> mapdl.nsel("NONE")
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 0
+            Maximum node number:      270641
+
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+        """
+        from ansys.mapdl.core.database import MapdlDb
+
+        if self._db is None:
+            self._db = MapdlDb(self)
+            self._db.start()
+
+        return self._db
 
     @protect_grpc
     def _data_info(self, pname):

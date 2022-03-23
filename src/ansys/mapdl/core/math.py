@@ -166,7 +166,7 @@ class MapdlMath:
         """Print out the status of all APDLMath Objects"""
         return self._mapdl.run("*STATUS,MATH", mute=False)
 
-    def vec(self, size=0, dtype=np.double, init=None, name=None):
+    def vec(self, size=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create a vector.
 
         Parameters
@@ -183,13 +183,16 @@ class MapdlMath:
             or ``"rand"``.
 
         name : str, optional
-            Give the vector a name.  Otherwise one will be
-            automatically generated.
+            Give the vector a name.  Otherwise one will be automatically
+            generated.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
-            APDLMath Vector.
+        ansys.mapdl.math.AnsVec or numpy.ndarray
+            APDLMath Vector or :class:`numpy.ndarray`.
         """
         if dtype not in MYCTYPE:
             raise ANSYSDataTypeError
@@ -197,9 +200,18 @@ class MapdlMath:
         if not name:
             name = id_generator()
             self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
-            return AnsVec(name, self._mapdl, dtype, init)
+
+            ans_vec = AnsVec(name, self._mapdl, dtype, init)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
         else:
-            return AnsVec(name, self._mapdl)
+            ans_vec = AnsVec(name, self._mapdl)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
 
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
         """Create an APDLMath matrix.
@@ -249,11 +261,12 @@ class MapdlMath:
                 raise ValueError(f"Invalid init method '{init}'")
         else:
             info = self._mapdl._data_info(name)
-            mtype = info.objtype
-            if mtype == 2:
+            if info.objtype == pb_types.DataType.DMAT:
                 return AnsDenseMat(name, self._mapdl)
-            else:
+            elif info.objtype == pb_types.DataType.SMAT:
                 return AnsSparseMat(name, self._mapdl)
+            else:  # pragma: no cover
+                raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
         return mat
 
