@@ -171,7 +171,7 @@ def test_elems_max_num(elems):
     assert elems.max_num == 64
 
 
-def test_elems_info(elems):
+def test_elems_get(elems):
     ielm = 1
     elem_info = elems.get(ielm)
 
