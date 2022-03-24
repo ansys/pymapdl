@@ -166,11 +166,7 @@ jobs:
 
       - name: Build Documentation
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
-
-      # Verify that sphinx generates no warnings
-      - name: Check for sphinx warnings
-        run: python doc/print_errors.py
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: Zip documentation
         run: |
