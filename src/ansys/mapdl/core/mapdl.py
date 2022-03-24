@@ -1061,6 +1061,12 @@ class _MapdlCore(Commands):
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Volume Plot")
+            if not self.geometry.n_volu:
+                warnings.warn(
+                    "Either no volumes have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             cm_name = "__tmp_area2__"
             self.cm(cm_name, "AREA", mute=True)
             self.aslv("S", mute=True)  # select areas attached to active volumes
@@ -1178,6 +1184,13 @@ class _MapdlCore(Commands):
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
+
+            if not self.geometry.n_area:
+                warnings.warn(
+                    "Either no areas have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             if quality > 10:
                 quality = 10
             if quality < 1:
@@ -1367,7 +1380,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
                 warnings.warn(
-                    "Either no lines have been selected or there " "is nothing to plot"
+                    "Either no lines have been selected or there is nothing to plot."
                 )
                 return general_plotter([], [], [], **kwargs)
 
