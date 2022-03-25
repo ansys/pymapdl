@@ -208,7 +208,10 @@ class _MapdlCore(Commands):
         # Wrapping LISTING FUNCTIONS.
         def wrap_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -216,9 +219,12 @@ class _MapdlCore(Commands):
 
             return inner_wrapper
 
-        def wrap_BC_listing_function(func):
+        def wrap_bc_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -235,7 +241,7 @@ class _MapdlCore(Commands):
 
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
-                setattr(self, name, wrap_BC_listing_function(func))
+                setattr(self, name, wrap_bc_listing_function(func))
 
     @property
     def _name(self):  # pragma: no cover
@@ -408,7 +414,7 @@ class _MapdlCore(Commands):
         """
         if self._distributed:
             raise RuntimeError(
-                "chained commands are not permitted in distributed ansys."
+                "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
 
@@ -1902,8 +1908,9 @@ class _MapdlCore(Commands):
             return value
 
     @property
-    def jobname(self):
-        """MAPDL job name.
+    def jobname(self) -> str:
+        """
+        MAPDL job name.
 
         This is requested from the active mapdl instance.
         """
@@ -1914,7 +1921,7 @@ class _MapdlCore(Commands):
         return self._jobname
 
     @jobname.setter
-    def jobname(self, new_jobname):
+    def jobname(self, new_jobname: str):
         """Set the jobname"""
         self.finish(mute=True)
         self.filname(new_jobname, mute=True)
@@ -1932,7 +1939,7 @@ class _MapdlCore(Commands):
         memory_option="",
         mxpand="",
         elcalc=False,
-    ):
+    ) -> str:
         """Run a modal with basic settings analysis
 
         Parameters
@@ -2097,10 +2104,12 @@ class _MapdlCore(Commands):
         self.finish(mute=True)
         return out
 
-    def run_multiline(self, commands):
+    def run_multiline(self, commands) -> str:
         """Run several commands as a single block
 
-        .. warning:: This function is being deprecated. Please use `input_strings` instead.
+        .. deprecated:: 0.61.0
+           This function is being deprecated. Please use `input_strings`
+           instead.
 
         Parameters
         ----------
@@ -2165,8 +2174,10 @@ class _MapdlCore(Commands):
         )
         return self.input_strings(commands=commands)
 
-    def input_strings(self, commands):
-        """Run several commands as a single block.
+    def input_strings(self, commands) -> str:
+        """
+        Run several commands as a single block.
+
         These commands are all in a single string or in list of strings.
 
         Parameters
@@ -2208,7 +2219,6 @@ class _MapdlCore(Commands):
          KEYOPT( 1- 6)=        0      0      0        0      0      0
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
-        output continues...
 
         """
         if isinstance(commands, str):
@@ -2218,10 +2228,12 @@ class _MapdlCore(Commands):
         self._flush_stored()
         return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs):
-        """Run single APDL command.
+    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+        """
+        Run single APDL command.
 
-        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
+        For multiple commands, use :func:`Mapdl.input_strings()
+        <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
@@ -2378,8 +2390,9 @@ class _MapdlCore(Commands):
         return self._response
 
     @property
-    def ignore_errors(self):
-        """Flag to ignore MAPDL errors.
+    def ignore_errors(self) -> bool:
+        """
+        Flag to ignore MAPDL errors.
 
         Normally, any string containing "*** ERROR ***" from MAPDL
         will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
@@ -2392,7 +2405,8 @@ class _MapdlCore(Commands):
         self._ignore_errors = bool(value)
 
     def load_array(self, name, array):
-        """Load an array from Python to MAPDL.
+        """
+        Load an array from Python to MAPDL.
 
         Uses ``VREAD`` to transfer the array.
         The format of the numbers used in the intermediate file is F24.18.
@@ -2475,7 +2489,7 @@ class _MapdlCore(Commands):
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
-        Uses TREAD to transfer the table.
+        Uses ``TREAD`` to transfer the table.
         It should be noticed that PyMAPDL when query a table, it will return
         the table but not its axis (meaning it will return ``table[1:,1:]``).
 
@@ -2603,8 +2617,9 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     @property
-    def version(self):
-        """MAPDL build version
+    def version(self) -> float:
+        """
+        MAPDL build version.
 
         Examples
         --------
@@ -2615,8 +2630,9 @@ class _MapdlCore(Commands):
 
     @property
     @supress_logging
-    def directory(self):
-        """Current MAPDL directory
+    def directory(self) -> str:
+        """
+        Current MAPDL directory.
 
         Examples
         --------
