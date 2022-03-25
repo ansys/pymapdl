@@ -160,6 +160,7 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
+        self._cached_routine = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -207,7 +208,10 @@ class _MapdlCore(Commands):
         # Wrapping LISTING FUNCTIONS.
         def wrap_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -215,9 +219,12 @@ class _MapdlCore(Commands):
 
             return inner_wrapper
 
-        def wrap_BC_listing_function(func):
+        def wrap_bc_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -234,7 +241,7 @@ class _MapdlCore(Commands):
 
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
-                setattr(self, name, wrap_BC_listing_function(func))
+                setattr(self, name, wrap_bc_listing_function(func))
 
     @property
     def _name(self):  # pragma: no cover
@@ -407,7 +414,7 @@ class _MapdlCore(Commands):
         """
         if self._distributed:
             raise RuntimeError(
-                "chained commands are not permitted in distributed ansys."
+                "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
 
@@ -854,7 +861,7 @@ class _MapdlCore(Commands):
         # cache result file, version, and routine before closing
         resultfile = self._result_file
         version = self.version
-        prior_processor = self.parameters.routine
+        self._cache_routine()
 
         # finish, save and exit the server
         self.finish(mute=True)
@@ -892,9 +899,19 @@ class _MapdlCore(Commands):
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(tmp_database, mute=True)
-        if prior_processor is not None:
-            if "BEGIN" not in prior_processor.upper():
-                self.run(f"/{prior_processor}", mute=True)
+
+    def _cache_routine(self):
+        """Cache the current routine."""
+        self._cached_routine = self.parameters.routine
+
+    def _resume_routine(self):
+        """Resume the cached routine."""
+        if self._cached_routine is not None:
+            if "BEGIN" not in self._cached_routine:
+                self.run(f"/{self._cached_routine}", mute=True)
+            else:
+                self.finish(mute=True)
+            self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
@@ -1050,6 +1067,12 @@ class _MapdlCore(Commands):
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Volume Plot")
+            if not self.geometry.n_volu:
+                warnings.warn(
+                    "Either no volumes have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             cm_name = "__tmp_area2__"
             self.cm(cm_name, "AREA", mute=True)
             self.aslv("S", mute=True)  # select areas attached to active volumes
@@ -1167,6 +1190,13 @@ class _MapdlCore(Commands):
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
+
+            if not self.geometry.n_area:
+                warnings.warn(
+                    "Either no areas have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             if quality > 10:
                 quality = 10
             if quality < 1:
@@ -1356,7 +1386,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
                 warnings.warn(
-                    "Either no lines have been selected or there " "is nothing to plot"
+                    "Either no lines have been selected or there is nothing to plot."
                 )
                 return general_plotter([], [], [], **kwargs)
 
@@ -1878,8 +1908,9 @@ class _MapdlCore(Commands):
             return value
 
     @property
-    def jobname(self):
-        """MAPDL job name.
+    def jobname(self) -> str:
+        """
+        MAPDL job name.
 
         This is requested from the active mapdl instance.
         """
@@ -1890,7 +1921,7 @@ class _MapdlCore(Commands):
         return self._jobname
 
     @jobname.setter
-    def jobname(self, new_jobname):
+    def jobname(self, new_jobname: str):
         """Set the jobname"""
         self.finish(mute=True)
         self.filname(new_jobname, mute=True)
@@ -1908,7 +1939,7 @@ class _MapdlCore(Commands):
         memory_option="",
         mxpand="",
         elcalc=False,
-    ):
+    ) -> str:
         """Run a modal with basic settings analysis
 
         Parameters
@@ -2073,10 +2104,12 @@ class _MapdlCore(Commands):
         self.finish(mute=True)
         return out
 
-    def run_multiline(self, commands):
+    def run_multiline(self, commands) -> str:
         """Run several commands as a single block
 
-        .. warning:: This function is being deprecated. Please use `input_strings` instead.
+        .. deprecated:: 0.61.0
+           This function is being deprecated. Please use `input_strings`
+           instead.
 
         Parameters
         ----------
@@ -2141,8 +2174,10 @@ class _MapdlCore(Commands):
         )
         return self.input_strings(commands=commands)
 
-    def input_strings(self, commands):
-        """Run several commands as a single block.
+    def input_strings(self, commands) -> str:
+        """
+        Run several commands as a single block.
+
         These commands are all in a single string or in list of strings.
 
         Parameters
@@ -2184,7 +2219,6 @@ class _MapdlCore(Commands):
          KEYOPT( 1- 6)=        0      0      0        0      0      0
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
-        output continues...
 
         """
         if isinstance(commands, str):
@@ -2194,10 +2228,12 @@ class _MapdlCore(Commands):
         self._flush_stored()
         return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs):
-        """Run single APDL command.
+    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+        """
+        Run single APDL command.
 
-        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
+        For multiple commands, use :func:`Mapdl.input_strings()
+        <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
@@ -2354,8 +2390,9 @@ class _MapdlCore(Commands):
         return self._response
 
     @property
-    def ignore_errors(self):
-        """Flag to ignore MAPDL errors.
+    def ignore_errors(self) -> bool:
+        """
+        Flag to ignore MAPDL errors.
 
         Normally, any string containing "*** ERROR ***" from MAPDL
         will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
@@ -2368,7 +2405,8 @@ class _MapdlCore(Commands):
         self._ignore_errors = bool(value)
 
     def load_array(self, name, array):
-        """Load an array from Python to MAPDL.
+        """
+        Load an array from Python to MAPDL.
 
         Uses ``VREAD`` to transfer the array.
         The format of the numbers used in the intermediate file is F24.18.
@@ -2451,7 +2489,7 @@ class _MapdlCore(Commands):
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
-        Uses TREAD to transfer the table.
+        Uses ``TREAD`` to transfer the table.
         It should be noticed that PyMAPDL when query a table, it will return
         the table but not its axis (meaning it will return ``table[1:,1:]``).
 
@@ -2579,8 +2617,9 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     @property
-    def version(self):
-        """MAPDL build version
+    def version(self) -> float:
+        """
+        MAPDL build version.
 
         Examples
         --------
@@ -2591,8 +2630,9 @@ class _MapdlCore(Commands):
 
     @property
     @supress_logging
-    def directory(self):
-        """Current MAPDL directory
+    def directory(self) -> str:
+        """
+        Current MAPDL directory.
 
         Examples
         --------

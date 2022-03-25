@@ -1,24 +1,54 @@
-"""Contains the ansXpl class"""
+"""Contains the ansXpl class."""
 import json
+import pathlib
+import random
+import string
 import weakref
 
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+from ansys.api.mapdl.v0 import mapdl_pb2
 import numpy as np
 
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from .common_grpc import ANSYS_VALUE_TYPE
+from .errors import MapdlRuntimeError
+
+
+def id_generator(size=6, chars=string.ascii_uppercase):
+    """Generate a random string using only uppercase letters."""
+    return "".join(random.choice(chars) for _ in range(size))
+
+
+MYCTYPE = {
+    np.int32: "I",
+    np.int64: "L",
+    np.single: "F",
+    np.double: "D",
+    np.complex64: "C",
+    np.complex128: "Z",
+}
 
 
 class ansXpl:
-    """ANSYS database explorer class.
+    """
+    ANSYS database explorer.
 
     Examples
     --------
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
     >>> xpl = mapdl.xpl
+
+    Open a mode file and extract a vector.
+
+    >>> xpl.open('file.mode')
+    >>> vec = xpl.read('MASS')
+    >>> vec.asarray()
+    array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
+            46, 49, 52, 55, 58,  1], dtype=int32)
+
     """
 
     def __init__(self, mapdl):
+        """Initialize the class."""
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
@@ -30,11 +60,12 @@ class ansXpl:
 
     @property
     def _mapdl(self):
-        """Return the weakly referenced instance of mapdl"""
+        """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
     def open(self, filename, option=""):
-        """Open an MAPDL file to explore
+        """
+        Open an MAPDL file to explore.
 
         Parameters
         ----------
@@ -48,15 +79,22 @@ class ansXpl:
 
         Examples
         --------
-        >>> xpl.open('file.full')
+        >>> xpl.open('file.mode')
+        ===============================================
+        =====      ANSYS File Xplorer            ======
+        ===============================================
+
+        Opening the file.mode ANSYS File
+
         """
         self._filename = filename
-        out = self._mapdl.run("*XPL,OPEN,%s,,%s" % (filename, option))
+        out = self._mapdl.run(f"*XPL,OPEN,{filename},,{option}")
         self._open = True
         return out
 
     def close(self):
-        """Close the MAPDL file after opening.
+        """
+        Close the MAPDL file after opening.
 
         Returns
         -------
@@ -65,7 +103,9 @@ class ansXpl:
 
         Examples
         --------
+        >>> xpl.open("file.mode")
         >>> xpl.close()
+        =====      ANSYS File Xplorer : Close the file.mode ANSYS File
         """
         response = self._mapdl.run("*XPL,CLOSE")
         self._check_ignored(response)
@@ -73,7 +113,8 @@ class ansXpl:
         return response
 
     def list(self, nlev=1):
-        """List the records at the current level.
+        """
+        List the records at the current level.
 
         Parameters
         ----------
@@ -83,23 +124,46 @@ class ansXpl:
         Returns
         -------
         str
-            Response from MAPDL.
+            Listing of records from the current level.
 
         Examples
         --------
-        >>> xpl.list(1)
+        Open a full file and list the current records.
+
+        >>> xpl.open("file.full")
+        >>> xpl.list()
+        =====      ANSYS File Xplorer : List Blocks in File file.full
+         ::FULL::HEADER         Size =        652  B     Total  Size =    180.297 KB
+         ::FULL::DOFSBYNOD            Size =         24  B
+         ::FULL::BACK                 Size =        336  B
+
+         ::FULL::STIFF::HEADER        Size =    117.316 KB
+         ::FULL::RHS                  Size =      1.910 KB
+         ::FULL::DIAGK                Size =      1.910 KB
+         ::FULL::SCLK                 Size =      1.910 KB
+         ::FULL::MRK                  Size =        984  B
+         ::FULL::NODEEXT              Size =        336  B
+         ::FULL::PCGDOFS              Size =        984  B
+         ::FULL::BCDOFS               Size =        984  B
+         ::FULL::BCVALUES             Size =         12  B
+
+         ::FULL::MASS::HEADER         Size =     50.801 KB
+         ::FULL::DIAGM                Size =      1.910 KB
+         ::FULL::NGPH                 Size =        336  B
+
         """
-        response = self._mapdl.run("*XPL,LIST,%d" % nlev)
+        response = self._mapdl.run(f"*XPL,LIST,{nlev}")
         self._check_ignored(response)
         return response
 
     def _check_ignored(self, response):
-        """Check for ignored in response"""
+        """Check for ignored in response."""
         if "ignored" in response:
             raise MapdlRuntimeError(response)
 
     def help(self):
-        """XPL help message
+        """
+        XPL help message.
 
         Examples
         --------
@@ -108,7 +172,8 @@ class ansXpl:
         return self._mapdl.run("*XPL,HELP")
 
     def step(self, where):
-        """Go down in the tree of records
+        """
+        Go down in the tree of records
 
         Parameters
         ----------
@@ -129,14 +194,14 @@ class ansXpl:
          Current Location : FULL::MASS
             File Location : 7644
         """
-        response = self._mapdl.run("*XPL,STEP,%s" % where)
+        response = self._mapdl.run(f"*XPL,STEP,{where}")
         if "Not Found" in response:
             raise RuntimeError(response.strip())
         return response
 
     def info(self, recname, option=""):
-        """Gives details on a specific record, or all records (using
-        ``"*"``)
+        """
+        Gives details on a specific record, or all records (using ``"*"``)
 
         Parameters
         ----------
@@ -160,11 +225,11 @@ class ansXpl:
                  - Record Size   : 81
                  - Data type     : integer values
         """
-        return self._mapdl.run("*XPL,INFO," + recname + "," + option)
+        return self._mapdl.run(f"*XPL,INFO,{recname},{option}")
 
     def print(self, recname):
-        """Print values of a given records, or all records (using
-        ``"*"``)
+        """
+        Print values of a given records, or all records (using ``"*"``).
 
         Parameters
         ----------
@@ -189,10 +254,11 @@ class ansXpl:
                1         2         3
 
         """
-        return self._mapdl.run("*XPL,PRINT,%s" % recname)
+        return self._mapdl.run(f"*XPL,PRINT,{recname}")
 
     def json(self):
-        """Create a JSON representation of the tree or records.
+        """
+        Return a JSON representation of the tree or records.
 
         Examples
         --------
@@ -217,7 +283,8 @@ class ansXpl:
         return json.loads(text)
 
     def where(self):
-        """Prints the current location in the MAPDL FIle
+        """
+        Returns the current location in the MAPDL file.
 
         Returns
         -------
@@ -234,7 +301,8 @@ class ansXpl:
         return self._mapdl.run("*XPL,WHERE")
 
     def up(self, nlev=1):
-        """Go up in the tree.
+        """
+        Go up in the tree.
 
         nlev : int
             Number of levels to recursively go up, or TOP
@@ -247,10 +315,11 @@ class ansXpl:
         """
         if str(nlev).upper().strip() == "TOP":
             return self._mapdl.run("*XPL,UP,TOP")
-        return self._mapdl.run("*XPL,UP,%d" % nlev)
+        return self._mapdl.run(f"*XPL,UP,{nlev}")
 
     def goto(self, path):
-        """Go directly to a new location in the file.
+        """
+        Go directly to a new location in the file.
 
         Parameters
         ----------
@@ -263,10 +332,11 @@ class ansXpl:
          =====      ANSYS File Xplorer : Go up to top level(s)
          =====      ANSYS File Xplorer : Step into Block MASS
         """
-        return self._mapdl.run("*XPL,GOTO,%s" % path)
+        return self._mapdl.run(f"*XPL,GOTO,{path}")
 
     def copy(self, newfile, option=""):
-        """Copy the current opened as a new file.
+        """
+        Copy the current opened as a new file.
 
         Parameters
         ----------
@@ -282,21 +352,108 @@ class ansXpl:
          =====      ANSYS File Xplorer : Copy file.full ANSYS file to file tmpfile.full
             >>      Remove existing output file tmpfile.full
         """
-        return self._mapdl.run("*XPL,COPY,%s,%s" % (newfile, option))
+        return self._mapdl.run(f"*XPL,COPY,{newfile},{option}")
 
     def save(self):
-        """Save the current file, ignoring the marked records"""
+        """Save the current file, ignoring the marked records."""
         response = self._mapdl.run("*XPL,SAVE").strip()
         self._check_ignored(response)
         return response
 
-    def read(self, recordname):
-        """Read a given record and fill a Python array.
+    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
+        """
+        Import a Matrix/Vector from a MAPDL result file.
+
+        At the moment, this only supports reading the displacement vectors from
+        a result file.
+
+        Parameters
+        ----------
+        recordname : str
+            Record name. Currently only supports the ``"NSL"`` record,
+            displacement vectors.
+
+        sets : str or int
+            Number of sets. Can be ``"ALL"`` or the number of sets to load.
+
+        asarray : bool, optional
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
+            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray
-            The array of values.
+        numpy.ndarray or ansys.mapdl.core.math.AnsMat
+            A :class:`numpy.ndarray` or :class:`AnsMat
+            <ansys.mapdl.core.math.AnsMat>` of the displacement vectors,
+            depending on the value of ``asarray``.
+
+        Notes
+        -----
+        This only works on the ``"NSL"`` record of MAPDL result files.
+
+        Examples
+        --------
+        First, open a result file and extract the displacement vectors for all
+        sets.
+
+        >>> xpl.open("file.rst")
+        >>> mat = xpl.extract("NSL")
+        >>> mat
+        Dense APDLMath Matrix (243, 10)
+
+        Convert to a dense numpy array
+
+        >>> arr = mat.asarray()
+        >>> arr
+        array([[-9.30806802e-03, -2.39600770e-02, -5.37856729e-03, ...,
+                -5.61188243e-03, -7.17686067e-11,  3.71893252e-03],
+               [-1.60960014e-02,  2.00410618e-02,  8.05822565e-03, ...,
+                -1.26917511e-02, -5.14133724e-11, -1.38783485e-03],
+               [ 2.54040694e-02,  3.91901513e-03, -2.67965796e-03, ...,
+                -1.46365178e-02,  8.31735188e-11, -2.33109771e-03],
+               ...,
+               [-2.80679551e-03, -1.45686692e-02,  8.05466291e-03, ...,
+                 5.88196684e-03,  1.72211103e-02,  6.10079082e-03],
+               [-7.06675717e-03,  1.30455037e-02, -6.31685295e-03, ...,
+                 1.08619340e-02, -1.72211102e-02,  2.52199472e-03],
+               [ 2.29726170e-02,  3.54392176e-03, -1.87020162e-03, ...,
+                 1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
+
+        """
+        if recordname.upper() != "NSL":
+            raise ValueError("Currently, the only supported recordname is 'NSL'")
+
+        rand_name = id_generator()
+        self._mapdl._log.info(
+            "Calling MAPDL to extract the %s matrix from %s", recordname, self._filename
+        )
+        num_first = 1
+        num_last = 1
+        if sets == "ALL":
+            num_last = -1
+
+        dtype = np.double
+        file_extension = pathlib.Path(self._filename).suffix[1:]
+        if file_extension.lower() != "rst":
+            raise RuntimeError(
+                "This method only supports extracting records from result files"
+            )
+
+        self._mapdl.run(
+            f"*DMAT,{rand_name},{MYCTYPE[dtype]},IMPORT,{file_extension},{self._filename},"
+            f"{num_first},{num_last},{recordname}",
+            mute=False,
+        )
+        return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+
+    def read(self, recordname):
+        """
+        Read a record and return either an APDL math matrix or an APDL math vector.
+
+        Returns
+        -------
+        ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+            A handle to the APDLMath object.
 
         Examples
         --------
@@ -305,45 +462,41 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
-        response = self._mapdl.run("*XPL,READ,%s,TmpXplData" % recordname)
+        rand_name = id_generator()
+        response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
-        response = self._mapdl._data_info("TmpXplData")
+        data_info = self._mapdl._data_info(rand_name)
 
-        if response.stype == anskernel.INTEGER:
-            dtype = np.int32
-        elif response.stype == anskernel.HYPER:
-            dtype = np.int64
-        elif response.stype == anskernel.FLOAT:
-            dtype = np.single
-        elif response.stype == anskernel.DOUBLE:
-            dtype = np.double
-        elif response.stype == anskernel.FCPLX:
-            dtype = np.complex64
-        elif response.stype == anskernel.DCPLX:
-            dtype = np.complex128
-        else:
-            raise TypeError("Unhandled ANSYS type %s" % response.stype)
+        dtype = ANSYS_VALUE_TYPE[data_info.stype]
+        if dtype is None:  # pragma: no cover
+            raise ValueError("Unknown MAPDL data type")
 
-        mm = self._mapdl.math
-        return mm.vec(dtype=dtype, name="TmpXplData")
+        # return either vector or matrix type
+        if data_info.objtype == mapdl_pb2.DataType.VEC:
+            return self._mapdl.math.vec(dtype=dtype, name=rand_name)
+        elif data_info.objtype in [mapdl_pb2.DataType.DMAT, mapdl_pb2.DataType.SMAT]:
+            return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+        else:  # pragma: no cover
+            raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
     def write(self, recordname, vecname):
-        """Write a given record back to an MAPDL File
-        Use the write function at your own risk, you may corrupt
-        an existing file by changing the size of a record in the
-        file.
-        This function must be used only on a non-compressed file
+        """
+        Write a given record back to an MAPDL file.
+
+        Use the write function at your own risk, you may corrupt an existing
+        file by changing the size of a record in the file.  This method must be
+        used only on a non-compressed file.
 
         Parameters
         ----------
         recordname : str
             Name of the record you want to overwrite. Your position
             in the file must be set accordingly to this record location
-            ( same as if you want to read it)
+            (same as if you want to read it).
 
         vecname : str
             Name of the APDLMath vector you want to write in the MAPDL
-            file. Its size must be consistent with the existing record
+            file. Its size must be consistent with the existing record.
 
         Returns
         -------

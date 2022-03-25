@@ -556,14 +556,15 @@ def test_nodes(tmpdir, cleared, mapdl):
     mapdl.fill(1, 11, 9)
 
     basename = "tmp.nodes"
-    filename = str(tmpdir.mkdir("tmpdir").join(basename))
+    target_dir = tmpdir.mkdir("tmpdir")
+    filename = str(target_dir.join(basename))
     if mapdl._local:
         mapdl.nwrite(filename)
     else:
         mapdl.nwrite(basename)
-        mapdl.download(basename)
+        mapdl.download(basename, target_dir=str(target_dir))
 
-    assert np.allclose(mapdl.mesh.nodes, np.loadtxt(basename)[:, 1:])
+    assert np.allclose(mapdl.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl.mesh.n_node == 11
     assert np.allclose(mapdl.mesh.nnum, range(1, 12))
 
