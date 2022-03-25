@@ -1,0 +1,10 @@
+[run]
+omit =
+    # omit commands
+    ansys/mapdl/core/_commands/*
+
+    # ignore legacy interfaces
+    ansys/mapdl/core/mapdl_console.py
+    ansys/mapdl/core/mapdl_corba.py
+    ansys/mapdl/core/jupyter.py
+

@@ -1,27 +1,28 @@
-from pathlib import Path
 from collections import namedtuple
 import os
+from pathlib import Path
+import signal
 import time
 
+from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.launcher import (
-    get_start_instance,
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
+    get_start_instance,
 )
-from common import get_details_of_nodes, get_details_of_elements, Node, Element
-
+from ansys.mapdl.core.misc import get_ansys_bin
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 
-SpacedPaths = namedtuple('SpacedPaths', ['path_without_spaces', 'path_with_spaces',
-                                         'path_with_single_quote'])
+SpacedPaths = namedtuple(
+    "SpacedPaths", ["path_without_spaces", "path_with_spaces", "path_with_single_quote"]
+)
 
 
 # Check if MAPDL is installed
@@ -76,7 +77,10 @@ if START_INSTANCE and EXEC_FILE is None:
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
-        os.kill(pid, 0)
+        # There are two main options:
+        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
+        # - Kill signal (KILLTER). int=9. Hard termination
+        os.kill(pid, signal.SIGTERM)
     except OSError:
         return False
     else:
@@ -277,6 +281,22 @@ def cube_solve(cleared, mapdl):
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
+
+
+@pytest.fixture
+def box_with_fields(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.mp("kxx", 1, 45)
+    mapdl.mp("ex", 1, 2e10)
+    mapdl.mp("perx", 1, 1)
+    mapdl.mp("murx", 1, 1)
+    mapdl.et(1, "SOLID70")
+    mapdl.et(2, "CPT215")
+    mapdl.et(3, "SOLID122")
+    mapdl.et(4, "SOLID96")
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.esize(0.5)
+    return mapdl
 
 
 @pytest.fixture

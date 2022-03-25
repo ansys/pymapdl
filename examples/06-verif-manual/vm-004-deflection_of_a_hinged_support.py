@@ -60,7 +60,8 @@ Notes:
 # Start MAPDL
 # ~~~~~~~~~~~
 
-from math import sin, cos, pi
+from math import cos, pi, sin
+
 from ansys.mapdl.core import launch_mapdl
 
 # start mapdl and clear it
@@ -157,7 +158,7 @@ mapdl.post_processing.plot_nodal_displacement(
 #    text, it returns a numpy array.
 
 
-seqv = mapdl.post_processing.nodal_eqv_stress
+seqv = mapdl.post_processing.nodal_eqv_stress()
 
 # print out the nodes
 for i, nnum in enumerate(mapdl.mesh.nnum):
@@ -197,3 +198,7 @@ Displacement [in]     -0.12          {displacement:.2f}                 {abs(dis
 """
 
 print(results)
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

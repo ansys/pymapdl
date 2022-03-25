@@ -1,5 +1,5 @@
-PyMAPDL Documentation
-=====================
+PyMAPDL Documentation |version|
+===============================
 
 .. toctree::
    :hidden:

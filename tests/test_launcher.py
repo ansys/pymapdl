@@ -3,10 +3,16 @@ import os
 import weakref
 
 import pytest
+
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.launcher import _version_from_path, get_start_instance, _validate_add_sw, launch_mapdl
-from ansys.mapdl.core.misc import get_ansys_bin
+from ansys.mapdl.core.launcher import (
+    _validate_add_sw,
+    _version_from_path,
+    get_start_instance,
+    launch_mapdl,
+)
 from ansys.mapdl.core.licensing import LICENSES
+from ansys.mapdl.core.misc import get_ansys_bin
 
 try:
     import ansys_corba  # noqa: F401
@@ -59,8 +65,8 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_add_sw('', exec_path)
-    assert 'msmpi' in add_sw
+    add_sw = _validate_add_sw("", exec_path)
+    assert "msmpi" in add_sw
 
 
 @pytest.mark.parametrize("path_data", paths)
@@ -134,13 +140,13 @@ def test_license_type_keyword():
     for license_name, license_description in LICENSES.items():
         mapdl = launch_mapdl(license_type=license_name)
 
-        #Using first line to ensure not picking up other stuff.
-        checks.append(license_description in mapdl.__str__().split('\n')[0])
+        # Using first line to ensure not picking up other stuff.
+        checks.append(license_description in mapdl.__str__().split("\n")[0])
         mapdl.exit()
 
     assert any(checks)
 
-    dummy_license_name = 'dummy'
+    dummy_license_name = "dummy"
     # I had to scape the parenthesis because the match argument uses regex.
     expected_warn = f"The keyword argument 'license_type' value \('{dummy_license_name}'\) is not a recognized license name or has been deprecated"
     with pytest.warns(UserWarning, match=expected_warn):
@@ -157,31 +163,35 @@ def test_license_type_keyword_names():
     for license_name, license_description in LICENSES.items():
         mapdl = launch_mapdl(license_type=license_name)
 
-        #Using first line to ensure not picking up other stuff.
-        successful_check = license_description in mapdl.__str__().split('\n')[0] or successful_check
-        assert license_description in mapdl.__str__().split('\n')[0]
+        # Using first line to ensure not picking up other stuff.
+        successful_check = (
+            license_description in mapdl.__str__().split("\n")[0] or successful_check
+        )
+        assert license_description in mapdl.__str__().split("\n")[0]
         mapdl.exit()
 
-    assert successful_check # if at least one license is ok, this should be true.
+    assert successful_check  # if at least one license is ok, this should be true.
 
 
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(additional_switches=' -p' + license_name)
+        mapdl = launch_mapdl(additional_switches=" -p" + license_name)
 
-        #Using first line to ensure not picking up other stuff.
-        successful_check = license_description in mapdl.__str__().split('\n')[0] or successful_check
+        # Using first line to ensure not picking up other stuff.
+        successful_check = (
+            license_description in mapdl.__str__().split("\n")[0] or successful_check
+        )
         mapdl.exit()
 
-    assert successful_check # if at least one license is ok, this should be true.
+    assert successful_check  # if at least one license is ok, this should be true.
 
-    dummy_license_name = 'dummy'
+    dummy_license_name = "dummy"
     # I had to scape the parenthesis because the match argument uses regex.
     expected_warn = f"The additional switch product value \('-p {dummy_license_name}'\) is not a recognized license name or has been deprecated"
-    with  pytest.warns(UserWarning, match=expected_warn):
-        mapdl = launch_mapdl(additional_switches=f' -p {dummy_license_name}')
+    with pytest.warns(UserWarning, match=expected_warn):
+        mapdl = launch_mapdl(additional_switches=f" -p {dummy_license_name}")
         # regardless the license specification, it should lunch.
         assert mapdl.is_alive
     mapdl.exit()
