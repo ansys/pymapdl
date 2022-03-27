@@ -57,13 +57,18 @@ def _chunk_lower_triangular_matrix(
     If the input matrix is non-symmetric then the upper half-matrix will be lost.
     """
     vals = []
+    if np.ndim(matrix) != 2:
+        raise ValueError("Input matrix must be two dimensional.")
+    size = matrix.shape
+    if size[0] != size[1]:
+        raise ValueError("Input matrix must be square.")
     for row_index in range(0, matrix.shape[0]):
         for col_index in range(0, row_index + 1):
             vals.append(matrix[row_index][col_index])
     return _chunk_data(vals)
 
 
-def fill_lower_triangular_matrix(vector: List[float]) -> np.ndarray:
+def fill_upper_triangular_matrix(vector: List[float]) -> np.ndarray:
     """
     Helper function to convert a vector of coefficients into a full matrix. Generates a symmetric, square matrix.
 

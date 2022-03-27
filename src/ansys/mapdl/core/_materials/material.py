@@ -43,6 +43,7 @@ class Material:
             Reference temperature for this material, affects thermal expansion and some non-linear models. Default 0.0
         """
         self._properties = {}
+        self._nonlinear_models = {}
         self._id = material_id
         if properties is not None:
             self.properties = properties
@@ -83,6 +84,8 @@ class Material:
                 assert isinstance(
                     v, (float, np.ndarray)
                 ), "Linear material properties must be either floats or numpy arrays."
+                if k == PropertyCode.REFT:
+                    assert isinstance(v, float), "Reference temperature must be a float."
                 self._properties[k] = v
 
     @property

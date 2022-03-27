@@ -7,7 +7,7 @@ from ..common import (
     FLOAT_VALUE_REGEX,
     MATRIX_LABEL_REGEX,
     _chunk_lower_triangular_matrix,
-    fill_lower_triangular_matrix,
+    fill_upper_triangular_matrix,
 )
 from ._base import _BaseModel
 from .exceptions import ModelValidationException
@@ -196,7 +196,7 @@ class AnisotropicElasticity(_BaseModel):
             data_at_temp = [row[temp_index + 1] for row in matrix_data]
             if np.allclose(data_at_temp[10:], 0):
                 data_at_temp = data_at_temp[0:10]
-            coeffs.append(fill_lower_triangular_matrix(data_at_temp))
+            coeffs.append(fill_upper_triangular_matrix(data_at_temp))
         if all([matrix.size == 16 for matrix in coeffs]):
             ndim = 2
         else:
@@ -225,7 +225,7 @@ class AnisotropicElasticity(_BaseModel):
             ndim = 2
         else:
             ndim = 3
-        coeffs = fill_lower_triangular_matrix(data_at_temp)
+        coeffs = fill_upper_triangular_matrix(data_at_temp)
         return ndim, temp_values, coeffs
 
     @staticmethod
