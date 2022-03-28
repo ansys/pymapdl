@@ -14,7 +14,7 @@ env:
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
 
 jobs:
