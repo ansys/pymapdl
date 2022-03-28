@@ -204,7 +204,7 @@ Additionally, you run a Docker image of PyMAPDL with:
 
 .. code:: pwsh
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 docker.pkg.github.com/pyansys/pymapdl/mapdl -smp > log.txt
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
 
 Successive runs should restart the container or just delete it and rerun it using:
 
@@ -213,7 +213,7 @@ Successive runs should restart the container or just delete it and rerun it usin
     docker stop mapdl
     docker container prune
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 docker.pkg.github.com/pyansys/pymapdl/mapdl -smp > log.txt
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
 
 
 This will create a log file (``log.txt``) in your current directory location.
@@ -274,7 +274,7 @@ You can then run the Docker image with:
 
 .. code:: bash
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 docker.pkg.github.com/pyansys/pymapdl/mapdl -smp  1>log.txt
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp  1>log.txt
 
 .. warning:: The use of UPFs with Docker images or PyMAPDL is still in the Alpha state.
 
