@@ -388,6 +388,18 @@ def test_solve_py(mapdl, mm, cube_solve):
     assert np.allclose(rhs0, rhs1)
 
 
+@pytest.mark.parametrize(
+    "vec_type", ["RHS", "gvec", "BACK", pytest.param("dummy", marks=pytest.mark.xfail)]
+)
+def test_get_vec(mapdl, mm, cube_solve, vec_type):
+    vec = mm.get_vec(mat_id=vec_type).asarray()
+    if vec_type.upper() == "BACK":
+        assert vec.dtype == np.int32
+    else:
+        assert vec.dtype == np.double
+    assert vec.shape
+
+
 def test_get_vector(mm):
     vec = mm.ones(10)
     arr = vec.asarray()
