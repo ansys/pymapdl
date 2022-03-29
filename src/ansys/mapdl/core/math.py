@@ -701,7 +701,7 @@ class MapdlMath:
         )
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
-            return self._mapdl._vec_data(ans_vec.id)
+            return self._mapdl._vec_data(ans_vec.id).astype(dtype)
         return ans_vec
 
     def set_vec(self, data, name=None):
