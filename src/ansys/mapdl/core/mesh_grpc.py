@@ -391,7 +391,12 @@ class MeshGrpc(Mesh):
         # TODO: arrays from gRPC interface should include size of the elem array
         lst_value = np.array(elem_raw.size - n_elem, np.int32)
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
-        return elem_raw[n_elem:], offset
+
+        # overwriting the last column to include element numbers
+        elems_ = elem_raw[n_elem:].copy()  # elem_raw is only-read
+        indx_elem = offset[:-1] + 8
+        elems_[indx_elem] = self.enum
+        return elems_, offset
 
     def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
         """Loads element types from the MAPDL server.
