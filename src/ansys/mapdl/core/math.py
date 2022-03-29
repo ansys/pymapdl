@@ -648,7 +648,7 @@ class MapdlMath:
         fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(self, dtype=None, fname="file.full", mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
@@ -664,8 +664,10 @@ class MapdlMath:
 
             * ``"RHS"`` - Load vector
             * ``"GVEC"`` - Constraint equation constant terms
-            * ``"BACK"`` - nodal mapping vector (internal to user)
+            * ``"BACK"`` - nodal mapping vector (internal to user).
+            If this is used, the default ``dtype`` is ``np.int32``.
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
+            If this is used, the default ``dtype`` is ``np.int32``.
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
@@ -685,6 +687,17 @@ class MapdlMath:
         self._mapdl._log.info(
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
+
+        if mat_id.upper() not in ["RHS", "GVEC", "BACK", "FORWARD"]:
+            raise ValueError(
+                f"The 'mat_id' value ({mat_id}) is not allowed."
+                'Only "RHS", "GVEC", "BACK", or "FORWARD" are allowed.'
+            )
+
+        if mat_id.upper() in ["BACK", "FORWARD"] and not dtype:
+            dtype = np.int32
+        else:
+            dtype = np.double
 
         fname = self._load_file(fname)
         self._mapdl.run(
