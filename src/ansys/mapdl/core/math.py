@@ -445,10 +445,6 @@ class MapdlMath:
             * ``"STIFF"`` - Stiffness matrix
             * ``"MASS"`` - Mass matrix
             * ``"DAMP"`` - Damping matrix
-            * ``"NOD2BCS"`` - Mapping vector relating the full set of
-              nodal DOFs to the subset that the solver uses
-            * ``"USR2BCS"`` - Mapping vector relating the full set of
-              external nodal DOFs to the subset that the solver uses
             * ``"GMAT"`` - Constraint equation matrix
             * ``"K_RE"`` - Real part of the stiffness matrix
             * ``"K_IM"`` - Imaginary part of the stiffness matrix
@@ -472,8 +468,8 @@ class MapdlMath:
             "STIFF",
             "MASS",
             "DAMP",
-            "NOD2BCS",
-            "USR2BCS",
+            # "NOD2BCS",  # Not allowed since #990
+            # "USR2BCS",
             "GMAT",
             "K_RE",
             "K_IM",
@@ -665,9 +661,9 @@ class MapdlMath:
             * ``"RHS"`` - Load vector
             * ``"GVEC"`` - Constraint equation constant terms
             * ``"BACK"`` - nodal mapping vector (internal to user).
-            If this is used, the default ``dtype`` is ``np.int32``.
+              If this is used, the default ``dtype`` is ``np.int32``.
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
-            If this is used, the default ``dtype`` is ``np.int32``.
+              If this is used, the default ``dtype`` is ``np.int32``.
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
