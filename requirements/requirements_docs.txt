@@ -10,7 +10,7 @@ pandas==1.4.1
 plotly==5.6.0
 pyansys_sphinx_theme==0.2.3
 pypandoc==1.7.4
-pytest-sphinx==0.3.1
+pytest-sphinx==0.4.0
 pythreejs==2.3.0
 pyvista==0.33.3
 sphinx-autobuild==2021.3.14
