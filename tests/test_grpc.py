@@ -359,3 +359,10 @@ def test_download_project_extensions(mapdl, tmpdir):
     assert "out" in files_extensions
     assert "err" not in files_extensions
     assert "lock" not in files_extensions
+
+
+def test__channel_str(mapdl):
+    assert mapdl._channel_str is not None
+    assert ":" in mapdl._channel_str
+    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search("\d{4,6}", mapdl._channel_str)
