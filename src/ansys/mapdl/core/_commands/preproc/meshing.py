@@ -2755,17 +2755,17 @@ class Meshing:
         ----------
         vol
             Number of the volume containing the tetrahedral elements to be
-            improved.  If VOL = ALL (default), improve the tetrahedral elements
-            in all selected volumes.  If VOL = P, graphical picking is enabled
+            improved.  If ``VOL = ALL`` (default), improve the tetrahedral elements
+            in all selected volumes.  If ``VOL = P``, graphical picking is enabled
             and all remaining command fields are ignored (valid only in the
-            GUI).  A component name may also be substituted for VOL.
+            GUI).  A component name may also be substituted for ``VOL``.
 
         chgbnd
             Specifies whether to allow boundary modification.  Boundary
             modification includes such things as changes in the connectivity of
             the element faces on the boundary and the addition of boundary
             nodes.  (Also see "Notes" below for important usage information for
-            CHGBND.)
+            ``CHGBND``.)
 
             0 - Do not allow boundary modification.
 
@@ -2782,21 +2782,21 @@ class Meshing:
 
             2 - Perform the greatest amount of swapping/smoothing.
 
-            3 - Perform the greatest amount of swapping/smoothing, plus additional improvement
-                techniques (default).
+            3 - Perform the greatest amount of swapping/smoothing, plus
+            additional improvement techniques (default).
 
         Notes
         -----
-        VIMP is useful for further improving a volume mesh created in ANSYS
-        [VMESH], especially quadratic tetrahedral element meshes.
+        ``VIMP`` is useful for further improving a volume mesh created in ANSYS
+        [``VMESH``], especially quadratic tetrahedral element meshes.
 
-        The VIMP command enables you to improve a given tetrahedral mesh by
+        The ``VIMP`` command enables you to improve a given tetrahedral mesh by
         reducing the number of poorly-shaped tetrahedral elements (in
         particular, the number of sliver tetrahedral elements)--as well as the
         overall number of elements--in the mesh.  It also improves the overall
         quality of the mesh.
 
-        Regardless of the value of the CHGBND argument, boundary mid-nodes can
+        Regardless of the value of the ``CHGBND`` argument, boundary mid-nodes can
         be moved.
 
         When loads or constraints have been placed on boundary nodes or mid-
@@ -2804,11 +2804,11 @@ class Meshing:
         message to let you know that it will not update the loads or
         constraints.
 
-        Even when CHGBND = 1, no boundary modification is performed on areas
+        Even when ``CHGBND = 1``, no boundary modification is performed on areas
         and lines that are not modifiable (for example, areas that are adjacent
         to other volumes or that contain shell elements, or lines that are not
         incident on modifiable areas, contain beam elements, or have line
-        divisions specified for them [LESIZE]).
+        divisions specified for them [``LESIZE``]).
         """
         command = f"VIMP,{vol},{chgbnd},{implevel}"
         return self.run(command, **kwargs)
