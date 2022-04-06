@@ -380,7 +380,7 @@ class MapdlGrpc(_MapdlCore):
 
         if not connected:
             raise IOError(
-                f"Unable to connect to MAPDL gRPC instance at {self._target_str}"
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
             )
 
     @property
