@@ -18,7 +18,15 @@ from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import create_temp_dir, is_float, random_string, threaded
+from ansys.mapdl.core.misc import (
+    check_valid_ip,
+    check_valid_port,
+    check_valid_start_instance,
+    create_temp_dir,
+    is_float,
+    random_string,
+    threaded,
+)
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
@@ -800,7 +808,7 @@ def launch_mapdl(
     start_timeout=120,
     port=None,
     cleanup_on_exit=True,
-    start_instance=True,
+    start_instance=None,
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
@@ -1076,12 +1084,18 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
+        check_valid_ip(ip)
 
     if port is None:
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+        check_valid_port(port)
 
     # connect to an existing instance if enabled
-    if not get_start_instance(start_instance):
+    if start_instance is None:
+        start_instance = os.environ.get("PYMAPDL_START_INSTANCE", True)
+        start_instance = check_valid_start_instance(start_instance)
+
+    if not start_instance:
         mapdl = MapdlGrpc(
             ip=ip,
             port=port,

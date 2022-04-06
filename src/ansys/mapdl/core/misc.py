@@ -4,6 +4,7 @@ import inspect
 import os
 import platform
 import random
+import socket
 import string
 import sys
 import tempfile
@@ -378,3 +379,46 @@ def load_file(mapdl, fname):
 
     # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)
+
+
+def check_valid_ip(ip):
+    """Check for valid IP address"""
+    if ip != "localhost":
+        ip = ip.replace('"', "").replace("'", "")
+        socket.inet_aton(ip)
+
+
+def check_valid_port(port, lower_bound=1000, high_bound=60000):
+    if not isinstance(port, int):
+        raise ValueError("The 'port' parameter should be an integer.")
+
+    if lower_bound < port < high_bound:
+        return
+    else:
+        raise ValueError(
+            f"'port' values should be between {lower_bound} and {high_bound}."
+        )
+
+
+def check_valid_start_instance(start_instance):
+    """
+    Checks if the value obtained from the environmental variable is valid.
+
+    Parameters
+    ----------
+    start_instance : str
+        Value obtained from the correspondent environment variable.
+    """
+    if not isinstance(start_instance, (str, bool)):
+        raise ValueError("The value 'start_instance' should be an string or a boolean.")
+
+    if isinstance(start_instance, bool):
+        return start_instance
+
+    else:  # str
+        if start_instance.lower() not in ["true", "false"]:
+            raise ValueError(
+                f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
+            )
+        else:
+            return start_instance.lower() == True
