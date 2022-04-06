@@ -801,7 +801,7 @@ def launch_mapdl(
     port=None,
     cleanup_on_exit=True,
     start_instance=True,
-    ip=LOCALHOST,
+    ip=None,
     clear_on_connect=True,
     log_apdl=None,
     verbose_mapdl=False,
@@ -1073,11 +1073,12 @@ def launch_mapdl(
     """
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
-    ip = os.environ.get("PYMAPDL_IP", ip)
-    if "PYMAPDL_PORT" in os.environ:
-        port = int(os.environ.get("PYMAPDL_PORT", "50052"))
+
+    if ip is None:
+        ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
+
     if port is None:
-        port = MAPDL_DEFAULT_PORT
+        port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
 
     # connect to an existing instance if enabled
     if not get_start_instance(start_instance):
