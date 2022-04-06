@@ -1540,26 +1540,19 @@ class MapdlGrpc(_MapdlCore):
         recursive : bool
             Use recursion when using glob pattern.
 
-        .. warning::
-            This feature is only available for MAPDL 2021R1 or newer.
+        .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
         .. note::
-            * The glob pattern search does not search recursively in remote instances.
-            * In a remote instance, it is not possible to list or download files in different
-              locations than the MAPDL working directory.
-            * If you are in local and provide a file path, downloading files
-              from a different folder is allowed.
-              However it is not a recommended approach.
+           * The glob pattern search does not search recursively in remote instances.
+           * In a remote instance, it is not possible to list or download files in different
+               locations than the MAPDL working directory.
+           * If you are in local and provide a file path, downloading files
+               from a different folder is allowed.
+               However it is not a recommended approach.
 
         Examples
         --------
-        Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
 
-        >>> mapdl.download('all')
-
-        Download every single file in the MAPDL workind directory:
-
-        >>> mapdl.download('everything')
 
         Download a single file:
 
@@ -1568,6 +1561,14 @@ class MapdlGrpc(_MapdlCore):
         Download all the files starting with `'file'`:
 
         >>> mapdl.download('file*')
+
+        Download every single file in the MAPDL workind directory:
+
+        >>> mapdl.download('*.*')
+
+        Alternatively, you can download all the files using :func:`Mapdl.download_project <ansys.mapdl.core.Mapdl.download_project>` (Recommended):
+
+        >>> mapdl.download_project()
 
         """
 
