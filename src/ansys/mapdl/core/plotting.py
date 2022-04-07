@@ -86,7 +86,9 @@ def general_plotter(
         Shows a vtk axes widget.  Enabled by default.
 
     savefig : str, optional
-        Saves screenshot to a file path.
+        Saves screenshot to a file path. If used, ``notebook`` and
+        ``off_screen`` are evaluated to ``False`` and ``True``
+        respectively.
 
     style : string, optional
         Visualization style of the mesh.  One of the following:
@@ -212,6 +214,10 @@ def general_plotter(
     """
     if notebook:
         off_screen = True
+
+    if savefig:
+        off_screen = True
+        notebook = False
 
     if theme is None:
         theme = MapdlTheme()
