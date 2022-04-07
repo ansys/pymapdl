@@ -383,7 +383,7 @@ def load_file(mapdl, fname):
 
 def check_valid_ip(ip):
     """Check for valid IP address"""
-    if ip != "localhost":
+    if ip.lower() != "localhost":
         ip = ip.replace('"', "").replace("'", "")
         socket.inet_aton(ip)
 
@@ -415,7 +415,7 @@ def check_valid_start_instance(start_instance):
     if isinstance(start_instance, bool):
         return start_instance
 
-    else:  # str
+    else:
         if start_instance.lower() not in ["true", "false"]:
             raise ValueError(
                 f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
