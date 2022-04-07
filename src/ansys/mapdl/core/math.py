@@ -445,10 +445,6 @@ class MapdlMath:
             * ``"STIFF"`` - Stiffness matrix
             * ``"MASS"`` - Mass matrix
             * ``"DAMP"`` - Damping matrix
-            * ``"NOD2BCS"`` - Mapping vector relating the full set of
-              nodal DOFs to the subset that the solver uses
-            * ``"USR2BCS"`` - Mapping vector relating the full set of
-              external nodal DOFs to the subset that the solver uses
             * ``"GMAT"`` - Constraint equation matrix
             * ``"K_RE"`` - Real part of the stiffness matrix
             * ``"K_IM"`` - Imaginary part of the stiffness matrix
@@ -472,8 +468,8 @@ class MapdlMath:
             "STIFF",
             "MASS",
             "DAMP",
-            "NOD2BCS",
-            "USR2BCS",
+            # "NOD2BCS",  # Not allowed since #990
+            # "USR2BCS",
             "GMAT",
             "K_RE",
             "K_IM",
@@ -648,7 +644,7 @@ class MapdlMath:
         fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(self, dtype=None, fname="file.full", mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
@@ -664,8 +660,10 @@ class MapdlMath:
 
             * ``"RHS"`` - Load vector
             * ``"GVEC"`` - Constraint equation constant terms
-            * ``"BACK"`` - nodal mapping vector (internal to user)
+            * ``"BACK"`` - nodal mapping vector (internal to user).
+              If this is used, the default ``dtype`` is ``np.int32``.
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
+              If this is used, the default ``dtype`` is ``np.int32``.
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
@@ -686,13 +684,24 @@ class MapdlMath:
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
 
+        if mat_id.upper() not in ["RHS", "GVEC", "BACK", "FORWARD"]:
+            raise ValueError(
+                f"The 'mat_id' value ({mat_id}) is not allowed."
+                'Only "RHS", "GVEC", "BACK", or "FORWARD" are allowed.'
+            )
+
+        if mat_id.upper() in ["BACK", "FORWARD"] and not dtype:
+            dtype = np.int32
+        else:
+            dtype = np.double
+
         fname = self._load_file(fname)
         self._mapdl.run(
             f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
-            return self._mapdl._vec_data(ans_vec.id)
+            return self._mapdl._vec_data(ans_vec.id).astype(dtype, copy=False)
         return ans_vec
 
     def set_vec(self, data, name=None):
