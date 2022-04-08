@@ -20,7 +20,7 @@ Element Type(s):
 
 .. figure:: ../../../_static/vm10_setup_1.png
     :align: center
-    :width: 300
+    :width: 400
     :alt:  VM10 Geometry of Beam188 and Element Model
     :figclass: align-center
 
