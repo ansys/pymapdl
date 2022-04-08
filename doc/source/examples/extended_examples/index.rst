@@ -3,15 +3,6 @@
 Extended Examples
 =================
 
-.. toctree::
-    :hidden:
-    :maxdepth: 3
-
-    techdemo-1/ex_0-tecbrakesqueal
-    Cart-Pole Simulation <https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html>
-    ex_01-gmsh_example/ex_01-gmsh_example
-    Python_UPF/python_upf_examples
-
 
 These extended examples aim to explain other concepts such as interoperability
 with other programs, libraries, and features in development.
