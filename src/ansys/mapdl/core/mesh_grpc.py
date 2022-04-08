@@ -80,8 +80,10 @@ class MeshGrpc(Mesh):
         self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
         self._mapdl.nsle("S", mute=True)
 
+        # not thread safe
+        self._update_cache_elem().join()
+
         threads = [
-            self._update_cache_elem(),
             self._update_cache_element_desc(),
             self._update_cache_nnum(),
             self._update_node_coord(),
@@ -396,7 +398,7 @@ class MeshGrpc(Mesh):
         elems_ = elem_raw.copy()  # elem_raw is only-read
         elems_ = elems_[n_elem:]
         indx_elem = offset[:-1] + 8  # Getting index of the second EL_SHAPE column
-        elems_[indx_elem] = self.enum  # This line is generating segfaul
+        elems_[indx_elem] = self.enum
         return elems_, offset
 
     def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
