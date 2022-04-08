@@ -25,7 +25,7 @@ Static Analysis ``ANTYPE=0``
 
 3-D 2 Node Beam (BEAM188)
 
-.. image:: ../../_static/vm2_setup.png
+.. image:: ../../../_static/vm2_setup.png
    :width: 400
    :alt: VM2 Problem Sketch
 
