@@ -1477,7 +1477,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):  # pragma: no cover
+    def download_project(self, extensions=None, target_dir=None):
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1517,6 +1517,8 @@ class MapdlGrpc(_MapdlCore):
     ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
 
+        .. warning:: This feature is only available for MAPDL 2021R1 or newer.
+
         Parameters
         ----------
         files : str or List[str] or Tuple(str)
@@ -1540,27 +1542,19 @@ class MapdlGrpc(_MapdlCore):
         recursive : bool
             Use recursion when using glob pattern.
 
-        .. warning::
-            This feature is only available for MAPDL 2021R1 or newer.
+        Notes
+        -----
+        There are some considerations to keep in mind when using this command:
 
-        .. note::
-            * The glob pattern search does not search recursively in remote instances.
-            * In a remote instance, it is not possible to list or download files in different
-              locations than the MAPDL working directory.
-            * If you are in local and provide a file path, downloading files
-              from a different folder is allowed.
-              However it is not a recommended approach.
+        * The glob pattern search does not search recursively in remote instances.
+        * In a remote instance, it is not possible to list or download files in different
+          locations than the MAPDL working directory.
+        * If you are in local and provide a file path, downloading files
+          from a different folder is allowed.
+          However it is not a recommended approach.
 
         Examples
         --------
-        Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
-
-        >>> mapdl.download('all')
-
-        Download every single file in the MAPDL workind directory:
-
-        >>> mapdl.download('everything')
-
         Download a single file:
 
         >>> mapdl.download('file.out')
@@ -1569,7 +1563,22 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
+        Download every single file in the MAPDL workind directory:
+
+        >>> mapdl.download('*.*')
+
+        Alternatively, you can download all the files using
+        :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
+
+        >>> mapdl.download_project()
+
         """
+
+        if chunk_size > 4 * 1024 * 1024:  # 4MB
+            raise ValueError(
+                f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
+                "Please decrease ``chunk_size`` value."
+            )
 
         self_files = self.list_files()  # to avoid calling it too much
 
