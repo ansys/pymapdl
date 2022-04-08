@@ -636,9 +636,6 @@ def test_elements(cleared, mapdl):
             [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16],
         ]
     )
-    if "Grpc" in str(type(mapdl)):
-        # no element number in elements
-        expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
