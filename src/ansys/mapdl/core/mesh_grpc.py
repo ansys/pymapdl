@@ -393,12 +393,16 @@ class MeshGrpc(Mesh):
         lst_value = np.array(elem_raw.size - n_elem, np.int32)
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
-        # overwriting the last column to include element numbers
         elems_ = deepcopy(elem_raw)  # elem_raw is only-read
-        elems_ = elems_[n_elem:]  # elem_raw is only-read
-        indx_elem = offset[:-1] + 8
-        elems_[indx_elem] = self.enum
-        return elems_, offset
+
+        return elem_raw[n_elem:], offset
+
+        # overwriting the last column to include element numbers
+        # elems_ = deepcopy(elem_raw)  # elem_raw is only-read
+        # elems_ = elems_[n_elem:]  # elem_raw is only-read
+        # indx_elem = offset[:-1] + 8
+        # elems_[indx_elem] = self.enum
+        # return elems_, offset
 
     def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
         """Loads element types from the MAPDL server.
