@@ -396,6 +396,7 @@ class MeshGrpc(Mesh):
         elems_ = deepcopy(elem_raw)  # elem_raw is only-read
         elems_ = elems_[n_elem:]
         indx_elem = offset[:-1] + 8
+        elems_[indx_elem] = self.enum
 
         return elem_raw[n_elem:], offset
 
