@@ -394,7 +394,8 @@ class MeshGrpc(Mesh):
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
         elems_ = deepcopy(elem_raw)  # elem_raw is only-read
-        elems_ = elems_[n_elem:]  # elem_raw is only-read
+        elems_ = elems_[n_elem:]
+        indx_elem = offset[:-1] + 8
 
         return elem_raw[n_elem:], offset
 
