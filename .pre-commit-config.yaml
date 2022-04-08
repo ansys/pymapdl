@@ -31,6 +31,12 @@ repos:
 #     additional_dependencies: [toml]
 #     exclude: "tests/"
 
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: check-merge-conflict
+  - id: debug-statements
+
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
   rev: 0.14.0
