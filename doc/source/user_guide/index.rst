@@ -27,7 +27,6 @@ PyMAPDL library.
    pool
    xpl
    upf
-   extended_examples/index
 
 
 PyMAPDL Basic Overview
