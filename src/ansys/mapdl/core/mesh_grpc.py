@@ -1,4 +1,5 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+from copy import deepcopy
 import os
 import time
 import weakref
@@ -393,7 +394,7 @@ class MeshGrpc(Mesh):
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
         # overwriting the last column to include element numbers
-        elems_ = elem_raw.copy()  # elem_raw is only-read
+        elems_ = deepcopy(elem_raw)  # elem_raw is only-read
         elems_ = elems_[n_elem:]  # elem_raw is only-read
         indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
