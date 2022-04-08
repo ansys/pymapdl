@@ -1,5 +1,4 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
-from copy import deepcopy
 import os
 import time
 import weakref
@@ -392,13 +391,6 @@ class MeshGrpc(Mesh):
         # TODO: arrays from gRPC interface should include size of the elem array
         lst_value = np.array(elem_raw.size - n_elem, np.int32)
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
-
-        elems_ = deepcopy(elem_raw)  # elem_raw is only-read
-        elems_ = elems_[n_elem:]
-        indx_elem = offset[:-1] + 8
-        enum = deepcopy(self.enum)
-        elems_[indx_elem] = enum
-
         return elem_raw[n_elem:], offset
 
         # overwriting the last column to include element numbers
