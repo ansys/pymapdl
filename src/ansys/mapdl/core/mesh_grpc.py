@@ -396,7 +396,8 @@ class MeshGrpc(Mesh):
         elems_ = deepcopy(elem_raw)  # elem_raw is only-read
         elems_ = elems_[n_elem:]
         indx_elem = offset[:-1] + 8
-        elems_[indx_elem] = self.enum
+        enum = deepcopy(self.enum)
+        elems_[indx_elem] = enum
 
         return elem_raw[n_elem:], offset
 
@@ -404,7 +405,7 @@ class MeshGrpc(Mesh):
         # elems_ = deepcopy(elem_raw)  # elem_raw is only-read
         # elems_ = elems_[n_elem:]  # elem_raw is only-read
         # indx_elem = offset[:-1] + 8
-        # elems_[indx_elem] = self.enum
+        # elems_[indx_elem] = self.enum  # This line is generating segfaul
         # return elems_, offset
 
     def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
