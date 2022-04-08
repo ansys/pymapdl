@@ -393,7 +393,8 @@ class MeshGrpc(Mesh):
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
         # overwriting the last column to include element numbers
-        elems_ = elem_raw[n_elem:].copy()  # elem_raw is only-read
+        elems_ = elem_raw.copy()  # elem_raw is only-read
+        elems_ = elems_[n_elem:]  # elem_raw is only-read
         indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
         return elems_, offset
