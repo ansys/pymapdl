@@ -7,7 +7,6 @@ import io
 import os
 import re
 import shutil
-import socket
 import subprocess
 import tempfile
 import threading
@@ -56,6 +55,7 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import (
+    check_valid_ip,
     last_created,
     random_string,
     run_as_prep7,
@@ -159,13 +159,6 @@ class RepeatingTimer(threading.Timer):
         while not self.finished.is_set():
             self.function(*self.args, **self.kwargs)
             self.finished.wait(self.interval)
-
-
-def check_valid_ip(ip):
-    """Check for valid IP address"""
-    if ip != "localhost":
-        ip = ip.replace('"', "").replace("'", "")
-        socket.inet_aton(ip)
 
 
 class MapdlGrpc(_MapdlCore):
