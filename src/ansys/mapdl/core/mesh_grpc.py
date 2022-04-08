@@ -394,9 +394,9 @@ class MeshGrpc(Mesh):
         return elem_raw[n_elem:], offset
 
         # overwriting the last column to include element numbers
-        # elems_ = deepcopy(elem_raw)  # elem_raw is only-read
-        # elems_ = elems_[n_elem:]  # elem_raw is only-read
-        # indx_elem = offset[:-1] + 8
+        # elems_ = elem_raw.copy()  # elem_raw is only-read
+        # elems_ = elems_[n_elem:]
+        # indx_elem = offset[:-1] + 8  # Getting index of the second EL_SHAPE column
         # elems_[indx_elem] = self.enum  # This line is generating segfaul
         # return elems_, offset
 
