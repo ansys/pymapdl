@@ -10,10 +10,11 @@ on:
       - main
 
 env:
-  PYMAPDL_PORT: 21000  # default won't work on azure
+  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
 
 jobs:
@@ -165,11 +166,7 @@ jobs:
 
       - name: Build Documentation
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
-
-      # Verify that sphinx generates no warnings
-      - name: Check for sphinx warnings
-        run: python doc/print_errors.py
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: Zip documentation
         run: |
@@ -210,7 +207,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
 
     steps:
       - uses: actions/checkout@v2

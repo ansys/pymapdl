@@ -509,15 +509,15 @@ the reference.
             pInvDer = np.zeros(9) 
 
             for i in range(5): 
-            ia    = i+1 
-            t3i   = t3i * THREE 
-            i1i   = i1i * i1 
-            i1i1  = i1i  * im1 
-            i1i2  = i1i1 * im1 
-            lm2 = ci[i] / (lm ** (TWO*(ia-ONE))) 
-            potential = potential + lm2 * (i1i - t3i) 
-            pInvDer[0] = pInvDer[0] + lm2 * ia * i1i1 
-            pInvDer[2] = pInvDer[2] + lm2 * ia * (ia-ONE) * i1i2 
+                ia    = i+1 
+                t3i   = t3i * THREE 
+                i1i   = i1i * i1 
+                i1i1  = i1i  * im1 
+                i1i2  = i1i1 * im1 
+                lm2 = ci[i] / (lm ** (TWO*(ia-ONE)))
+                potential = potential + lm2 * (i1i - t3i) 
+                pInvDer[0] = pInvDer[0] + lm2 * ia * i1i1 
+                pInvDer[2] = pInvDer[2] + lm2 * ia * (ia-ONE) * i1i2 
 
             potential = potential * mu 
             pInvDer[0] = pInvDer[0] * mu 
@@ -526,12 +526,13 @@ the reference.
             j1 = ONE / jj 
             pInvDer[7] = ZERO 
             pInvDer[8] = ZERO 
+
             if oD1 > TOLER: 
-            oD1  = ONE / oD1 
-            incomp = False 
-            potential = potential + oD1*((jj*jj - ONE)*HALF - math.log(jj)) 
-            pInvDer[7] = oD1*(jj - j1) 
-            pInvDer[8] = oD1*(ONE + j1*j1) 
+                oD1  = ONE / oD1 
+                incomp = False 
+                potential = potential + oD1*((jj*jj - ONE)*HALF - math.log(jj)) 
+                pInvDer[7] = oD1*(jj - j1) 
+                pInvDer[8] = oD1*(ONE + j1*j1) 
 
             response.potential = potential 
             response.incomp = incomp 

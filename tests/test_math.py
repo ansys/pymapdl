@@ -1,7 +1,6 @@
 """Test APDL Math functionality"""
 import os
 import re
-from shutil import copy
 
 import numpy as np
 import pytest
@@ -97,10 +96,21 @@ def test_invalid_dtype(mm):
         mm.vec(10, dtype=np.uint8)
 
 
+def test_vec(mm):
+    vec = mm.vec(10, asarray=False)
+    assert isinstance(vec, apdl_math.AnsVec)
+
+    arr = mm.vec(10, asarray=True)
+    assert isinstance(arr, np.ndarray)
+
+
 def test_vec_from_name(mm):
     vec0 = mm.vec(10)
     vec1 = mm.vec(name=vec0.id)
     assert np.allclose(vec0, vec1)
+
+    vec1 = mm.vec(name=vec0.id, asarray=True)
+    assert isinstance(vec1, np.ndarray)
 
 
 def test_vec__mul__(mm):
@@ -199,10 +209,7 @@ def test_load_stiff_mass(mm, cube_solve, tmpdir):
 
 
 def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
-    full_files = mm._mapdl.download("*.full")
-    assert os.path.exists(full_files[0])
-    full_path = os.path.join(os.getcwd(), full_files[0])
-    copy(full_path, tmpdir)
+    full_files = mm._mapdl.download("*.full", target_dir=tmpdir)
     fname_ = os.path.join(tmpdir, full_files[0])
     assert os.path.exists(fname_)
 
@@ -211,10 +218,6 @@ def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
     assert k.shape == m.shape
     assert all([each > 0 for each in k.shape])
     assert all([each > 0 for each in m.shape])
-
-    # deleting temp files
-    for each_file in full_files:
-        os.remove(each_file)
 
 
 def test_load_stiff_mass_as_array(mm, cube_solve):
@@ -383,6 +386,19 @@ def test_solve_py(mapdl, mm, cube_solve):
     rhs0 = mm.get_vec()
     rhs1 = mm.rhs()
     assert np.allclose(rhs0, rhs1)
+
+
+@pytest.mark.parametrize(
+    "vec_type", ["RHS", "BACK", pytest.param("dummy", marks=pytest.mark.xfail)]
+)
+def test_get_vec(mapdl, mm, cube_solve, vec_type):
+    if vec_type.upper() == "BACK":
+        vec = mm.get_vec(mat_id=vec_type, asarray=True)  # To test asarray arg.
+        assert vec.dtype == np.int32
+    else:
+        vec = mm.get_vec(mat_id=vec_type).asarray()
+        assert vec.dtype == np.double
+    assert vec.shape
 
 
 def test_get_vector(mm):

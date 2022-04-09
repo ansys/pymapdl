@@ -83,6 +83,23 @@ def setup_for_cmatrix(mapdl, cleared):
     mapdl.run("/solu")
 
 
+def test_connect_via_channel(mapdl):
+    """Validate MapdlGrpc can be created directly from a channel."""
+
+    import grpc
+
+    from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
+
+    channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
+    mapdl = MapdlGrpc(channel=channel)
+    assert mapdl.is_alive
+
+
 def test_clear_nostart(mapdl):
     resp = mapdl._send_command("FINISH")
     resp = mapdl._send_command("/CLEAR, NOSTART")
@@ -342,3 +359,10 @@ def test_download_project_extensions(mapdl, tmpdir):
     assert "out" in files_extensions
     assert "err" not in files_extensions
     assert "lock" not in files_extensions
+
+
+def test__channel_str(mapdl):
+    assert mapdl._channel_str is not None
+    assert ":" in mapdl._channel_str
+    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search("\d{4,6}", mapdl._channel_str)

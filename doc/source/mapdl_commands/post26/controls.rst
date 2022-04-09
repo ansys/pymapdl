@@ -1,4 +1,4 @@
-.. _ref_controls_api:
+.. _ref_post26_controls_api:
 
 ********
 Controls

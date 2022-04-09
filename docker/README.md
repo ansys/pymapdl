@@ -32,7 +32,7 @@ with:
 
 ```
 GH_USERNAME=myusername
-cat GH_TOKEN.txt | docker login docker.pkg.github.com -u $GH_USERNAME --password-stdin
+cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 ```
 
 You can now launch MAPDL directly from docker with a short script or

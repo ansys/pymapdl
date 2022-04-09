@@ -26,10 +26,10 @@ To install it, run Julia and switch to the package manager by pressing  the``"]"
 If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
 To create a virtual environment, use the ``activate`` command with the name of the new environment that you want to create or activate.
 
-.. code-block:: julia
+.. code-block::
 
     (@1.7) pkg> activate julia_test
-      Activating project at `C:\Users\USER\julia_test`
+      Activating project at `C:/Users/USER/julia_test`
 
 
 A message should appear, indicating that the new package (``julia_test``) has been activated. This environment name will now precede the command line.
@@ -114,7 +114,7 @@ In Linux:, you would install with:
 
 Finally, after restarting Julia, you can import PyMAPDL using the same procedure as described above:
 
-.. code-block:: julia
+.. code-block::
     
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")

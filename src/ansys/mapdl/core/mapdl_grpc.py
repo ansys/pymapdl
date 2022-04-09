@@ -7,7 +7,6 @@ import io
 import os
 import re
 import shutil
-import socket
 import subprocess
 import tempfile
 import threading
@@ -20,19 +19,19 @@ from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
 from tqdm import tqdm
 
-MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
-MSG_MODULE = """ANSYS API module (ansys.api.mapdl) could not be found.
+MSG_MODULE = """ANSYS API module `ansys.api.mapdl` could not be found.
 This might be due to a faulty installation or obsolete API module version.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'.
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
@@ -41,10 +40,8 @@ try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
     from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
-
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
@@ -58,6 +55,7 @@ from ansys.mapdl.core.common_grpc import (
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import (
+    check_valid_ip,
     last_created,
     random_string,
     run_as_prep7,
@@ -163,13 +161,6 @@ class RepeatingTimer(threading.Timer):
             self.finished.wait(self.interval)
 
 
-def check_valid_ip(ip):
-    """Check for valid IP address"""
-    if ip != "localhost":
-        ip = ip.replace('"', "").replace("'", "")
-        socket.inet_aton(ip)
-
-
 class MapdlGrpc(_MapdlCore):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
@@ -219,13 +210,27 @@ class MapdlGrpc(_MapdlCore):
     >>> from ansys.mapdl import core as pymapdl
     >>> mapdl = pymapdl.Mapdl()
 
-    Connect to an instance of MAPDL running on the LAN on a default port
+    Connect to an instance of MAPDL running on the LAN on a default port.
 
     >>> mapdl = pymapdl.Mapdl('192.168.1.101')
 
-    Connect to an instance of MAPDL running on the LAN on a non-default port
+    Connect to an instance of MAPDL running on the LAN on a non-default port.
 
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
+
+    If you wish to customize the channel, you can also directly connect
+    directly to gRPC channels. For example, if you wanted to create an insecure
+    channel with a maximum message length of 8 MB.
+
+    >>> import grpc
+    >>> channel = grpc.insecure_channel(
+    ...     '127.0.0.1:50052',
+    ...     options=[
+    ...         ("grpc.max_receive_message_length", 8*1024**2),
+    ...     ],
+    ... )
+    >>> mapdl = pymapdl.Mapdl(channel=channel)
+
     """
 
     # Required by `_name` method to be defined before __init__ be
@@ -234,7 +239,7 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(
         self,
-        ip="127.0.0.1",
+        ip=None,
         port=None,
         timeout=15,
         loglevel="WARNING",
@@ -244,10 +249,19 @@ class MapdlGrpc(_MapdlCore):
         set_no_abort=True,
         remove_temp_files=False,
         print_com=False,
+        channel=None,
         **kwargs,
     ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
+
+        if channel is not None:
+            if ip is not None or port is not None:
+                raise ValueError(
+                    "If `channel` is specified, neither `port` nor `ip` can be specified."
+                )
+        elif ip is None:
+            ip = "127.0.0.1"
 
         # port and ip are needed to setup the log
         self._port = port
@@ -259,8 +273,6 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **kwargs,
         )
-
-        check_valid_ip(ip)
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
@@ -274,7 +286,6 @@ class MapdlGrpc(_MapdlCore):
         self._jobname = kwargs.pop("jobname", "file")
         self._path = kwargs.pop("run_location", None)
         self._busy = False  # used to check if running a command on the server
-        self._channel_str = None
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in kwargs:  # pragma: no cover  # allow this to be overridden
             self._local = kwargs["local"]
@@ -282,46 +293,24 @@ class MapdlGrpc(_MapdlCore):
         self._exiting = False
         self._exited = None
         self._mute = False
+        self._db = None
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
 
             port = MAPDL_DEFAULT_PORT
-        self._server = None
-        self._channel = None
         self._state = None
         self._stub = None
         self._timeout = timeout
         self._pids = []
 
-        # try to connect over a series of attempts rather than one
-        # single one.  This prevents a single failed connection from
-        # blocking other attempts
-        n_attempts = 5  # consider adding this as a kwarg
-        connected = False
-        attempt_timeout = timeout / n_attempts
-
-        max_time = time.time() + timeout
-        i = 0
-
-        while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i + 1)
-            connected = self._connect(
-                port, timeout=attempt_timeout, set_no_abort=set_no_abort
-            )
-            i += 1
-            if connected:
-                self._log.debug("Connected")
-                break
+        if channel is None:
+            self._channel = self._create_channel(ip, port)
         else:
-            self._log.debug(
-                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
-            )
+            self._channel = channel
 
-        if not connected:
-            raise IOError(
-                "Unable to connect to MAPDL gRPC instance at %s" % self._channel_str
-            )
+        # connect and validate to the channel
+        self._multi_connect()
 
         # double check we have access to the local path if not
         # explicitly specified
@@ -331,6 +320,72 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in kwargs:
             self._cache_pids()
+
+    def _create_channel(self, ip, port):
+        """Create an insecured grpc channel."""
+        check_valid_ip(ip)
+
+        # open the channel
+        channel_str = f"{ip}:{port}"
+        self._log.debug("Opening insecure channel at %s", channel_str)
+        return grpc.insecure_channel(
+            channel_str,
+            options=[
+                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+            ],
+        )
+
+    def _multi_connect(self, n_attempts=5, timeout=15, set_no_abort=True):
+        """Try to connect over a series of attempts to the channel.
+
+        Parameters
+        ----------
+        n_attempts : int, optional
+            Number of connection attempts.
+        timeout : float, optional
+            Total timeout.
+        set_no_abort : bool, optional
+            Sets MAPDL to not abort at the first error within /BATCH mode.
+            Default ``True``.
+
+        """
+        # This prevents a single failed connection from blocking other attempts
+        connected = False
+        attempt_timeout = timeout / n_attempts
+
+        max_time = time.time() + timeout
+        i = 0
+        while time.time() < max_time and i <= n_attempts:
+            self._log.debug("Connection attempt %d", i + 1)
+            connected = self._connect(
+                timeout=attempt_timeout, set_no_abort=set_no_abort
+            )
+            i += 1
+            if connected:
+                self._log.debug("Connected")
+                break
+        else:
+            self._log.debug(
+                "Reached either maximum amount of connection attempts (%d) or timeout (%f s).",
+                n_attempts,
+                timeout,
+            )
+
+        if not connected:
+            raise IOError(
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
+            )
+
+    @property
+    def _channel_str(self):
+        """Return the target string.
+
+        Generally of the form of "ip:port", like "127.0.0.1:50052".
+
+        """
+        if self._channel is not None:
+            return self._channel._channel.target().decode()
+        return ""
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
@@ -388,7 +443,7 @@ class MapdlGrpc(_MapdlCore):
         info = super().__repr__()
         return info
 
-    def _connect(self, port, timeout=5, set_no_abort=True, enable_health_check=False):
+    def _connect(self, timeout=5, set_no_abort=True, enable_health_check=False):
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
@@ -396,18 +451,6 @@ class MapdlGrpc(_MapdlCore):
         timeout : float
             Time in seconds to wait until the connection has been established
         """
-        self._server = {"ip": self._ip, "port": port}
-
-        # open the channel
-        self._channel_str = "%s:%d" % (self._ip, port)
-        self._log.debug("Opening insecure channel at %s", self._channel_str)
-        self._channel = grpc.insecure_channel(
-            self._channel_str,
-            options=[
-                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-            ],
-        )
-
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
 
@@ -1427,7 +1470,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):  # pragma: no cover
+    def download_project(self, extensions=None, target_dir=None):
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1467,6 +1510,8 @@ class MapdlGrpc(_MapdlCore):
     ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
 
+        .. warning:: This feature is only available for MAPDL 2021R1 or newer.
+
         Parameters
         ----------
         files : str or List[str] or Tuple(str)
@@ -1490,27 +1535,19 @@ class MapdlGrpc(_MapdlCore):
         recursive : bool
             Use recursion when using glob pattern.
 
-        .. warning::
-            This feature is only available for MAPDL 2021R1 or newer.
+        Notes
+        -----
+        There are some considerations to keep in mind when using this command:
 
-        .. note::
-            * The glob pattern search does not search recursively in remote instances.
-            * In a remote instance, it is not possible to list or download files in different
-              locations than the MAPDL working directory.
-            * If you are in local and provide a file path, downloading files
-              from a different folder is allowed.
-              However it is not a recommended approach.
+        * The glob pattern search does not search recursively in remote instances.
+        * In a remote instance, it is not possible to list or download files in different
+          locations than the MAPDL working directory.
+        * If you are in local and provide a file path, downloading files
+          from a different folder is allowed.
+          However it is not a recommended approach.
 
         Examples
         --------
-        Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
-
-        >>> mapdl.download('all')
-
-        Download every single file in the MAPDL workind directory:
-
-        >>> mapdl.download('everything')
-
         Download a single file:
 
         >>> mapdl.download('file.out')
@@ -1519,7 +1556,22 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
+        Download every single file in the MAPDL workind directory:
+
+        >>> mapdl.download('*.*')
+
+        Alternatively, you can download all the files using
+        :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
+
+        >>> mapdl.download_project()
+
         """
+
+        if chunk_size > 4 * 1024 * 1024:  # 4MB
+            raise ValueError(
+                f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
+                "Please decrease ``chunk_size`` value."
+            )
 
         self_files = self.list_files()  # to avoid calling it too much
 
@@ -1848,6 +1900,53 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.math import MapdlMath
 
         return MapdlMath(self)
+
+    @property
+    @check_version.version_requires((0, 4, 1))
+    def db(self):
+        """
+        MAPDL database interface.
+
+        Returns
+        -------
+        :class:`MapdlDb <ansys.mapdl.core.database.MapdlDb>`
+
+        Examples
+        --------
+        Create a nodes instance.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> # create nodes...
+        >>> nodes = mapdl.db.nodes
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 270641
+            Maximum node number:      270641
+
+        >>> mapdl.nsel("NONE")
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 0
+            Maximum node number:      270641
+
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+        """
+        from ansys.mapdl.core.database import MapdlDb
+
+        if self._db is None:
+            self._db = MapdlDb(self)
+            self._db.start()
+
+        return self._db
 
     @protect_grpc
     def _data_info(self, pname):
