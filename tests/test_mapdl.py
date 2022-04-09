@@ -636,9 +636,6 @@ def test_elements(cleared, mapdl):
             [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16],
         ]
     )
-    if "Grpc" in str(type(mapdl)):
-        # no element number in elements
-        expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
@@ -1318,7 +1315,11 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     with open(fname_, "w") as fid:
         fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
 
-    assert fname_ not in mapdl.list_files()
+    # file might be left behind from a previous test
+    if fname_ in mapdl.list_files():
+        mapdl.slashdelete(fname_)
+        assert fname_ not in mapdl.list_files()
+
     mapdl.clear()
     mapdl.prep7()
     captured = capsys.readouterr()  # To flush it
