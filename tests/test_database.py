@@ -6,6 +6,8 @@ import pytest
 from ansys.mapdl.core.database import DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
 
+pytestmark = pytest.mark.skip
+
 
 @pytest.fixture(scope="session")
 def db(mapdl):

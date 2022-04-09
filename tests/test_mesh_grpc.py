@@ -27,3 +27,8 @@ def test_mesh_attributes(mapdl, cube_solve):
     mapdl.dim("par", "", len(mapdl.mesh.enum))
     mapdl.starvget("par", "ELEM", "0", "ELIST")
     assert np.allclose(mapdl.parameters["par"].flatten(), mapdl.mesh.enum)
+
+
+def test_elem_num_in_mesh_elem(mapdl, cube_solve):
+    enums = np.array([each[8] for each in mapdl.mesh.elem])
+    assert np.allclose(mapdl.mesh.enum, enums)
