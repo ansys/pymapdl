@@ -55,6 +55,7 @@ class MeshGrpc(Mesh):
             self._cache_element_desc = None
             self._grid_cache = None
             self._surf_cache = None
+            self._cached_elements = None
 
             self._node_coord = None
             self._enum = None
