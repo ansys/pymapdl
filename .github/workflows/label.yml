@@ -1,0 +1,57 @@
+name: "Pull Request Labeler"
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Label based on changed files
+      uses: actions/labeler@v3
+      with:
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
+        sync-labels: ''
+
+    # Label based on branch name
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'doc/') || startsWith(github.event.pull_request.head.ref, 'docs')
+      with:
+        labels: documentation
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'docker')
+      with:
+        labels: docker
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'maint') || startsWith(github.event.pull_request.head.ref, 'no-ci') || startsWith(github.event.pull_request.head.ref, 'ci')
+      with:
+        labels: maintenance
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'junk')
+      with:
+        labels: ignore-for-release
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'feat')
+      with:
+        labels: enhancement
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'fix') || startsWith(github.event.pull_request.head.ref, 'patch')
+      with:
+        labels: bug
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: startsWith(github.event.pull_request.head.ref, 'release')
+      with:
+        labels: release
+    - uses: peter-evans/create-or-update-comment@v2
+      if: |
+        not contains(github.event.pull_request.labels.*.name, 'enhancement') &&
+        not contains(github.event.pull_request.labels.*.name, 'documentation') &&
+        not contains(github.event.pull_request.labels.*.name, 'maintenance')
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          Please add one of the following labels to add this contribution to the Release Notes :point_down:
+          - [enhancement](https://github.com/pyansys/pymapdl/pulls?q=label%3Aenhancement+)
+          - [documentation](https://github.com/pyansys/pymapdl/pulls?q=label%3Adocumentation+)
+          - [maintenance](https://github.com/pyansys/pymapdl/pulls?q=label%3Amaintenance+)
