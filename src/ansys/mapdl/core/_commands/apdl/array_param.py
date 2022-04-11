@@ -1224,13 +1224,13 @@ class ArrayParam:
         element of B and stores the result in the first element of A.
         Operations continue on successive array elements ``[*VLEN, *VMASK]`` with
         the default being all successive elements.  Skipping array elements via
-        ``*VMASK`` or ``*VLEN`` for the DER and INT functions skips only the writing
+        ``*VMASK`` or ``*VLEN`` for the ``DER`` and ``INT`` functions skips only the writing
         of the results (skipped array element data are used in all
         calculations).
 
         Parameter functions and operations are available to operate on a scalar
-        parameter or a single element of an array parameter, such as SQRT(B) or
-        SQRT(A(4)).  See the ``*SET`` command for details.  Operations on a
+        parameter or a single element of an array parameter, such as ``SQRT(B)`` or
+        ``SQRT(A(4))``.  See the ``*SET`` command for details.  Operations on a
         sequence of array elements can be done by repeating the desired
         function or operation in a do-loop ``[*DO]``.  The vector operations within
         the ANSYS program (``*VXX`` commands) are internally programmed do-loops
