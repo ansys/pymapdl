@@ -10,6 +10,8 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. === EXAMPLES ===
 
+.. _ref_example_gallery:
+
 .. include:: examples/index.rst
    :start-line: 2
 
