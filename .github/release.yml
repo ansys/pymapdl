@@ -1,6 +1,3 @@
-
-# release.yml
-
 changelog:
   exclude:
     labels:
