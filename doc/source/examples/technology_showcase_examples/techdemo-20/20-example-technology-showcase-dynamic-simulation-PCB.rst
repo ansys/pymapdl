@@ -72,9 +72,9 @@ between the IC packages and the circuit board.
 
 
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_001.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_001.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_001.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_001.png
    :class: sphx-glr-single-img
 
 
@@ -165,14 +165,14 @@ that are binded together.
 
 
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_002.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_002.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_002.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_002.png
    :class: sphx-glr-single-img
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
    :class: sphx-glr-single-img
 
 
@@ -2007,14 +2007,14 @@ but will run locally if uncommented.
 
 
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_004.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_004.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_004.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_004.png
    :class: sphx-glr-single-img
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
    :class: sphx-glr-single-img
 
 
@@ -2383,9 +2383,9 @@ Post-process PSD analysis in POST1
 
 
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_006.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_006.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_006.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_006.png
    :class: sphx-glr-single-img
 
 
@@ -2470,9 +2470,9 @@ Post-process PSD analysis using Matplotlib
 
 
 
-.. image-sg:: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_007.png
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_007.png
    :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/examples/07-technology-showcase-examples/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_007.png
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_007.png
    :class: sphx-glr-single-img
 
 
