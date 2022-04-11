@@ -1077,7 +1077,7 @@ class ArrayParam:
 
             * ``LT``
               Less than comparison: ``Par1<Par2`` gives 1.0 if true, 0.0 if
-            false.
+              false.
 
             * ``LE``
               Less than or equal comparison: ``Par1 <= Par2`` gives
@@ -1103,7 +1103,7 @@ class ArrayParam:
               First derivative:
 
               .. math::
-                 \dfrac{\partial(Par1)}{\partial(Par2)}
+                 \dfrac{\mathrm{d}(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})}
 
               The derivative at a point is determined over points
               half way between the previous and next points
@@ -1116,7 +1116,7 @@ class ArrayParam:
               Second derivative:
 
               .. math::
-                 \dfrac{\partial^2(Par1)}{\partial(Par2)^2}
+                 \dfrac{\mathrm{d}^2(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})^2}
 
               See also ``DER1``.
 
