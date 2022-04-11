@@ -11,7 +11,7 @@ These examples are a work-in-progress and will be extended during the life of
 this project.
 
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-| :ref:`tech_demo_01`        | Technology showcase demonstration example 01: Brake Squeal Analysis.                                    |
+| Name                       | Description                                                                                             |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | `Cart-Pole Simulation`_    | Demonstrates a reinforcement machine learning example using MAPDL through PyMAPDL.                      |
 +----------------------------+---------------------------------------------------------------------------------------------------------+

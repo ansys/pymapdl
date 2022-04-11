@@ -104,7 +104,6 @@ html_favicon = "favicon.png"
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
 
-
 # static path
 html_static_path = ["_static"]
 
@@ -139,7 +138,6 @@ todo_include_todos = False
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
-
 
 # -- Sphinx Gallery Options ---------------------------------------------------
 sphinx_gallery_conf = {
