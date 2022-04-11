@@ -1,8 +1,12 @@
+import re
+
 import numpy as np
 import pytest
 
 from ansys.mapdl.core.database import DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
+
+pytestmark = pytest.mark.skip
 
 
 @pytest.fixture(scope="session")
@@ -204,3 +208,10 @@ def test_elems_push(elems):
 
     with pytest.raises(ValueError, match="`elmdat` must be length 10"):
         elems.push(ielm_new, [1, 2, 3], elem_info.nodes)
+
+
+def test__channel_str(db):
+    assert db._channel_str is not None
+    assert ":" in db._channel_str
+    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
+    assert re.search("\d{4,6}", db._channel_str)
