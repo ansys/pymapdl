@@ -239,7 +239,7 @@ class ArrayParam:
               * ``Par1`` is the ``Nout`` x 3 array of points that will be mapped
                 to. ``Par2`` is the ``Nin`` x ``M`` array that contains ``M`` values of
                 data to be interpolated at each point and corresponds to
-                the ``Nin`` x 3 points in Par3. The resulting ``ParR`` is the ``Nout``
+                the ``Nin`` x 3 points in ``Par3``. The resulting ``ParR`` is the ``Nout``
                 x ``M`` array of mapped data points.
 
                 For each point in the destination mesh, all possible
@@ -292,7 +292,7 @@ class ArrayParam:
 
             * ``Val1, Val2, ..., Val6``
               Additional input used in the operation. The meanings of
-              Val1 through Val6 vary depending on the specified matrix
+              ``Val1`` through ``Val6`` vary depending on the specified matrix
               operation. See the description of Oper for details.
         """
         command = (
@@ -322,11 +322,11 @@ class ArrayParam:
             Filename extension (eight-character maximum).
 
         label
-            Can use a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (JIK).
+            Can use a value of ``IJK``, ``IKJ``, ``JIK``, ``JKI``, ``KIJ``, ``KJI``, or blank (``JIK``).
 
         n1, n2, n3
-            Write as (((ParR(i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for
-            Label = KIJ. n1, n2, and n3 default to the corresponding dimensions
+            Write as ``(((ParR(i,j,k), k = 1,n1), i = 1, n2), j = 1, n3)`` for
+            ``Label = KIJ``. ``n1``, ``n2``, and ``n3`` default to the corresponding dimensions
             of the array parameter ParR.
 
         Notes
@@ -370,7 +370,7 @@ class ArrayParam:
         to this command, while ``*VCUM`` does not apply to this command. See the
         ``*VOPER`` command for details. If you are in the GUI, the ``*MWRITE`` command
         must be contained in an externally prepared file and read into ANSYS
-        (i.e., ``*USE``, /INPUT, etc.).
+        (i.e., ``*USE``, ``/INPUT``, etc.).
 
         This command is valid in any processor.
         """
@@ -526,7 +526,7 @@ class ArrayParam:
             Name of the first table parameter.
 
         oper
-            The operation to be performed: ADD.  The operation is:
+            The operation to be performed: ``ADD``.  The operation is:
             ``ParR(i,j,k) = FACT1*Par1(i,j,k) + FACT2 *Par2(i,j,k) +CON1``
 
         par2
@@ -568,22 +568,22 @@ class ArrayParam:
         kabsr
             Absolute value of results parameter:
 
-            Do not take absolute value of results parameter (ParR). - Take absolute value.
+            Do not take absolute value of results parameter (``ParR``). - Take absolute value.
 
         kabs1
             Absolute value of first parameter:
 
-            Do not take absolute value of first parameter (Par1 or ParI). - Take absolute value.
+            Do not take absolute value of first parameter (``Par1`` or ``ParI``). - Take absolute value.
 
         kabs2
             Absolute value of second parameter:
 
-            Do not take absolute value of second parameter (Par2 or ParJ). - Take absolute value.
+            Do not take absolute value of second parameter (``Par2`` or ``ParJ``). - Take absolute value.
 
         kabs3
             Absolute value of third parameter:
 
-            Do not take absolute value of third parameter (Par3 or ParK). - Take absolute value.
+            Do not take absolute value of third parameter (``Par3`` or ``ParK``). - Take absolute value.
 
         Notes
         -----
@@ -683,18 +683,18 @@ class ArrayParam:
         Parameters
         ----------
         factr
-            Scale factor applied to results (ParR) parameter.  Defaults to 1.0.
+            Scale factor applied to results (``ParR``) parameter.  Defaults to 1.0.
 
         fact1
-            Scale factor applied to first parameter (Par1 or ParI).  Defaults
+            Scale factor applied to first parameter (``Par1`` or ``ParI``).  Defaults
             to 1.0.
 
         fact2
-            Scale factor applied to second parameter (Par2 or ParJ).  Defaults
+            Scale factor applied to second parameter (``Par2`` or ``ParJ``).  Defaults
             to 1.0.
 
         fact3
-            Scale factor applied to third parameter (Par3 or ParK).  Defaults
+            Scale factor applied to third parameter (``Par3`` or ``ParK``).  Defaults
             to 1.0.
 
         Notes
@@ -732,54 +732,152 @@ class ArrayParam:
         func
             Function to be performed:
 
-            Arccosine: ACOS(Par1). - Arcsine: ASIN(Par1).
+            * ACOS
+              Arccosine: ``ACOS(Par1)``.
 
-            Par1 is sorted in ascending order.  ``*VCOL``, ``*VMASK``,
-            ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
-            ``*VLEN,NROW`` does apply.
+            * ``ASIN``
+              Arcsine: ``ASIN(Par1)``.
 
-            Compress: Selectively compresses data set.  "True"
-            (``*VMASK``) values of Par1 (or row positions to be considered
-            according to the NINC value on the ``*VLEN`` command) are
-            written in compressed form to ParR, starting at the
-            specified position. - Copy: Par1 copied to ParR.
+            * ``ASORT``
+              ``Par1`` is sorted in ascending order.  ``*VCOL``, ``*VMASK``,
+              ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
+              ``*VLEN,NROW`` does apply.
 
-            Cosine: COS(Par1). - Hyperbolic cosine: COSH(Par1).
+            * ``ATAN``
+              Arctangent: ``ATAN(Par1)``
 
-            Direction cosines of the principal stresses (nX9).  Par1
-            contains the nX6 component stresses for the n locations of
-            the calculations. - Par1 is sorted in descending order.
-            ``*VCOL``, ``*VMASK``, ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
-            ``*VLEN,NROW`` does apply.
+            * ``COMP``
+              Compress: Selectively compresses data set.  "True"
+              (``*VMASK``) values of ``Par1`` (or row positions to be considered
+              according to the ``NINC`` value on the ``*VLEN`` command) are
+              written in compressed form to ``ParR``, starting at the
+              specified position.
 
-            Euler angles of the principal stresses (nX3).  Par1
-            contains the nX6 component stresses for the n locations of
-            the calculations. - Exponential: EXP(Par1).
+            * ``COPY``
+              Copy: ``Par1`` copied to ``ParR``.
 
-            Expand: Reverse of the COMP function.  All elements of
-            Par1 (starting at the position specified) are written in
-            expanded form to corresponding "true" (``*VMASK``) positions
-            (or row positions to be considered according to the NINC
-            value on the ``*VLEN`` command) of ParR. - Natural logarithm:
-            LOG(Par1).
+            * ``COS``
+              Cosine: ``COS(Par1)``.
 
-            Common logarithm: LOG10(Par1). - Nearest integer: 2.783
-            becomes 3.0, -1.75 becomes -2.0.
+            * ``COSH``
+              Hyperbolic cosine: ``COSH(Par1)``.
 
-            Logical complement: values 0.0 (false) become 1.0 (true).
-            Values > 0.0 (true) become 0.0 (false). - Principal
-            stresses (nX5). Par1 contains the nX6 component stresses
-            for the n locations of the calculations.
+            * ``DIRCOS``
+              Direction cosines of the principal stresses (nX9).  ``Par1``
+              contains the nX6 component stresses for the ``n`` locations of
+              the calculations.
 
-            Power function: ``Par1**CON1``. Exponentiation of any negative
-            number in the vector Par1 to a non-integer power is
-            performed by exponentiating the positive number and
-            prepending the minus sign. For example, ``-4**2.3`` is
-            ``-(4**2.3)``.
+            * ``DSORT``
+              ``Par1`` is sorted in descending order.
+              ``*VCOL``, ``*VMASK``, ``*VCUM``, and ``*VLEN,,NINC`` do not apply.
+              ``*VLEN,NROW`` does apply.
 
-            Hyperbolic sine: SINH(Par1). - Square root: SQRT(Par1).
+            * ``EURLER``
+              Euler angles of the principal stresses (nX3).  ``Par1``
+              contains the nX6 component stresses for the ``n`` locations of
+              the calculations.
 
-            Tangent: TAN(Par1). - Hyperbolic tangent: TANH(Par1).
+            * ``EXP``
+              Exponential: ``EXP(Par1)``.
+
+            * ``EXPA``
+              Expand: Reverse of the COMP function.  All elements of
+              ``Par1`` (starting at the position specified) are written in
+              expanded form to corresponding "true" (``*VMASK``) positions
+              (or row positions to be considered according to the ``NINC``
+              value on the ``*VLEN`` command) of ``ParR``.
+
+            * ``LOG``
+              Natural logarithm: ``LOG(Par1)``.
+
+            * ``LOG10``
+              Common logarithm: ``LOG10(Par1)``.
+
+            * ``NINT``
+              Nearest integer: 2.783 becomes 3.0, -1.75 becomes -2.0.
+
+            * ``NOT``
+              Logical complement: values 0.0 (false) become 1.0 (true).
+              Values > 0.0 (true) become 0.0 (false).
+
+            * ``PRIN``
+              Principal stresses (nX5). ``Par1`` contains the ``nX6`` component stresses
+              for the ``n`` locations of the calculations.
+
+            * ``PWR``
+              Power function: ``Par1**CON1``. Exponentiation of any negative
+              number in the vector ``Par1`` to a non-integer power is
+              performed by exponentiating the positive number and
+              prepending the minus sign. For example, ``-4**2.3`` is
+              ``-(4**2.3)``.
+
+            * ``SIN``
+              Sine: ``SIN(Par1)``
+
+            * ``SINH``
+              Hyperbolic sine: ``SINH(Par1)``.
+
+            * ``SQRT``
+              Square root: ``SQRT(Par1)``.
+
+            * ``TAN``
+              Tangent: ``TAN(Par1)``.
+
+            * ``TANH``
+              Hyperbolic tangent: ``TANH(Par1)``.
+
+            * ``TANG``
+              Tangent to a path at a point: the slope at a point is determined by linear interpolation half
+              way between the previous and next points. Points are assumed to be in the global Cartesian
+              coordinate system. Path points are specified in array ``Par1`` (having 3 consecutive columns
+              of data, with the columns containing the ``x``, ``y``, and ``z`` coordinate locations, respectively, of
+              the points). Only the starting row index and the column index for the x coordinates are
+              specified, such as ``A(1,1)``. The y and z coordinates of the vector are assumed to begin in the
+              corresponding next columns, such as ``A(1,2)`` and ``A(1,3)``. The tangent result, ``ParR``, must also
+              have 3 consecutive columns of data and will contain the tangent direction vector (normalized
+              to 1.0); such as 1,0,0 for an x-direction vector.
+
+            * ``NORM``
+              Normal to a path and an input vector at a point: determined from the cross-product of the
+              calculated tangent vector (see ``TANG``) and the input direction vector (with the ``i``,
+              ``j``, and ``k`` components input as ``CON1``, ``CON2``, and ``CON3``).
+              Points are assumed to be in the global Cartesian coordinate system.
+              Path points are specified in array ``Par1`` (having 3 consecutive
+              columns of data, with the columns containing the ``x``, ``y``, and ``z``
+              coordinate locations, respectively, of the points).
+              Only the starting row index and the column index for the ``x`` coordinates
+              are specified, such as ``A(1,1)``. The ``y`` and ``z`` coordinates of the vector are assumed to begin
+              in the corresponding next columns, such as ``A(1,2)`` and ``A(1,3)``. The normal result, ``ParR``,
+              must also have 3 consecutive columns of data and will contain the normal direction vector
+              (normalized to 1.0); such as ``1,0,0`` for an x-direction vector
+
+            * ``LOCAL``
+              Transforms global Cartesian coordinates of a point to the coordinates of a specified system:
+              points to be transformed are specified in array ``Par1`` (having 3 consecutive columns of
+              data, with the columns containing the ``x``, ``y``, and ``z`` global Cartesian coordinate locations,
+              respectively, of the points).
+              Only the starting row index and the column index for the ``x``
+              coordinates are specified, such as ``A(1,1)``.
+              The y and z coordinates of the vector are assumed
+              to begin in the corresponding next columns, such as ``A(1,2)`` and ``A(1,3)``.
+              Results are transformed to coordinate system ``CON1`` (which may be any valid coordinate system number,
+              such as 1,2,11,12, etc.). The transformed result, ``ParR``, must also have 3 consecutive columns
+              of data and will contain the corresponding transformed coordinate locations.
+
+            * ``GLOBAL``
+              Transforms specified coordinates of a point to global Cartesian coordinates: points to be
+              transformed are specified in array ``Par1`` (having 3 consecutive columns of data, with the
+              columns containing the local coordinate locations (``x``, ``y``, ``z`` or ``r``, ``θ``, ``z``
+              or etc.) of the points).
+              Only the starting row index and the column index for the x coordinates are specified, such
+              as ``A(1,1)``.
+              The y and z coordinates (or ``θ`` and ``z``, or etc.) of the vector are assumed to begin
+              in the corresponding next columns, such as ``A(1,2)`` and ``A(1,3)``.
+              Local coordinate locations are assumed to be in coordinate system ``CON1``
+              (which may be any valid coordinate system number, such as 1,2,11,12, etc.).
+              The transformed result, ``ParR``, must also have 3 consecutive
+              columns of data, with the columns containing the global Cartesian ``x``, y, and z coordinate
+              locations, respectively.
 
         par1
             Array parameter vector in the operation.
@@ -828,22 +926,22 @@ class ArrayParam:
 
         Notes
         -----
-        Forms an array parameter (of type ARRAY) by interpolating values of an
-        array parameter (of type TABLE) at specified table index locations
+        Forms an array parameter (of type ``ARRAY``) by interpolating values of an
+        array parameter (of type ``TABLE``) at specified table index locations
         according to:
 
-        ParR = f(ParT, Parl, ParJ, ParK)
+        ``ParR = f(ParT, Parl, ParJ, ParK)``
 
-        where ParT is the type TABLE array parameter, and ParI, ParJ, ParK are
-        the type ARRAY array parameter vectors of index values for
-        interpolation in ParT.  See the ``*DIM`` command for TABLE and ARRAY
+        where ``ParT`` is the type ``TABLE`` array parameter, and ``ParI``, ``ParJ``, ``ParK`` are
+        the type ``ARRAY`` array parameter vectors of index values for
+        interpolation in ``ParT``.  See the ``*DIM`` command for ``TABLE`` and ``ARRAY``
         declaration types.  Linear interpolation is used.  The starting array
-        element number for the TABLE array (ParT) is not used (but a value must
+        element number for the ``TABLE`` array (``ParT``) is not used (but a value must
         be input).  Starting array element numbers must be defined for each
         array parameter vector if it does not start at the first location. For
         example, ``*VITRP,R(5),TAB(1,1),X(2),Y(4)`` uses the second element of X
         and the fourth element of Y as index values (row and column) for a 2-D
-        interpolation in TAB and stores the result in the fifth element of R.
+        interpolation in ``TAB`` and stores the result in the fifth element of R.
         Operations continue on successive array elements ``[*VLEN, *VMASK]`` with
         the default being all successive elements.  Absolute values and scale
         factors may be applied to the result parameter ``[*VABS, *VFACT]``.
@@ -874,25 +972,25 @@ class ArrayParam:
         The size of the submatrix used is determined from the upper left
         starting array element (defined on the operation command) to the lower
         right array element (defined by the number of rows on this command and
-        the number of columns on the ``*VCOL`` command).  NINC allows skipping row
+        the number of columns on the ``*VCOL`` command).  ``NINC`` allows skipping row
         operations for some operation commands.  Skipped rows are included in
         the row count.  The starting row number must be defined on the
         operation command for each parameter read and for the result written.
 
-        The default NROW is calculated from the maximum number of rows of the
+        The default ``NROW`` is calculated from the maximum number of rows of the
         result array (the ``*DIM`` row dimension) minus the starting location + 1.
-        For example, ``*DIM,R,,10`` and a starting location of R(7) gives a default
-        of 4 loops (filling R(7), R(8), R(9), and R(10)).  Repeat operations
+        For example, ``*DIM,R,,10`` and a starting location of ``R(7)`` gives a default
+        of 4 loops (filling ``R(7)``, ``R(8)``, ``R(9)``, and ``R(10)``).  Repeat operations
         automatically terminate at the last row of the result array.  Existing
         values in the rows and columns of the results matrix remain unchanged
         where not overwritten by the requested input or operation values.
 
-        The stride (NINC) allows operations to be performed at regular
+        The stride (``NINC``) allows operations to be performed at regular
         intervals.  It has no effect on the total number of row operations.
         Skipped operations retain the previous result.  For example, ``*DIM,R,,6,``
-        with a starting location of R(1), NROW = 10, and NINC = 2 calculates
-        values for locations R(1), R(3), and R(5) and retains values for
-        locations R(2), R(4), and R(6).  A more general skip control may be
+        with a starting location of ``R(1)``, ``NROW = 10``, and ``NINC = 2`` calculates
+        values for locations ``R(1)``, ``R(3)``, and ``R(5)`` and retains values for
+        locations ``R(2)``, ``R(4)``, and ``R(6)``.  A more general skip control may be
         done by masking ``[*VMASK]``.  The row control settings are reset to the
         defaults after each ``*VXX`` or ``*MXX`` operation.  Use ``*VSTAT`` to list
         settings.
@@ -921,16 +1019,17 @@ class ArrayParam:
         corresponding mask vector value is checked.  A true value allows the
         operation to be done.  A false value skips the operation (and retains
         the previous results).  A mask vector can be created from direct input,
-        such as M(1) = 1,0,0,1,1,0,1; or from the DATA function of the ``*VFILL``
+        such as ``M(1) = 1,0,0,1,1,0,1``; or from the DATA function of the ``*VFILL``
         command.  The NOT function of the ``*VFUN`` command can be used to reverse
         the logical sense of the mask vector.  The logical compare operations
-        (LT, LE, EQ, NE, GE, and GT) of the ``*VOPER`` command also produce a mask
+        (``LT``, ``LE``, ``EQ``, ``NE``, ``GE``, and ``GT``) of
+        the ``*VOPER`` command also produce a mask
         vector by operating on two other vectors.  Any numeric vector can be
         used as a mask vector since the actual interpretation assumes values
         less than 0.0 are 0.0 (false) and values greater than 0.0 are 1.0
         (true).  If the mask vector is not specified (or has fewer values than
         the result vector), true (1.0) values are assumed for the unspecified
-        values.  Another skip control may be input with NINC on the ``*VLEN``
+        values.  Another skip control may be input with ``NINC`` on the ``*VLEN``
         command.  If both are present, operations occur only when both are
         true.  The mask setting is reset to the default (no mask) after each
         ``*VXX`` or ``*MXX`` operation.  Use ``*VSTAT`` to list settings.
@@ -947,106 +1046,177 @@ class ArrayParam:
 
         Parameters
         ----------
-        parr
+        PARR
             The name of the resulting array parameter vector.  See ``*SET``  for
             name restrictions.
 
-        par1
+        PAR1
             First array parameter vector in the operation.  May also be a
             scalar parameter or a literal constant.
 
-        oper
+        OPER
             Operations:
 
-            Addition: Par1+Par2. - Subtraction: Par1-Par2.
+            * ``ADD``
+              Addition: ``Par1+Par2``.
 
-            Multiplication: ``Par1*Par2``.
+            * ``SUB``
+              Subtraction: ``Par1-Par2``.
 
-            Division: Par1/Par2  (a divide by zero results in a value of zero).
+            * ``MULT``
+              Multiplication: ``Par1*Par2``.
 
-            Minimum: minimum of Par1 and Par2. - Maximum: maximum of Par1 and Par2.
+            * ``DIV``
+              Division: ``Par1/Par2``  (a divide by zero results in a value of zero).
 
-            Less than comparison: Par1<Par2 gives 1.0 if true, 0.0 if
-            false. - Less than or equal comparison: Par1 Par2 gives
-            1.0 if true, 0.0 if false.
+            * ``MIN``
+              Minimum: minimum of ``Par1`` and ``Par2``.
 
-            Equal comparison: Par1 = Par2 gives 1.0 if true, 0.0 if
-            false. - Not equal comparison: Par1 ≠ Par2 gives 1.0 if
-            true, 0.0 if false.
+            * ``MAX``
+              Maximum: maximum of ``Par1`` and ``Par2``.
 
-            Greater than or equal comparison: Par1 Par2 gives 1.0 if
-            true, 0.0 if false. - Greater than comparison: Par1>Par2
-            gives 1.0 if true, 0.0 if false.
+            * ``LT``
+              Less than comparison: ``Par1<Par2`` gives 1.0 if true, 0.0 if
+            false.
 
-            First derivative: d(Par1)/d(Par2).  The derivative at a
-            point is determined over points half way between the
-            previous and next points (by linear interpolation). Par1
-            must be a function (a unique Par1 value for each Par2
-            value) and Par2 must be in ascending order. - Second
-            derivative: d2(Par1)/d(Par2)2.  See also DER1.
+            * ``LE``
+              Less than or equal comparison: ``Par1 <= Par2`` gives
+              1.0 if true, 0.0 if false.
 
-            Single integral: Par1 d(Par2), where CON1 is the
-            integration constant.  The integral at a point is
-            determined by using the single integration procedure
-            described in the Mechanical APDL Theory Reference. -
-            Double integral: Par1 d(Par2), where CON1 is the
-            integration constant of the first integral and CON2 is the
-            integration constant of the second integral.  If Par1
-            contains acceleration data, CON1 is the initial velocity
-            and CON2 is the initial displacement.  See also INT1.
+            * ``EQ``
+              Equal comparison: ``Par1 = Par2`` gives 1.0 if true, 0.0 if
+              false.
 
-            Dot product: Par1 . Par2.  Par1 and Par2 must each have
-            three consecutive columns of data, with the columns
-            containing the i, j, and k vector components,
-            respectively.  Only the starting row index and the column
-            index for the i components are specified for Par1 and
-            Par2, such as A(1,1).  The j and k components of the
-            vector are assumed to begin in the corresponding next
-            columns, such as A(1,2) and A(1,3). - Cross product: Par1
-            x Par2.  Par1, Par2, and ParR must each have 3 components,
-            respectively.  Only the starting row index and the column
-            index for the i components are specified for Par1, Par2,
-            and ParR, such as A(1,1).  The j and k components of the
-            vector are assumed to begin in the corresponding next
-            columns, such as A(1,2) and A(1,3).
+            * ``NE``
+              Not equal comparison: ``Par1 ≠ Par2`` gives 1.0 if
+              true, 0.0 if false.
 
-            Gather: For a vector of position numbers, Par2, copy the
-            value of Par1 at each position number to ParR.  Example:
-            for Par1 = 10,20,30,40 and Par2 = 2,4,1; ParR =
-            20,40,10. - Scatter: Opposite of GATH operation.  For a
-            vector of position numbers, Par2, copy the value of Par1
-            to that position number in ParR.  Example: for Par1 =
-            10,20,30,40,50 and Par2 = 2,1,0,5,3; ParR = 20,10,50,0,40.
+            * ``GE``
+              Greater than or equal comparison: ``Par1 >= Par2`` gives 1.0 if
+              true, 0.0 if false.
 
-            Arctangent: arctangent of Par1/Par2 with the sign of each
-            component considered. - Transform the data in Par1 from
-            the global Cartesian coordinate system to the local
-            coordinate system given in CON1. Par1 must be an N x 3
-            (i.e., vector) or an N x 6 (i.e., stress or strain tensor)
-            array. If the local coordinate system is a cylindrical,
-            spherical, or toroidal system, then you must provide the
-            global Cartesian coordinates in Par2 as an N x 3 array.
-            Set CON2 = 1 if the data is strain data.
+            * ``GT``
+              Greater than comparison: ``Par1>Par2``
+              gives 1.0 if true, 0.0 if false.
 
-        par2
+            * ``DER``
+              First derivative:
+
+              .. math::
+                 \dfrac{\partial(Par1)}{\partial(Par2)}
+
+              The derivative at a point is determined over points
+              half way between the previous and next points
+              (by linear interpolation).
+              ``Par1`` must be a function (a unique ``Par1``
+              value for each ``Par2``
+              value) and ``Par2`` must be in ascending order.
+
+            * ``DER2``
+              Second derivative:
+
+              .. math::
+                 \dfrac{\partial^2(Par1)}{\partial(Par2)^2}
+
+              See also ``DER1``.
+
+            * ``INT1``
+              Single integral:
+
+              .. math::
+
+                 \int Par1 \, d(Par2)
+
+              where ``CON1`` is the integration constant.
+              The integral at a point is
+              determined by using the single integration procedure
+              described in the Mechanical APDL Theory Reference.
+
+            * ``INT2``
+              Double integral:
+
+              .. math::
+
+                 \iint Par1 \, d(Par2)
+
+              where ``CON1`` is the integration constant of the first
+              integral and ``CON2`` is the integration constant
+              of the second integral.  If ``Par1``
+              contains acceleration data, ``CON1`` is the initial velocity
+              and ``CON2`` is the initial displacement.  See also ``INT1``.
+
+            * ``DOT``
+              Dot product: ``Par1 . Par2``.
+              ``Par1`` and ``Par2`` must each have
+              three consecutive columns of data, with the columns
+              containing the ``i``, ``j``, and ``k`` vector components,
+              respectively.  Only the starting row index and the column
+              index for the ``i`` components are specified for ``Par1`` and
+              ``Par2``, such as ``A(1,1)``.  The ``j`` and ``k`` components of the
+              vector are assumed to begin in the corresponding next
+              columns, such as ``A(1,2)`` and ``A(1,3)``.
+
+            * ``CROSS``
+              Cross product: ``Par1 x Par2``.
+              ``Par1``, ``Par2``, and ``ParR`` must each have 3 components,
+              respectively.  Only the starting row index and the column
+              index for the i components are specified for ``Par1``, ``Par2``,
+              and ``ParR``, such as ``A(1,1)``.  The j and k components of the
+              vector are assumed to begin in the corresponding next
+              columns, such as ``A(1,2)`` and ``A(1,3)``.
+
+            * ``GATH``
+              Gather: For a vector of position numbers, ``Par2``, copy the
+              value of ``Par1`` at each position number to ParR.  Example:
+              for ``Par1 = 10,20,30,40`` and ``Par2 = 2,4,1``; ``ParR =
+              20,40,10``.
+
+            * ``SCAT``
+              Scatter: Opposite of ``GATH`` operation.  For a
+              vector of position numbers, ``Par2``, copy the value of ``Par1``
+              to that position number in ``ParR``.  Example: for ``Par1 =
+              10,20,30,40,50`` and ``Par2 = 2,1,0,5,3``; ``ParR = 20,10,50,0,40``.
+
+            * ``ATN2``
+              Arctangent: arctangent of ``Par1/Par2`` with the sign of each
+              component considered.
+
+            * ``LOCAL``
+              Transform the data in ``Par1`` from
+              the global Cartesian coordinate system to the local
+              coordinate system given in ``CON1``. ``Par1`` must be an ``N`` x 3
+              (i.e., vector) or an ``N`` x 6 (i.e., stress or strain tensor)
+              array. If the local coordinate system is a cylindrical,
+              spherical, or toroidal system, then you must provide the
+              global Cartesian coordinates in ``Par2`` as an ``N`` x 3 array.
+              Set ``CON2 = 1`` if the data is strain data.
+
+            * ``GLOBAL``
+              Transform the data in ``Par1`` from the local coordinate system given in ``CON1`` to the global
+              Cartesian coordinate system. ``Par1`` must be an ``N`` x 3 (that is, vector) or an ``N`` x 6 (that is,
+              stress or strain tensor) array. If the local coordinate system is a cylindrical, spherical, or
+              toroidal system, then you must provide the global Cartesian coordinates in ``Par2`` as an ``N``
+              x 3 array. Set ``CON2 = 1`` if the data is strain data.
+
+        PAR2
             Second array parameter vector in the operation.  May also be a
             scalar parameter or a literal constant.
 
-        con1
-            First constant (used only with the INT1 and INT2 operations).
+        CON1
+            First constant (used only with the ``INT1`` and ``INT2`` operations).
 
-        con2
-            Second constant (used only with the INT2 operation).
+        CON2
+            Second constant (used only with the ``INT2`` operation).
 
         Notes
         -----
         Operates on two input array parameter vectors and produces one output
         array parameter vector according to:
 
-        ParR = Par1 o Par2
+        ``ParR = Par1 o Par2``
 
         where the operations (o) are described below.  ParR may be the same as
-        Par1 or Par2.  Absolute values and scale factors may be applied to all
+        ``Par1`` or ``Par2``.  Absolute values and scale factors may be applied to all
         parameters [``*VABS``, ``*VFACT``].  Results may be cumulative [``*VCUM``].
         Starting array element numbers must be defined for each array parameter
         vector if it does not start at the first location, such as
@@ -1067,8 +1237,8 @@ class ArrayParam:
         that conveniently perform the indicated operation over a sequence of
         array elements.  If the array is multidimensional, only the first
         subscript is incremented in the do-loop, that is, the operation repeats
-        in column vector fashion "down" the array.  For example, for A(1,5),
-        A(2,5), A(3,5), etc.  The starting location of the row index must be
+        in column vector fashion "down" the array.  For example, for ``A(1,5)``,
+        ``A(2,5)``, ``A(3,5)``, etc.  The starting location of the row index must be
         defined for each parameter read and for the result written.
 
         The default number of loops is from the starting result location to the
@@ -1099,32 +1269,55 @@ class ArrayParam:
         func
             Functions:
 
-            Maximum: the maximum Par1 array element value. - Minimum:
-            the minimum Par1 array element value.
+            * ``MAX``
+              Maximum: the maximum ``Par1`` array element value.
 
-            Index location of the maximum Par1 array element value.
-            Array Par1 is searched starting from its specified
-            index. - Index location of the minimum Par1 array element
-            value.  Array Par1 is searched starting from its specified
-            index.
+            * ``MIN``
+              Minimum: the minimum ``Par1`` array element value.
 
-            Index location of the first nonzero value in array Par1.
-            Array Par1 is searched starting from its specified
-            index. - Index location of the last nonzero value in array
-            Par1.  Array Par1 is searched starting from its specified
-            index.
+            * ``LMAX``
+              Index location of the maximum ``Par1`` array element value.
+              Array ``Par1`` is searched starting from its specified
+              index.
 
-            Sum: Par1 (the summation of the Par1 array element
-            values). - Median: value of Par1 at which there are an
-            equal number of values above and below.
+            * ``LMIN``
+              Index location of the minimum ``Par1`` array element
+              value.  Array ``Par1`` is searched starting from its specified
+              index.
 
-            Mean: (σ Par1)/NUM, where NUM is the number of summed
-            values.
+            * ``FIRST``
+              Index location of the first nonzero value in array ``Par1``.
+              Array ``Par1`` is searched starting from its specified
+              index.
 
-            Variance: ``(σ ((Par1-MEAN)**2))/NUM``.
+            * ``LAST``
+              Index location of the last nonzero value in array
+              ``Par1``.  Array ``Par1`` is searched starting from its specified
+              index.
 
-            Standard deviation: square root of VARI. -
-            Root-mean-square: square root of ``(σ (Par1**2))/NUM``.
+            * ``SUM``
+              Sum: ``Par1`` (the summation of the ``Par1`` array element
+              values).
+
+            * ``MEDI``
+              Median: value of ``Par1`` at which there are an
+              equal number of values above and below.
+
+            * ``MEAN``
+              Mean: ``(σ Par1)/NUM``, where ``NUM`` is the number of summed
+              values.
+
+            * ``VARI``
+              Variance: ``(σ ((Par1-MEAN)**2))/NUM``.
+
+            * ``STDV``
+              Standard deviation: square root of ``VARI``.
+
+            * ``RMS``
+              Root-mean-square: square root of ``(σ (Par1**2))/NUM``.
+
+            * ``NUM``
+              Number: the number of summed values (masked values are not counted).
 
         par1
             Array parameter vector in the operation.
@@ -1134,12 +1327,12 @@ class ArrayParam:
         Operates on one input array parameter vector and produces one output
         scalar parameter according to:
 
-        ParR = f(Par1)
+        ``ParR = f(Par1)``
 
         where the functions (f) are described below. The starting array element
         number must be defined for the array parameter vector.  For example,
-        ``*VSCFUN,MU,MEAN,A(1)`` finds the mean of the A vector values, starting
-        from the first value and stores the result as parameter MU.  Operations
+        ``*VSCFUN,MU,MEAN,A(1)`` finds the mean of the ``A`` vector values, starting
+        from the first value and stores the result as parameter ``MU``.  Operations
         use successive array elements ``[*VLEN, *VMASK]`` with the default being
         all successive array elements.  Absolute values and scale factors may
         be applied to all parameters ``[*VABS, *VFACT]``.  Results may be
