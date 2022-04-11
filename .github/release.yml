@@ -1,0 +1,24 @@
+
+# release.yml
+
+changelog:
+  exclude:
+    labels:
+      - ignore-for-release
+  categories:
+    - title: New Features
+      labels:
+        - enhancement
+    - title: Bug fixes or behavior changes
+      labels:
+        - bug
+    - title: Documentation
+      labels:
+        - documentation
+        - Examples
+    - title: Maintenance
+      labels:
+        - maintenance
+    - title: MAPDL and/or API related
+      labels:
+        - MAPDL
