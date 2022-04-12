@@ -150,7 +150,19 @@ def test_bc_plot_options(
 
 @skip_no_xserver
 @pytest.mark.parametrize(
-    "bc_labels", ["Mechanical", "mechanical", "meCHANICAL", "ux", "UX", ["UX", "UY"]]
+    "bc_labels",
+    [
+        "Mechanical",
+        "mechanical",
+        "meCHANICAL",
+        "ux",
+        "UX",
+        "error",
+        ["UX", "UY"],
+        pytest.param("error", marks=pytest.mark.xfail),
+        pytest.param(["UX", "error"], marks=pytest.mark.xfail),
+        "CSGZ",
+    ],
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     p = mapdl.nplot(
@@ -168,6 +180,7 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         pytest.param(["NOdes"], marks=pytest.mark.xfail),
         pytest.param("error", marks=pytest.mark.xfail),
         pytest.param(["error"], marks=pytest.mark.xfail),
+        pytest.param({"error": "Not accepting dicts"}, marks=pytest.mark.xfail),
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):

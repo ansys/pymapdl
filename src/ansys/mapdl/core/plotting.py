@@ -22,7 +22,7 @@ BC_F = [
     "AMPS",
     "CHRGS",
     # "FLUX",
-    # "CSGZ",
+    "CSGZ",
 ]  # TODO: Add moments MX, MY, MZ
 FIELDS = {
     "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
@@ -847,7 +847,7 @@ def _bc_target_checker(bc_target):
         )
 
     if isinstance(bc_target, str):
-        if bc_target not in ALLOWED_TARGETS:
+        if bc_target.upper() not in ALLOWED_TARGETS:
             raise ValueError(
                 f"The parameter '{bc_target}' in 'bc_target' is not supported.\n"
                 f"At the moments only the following are supported:\n{ALLOWED_TARGETS}"
