@@ -36,7 +36,7 @@ if not os.path.isdir(SETTINGS_DIR):
     except:
         warnings.warn(
             "Unable to create settings directory.\n"
-            + "Will be unable to cache MAPDL executable location"
+            "Will be unable to cache MAPDL executable location"
         )
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
@@ -57,7 +57,7 @@ Be aware of possible errors or unexpected behavior with this configuration.
 
 
 def _is_ubuntu():
-    """Determine if running as Ubuntu
+    """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
@@ -1104,7 +1104,7 @@ def launch_mapdl(
             # we're allowed to start instances
             if os.environ.get("PYMAPDL_START_INSTANCE", True):
                 return launch_mapdl(
-                    start_instance=True,
+                    start_instance=start_instance,
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
