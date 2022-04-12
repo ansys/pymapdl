@@ -157,3 +157,20 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         return_plotter=True, plot_bc=True, plot_labels=True, bc_labels=bc_labels
     )
     assert isinstance(p, Plotter)
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "bc_target",
+    [
+        "Nodes",
+        ["NOdes"],
+        pytest.param("error", marks=pytest.mark.xfail),
+        pytest.param(["error"], marks=pytest.mark.xfail),
+    ],
+)
+def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
+    p = mapdl.nplot(
+        return_plotter=True, plot_bc=True, plot_labels=True, bc_target=bc_target
+    )
+    assert isinstance(p, Plotter)
