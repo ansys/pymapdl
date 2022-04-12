@@ -7,7 +7,13 @@ from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 from .theme import MapdlTheme
 
 # Supported labels
-BC_D = ["TEMP", "UX", "UY", "UZ", "VOLT", "MAG"]
+BC_D = [
+    "TEMP",
+    "UX",
+    "UY",
+    "UZ",
+    "VOLT",  # "MAG"
+]
 BC_F = [
     "HEAT",
     "FX",
@@ -15,13 +21,13 @@ BC_F = [
     "FZ",
     "AMPS",
     "CHRGS",
-    "FLUX",
-    "CSGZ",
+    # "FLUX",
+    # "CSGZ",
 ]  # TODO: Add moments MX, MY, MZ
 FIELDS = {
     "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
-    "THERMAL": ["TEMP", "FLUX"],
-    "ELECTRICAL": ["VOLT", "CHRGS"],
+    "THERMAL": ["TEMP", "HEAT"],
+    "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
 }
 
 
@@ -96,6 +102,8 @@ BC_plot_settings = {
     "FX": {"color": "red", "glyph": FX},
     "FY": {"color": "green", "glyph": FY},
     "FZ": {"color": "blue", "glyph": FZ},
+    "AMPS": {"color": "grey", "glyph": VOLT},
+    "CHRGS": {"color": "grey", "glyph": VOLT},
 }
 
 # Using * to force all the following arguments to be keyword only.
@@ -627,7 +635,7 @@ def general_plotter(
         )
 
     if title:  # Added here to avoid labels overlapping title
-        pl.add_title(title)
+        pl.add_title(title, color=text_color)
 
     if return_cpos and return_plotter:
         raise ValueError(
@@ -686,7 +694,11 @@ def bc_plotter(
     # min_dist = approximate_minimum_distance_between_points(mapdl.mesh.nodes)
     # min_dist = 0.00001
     min_dist = get_bounding_box(mapdl.mesh.nodes)
-    min_dist = min_dist[min_dist != 0].mean() * 0.75 / 10
+    min_dist = min_dist[min_dist != 0]
+    if min_dist.size != 0:
+        min_dist = min_dist.mean() * 0.75 / 10
+    else:  # Case were there is only one node
+        min_dist = 1
 
     if "NODES" in bc_target:
         pl = bc_nodes_plotter(
@@ -719,6 +731,9 @@ def bc_nodes_plotter(
 
         else:
             raise Exception(f"The label '{each_label}' is not supported.")
+
+        if bc.size == 0:  # There is no nodes with such label
+            return pl
 
         bc_num = bc[:, 0].astype(int)
         bc_nodes = nodes_xyz[np.isin(nodes_num, bc_num), :]
