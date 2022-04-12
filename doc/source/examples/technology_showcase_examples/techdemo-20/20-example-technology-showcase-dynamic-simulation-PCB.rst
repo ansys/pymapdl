@@ -18,6 +18,7 @@
 .. _sphx_glr_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
 
 .. _ref_dynamic_simulation_printed_circuit_board:
+.. _tech_demo_20:
 
 Dynamic simulation of a printed circuit board assembly
 ------------------------------------------------------
