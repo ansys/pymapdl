@@ -704,7 +704,7 @@ def bc_plotter(
 def bc_nodes_plotter(
     mapdl, pl, bc_labels, plot_labels=False, min_dist=1, plot_bc_legend=None
 ):
-    """Plot nodes BC given a list of labels"""
+    """Plot nodes BC given a list of labels."""
     nodes_xyz = mapdl.mesh.nodes
     nodes_num = mapdl.mesh.nnum
 
@@ -762,15 +762,15 @@ def bc_nodes_plotter(
             if bc_point_labels is None:
                 bc_point_labels = {each: "" for each in nodes_num}
 
-            for id, values in zip(bc_num, bc_values):
-                if not bc_point_labels[id]:
+            for id_, values in zip(bc_num, bc_values):
+                if not bc_point_labels[id_]:
                     bc_point_labels[
-                        id
-                    ] = f"Node: {id}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                        id_
+                    ] = f"Node: {id_}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
                 else:
                     bc_point_labels[
-                        id
-                    ] = f"{bc_point_labels[id]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                        id_
+                    ] = f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
 
     if plot_labels:
         pcloud = pv.PolyData(nodes_xyz)
@@ -785,7 +785,6 @@ def bc_nodes_plotter(
 
 def _bc_labels_checker(bc_labels):
     """Make sure we have allowed parameters and data types for ``bc_labels``"""
-
     if not isinstance(bc_labels, (str, list, tuple)):
         raise ValueError(
             "The parameter 'bc_labels' can be only a string, a list of strings or tuple of strings."
