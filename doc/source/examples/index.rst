@@ -11,9 +11,10 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 .. === EXAMPLES ===
 
 .. _ref_example_gallery:
+.. _ref_gallery_of_examples:
 
-.. include:: examples/index.rst
-   :start-line: 2
+.. .. include:: examples/index.rst
+..    :start-line: 2
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
@@ -37,5 +38,5 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
     extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
     extended_examples/Python_UPF/python_upf_examples
 
-.. include:: extended_examples/index.rst
+include:: extended_examples/index.rst
 
