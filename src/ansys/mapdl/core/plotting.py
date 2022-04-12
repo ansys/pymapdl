@@ -292,13 +292,6 @@ def _general_plotter(
                     off_screen=True)
 
     """
-    if notebook:
-        off_screen = True
-
-    if savefig:
-        off_screen = True
-        notebook = False
-
     if theme is None:
         theme = MapdlTheme()
 
@@ -538,6 +531,7 @@ def general_plotter(
     return_plotter : bool, optional
         Return the plotting object rather than showing the plot and
         returning the camera position.  Default ``False``.
+        This overrides the ``return_cpos`` value.
 
     return_cpos : bool, optional
         Returns the camera position as an array. Default ``False``.
@@ -573,6 +567,12 @@ def general_plotter(
                     off_screen=True)
 
     """
+    if notebook:
+        off_screen = True
+
+    if savefig:
+        off_screen = True
+        notebook = False
 
     # Getting the plotter
     pl = _general_plotter(
@@ -629,19 +629,10 @@ def general_plotter(
     if title:  # Added here to avoid labels overlapping title
         pl.add_title(title)
 
-    def return_from_plotter():
-        returns_parameter = []
-        if return_plotter:
-            returns_parameter.append(pl)
-        if return_cpos:
-            returns_parameter.append(pl.camera_position)
-
-        if not returns_parameter:
-            returns_parameter = None
-        else:
-            returns_parameter = tuple(
-                returns_parameter
-            )  # We should return a tuple if possible.
+    if return_cpos and return_plotter:
+        raise ValueError(
+            "'return_cpos' and 'return_plotter' cannot be both 'True' at the same time."
+        )
 
     # permit user to save the figure as a screenshot
     if savefig:
@@ -649,8 +640,8 @@ def general_plotter(
         pl.screenshot(savefig)
 
         # return unclosed plotter
-        if returns_parameter:
-            return returns_parameter
+        if return_plotter:
+            return pl
 
         # if not returning plotter, close right away
         pl.close()
@@ -658,10 +649,12 @@ def general_plotter(
     else:
         pl.show()
 
-    # Recreating "returns" to update cpos
-    returns_parameter = return_from_plotter()
-
-    return returns_parameter
+    if return_plotter:
+        return pl
+    elif return_cpos:
+        return pl.camera_position
+    else:
+        return None
 
 
 def bc_plotter(
