@@ -92,7 +92,7 @@ mphi = m.dot(phi)
 
 
 ######################################################################
-# Next, compute the :math:`||K.\phi_1||_2`` quantity and normalize the
+# Next, compute the :math:`||K.\phi_1||_2` quantity and normalize the
 # residual value.
 
 # APDL Command: *MULT,K,,Phi,,KPhi
