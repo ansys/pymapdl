@@ -7,6 +7,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_start_instance,
+    last_created,
 )
 
 
@@ -62,3 +63,16 @@ def test_check_valid_port(port):
 )
 def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
+
+
+def test_creation_time(tmpdir):
+    files_ = []
+    for i in range(4):
+        file_name = f"tmp_{i}.tmp"
+        file_path = str(tmpdir.join(file_name))
+        files_.append(file_path)
+
+        with open(file_path, "w") as fid:
+            fid.write("")
+
+    assert last_created(files_) is not None
