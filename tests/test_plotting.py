@@ -164,7 +164,8 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     "bc_target",
     [
         "Nodes",
-        ["NOdes"],
+        "NOdes",
+        pytest.param(["NOdes"], marks=pytest.mark.xfail),
         pytest.param("error", marks=pytest.mark.xfail),
         pytest.param(["error"], marks=pytest.mark.xfail),
     ],
