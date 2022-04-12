@@ -5,12 +5,15 @@ on:
 
 jobs:
   triage:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
     - name: Label based on changed files
-      uses: actions/labeler@v3
+      uses: actions/labeler@v4
       with:
-        repo-token: "${{ secrets.LABELER_TOKEN }}"
+        repo-token: "${{ secrets.GITHUB_TOKEN }}"
         # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
         sync-labels: ''
 
