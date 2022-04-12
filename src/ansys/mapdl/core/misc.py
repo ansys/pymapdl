@@ -248,12 +248,6 @@ def threaded_daemon(func):
     return wrapper
 
 
-def chunks(l, n):
-    """Yield successive n-sized chunks from l"""
-    for i in range(0, len(l), n):
-        yield l[i : i + n]
-
-
 def unique_rows(a):
     """Returns unique rows of a and indices of those rows"""
     if not a.flags.c_contiguous:
