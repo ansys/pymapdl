@@ -61,7 +61,7 @@ required libraries:
 
 .. code:: bash
    
-   yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
+   sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
 If using Ubuntu, follow the instructions in `Running MAPDL: Ubuntu <https://mapdldocs.pyansys.com/getting_started/running_mapdl.html#ubuntu/>`_ .
@@ -88,7 +88,7 @@ To install ANSYS products in WSL Linux:
 
    .. code:: bash
    
-       ./INSTALL -silent -install_dir /usr/ansys_inc/ -mechapdl
+       sudo ./INSTALL -silent -install_dir /usr/ansys_inc/ -mechapdl
 
    where: 
 
@@ -111,7 +111,7 @@ create a symbolic link with:
 
 .. code:: bash
 
-    ln -s /usr/ansys_inc /ansys_inc
+    sudo ln -s /usr/ansys_inc /ansys_inc
 
 By default, PyMAPDL expects the MAPDL executable to be in
 ``/usr/ansys_inc``. Whether you install it there or not, we recommend that you
