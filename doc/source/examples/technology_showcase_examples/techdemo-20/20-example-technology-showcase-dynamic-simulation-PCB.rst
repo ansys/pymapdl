@@ -2477,17 +2477,6 @@ Post-process PSD analysis using Matplotlib
    :class: sphx-glr-single-img
 
 
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(31.226314019097217, 0.5, 'Response power spectral density')
-
-
-
 .. GENERATED FROM PYTHON SOURCE LINES 300-301
 
 Exit MAPDL
