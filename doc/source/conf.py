@@ -8,6 +8,7 @@ from pyansys_sphinx_theme import pyansys_logo_black
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
 # Manage errors
@@ -26,6 +27,7 @@ if not os.path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
+pymapdl.BUILDING_GALLERY = True
 
 # suppress annoying matplotlib bug
 warnings.filterwarnings(

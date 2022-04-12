@@ -1092,11 +1092,26 @@ def launch_mapdl(
 
     # connect to an existing instance if enabled
     if start_instance is None:
-        start_instance = os.environ.get("PYMAPDL_START_INSTANCE", True)
-        start_instance = check_valid_start_instance(start_instance)
+        start_instance = check_valid_start_instance(
+            os.environ.get("PYMAPDL_START_INSTANCE", True)
+        )
 
-    if not start_instance:
-        mapdl = MapdlGrpc(
+        # special handling when building the gallery outside of CI. This
+        # creates an instance of mapdl the first time if PYMAPDL start instance
+        # is False.
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            # launch an instance of pymapdl if it does not already exist and
+            # we're allowed to start instances
+            if os.environ.get("PYMAPDL_START_INSTANCE", True):
+                return launch_mapdl(
+                    start_instance=True,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+
+    if not start_instance or not pymapdl.BUILDING_GALLERY:
+        return MapdlGrpc(
             ip=ip,
             port=port,
             cleanup_on_exit=False,
