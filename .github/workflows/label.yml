@@ -10,7 +10,7 @@ jobs:
     - name: Label based on changed files
       uses: actions/labeler@v3
       with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
+        repo-token: "${{ secrets.LABELER_TOKEN }}"
         # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
         sync-labels: ''
 
