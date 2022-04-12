@@ -157,7 +157,6 @@ def test_bc_plot_options(
         "meCHANICAL",
         "ux",
         "UX",
-        "error",
         ["UX", "UY"],
         pytest.param("error", marks=pytest.mark.xfail),
         pytest.param(["UX", "error"], marks=pytest.mark.xfail),
