@@ -1,0 +1,14 @@
+documentation:
+- doc/**/*
+- examples/**/*
+maintenance:
+- .github/**/*
+- codecov.yml
+- .flake8
+- .coveragerc
+- ignore_words.txt
+- pyproject.toml
+dependencies:
+- requirements*
+docker:
+- docker/**/*
