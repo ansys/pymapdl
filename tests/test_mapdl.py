@@ -132,14 +132,6 @@ def warns_in_cdread_error_log(mapdl):
         return any(warns)
 
 
-@pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
-
-
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl._name
