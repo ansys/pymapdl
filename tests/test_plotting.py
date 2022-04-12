@@ -1,12 +1,30 @@
-"""Unit tests regarding plotting"""
+"""Unit tests regarding plotting."""
 import os
 
 import pytest
-from pyvista.plotting import system_supports_plotting
+from pyvista.plotting import Plotter, system_supports_plotting
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
+
+
+@pytest.fixture
+def bc_example(mapdl, make_block):
+
+    mapdl.prep7()
+
+    mapdl.nsel("s", "node", "", 1)
+    mapdl.f("all", "FX", 100)
+    mapdl.f("all", "FY", 100)
+    mapdl.f("all", "FZ", 100)
+
+    mapdl.nsel("s", "node", "", 2)
+    mapdl.d("all", "UX", 0)
+    mapdl.d("all", "UY", 0)
+    mapdl.d("all", "UZ", 0)
+
+    mapdl.nsel("a", "node", "", 1)
 
 
 @skip_no_xserver
@@ -108,3 +126,34 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
         savefig=filename,
     )
     assert os.path.isfile(filename)
+
+
+@skip_no_xserver
+@pytest.mark.parametrize("return_plotter", [True, False])
+@pytest.mark.parametrize("plot_bc_legend", [True, False])
+@pytest.mark.parametrize("plot_labels", [True, False])
+def test_bc_plot_options(
+    mapdl, bc_example, return_plotter, plot_bc_legend, plot_labels
+):
+    p = mapdl.nplot(
+        return_plotter=return_plotter,
+        plot_bc=True,
+        plot_bc_legend=plot_bc_legend,
+        plot_labels=plot_labels,
+    )
+
+    if return_plotter:
+        assert isinstance(p, Plotter)
+    else:
+        assert p is None
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "bc_labels", ["Mechanical", "mechanical", "meCHANICAL", "ux", "UX", ["UX", "UY"]]
+)
+def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
+    p = mapdl.nplot(
+        return_plotter=True, plot_bc=True, plot_labels=True, bc_labels=bc_labels
+    )
+    assert isinstance(p, Plotter)
