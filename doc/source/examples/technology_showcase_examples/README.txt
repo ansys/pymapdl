@@ -1,3 +1,6 @@
+.. _ref_technology_showcase_examples:
+
+
 Technology Showcase Manual Examples
 ====================================
 This section demonstrates the broad simulation capabilities of Ansys Mechanical
