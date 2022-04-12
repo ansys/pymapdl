@@ -980,7 +980,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             labels = []
             if nnum:
