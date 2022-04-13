@@ -422,7 +422,7 @@ def general_plotter(
     mapdl=None,
     plot_bc=False,
     plot_bc_legend=None,
-    plot_labels=None,
+    plot_bc_labels=None,
     bc_labels=None,
     bc_target=None,
 ):
@@ -483,9 +483,10 @@ def general_plotter(
         Shows the edges of a mesh.  Does not apply to a wireframe
         representation.
 
-    edge_color : string or 3 item list, optional, defaults to black
+    edge_color : string or 3 item list, optional,
         The solid color to give the edges when ``show_edges=True``.
         Either a string, RGB list, or hex color string.
+        Defaults to black.
 
     point_size : float, optional
         Point size of any nodes in the dataset plotted. Also applicable
@@ -518,10 +519,10 @@ def general_plotter(
        this. If ``colorcet`` or ``cmocean`` are installed, their
        colormaps can be specified by name.
 
-        You can also specify a list of colors to override an
-        existing colormap with a custom one.  For example, to
-        create a three color colormap you might specify
-        ``['green', 'red', 'blue']``
+       You can also specify a list of colors to override an
+       existing colormap with a custom one.  For example, to
+       create a three color colormap you might specify
+       ``['green', 'red', 'blue']``
 
     render_points_as_spheres : bool, optional
         Render points as spheres.
@@ -544,11 +545,78 @@ def general_plotter(
     return_cpos : bool, optional
         Returns the camera position as an array. Default ``False``.
 
+    mapdl : Mapdl instance, optional
+        If you want to use `plot_bc` keyword, the MAPDL instance
+        needs to be passed as argument. Defaults to ``None``
+
+    plot_bc : bool, optional
+        Activate the plotting of the boundary conditions.
+        Defaults to ``False``.
+
+        .. warning:: This is in alpha state.
+
+    plot_bc_legend : bool, optional
+        Shows the boundary conditions legend.
+        Defaults to ``False``
+
+    plot_bc_labels : bool, optional
+        Shows the boundary conditions label per node.
+        Defaults to ``False``.
+
+    bc_labels : List[str], Tuple(str), optional
+        List or tuple of strings with the boundary conditions
+        to plot, i.e. ["UX", "UZ"].
+        You can obtain the allowed boundary conditions by
+        evaluating ``ansys.mapdl.core.plotting.BCS``.
+        You can use also the following shortcuts:
+
+        * **'mechanical'**
+          To plot the following mechanical boundary conditions:
+          'UX', 'UY', 'UZ', 'FX', 'FY', and 'FZ'.
+          Rotational or momentum boundary conditions are not
+          allowed.
+
+        * **'thermal'**
+          To plot the following boundary conditions: 'TEMP' and
+          'HEAT'.
+
+        * **'electrical'**
+          To plot the following electrical boundary conditions:
+          'VOLT', 'CHRGS', and 'AMPS'.
+
+        Defaults to all the allowed boundary conditions present
+        in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+        and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+    bc_target : List[str], Tuple(str), optional
+        Specify the boundary conditions target
+        to plot, i.e. "Nodes", "Elements".
+        You can obtain the allowed boundary conditions target by
+        evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+        Defaults to only ``Nodes``.
+
     Returns
     -------
     cpos or pyvista.Plotter
         Camera position or instance of ``pyvista.Plotter`` depending
         on ``return_plotter``.
+
+    Notes
+    -----
+    Plotting boundary conditions is still under-development, so feel free to share feedback
+    or suggestion in `PyMAPDL <https://github.com/pyansys/pymapdl>`_.
+    At the moment only nodal boundary conditions can be shown (``bc_target='Nodes'``), and only
+    the following types of boundary conditions:
+
+    +------------+--------------------------------------+
+    | Field      | Boundary conditions                  |
+    +============+======================================+
+    | MECHANICAL | ["UX", "UY", "UZ", "FX", "FY", "FZ"] |
+    +------------+--------------------------------------+
+    | THERMAL    | ["TEMP", "HEAT"]                     |
+    +------------+--------------------------------------+
+    | ELECTRICAL | ["VOLT", "CHRGS", "AMPS"]            |
+    +------------+--------------------------------------+
 
     Examples
     --------
@@ -559,6 +627,10 @@ def general_plotter(
     Enable smooth_shading on an element plot.
 
     >>> cpos = mapdl.eplot(smooth_shading=True)
+
+    Plot boundary conditions "UX" and "UZ" on the nodes:
+
+    >>> mapdl.nplot(plot_bc=True, bc_labels=["UX", "UZ"], plot_bc_labels=True)
 
     Return the plotting instance, modify it, and display the plot.
 
@@ -629,7 +701,7 @@ def general_plotter(
             pl,
             mapdl=mapdl,
             plot_bc_legend=plot_bc_legend,
-            plot_labels=plot_labels,
+            plot_bc_labels=plot_bc_labels,
             bc_labels=bc_labels,
             bc_target=bc_target,
         )
@@ -670,7 +742,7 @@ def bc_plotter(
     mapdl=None,
     bc_labels=None,
     bc_target=None,
-    plot_labels=False,
+    plot_bc_labels=False,
     plot_bc_legend=None,
 ):
 
@@ -703,7 +775,7 @@ def bc_plotter(
             mapdl,
             pl,
             bc_labels,
-            plot_labels=plot_labels,
+            plot_bc_labels=plot_bc_labels,
             min_dist=min_dist,
             plot_bc_legend=plot_bc_legend,
         )
@@ -712,7 +784,7 @@ def bc_plotter(
 
 
 def bc_nodes_plotter(
-    mapdl, pl, bc_labels, plot_labels=False, min_dist=1, plot_bc_legend=None
+    mapdl, pl, bc_labels, plot_bc_labels=False, min_dist=1, plot_bc_legend=None
 ):
     """Plot nodes BC given a list of labels."""
     nodes_xyz = mapdl.mesh.nodes
@@ -771,7 +843,7 @@ def bc_nodes_plotter(
             label=name_,
         )
 
-        if plot_labels:
+        if plot_bc_labels:
             if bc_point_labels is None:
                 bc_point_labels = {each: "" for each in nodes_num}
 
@@ -785,7 +857,7 @@ def bc_nodes_plotter(
                         id_
                     ] = f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
 
-    if plot_labels:
+    if plot_bc_labels:
         pcloud = pv.PolyData(nodes_xyz)
         pcloud["labels"] = list(bc_point_labels.values())
         pl.add_point_labels(pcloud.points, pcloud["labels"], shape_opacity=0.25)
