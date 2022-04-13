@@ -1,4 +1,5 @@
 """Small or misc tests that don't fit in other test modules"""
+import numpy as np
 import pytest
 from pyvista.plotting import system_supports_plotting
 
@@ -8,6 +9,7 @@ from ansys.mapdl.core.misc import (
     check_valid_port,
     check_valid_start_instance,
     last_created,
+    run_as_prep7,
 )
 
 
@@ -76,3 +78,19 @@ def test_creation_time(tmpdir):
             fid.write("")
 
     assert last_created(files_) is not None
+
+
+def test_run_as_prep7(mapdl, cleared):
+    mapdl.post1()
+    assert "POST1" in mapdl.parameters.routine
+
+    @run_as_prep7
+    def fun(
+        mapdl,
+    ):  # This function is for mapdl methods, hence we have to pass the MAPDL instance somehow.
+        mapdl.k("", 1, 1, 1)
+
+    fun(mapdl)
+    assert "POST1" in mapdl.parameters.routine
+    last_keypoint = np.array(mapdl.klist().splitlines()[-1].split(), dtype=float)[0:4]
+    assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
