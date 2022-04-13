@@ -9,6 +9,7 @@ from ansys.mapdl.core.misc import (
     check_valid_port,
     check_valid_start_instance,
     last_created,
+    no_return,
     run_as_prep7,
 )
 
@@ -92,5 +93,19 @@ def test_run_as_prep7(mapdl, cleared):
 
     fun(mapdl)
     assert "POST1" in mapdl.parameters.routine
+    last_keypoint = np.array(mapdl.klist().splitlines()[-1].split(), dtype=float)[0:4]
+    assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
+
+
+def test_no_return(mapdl, cleared):
+    mapdl.prep7()
+
+    @no_return
+    def fun(
+        mapdl,
+    ):  # This function is for mapdl methods, hence we have to pass the MAPDL instance somehow.
+        mapdl.k("", 1, 1, 1)
+
+    assert fun(mapdl) is None
     last_keypoint = np.array(mapdl.klist().splitlines()[-1].split(), dtype=float)[0:4]
     assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
