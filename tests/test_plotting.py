@@ -131,15 +131,15 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
 @skip_no_xserver
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
-@pytest.mark.parametrize("plot_labels", [True, False])
+@pytest.mark.parametrize("plot_bc_labels", [True, False])
 def test_bc_plot_options(
-    mapdl, bc_example, return_plotter, plot_bc_legend, plot_labels
+    mapdl, bc_example, return_plotter, plot_bc_legend, plot_bc_labels
 ):
     p = mapdl.nplot(
         return_plotter=return_plotter,
         plot_bc=True,
         plot_bc_legend=plot_bc_legend,
-        plot_labels=plot_labels,
+        plot_bc_labels=plot_bc_labels,
     )
 
     if return_plotter:
@@ -165,7 +165,7 @@ def test_bc_plot_options(
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_labels=True, bc_labels=bc_labels
+        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_labels=bc_labels
     )
     assert isinstance(p, Plotter)
 
@@ -184,6 +184,6 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_labels=True, bc_target=bc_target
+        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_target=bc_target
     )
     assert isinstance(p, Plotter)
