@@ -1127,8 +1127,9 @@ def launch_mapdl(
                 )
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
-            else:
-                # otherwise, connect to the existing gallery instance
+
+                # otherwise, connect to the existing gallery instance if available
+            elif GALLERY_INSTANCE[0] is None:
                 mapdl = MapdlGrpc(
                     ip=GALLERY_INSTANCE[0]["ip"],
                     port=GALLERY_INSTANCE[0]["port"],
@@ -1139,6 +1140,18 @@ def launch_mapdl(
                 if clear_on_connect:
                     mapdl.clear()
                 return mapdl
+
+                # finally, if running on CI/CD, connect to the default instance
+            else:
+                return MapdlGrpc(
+                    ip=ip,
+                    port=port,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+            if clear_on_connect:
+                mapdl.clear()
 
     if not start_instance:
         return MapdlGrpc(
