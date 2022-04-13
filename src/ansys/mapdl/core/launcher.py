@@ -1143,7 +1143,7 @@ def launch_mapdl(
 
                 # finally, if running on CI/CD, connect to the default instance
             else:
-                return MapdlGrpc(
+                mapdl = MapdlGrpc(
                     ip=ip,
                     port=port,
                     cleanup_on_exit=False,
@@ -1152,6 +1152,7 @@ def launch_mapdl(
                 )
             if clear_on_connect:
                 mapdl.clear()
+            return mapdl
 
     if not start_instance:
         return MapdlGrpc(
