@@ -425,6 +425,8 @@ def general_plotter(
     plot_bc_labels=None,
     bc_labels=None,
     bc_target=None,
+    bc_glyph_size=None,
+    bc_labels_font_size=16,
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -595,11 +597,20 @@ def general_plotter(
         evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
         Defaults to only ``Nodes``.
 
+    bc_glyph_size : float, optional
+        Specify the size of the glyph used for the boundary
+        conditions plotting.
+        By default is ratio of the bounding box dimensions.
+
+    bc_labels_font_size : float, optional
+        Size of the text on the boundary conditions labels.
+        By default it is 16.
+
     Returns
     -------
-    cpos or pyvista.Plotter
-        Camera position or instance of ``pyvista.Plotter`` depending
-        on ``return_plotter``.
+    cpos or pyvista.Plotter or None
+        Camera position or instance of ``pyvista.Plotter`` or ``None`` depending
+        on ``return_plotter`` and ``return_cpos``.
 
     Notes
     -----
@@ -704,6 +715,8 @@ def general_plotter(
             plot_bc_labels=plot_bc_labels,
             bc_labels=bc_labels,
             bc_target=bc_target,
+            bc_glyph_size=bc_glyph_size,
+            bc_labels_font_size=bc_labels_font_size,
         )
 
     if title:  # Added here to avoid labels overlapping title
@@ -744,6 +757,8 @@ def bc_plotter(
     bc_target=None,
     plot_bc_labels=False,
     plot_bc_legend=None,
+    bc_glyph_size=None,
+    bc_labels_font_size=16,
 ):
 
     if bc_labels:
@@ -763,12 +778,17 @@ def bc_plotter(
     #
     # Later can find a way to plot them and keep their size constant independent of the zoom.
 
-    min_dist = get_bounding_box(mapdl.mesh.nodes)
-    min_dist = min_dist[min_dist != 0]
-    if min_dist.size != 0:
-        min_dist = min_dist.mean() * 0.75 / 10
-    else:  # Case were there is only one node
-        min_dist = 1
+    if not isinstance(bc_glyph_size, (int, float)):
+        raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
+
+    if bc_glyph_size is None:
+        bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
+        bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
+
+        if bc_glyph_size.size != 0:
+            bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
+        else:  # Case were there is only one node
+            bc_glyph_size = 1
 
     if "NODES" in bc_target:
         pl = bc_nodes_plotter(
@@ -776,15 +796,26 @@ def bc_plotter(
             pl,
             bc_labels,
             plot_bc_labels=plot_bc_labels,
-            min_dist=min_dist,
+            bc_glyph_size=bc_glyph_size,
             plot_bc_legend=plot_bc_legend,
+            bc_labels_font_size=bc_labels_font_size,
         )
+
+    # Add next things
+    if "ELEM" in bc_target:
+        pass
 
     return pl
 
 
 def bc_nodes_plotter(
-    mapdl, pl, bc_labels, plot_bc_labels=False, min_dist=1, plot_bc_legend=None
+    mapdl,
+    pl,
+    bc_labels,
+    plot_bc_labels=False,
+    bc_glyph_size=1,
+    plot_bc_legend=None,
+    bc_labels_font_size=16,
 ):
     """Plot nodes BC given a list of labels."""
     nodes_xyz = mapdl.mesh.nodes
@@ -820,7 +851,7 @@ def bc_nodes_plotter(
             )  # In case all the values are the same
 
         pcloud = pv.PolyData(bc_nodes)
-        pcloud["scale"] = bc_scale * min_dist
+        pcloud["scale"] = bc_scale * bc_glyph_size
 
         # Specify tolerance in terms of fraction of bounding box length.
         # Float value is between 0 and 1. Default is None.
@@ -860,7 +891,12 @@ def bc_nodes_plotter(
     if plot_bc_labels:
         pcloud = pv.PolyData(nodes_xyz)
         pcloud["labels"] = list(bc_point_labels.values())
-        pl.add_point_labels(pcloud.points, pcloud["labels"], shape_opacity=0.25)
+        pl.add_point_labels(
+            pcloud.points,
+            pcloud["labels"],
+            shape_opacity=0.25,
+            font_size=bc_labels_font_size,
+        )
 
     if plot_bc_legend:
         pl.add_legend(bcolor=None)
