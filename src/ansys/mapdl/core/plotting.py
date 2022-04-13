@@ -691,8 +691,6 @@ def bc_plotter(
     #
     # Later can find a way to plot them and keep their size constant independent of the zoom.
 
-    # min_dist = approximate_minimum_distance_between_points(mapdl.mesh.nodes)
-    # min_dist = 0.00001
     min_dist = get_bounding_box(mapdl.mesh.nodes)
     min_dist = min_dist[min_dist != 0]
     if min_dist.size != 0:

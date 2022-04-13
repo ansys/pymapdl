@@ -329,27 +329,6 @@ def no_return(func):
     return wrapper
 
 
-def approximate_minimum_distance_between_points(nodes_xyz):
-    """
-    Calculate the minimum distance between points in a given array.
-
-    It sort the nodes per each columns and check the distance of the first third of each column.
-    """
-    min_dist = np.inf
-    for each_column in range(3):
-        nodes_xyz = nodes_xyz[np.argsort(nodes_xyz[:, each_column])]
-        for ind0, each0 in enumerate(nodes_xyz):
-            for ind1, each1 in enumerate(nodes_xyz):
-                if (
-                    ind0 < ind1
-                    and ind0 < len(nodes_xyz) // 3
-                    and ind1 < len(nodes_xyz) // 3
-                ):
-                    dist = sum((each0 - each1) ** 2) ** 0.5
-                    min_dist = np.min((dist, min_dist))
-    return min_dist
-
-
 def get_bounding_box(nodes_xyz):
     min_ = np.min(nodes_xyz, axis=0)
     max_ = np.max(nodes_xyz, axis=0)
