@@ -773,6 +773,12 @@ class MapdlGrpc(_MapdlCore):
             if not get_start_instance():
                 self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
                 return
+            # or building the gallery
+            from ansys.mapdl import core as pymapdl
+
+            if pymapdl.BUILDING_GALLERY:
+                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                return
 
         if self._exited:
             return

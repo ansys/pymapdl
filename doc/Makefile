@@ -22,7 +22,7 @@ help:
 # customized clean due to examples gallery
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf source/examples/examples
+	rm -rf source/examples/gallery_examples
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
 # customized clean due to examples gallery

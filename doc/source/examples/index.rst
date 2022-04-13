@@ -8,9 +8,12 @@ Examples
 Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 
-.. === EXAMPLES ===
+.. === EXAMPLES Gallery ===
 
-.. include:: examples/index.rst
+..
+   We have to include this rather than include it in a tree.
+
+.. include:: gallery_examples/index.rst
    :start-line: 2
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
