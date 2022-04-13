@@ -778,9 +778,6 @@ def bc_plotter(
     #
     # Later can find a way to plot them and keep their size constant independent of the zoom.
 
-    if not isinstance(bc_glyph_size, (int, float)):
-        raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
-
     if bc_glyph_size is None:
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
@@ -789,6 +786,9 @@ def bc_plotter(
             bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
         else:  # Case were there is only one node
             bc_glyph_size = 1
+
+    if not isinstance(bc_glyph_size, (int, float)):
+        raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
 
     if "NODES" in bc_target:
         pl = bc_nodes_plotter(
