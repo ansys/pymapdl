@@ -1129,7 +1129,7 @@ def launch_mapdl(
                 return mapdl
 
                 # otherwise, connect to the existing gallery instance if available
-            elif GALLERY_INSTANCE[0] is None:
+            elif GALLERY_INSTANCE[0] is not None:
                 mapdl = MapdlGrpc(
                     ip=GALLERY_INSTANCE[0]["ip"],
                     port=GALLERY_INSTANCE[0]["port"],
