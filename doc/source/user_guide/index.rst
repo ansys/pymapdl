@@ -27,7 +27,6 @@ PyMAPDL library.
    pool
    xpl
    upf
-   extended_examples/index
 
 
 PyMAPDL Basic Overview
@@ -97,7 +96,7 @@ you had instead outputted it to a script file.
 The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
 than just sending text to MAPDL and includes higher level wrapping
 allowing for better scripting and interaction with MAPDL.  See the
-:ref:`ref_example_gallery` for an overview of the various advanced
+:ref:`ref_examples` for an overview of the various advanced
 methods to visualize, script, and interact with MAPDL.
 
 

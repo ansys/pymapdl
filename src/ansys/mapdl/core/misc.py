@@ -407,7 +407,14 @@ def check_valid_start_instance(start_instance):
     Parameters
     ----------
     start_instance : str
-        Value obtained from the correspondent environment variable.
+        Value obtained from the corresponding environment variable.
+
+    Returns
+    -------
+    bool
+        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
+        ``False`` if otherwise.
+
     """
     if not isinstance(start_instance, (str, bool)):
         raise ValueError("The value 'start_instance' should be an string or a boolean.")
@@ -415,10 +422,9 @@ def check_valid_start_instance(start_instance):
     if isinstance(start_instance, bool):
         return start_instance
 
-    else:
-        if start_instance.lower() not in ["true", "false"]:
-            raise ValueError(
-                f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
-            )
-        else:
-            return start_instance.lower() == True
+    if start_instance.lower() not in ["true", "false"]:
+        raise ValueError(
+            f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
+        )
+
+    return start_instance.lower() == "true"

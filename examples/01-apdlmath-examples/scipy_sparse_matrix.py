@@ -1,5 +1,5 @@
 """
-Transfer APDLMath Sparse Matrices to and from SciPy Sparse Matrices
+APDLMath Sparse Matrices and SciPy Sparse Matrices
 -------------------------------------------------------------------
 
 This tutorial will show how to get APDLMath sparse matrices (typically
