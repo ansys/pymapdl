@@ -175,18 +175,23 @@ For all general plotting options, see
 Plotting Boundary Conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. warning:: This feature is still on beta so its functionalities and stability are limited.
-    Please check the documentation regarding the allowed boundary conditions and targets.
+.. warning::
+   This feature is still on beta so its functionalities and stability are
+   limited.  Please check the documentation regarding the allowed boundary
+   conditions and targets.
 
-It is possible to plot the boundary conditions applied on the model by specifying ``plot_bc``
-in the plotting functions such as :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`.
+It is possible to plot the boundary conditions applied on the model by
+specifying ``plot_bc=True`` in the plotting functions such as
+:func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`.
 
 .. code:: python
 
-    >>> mapdl.nplot(plot_bc=True,
-                    plot_labels=True,
-                    savefig=f'bc_plot.png',
-                    bc_labels="mechanical")
+    >>> mapdl.nplot(
+    ...     plot_bc=True,
+    ...     plot_labels=True,
+    ...     savefig=f'bc_plot.png',
+    ...     bc_labels="mechanical"
+    ... )
 
 
 .. figure:: ../images/bc_plot.png
@@ -196,8 +201,9 @@ in the plotting functions such as :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.n
     Forces (arrows) and displacements (cones)
 
 .. note::
-    Since the boundary conditions can only target nodes at the moment, you can only use
-    ``plot_bc`` as an argument in the function :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`.
+    Since the boundary conditions can only target nodes at the moment, you can
+    only use ``plot_bc`` as an argument in the function :func:`Mapdl.nplot()
+    <ansys.mapdl.core.Mapdl.nplot>`.
 
 
 
