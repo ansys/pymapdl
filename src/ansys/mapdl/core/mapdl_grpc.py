@@ -1048,7 +1048,6 @@ class MapdlGrpc(_MapdlCore):
                 targets = rth_files
             else:
                 remote_files_str = "\n".join("\t%s" % item for item in remote_files)
-                print("\t".join("\n%s" % item for item in ["a", "b", "c"]))
                 raise FileNotFoundError(
                     "Unable to locate any result file from the "
                     "following remote result files:\n\n" + remote_files_str
