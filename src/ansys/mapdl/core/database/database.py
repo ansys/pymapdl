@@ -7,7 +7,7 @@ import weakref
 
 try:
     from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
-except ImportError:
+except ImportError:  # Pragma: No cover
     raise ImportError(
         "Please upgrade the 'ansys.api.mapdl' package to at least v0.5.1."
         "You can use 'pip install ansys-api-mapdl --upgrade"
