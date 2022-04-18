@@ -20,7 +20,7 @@ Analysis Type(s):
 Element Type(s):
  - 3-D Spar (or Truss) Elements (LINK180)
 
-.. image:: ../../_static/vm3_setup.png
+.. image:: ../../../_static/vm3_setup.png
    :width: 400
    :alt: VM3 Problem Sketch
 

@@ -1,5 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
+import atexit
 from glob import glob
 import os
 import platform
@@ -36,7 +37,7 @@ if not os.path.isdir(SETTINGS_DIR):
     except:
         warnings.warn(
             "Unable to create settings directory.\n"
-            + "Will be unable to cache MAPDL executable location"
+            "Will be unable to cache MAPDL executable location"
         )
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
@@ -55,9 +56,24 @@ launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
 Be aware of possible errors or unexpected behavior with this configuration.
 """
 
+GALLERY_INSTANCE = [None]
+
+
+def _cleanup_gallery_instance():  # pragma: no cover
+    """This cleans up any left over instances of MAPDL from building the gallery."""
+    if GALLERY_INSTANCE[0] is not None:
+        mapdl = MapdlGrpc(
+            ip=GALLERY_INSTANCE[0]["ip"],
+            port=GALLERY_INSTANCE[0]["port"],
+        )
+        mapdl.exit(force=True)
+
+
+atexit.register(_cleanup_gallery_instance)
+
 
 def _is_ubuntu():
-    """Determine if running as Ubuntu
+    """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
@@ -1092,11 +1108,54 @@ def launch_mapdl(
 
     # connect to an existing instance if enabled
     if start_instance is None:
-        start_instance = os.environ.get("PYMAPDL_START_INSTANCE", True)
-        start_instance = check_valid_start_instance(start_instance)
+        start_instance = check_valid_start_instance(
+            os.environ.get("PYMAPDL_START_INSTANCE", True)
+        )
+
+        # special handling when building the gallery outside of CI. This
+        # creates an instance of mapdl the first time if PYMAPDL start instance
+        # is False.
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            # launch an instance of pymapdl if it does not already exist and
+            # we're allowed to start instances
+            if start_instance and GALLERY_INSTANCE[0] is None:
+                mapdl = launch_mapdl(
+                    start_instance=True,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
+                return mapdl
+
+                # otherwise, connect to the existing gallery instance if available
+            elif GALLERY_INSTANCE[0] is not None:
+                mapdl = MapdlGrpc(
+                    ip=GALLERY_INSTANCE[0]["ip"],
+                    port=GALLERY_INSTANCE[0]["port"],
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                if clear_on_connect:
+                    mapdl.clear()
+                return mapdl
+
+                # finally, if running on CI/CD, connect to the default instance
+            else:
+                mapdl = MapdlGrpc(
+                    ip=ip,
+                    port=port,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+            if clear_on_connect:
+                mapdl.clear()
+            return mapdl
 
     if not start_instance:
-        mapdl = MapdlGrpc(
+        return MapdlGrpc(
             ip=ip,
             port=port,
             cleanup_on_exit=False,

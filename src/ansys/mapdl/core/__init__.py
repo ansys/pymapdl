@@ -54,3 +54,6 @@ except:  # pragma: no cover
 # override default launcher when on pyansys.com
 if "ANSJUPHUB_VER" in os.environ:
     from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+
+
+BUILDING_GALLERY = False
