@@ -1,17 +1,18 @@
 """Test PyMAPDL license.py module."""
 
+import os
 import time
 import types
-import os
+
 import pytest
 
-from ansys.mapdl.core import licensing, errors, launch_mapdl
+from ansys.mapdl.core import errors, launch_mapdl, licensing
+from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import threaded
-from ansys.mapdl.core.launcher import get_start_instance, check_valid_ansys
 
 skip_launch_mapdl = pytest.mark.skipif(
     not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally"
+    reason="Must be able to launch MAPDL locally",
 )
 
 
@@ -32,16 +33,16 @@ FAKE_CHECKOUT_SUCCESS = """
 test_net_3 = "203.0.113.0"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
-SAMPLE_LOG_PATH = os.path.join(PATH, 'test_files', 'sample_lic_log.log')
+SAMPLE_LOG_PATH = os.path.join(PATH, "test_files", "sample_lic_log.log")
 
 
 @threaded
 def write_log(path):
     """Write in a background process to a file"""
     time.sleep(0.01)
-    with open(path, 'w') as fid:
+    with open(path, "w") as fid:
         for line in FAKE_CHECKOUT_SUCCESS.splitlines():
-            fid.write(line + '\n')
+            fid.write(line + "\n")
             time.sleep(0.01)
 
 
@@ -50,29 +51,30 @@ try:
 except:
     LIC_INSTALLED = None
 
-skip_no_lic_bin = pytest.mark.skipif(not LIC_INSTALLED,
-                                     reason="Requires local license utilities binaries")
+skip_no_lic_bin = pytest.mark.skipif(
+    not LIC_INSTALLED, reason="Requires local license utilities binaries"
+)
 
 
 @skip_no_lic_bin
 def test_get_licdebug_path():
     ansyslic_dir = licensing.get_ansyslic_dir()
-    if os.name == 'nt':
-        assert 'Shared Files' in ansyslic_dir and 'Licensing' in ansyslic_dir
+    if os.name == "nt":
+        assert "Shared Files" in ansyslic_dir and "Licensing" in ansyslic_dir
     else:
         assert os.path.isdir(ansyslic_dir)
-        assert 'shared_files' in ansyslic_dir and 'licensing' in ansyslic_dir
+        assert "shared_files" in ansyslic_dir and "licensing" in ansyslic_dir
 
 
 @skip_no_lic_bin
 def test_checkout_license():
-    output = licensing.checkout_license('meba')
+    output = licensing.checkout_license("meba")
     assert "ANSYS LICENSE MANAGER ERROR" not in output
 
 
 @skip_no_lic_bin
 def test_checkout_license_fail():
-    output = licensing.checkout_license('meba', test_net_3, 1055)
+    output = licensing.checkout_license("meba", test_net_3, 1055)
     assert "CHECKOUT FAILED" in output
 
 
@@ -89,12 +91,12 @@ def test_check_mech_license_available_fail():
 
 def test_get_licdebug_tail_timeout():
     with pytest.raises(TimeoutError):
-        msg = licensing.get_licdebug_tail('does_not_exist', start_timeout=0.05)
+        msg = licensing.get_licdebug_tail("does_not_exist", start_timeout=0.05)
         next(msg)
 
 
 def test_get_licdebug_tail(tmpdir):
-    tmp_file = tmpdir.join('tmplog.log')
+    tmp_file = tmpdir.join("tmplog.log")
     write_log(tmp_file)
 
     msg_iter = licensing.get_licdebug_tail(tmp_file, start_timeout=1)

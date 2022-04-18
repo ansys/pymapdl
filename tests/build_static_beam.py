@@ -3,8 +3,9 @@ Build static beam to grab boundary conditions
 """
 
 import os
-from pyansys import examples
+
 import pyansys
+from pyansys import examples
 
 os.environ["I_MPI_SHM_LMT"] = "shm"  # necessary on ubuntu
 mapdl = pyansys.launch_mapdl(override=True, additional_switches="-smp")

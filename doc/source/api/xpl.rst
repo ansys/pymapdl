@@ -6,6 +6,5 @@ Database Explorer
 
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
    xpl.ansXpl
