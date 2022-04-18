@@ -5,7 +5,14 @@ import time
 from warnings import warn
 import weakref
 
-from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
+try:
+    from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
+except ImportError:
+    raise ImportError(
+        "Please upgrade the 'ansys.api.mapdl' package to at least v0.5.1."
+        "You can use 'pip install ansys-api-mapdl --upgrade"
+    )
+
 import grpc
 
 from ..mapdl_grpc import MapdlGrpc
