@@ -244,8 +244,7 @@ def test_license_type_additional_switch():
         ),
     ],
 )
-def test_save_ansys_path(monkeypatch, exe_loc, input_):
-    monkeypatch.setattr("builtins.input", lambda _: input_)
+def test_save_ansys_path(exe_loc, input_):
     path_ = save_ansys_path(exe_loc)
 
     assert isinstance(path_, str)

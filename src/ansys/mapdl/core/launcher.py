@@ -746,7 +746,7 @@ def save_ansys_path(exe_loc=None):
     if exe_loc is None:
         exe_loc, _ = find_ansys()
 
-    if is_valid_executable_path(exe_loc):
+    if is_valid_executable_path(exe_loc):  # pragma: not cover
         if not is_common_executable_path(exe_loc):
             warn_uncommon_executable_path(exe_loc)
 
@@ -755,7 +755,7 @@ def save_ansys_path(exe_loc=None):
 
     if exe_loc is not None:
         if is_valid_executable_path(exe_loc):
-            return exe_loc
+            return exe_loc  # pragma: no cover
 
     # otherwise, query user for the location
     print("Cached ANSYS executable not found")
@@ -767,7 +767,7 @@ def save_ansys_path(exe_loc=None):
         ">>> save_ansys_path('/new/path/to/executable/')\n"
     )
     need_path = True
-    while need_path:
+    while need_path:  # pragma: no cover
         exe_loc = input("Enter the location of an ANSYS executable (ansysXXX):")
 
         if is_valid_executable_path(exe_loc):
