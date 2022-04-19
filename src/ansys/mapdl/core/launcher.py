@@ -791,11 +791,22 @@ def is_valid_executable_path(exe_loc):
 
 
 def is_common_executable_path(exe_loc):
+
+    path = os.path.normpath(exe_loc)
+    path = path.split(os.sep)
+    if re.search("v(\d\d\d)", exe_loc) and re.search("ansys(\d\d\d)", exe_loc):
+        equal_version = (
+            re.search("v(\d\d\d)", exe_loc)[0] == re.search("ansys(\d\d\d)", exe_loc)[0]
+        )
+    else:
+        equal_version = False
+
     return (
         is_valid_executable_path(exe_loc)
         and re.search("v\d\d\d", exe_loc)
-        and "ansys" in exe_loc
-        and "bin" in exe_loc
+        and "ansys" in path
+        and "bin" in path
+        and equal_version
     )
 
 
