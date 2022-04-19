@@ -2903,8 +2903,8 @@ class _MapdlCore(Commands):
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s]{0,31}$"
-        ""
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
                 f"The parameter name `{param_name}` is an invalid parameter name."

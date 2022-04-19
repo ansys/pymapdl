@@ -1,5 +1,6 @@
 """Test MAPDL interface"""
 import os
+import re
 import time
 
 from ansys.mapdl.reader import examples
@@ -1383,6 +1384,8 @@ def test_extra_argument_in_get(mapdl, make_block):
 )
 def test_parameters_name(mapdl, par_name):
     mapdl.run(f"{par_name} = 123")
+    if not re.search(r"[\(|\)]", par_name):
+        assert mapdl.parameters[par_name] == 123
 
 
 @pytest.mark.parametrize(
@@ -1495,6 +1498,9 @@ def test_parameters_name(mapdl, par_name):
 )
 def test_parameters_name_in_get(mapdl, par_name):
     mapdl.get(par=par_name, entity="node", item1="count")
+    if not re.search(r"[\(|\)]", par_name):
+        assert mapdl.parameters[par_name]
+        assert isinstance(mapdl.parameters[par_name], float)
 
 
 @pytest.mark.parametrize("value", [1e-6, 1e-5, 1e-3, None])
