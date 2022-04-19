@@ -9,7 +9,11 @@ from ansys.mapdl.core.launcher import (
     _validate_add_sw,
     _version_from_path,
     get_start_instance,
+    is_common_executable_path,
+    is_valid_executable_path,
     launch_mapdl,
+    save_ansys_path,
+    warn_uncommon_executable_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
 from ansys.mapdl.core.misc import get_ansys_bin
@@ -195,3 +199,77 @@ def test_license_type_additional_switch():
         # regardless the license specification, it should lunch.
         assert mapdl.is_alive
     mapdl.exit()
+
+
+@pytest.mark.parametrize(
+    "exe_loc, input_",
+    [
+        pytest.param(None, "", id="Normal execution. Return path"),
+        pytest.param(
+            "/not_valid/",
+            save_ansys_path(),
+            id="Checking wrong path, and later user input.",
+        ),
+    ],
+)
+def test_save_ansys_path(monkeypatch, exe_loc, input_):
+    monkeypatch.setattr("builtins.input", lambda _: input_)
+    path_ = save_ansys_path(exe_loc)
+
+    assert isinstance(path_, str)
+    assert os.path.exists(path_)
+
+
+@pytest.mark.parametrize(
+    "file,result",
+    [
+        ("ansys221", True),
+        ("ansy212", False),
+        ("ansys22", False),
+        ("ansys", False),
+        ("ger123", False),
+    ],
+)
+def test_is_valid_executable_path(tmpdir, file, result):
+    filename = str(tmpdir.mkdir("tmpdir").join(file))
+
+    with open(filename, "w") as fid:
+        fid.write("")
+
+    assert is_valid_executable_path(filename) == result
+
+
+@pytest.mark.parametrize(
+    "file_path,result",
+    [
+        pytest.param(
+            "random/v221/ansys/bin/ansys221", True, id="Normal successful case."
+        ),
+        pytest.param("random/random/ansys/bin/ans221", False, id="No vXXX directory"),
+        pytest.param("random/v221/random/bin/ans221", False, id="No ansys directory"),
+        pytest.param("random/v221/ansys/random/ans221", False, id="No bin directory"),
+        pytest.param(
+            "random/v221/ansys/bin/ansys22", False, id="version number incomplete"
+        ),
+        pytest.param("random/v221/ansys/bin/ansys222", False, id="Different version"),
+    ],
+)
+def test_is_common_executable_path(tmpdir, file_path, result):
+    path = os.path.normpath(file_path)
+    path = path.split(os.sep)
+
+    filename = str(
+        tmpdir.mkdir(path[0]).mkdir(path[1]).mkdir(path[2]).mkdir(path[3]).join(path[4])
+    )
+
+    with open(filename, "w") as fid:
+        fid.write("")
+
+    assert is_common_executable_path(filename) == result
+
+
+def test_warn_uncommon_executable_path():
+    with pytest.warns(
+        UserWarning, match="does not match the usual ansys executable path style"
+    ):
+        warn_uncommon_executable_path("")
