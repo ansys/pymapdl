@@ -103,7 +103,7 @@ def test_connect_via_channel(mapdl):
 def test_clear_nostart(mapdl):
     resp = mapdl._send_command("FINISH")
     resp = mapdl._send_command("/CLEAR, NOSTART")
-    assert "CLEAR ANSYS DATABASE AND RESTART" in resp
+    assert re.search("CLEAR (ANSYS|MAPDL) DATABASE AND RESTART", resp)
 
 
 # NOTE: This command cannot be run repeately, otherwise we end up with
