@@ -733,7 +733,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     -----
     The configuration file location (``config.txt``) can be found in
     ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
-    
+
     .. code::
 
         >>> import appdirs
@@ -743,11 +743,12 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
 
     You can change the default ``exe_loc`` either by modifying the mentioned
     ``config.txt`` file or by executing this function:
-    
+
     .. code::
 
        >>> from ansys.mapdl.core.launcher import save_ansys_path
        >>> save_ansys_path('/new/path/to/executable')
+
     """
     if exe_loc is None:
         exe_loc, _ = find_ansys()
