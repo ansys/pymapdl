@@ -2902,6 +2902,7 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        param_name = param_name.strip()
 
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
@@ -2914,7 +2915,7 @@ class _MapdlCore(Commands):
 
         # invalid parameter (using ARGXX or ARXX)
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d_\(\),\s]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in undescore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
