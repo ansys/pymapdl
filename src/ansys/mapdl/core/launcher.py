@@ -707,7 +707,7 @@ def change_default_ansys_path(exe_loc):
         raise FileNotFoundError("File %s is invalid or does not exist" % exe_loc)
 
 
-def save_ansys_path(exe_loc=None):
+def save_ansys_path(exe_loc=None):  # pragma: no cover
     """Find ANSYS path or query user.
 
     If no ``exe_loc`` argument is supplied, this function attempt
@@ -784,7 +784,7 @@ def save_ansys_path(exe_loc=None):
     return exe_loc
 
 
-def is_valid_executable_path(exe_loc):
+def is_valid_executable_path(exe_loc):  # pragma: no cover
     return (
         os.path.isfile(exe_loc)
         and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
@@ -792,8 +792,7 @@ def is_valid_executable_path(exe_loc):
     )
 
 
-def is_common_executable_path(exe_loc):
-
+def is_common_executable_path(exe_loc):  # pragma: no cover
     path = os.path.normpath(exe_loc)
     path = path.split(os.sep)
     if (
@@ -815,7 +814,7 @@ def is_common_executable_path(exe_loc):
     )
 
 
-def warn_uncommon_executable_path(exe_loc):
+def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
     warnings.warn(
         f"The supplied path ('{exe_loc}') does not match the usual ansys executable path style"
         "('directory/vXXX/ansys/bin/ansysXXX'). "
