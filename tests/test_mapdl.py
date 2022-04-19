@@ -1280,6 +1280,10 @@ def test_extra_argument_in_get(mapdl, make_block):
         "asd",
         "a12345",
         "a12345_",
+        "asdf(1,1)",
+        "asdf(1,1,1)",
+        "_asdf(1)",
+        "__asdf(1,1,1,1,1,1)_",
         pytest.param(
             "_a12345",
             marks=pytest.mark.xfail,
@@ -1359,6 +1363,21 @@ def test_extra_argument_in_get(mapdl, make_block):
             "a23456789012345678901234567890123",
             marks=pytest.mark.xfail,
             id="Name too long",
+        ),
+        pytest.param(
+            "aasdf234asdf5678901-2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign -",
+        ),
+        pytest.param(
+            "aasdf234asdf5678901+2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign +",
+        ),
+        pytest.param(
+            "aasdf234a?sdf5678901?2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign ?",
         ),
     ],
 )
@@ -1373,6 +1392,10 @@ def test_parameters_name(mapdl, par_name):
         "asd",
         "a12345",
         "a12345_",
+        "asdf(1,1)",
+        "asdf(1,1,1)",
+        "_asdf(1)",
+        "__asdf(1,1,1,1,1,1)_",
         pytest.param(
             "_a12345",
             marks=pytest.mark.xfail,
@@ -1452,6 +1475,21 @@ def test_parameters_name(mapdl, par_name):
             "a23456789012345678901234567890123",
             marks=pytest.mark.xfail,
             id="Name too long",
+        ),
+        pytest.param(
+            "aasdf234asdf5678901-2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign -",
+        ),
+        pytest.param(
+            "aasdf234asdf5678901+2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign +",
+        ),
+        pytest.param(
+            "aasdf234a?sdf5678901?2345",
+            marks=pytest.mark.xfail,
+            id="Not valid sign ?",
         ),
     ],
 )
