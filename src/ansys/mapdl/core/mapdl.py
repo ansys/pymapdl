@@ -2913,7 +2913,7 @@ class _MapdlCore(Commands):
                 "It cannot start with a number either."
             )
 
-        # invalid parameter (using ARGXX or ARXX)
+        # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
             r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
@@ -2924,6 +2924,7 @@ class _MapdlCore(Commands):
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
+        # invalid parameter (using ARGXX or ARXX)
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
         if re.search(
             match_reserved_arg_parameter_name, param_name
