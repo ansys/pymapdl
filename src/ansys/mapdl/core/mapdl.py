@@ -2903,7 +2903,8 @@ class _MapdlCore(Commands):
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s]{0,31}$"
+        ""
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
                 f"The parameter name `{param_name}` is an invalid parameter name."
@@ -2913,7 +2914,7 @@ class _MapdlCore(Commands):
 
         # invalid parameter (using ARGXX or ARXX)
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d_\(\),\s]$"
         )
         # If it also ends in undescore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
