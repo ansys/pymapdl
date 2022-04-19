@@ -785,8 +785,10 @@ def save_ansys_path(exe_loc=None):
 
 
 def is_valid_executable_path(exe_loc):
-    return os.path.isfile(exe_loc) and re.search(
-        "ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc))
+    return (
+        os.path.isfile(exe_loc)
+        and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
+        is not None
     )
 
 
@@ -794,9 +796,12 @@ def is_common_executable_path(exe_loc):
 
     path = os.path.normpath(exe_loc)
     path = path.split(os.sep)
-    if re.search("v(\d\d\d)", exe_loc) and re.search("ansys(\d\d\d)", exe_loc):
+    if (
+        re.search("v(\d\d\d)", exe_loc) is not None
+        and re.search("ansys(\d\d\d)", exe_loc) is not None
+    ):
         equal_version = (
-            re.search("v(\d\d\d)", exe_loc)[0] == re.search("ansys(\d\d\d)", exe_loc)[0]
+            re.search("v(\d\d\d)", exe_loc)[1] == re.search("ansys(\d\d\d)", exe_loc)[1]
         )
     else:
         equal_version = False
