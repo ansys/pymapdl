@@ -237,7 +237,6 @@ def test_license_type_additional_switch():
     "exe_loc",
     [
         pytest.param(None, id="Normal execution. Return path"),
-        pytest.param(save_ansys_path(), id="Valid path. Return path"),
     ],
 )
 def test_save_ansys_path(exe_loc):
