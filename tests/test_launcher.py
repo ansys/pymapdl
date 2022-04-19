@@ -234,17 +234,13 @@ def test_license_type_additional_switch():
 
 
 @pytest.mark.parametrize(
-    "exe_loc, input_",
+    "exe_loc",
     [
-        pytest.param(None, "", id="Normal execution. Return path"),
-        pytest.param(
-            "/not_valid/",
-            save_ansys_path(),
-            id="Checking wrong path, and later user input.",
-        ),
+        pytest.param(None, id="Normal execution. Return path"),
+        pytest.param(save_ansys_path(), id="Valid path. Return path"),
     ],
 )
-def test_save_ansys_path(exe_loc, input_):
+def test_save_ansys_path(exe_loc):
     path_ = save_ansys_path(exe_loc)
 
     assert isinstance(path_, str)
