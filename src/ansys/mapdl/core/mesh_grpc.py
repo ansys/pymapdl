@@ -398,7 +398,7 @@ class MeshGrpc(Mesh):
         # overwriting the last column to include element numbers
         elems_ = elem_raw.copy()  # elem_raw is only-read
         elems_ = elems_[n_elem:]
-        indx_elem = offset[:-1] + 8  # Getting index of the second EL_SHAPE column
+        indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
         return elems_, offset
 

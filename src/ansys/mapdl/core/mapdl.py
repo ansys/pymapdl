@@ -947,24 +947,91 @@ class _MapdlCore(Commands):
             Defaults to current ``use_vtk`` setting as set on the
             initialization of MAPDL.
 
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
+
         Examples
         --------
-        Plot using VTK while showing labels and changing the background
+        Plot using VTK while showing labels and changing the background.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(nnum=True, vtk=True, background='w', color='k',
-                        show_bounds=True)
+        >>> mapdl.nplot(
+        ...     nnum=True,
+        ...     vtk=True,
+        ...     background='w',
+        ...     color='k',
+        ...     show_bounds=True
+        ... )
 
-        Plot without using VTK
+        Plot without using VTK.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
+
+        Plot nodal boundary conditions.
+
+        >>> mapdl.nplot(
+        ...     plot_bc=True,
+        ...     plot_labels=True,
+        ...     bc_labels="mechanical",
+        ... )
 
         """
         # lazy import here to avoid top level import
@@ -980,7 +1047,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             labels = []
             if nnum:
@@ -991,7 +1058,7 @@ class _MapdlCore(Commands):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            return general_plotter([], points, labels, **kwargs)
+            return general_plotter([], points, labels, mapdl=self, **kwargs)
 
         # otherwise, use the built-in nplot
         if isinstance(nnum, bool):
@@ -2899,6 +2966,56 @@ class _MapdlCore(Commands):
                 warn("\n" + self._response)
 
         return returns_
+
+    def get_nodal_loads(self, label=None):
+        """
+        Get the applied nodal loads.
+
+        Uses ``FLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal loads are filtered to correspondent given label.
+            Example of labels are ``FX``, ``FZ``, ``CHRGS`` or ``CSGZ``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        loads = self.flist().to_list()
+        if label:
+            loads = np.array(
+                [[each[0], each[2], each[3]] for each in loads if each[1] == label]
+            )
+        return loads
+
+    def get_nodal_constrains(self, label=None):
+        """
+        Get the applied nodal constrains:
+
+        Uses ``DLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal constrains are filtered to correspondent given label.
+            Example of labels are ``UX``, ``UZ``, ``VOLT`` or ``TEMP``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        constrains = self.dlist().to_list()
+        if label:
+            constrains = np.array(
+                [[each[0], each[2], each[3]] for each in constrains if each[1] == label]
+            )
+        return constrains
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""

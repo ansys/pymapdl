@@ -19,7 +19,7 @@ MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == "nt":
+    if os.name == "nt":  # Pragma: no cover
         ans_root = "c:/Program Files/ANSYS Inc/"
         mapdlbin = os.path.join(
             ans_root, "v%s" % rver, "ansys", "bin", "winx64", "ANSYS%s.exe" % rver
@@ -197,7 +197,7 @@ def supress_logging(func):
     return wrapper
 
 
-def run_as_prep7(func):
+def run_as_prep7(func):  # Pragma: no cover
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
@@ -246,12 +246,6 @@ def threaded_daemon(func):
         return thread
 
     return wrapper
-
-
-def chunks(l, n):
-    """Yield successive n-sized chunks from l"""
-    for i in range(0, len(l), n):
-        yield l[i : i + n]
 
 
 def unique_rows(a):
@@ -333,6 +327,13 @@ def no_return(func):
         func(*args, **kwargs)
 
     return wrapper
+
+
+def get_bounding_box(nodes_xyz):
+    min_ = np.min(nodes_xyz, axis=0)
+    max_ = np.max(nodes_xyz, axis=0)
+
+    return max_ - min_
 
 
 def load_file(mapdl, fname):

@@ -39,6 +39,11 @@ mapdl.nsel("S", "LOC", "Z")
 mapdl.d("all", "all")
 mapdl.allsel()
 
+# plot the boundary conditions
+mapdl.nplot(plot_bc=True)
+
+###############################################################################
+
 mapdl.mxpand(elcalc="YES")
 mapdl.modal_analysis(nmode=6)
 
