@@ -168,7 +168,7 @@ shape tool, as shown in the following figure:
     mapdl.cyl4(0, 0, r1, 90, r1, 180, h)
     mapdl.cyl4(0, 0, r1, 180, r1, 270, h)
     mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
-    mapdl.vglue(3, 4, 5, 6)
+    mapdl.vglue(3, 4, 5, 6);
 
 
 
@@ -182,7 +182,6 @@ shape tool, as shown in the following figure:
         p.add_mesh(each, show_edges=False, show_scalar_bar=False, style='surface', color='grey')
     p.show()
 
-    ## To add code to plot the geometry dynamically   
 
 **Figure 28.1: 3-D Model of Workpiece and Tool**
 
@@ -228,7 +227,7 @@ nearest the weld line.
 
 The height of the tool is equal to the shoulder diameter. Both the workpiece
 (steel plates) and the tool are modeled using coupled-field element
-SOLID226 with the structural-thermal option (``KEYOPT(1)= 11``). 
+``SOLID226`` with the structural-thermal option (``KEYOPT(1)= 11``). 
 
 
 .. code:: python
@@ -330,11 +329,16 @@ shows the 3-D meshed model:
     mapdl.eplot(vtk=True, background='white')
 
 
-.. jupyter-execute::
+.. jupyter-execute:: 
     :hide-code:
-
-    # grid = mapdl.mesh.grid
-    # grid.plot() #show_edges=True, show_scalar_bar=False
+    
+    # Plotting geometry
+    p = pyvista.Plotter()
+    p.background_color='white'
+    for each in mapdl.geometry.areas():
+        p.add_mesh(each, show_edges=True, show_scalar_bar=False, style='surface', color='grey')
+    p.show()
+    
 
 **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
 
@@ -353,8 +357,8 @@ Contact is modeled as follows for the FSW simulation:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 During the simulation, the surfaces to be joined come into contact. A standard
-surface-to-surface contact pair using TARGE170 and
-CONTA174, as shown in the following figure:
+surface-to-surface contact pair using ``TARGE170`` and
+``CONTA174``, as shown in the following figure:
 
 .. figure:: graphics/gtecfricstir_fig3.png
     :align: center
@@ -370,19 +374,19 @@ geometrical, material, and contact nonlinearities.
 
 The problem simulates welding using the bonding capability of contact
 elements. To achieve continuous bonding and simulate a perfect thermal contact
-between the plates, a high thermal contact conductance (TCC) of 2E06
+between the plates, a high thermal contact conductance (TCC) of :math:`\mathrm{2\cdot 10^6}`
 W/m2 °C is specified. (A small TCC value
 yields an imperfect contact and a temperature discontinuity across the
 interface.) The conductance is specified as a real constant for
-CONTA174 elements. 
+``CONTA174`` elements. 
 
 The maximum temperature ranges from 70 to 90 percent of the melting
 temperature of the workpiece material. Welding occurs after the temperature of
 the material around the contacting surfaces exceeds the bonding temperature
 (approximately 70 percent of the workpiece melting temperature). In this case,
 1000 °C is considered to be the bonding temperature based on the reference
-results. The bonding temperature is specified using the real constant TBND for
-CONTA174. When the temperature at the contact
+results. The bonding temperature is specified using the real constant ``TBND`` for
+``CONTA174``. When the temperature at the contact
 surface for closed contact exceeds the bonding temperature, the contact type
 changes to bonded. The contact status remains bonded for the remainder of the
 simulation, even though the temperature subsequently decreases below the bonding
@@ -423,7 +427,7 @@ value.
     mapdl.real(6)
     mapdl.cmsel("s", "tn.tgt")
     mapdl.esurf()
-    _ = mapdl.allsel("all")
+    mapdl.allsel("all")
     
 
 28.3.2.2. Contact Pair Between Tool and Workpiece
@@ -432,41 +436,41 @@ value.
 The tool plunges into the work piece, rotates, and moves along the weld line.
 Because the frictional contact between the tool and workpiece is primarily
 responsible for heat generation, a standard surface-to-surface contact pair is
-defined between the tool and workpiece. The CONTA174
+defined between the tool and workpiece. The ``CONTA174``
 element is used to model the contact surface on the top surface of the
 workpiece, and the TARGE170 element is used for the
 tool, as shown in this figure:
 
-.. figure:: graphics/gtecfricstir_fig4.png
-    :align: center
-    :alt: Contact Pair Between Tool and Workpiece
-    :figclass: align-center
+.. .. figure:: graphics/gtecfricstir_fig4.png
+..     :align: center
+..     :alt: Contact Pair Between Tool and Workpiece
+..     :figclass: align-center
     
-    **Figure 28.4: Contact Pair Between Tool and Workpiece**
+..     **Figure 28.4: Contact Pair Between Tool and Workpiece**
 
-
-
-.. jupyter-execute::
+.. jupyter-execute:: 
     :hide-code:
     
     mapdl.allsel("all")
-    mapdl.esel("s", "ename","", 170)
-    mapdl.esel("a", "ename", "", 174)
 
-    # grid = mapdl.mesh.grid
-    # grid.plot()
-    # _ = mapdl.eplot(vtk=True, background='white')
+    # Plotting geometry
+    p = pyvista.Plotter()
+    p.background_color='white'
+    for elem, color in zip((170, 174),('red', 'blue')):
+        mapdl.esel("s", "ename","", elem)
+        esurf = mapdl.mesh._grid.linear_copy().extract_surface().clean()
+        p.add_mesh(esurf, show_edges=True, show_scalar_bar=False, style='surface', color=color)
+    
+    p.show()
 
-
-
-**Figure 28.4: Contact Pair Between Tool and Workpiece**
+**Figure 28.4: Contact Pair Between Tool and Workpiece. CONTA174 in blue, and TARGE170 in red.**
 
 
 Two real constants are specified to model friction-induced heat generation.
 The fraction of frictional dissipated energy converted into heat is modeled
-first; the FHTG real constant is set to 1 to convert all frictional dissipated
+first; the ``FHTG`` real constant is set to 1 to convert all frictional dissipated
 energy into heat. The factor for the distribution of heat between contact and
-target surfaces is defined next; the FWGT real constant is set to 0.95, so that
+target surfaces is defined next; the ``FWGT`` real constant is set to 0.95, so that
 95 percent of the heat generated from the friction flows into the workpiece and
 only five percent flows into the tool.
 
@@ -475,7 +479,7 @@ this contact pair because most of the heat generated transfers to the workpiece.
 Some additional heat is also generated by plastic deformation of the workpiece
 material. Because the workpiece material softens and the value of friction
 coefficient drops as the temperature increases, a variable coefficient of friction
-(0.4 to 0.2) is defined (**TB**,FRIC with **TBTEMP** and **TBDATA**).
+(0.4 to 0.2) is defined (``TB,FRIC`` with ``TBTEMP`` and ``TBDATA``).
 
 .. **Example 28.2: Specifying the Settings for the Contact Pair**
 
@@ -536,14 +540,14 @@ and moves along the weld line. A pilot node is created at the center of the top
 surface of the tool in order to apply the rotation and translation on the tool.
 The motion of the pilot node controls the motion of the entire tool. A rigid
 surface constraint is defined between the pilot node
-(TARGE170) and the nodes of the top surface of the
-tool (CONTA174). A multipoint constraint (MPC)
+(``TARGE170``) and the nodes of the top surface of the
+tool (``CONTA174``). A multipoint constraint (MPC)
 algorithm with contact surface behavior defined as bonded always is used to
 constrain the contact nodes to the rigid body motion defined by the pilot
 node.
 
 The following contact settings are used for the
-CONTA174 elements:
+``CONTA174`` elements:
 
 * To include MPC contact algorithm: ``KEYOPT(2) = 2``
 * For a rigid surface constraint: ``KEYOPT(4) = 2``
@@ -613,22 +617,24 @@ constant due to the limitations of data available in the literature.
 
 It is assumed that the plastic deformation of the material uses the von Misses yield
 criterion, as well as the associated flow rule and the work-hardening rule. Therefore, a bilinear isotropic hardening
-model (**TB**,PLASTIC,,,,BISO) is selected.
+model (``TB,PLASTIC,,,,BISO``) is selected.
 
 The following table shows the material properties of the workpiece:
 
 **Table 28.1: Workpiece Material Properties**
 
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
-|                                                                                              | **Material Properties of the Plates**   |
+| **Property**                                                                                 | **Value**                               |
 +==============================================================================================+=========================================+
+| Linear Properties                                                                                                                      |
++----------------------------------------------------------------------------------------------+-----------------------------------------+
 | Young’s modulus                                                                              | 193 GPa                                 |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 | Poisson’s ratio                                                                              | 0.3                                     |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 | Coefficient of thermal expansion                                                             | 18.7 µm/m °C                            |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
-| **Bilinear Isotropic Hardening Constants (TB,PLASTIC,,,,BISO)**                                                                        |
+| **Bilinear Isotropic Hardening Constants (``TB,PLASTIC,,,,BISO``)**                                                                    |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 | Yield stress                                                                                 | 290 MPa                                 |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
@@ -645,12 +651,12 @@ The following table shows the material properties of the workpiece:
 | Density (Kg/m3)                                                                              | 7894                                    |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 
-**TBDATA** defines the yield stress and tangent modulus.
+``TBDATA`` defines the yield stress and tangent modulus.
 
 The fraction of the plastic work dissipated as heat during FSW is about 80
 percent. Therefore, the fraction of
 plastic work converted to heat (Taylor-Quinney coefficient) is set to 0.8
-(**MP**,QRATE) for the calculation of plastic heat generation in the
+(``MP,QRATE``) for the calculation of plastic heat generation in the
 workpiece material.
 
 To weld a high-temperature material such as 304L stainless steel, a tool composed of
@@ -664,6 +670,8 @@ The following table shows the material properties of the PCBN tool:
 **Table 28.2: Material Properties of the PCBN Tool**
 
 +----------------------+-------------+
+| Property             | Value       |
++======================+=============+
 | Young modulus        | 680 GPa     |
 +----------------------+-------------+
 | Poisson's ratio      | 0.22        |
@@ -816,6 +824,7 @@ are constrained in the perpendicular direction (z direction).
 
 
 
+
 .. **Example 28.4: Defining the Mechanical Boundary Conditions**
     
 .. code:: python 
@@ -881,8 +890,8 @@ speed of 2.7 mm/s.
 ------------------------------------
 
 A nonlinear transient analysis is performed in three load steps using
-structural-thermal options of SOLID226 and
-CONTA174. 
+structural-thermal options of ``SOLID226`` and
+``CONTA174``. 
 
 FSW simulation includes factors such as nonlinearity, contact, friction, large plastic
 deformation, structural-thermal coupling, and different loadings at each load step. The
@@ -1204,12 +1213,12 @@ Friction and plastic deformation generate heat. A calculation of frictional and
 plastic heat generation is performed. The generation of heat due to friction begins
 in the second load step. 
 
-The CONTA174 element's FDDIS (SMISC item) output option
+The ``CONTA174`` element's FDDIS (SMISC item) output option
 is used to calculate frictional heat generation on the workpiece. This option gives
 the frictional energy dissipation per unit area for an element. After multiplying
 this value with the corresponding element area, the friction heat-generation rate
 for an element is calculated. By summing the values from each
-CONTA174 element of the workpiece, the total frictional
+``CONTA174`` element of the workpiece, the total frictional
 heat generation rate is calculated for a given time. 
 
 It is possible to calculate the total frictional heat-generation rate at each
@@ -1227,7 +1236,7 @@ The plot indicates that the frictional heat starts from the second load step
 (after 1 second). 
 
 The element contact area can be calculated using the
-CONTA174 element CAREA (NMISC, 58) output
+``CONTA174`` element CAREA (NMISC, 58) output
 option.
 
 .. **Example 28.6: Defining the Frictional Heat Calculations**
@@ -1281,11 +1290,11 @@ option.
 
 
 A similar calculation is performed to check the heat generation from plastic
-deformation on the workpiece. The SOLID226 element's output
+deformation on the workpiece. The ``SOLID226`` element's output
 option PHEAT (NMISC, 5) gives the plastic heat generation rate per unit volume.
 After multiplying this value with the corresponding element volume, the plastic heat
 generation rate for an element is calculated. By summing the values from each
-element (SOLID226) of the workpiece, the total plastic heat
+element (``SOLID226``) of the workpiece, the total plastic heat
 generation rate is calculated for a particular time. 
 
 It is possible to calculate the total frictional heat generation rate at each
