@@ -2349,11 +2349,14 @@ class _MapdlCore(Commands):
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
+
             class StringWithLiteralRepr(str):
                 def __init__(self, inner_str):
                     self._inner_str = inner_str
+
                 def __repr__(self):
                     return self._inner_str
+
             self._response = StringWithLiteralRepr(text.strip())
             self._log.info(self._response)
         else:
