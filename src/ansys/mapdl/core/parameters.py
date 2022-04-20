@@ -599,7 +599,7 @@ class Parameters:
             self._mapdl.upload(filename, progress_bar=False)
 
     class _full_parameter_output:
-        """Allows user to enter commands that need to run non-interactively."""
+        """Change the show_** options to true to allow full parameter output."""
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
@@ -609,19 +609,19 @@ class Parameters:
         def __enter__(self):
             """Storing current state"""
             self.show_leading_underscore_parameters = (
-                self._parent().show_leading_underscore_parameter
+                self._parent().show_leading_underscore_parameters
             )
             self.show_trailing_underscore_parameters = (
                 self._parent().show_trailing_underscore_parameters
             )
 
             """Getting full output"""
-            self._parent().show_leading_underscore_parameter = True
+            self._parent().show_leading_underscore_parameters = True
             self._parent().show_trailing_underscore_parameters = True
 
         def __exit__(self, *args):
             """Coming back to previous state"""
-            self._parent().show_leading_underscore_parameter = (
+            self._parent().show_leading_underscore_parameters = (
                 self.show_leading_underscore_parameters
             )
             self._parent().show_trailing_underscore_parameters = (
