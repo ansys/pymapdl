@@ -607,7 +607,7 @@ class Parameters:
             self.show_trailing_underscore_parameters = None
 
         def __enter__(self):
-            """Storing current state"""
+            """Storing current state."""
             self.show_leading_underscore_parameters = (
                 self._parent().show_leading_underscore_parameters
             )
@@ -615,12 +615,12 @@ class Parameters:
                 self._parent().show_trailing_underscore_parameters
             )
 
-            """Getting full output"""
+            # Getting full output.
             self._parent().show_leading_underscore_parameters = True
             self._parent().show_trailing_underscore_parameters = True
 
         def __exit__(self, *args):
-            """Coming back to previous state"""
+            """Coming back to previous state."""
             self._parent().show_leading_underscore_parameters = (
                 self.show_leading_underscore_parameters
             )
