@@ -39,7 +39,7 @@ def test__get_parameter_array(mapdl, number):
 
 
 # We use also 'run' and 'get' to be more confident.
-@pytest.mark.parametrize("func", ["run", "get", "_check_parameter_name"])
+@pytest.mark.parametrize("func", ["run", "get", "_check_parameter_name", "parameters"])
 @pytest.mark.parametrize(
     "par_name",
     [
@@ -178,6 +178,9 @@ def test_parameters_name(mapdl, func, par_name):
     elif func == "_check_parameter_name":
         mapdl._check_parameter_name(par_name)
         return True
+
+    elif func == "parameters":
+        mapdl.parameters[par_name] = 17.0
 
     if not re.search(r"[\(|\)]", par_name):
         assert mapdl.parameters[par_name]
