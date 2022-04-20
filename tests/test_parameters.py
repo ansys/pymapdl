@@ -182,6 +182,7 @@ def test_parameters_name(mapdl, func, par_name):
     elif func == "parameters":
         mapdl.parameters[par_name] = 17.0
 
-    if not re.search(r"[\(|\)]", par_name):
+    if not re.search(r"[\(|\)]", par_name) and not re.search(r"_.*_", par_name):
+        # Avoiding check if indexing or starting and ending with _.
         assert mapdl.parameters[par_name]
         assert isinstance(mapdl.parameters[par_name], float)
