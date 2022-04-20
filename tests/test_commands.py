@@ -238,6 +238,8 @@ def test_docstring_injector(mapdl, method):
 
 
 def test_string_with_literal():
-    output = StringWithLiteralRepr("asdf\nasdf")
+    base_ = "asdf\nasdf"
+    output = StringWithLiteralRepr(base_)
     assert output.__repr__() == output
+    assert output.__repr__() == base_
     assert len(output.split()) == 2
