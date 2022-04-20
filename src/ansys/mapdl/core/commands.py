@@ -753,8 +753,5 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
 
 class StringWithLiteralRepr(str):
-    def __init__(self, inner_str):
-        self._inner_str = inner_str
-
     def __repr__(self):
-        return self._inner_str
+        return self.__str__()
