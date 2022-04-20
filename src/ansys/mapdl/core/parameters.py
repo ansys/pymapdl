@@ -36,6 +36,72 @@ UNITS_MAP = {
 class Parameters:
     """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
 
+    Notes
+    -----
+
+    **Leading underscored parameters**
+
+    The parameters starting with underscore ('_') are reserved parameters
+    for MAPDL macros and routines, therefore its use is discouraged, and
+    in PyMAPDL you cannot set them by default.
+
+    If you need to set one of this parameters, you can use ``mapdl._run``
+    to avoid PyMAPDL parameter name checks. For example
+
+    >>> mapdl._run('_parameter=123')
+    'PARAMETER _PARAMETER =     123.00000000'
+
+    By default, this type of parameters cannot be seen when issuing
+    ``mapdl.parameters``. However, you can change this by setting
+    ``mapdl.parameters.show_leading_underscore_parameters`` equal to True.
+    For example:
+
+    >>> mapdl.parameters.show_leading_underscore_parameters=True
+    >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
+    PORT                             : 50053.0
+    _RETURN                          : 0.0
+    _STATUS                          : 0.0
+    _UIQR                            : 17.0
+
+
+    **Trailing underscored parameters**
+
+    The parameters ending underscore are recommend for user routines
+    and macros.
+    You can set this type of parameters in PyMAPDL, but by default,
+    they cannot be seen in ``mapdl.parameters``, unless
+    ``mapdl.parameters.show_trailing_underscore_parameters`` is set
+    to True.
+
+    >>> mapdl.parameters['param_'] = 1.0
+    >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
+    >>> mapdl.parameters.show_trailing_underscore_parameters=True
+    >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
+    PARAM_                           : 1.0
+
+    **Parameters with leading and trailing underscore**
+
+    These are an especial type of parameters. They CANNOT be seen
+    in ``mapdl.parameters`` under any circumstances, and because
+    of it, it uses is not recommended.
+
+    You can still retrieve them using any of the normal methods
+    to retrieve parameters. But you shall know the parameter name.
+    For example:
+
+    >>> mapdl.parameters["_param_"] = 1.0
+    >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
+    >>> print(mapdl.parameters['_param_'])
+    1.0
+
     Examples
     --------
     Simply list all parameters except for MAPDL MATH parameters.
@@ -66,6 +132,7 @@ class Parameters:
         self._mapdl_weakref = weakref.ref(mapdl)
         self.show_leading_underscore_parameters = False
         self.show_trailing_underscore_parameters = False
+        self.full_parameters_output = self._full_parameter_output(self)
 
     @property
     def _mapdl(self):
@@ -304,7 +371,9 @@ class Parameters:
         # It is more efficient (less parsing) and
         # you can obtain leading and trailing underscore parameters, which
         # they don't appear in a normal ``*STATUS``
-        parameters = interp_star_status(self._mapdl.starstatus(key))
+
+        with self.full_parameters_output:
+            parameters = self._parm
 
         if key not in parameters:
             raise IndexError("%s not a valid parameter_name" % key)
@@ -321,6 +390,8 @@ class Parameters:
 
     def __setitem__(self, key, value):
         """Set a parameter"""
+        self._mapdl._check_parameter_name(key)
+
         # parameters = self._parm  # check parameter exists
         if isinstance(value, (np.ndarray, list)):
             self._set_parameter_array(key, value)
@@ -526,6 +597,36 @@ class Parameters:
 
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
+
+    class _full_parameter_output:
+        """Allows user to enter commands that need to run non-interactively."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.show_leading_underscore_parameters = None
+            self.show_trailing_underscore_parameters = None
+
+        def __enter__(self):
+            """Storing current state"""
+            self.show_leading_underscore_parameters = (
+                self._parent().show_leading_underscore_parameter
+            )
+            self.show_trailing_underscore_parameters = (
+                self._parent().show_trailing_underscore_parameters
+            )
+
+            """Getting full output"""
+            self._parent().show_leading_underscore_parameter = True
+            self._parent().show_trailing_underscore_parameters = True
+
+        def __exit__(self, *args):
+            """Coming back to previous state"""
+            self._parent().show_leading_underscore_parameter = (
+                self.show_leading_underscore_parameters
+            )
+            self._parent().show_trailing_underscore_parameters = (
+                self.show_trailing_underscore_parameters
+            )
 
 
 def interp_star_status(status):
