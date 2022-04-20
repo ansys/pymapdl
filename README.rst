@@ -104,12 +104,12 @@ Alternatively, install the latest from `PyMAPDL GitHub
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
-For a local "development" version, install with:
+For a local "development" version, install with (requires pip >= 22.0):
 
 .. code::
 
    git clone https://github.com/pyansys/pymapdl.git
-   cd mapdl
+   cd pymapdl
    pip install -e .
 
 
