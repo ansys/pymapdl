@@ -104,12 +104,12 @@ Alternatively, install the latest from `PyMAPDL GitHub
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
-For a local "development" version, install with:
+For a local "development" version, install with (requires pip >= 22.0):
 
 .. code::
 
    git clone https://github.com/pyansys/pymapdl.git
-   cd mapdl
+   cd pymapdl
    pip install -e .
 
 
@@ -117,8 +117,7 @@ Dependencies
 ------------
 You will need a local licenced copy of ANSYS to run MAPDL prior and
 including 2021R1.  If you have the latest version of 2021R1 you do
-not need MAPDL installed locally and can connect to a remote instance
-via gRPC.
+not need MAPDL installed locally and can connect to a remote instance.
 
 
 Getting Started

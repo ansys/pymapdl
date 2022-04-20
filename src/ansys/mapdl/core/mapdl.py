@@ -24,6 +24,7 @@ from ansys.mapdl.core.commands import (
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
+    StringWithLiteralRepr,
     inject_docs,
 )
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
@@ -2349,7 +2350,7 @@ class _MapdlCore(Commands):
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
-            self._response = text.strip()
+            self._response = StringWithLiteralRepr(text.strip())
             self._log.info(self._response)
         else:
             self._response = None

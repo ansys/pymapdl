@@ -750,3 +750,8 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
             df["IMAG"] = df["IMAG"].astype(np.float64, copy=False)
 
         return df
+
+
+class StringWithLiteralRepr(str):
+    def __repr__(self):
+        return self.__str__()
