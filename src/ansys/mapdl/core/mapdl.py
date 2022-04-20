@@ -2913,6 +2913,24 @@ class _MapdlCore(Commands):
                 "It cannot start with a number either."
             )
 
+        if "(" in param_name or ")" in param_name:
+            if param_name.count("(") != param_name.count(")"):
+                raise ValueError(
+                    "The parameter name should have all the parenthesis in pairs (closed)."
+                )
+
+            if param_name[-1] != ")":
+                raise ValueError(
+                    "If using parenthesis (indexing), you cannot use any character after the closing parenthesis."
+                )
+
+            # Check recursively the parameter name without parenthesis.
+            # This is the real parameter name, however it must already exists to not raise an error.
+            sub_param_name = re.findall(r"^(.*)\(", param_name)
+            if sub_param_name:
+                self._check_parameter_name(sub_param_name[0])
+                return  # Following checks should not run against the parenthesis
+
         # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
             r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
@@ -2971,3 +2989,27 @@ class _MapdlCore(Commands):
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
+
+    @wraps(Commands.dim)
+    def dim(
+        self,
+        par="",
+        type_="",
+        imax="",
+        jmax="",
+        kmax="",
+        var1="",
+        var2="",
+        var3="",
+        csysid="",
+        **kwargs,
+    ):
+        self._check_parameter_name(par)  # parameter name check
+        if "(" in par or ")" in par:
+            raise ValueError(
+                "Parenthesis are not allowed as parameter name in 'mapdl.dim'."
+            )
+
+        return super().dim(
+            par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
+        )
