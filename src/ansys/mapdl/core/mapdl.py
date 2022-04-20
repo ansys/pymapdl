@@ -2902,8 +2902,10 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
                 f"The parameter name `{param_name}` is an invalid parameter name."
@@ -2911,9 +2913,27 @@ class _MapdlCore(Commands):
                 "It cannot start with a number either."
             )
 
-        # invalid parameter (using ARGXX or ARXX)
+        if "(" in param_name or ")" in param_name:
+            if param_name.count("(") != param_name.count(")"):
+                raise ValueError(
+                    "The parameter name should have all the parenthesis in pairs (closed)."
+                )
+
+            if param_name[-1] != ")":
+                raise ValueError(
+                    "If using parenthesis (indexing), you cannot use any character after the closing parenthesis."
+                )
+
+            # Check recursively the parameter name without parenthesis.
+            # This is the real parameter name, however it must already exists to not raise an error.
+            sub_param_name = re.findall(r"^(.*)\(", param_name)
+            if sub_param_name:
+                self._check_parameter_name(sub_param_name[0])
+                return  # Following checks should not run against the parenthesis
+
+        # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in undescore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
@@ -2922,6 +2942,7 @@ class _MapdlCore(Commands):
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
+        # invalid parameter (using ARGXX or ARXX)
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
         if re.search(
             match_reserved_arg_parameter_name, param_name
@@ -2968,3 +2989,27 @@ class _MapdlCore(Commands):
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
+
+    @wraps(Commands.dim)
+    def dim(
+        self,
+        par="",
+        type_="",
+        imax="",
+        jmax="",
+        kmax="",
+        var1="",
+        var2="",
+        var3="",
+        csysid="",
+        **kwargs,
+    ):
+        self._check_parameter_name(par)  # parameter name check
+        if "(" in par or ")" in par:
+            raise ValueError(
+                "Parenthesis are not allowed as parameter name in 'mapdl.dim'."
+            )
+
+        return super().dim(
+            par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
+        )
