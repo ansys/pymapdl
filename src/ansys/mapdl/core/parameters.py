@@ -64,6 +64,8 @@ class Parameters:
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
+        self.show_leading_underscore_parameters = False
+        self.show_trailing_underscore_parameters = False
 
     @property
     def _mapdl(self):
@@ -262,7 +264,17 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        return interp_star_status(self._mapdl.starstatus())
+        params = interp_star_status(self._mapdl.starstatus())
+
+        if self.show_leading_underscore_parameters:
+            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            params.update(_params)
+
+        if self.show_trailing_underscore_parameters:
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params.update(params_)
+
+        return params
 
     def __repr__(self):
         """Return the current parameters in a pretty format"""
@@ -288,7 +300,12 @@ class Parameters:
             raise TypeError("Parameter name must be a string")
         key = key.upper()
 
-        parameters = self._parm
+        # We are going to directly query the desired parameter.
+        # It is more efficient (less parsing) and
+        # you can obtain leading and trailing underscore parameters, which
+        # they don't appear in a normal ``*STATUS``
+        parameters = interp_star_status(self._mapdl.starstatus(key))
+
         if key not in parameters:
             raise IndexError("%s not a valid parameter_name" % key)
 
