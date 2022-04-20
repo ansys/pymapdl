@@ -11,6 +11,7 @@ from ansys.mapdl.core.commands import (
     CommandListingOutput,
     CommandOutput,
     Commands,
+    StringWithLiteralRepr,
 )
 
 try:
@@ -234,3 +235,9 @@ def test_docstring_injector(mapdl, method):
             assert "``str.to_list()``" in docstring
             assert "``str.to_array()``" in docstring
             assert "``str.to_dataframe()``" in docstring
+
+
+def test_string_with_literal():
+    output = StringWithLiteralRepr("asdf\nasdf")
+    assert output.__repr__()
+    assert len(output.split()) == 2
