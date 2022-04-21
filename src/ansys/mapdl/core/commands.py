@@ -29,7 +29,7 @@ from ._commands import (
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
 REG_FLOAT_INT = re.compile(r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+\s")
 BC_REGREP = re.compile(
-    r"([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
+    r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
 )
 
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
