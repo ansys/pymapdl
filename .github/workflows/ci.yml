@@ -164,7 +164,7 @@ jobs:
           path: doc/build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            doc-buil-v${{ env.RESET_DOC_BUILD_CACHE }}d-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}d-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
         uses: actions/cache@v2
