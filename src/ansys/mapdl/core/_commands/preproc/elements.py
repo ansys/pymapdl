@@ -1296,6 +1296,7 @@ class Elements:
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
                 [],
                 labels,
+                mapdl=self,
                 **kwargs,
             )
 
