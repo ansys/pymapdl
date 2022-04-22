@@ -14,8 +14,8 @@ changelog:
         - Examples
     - title: Maintenance
       labels:
-        - maintenance
-        - dependencies
+        - Maintenance
+        - Dependencies
     - title: MAPDL and/or API related
       labels:
         - MAPDL
