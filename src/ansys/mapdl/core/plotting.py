@@ -328,7 +328,8 @@ def general_plotter(
         pl.close()
 
     else:
-        pl.show()
+        if not return_plotter:
+            pl.show()
 
     # Recreating "returns" to update cpos
     returns_parameter = return_from_plotter()
