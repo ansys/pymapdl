@@ -1,8 +1,8 @@
 autopep8==1.6.0
 matplotlib==3.5.1
+scipy==1.8.0
 pandas==1.4.2
 pytest==7.1.1
 pytest-cov==3.0.0
 pyvista==0.34.1
-scipy==1.8.0
 vtk==9.0.3
