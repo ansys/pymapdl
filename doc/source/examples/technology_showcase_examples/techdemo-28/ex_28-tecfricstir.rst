@@ -809,24 +809,36 @@ To simulate support at the bottom of the plates, all bottom nodes of the workpie
 are constrained in the perpendicular direction (z direction).
 
 
-.. figure:: graphics/gtecfricstir_fig7.png
-    :align: center
-    :alt: Mechanical Boundary Conditions-0
-    :figclass: align-center
+.. .. figure:: graphics/gtecfricstir_fig7.png
+..     :align: center
+..     :alt: Mechanical Boundary Conditions-0
+..     :figclass: align-center
+
+
+.. .. figure:: graphics/gtecfricstir_fig8.png
+..     :align: center
+..     :alt: Mechanical Boundary Conditions-1
+..     :figclass: align-center
     
+..     **Figure 28.7: Mechanical Boundary Conditions**
 
-.. figure:: graphics/gtecfricstir_fig8.png
-    :align: center
-    :alt: Mechanical Boundary Conditions-1
-    :figclass: align-center
+
+.. jupyter-execute:: 
+    :hide-code:
     
-    **Figure 28.7: Mechanical Boundary Conditions**
+    mapdl.allsel("all")
 
+    # Plotting BC
+    pl = mapdl.eplot(plot_bc=True, off_screen=True, 
+        return_plotter=True,
+        bc_glyph_size=0.002)
+    pl.notebook = True
+    pl
 
+**Figure 28.7: Mechanical Boundary Conditions:**
+X-direction (UX) in red, Y-direction (UY) in green, and Z-direction (UZ) in blue.
 
-
-.. **Example 28.4: Defining the Mechanical Boundary Conditions**
-    
+   
 .. code:: python 
     
     # Mechanical Boundary Conditions
@@ -869,15 +881,15 @@ The following table shows the details for each load step.
 
 **Table 28.3: Load Steps**
 
-+-----------+------------------+----------------------------------------------------------------------------+------------------------------+
-| Load Step | Time Period (sec)| Loadings on Pilot Node                                                     | Boundary Condition           |
-+===========+==================+============================================================================+==============================+
-| 1         | 1                | Displacement boundary condition                                            | UZ = -7.95E-07 m             |
-+-----------+------------------+----------------------------------------------------------------------------+------------------------------+
-| 2         | 5.5              | Rotational boundary condition                                              | ROTZ = 60 RPM                |
-+-----------+------------------+----------------------------------------------------------------------------+------------------------------+
-| 3         | 22.5             | Displacement and rotational boundary conditions together on the pilot node | ROTZ = 60 RPM UY= 60.96E-3 m |
-+-----------+------------------+----------------------------------------------------------------------------+------------------------------+
++-----------+------------------+----------------------------------------------------------------------------+--------------------------------------+
+| Load Step | Time Period (sec)| Loadings on Pilot Node                                                     | Boundary Condition                   |
++===========+==================+============================================================================+======================================+
+| 1         | 1                | Displacement boundary condition                                            | ``UZ`` = -7.95E-07 m                 |
++-----------+------------------+----------------------------------------------------------------------------+--------------------------------------+
+| 2         | 5.5              | Rotational boundary condition                                              | ``ROTZ`` = 60 RPM                    |
++-----------+------------------+----------------------------------------------------------------------------+--------------------------------------+
+| 3         | 22.5             | Displacement and rotational boundary conditions together on the pilot node | ``ROTZ`` = 60 RPM ``UY``= 60.96E-3 m |
++-----------+------------------+----------------------------------------------------------------------------+--------------------------------------+
 
 
 The tool plunges into the workpiece at a very shallow depth, then rotates to
@@ -906,24 +918,24 @@ shown in the following table:
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | Solution Setting                | Description of Setting and Comments                                                                                                                                                                                                                                                                                                                              |
 +=================================+==================================================================================================================================================================================================================================================================================================================================================================+
-| **ANTYPE**,4                    | Transient analysis.                                                                                                                                                                                                                                                                                                                                              |
+| ``ANTYPE,4``                    | Transient analysis.                                                                                                                                                                                                                                                                                                                                              |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **LNSRCH**,ON                   | For contact problems,this option is useful for enhancing convergence.                                                                                                                                                                                                                                                                                            |
+| ``LNSRCH,ON``                   | For contact problems,this option is useful for enhancing convergence.                                                                                                                                                                                                                                                                                            |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **CUTCONTROL**, PLSLIMIT,0.15   | Controls the time-step cutback during a nonlinear solution and specifies the maximum equivalent plastic strain allowed within a time-step. If the calculated value exceeds the specified value, the program performs a cutback (bisection). **PLSLIMIT** is set at 15 percent (from the default five percent) because solution-control support is not available. |
+| ``CUTCONTROL, PLSLIMIT,0.15``   | Controls the time-step cutback during a nonlinear solution and specifies the maximum equivalent plastic strain allowed within a time-step. If the calculated value exceeds the specified value, the program performs a cutback (bisection). ``PLSLIMIT`` is set at 15 percent (from the default five percent) because solution-control support is not available. |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **NLGEOM**,ON                   | Includes large-deflection effects or large strain effects, according to the element type.                                                                                                                                                                                                                                                                        |
+| ``NLGEOM,ON``                   | Includes large-deflection effects or large strain effects, according to the element type.                                                                                                                                                                                                                                                                        |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **NROPT**,UNSYM                 | Recommended for contact elements with high friction coefficients.                                                                                                                                                                                                                                                                                                |
+| ``NROPT,UNSYM``                 | Recommended for contact elements with high friction coefficients.                                                                                                                                                                                                                                                                                                |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **TIMINT**,OFF,STRUC            | To speed up convergence in a coupled-field transient analysis, the structural dynamic effects are turned off. These structural effects are not important in the modeling of heat generation due to friction; however,the thermal dynamic effects are considered here.                                                                                            |
+| ``TIMINT,OFF,STRUC``            | To speed up convergence in a coupled-field transient analysis, the structural dynamic effects are turned off. These structural effects are not important in the modeling of heat generation due to friction; however,the thermal dynamic effects are considered here.                                                                                            |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **KBC**,0                       | The loads applied to intermediate substeps within the load step are ramped because the structural dynamic effects are set to off.                                                                                                                                                                                                                                |
+| ``KBC,0``                       | The loads applied to intermediate substeps within the load step are ramped because the structural dynamic effects are set to off.                                                                                                                                                                                                                                |
 +---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 To allow for a faster solution, automatic time-stepping is activated
-(**AUTOTS**,ON). The initial time step size
-(**DELTIM**) is set to 0.1, and the minimum time step is set to
+(``AUTOTS,ON``). The initial time step size
+(``DELTIM``) is set to 0.1, and the minimum time step is set to
 0.001. The maximum time step is set as 0.2 in load steps 2 and 3. 
 A higher maximum time-step size may result in an unconverged solution.
 
