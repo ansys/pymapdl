@@ -2454,7 +2454,8 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
-        text = self._run(command, mute=mute, **kwargs)
+        verbose = kwargs.get("verbose", False)
+        text = self._run(command, verbose=verbose, mute=mute)
 
         if mute:
             return
