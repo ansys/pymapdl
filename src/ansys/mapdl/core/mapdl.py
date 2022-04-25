@@ -981,7 +981,8 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
-        elif vtk is True:
+
+        if vtk is True:
             if _HAS_PYVISTA:
                 # lazy import here to avoid top level import
                 import pyvista as pv

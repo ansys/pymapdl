@@ -358,7 +358,8 @@ def test_kplot(cleared, mapdl, tmpdir, vtk):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.kplot(vtk=vtk, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
 
 @skip_no_xserver
@@ -436,7 +437,8 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
 
 @skip_in_cloud
