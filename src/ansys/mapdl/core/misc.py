@@ -19,7 +19,7 @@ MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == "nt":
+    if os.name == "nt":  # pragma: no cover
         program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
         ans_root = os.getenv(
             f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
