@@ -135,7 +135,7 @@ class _MapdlCore(Commands):
     def __init__(
         self,
         loglevel="DEBUG",
-        use_vtk=None,
+        use_vtk=True,
         log_apdl=None,
         log_file=False,
         local=True,
