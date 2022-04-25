@@ -99,7 +99,7 @@ def get_file_chunks(filename, progress_bar=False):
             raise ModuleNotFoundError(
                 f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
                 "To avoid this message you can set 'progress_bar=False'."
-            )
+            )  # pragma: no cover
 
         n_bytes = os.path.getsize(filename)
 
@@ -146,7 +146,7 @@ def save_chunks_to_file(
             raise ModuleNotFoundError(
                 f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
                 "To avoid this message you can set 'progress_bar=False'."
-            )
+            )  # pragma: no cover
 
         pbar = tqdm(
             total=file_size,
@@ -1601,10 +1601,6 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_project()
 
         """
-
-        if not progress_bar and _HAS_TQDM:
-            progress_bar = True
-
         if chunk_size > 4 * 1024 * 1024:  # 4MB
             raise ValueError(
                 f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "

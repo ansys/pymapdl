@@ -15,6 +15,9 @@ from ansys.mapdl.core.launcher import (
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
+if _HAS_TQDM:
+    from tqdm import tqdm
+
 
 def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
     """Return a list the first ``n_ports`` ports starting from ``starting_port``"""
@@ -111,7 +114,7 @@ class LocalMapdlPool:
         wait=True,
         run_location=None,
         port=MAPDL_DEFAULT_PORT,
-        progress_bar=False,
+        progress_bar=True,
         restart_failed=True,
         remove_temp_files=True,
         **kwargs,
@@ -158,7 +161,7 @@ class LocalMapdlPool:
                 raise ModuleNotFoundError(
                     f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
-                )
+                )  # pragma: no cover
 
             pbar = tqdm(total=n_instances, desc="Creating Pool")
 
@@ -197,7 +200,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=False,
+        progress_bar=True,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -289,7 +292,7 @@ class LocalMapdlPool:
                 raise ModuleNotFoundError(
                     f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
-                )
+                )  # pragma: no cover
 
             pbar = tqdm(total=n, desc="MAPDL Running")
 
@@ -389,7 +392,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=False,
+        progress_bar=True,
         close_when_finished=False,
         timeout=None,
         wait=True,
