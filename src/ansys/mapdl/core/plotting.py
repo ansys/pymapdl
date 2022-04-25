@@ -740,7 +740,8 @@ def general_plotter(
         pl.close()
 
     else:
-        pl.show()
+        if not return_plotter:
+            pl.show()
 
     if return_plotter:
         return pl

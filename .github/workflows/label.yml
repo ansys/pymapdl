@@ -4,7 +4,7 @@ on:
     types: [opened, reopened]
 
 jobs:
-  triage:
+  PR-Labeler:
     permissions:
       contents: read
       pull-requests: write
@@ -22,39 +22,42 @@ jobs:
       if: startsWith(github.event.pull_request.head.ref, 'doc/') || startsWith(github.event.pull_request.head.ref, 'docs')
       with:
         labels: Documentation
+
     - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'docker')
+      if: startsWith(github.event.pull_request.head.ref, 'docker') || startsWith(github.event.pull_request.head.ref, 'no-ci') || startsWith(github.event.pull_request.head.ref, 'ci')
       with:
-        labels: docker
+        labels: CI/CD
+
     - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'maint') || startsWith(github.event.pull_request.head.ref, 'no-ci') || startsWith(github.event.pull_request.head.ref, 'ci')
+      if: startsWith(github.event.pull_request.head.ref, 'maint')
       with:
-        labels: maintenance
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'junk')
-      with:
-        labels: ignore-for-release
+        labels: Maintenance
+
     - uses: actions-ecosystem/action-add-labels@v1
       if: startsWith(github.event.pull_request.head.ref, 'feat')
       with:
-        labels: Enhancement
+        labels: |
+          - Enhancement
+          - NEW FEATURE
+
     - uses: actions-ecosystem/action-add-labels@v1
       if: startsWith(github.event.pull_request.head.ref, 'fix') || startsWith(github.event.pull_request.head.ref, 'patch')
       with:
         labels: BUG
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'release')
-      with:
-        labels: release
+
     - uses: peter-evans/create-or-update-comment@v2
       if: |
-        not contains(github.event.pull_request.labels.*.name, 'enhancement') &&
-        not contains(github.event.pull_request.labels.*.name, 'documentation') &&
-        not contains(github.event.pull_request.labels.*.name, 'maintenance')
+        ${{ !contains(github.event.pull_request.labels.*.name, 'Enhancement')} } &&
+        ${{ !contains(github.event.pull_request.labels.*.name, 'Documentation')} } &&
+        ${{ !contains(github.event.pull_request.labels.*.name, 'Maintenance')} }
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           Please add one of the following labels to add this contribution to the Release Notes :point_down:
-          - [enhancement](https://github.com/pyansys/pymapdl/pulls?q=label%3Aenhancement+)
-          - [documentation](https://github.com/pyansys/pymapdl/pulls?q=label%3Adocumentation+)
-          - [maintenance](https://github.com/pyansys/pymapdl/pulls?q=label%3Amaintenance+)
+          - [BUG](https://github.com/pyansys/pymapdl/pulls?q=label%3Abug+)
+          - [NEW FEATURE](https://github.com/pyansys/pymapdl/pulls?q=label%3A"NEW%20FEATURE"+)
+          - [Enhancement](https://github.com/pyansys/pymapdl/pulls?q=label%3Aenhancement+)
+          - [Documentation](https://github.com/pyansys/pymapdl/pulls?q=label%3Adocumentation+)
+          - [Examples](https://github.com/pyansys/pymapdl/pulls?q=label%3Aexamples+)
+          - [Maintenance](https://github.com/pyansys/pymapdl/pulls?q=label%3Amaintenance+)
+          - [CI/CD](https://github.com/pyansys/pymapdl/pulls?q=label%3Aci%2Fcd+)
