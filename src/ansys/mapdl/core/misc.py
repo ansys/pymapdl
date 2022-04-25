@@ -64,10 +64,8 @@ class Report(scooby.Report):
         core = [
             "matplotlib",
             "numpy",
-            "pyvista",
             "appdirs",
             "tqdm",
-            "pyiges",
             "scipy",
             "grpc",  # grpcio
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
@@ -79,7 +77,7 @@ class Report(scooby.Report):
             core.extend(["pexpect"])
 
         # Optional packages
-        optional = ["matplotlib"]
+        optional = ["matplotlib", "pyvista", "pyiges"]
         if sys.version_info[1] < 9:
             optional.append("ansys_corba")
 
