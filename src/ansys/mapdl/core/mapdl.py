@@ -18,6 +18,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -134,7 +135,7 @@ class _MapdlCore(Commands):
     def __init__(
         self,
         loglevel="DEBUG",
-        use_vtk=True,
+        use_vtk=None,
         log_apdl=None,
         log_file=False,
         local=True,
@@ -150,7 +151,17 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
-        self._use_vtk = use_vtk
+
+        if _HAS_PYVISTA:
+            self._use_vtk = use_vtk
+        else:
+            if use_vtk:
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                )
+            else:
+                self._use_vtk = False
+
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
@@ -968,11 +979,16 @@ class _MapdlCore(Commands):
         >>> mapdl.nplot(vtk=False)
 
         """
-        # lazy import here to avoid top level import
-        import pyvista as pv
-
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if _HAS_PYVISTA:
+                # lazy import here to avoid top level import
+                import pyvista as pv
+            else:
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
@@ -1000,6 +1016,81 @@ class _MapdlCore(Commands):
 
         self._enable_interactive_plotting()
         return super().nplot(nnum, **kwargs)
+
+    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+        """Plots the currently selected elements.
+
+        APDL Command: EPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
+        Parameters
+        ----------
+        vtk : bool, optional
+            Plot the currently selected elements using ``pyvista``.
+            Defaults to current ``use_vtk`` setting.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs
+            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            keyword arguments related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.1)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.vgen(2, 'all')
+        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
+                        show_node_numbering=True)
+
+        Save a screenshot to disk without showing the plot
+
+        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                        window_size=[1920, 1080], savefig='screenshot.png',
+                        off_screen=True)
+
+        """
+        if vtk is None:
+            vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
+
+        if vtk:
+            kwargs.setdefault("title", "MAPDL Element Plot")
+            if not self._mesh.n_elem:
+                warnings.warn("There are no elements to plot.")
+                return general_plotter([], [], [], **kwargs)
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault("show_edges", True)
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+
+            return general_plotter(
+                [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
+                [],
+                labels,
+                **kwargs,
+            )
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
+        return self.run("EPLOT")
 
     def vplot(
         self,
@@ -1065,6 +1156,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Volume Plot")
@@ -1186,6 +1282,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
@@ -1381,6 +1482,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
@@ -1459,6 +1565,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
