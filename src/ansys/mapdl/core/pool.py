@@ -157,11 +157,11 @@ class LocalMapdlPool:
 
         pbar = None
         if wait and progress_bar:
-            if not _HAS_TQDM:
+            if not _HAS_TQDM:  # pragma: no cover
                 raise ModuleNotFoundError(
                     f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
-                )  # pragma: no cover
+                )
 
             pbar = tqdm(total=n_instances, desc="Creating Pool")
 
@@ -288,11 +288,11 @@ class LocalMapdlPool:
 
         pbar = None
         if progress_bar:
-            if not _HAS_TQDM:
+            if not _HAS_TQDM:  # pragma: no cover
                 raise ModuleNotFoundError(
                     f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
-                )  # pragma: no cover
+                )
 
             pbar = tqdm(total=n, desc="MAPDL Running")
 
