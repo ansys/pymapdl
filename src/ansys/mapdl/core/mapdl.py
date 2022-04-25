@@ -985,7 +985,7 @@ class _MapdlCore(Commands):
             if _HAS_PYVISTA:
                 # lazy import here to avoid top level import
                 import pyvista as pv
-            else:
+            else:  # pragma: no cover
                 raise ModuleNotFoundError(
                     f"Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
