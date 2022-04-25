@@ -68,7 +68,7 @@ try:
     from tqdm import tqdm
 
     _HAS_TQDM = True
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
 
 TMP_VAR = "__tmpvar__"
@@ -95,11 +95,11 @@ def get_file_chunks(filename, progress_bar=False):
     """Serializes a file into chunks"""
     pbar = None
     if progress_bar:
-        if not _HAS_TQDM:
+        if not _HAS_TQDM:  # pragma: no cover
             raise ModuleNotFoundError(
                 f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
                 "To avoid this message you can set 'progress_bar=False'."
-            )  # pragma: no cover
+            )
 
         n_bytes = os.path.getsize(filename)
 
@@ -142,11 +142,11 @@ def save_chunks_to_file(
     """
     pbar = None
     if progress_bar:
-        if not _HAS_TQDM:
+        if not _HAS_TQDM:  # pragma: no cover
             raise ModuleNotFoundError(
                 f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
                 "To avoid this message you can set 'progress_bar=False'."
-            )  # pragma: no cover
+            )
 
         pbar = tqdm(
             total=file_size,
