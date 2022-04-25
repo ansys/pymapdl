@@ -5,8 +5,6 @@ import shutil
 import time
 import warnings
 
-from tqdm import tqdm
-
 from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import (
@@ -14,6 +12,7 @@ from ansys.mapdl.core.launcher import (
     _version_from_path,
     port_in_use,
 )
+from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
 
@@ -112,7 +111,7 @@ class LocalMapdlPool:
         wait=True,
         run_location=None,
         port=MAPDL_DEFAULT_PORT,
-        progress_bar=True,
+        progress_bar=False,
         restart_failed=True,
         remove_temp_files=True,
         **kwargs,
@@ -155,6 +154,12 @@ class LocalMapdlPool:
 
         pbar = None
         if wait and progress_bar:
+            if not _HAS_TQDM:
+                raise ModuleNotFoundError(
+                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To avoid this message you can set 'progress_bar=False'."
+                )
+
             pbar = tqdm(total=n_instances, desc="Creating Pool")
 
         # initialize a list of dummy instances
@@ -192,7 +197,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=True,
+        progress_bar=False,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -253,7 +258,7 @@ class LocalMapdlPool:
                 completed_indices.append(index)
                 return mapdl.parameters.routine
         >>> inputs = [(examples.vmfiles['vm%d' % i], i) for i in range(1, 10)]
-        >>> output = pool.map(func, inputs, progress_bar=True, wait=True)
+        >>> output = pool.map(func, inputs, progress_bar=False, wait=True)
         ['Begin level',
          'Begin level',
          'Begin level',
@@ -280,6 +285,12 @@ class LocalMapdlPool:
 
         pbar = None
         if progress_bar:
+            if not _HAS_TQDM:
+                raise ModuleNotFoundError(
+                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To avoid this message you can set 'progress_bar=False'."
+                )
+
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
@@ -378,7 +389,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=True,
+        progress_bar=False,
         close_when_finished=False,
         timeout=None,
         wait=True,
