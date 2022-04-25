@@ -19,16 +19,15 @@ MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == "nt":
-        ans_root = "c:/Program Files/ANSYS Inc/"
-        mapdlbin = os.path.join(
-            ans_root, "v%s" % rver, "ansys", "bin", "winx64", "ANSYS%s.exe" % rver
+    if os.name == "nt":  # pragma: no cover
+        program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
+        ans_root = os.getenv(
+            f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
         )
+        mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
     else:
-        ans_root = "/usr/ansys_inc"
-        mapdlbin = os.path.join(
-            ans_root, "v%s" % rver, "ansys", "bin", "ansys%s" % rver
-        )
+        ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
+        mapdlbin = os.path.join(*ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
 
     return mapdlbin
 

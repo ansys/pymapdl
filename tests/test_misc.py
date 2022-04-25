@@ -7,6 +7,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_start_instance,
+    get_ansys_bin,
 )
 
 
@@ -62,3 +63,8 @@ def test_check_valid_port(port):
 )
 def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
+
+
+def test_get_ansys_bin(mapdl):
+    rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
+    assert isinstance(get_ansys_bin(rver), str)
