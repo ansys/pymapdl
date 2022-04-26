@@ -87,7 +87,13 @@ def test_info(mapdl, capfd):
     assert "UPDATE" in out
 
     for each_key in info:
-        assert len(info[each_key]) > 10
+        assert len(info[each_key]) >= 9
+
+    # Checking mapping to /STATUS command
+    # The time line changes, as well as DB, so we only check first
+    # part
+    ind = info["ALL"].find("*****    DATABASE STATUS    *****")
+    assert info["ALL"][:ind] == mapdl.slashstatus("ALL")[:ind]
 
 
 def test_get_ansys_bin(mapdl):

@@ -443,6 +443,11 @@ class Information(dict):
 
     The results are cached for later calls.
 
+    If you provide any of ``/STATUS`` arguments
+    (``"ALL"``, ``"TITLE"``, ``"UNITS"``, ``"MEM"``, ``"DB"``,
+     ``"CONFIG"``, ``"GLOBAL"``, ``"SOLU"``, or ``"PROD"``),
+    the return will be the raw MAPDL output form that command.
+
     Examples
     --------
     >>> mapdl.info
@@ -486,7 +491,7 @@ class Information(dict):
             if self._mapdl._exited:  # pragma: no cover
                 raise RuntimeError("Information class: MAPDL exited")
 
-            stats = self._mapdl.slashstatus("PROD")
+            stats = self._mapdl.slashstatus("ALL")
             self._stats = stats
         except Exception:  # pragma: no cover
             raise RuntimeError("Information class: MAPDL exited")
@@ -527,7 +532,9 @@ class Information(dict):
             "Boundary condition information", self.get_boundary_condition_information()
         )
         super().__setitem__("Routine information", self.get_routine_information())
-        super().__setitem__("Solution options", self.get_solution_options())
+        super().__setitem__(
+            "Solution options configuration", self.get_solution_options_configuration()
+        )
         super().__setitem__("Load step options", self.get_load_step_options())
 
         self.cached = True
@@ -535,6 +542,20 @@ class Information(dict):
     def __getitem__(self, key):
         if not self.cached:
             self._query()
+
+        # In case we are providing the args of "/STATUS"
+        if key.upper() in [
+            "ALL",
+            "TITLE",
+            "UNITS",
+            "MEM",
+            "DB",
+            "CONFIG",
+            "GLOBAL",
+            "SOLU",
+            "PROD",
+        ]:
+            return self._mapdl.slashstatus(key.upper())
 
         return super().__getitem__(key)
 
@@ -636,7 +657,7 @@ class Information(dict):
         end_string = None
         return self._get_between(init_, end_string)
 
-    def get_solution_options(self):
+    def get_solution_options_configuration(self):
         init_ = "S O L U T I O N   O P T I O N S"
         end_string = "L O A D   S T E P   O P T I O N S"
         return self._get_between(init_, end_string)
