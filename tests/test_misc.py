@@ -65,16 +65,24 @@ def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
 
 
-def test_info(mapdl):
+def test_info(mapdl, capfd):
     info = mapdl.info
 
-    assert "ANSYS" in info["Product"]
+    assert "Ansys" in info["Product"]
     assert "RELEASE" in info["MAPDL Version"]
 
     assert "PyMAPDL" in mapdl.info.__repr__()
 
     with pytest.raises(ValueError):
         info["myvalue"] = 1234  # You cannot change info values
+
+    out, _ = capfd.readouterr()  # flushing
+    print(info)
+    out, _ = capfd.readouterr()
+
+    assert "Ansys" in out
+    assert "Product" in out
+    assert "MAPDL Version" in out
 
 
 def test_get_ansys_bin(mapdl):
