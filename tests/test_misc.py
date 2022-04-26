@@ -68,7 +68,8 @@ def test_check_valid_start_instance(start_instance):
 def test_info(mapdl, capfd):
     info = mapdl.info
 
-    assert "Ansys" in info["Product"]
+    # Some versions have this in upper case??
+    assert "ansys" in info["Product"].lower()
     assert "RELEASE" in info["MAPDL Version"]
 
     assert "PyMAPDL" in mapdl.info.__repr__()
@@ -80,9 +81,10 @@ def test_info(mapdl, capfd):
     print(info)
     out, _ = capfd.readouterr()
 
-    assert "Ansys" in out
+    assert "ansys" in out.lower()
     assert "Product" in out
     assert "MAPDL Version" in out
+    assert "UPDATE" in out
 
 
 def test_get_ansys_bin(mapdl):
