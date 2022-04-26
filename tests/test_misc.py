@@ -62,3 +62,15 @@ def test_check_valid_port(port):
 )
 def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
+
+
+def test_info(mapdl):
+    info = mapdl.info
+
+    assert "Ansys" in info["Product"]
+    assert "RELEASE" in info["MAPDL Version"]
+
+    assert "PyMAPDL" in mapdl.info.__repr__()
+
+    with pytest.raises(ValueError):
+        info["myvalue"] = 1234  # You cannot change info values
