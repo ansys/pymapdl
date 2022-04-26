@@ -1366,3 +1366,6 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 def test_plot_empty_mesh(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.nplot(vtk=True)
+
+    with pytest.warns(UserWarning):
+        mapdl.eplot(vtk=True)

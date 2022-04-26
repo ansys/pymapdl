@@ -154,7 +154,7 @@ class _MapdlCore(Commands):
 
         if _HAS_PYVISTA:
             self._use_vtk = use_vtk
-        else:
+        else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
                     f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
