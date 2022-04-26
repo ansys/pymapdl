@@ -68,7 +68,7 @@ def test_check_valid_start_instance(start_instance):
 def test_info(mapdl):
     info = mapdl.info
 
-    assert "Ansys" in info["Product"]
+    assert "ANSYS" in info["Product"]
     assert "RELEASE" in info["MAPDL Version"]
 
     assert "PyMAPDL" in mapdl.info.__repr__()
@@ -80,4 +80,3 @@ def test_info(mapdl):
 def test_get_ansys_bin(mapdl):
     rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
     assert isinstance(get_ansys_bin(rver), str)
-
