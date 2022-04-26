@@ -86,6 +86,9 @@ def test_info(mapdl, capfd):
     assert "MAPDL Version" in out
     assert "UPDATE" in out
 
+    for each_key in info:
+        assert len(info[each_key]) > 10
+
 
 def test_get_ansys_bin(mapdl):
     rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")

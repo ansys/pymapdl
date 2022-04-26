@@ -471,6 +471,8 @@ class Information(dict):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.cached = False
+        self._stats = None
+        self._repr_keys = ["Product", "MAPDL Version", "PyMAPDL Version"]
 
     @property
     def _mapdl(self):
@@ -485,6 +487,7 @@ class Information(dict):
                 raise RuntimeError("Information class: MAPDL exited")
 
             stats = self._mapdl.slashstatus("PROD")
+            self._stats = stats
         except Exception:  # pragma: no cover
             raise RuntimeError("Information class: MAPDL exited")
 
@@ -503,6 +506,29 @@ class Information(dict):
         super().__setitem__("Product", product)
         super().__setitem__("MAPDL Version", mapdl_version)
         super().__setitem__("PyMAPDL Version", pymapdl.__version__)
+
+        # Getting extra information
+        super().__setitem__("Products", self.get_products())
+        super().__setitem__(
+            "Preprocessing capabilities", self.get_preprocessing_capabilities()
+        )
+        super().__setitem__("Aux capabilities", self.get_aux_capabilities())
+        super().__setitem__("Solution options", self.get_solution_options())
+        super().__setitem__("Post capabilities", self.get_post_capabilities())
+        super().__setitem__("Titles", self.get_titles())
+        super().__setitem__("Units", self.get_units())
+        super().__setitem__("Scratch memory status", self.get_scratch_memory_status())
+        super().__setitem__("Database status", self.get_database_status())
+        super().__setitem__("Config values", self.get_config_values())
+        super().__setitem__("Global status", self.get_global_status())
+        super().__setitem__("Job information", self.get_job_information())
+        super().__setitem__("Model information", self.get_model_information())
+        super().__setitem__(
+            "Boundary condition information", self.get_boundary_condition_information()
+        )
+        super().__setitem__("Routine information", self.get_routine_information())
+        super().__setitem__("Solution options", self.get_solution_options())
+        super().__setitem__("Load step options", self.get_load_step_options())
 
         self.cached = True
 
@@ -523,5 +549,99 @@ class Information(dict):
             [
                 f"{each_key}:".ljust(25) + f"{each_value}".ljust(25)
                 for each_key, each_value in self.items()
+                if each_key in self._repr_keys
             ]
         )
+
+    def _get_between(self, init_string, end_string=None):
+        st = self._stats.find(init_string)
+        if not end_string:
+            en = -1
+        else:
+            en = self._stats.find(end_string)
+        return "\n".join(self._stats[st:en].splitlines()[1:]).strip()
+
+    def get_products(self):
+        init_ = "*** Products ***"
+        end_string = "*** PreProcessing Capabilities ***"
+        return self._get_between(init_, end_string)
+
+    def get_preprocessing_capabilities(self):
+        init_ = "*** PreProcessing Capabilities ***"
+        end_string = "*** Aux Capabilities ***"
+        return self._get_between(init_, end_string)
+
+    def get_aux_capabilities(self):
+        init_ = "*** Aux Capabilities ***"
+        end_string = "*** Solution Options ***"
+        return self._get_between(init_, end_string)
+
+    def get_solution_options(self):
+        init_ = "*** Solution Options ***"
+        end_string = "*** Post Capabilities ***"
+        return self._get_between(init_, end_string)
+
+    def get_post_capabilities(self):
+        init_ = "*** Post Capabilities ***"
+        end_string = "***** TITLES *****"
+        return self._get_between(init_, end_string)
+
+    def get_titles(self):
+        init_ = "***** TITLES *****"
+        end_string = "***** UNITS *****"
+        return self._get_between(init_, end_string)
+
+    def get_units(self):
+        init_ = "***** UNITS *****"
+        end_string = "***** SCRATCH MEMORY STATUS *****"
+        return self._get_between(init_, end_string)
+
+    def get_scratch_memory_status(self):
+        init_ = "***** SCRATCH MEMORY STATUS *****"
+        end_string = "*****    DATABASE STATUS    *****"
+        return self._get_between(init_, end_string)
+
+    def get_database_status(self):
+        init_ = "*****    DATABASE STATUS    *****"
+        end_string = "***** CONFIG VALUES *****"
+        return self._get_between(init_, end_string)
+
+    def get_config_values(self):
+        init_ = "***** CONFIG VALUES *****"
+        end_string = "G L O B A L   S T A T U S"
+        return self._get_between(init_, end_string)
+
+    def get_global_status(self):
+        init_ = "G L O B A L   S T A T U S"
+        end_string = "J O B   I N F O R M A T I O N"
+        return self._get_between(init_, end_string)
+
+    def get_job_information(self):
+        init_ = "J O B   I N F O R M A T I O N"
+        end_string = "M O D E L   I N F O R M A T I O N"
+        return self._get_between(init_, end_string)
+
+    def get_model_information(self):
+        init_ = "M O D E L   I N F O R M A T I O N"
+        end_string = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
+        return self._get_between(init_, end_string)
+
+    def get_boundary_condition_information(self):
+        init_ = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
+        end_string = "R O U T I N E   I N F O R M A T I O N"
+        return self._get_between(init_, end_string)
+
+    def get_routine_information(self):
+        init_ = "R O U T I N E   I N F O R M A T I O N"
+        end_string = None
+        return self._get_between(init_, end_string)
+
+    def get_solution_options(self):
+        init_ = "S O L U T I O N   O P T I O N S"
+        end_string = "L O A D   S T E P   O P T I O N S"
+        return self._get_between(init_, end_string)
+
+    def get_load_step_options(self):
+        init_ = "L O A D   S T E P   O P T I O N S"
+        end_string = None
+        return self._get_between(init_, end_string)
