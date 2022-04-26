@@ -12,7 +12,13 @@ LOG.debug("Loaded logging module as LOG")
 _LOCAL_PORTS = []
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
-from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+try:
+    from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+
+    _HAS_PYVISTA = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'Pyvista' is not installed.")
+    _HAS_PYVISTA = False
 
 try:
     import importlib.metadata as importlib_metadata
