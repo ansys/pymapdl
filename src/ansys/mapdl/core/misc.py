@@ -469,7 +469,7 @@ class Information(dict):
     def __init__(self, mapdl):
         from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.cached = False
@@ -483,13 +483,13 @@ class Information(dict):
         """We might need to do more calls if we implement properties
         that change over the MAPDL session."""
         try:
-            if self._mapdl._exited:
-                self._mapdl._log.debug("Information class: MAPDL exited")
-                return
+            if self._mapdl._exited:  # pragma: no cover
+                raise RuntimeError("Information class: MAPDL exited")
+
             stats = self._mapdl.slashstatus("PROD")
         except Exception:  # pragma: no cover
-            self._mapdl._log.debug("Information class: MAPDL exited")
-            return
+            raise RuntimeError("Information class: MAPDL exited")
+
         self._mapdl._log.debug("Information class: Getting info")
 
         st = stats.find("*** Products ***")
@@ -518,7 +518,7 @@ class Information(dict):
         raise ValueError("It is no allowed to modify 'mapdl.info' parameters.")
 
     def __repr__(self):
-        if not self.cached:
+        if not self.cached:  # pragma: no cover
             self._query()
 
         return "\n".join(

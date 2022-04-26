@@ -1360,3 +1360,12 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     # Test suppliying a dir path when in remote
     with pytest.raises(IOError):
         mapdl.mpwrite("/test_dir/test", "mp")
+
+
+def test_mapdl_str(mapdl, capfd):
+    print(mapdl)
+
+    out, _ = capfd.readouterr()
+    assert "Ansys" in out
+    assert "Product" in out
+    assert "MAPDL Version" in out
