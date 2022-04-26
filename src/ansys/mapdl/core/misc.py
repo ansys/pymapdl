@@ -9,9 +9,12 @@ import string
 import sys
 import tempfile
 from threading import Thread
+import weakref
 
 import numpy as np
 import scooby
+
+from ansys.mapdl import core as pymapdl
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -428,3 +431,100 @@ def check_valid_start_instance(start_instance):
         )
 
     return start_instance.lower() == "true"
+
+
+class Information(dict):
+    """
+    This class provide some MAPDL information in a "dict-like" manner.
+
+    It is also the object that is called when you issue "print(mapdl)",
+    which means it is called by "mapdl.__str__()".
+
+    Notes
+    -----
+    You cannot directly modify the values of the keys.
+
+    The results are cached for later calls.
+
+    Examples
+    --------
+    >>> mapdl.info
+    Product:             Ansys Mechanical Enterprise
+    MAPDL Version:       21.2
+    ansys.mapdl Version: 0.62.dev0
+
+    >>> print(mapdl)
+    Product:             Ansys Mechanical Enterprise
+    MAPDL Version:       21.2
+    ansys.mapdl Version: 0.62.dev0
+
+    >>> mapdl.info['Product']
+    'Ansys Mechanical Enterprise'
+
+    >>> info = mapdl.info
+    >>> info['MAPDL Version']
+    'RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601'
+
+    """
+
+    def __init__(self, mapdl):
+        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import
+
+        if not isinstance(mapdl, _MapdlCore):
+            raise TypeError("Must be implemented from MAPDL class")
+        self._mapdl_weakref = weakref.ref(mapdl)
+        self.cached = False
+
+    @property
+    def _mapdl(self):
+        """Return the weakly referenced instance of mapdl"""
+        return self._mapdl_weakref()
+
+    def _query(self):
+        """We might need to do more calls if we implement properties
+        that change over the MAPDL session."""
+        try:
+            if self._mapdl._exited:
+                self._mapdl._log.debug("Information class: MAPDL exited")
+                return
+            stats = self._mapdl.slashstatus("PROD")
+        except Exception:  # pragma: no cover
+            self._mapdl._log.debug("Information class: MAPDL exited")
+            return
+        self._mapdl._log.debug("Information class: Getting info")
+
+        st = stats.find("*** Products ***")
+        en = stats.find("*** PrePro")
+        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
+
+        # get product version
+        stats = self._mapdl.slashstatus("TITLE")
+        st = stats.find("RELEASE")
+        en = stats.find("INITIAL", st)
+        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
+
+        super().__setitem__("Product", product)
+        super().__setitem__("MAPDL Version", mapdl_version)
+        super().__setitem__("PyMAPDL Version", pymapdl.__version__)
+
+        self.cached = True
+
+    def __getitem__(self, key):
+        if not self.cached:
+            self._query()
+
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        raise ValueError("It is no allowed to modify 'mapdl.info' parameters.")
+
+    def __repr__(self):
+        if not self.cached:
+            self._query()
+
+        return "\n".join(
+            [
+                f"{each_key}:".ljust(25) + f"{each_value}".ljust(25)
+                for each_key, each_value in self.items()
+            ]
+        )
