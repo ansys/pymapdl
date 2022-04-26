@@ -1367,7 +1367,7 @@ def test_mapdl_str(mapdl, capfd):
     print(mapdl)
 
     out, _ = capfd.readouterr()
-    assert "Ansys" in out
+    assert "ansys" in out.lower()
     assert "Product" in out
     assert "MAPDL Version" in out
 
