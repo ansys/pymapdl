@@ -77,7 +77,6 @@ def test_mapdl_info(mapdl, capfd):
     for attr, value in inspect.getmembers(info):
         if not attr.startswith("_"):
             assert isinstance(value, str)
-            assert len(value) >= 8
 
             with pytest.raises(ValueError):
                 setattr(info, attr, "any_value")
