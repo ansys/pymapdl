@@ -1008,10 +1008,12 @@ def launch_mapdl(
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
     ip : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``'127.0.0.1'``. You can also override the default behavior of
-        this keyword argument with the environment variable
-        "PYMAPDL_IP=FALSE".
+        Used only when ``start_instance`` is ``False``. If provided,
+        it will force ``start_instance`` to be ``False``.
+        You can also provide a hostname as an alternative to an IP address.
+        Defaults to ``'127.0.0.1'``. You can also override the
+        default behavior of this keyword argument with the
+        environment variable "PYMAPDL_IP=FALSE".
 
     clear_on_connect : bool, optional
         Used only when ``start_instance`` is ``False``.  Defaults to
