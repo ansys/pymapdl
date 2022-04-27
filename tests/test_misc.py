@@ -67,37 +67,6 @@ def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
 
 
-def test_info(mapdl, capfd):
-    info = mapdl.info
-
-    # Some versions have this in upper case??
-    assert "ansys" in info["Product"].lower()
-    assert "RELEASE" in info["MAPDL Version"]
-
-    assert "PyMAPDL" in mapdl.info.__repr__()
-
-    with pytest.raises(ValueError):
-        info["myvalue"] = 1234  # You cannot change info values
-
-    out, _ = capfd.readouterr()  # flushing
-    print(info)
-    out, _ = capfd.readouterr()
-
-    assert "ansys" in out.lower()
-    assert "Product" in out
-    assert "MAPDL Version" in out
-    assert "UPDATE" in out
-
-    for each_key in info:
-        assert len(info[each_key]) >= 9
-
-    # Checking mapping to /STATUS command
-    # The time line changes, as well as DB, so we only check first
-    # part
-    ind = info["ALL"].find("*****    DATABASE STATUS    *****")
-    assert info["ALL"][:ind] == mapdl.slashstatus("ALL")[:ind]
-
-
 def test_get_ansys_bin(mapdl):
     rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
     assert isinstance(get_ansys_bin(rver), str)
@@ -108,6 +77,7 @@ def test_mapdl_info(mapdl, capfd):
     for attr, value in inspect.getmembers(info):
         if not attr.startswith("_"):
             assert isinstance(value, str)
+            assert len(value) >= 8
 
             with pytest.raises(ValueError):
                 setattr(info, attr, "any_value")
