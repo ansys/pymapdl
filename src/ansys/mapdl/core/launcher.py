@@ -1189,7 +1189,11 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-        check_valid_ip(ip)
+    else:  # pragma: no cover
+        start_instance = False
+        ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
+
+    check_valid_ip(ip)  # double check
 
     if port is None:
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
