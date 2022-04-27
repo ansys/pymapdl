@@ -91,18 +91,15 @@ jobs:
         id: version
 
       - name: Generate wheelhouse
-        # if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         run: pip wheel . -w wheelhouse
 
       - name: Zip wheelhouse
         uses: vimtor/action-zip@v1
-        # if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         with:
           files: wheelhouse
           dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
 
       - name: Upload Wheelhouse
-        # if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
