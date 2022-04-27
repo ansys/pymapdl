@@ -1,4 +1,6 @@
 """Small or misc tests that don't fit in other test modules"""
+import inspect
+
 import pytest
 from pyvista.plotting import system_supports_plotting
 
@@ -99,3 +101,24 @@ def test_info(mapdl, capfd):
 def test_get_ansys_bin(mapdl):
     rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
     assert isinstance(get_ansys_bin(rver), str)
+
+
+def test_mapdl_info(mapdl, capfd):
+    info = mapdl.info
+    for attr, value in inspect.getmembers(info):
+        if not attr.startswith("_"):
+            assert isinstance(value, str)
+
+            with pytest.raises(ValueError):
+                setattr(info, attr, "any_value")
+
+    assert "PyMAPDL" in mapdl.info.__repr__()
+
+    out, _ = capfd.readouterr()  # flushing
+    print(info)
+    out, _ = capfd.readouterr()
+
+    assert "ansys" in out.lower()
+    assert "Product" in out
+    assert "MAPDL Version" in out
+    assert "UPDATE" in out

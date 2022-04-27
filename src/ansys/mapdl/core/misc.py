@@ -4,6 +4,7 @@ import inspect
 import os
 import platform
 import random
+import re
 import socket
 import string
 import sys
@@ -430,23 +431,31 @@ def check_valid_start_instance(start_instance):
     return start_instance.lower() == "true"
 
 
-class Information(dict):
+def requires_update(requires_update=False):
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            if requires_update or not self._stats:
+                self._update()
+            return function(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+class Information:
     """
-    This class provide some MAPDL information in a "dict-like" manner.
+    This class provide some MAPDL information from ``/STATUS`` MAPDL command.
 
     It is also the object that is called when you issue "print(mapdl)",
-    which means it is called by "mapdl.__str__()".
+    which means ``print`` calls "mapdl.info.__str__()".
 
     Notes
     -----
-    You cannot directly modify the values of the keys.
+    You cannot directly modify the values of this class.
 
-    The results are cached for later calls.
-
-    If you provide any of ``/STATUS`` arguments
-    (``"ALL"``, ``"TITLE"``, ``"UNITS"``, ``"MEM"``, ``"DB"``,
-     ``"CONFIG"``, ``"GLOBAL"``, ``"SOLU"``, or ``"PROD"``),
-    the return will be the raw MAPDL output form that command.
+    Some of the results are cached for later calls.
 
     Examples
     --------
@@ -460,31 +469,35 @@ class Information(dict):
     MAPDL Version:       21.2
     ansys.mapdl Version: 0.62.dev0
 
-    >>> mapdl.info['Product']
+    >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
 
     >>> info = mapdl.info
-    >>> info['MAPDL Version']
+    >>> info.mapdl_version
     'RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601'
 
     """
 
     def __init__(self, mapdl):
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import
+        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
 
         if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
+
         self._mapdl_weakref = weakref.ref(mapdl)
-        self.cached = False
         self._stats = None
-        self._repr_keys = ["Product", "MAPDL Version", "PyMAPDL Version"]
+        self._repr_keys = {
+            "Product": "product",
+            "MAPDL Version": "mapdl_version",
+            "PyMAPDL Version": "pymapdl_version",
+        }
 
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
-    def _query(self):
+    def _update(self):
         """We might need to do more calls if we implement properties
         that change over the MAPDL session."""
         try:
@@ -492,177 +505,349 @@ class Information(dict):
                 raise RuntimeError("Information class: MAPDL exited")
 
             stats = self._mapdl.slashstatus("ALL")
-            self._stats = stats
         except Exception:  # pragma: no cover
+            self._stats = None
             raise RuntimeError("Information class: MAPDL exited")
 
-        self._mapdl._log.debug("Information class: Getting info")
-
-        st = stats.find("*** Products ***")
-        en = stats.find("*** PrePro")
-        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
-
-        # get product version
-        stats = self._mapdl.slashstatus("TITLE")
-        st = stats.find("RELEASE")
-        en = stats.find("INITIAL", st)
-        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
-
-        super().__setitem__("Product", product)
-        super().__setitem__("MAPDL Version", mapdl_version)
-        super().__setitem__("PyMAPDL Version", pymapdl.__version__)
-
-        # Getting extra information
-        super().__setitem__("Products", self.get_products())
-        super().__setitem__(
-            "Preprocessing capabilities", self.get_preprocessing_capabilities()
-        )
-        super().__setitem__("Aux capabilities", self.get_aux_capabilities())
-        super().__setitem__("Solution options", self.get_solution_options())
-        super().__setitem__("Post capabilities", self.get_post_capabilities())
-        super().__setitem__("Titles", self.get_titles())
-        super().__setitem__("Units", self.get_units())
-        super().__setitem__("Scratch memory status", self.get_scratch_memory_status())
-        super().__setitem__("Database status", self.get_database_status())
-        super().__setitem__("Config values", self.get_config_values())
-        super().__setitem__("Global status", self.get_global_status())
-        super().__setitem__("Job information", self.get_job_information())
-        super().__setitem__("Model information", self.get_model_information())
-        super().__setitem__(
-            "Boundary condition information", self.get_boundary_condition_information()
-        )
-        super().__setitem__("Routine information", self.get_routine_information())
-        super().__setitem__(
-            "Solution options configuration", self.get_solution_options_configuration()
-        )
-        super().__setitem__("Load step options", self.get_load_step_options())
-
-        self.cached = True
-
-    def __getitem__(self, key):
-        if not self.cached:
-            self._query()
-
-        # In case we are providing the args of "/STATUS"
-        if key.upper() in [
-            "ALL",
-            "TITLE",
-            "UNITS",
-            "MEM",
-            "DB",
-            "CONFIG",
-            "GLOBAL",
-            "SOLU",
-            "PROD",
-        ]:
-            return self._mapdl.slashstatus(key.upper())
-
-        return super().__getitem__(key)
-
-    def __setitem__(self, key, value):
-        raise ValueError("It is no allowed to modify 'mapdl.info' parameters.")
+        stats = stats.replace("\n ", "\n")  # Bit of formatting
+        self._stats = stats
+        self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self):
-        if not self.cached:  # pragma: no cover
-            self._query()
+        if not self._stats:  # pragma: no cover
+            self._update()
 
         return "\n".join(
             [
-                f"{each_key}:".ljust(25) + f"{each_value}".ljust(25)
-                for each_key, each_value in self.items()
-                if each_key in self._repr_keys
+                f"{each_name}:".ljust(25) + f"{getattr(self, each_attr)}".ljust(25)
+                for each_name, each_attr in self._repr_keys.items()
             ]
         )
 
-    def _get_between(self, init_string, end_string=None):
-        st = self._stats.find(init_string)
-        if not end_string:
-            en = -1
-        else:
-            en = self._stats.find(end_string)
-        return "\n".join(self._stats[st:en].splitlines()[1:]).strip()
+    @property
+    @requires_update(False)
+    def product(self):
+        return self._get_product()
 
-    def get_products(self):
+    @product.setter
+    def product(self, value):
+        raise ValueError("The method 'product' cannot be changed.")
+
+    @property
+    @requires_update(False)
+    def mapdl_version(self):
+        return self._get_mapdl_version()
+
+    @mapdl_version.setter
+    def mapdl_version(self, value):
+        raise ValueError("The method 'mapdl_version' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def mapdl_version_release(self):
+        st = self._get_mapdl_version()
+        return self._get_between("RELEASE", "BUILD", st).strip()
+
+    @mapdl_version_release.setter
+    def mapdl_version_release(self, value):
+        raise ValueError("The method 'mapdl_version_release' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def mapdl_version_build(self):
+        st = self._get_mapdl_version()
+        return self._get_between("BUILD", "UPDATE", st).strip()
+
+    @mapdl_version_build.setter
+    def mapdl_version_build(self, value):
+        raise ValueError("The method 'mapdl_version_build' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def mapdl_version_update(self):
+        st = self._get_mapdl_version()
+        return self._get_between("UPDATE", "", st).strip()
+
+    @mapdl_version_update.setter
+    def mapdl_version_update(self, value):
+        raise ValueError("The method 'mapdl_version_update' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def pymapdl_version(self):
+        return self._get_pymapdl_version()
+
+    @pymapdl_version.setter
+    def pymapdl_version(self, value):
+        raise ValueError("The method 'pymapdl_version' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def products(self):
+        return self._get_products()
+
+    @products.setter
+    def products(self, value):
+        raise ValueError("The method 'products' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def preprocessing_capabilities(self):
+        return self._get_preprocessing_capabilities()
+
+    @preprocessing_capabilities.setter
+    def preprocessing_capabilities(self, value):
+        raise ValueError("The method 'preprocessing_capabilities' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def aux_capabilities(self):
+        return self._get_aux_capabilities()
+
+    @aux_capabilities.setter
+    def aux_capabilities(self, value):
+        raise ValueError("The method 'aux_capabilities' cannot be changed")
+
+    @property
+    @requires_update(True)
+    def solution_options(self):
+        return self._get_solution_options()
+
+    @solution_options.setter
+    def solution_options(self, value):
+        raise ValueError("The method 'solution_options' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def post_capabilities(self):
+        return self._get_post_capabilities()
+
+    @post_capabilities.setter
+    def post_capabilities(self, value):
+        raise ValueError("The method 'post_capabilities' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def titles(self):
+        return self._get_titles()
+
+    @titles.setter
+    def titles(self, value):
+        raise ValueError("The method 'titles' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def units(self):
+        return self._get_units()
+
+    @units.setter
+    def units(self, value):
+        raise ValueError("The method 'units' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def scratch_memory_status(self):
+        return self._get_scratch_memory_status()
+
+    @scratch_memory_status.setter
+    def scratch_memory_status(self, value):
+        raise ValueError("The method 'scratch_memory_status' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def database_status(self):
+        return self._get_database_status()
+
+    @database_status.setter
+    def database_status(self, value):
+        raise ValueError("The method 'database_status' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def config_values(self):
+        return self._get_config_values()
+
+    @config_values.setter
+    def config_values(self, value):
+        raise ValueError("The method 'config_values' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def global_status(self):
+        return self._get_global_status()
+
+    @global_status.setter
+    def global_status(self, value):
+        raise ValueError("The method 'global_status' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def job_information(self):
+        return self._get_job_information()
+
+    @job_information.setter
+    def job_information(self, value):
+        raise ValueError("The method 'job_information' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def model_information(self):
+        return self._get_model_information()
+
+    @model_information.setter
+    def model_information(self, value):
+        raise ValueError("The method 'model_information' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def boundary_condition_information(self):
+        return self._get_boundary_condition_information()
+
+    @boundary_condition_information.setter
+    def boundary_condition_information(self, value):
+        raise ValueError(
+            "The method 'boundary_condition_information' cannot be changed"
+        )
+
+    @property
+    @requires_update(False)
+    def routine_information(self):
+        return self._get_routine_information()
+
+    @routine_information.setter
+    def routine_information(self, value):
+        raise ValueError("The method 'routine_information' cannot be changed")
+
+    @property
+    @requires_update(False)
+    def solution_options_configuration(self):
+        return self._get_solution_options_configuration()
+
+    @solution_options_configuration.setter
+    def solution_options_configuration(self, value):
+        raise ValueError(
+            "The method 'solution_options_configuration' cannot be changed"
+        )
+
+    @property
+    @requires_update(False)
+    def load_step_options(self):
+        return self._get_load_step_options()
+
+    @load_step_options.setter
+    def load_step_options(self, value):
+        raise ValueError("The method 'load_step_options' cannot be changed")
+
+    def _get_between(self, init_string, end_string=None, string=None):
+        if not string:
+            string = self._stats
+
+        st = string.find(init_string) + len(init_string)
+
+        if not end_string:
+            en = None
+        else:
+            en = string.find(end_string)
+        return "\n".join(string[st:en].splitlines()).strip()
+
+    def _get_product(self):
+        return self._get_products().splitlines()[0]
+
+    def _get_mapdl_version(self):
+        titles_ = self._get_titles()
+        st = titles_.find("RELEASE")
+        en = titles_.find("INITIAL", st)
+        return titles_[st:en].split("CUSTOMER")[0].strip()
+
+    def _get_pymapdl_version(self):
+        return pymapdl.__version__
+
+    def _get_title(self):
+        match = re.match(r"TITLE=(.*)$", self._get_titles())
+        if match:
+            return match.groups(1)[0].strip()
+
+    def _get_products(self):
         init_ = "*** Products ***"
         end_string = "*** PreProcessing Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def get_preprocessing_capabilities(self):
+    def _get_preprocessing_capabilities(self):
         init_ = "*** PreProcessing Capabilities ***"
         end_string = "*** Aux Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def get_aux_capabilities(self):
+    def _get_aux_capabilities(self):
         init_ = "*** Aux Capabilities ***"
         end_string = "*** Solution Options ***"
         return self._get_between(init_, end_string)
 
-    def get_solution_options(self):
+    def _get_solution_options(self):
         init_ = "*** Solution Options ***"
         end_string = "*** Post Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def get_post_capabilities(self):
+    def _get_post_capabilities(self):
         init_ = "*** Post Capabilities ***"
         end_string = "***** TITLES *****"
         return self._get_between(init_, end_string)
 
-    def get_titles(self):
+    def _get_titles(self):
         init_ = "***** TITLES *****"
         end_string = "***** UNITS *****"
         return self._get_between(init_, end_string)
 
-    def get_units(self):
+    def _get_units(self):
         init_ = "***** UNITS *****"
         end_string = "***** SCRATCH MEMORY STATUS *****"
         return self._get_between(init_, end_string)
 
-    def get_scratch_memory_status(self):
+    def _get_scratch_memory_status(self):
         init_ = "***** SCRATCH MEMORY STATUS *****"
         end_string = "*****    DATABASE STATUS    *****"
         return self._get_between(init_, end_string)
 
-    def get_database_status(self):
+    def _get_database_status(self):
         init_ = "*****    DATABASE STATUS    *****"
         end_string = "***** CONFIG VALUES *****"
         return self._get_between(init_, end_string)
 
-    def get_config_values(self):
+    def _get_config_values(self):
         init_ = "***** CONFIG VALUES *****"
         end_string = "G L O B A L   S T A T U S"
         return self._get_between(init_, end_string)
 
-    def get_global_status(self):
+    def _get_global_status(self):
         init_ = "G L O B A L   S T A T U S"
         end_string = "J O B   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def get_job_information(self):
+    def _get_job_information(self):
         init_ = "J O B   I N F O R M A T I O N"
         end_string = "M O D E L   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def get_model_information(self):
+    def _get_model_information(self):
         init_ = "M O D E L   I N F O R M A T I O N"
         end_string = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def get_boundary_condition_information(self):
+    def _get_boundary_condition_information(self):
         init_ = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
         end_string = "R O U T I N E   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def get_routine_information(self):
+    def _get_routine_information(self):
         init_ = "R O U T I N E   I N F O R M A T I O N"
         end_string = None
         return self._get_between(init_, end_string)
 
-    def get_solution_options_configuration(self):
+    def _get_solution_options_configuration(self):
         init_ = "S O L U T I O N   O P T I O N S"
         end_string = "L O A D   S T E P   O P T I O N S"
         return self._get_between(init_, end_string)
 
-    def get_load_step_options(self):
+    def _get_load_step_options(self):
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
