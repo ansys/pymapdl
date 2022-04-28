@@ -109,3 +109,6 @@ def test_info_stitle(mapdl):
 
     info.stitles = stitles
     assert stitles == info.stitles
+
+    info.stitles = None
+    assert not info.stitles
