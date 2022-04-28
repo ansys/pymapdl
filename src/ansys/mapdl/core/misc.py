@@ -541,29 +541,11 @@ class Information:
         """Retrieve the product from the MAPDL instance."""
         return self._get_product()
 
-    @product.setter
-    def product(self, value):
-        """Set the value for the MAPDL Product
-
-        .. warning:: By default, you cannot change 'product' property.
-
-        """
-        raise ValueError("The property 'product' cannot be changed.")
-
     @property
     @update_information_first(False)
     def mapdl_version(self):
         """Retrieve the MAPDL version from the MAPDL instance."""
         return self._get_mapdl_version()
-
-    @mapdl_version.setter
-    def mapdl_version(self, value):
-        """Set the value for the MAPDL Version
-
-        .. warning:: By default, you cannot change 'mapdl_version' property.
-
-        """
-        raise ValueError("The property 'mapdl_version' cannot be changed")
 
     @property
     @update_information_first(False)
@@ -572,30 +554,12 @@ class Information:
         st = self._get_mapdl_version()
         return self._get_between("RELEASE", "BUILD", st).strip()
 
-    @mapdl_version_release.setter
-    def mapdl_version_release(self, value):
-        """Set the value for the MAPDL version release
-
-        .. warning:: By default, you cannot change 'mapdl_version_release' property.
-
-        """
-        raise ValueError("The property 'mapdl_version_release' cannot be changed")
-
     @property
     @update_information_first(False)
     def mapdl_version_build(self):
         """Retrieve the MAPDL version build from the MAPDL instance."""
         st = self._get_mapdl_version()
         return self._get_between("BUILD", "UPDATE", st).strip()
-
-    @mapdl_version_build.setter
-    def mapdl_version_build(self, value):
-        """Set the value for the MAPDL Mapdl Version Build
-
-        .. warning:: By default, you cannot change 'mapdl_version_build' property.
-
-        """
-        raise ValueError("The property 'mapdl_version_build' cannot be changed")
 
     @property
     @update_information_first(False)
@@ -604,29 +568,11 @@ class Information:
         st = self._get_mapdl_version()
         return self._get_between("UPDATE", "", st).strip()
 
-    @mapdl_version_update.setter
-    def mapdl_version_update(self, value):
-        """Set the value for the MAPDL Mapdl Version Update
-
-        .. warning:: By default, you cannot change 'mapdl_version_update' property.
-
-        """
-        raise ValueError("The property 'mapdl_version_update' cannot be changed")
-
     @property
     @update_information_first(False)
     def pymapdl_version(self):
         """Retrieve the PyMAPDL version from the MAPDL instance."""
         return self._get_pymapdl_version()
-
-    @pymapdl_version.setter
-    def pymapdl_version(self, value):
-        """Set the value for the MAPDL PyMAPDL Version
-
-        .. warning:: By default, you cannot change 'pymapdl_version' property.
-
-        """
-        raise ValueError("The property 'pymapdl_version' cannot be changed")
 
     @property
     @update_information_first(False)
@@ -634,29 +580,11 @@ class Information:
         """Retrieve the products from the MAPDL instance."""
         return self._get_products()
 
-    @products.setter
-    def products(self, value):
-        """Set the value for the MAPDL Products
-
-        .. warning:: By default, you cannot change 'products' property.
-
-        """
-        raise ValueError("The property 'products' cannot be changed")
-
     @property
     @update_information_first(False)
     def preprocessing_capabilities(self):
         """Retrieve the preprocessing capabilities from the MAPDL instance."""
         return self._get_preprocessing_capabilities()
-
-    @preprocessing_capabilities.setter
-    def preprocessing_capabilities(self, value):
-        """Set the value for the MAPDL Preprocessing Capabilities
-
-        .. warning:: By default, you cannot change 'preprocessing_capabilities' property.
-
-        """
-        raise ValueError("The property 'preprocessing_capabilities' cannot be changed")
 
     @property
     @update_information_first(False)
@@ -664,29 +592,11 @@ class Information:
         """Retrieve the aux capabilities from the MAPDL instance."""
         return self._get_aux_capabilities()
 
-    @aux_capabilities.setter
-    def aux_capabilities(self, value):
-        """Set the value for the MAPDL Aux Capabilities
-
-        .. warning:: By default, you cannot change 'aux_capabilities' property.
-
-        """
-        raise ValueError("The property 'aux_capabilities' cannot be changed")
-
     @property
     @update_information_first(True)
     def solution_options(self):
         """Retrieve the solution options from the MAPDL instance."""
         return self._get_solution_options()
-
-    @solution_options.setter
-    def solution_options(self, value):
-        """Set the value for the MAPDL Solution Options
-
-        .. warning:: By default, you cannot change 'solution_options' property.
-
-        """
-        raise ValueError("The property 'solution_options' cannot be changed")
 
     @property
     @update_information_first(False)
@@ -694,31 +604,11 @@ class Information:
         """Retrieve the post capabilities from the MAPDL instance."""
         return self._get_post_capabilities()
 
-    @post_capabilities.setter
-    def post_capabilities(self, value):
-        """Set the value for the MAPDL Post Capabilities
-
-        .. warning:: By default, you cannot change 'post_capabilities' property.
-
-        """
-        raise ValueError("The property 'post_capabilities' cannot be changed")
-
     @property
     @update_information_first(True)
     def titles(self):
         """Retrieve the titles from the MAPDL instance."""
         return self._get_titles()
-
-    @titles.setter
-    def titles(self, value):
-        """Set the value for the MAPDL titles
-
-        .. warning:: By default, you cannot change 'titles' property.
-
-        """
-        raise ValueError(
-            "The property 'titles' cannot be changed. But you can change 'Mapdl.info.title'"
-        )
 
     @property
     @update_information_first(True)
@@ -728,25 +618,12 @@ class Information:
 
     @title.setter
     def title(self, title):
-        """Set the value for the MAPDL title"""
         return self._mapdl.title(title)
 
     @property
     @update_information_first(True)
     def stitles(self, i=None):
-        """Retrieve the stitle from the MAPDL instance.
-
-        If ``i`` is supplied, only retrieve the stitle number i.
-        Starting from 0 up to 3 (Python indexing).
-        """
-        if not i:
-            return self._get_stitles()
-        else:
-            return self._get_stitles()[i]
-
-    @stitles.setter
-    def stitles(self, stitle, i=None):
-        """Set the value for the MAPDL stitle.
+        """Retrieve or set the value for the MAPDL stitle (subtitles).
 
         If 'stitle' includes newline characters (`\\n`), then each line
         is assigned to one STITLE.
@@ -757,6 +634,13 @@ class Information:
 
         Starting from 0 up to 3 (Python indexing).
         """
+        if not i:
+            return self._get_stitles()
+        else:
+            return self._get_stitles()[i]
+
+    @stitles.setter
+    def stitles(self, stitle, i=None):
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -781,27 +665,11 @@ class Information:
         else:
             self._mapdl.stitle(i, stitle)
 
-    def _get_stitles(self):
-        return [
-            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            for i in range(1, 5)
-            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-        ]
-
     @property
     @update_information_first(True)
     def units(self):
         """Retrieve the units from the MAPDL instance."""
         return self._get_units()
-
-    @units.setter
-    def units(self, value):
-        """Set the value for the MAPDL Units
-
-        .. warning:: By default, you cannot change 'units' property.
-
-        """
-        raise ValueError("The property 'units' cannot be changed")
 
     @property
     @update_information_first(True)
@@ -809,29 +677,11 @@ class Information:
         """Retrieve the scratch memory status from the MAPDL instance."""
         return self._get_scratch_memory_status()
 
-    @scratch_memory_status.setter
-    def scratch_memory_status(self, value):
-        """Set the value for the MAPDL Scratch Memory Status
-
-        .. warning:: By default, you cannot change 'scratch_memory_status' property.
-
-        """
-        raise ValueError("The property 'scratch_memory_status' cannot be changed")
-
     @property
     @update_information_first(True)
     def database_status(self):
         """Retrieve the database status from the MAPDL instance."""
         return self._get_database_status()
-
-    @database_status.setter
-    def database_status(self, value):
-        """Set the value for the MAPDL Database Status
-
-        .. warning:: By default, you cannot change 'database_status' property.
-
-        """
-        raise ValueError("The property 'database_status' cannot be changed")
 
     @property
     @update_information_first(True)
@@ -839,29 +689,11 @@ class Information:
         """Retrieve the config values from the MAPDL instance."""
         return self._get_config_values()
 
-    @config_values.setter
-    def config_values(self, value):
-        """Set the value for the MAPDL Config Values
-
-        .. warning:: By default, you cannot change 'config_values' property.
-
-        """
-        raise ValueError("The property 'config_values' cannot be changed")
-
     @property
     @update_information_first(True)
     def global_status(self):
         """Retrieve the global status from the MAPDL instance."""
         return self._get_global_status()
-
-    @global_status.setter
-    def global_status(self, value):
-        """Set the value for the MAPDL Global Status
-
-        .. warning:: By default, you cannot change 'global_status' property.
-
-        """
-        raise ValueError("The property 'global_status' cannot be changed")
 
     @property
     @update_information_first(True)
@@ -869,29 +701,11 @@ class Information:
         """Retrieve the job information from the MAPDL instance."""
         return self._get_job_information()
 
-    @job_information.setter
-    def job_information(self, value):
-        """Set the value for the MAPDL Job Information
-
-        .. warning:: By default, you cannot change 'job_information' property.
-
-        """
-        raise ValueError("The property 'job_information' cannot be changed")
-
     @property
     @update_information_first(True)
     def model_information(self):
         """Retrieve the model information from the MAPDL instance."""
         return self._get_model_information()
-
-    @model_information.setter
-    def model_information(self, value):
-        """Set the value for the MAPDL Model Information
-
-        .. warning:: By default, you cannot change 'model_information' property.
-
-        """
-        raise ValueError("The property 'model_information' cannot be changed")
 
     @property
     @update_information_first(True)
@@ -899,31 +713,11 @@ class Information:
         """Retrieve the boundary condition information from the MAPDL instance."""
         return self._get_boundary_condition_information()
 
-    @boundary_condition_information.setter
-    def boundary_condition_information(self, value):
-        """Set the value for the MAPDL Boundary Condition Information
-
-        .. warning:: By default, you cannot change 'boundary_condition_information' property.
-
-        """
-        raise ValueError(
-            "The method 'boundary_condition_information' cannot be changed"
-        )
-
     @property
     @update_information_first(True)
     def routine_information(self):
         """Retrieve the routine information from the MAPDL instance."""
         return self._get_routine_information()
-
-    @routine_information.setter
-    def routine_information(self, value):
-        """Set the value for the MAPDL Routine Information
-
-        .. warning:: By default, you cannot change 'routine_information' property.
-
-        """
-        raise ValueError("The property 'routine_information' cannot be changed")
 
     @property
     @update_information_first(True)
@@ -931,31 +725,11 @@ class Information:
         """Retrieve the solution options configuration from the MAPDL instance."""
         return self._get_solution_options_configuration()
 
-    @solution_options_configuration.setter
-    def solution_options_configuration(self, value):
-        """Set the value for the MAPDL Solution Options Configuration
-
-        .. warning:: By default, you cannot change 'solution_options_configuration' property.
-
-        """
-        raise ValueError(
-            "The method 'solution_options_configuration' cannot be changed"
-        )
-
     @property
     @update_information_first(True)
     def load_step_options(self):
         """Retrieve the load step options from the MAPDL instance."""
         return self._get_load_step_options()
-
-    @load_step_options.setter
-    def load_step_options(self, value):
-        """Set the value for the MAPDL Load Step Options
-
-        .. warning:: By default, you cannot change 'load_step_options' property.
-
-        """
-        raise ValueError("The property 'load_step_options' cannot be changed")
 
     def _get_between(self, init_string, end_string=None, string=None):
         if not string:
@@ -985,6 +759,13 @@ class Information:
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
             return match.groups(1)[0].strip()
+
+    def _get_stitles(self):
+        return [
+            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
+            for i in range(1, 5)
+            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+        ]
 
     def _get_products(self):
         init_ = "*** Products ***"
