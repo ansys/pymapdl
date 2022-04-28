@@ -75,7 +75,7 @@ def test_get_ansys_bin(mapdl):
 def test_mapdl_info(mapdl, capfd):
     info = mapdl.info
     for attr, value in inspect.getmembers(info):
-        if not attr.startswith("_"):
+        if not attr.startswith("_") and attr not in ["title", "stitles"]:
             assert isinstance(value, str)
 
             with pytest.raises(ValueError):
