@@ -59,50 +59,40 @@ after restarting the Python kernel.
 
 Offline Installation
 ~~~~~~~~~~~~~~~~~~~~
-If you would like to install ``ansys-mapdl-core`` on a computer
-without access to the internet, you can create a ``wheelhouse`` that
-contains all the dependencies necessary to install a python package
-without downloading each package individually.
+If you lack an internet connection on your install machine, the recommended way
+of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
+Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+machine architecture.
 
-On the host connected to the internet, run:
+Each wheelhouse archive contains all the python wheels necessary to install
+PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
+this on an isolated system with a fresh python or on a virtual environment.
 
-.. code::
-
-   pip install wheel
-   python -m pip wheel --wheel-dir=pyansys_wheelhouse ansys-mapdl-core
-
-This creates a new directory called ``pyansys_wheelhouse`` which
-contains every python package necessary to install
-``ansys-mapdl-core``.
-
-Next, zip the ``pyansys_wheelhouse`` directory and upload it to your
-offline computer. On the offline computer, unzip it and then install
-it with:
+For example, on Linux with Python 3.7, unzip it and install it with the following:
 
 .. code::
 
-   python -m pip install --no-index --find-links=pyansys_wheelhouse ansys-mapdl-core
+   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
+   pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
-This tells Python to install ``ansys-mapdl-core`` by only looking
-within the ``pyansys_wheelhouse`` directory.
+If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
+install using the same command as above.
 
-.. note::
-
-   The OS and version of Python used to generate the wheelhouse must
-   match the offline machine.
+Consider installing using a `virtual environment
+<https://docs.python.org/3/library/venv.html>`_.
 
 
-ANSYS Software Requirements
+Ansys Software Requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For the latest features, you will need a copy of ANSYS 2021R1
-installed locally, but PyMAPDL is compatible with ANSYS 17.0 and newer
+For the latest features, you will need a copy of Ansys 2021R1
+installed locally, but PyMAPDL is compatible with Ansys 17.0 and newer
 on Windows and 13.0 on Linux.
 
 .. note::
 
-    The latest versions of ANSYS provide signifiantly better support
+    The latest versions of Ansys provide signifiantly better support
     and features.  Certain features will not be supported by earlier
-    versions of ANSYS (e.g. APDL Math).
+    versions of Ansys (e.g. APDL Math).
 
 
 Verify Your Installation

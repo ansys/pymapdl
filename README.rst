@@ -113,9 +113,34 @@ For a local "development" version, install with:
    pip install -e .
 
 
+Offline Installation
+~~~~~~~~~~~~~~~~~~~~
+If you lack an internet connection on your install machine, the recommended way
+of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
+Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+machine architecture.
+
+Each wheelhouse archive contains all the python wheels necessary to install
+PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
+this on an isolated system with a fresh python or on a virtual environment.
+
+For example, on Linux with Python 3.7, unzip it and install it with the following:
+
+.. code::
+
+   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
+   pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
+
+If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
+install using the same command as above.
+
+Consider installing using a `virtual environment
+<https://docs.python.org/3/library/venv.html>`_.
+
+
 Dependencies
 ------------
-You will need a local licenced copy of ANSYS to run MAPDL prior and
+You will need a local licenced copy of Ansys to run MAPDL prior and
 including 2021R1.  If you have the latest version of 2021R1 you do
 not need MAPDL installed locally and can connect to a remote instance
 via gRPC.

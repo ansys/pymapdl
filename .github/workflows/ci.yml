@@ -16,6 +16,16 @@ env:
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
+  # Following env vars when changed will "reset" the mentioned cache,
+  # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
+  # You should go up in number, if you go down (or repeat a previous value)
+  # you might end up reusing a previous cache if it haven't been deleted already.
+  # It applies 7 days retention policy by default.
+  RESET_PIP_CACHE: 0
+  RESET_EXAMPLES_CACHE: 0
+  RESET_DOC_BUILD_CACHE: 0
+  RESET_AUTOSUMMARY_CACHE: 0
+  PACKAGE_NAME: PyMAPDL
 
 jobs:
 
@@ -68,13 +78,33 @@ jobs:
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install PyMAPDL
-        run: |
-          pip install .
+        run: pip install .
 
       - name: Test import
         working-directory: tests
+        run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+
+      - name: Retrieve PyMAPDL version
         run: |
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+        id: version
+
+      - name: Generate wheelhouse
+        run: pip wheel . -w wheelhouse
+
+      - name: Zip wheelhouse
+        uses: vimtor/action-zip@v1
+        with:
+          files: wheelhouse
+          dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
+
+      - name: Upload Wheelhouse
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
+          path: '*.zip'
+          retention-days: 7
 
   docs_build:
     name: Build Documentation
@@ -306,7 +336,8 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*.pdf
-      
+            ./**/*.zip
+
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
         if: ${{ failure() }}
@@ -316,5 +347,5 @@ jobs:
           job: ${{ toJson(job) }}
           steps: ${{ toJson(steps) }}
           overwrite: "{
-            title: `Release FAILED!`, 
+            title: `Release FAILED!`,
             }"
