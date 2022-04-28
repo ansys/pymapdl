@@ -31,6 +31,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
+    Information,
     last_created,
     load_file,
     random_string,
@@ -200,6 +201,8 @@ class _MapdlCore(Commands):
         self._post = PostProcessing(self)
 
         self._wrap_listing_functions()
+
+        self._info = Information(self)
 
     @property
     def print_com(self):
@@ -570,27 +573,12 @@ class _MapdlCore(Commands):
 
     @supress_logging
     def __str__(self):
-        try:
-            if self._exited:
-                return "MAPDL exited"
-            stats = self.slashstatus("PROD")
-        except Exception:  # pragma: no cover
-            return "MAPDL exited"
+        return self.info.__str__()
 
-        st = stats.find("*** Products ***")
-        en = stats.find("*** PrePro")
-        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
-
-        # get product version
-        stats = self.slashstatus("TITLE")
-        st = stats.find("RELEASE")
-        en = stats.find("INITIAL", st)
-        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
-
-        info = [f"Product:         {product}"]
-        info.append(f"MAPDL Version:   {mapdl_version}")
-        info.append(f"PyMAPDL Version: {pymapdl.__version__}\n")
-        return "\n".join(info)
+    @property
+    def info(self):
+        """General information"""
+        return self._info
 
     @property
     def geometry(self):
@@ -2420,11 +2408,10 @@ class _MapdlCore(Commands):
             msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
             self._log.info(msg)
 
-            # This very likely won't be recorded anywhere.
-
+            # This, very likely, won't be recorded anywhere.
             # But just in case, I'm adding info as /com
             command = (
-                f"/com, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
+                f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
 
         if command[:3].upper() in INVAL_COMMANDS:

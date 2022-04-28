@@ -1363,6 +1363,13 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
         mapdl.mpwrite("/test_dir/test", "mp")
 
 
+def test_mapdl_str(mapdl):
+    out = str(mapdl)
+    assert "ansys" in out.lower()
+    assert "Product" in out
+    assert "MAPDL Version" in out
+
+
 def test_plot_empty_mesh(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.nplot(vtk=True)
