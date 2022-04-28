@@ -82,12 +82,30 @@ def test_mapdl_info(mapdl, capfd):
                 setattr(info, attr, "any_value")
 
     assert "PyMAPDL" in mapdl.info.__repr__()
-
-    out, _ = capfd.readouterr()  # flushing
-    print(info)
-    out, _ = capfd.readouterr()
+    out = info.__str__()
 
     assert "ansys" in out.lower()
     assert "Product" in out
     assert "MAPDL Version" in out
     assert "UPDATE" in out
+
+
+def test_info_title(mapdl):
+    title = "this is my title"
+    mapdl.info.title = title
+    assert title == mapdl.info.title
+
+
+def test_info_stitle(mapdl):
+    info = mapdl.info
+
+    assert not info.stitles
+    stitles = ["asfd", "qwer", "zxcv", "jkl"]
+    info.stitles = "\n".join(stitles)
+
+    assert stitles == info.stitles
+
+    stitles = stitles[::-1]
+
+    info.stitles = stitles
+    assert stitles == info.stitles
