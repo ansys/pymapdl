@@ -78,7 +78,7 @@ def test_mapdl_info(mapdl, capfd):
         if not attr.startswith("_") and attr not in ["title", "stitles"]:
             assert isinstance(value, str)
 
-            with pytest.raises(ValueError):
+            with pytest.raises(AttributeError):
                 setattr(info, attr, "any_value")
 
     assert "PyMAPDL" in mapdl.info.__repr__()
