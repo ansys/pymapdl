@@ -1,4 +1,6 @@
 """Small or misc tests that don't fit in other test modules"""
+import inspect
+
 import pytest
 from pyvista.plotting import system_supports_plotting
 
