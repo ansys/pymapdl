@@ -104,8 +104,9 @@ def convert_script(
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
     Converting a script and using it already in the same session.
-    For this case, it is recommended to use ``convert_apdl_block``
-    from the ``converter`` module since you do not have to write the file.
+    For this case, it is recommended to use
+    :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
+    since this way it is not needed to write the file.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
