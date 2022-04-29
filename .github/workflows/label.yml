@@ -1,30 +1,36 @@
 name: "Pull Request Labeler"
 on:
-  pull_request_target:
-    types: [opened, reopened]
+  pull_request:
 
 jobs:
-  PR-Labeler:
+
+  labeler:
     permissions:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+
+    # Label based on modified files
     - name: Label based on changed files
       uses: actions/labeler@v4
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        # https://github.com/actions/labeler/issues/112#issuecomment-1000491676
         sync-labels: ''
 
     # Label based on branch name
     - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'doc/') || startsWith(github.event.pull_request.head.ref, 'docs')
+      if: |
+        startsWith(github.event.pull_request.head.ref, 'doc') || 
+        startsWith(github.event.pull_request.head.ref, 'docs')
       with:
         labels: Documentation
 
     - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'docker') || startsWith(github.event.pull_request.head.ref, 'no-ci') || startsWith(github.event.pull_request.head.ref, 'ci')
+      if: |
+        startsWith(github.event.pull_request.head.ref, 'docker') ||
+        startsWith(github.event.pull_request.head.ref, 'no-ci') ||
+        startsWith(github.event.pull_request.head.ref, 'ci')
       with:
         labels: CI/CD
 
@@ -41,15 +47,19 @@ jobs:
           - NEW FEATURE
 
     - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'fix') || startsWith(github.event.pull_request.head.ref, 'patch')
+      if: |
+        startsWith(github.event.pull_request.head.ref, 'fix') ||
+        startsWith(github.event.pull_request.head.ref, 'patch')
       with:
         labels: BUG
 
-    - uses: peter-evans/create-or-update-comment@v2
-      if: |
-        ${{ !contains(github.event.pull_request.labels.*.name, 'Enhancement')} } &&
-        ${{ !contains(github.event.pull_request.labels.*.name, 'Documentation')} } &&
-        ${{ !contains(github.event.pull_request.labels.*.name, 'Maintenance')} }
+  commenter:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Suggest to add labels
+      uses: peter-evans/create-or-update-comment@v2
+      # Execute only when no labels have been applied to the pull request
+      if: github.event.pull_request.labels == '[]'
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
