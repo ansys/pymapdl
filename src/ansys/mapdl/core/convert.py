@@ -76,7 +76,7 @@ def convert_script(
 
     comment_solve : bool, optional
         If ``True``, it will pythonically comment the lines that
-        contain ``mapdl.solve`` or ``"/EOF"``.
+        contain ``"SOLVE"`` or ``"/EOF"``.
 
     cleanup_output : bool, optional
         If ``True`` the output is formatted using ``autopep8`` before writing
