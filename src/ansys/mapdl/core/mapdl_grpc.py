@@ -1192,18 +1192,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            return super().tbft(
-                oper,
-                id_,
-                option1,
-                option2,
-                option3,
-                option4,
-                option5,
-                option6,
-                option7,
-                **kwargs,
-            )
+        return super().tbft(
+            oper,
+            id_,
+            option1,
+            option2,
+            option3,
+            option4,
+            option5,
+            option6,
+            option7,
+            **kwargs,
+        )
 
     @protect_grpc
     def input(
