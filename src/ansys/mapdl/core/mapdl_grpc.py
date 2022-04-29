@@ -1373,6 +1373,11 @@ class MapdlGrpc(_MapdlCore):
         fext = fname.split(".")[-1]
         ffullpath = os.path.join(fpath, fname)
 
+        # if there is no dirname, we are assuming the file is
+        # in the python working directory.
+        if not fpath:
+            fpath = os.getcwd()
+
         if os.path.exists(ffullpath) and self._local:
             return ffullpath
 
