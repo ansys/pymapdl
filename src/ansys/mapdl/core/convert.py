@@ -233,7 +233,7 @@ def convert_apdl_block(
     >>> in_file = examples.vmfiles['vm10']
     >>> filename = in_file.split('\\')[-1]
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
-    >>> cmds = convert_apdl_block(file, out_file, line_ending='\n')
+    >>> cmds = convert_apdl_block(file, out_file, line_ending='\\n')
     >>> # Do any change in the text, for example:
     >>> cmds = cmds.replace('solve', '!solve')
     >>> mapdl = launch_mapdl()
