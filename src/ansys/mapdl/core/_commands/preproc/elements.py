@@ -1254,6 +1254,34 @@ class Elements:
         This command is valid in any processor.
 
         """
+        if vtk is None:
+            vtk = self._use_vtk
+
+        if vtk:
+            kwargs.setdefault("title", "MAPDL Element Plot")
+            if not self._mesh.n_elem:
+                warnings.warn("There are no elements to plot.")
+                return general_plotter([], [], [], **kwargs)
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault("show_edges", True)
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+
+            return general_plotter(
+                [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
+                [],
+                labels,
+                mapdl=self,
+                **kwargs,
+            )
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
         return self.run("EPLOT")
 
     def eread(self, fname: str = "", ext: str = "", **kwargs) -> Optional[str]:
