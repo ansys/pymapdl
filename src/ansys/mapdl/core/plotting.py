@@ -1,6 +1,5 @@
 """Plotting helper for MAPDL using pyvista"""
 import numpy as np
-import pyvista as pv
 
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 
@@ -300,6 +299,16 @@ def _general_plotter(
                     off_screen=True)
 
     """
+    # Lazy import
+    import pyvista as pv
+
+    if notebook:
+        off_screen = True
+
+    if savefig:
+        off_screen = True
+        notebook = False
+
     if theme is None:
         theme = MapdlTheme()
 

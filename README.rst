@@ -1,7 +1,10 @@
 PyMAPDL
 =======
-|pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black|
+|pyansys| |pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black|
 
+.. |pyansys| image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC
+   :target: https://docs.pyansys.com/
+   :alt: PyAnsys
 
 .. |pypi| image:: https://img.shields.io/pypi/v/ansys-mapdl-core.svg?logo=python&logoColor=white
    :target: https://pypi.org/project/ansys-mapdl-core/
@@ -113,9 +116,34 @@ For a local "development" version, install with (requires pip >= 22.0):
    pip install -e .
 
 
+Offline Installation
+~~~~~~~~~~~~~~~~~~~~
+If you lack an internet connection on your install machine, the recommended way
+of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
+Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+machine architecture.
+
+Each wheelhouse archive contains all the python wheels necessary to install
+PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
+this on an isolated system with a fresh python or on a virtual environment.
+
+For example, on Linux with Python 3.7, unzip it and install it with the following:
+
+.. code::
+
+   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
+   pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
+
+If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
+install using the same command as above.
+
+Consider installing using a `virtual environment
+<https://docs.python.org/3/library/venv.html>`_.
+
+
 Dependencies
 ------------
-You will need a local licenced copy of ANSYS to run MAPDL prior and
+You will need a local licenced copy of Ansys to run MAPDL prior and
 including 2021R1.  If you have the latest version of 2021R1 you do
 not need MAPDL installed locally and can connect to a remote instance.
 

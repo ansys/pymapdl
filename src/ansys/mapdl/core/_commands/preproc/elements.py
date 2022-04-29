@@ -1,9 +1,7 @@
 from typing import Optional, Union
-import warnings
 
 from ansys.mapdl.core._commands.parse import parse_e
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
-from ansys.mapdl.core.plotting import general_plotter
 
 
 class Elements:
@@ -1233,45 +1231,27 @@ class Elements:
         """
         return self.run(f"ENSYM,{iinc},,{ninc},{iel1},{iel2},{ieinc}", **kwargs)
 
-    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+    def eplot(self, **kwargs):
         """Plots the currently selected elements.
 
         APDL Command: EPLOT
 
-        .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
-            values set with the ``PNUM`` command.
-
-        Parameters
-        ----------
-        vtk : bool, optional
-            Plot the currently selected elements using ``pyvista``.
-            Defaults to current ``use_vtk`` setting.
-
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-
-        **kwargs
-            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
-            keyword arguments related to visualizing using ``vtk``.
-
-        Examples
-        --------
-        >>> mapdl.clear()
-        >>> mapdl.prep7()
-        >>> mapdl.block(0, 1, 0, 1, 0, 1)
-        >>> mapdl.et(1, 186)
-        >>> mapdl.esize(0.1)
-        >>> mapdl.vmesh('ALL')
-        >>> mapdl.vgen(2, 'all')
-        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
-                        show_node_numbering=True)
-
-        Save a screenshot to disk without showing the plot
-
-        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
-                        window_size=[1920, 1080], savefig='screenshot.png',
-                        off_screen=True)
+        Notes
+        ------
+        Produces an element display of the selected elements. In full
+        graphics, only those elements faces with all of their corresponding
+        nodes selected are plotted. In PowerGraphics, all element faces of the selected
+        element set are plotted irrespective of the nodes selected. However,
+        for both full graphics and Power Graphics, adjacent or otherwise
+        duplicated faces of 3-D solid elements will not be displayed in an attempt
+        to eliminate plotting of interior facets. See the ``DSYS`` command for display
+        coordinate system issues.
+        This command will display curvature in midside node elements when PowerGraphics is activated
+        [``/GRAPHICS ,POWER``] and ``/EFACET,2`` or ``/EFACET,4`` are enabled. (To display
+        curvature, two facets per edge is recommended [``/EFACET,2``]). When you specify ``/EFACET,1``,
+        PowerGraphics does not display midside nodes. ``/EFACET`` has no effect on EPLOT for non-midside
+        node elements.
+        This command is valid in any processor.
 
         """
         if vtk is None:
