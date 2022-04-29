@@ -68,9 +68,10 @@ def convert_script(
 
     add_imports : bool, optional
         If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl``
-        and ``mapdl = launch_mapdl(loglevel="WARNING")``to the beginning of the
-        output file. This option is useful if you are planning to use the output
-        script from another mapdl session. See examples section.
+        and ``mapdl = launch_mapdl(loglevel="WARNING")`` to the
+        beginning of the output file. This option is useful if you
+        are planning to use the output script from another mapdl
+        session. See examples section.
         This option overrides ``auto_exit``.
 
     comment_solve : bool, optional

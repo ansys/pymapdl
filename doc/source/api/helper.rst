@@ -11,6 +11,8 @@ or automating other tasks.
    :toctree: _autosummary
 
    convert_script
+   convert_apdl_block
+   Report
    launch_mapdl
    change_default_ansys_path
    find_ansys
