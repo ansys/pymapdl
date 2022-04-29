@@ -18,17 +18,20 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
+    StringWithLiteralRepr,
     inject_docs,
 )
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
+    Information,
     last_created,
     load_file,
     random_string,
@@ -149,7 +152,17 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
-        self._use_vtk = use_vtk
+
+        if _HAS_PYVISTA:
+            self._use_vtk = use_vtk
+        else:  # pragma: no cover
+            if use_vtk:
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                )
+            else:
+                self._use_vtk = False
+
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
@@ -188,6 +201,8 @@ class _MapdlCore(Commands):
         self._post = PostProcessing(self)
 
         self._wrap_listing_functions()
+
+        self._info = Information(self)
 
     @property
     def print_com(self):
@@ -558,27 +573,12 @@ class _MapdlCore(Commands):
 
     @supress_logging
     def __str__(self):
-        try:
-            if self._exited:
-                return "MAPDL exited"
-            stats = self.slashstatus("PROD")
-        except Exception:  # pragma: no cover
-            return "MAPDL exited"
+        return self.info.__str__()
 
-        st = stats.find("*** Products ***")
-        en = stats.find("*** PrePro")
-        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
-
-        # get product version
-        stats = self.slashstatus("TITLE")
-        st = stats.find("RELEASE")
-        en = stats.find("INITIAL", st)
-        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
-
-        info = [f"Product:         {product}"]
-        info.append(f"MAPDL Version:   {mapdl_version}")
-        info.append(f"PyMAPDL Version: {pymapdl.__version__}\n")
-        return "\n".join(info)
+    @property
+    def info(self):
+        """General information"""
+        return self._info
 
     @property
     def geometry(self):
@@ -1034,11 +1034,17 @@ class _MapdlCore(Commands):
         ... )
 
         """
-        # lazy import here to avoid top level import
-        import pyvista as pv
-
         if vtk is None:
             vtk = self._use_vtk
+
+        if vtk is True:
+            if _HAS_PYVISTA:
+                # lazy import here to avoid top level import
+                import pyvista as pv
+            else:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
@@ -1066,6 +1072,81 @@ class _MapdlCore(Commands):
 
         self._enable_interactive_plotting()
         return super().nplot(nnum, **kwargs)
+
+    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+        """Plots the currently selected elements.
+
+        APDL Command: EPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
+        Parameters
+        ----------
+        vtk : bool, optional
+            Plot the currently selected elements using ``pyvista``.
+            Defaults to current ``use_vtk`` setting.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs
+            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            keyword arguments related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.1)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.vgen(2, 'all')
+        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
+                        show_node_numbering=True)
+
+        Save a screenshot to disk without showing the plot
+
+        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                        window_size=[1920, 1080], savefig='screenshot.png',
+                        off_screen=True)
+
+        """
+        if vtk is None:
+            vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
+
+        if vtk:
+            kwargs.setdefault("title", "MAPDL Element Plot")
+            if not self._mesh.n_elem:
+                warnings.warn("There are no elements to plot.")
+                return general_plotter([], [], [], **kwargs)
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault("show_edges", True)
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+
+            return general_plotter(
+                [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
+                [],
+                labels,
+                **kwargs,
+            )
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
+        return self.run("EPLOT")
 
     def vplot(
         self,
@@ -1131,6 +1212,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Volume Plot")
@@ -1252,6 +1338,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
@@ -1447,6 +1538,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
@@ -1525,6 +1621,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
@@ -2374,11 +2475,10 @@ class _MapdlCore(Commands):
             msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
             self._log.info(msg)
 
-            # This very likely won't be recorded anywhere.
-
+            # This, very likely, won't be recorded anywhere.
             # But just in case, I'm adding info as /com
             command = (
-                f"/com, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
+                f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
 
         if command[:3].upper() in INVAL_COMMANDS:
@@ -2409,14 +2509,15 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
-        text = self._run(command, mute=mute, **kwargs)
+        verbose = kwargs.get("verbose", False)
+        text = self._run(command, verbose=verbose, mute=mute)
 
         if mute:
             return
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
-            self._response = text.strip()
+            self._response = StringWithLiteralRepr(text.strip())
             self._log.info(self._response)
         else:
             self._response = None
@@ -3019,8 +3120,10 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
                 f"The parameter name `{param_name}` is an invalid parameter name."
@@ -3028,9 +3131,27 @@ class _MapdlCore(Commands):
                 "It cannot start with a number either."
             )
 
-        # invalid parameter (using ARGXX or ARXX)
+        if "(" in param_name or ")" in param_name:
+            if param_name.count("(") != param_name.count(")"):
+                raise ValueError(
+                    "The parameter name should have all the parenthesis in pairs (closed)."
+                )
+
+            if param_name[-1] != ")":
+                raise ValueError(
+                    "If using parenthesis (indexing), you cannot use any character after the closing parenthesis."
+                )
+
+            # Check recursively the parameter name without parenthesis.
+            # This is the real parameter name, however it must already exists to not raise an error.
+            sub_param_name = re.findall(r"^(.*)\(", param_name)
+            if sub_param_name:
+                self._check_parameter_name(sub_param_name[0])
+                return  # Following checks should not run against the parenthesis
+
+        # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in undescore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
@@ -3039,6 +3160,7 @@ class _MapdlCore(Commands):
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
+        # invalid parameter (using ARGXX or ARXX)
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
         if re.search(
             match_reserved_arg_parameter_name, param_name
@@ -3085,3 +3207,27 @@ class _MapdlCore(Commands):
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
+
+    @wraps(Commands.dim)
+    def dim(
+        self,
+        par="",
+        type_="",
+        imax="",
+        jmax="",
+        kmax="",
+        var1="",
+        var2="",
+        var3="",
+        csysid="",
+        **kwargs,
+    ):
+        self._check_parameter_name(par)  # parameter name check
+        if "(" in par or ")" in par:
+            raise ValueError(
+                "Parenthesis are not allowed as parameter name in 'mapdl.dim'."
+            )
+
+        return super().dim(
+            par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
+        )

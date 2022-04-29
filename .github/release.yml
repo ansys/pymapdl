@@ -1,21 +1,21 @@
 changelog:
-  exclude:
-    labels:
-      - ignore-for-release
   categories:
     - title: New Features
       labels:
-        - enhancement
+        - Enhancement
+        - NEW FEATURE
     - title: Bug fixes or behavior changes
       labels:
-        - bug
+        - BUG
+        - BLOCKER
     - title: Documentation
       labels:
-        - documentation
+        - Documentation
         - Examples
     - title: Maintenance
       labels:
-        - maintenance
+        - Maintenance
+        - Dependencies
     - title: MAPDL and/or API related
       labels:
         - MAPDL

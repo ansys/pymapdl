@@ -707,37 +707,126 @@ def change_default_ansys_path(exe_loc):
         raise FileNotFoundError("File %s is invalid or does not exist" % exe_loc)
 
 
-def save_ansys_path(exe_loc=""):
-    """Find ANSYS path or query user"""
-    # if exe_loc.strip():
-    #     print('Cached ANSYS executable %s not found' % exe_loc)
-    # else:
-    #     print('Cached ANSYS executable not found')
-    exe_loc, ver = find_ansys()
-    if os.path.isfile(exe_loc):
-        # automatically cache this path
-        # print('Found ANSYS at %s' % exe_loc)
-        # resp = input('Use this location?  [Y/n]')
-        # if resp != 'n':
+def save_ansys_path(exe_loc=None):  # pragma: no cover
+    """Find ANSYS path or query user.
+
+    If no ``exe_loc`` argument is supplied, this function attempt
+    to obtain the MAPDL executable from (and in order):
+    - The default ansys paths (i.e. 'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX')
+    - The configuration file
+    - User input
+
+    If ``exe_loc`` is supplied, this function does some checks.
+    If successful, it will write that ``exe_loc`` into the config file.
+
+    Parameters
+    ----------
+    exe_loc : str, optional
+        Path of the MAPDL executable ('ansysXXX'), by default None
+
+    Returns
+    -------
+    str
+        Path of the MAPDL executable.
+
+    Notes
+    -----
+    The configuration file location (``config.txt``) can be found in
+    ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
+
+    .. code:: python
+
+        >>> import appdirs
+        >>> import os
+        >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
+        C:/Users/gayuso/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
+
+    You can change the default ``exe_loc`` either by modifying the mentioned
+    ``config.txt`` file or by executing this function:
+
+    .. code:: python
+
+       >>> from ansys.mapdl.core.launcher import save_ansys_path
+       >>> save_ansys_path('/new/path/to/executable')
+
+    """
+    if exe_loc is None:
+        exe_loc, _ = find_ansys()
+
+    if is_valid_executable_path(exe_loc):  # pragma: not cover
+        if not is_common_executable_path(exe_loc):
+            warn_uncommon_executable_path(exe_loc)
+
         change_default_ansys_path(exe_loc)
         return exe_loc
 
     if exe_loc is not None:
-        if os.path.isfile(exe_loc):
-            return exe_loc
+        if is_valid_executable_path(exe_loc):
+            return exe_loc  # pragma: no cover
 
     # otherwise, query user for the location
-    with open(CONFIG_FILE, "w") as f:
-        print("Cached ANSYS executable not found")
-        exe_loc = input("Enter location of ANSYS executable: ")
-        if not os.path.isfile(exe_loc):
-            raise FileNotFoundError(
-                "ANSYS executable not found at this location:\n%s" % exe_loc
+    print("Cached ANSYS executable not found")
+    print(
+        "You are about to enter manually the path of the ANSYS MAPDL executable (ansysXXX, where XXX is the version"
+        "This file is very likely to contained in path ending in 'vXXX/ansys/bin/ansysXXX', but it is not required.\n"
+        "\nIf you experience problems with the input path you can overwrite the configuration file by typing:\n"
+        ">>> from ansys.mapdl.core.launcher import save_ansys_path\n"
+        ">>> save_ansys_path('/new/path/to/executable/')\n"
+    )
+    need_path = True
+    while need_path:  # pragma: no cover
+        exe_loc = input("Enter the location of an ANSYS executable (ansysXXX):")
+
+        if is_valid_executable_path(exe_loc):
+            if not is_common_executable_path(exe_loc):
+                warn_uncommon_executable_path(exe_loc)
+            with open(CONFIG_FILE, "w") as f:
+                f.write(exe_loc)
+            need_path = False
+        else:
+            print(
+                "The supplied path is either: not a valid file path, or does not match 'ansysXXX' name."
             )
 
-        f.write(exe_loc)
-
     return exe_loc
+
+
+def is_valid_executable_path(exe_loc):  # pragma: no cover
+    return (
+        os.path.isfile(exe_loc)
+        and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
+        is not None
+    )
+
+
+def is_common_executable_path(exe_loc):  # pragma: no cover
+    path = os.path.normpath(exe_loc)
+    path = path.split(os.sep)
+    if (
+        re.search("v(\d\d\d)", exe_loc) is not None
+        and re.search("ansys(\d\d\d)", exe_loc) is not None
+    ):
+        equal_version = (
+            re.search("v(\d\d\d)", exe_loc)[1] == re.search("ansys(\d\d\d)", exe_loc)[1]
+        )
+    else:
+        equal_version = False
+
+    return (
+        is_valid_executable_path(exe_loc)
+        and re.search("v\d\d\d", exe_loc)
+        and "ansys" in path
+        and "bin" in path
+        and equal_version
+    )
+
+
+def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
+    warnings.warn(
+        f"The supplied path ('{exe_loc}') does not match the usual ansys executable path style"
+        "('directory/vXXX/ansys/bin/ansysXXX'). "
+        "You might have problems at later use."
+    )
 
 
 def check_lock_file(path, jobname, override):
@@ -919,10 +1008,12 @@ def launch_mapdl(
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
     ip : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``'127.0.0.1'``. You can also override the default behavior of
-        this keyword argument with the environment variable
-        "PYMAPDL_IP=FALSE".
+        Used only when ``start_instance`` is ``False``. If provided,
+        it will force ``start_instance`` to be ``False``.
+        You can also provide a hostname as an alternative to an IP address.
+        Defaults to ``'127.0.0.1'``. You can also override the
+        default behavior of this keyword argument with the
+        environment variable "PYMAPDL_IP=FALSE".
 
     clear_on_connect : bool, optional
         Used only when ``start_instance`` is ``False``.  Defaults to
@@ -1100,7 +1191,11 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-        check_valid_ip(ip)
+    else:  # pragma: no cover
+        start_instance = False
+        ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
+
+    check_valid_ip(ip)  # double check
 
     if port is None:
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))

@@ -1,4 +1,6 @@
 """Small or misc tests that don't fit in other test modules"""
+import inspect
+
 import numpy as np
 import pytest
 from pyvista.plotting import system_supports_plotting
@@ -8,6 +10,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_start_instance,
+    get_ansys_bin,
     last_created,
     no_return,
     run_as_prep7,
@@ -109,3 +112,50 @@ def test_no_return(mapdl, cleared):
     assert fun(mapdl) is None
     last_keypoint = np.array(mapdl.klist().splitlines()[-1].split(), dtype=float)[0:4]
     assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
+
+
+def test_get_ansys_bin(mapdl):
+    rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
+    assert isinstance(get_ansys_bin(rver), str)
+
+
+def test_mapdl_info(mapdl, capfd):
+    info = mapdl.info
+    for attr, value in inspect.getmembers(info):
+        if not attr.startswith("_") and attr not in ["title", "stitles"]:
+            assert isinstance(value, str)
+
+            with pytest.raises(AttributeError):
+                setattr(info, attr, "any_value")
+
+    assert "PyMAPDL" in mapdl.info.__repr__()
+    out = info.__str__()
+
+    assert "ansys" in out.lower()
+    assert "Product" in out
+    assert "MAPDL Version" in out
+    assert "UPDATE" in out
+
+
+def test_info_title(mapdl):
+    title = "this is my title"
+    mapdl.info.title = title
+    assert title == mapdl.info.title
+
+
+def test_info_stitle(mapdl):
+    info = mapdl.info
+
+    assert not info.stitles
+    stitles = ["asfd", "qwer", "zxcv", "jkl"]
+    info.stitles = "\n".join(stitles)
+
+    assert stitles == info.stitles
+
+    stitles = stitles[::-1]
+
+    info.stitles = stitles
+    assert stitles == info.stitles
+
+    info.stitles = None
+    assert not info.stitles

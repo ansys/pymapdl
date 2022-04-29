@@ -17,7 +17,6 @@ import weakref
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
-from tqdm import tqdm
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -63,6 +62,15 @@ from ansys.mapdl.core.misc import (
 )
 from ansys.mapdl.core.post import PostProcessing
 
+# Checking if tqdm is installed.
+# If it is, the default value for progress_bar is true.
+try:
+    from tqdm import tqdm
+
+    _HAS_TQDM = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_TQDM = False
+
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -87,6 +95,12 @@ def get_file_chunks(filename, progress_bar=False):
     """Serializes a file into chunks"""
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
+                "To avoid this message you can set 'progress_bar=False'."
+            )
+
         n_bytes = os.path.getsize(filename)
 
         base_name = os.path.basename(filename)
@@ -117,7 +131,7 @@ def get_file_chunks(filename, progress_bar=False):
 
 
 def save_chunks_to_file(
-    chunks, filename, progress_bar=True, file_size=None, target_name=""
+    chunks, filename, progress_bar=False, file_size=None, target_name=""
 ):
     """Saves chunks to a local file
 
@@ -126,9 +140,14 @@ def save_chunks_to_file(
     file_size : int
         File size saved in bytes.  ``0`` means no file was written.
     """
-
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
+                "To avoid this message you can set 'progress_bar=False'."
+            )
+
         pbar = tqdm(
             total=file_size,
             desc="Downloading %s" % target_name,
@@ -1048,7 +1067,6 @@ class MapdlGrpc(_MapdlCore):
                 targets = rth_files
             else:
                 remote_files_str = "\n".join("\t%s" % item for item in remote_files)
-                print("\t".join("\n%s" % item for item in ["a", "b", "c"]))
                 raise FileNotFoundError(
                     "Unable to locate any result file from the "
                     "following remote result files:\n\n" + remote_files_str
@@ -1476,7 +1494,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):
+    def download_project(self, extensions=None, target_dir=None, progress_bar=False):
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1488,6 +1506,11 @@ class MapdlGrpc(_MapdlCore):
         target_dir : Str, optional
             Path where the downloaded files will be located, by default None.
 
+        progress_bar : bool, optional
+            Display a progress bar using
+            ``tqdm`` when ``True``.  Helpful for showing download
+            progress. Default to ``False``.
+
         Returns
         -------
         List[Str]
@@ -1495,13 +1518,19 @@ class MapdlGrpc(_MapdlCore):
         """
         if not extensions:
             files = self.list_files()
-            list_of_files = self.download(files, target_dir=target_dir)
+            list_of_files = self.download(
+                files, target_dir=target_dir, progress_bar=progress_bar
+            )
 
         else:
             list_of_files = []
             for each_extension in extensions:
                 list_of_files.extend(
-                    self.download(files=f"*.{each_extension}", target_dir=target_dir)
+                    self.download(
+                        files=f"*.{each_extension}",
+                        target_dir=target_dir,
+                        progress_bar=progress_bar,
+                    )
                 )
 
         return list_of_files
@@ -1511,7 +1540,7 @@ class MapdlGrpc(_MapdlCore):
         files,
         target_dir=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        progress_bar=None,
         recursive=False,
     ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
@@ -1572,7 +1601,6 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_project()
 
         """
-
         if chunk_size > 4 * 1024 * 1024:  # 4MB
             raise ValueError(
                 f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
@@ -1669,7 +1697,7 @@ class MapdlGrpc(_MapdlCore):
         target_name,
         out_file_name=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        progress_bar=None,
     ):
         """Download a file from the gRPC instance
 
@@ -1697,6 +1725,10 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file.rst', 'my_result.rst')
         """
+
+        if not progress_bar and _HAS_TQDM:
+            progress_bar = True
+
         if out_file_name is None:
             out_file_name = target_name
 

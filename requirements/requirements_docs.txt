@@ -1,7 +1,7 @@
 Sphinx==4.5.0
 ansys-mapdl-reader==0.51.11
 imageio-ffmpeg==0.4.7
-imageio==2.16.2
+imageio==2.18.0
 jupyter_sphinx==0.3.2
 jupyterlab>=3.2.8
 matplotlib==3.5.1
@@ -12,7 +12,7 @@ pyansys_sphinx_theme==0.2.3
 pypandoc==1.7.5
 pytest-sphinx==0.4.0
 pythreejs==2.3.0
-pyvista==0.34.0
+pyvista==0.34.1
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.18.1
 sphinx-copybutton==0.5.0
