@@ -460,45 +460,7 @@ class _MapdlCore(Commands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the ``*GET`` command or ``GET`` command.
-
-        Returns
-        -------
-        :class:`ansys.mapdl.core.parameters.Parameters`
-
-        Examples
-        --------
-        Simply list all parameters except for MAPDL MATH parameters
-
-        >>> mapdl.parameters
-        ARR                              : ARRAY DIM (3, 1, 1)
-        PARM_FLOAT                       : 20.0
-        PARM_INT                         : 10.0
-        PARM_LONG_STR                    : "stringstringstringstringstringst"
-        PARM_STR                         : "string"
-        PORT                             : 50052.0
-
-        Get a parameter
-
-        >>> mapdl.parameters['PARM_FLOAT']
-        20.0
-
-        Get an array parameter
-
-        >>> mapdl.parameters['ARR']
-        array([1., 2., 3.])
-
-        Get the current routine
-
-        >>> mapdl.parameters.routine
-        'PREP7'
-
-        >>> mapdl.parameters.units
-        'SI'
-
-        >>> mapdl.parameters.csys
-        0
-        """
+        __doc__ = self._parameters.__doc__
         return self._parameters
 
     class _non_interactive:
