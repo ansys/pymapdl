@@ -118,7 +118,7 @@ class Plain_Report:
 
 if _HAS_SCOOBY:
     base_report_class = scooby.Report
-else:
+else:  # pragma: no cover
     base_report_class = Plain_Report
 
 
