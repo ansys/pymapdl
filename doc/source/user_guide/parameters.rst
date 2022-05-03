@@ -44,17 +44,20 @@ For a full listing of the methods and attributes available to the
 ``Parameters`` class, please reference the :ref:`ref_parameters_api`.
 
 
-Especially Named Parameters
-===========================
+
+.. _ref_special_named_param:
+
+Specially Named Parameters
+==========================
 
 Leading Underscored Parameters
 ------------------------------
 
 The parameters starting with underscore (``'_'``) are reserved parameters
-for MAPDL macros and routines, therefore its use is discouraged, and
-in PyMAPDL you cannot set them by default.
+for MAPDL macros and routines. Their use is discouraged, and in PyMAPDL
+you cannot set them directly.
 
-If you need to set one of this parameters, you can use
+If you need to set one of these parameters, you can use
 :attr:`Mapdl._run <ansys.mapdl.core.Mapdl._run>`
 to avoid PyMAPDL parameter name checks. For example
 
@@ -64,7 +67,7 @@ to avoid PyMAPDL parameter name checks. For example
    >>> mapdl._run('_parameter=123')
    'PARAMETER _PARAMETER =     123.00000000'
 
-By default, this type of parameters cannot be seen when issuing
+By default, this type of parameter cannot be seen when issuing
 :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
 However, you can change this by setting
 :attr:`Mapdl.parameters.show_leading_underscore_parameters 
@@ -88,9 +91,9 @@ For example:
 Trailing Underscored Parameters
 -------------------------------
 
-The parameters ending underscore are recommend for user routines
+Parameters ending with an underscore are recommended for user routines
 and macros.
-You can set this type of parameters in PyMAPDL, but by default,
+You can set this type of parameter in PyMAPDL, but by default,
 they cannot be seen in
 :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`, unless
 :attr:`Mapdl.parameters.show_trailing_underscore_parameters 
@@ -114,12 +117,10 @@ is set to ``True``.
 Parameters with Leading and Trailing Underscore
 -----------------------------------------------
 
-These are an especial type of parameters. They **CANNOT** be seen
-in :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`
-under any circumstances, and because of it, it uses is not recommended.
+These are a special type of parameter. They **CANNOT** be seen in :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` under any circumstances. Their use is not recommended.
 
 You can still retrieve them using any of the normal methods
-to retrieve parameters. But you shall know the parameter name.
+to retrieve parameters. But you need to know the parameter name.
 For example:
 
 
@@ -134,11 +135,12 @@ For example:
 
 
 
+.. _ref_numpy_arrays_in_mapdl:
 Issues when Importing and Exporting Numpy Arrays in MAPDL
 =========================================================
 
 Because of the way MAPDL is designed, there is no way to store an
-array whose one of its dimension is zero.
+array where one or more dimension is zero.
 This can happens in Numpy arrays, where its first dimension can be
 set to zero.
 
@@ -147,7 +149,7 @@ set to zero.
    >>> import numpy
    >>> from ansys.mapdl.core import launch_mapdl
    >>> mapdl = launch_mapdl()
-   >>> array40 = np.reshape([1,2,3, 4], (4,))
+   >>> array40 = np.reshape([1, 2, 3, 4], (4,))
    >>> array40
    array([1, 2, 3, 4])
 
