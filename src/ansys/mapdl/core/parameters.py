@@ -34,7 +34,7 @@ UNITS_MAP = {
 
 
 class Parameters:
-    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
+    """Collection of MAPDL parameters.
 
     Notes
     -----
@@ -55,6 +55,7 @@ class Parameters:
 
     These types of array dimensions will be always converted to ``1``.
     For example:
+
     >>> mapdl.parameters['mapdlarray40'] = array40
     >>> mapdl.parameters['mapdlarray40']
     array([[1.],
