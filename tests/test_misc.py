@@ -138,3 +138,22 @@ def test_plain_report():
     assert "Core packages" in rep_str
     assert "Optional packages" in rep_str
     assert "Additional packages" in rep_str
+
+
+def test_plain_report_no_options():
+    from ansys.mapdl.core.misc import Plain_Report
+
+    core = ["numpy", "ansys.mapdl.reader"]
+
+    report = Plain_Report(core=core)
+    rep_str = report.__repr__()
+
+    for each in core:
+        assert each in rep_str
+
+    assert "\n" in rep_str
+    assert len(rep_str.splitlines()) > 3
+
+    assert "Core packages" in rep_str
+    assert "Optional packages" not in rep_str
+    assert "Additional packages" not in rep_str

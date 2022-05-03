@@ -45,7 +45,7 @@ def get_ansys_bin(rver):
 
 
 class Plain_Report:
-    def __init__(self, core, optional, additional, **kwargs):
+    def __init__(self, core, optional=None, additional=None, **kwargs):
         """
         Base class for a plain report.
 
@@ -179,7 +179,7 @@ class Report(base_report_class):
 
             try:
                 extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 extra_meta = ("GPU Details", f"Error: {e.message}")
         else:
             extra_meta = ("GPU Details", "None")
