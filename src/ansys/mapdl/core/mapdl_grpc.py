@@ -221,6 +221,15 @@ class MapdlGrpc(_MapdlCore):
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
 
+    channel : grpc.Channel, optional
+        gRPC channel to use for the connection. Can be used as an
+        alternative to the ``ip`` and ``port`` parameters.
+
+    remote_instance : ansys.platform.instancemanagement.Instance
+        The corresponding remote instance when MAPDL is launched through
+        PyPIM. This instance will be deleted when calling
+        :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -269,10 +278,12 @@ class MapdlGrpc(_MapdlCore):
         remove_temp_files=False,
         print_com=False,
         channel=None,
+        remote_instance=None,
         **kwargs,
     ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
+        self._remote_instance = remote_instance
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -814,6 +825,9 @@ class MapdlGrpc(_MapdlCore):
         self._kill()  # sets self._exited = True
         self._close_process()
         self._remove_lock_file()
+
+        if self._remote_instance:
+            self._remote_instance.delete()
 
         if self._remove_tmp and self._local:
             self._log.debug("Removing local temporary files")

@@ -1,7 +1,10 @@
 """Test the mapdl launcher"""
 import os
+from unittest.mock import create_autospec
 import weakref
 
+import ansys.platform.instancemanagement as pypim
+import grpc
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -16,6 +19,7 @@ from ansys.mapdl.core.launcher import (
     warn_uncommon_executable_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH
 from ansys.mapdl.core.misc import get_ansys_bin
 
 try:
@@ -299,3 +303,64 @@ def test_warn_uncommon_executable_path():
         UserWarning, match="does not match the usual ansys executable path style"
     ):
         warn_uncommon_executable_path("")
+
+
+@pytest.mark.skipif(
+    not get_start_instance(), reason="Skip when start instance is disabled"
+)
+def test_launch_remote_instance(monkeypatch):
+    # Create a mock pypim pretenting it is configured and returning a channel to an already running mapdl
+    mapdl = launch_mapdl()
+    mock_instance = pypim.Instance(
+        definition_name="definitions/fake-mapdl",
+        name="instances/fake-mapdl",
+        ready=True,
+        status_message=None,
+        services={"grpc": pypim.Service(uri=mapdl._channel_str, headers={})},
+    )
+    pim_channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
+    mock_instance.wait_for_ready = create_autospec(mock_instance.wait_for_ready)
+    mock_instance.build_grpc_channel = create_autospec(
+        mock_instance.build_grpc_channel, return_value=pim_channel
+    )
+    mock_instance.delete = create_autospec(mock_instance.delete)
+
+    mock_client = pypim.Client(channel=grpc.insecure_channel("localhost:12345"))
+    mock_client.create_instance = create_autospec(
+        mock_client.create_instance, return_value=mock_instance
+    )
+
+    mock_connect = create_autospec(pypim.connect, return_value=mock_client)
+    mock_is_configured = create_autospec(pypim.is_configured, return_value=True)
+    monkeypatch.setattr(pypim, "connect", mock_connect)
+    monkeypatch.setattr(pypim, "is_configured", mock_is_configured)
+
+    # Start MAPDL with launch_mapdl
+    mapdl = launch_mapdl()
+
+    # Assert: pymapdl went through the pypim workflow
+    assert mock_is_configured.called
+    assert mock_connect.called
+    mock_client.create_instance.assert_called_with(
+        product_name="mapdl", product_version=None
+    )
+    assert mock_instance.wait_for_ready.called
+    mock_instance.build_grpc_channel.assert_called_with(
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ]
+    )
+
+    # And it connected using the channel created by PyPIM
+    assert mapdl._channel == pim_channel
+
+    # Stop MAPDL
+    mapdl.exit()
+
+    # Assert: The deletion was transmitted to PIM
+    mock_instance.delete.assert_called()

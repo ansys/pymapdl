@@ -11,6 +11,7 @@ import tempfile
 import time
 import warnings
 
+import ansys.platform.instancemanagement as pypim
 import appdirs
 
 from ansys.mapdl import core as pymapdl
@@ -18,7 +19,7 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
@@ -517,6 +518,46 @@ def launch_grpc(
         time.sleep(sleep_time)
 
     return port, run_location
+
+
+def launch_remote_mapdl(
+    version=None,
+    cleanup_on_exit=True,
+) -> _MapdlCore:
+    """Start MAPDL remotely using the product instance management API.
+
+    When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
+    This can be verified with :func:`pypim.is_configured <ansys.platform.instancemanagement.is_configured>`.
+
+    Parameters
+    ----------
+    version: str, optional
+        The MAPDL version to run, in the 3 digits format, such as "212".
+
+        If unspecified, the version will be chosen by the server.
+
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
+
+        If unspecified, it will be cleaned up.
+
+    Returns
+    -------
+    ansys.mapdl.core.mapdl._MapdlCore
+        An instance of Mapdl.
+    """
+    pim = pypim.connect()
+    instance = pim.create_instance(product_name="mapdl", product_version=version)
+    instance.wait_for_ready()
+    channel = instance.build_grpc_channel(
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ]
+    )
+    return MapdlGrpc(
+        channel=channel, cleanup_on_exit=cleanup_on_exit, remote_instance=instance
+    )
 
 
 def get_start_instance(start_instance_default=True):
@@ -1156,6 +1197,11 @@ def launch_mapdl(
         Enables shared-memory parallelism.
         See the Parallel Processing Guide for more information.
 
+    If the environment is configured to use `PyPIM <https://pypim.docs.pyansys.com>`_
+    and ``start_instance`` is ``True``, then starting the instance will be delegated to PyPIM.
+    In this event, most of the options will be ignored and the server side configuration will
+    be used.
+
     Examples
     --------
     Launch MAPDL using the best protocol.
@@ -1260,6 +1306,12 @@ def launch_mapdl(
         if clear_on_connect:
             mapdl.clear()
         return mapdl
+
+    if pypim.is_configured() and exec_file is None:
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
 
     # verify executable
     if exec_file is None:
