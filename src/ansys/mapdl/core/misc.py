@@ -10,6 +10,7 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from warnings import warn
 import weakref
 
 import numpy as np
