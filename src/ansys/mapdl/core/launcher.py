@@ -1247,6 +1247,12 @@ def launch_mapdl(
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
         check_valid_port(port)
 
+    # Start MAPDL with PyPIM if the environment is configured for it
+    # and the user did not pass a directive on how to launch it.
+    if pypim.is_configured() and exec_file is None:
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+
     # connect to an existing instance if enabled
     if start_instance is None:
         start_instance = check_valid_start_instance(
@@ -1306,12 +1312,6 @@ def launch_mapdl(
         if clear_on_connect:
             mapdl.clear()
         return mapdl
-
-    if pypim.is_configured() and exec_file is None:
-        # Start MAPDL with PyPIM if the environment is configured for it
-        # and the user did not pass a directive on how to launch it.
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
 
     # verify executable
     if exec_file is None:
