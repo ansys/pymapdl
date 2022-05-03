@@ -827,7 +827,8 @@ class MapdlGrpc(_MapdlCore):
         self._remove_lock_file()
 
         if self._remote_instance:
-            self._remote_instance.delete()
+            # No cover: The CI is working with a single MAPDL instance
+            self._remote_instance.delete()  # pragma: no cover
 
         if self._remove_tmp and self._local:
             self._log.debug("Removing local temporary files")
