@@ -43,8 +43,8 @@ jobs:
       if: startsWith(github.event.pull_request.head.ref, 'feat')
       with:
         labels: |
-          - Enhancement
-          - NEW FEATURE
+          Enhancement
+          NEW FEATURE
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
