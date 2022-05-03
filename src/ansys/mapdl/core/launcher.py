@@ -531,7 +531,7 @@ def launch_remote_mapdl(
 
     Parameters
     ----------
-    version: str, optional
+    version : str, optional
         The MAPDL version to run, in the 3 digits format, such as "212".
 
         If unspecified, the version will be chosen by the server.
