@@ -183,7 +183,6 @@ class Report(base_report_class):
             extra_meta = ("GPU Details", "None")
 
         super().__init__(
-            self,
             additional=additional,
             core=core,
             optional=optional,
