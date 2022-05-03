@@ -169,13 +169,13 @@ For example:
    (4, 1)
 
 This means that when you pass two arrays, one with the second axis equal
-to zero (i.e. ``array40``) and another one with the second axis equal
+to zero (e.g. ``array40``) and another one with the second axis equal
 to one, if later retrieved, they will have the same
 shape.
 
 .. code:: python
 
-   >>> array41 = np.reshape([1,2,3, 4], (4,1))
+   >>> array41 = np.reshape([1, 2, 3, 4], (4,1))
    >>> array41
    array([[1],
       [2],
@@ -187,5 +187,5 @@ shape.
       [2.],
       [3.],
       [4.]])
-   >>> np.allclose(mapdl.parameters['mapdlarray40'] == assert mapdl.parameters['mapdlarray41'])
+   >>> np.allclose(mapdl.parameters['mapdlarray40'], mapdl.parameters['mapdlarray41'])
    True
