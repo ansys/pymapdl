@@ -72,6 +72,8 @@ class Plain_Report:
         from importlib.metadata import PackageNotFoundError
         from importlib.metadata import version as get_lib_version
 
+        package = package.replace(".", "-")
+
         try:
             return get_lib_version(package)
         except PackageNotFoundError:
