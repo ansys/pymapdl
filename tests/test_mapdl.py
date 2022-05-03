@@ -838,8 +838,9 @@ def test_load_array_types(mapdl, array):
     assert np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
 
 
-@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(3,))])
+@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(5,))])
 def test_load_array_failure_types(mapdl, array):
+    array[0] = array[0] + 1  # This is to avoid having all elements equal #1061
     mapdl.load_array("myarr", array)
     array = np.array(array)
     assert not np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
