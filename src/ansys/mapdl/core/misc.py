@@ -16,6 +16,7 @@ import numpy as np
 import scooby
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import _HAS_PYVISTA
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -86,7 +87,7 @@ class Report(scooby.Report):
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
-        if gpu:
+        if gpu and _HAS_PYVISTA:
             from pyvista.utilities.errors import GPUInfo
 
             try:
