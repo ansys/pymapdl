@@ -50,7 +50,7 @@ class Plain_Report:
         Base class for a plain report.
 
 
-        Based on package "scooby" (https://github.com/banesullivan/scooby)
+        Based on `scooby <https://github.com/banesullivan/scooby>`_ package.
 
         Parameters
         ----------
