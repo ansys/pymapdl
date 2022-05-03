@@ -39,6 +39,50 @@ class Parameters:
     Notes
     -----
 
+    **Importing and export Numpy arrays in MAPDL**
+    Because of the way MAPDL is designed, there is no way to store an
+    array whose one of its dimension is zero.
+    This can happens in Numpy arrays, where its first dimension can be
+    set to zero.
+
+    >>> import numpy
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl()
+    >>> array40 = np.reshape([1,2,3, 4], (4,))
+    >>> array40
+    array([1, 2, 3, 4])
+
+    These types of array dimensions will be always converted to ``1``.
+    For example:
+    >>> mapdl.parameters['mapdlarray40'] = array40
+    >>> mapdl.parameters['mapdlarray40']
+    array([[1.],
+       [2.],
+       [3.],
+       [4.]])
+    >>> mapdl.parameters['mapdlarray40'].shape
+    (4, 1)
+
+    This means that when you pass two arrays, one with the second axis equal
+    to zero (i.e. ``array40``) and another one with the second axis equal
+    to one, if later retrieved, they will have the same
+    shape.
+
+    >>> array41 = np.reshape([1,2,3, 4], (4,1))
+    >>> array41
+    array([[1],
+       [2],
+       [3],
+       [4]])
+    >>> mapdl.parameters['mapdlarray41'] = array41
+    >>> mapdl.parameters['mapdlarray41']
+    array([[1.],
+       [2.],
+       [3.],
+       [4.]])
+    >>> np.allclose(mapdl.parameters['mapdlarray40'] == assert mapdl.parameters['mapdlarray41'])
+    True
+
     **Leading underscored parameters**
 
     The parameters starting with underscore ('_') are reserved parameters
@@ -366,11 +410,6 @@ class Parameters:
         if not isinstance(key, str):
             raise TypeError("Parameter name must be a string")
         key = key.upper()
-
-        # We are going to directly query the desired parameter.
-        # It is more efficient (less parsing) and
-        # you can obtain leading and trailing underscore parameters, which
-        # they don't appear in a normal ``*STATUS``
 
         with self.full_parameters_output:
             parameters = self._parm
