@@ -305,12 +305,8 @@ def test_warn_uncommon_executable_path():
         warn_uncommon_executable_path("")
 
 
-@pytest.mark.skipif(
-    not get_start_instance(), reason="Skip when start instance is disabled"
-)
-def test_launch_remote_instance(monkeypatch):
+def test_launch_remote_instance(monkeypatch, mapdl):
     # Create a mock pypim pretenting it is configured and returning a channel to an already running mapdl
-    mapdl = launch_mapdl()
     mock_instance = pypim.Instance(
         definition_name="definitions/fake-mapdl",
         name="instances/fake-mapdl",
@@ -341,7 +337,9 @@ def test_launch_remote_instance(monkeypatch):
     monkeypatch.setattr(pypim, "is_configured", mock_is_configured)
 
     # Start MAPDL with launch_mapdl
-    mapdl = launch_mapdl()
+    # Note: This is mocking to start MAPDL, but actually reusing the common one
+    # Thus cleanup_on_exit is set to false
+    mapdl = launch_mapdl(cleanup_on_exit=False)
 
     # Assert: pymapdl went through the pypim workflow
     assert mock_is_configured.called
@@ -359,8 +357,5 @@ def test_launch_remote_instance(monkeypatch):
     # And it connected using the channel created by PyPIM
     assert mapdl._channel == pim_channel
 
-    # Stop MAPDL
-    mapdl.exit()
-
-    # Assert: The deletion was transmitted to PIM
-    mock_instance.delete.assert_called()
+    # and it kept track of the instance to be able to delete it
+    assert mapdl._remote_instance == mock_instance
