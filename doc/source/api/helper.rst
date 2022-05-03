@@ -13,8 +13,8 @@ or automating other tasks.
    
    launch_mapdl
    convert_script
-   convert_apdl_block
    Report
+   Information
    change_default_ansys_path
    find_ansys
    close_all_local_instances
