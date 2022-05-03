@@ -39,7 +39,7 @@ class Parameters:
     Notes
     -----
 
-    **Importing and export Numpy arrays in MAPDL**
+    **Importing and exporting Numpy arrays in MAPDL**
 
     Because of the way MAPDL is designed, there is no way to store an
     array whose one of its dimension is zero.
