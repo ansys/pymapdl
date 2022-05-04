@@ -1160,10 +1160,11 @@ def test_get_file_path(mapdl, tmpdir):
     "option2,option3,option4",
     [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
 )
-def test_tbft(mapdl, option2, option3, option4):
+def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
     fname = "expdata.dat"
-    fpath = os.path.join(os.getcwd(), fname)
+    dirpath = tmpdir.mkdir("tmpdir")
+    fpath = dirpath.join(fname)
 
     with open(fpath, "w") as fid:
         fid.write(
@@ -1175,7 +1176,9 @@ def test_tbft(mapdl, option2, option3, option4):
         )
 
     if option4 == "DIR":
-        option4 = os.getcwd()
+        option4 = dirpath
+    else:
+        option2 = os.path.join(dirpath, option2)
 
     mapdl.prep7(mute=True)
     mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
