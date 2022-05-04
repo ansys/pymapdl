@@ -185,15 +185,15 @@ jobs:
           path: doc/build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}d-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
         uses: actions/cache@v2
         with:
           path: doc/source/**/_autosummary/*.rst
-          key: autosummary-rst-v{{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
-            autosummary-rst-v{{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Install Docs Build Requirements
         run: |
