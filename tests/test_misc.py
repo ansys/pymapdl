@@ -118,7 +118,7 @@ def test_info_stitle(mapdl):
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
 def test_load_file_local(mapdl, tmpdir, file_):
-    """Checking 'load_file' function"""
+    """Checking 'load_file' function."""
     mapdl._local = True
 
     if file_ == "dumdum.dummy":

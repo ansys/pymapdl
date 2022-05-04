@@ -492,7 +492,6 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
 
     elif not os.path.exists(fname) and base_fname in mapdl.list_files():
         mapdl._log.debug("File is already in the MAPDL working directory")
-        pass
 
     # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)
