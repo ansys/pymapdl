@@ -39,7 +39,7 @@ class Parameters:
     Notes
     -----
 
-    See :ref:`parameters` for additional notes.
+    See :ref:`ref_parameters` for additional notes.
 
     Examples
     --------

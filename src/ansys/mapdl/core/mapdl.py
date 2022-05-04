@@ -464,7 +464,7 @@ class _MapdlCore(Commands):
 
         Notes
         -----
-        See :ref:`special_named_param` for additional notes regarding parameter naming in MAPDL.
+        See :ref:`ref_special_named_param` for additional notes regarding parameter naming in MAPDL.
 
         Examples
         --------
