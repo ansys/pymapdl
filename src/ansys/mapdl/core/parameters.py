@@ -34,73 +34,12 @@ UNITS_MAP = {
 
 
 class Parameters:
-    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
+    """Collection of MAPDL parameters.
 
     Notes
     -----
 
-    **Leading underscored parameters**
-
-    The parameters starting with underscore ('_') are reserved parameters
-    for MAPDL macros and routines, therefore its use is discouraged, and
-    in PyMAPDL you cannot set them by default.
-
-    If you need to set one of this parameters, you can use ``mapdl._run``
-    to avoid PyMAPDL parameter name checks. For example
-
-    >>> mapdl._run('_parameter=123')
-    'PARAMETER _PARAMETER =     123.00000000'
-
-    By default, this type of parameters cannot be seen when issuing
-    ``mapdl.parameters``. However, you can change this by setting
-    ``mapdl.parameters.show_leading_underscore_parameters`` equal to True.
-    For example:
-
-    >>> mapdl.parameters.show_leading_underscore_parameters=True
-    >>> mapdl.parameters
-    MAPDL Parameters
-    ----------------
-    PORT                             : 50053.0
-    _RETURN                          : 0.0
-    _STATUS                          : 0.0
-    _UIQR                            : 17.0
-
-
-    **Trailing underscored parameters**
-
-    The parameters ending underscore are recommend for user routines
-    and macros.
-    You can set this type of parameters in PyMAPDL, but by default,
-    they cannot be seen in ``mapdl.parameters``, unless
-    ``mapdl.parameters.show_trailing_underscore_parameters`` is set
-    to True.
-
-    >>> mapdl.parameters['param_'] = 1.0
-    >>> mapdl.parameters
-    MAPDL Parameters
-    ----------------
-    >>> mapdl.parameters.show_trailing_underscore_parameters=True
-    >>> mapdl.parameters
-    MAPDL Parameters
-    ----------------
-    PARAM_                           : 1.0
-
-    **Parameters with leading and trailing underscore**
-
-    These are an especial type of parameters. They CANNOT be seen
-    in ``mapdl.parameters`` under any circumstances, and because
-    of it, it uses is not recommended.
-
-    You can still retrieve them using any of the normal methods
-    to retrieve parameters. But you shall know the parameter name.
-    For example:
-
-    >>> mapdl.parameters["_param_"] = 1.0
-    >>> mapdl.parameters
-    MAPDL Parameters
-    ----------------
-    >>> print(mapdl.parameters['_param_'])
-    1.0
+    See :ref:`ref_parameters` for additional notes.
 
     Examples
     --------
@@ -366,11 +305,6 @@ class Parameters:
         if not isinstance(key, str):
             raise TypeError("Parameter name must be a string")
         key = key.upper()
-
-        # We are going to directly query the desired parameter.
-        # It is more efficient (less parsing) and
-        # you can obtain leading and trailing underscore parameters, which
-        # they don't appear in a normal ``*STATUS``
 
         with self.full_parameters_output:
             parameters = self._parm
