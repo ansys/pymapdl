@@ -473,7 +473,7 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
             f"nor in the MAPDL working directory ('{mapdl.directory}')."
         )
 
-    elif os.path.exists(fname) and base_fname in mapdl.list_files():
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
         if priority_mapdl_file is None:
             warn(
                 f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
@@ -490,7 +490,9 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
         mapdl._log.debug("File is in the Python working directory, uploading.")
         mapdl.upload(fname)
 
-    elif not os.path.exists(fname) and base_fname in mapdl.list_files():
+    elif (
+        not os.path.exists(fname) and base_fname in mapdl.list_files()
+    ):  # pragma: no cover
         mapdl._log.debug("File is already in the MAPDL working directory")
 
     # Simplifying name for MAPDL reads it.
