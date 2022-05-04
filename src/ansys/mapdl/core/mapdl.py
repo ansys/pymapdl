@@ -1131,7 +1131,7 @@ class _MapdlCore(Commands):
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
                 [],
                 labels,
-                mapdl=mapdl,
+                mapdl=self,
                 **kwargs,
             )
 
