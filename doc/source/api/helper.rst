@@ -13,7 +13,6 @@ or automating other tasks.
    
    launch_mapdl
    convert_script
-   Report
    Information
    change_default_ansys_path
    find_ansys
