@@ -1773,6 +1773,7 @@ class MapdlGrpc(_MapdlCore):
         """
         if not os.path.isfile(file_name):
             raise FileNotFoundError(f"Unable to locate filename {file_name}")
+        self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         response = self._stub.UploadFile(chunks_generator)
