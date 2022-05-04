@@ -134,8 +134,9 @@ For example:
    1.0
 
 
-
 .. _ref_numpy_arrays_in_mapdl:
+
+
 Issues when Importing and Exporting Numpy Arrays in MAPDL
 =========================================================
 
