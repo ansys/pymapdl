@@ -14,9 +14,17 @@ from warnings import warn
 import weakref
 
 import numpy as np
-import scooby
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import _HAS_PYVISTA, LOG
+
+try:
+    import scooby
+
+    _HAS_SCOOBY = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'scooby' is not installed.")
+    _HAS_SCOOBY = False
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -37,7 +45,87 @@ def get_ansys_bin(rver):
     return mapdlbin
 
 
-class Report(scooby.Report):
+class Plain_Report:
+    def __init__(self, core, optional=None, additional=None, **kwargs):
+        """
+        Base class for a plain report.
+
+
+        Based on `scooby <https://github.com/banesullivan/scooby>`_ package.
+
+        Parameters
+        ----------
+        additional : iter[str]
+            List of packages or package names to add to output information.
+        core : iter[str]
+            The core packages to list first.
+        optional : iter[str]
+            A list of packages to list if they are available. If not available,
+            no warnings or error will be thrown.
+        """
+
+        self.additional = additional
+        self.core = core
+        self.optional = optional
+        self.kwargs = kwargs
+
+    def get_version(self, package):
+        from importlib.metadata import PackageNotFoundError
+        from importlib.metadata import version as get_lib_version
+
+        package = package.replace(".", "-")
+
+        try:
+            return get_lib_version(package)
+        except PackageNotFoundError:
+            return "Package not found"
+
+    def __repr__(self):
+        header = ["\n", "Packages Requirements", "*********************"]
+
+        core = ["\nCore packages", "-------------"]
+        core.extend(
+            [
+                f"{each.ljust(20)}: {self.get_version(each)}"
+                for each in self.core
+                if self.get_version(each)
+            ]
+        )
+
+        if self.optional:
+            optional = ["\nOptional packages", "-----------------"]
+            optional.extend(
+                [
+                    f"{each.ljust(20)}: {self.get_version(each)}"
+                    for each in self.optional
+                    if self.get_version(each)
+                ]
+            )
+        else:
+            optional = [""]
+
+        if self.additional:
+            additional = ["\nAdditional packages", "-----------------"]
+            additional.extend(
+                [
+                    f"{each.ljust(20)}: {self.get_version(each)}"
+                    for each in self.additional
+                    if self.get_version(each)
+                ]
+            )
+        else:
+            additional = [""]
+
+        return "\n".join(header + core + optional + additional)
+
+
+if _HAS_SCOOBY:
+    base_report_class = scooby.Report
+else:  # pragma: no cover
+    base_report_class = Plain_Report
+
+
+class Report(base_report_class):
     """A class for custom scooby.Report."""
 
     def __init__(self, additional=None, ncol=3, text_width=80, sort=False, gpu=True):
@@ -60,7 +148,7 @@ class Report(scooby.Report):
 
         gpu : bool
             Gather information about the GPU. Defaults to ``True`` but if
-            experiencing renderinng issues, pass ``False`` to safely generate
+            experiencing rendering issues, pass ``False`` to safely generate
             a report.
 
         """
@@ -87,18 +175,17 @@ class Report(scooby.Report):
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
-        if gpu:
+        if gpu and _HAS_PYVISTA:
             from pyvista.utilities.errors import GPUInfo
 
             try:
                 extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except:
-                extra_meta = ("GPU Details", "error")
+            except Exception as e:  # pragma: no cover
+                extra_meta = ("GPU Details", f"Error: {e.message}")
         else:
             extra_meta = ("GPU Details", "None")
 
-        scooby.Report.__init__(
-            self,
+        super().__init__(
             additional=additional,
             core=core,
             optional=optional,
