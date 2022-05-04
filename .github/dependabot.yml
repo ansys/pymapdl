@@ -6,8 +6,8 @@ updates:
     schedule:
       interval: "daily"
     labels:
-      - "maintenance"
-      - "dependencies"
+      - "Maintenance"
+      - "Dependencies"
     ignore:
       - dependency-name: "vtk"
       - dependency-name: "ansys-mapdl-reader"
