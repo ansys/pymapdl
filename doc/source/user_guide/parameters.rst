@@ -1,3 +1,6 @@
+
+.. _ref_parameters:
+
 *********************************
 Setting and Retrieving Parameters
 *********************************
