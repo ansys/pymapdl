@@ -460,15 +460,15 @@ class _MapdlCore(Commands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the ``*GET`` command or ``GET`` command.
+        """Collection of MAPDL parameters.
 
-        Returns
-        -------
-        :class:`ansys.mapdl.core.parameters.Parameters`
+        Notes
+        -----
+        See :ref:`ref_special_named_param` for additional notes regarding parameter naming in MAPDL.
 
         Examples
         --------
-        Simply list all parameters except for MAPDL MATH parameters
+        Simply list all parameters except for MAPDL MATH parameters.
 
         >>> mapdl.parameters
         ARR                              : ARRAY DIM (3, 1, 1)
@@ -488,16 +488,6 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['ARR']
         array([1., 2., 3.])
 
-        Get the current routine
-
-        >>> mapdl.parameters.routine
-        'PREP7'
-
-        >>> mapdl.parameters.units
-        'SI'
-
-        >>> mapdl.parameters.csys
-        0
         """
         return self._parameters
 
