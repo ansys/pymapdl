@@ -437,15 +437,15 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
       Path to the file.
 
     priority_mapdl_file : bool
-      In case of the file existing in the MAPDL file and
-      in the Python local environment, this kwarg specifies
-      which one has priority.
-      By default is True.
+      In case of the file existing in the MAPDL environment and
+      in the local Python environment, this parameter specifies
+      which one has priority. Defaults to ``True``, meaning the MAPDL file
+      has priority.
 
     Notes
     -----
 
-    **When in local:**
+    **When running MAPDL locally:**
 
     Checks if the file is reachable or is in the MAPDL directory,
     if not, it raises a ``FileNotFound`` exception.
