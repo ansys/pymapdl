@@ -378,42 +378,34 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
     If the file is local, it will be uploaded.
 
     """
-    if mapdl._local:  # pragma: no cover
-        base_fname = os.path.basename(fname)
-        if not os.path.exists(fname) and base_fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
-                f"nor in the MAPDL working directory ('{mapdl.directory}')."
+
+    base_fname = os.path.basename(fname)
+    if not os.path.exists(fname) and base_fname not in mapdl.list_files():
+        raise FileNotFoundError(
+            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+            f"nor in the MAPDL working directory ('{mapdl.directory}')."
+        )
+
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():
+        if priority_mapdl_file is None:
+            warn(
+                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
+                f"and in the MAPDL working directory ('{mapdl.directory}'). "
+                "Using the one already in the MAPDL directory.\n"
+                "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
             )
+            priority_mapdl_file = True
 
-        elif os.path.exists(fname) and base_fname in mapdl.list_files():
-            if priority_mapdl_file is None:
-                warn(
-                    f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
-                    f"and in the MAPDL working directory ('{mapdl.directory}'). "
-                    "Using the one already in the MAPDL directory.\n"
-                    "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
-                )
-                priority_mapdl_file = True
-
-            if not priority_mapdl_file:
-                mapdl.upload(fname)
-
-        elif os.path.exists(fname) and base_fname not in mapdl.list_files():
-            mapdl._log.debug("File is in the Python working directory, uploading.")
+        if not priority_mapdl_file:
             mapdl.upload(fname)
 
-        elif not os.path.exists(fname) and base_fname in mapdl.list_files():
-            mapdl._log.debug("File is already in the MAPDL working directory")
-            pass
+    elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+        mapdl._log.debug("File is in the Python working directory, uploading.")
+        mapdl.upload(fname)
 
-    else:
-        if not os.path.exists(fname) and fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the local client or remote working directory."
-            )
-        if os.path.exists(fname):
-            mapdl.upload(fname)
+    elif not os.path.exists(fname) and base_fname in mapdl.list_files():
+        mapdl._log.debug("File is already in the MAPDL working directory")
+        pass
 
     # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)
