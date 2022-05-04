@@ -112,3 +112,48 @@ def test_info_stitle(mapdl):
 
     info.stitles = None
     assert not info.stitles
+
+
+def test_plain_report():
+    from ansys.mapdl.core.misc import Plain_Report
+
+    core = ["numpy", "ansys.mapdl.reader"]
+    optional = ["pyvista", "tqdm"]
+    additional = ["scipy", "ger"]
+
+    report = Plain_Report(core=core, optional=optional, additional=additional)
+    rep_str = report.__repr__()
+
+    for each in core + optional + additional:
+        assert each in rep_str
+
+    # There should be only one package not found ("ger")
+    assert "Package not found" in rep_str
+    _rep_str = rep_str.replace("Package not found", "", 1)
+    assert "Package not found" not in _rep_str
+
+    assert "\n" in rep_str
+    assert len(rep_str.splitlines()) > 3
+
+    assert "Core packages" in rep_str
+    assert "Optional packages" in rep_str
+    assert "Additional packages" in rep_str
+
+
+def test_plain_report_no_options():
+    from ansys.mapdl.core.misc import Plain_Report
+
+    core = ["numpy", "ansys.mapdl.reader"]
+
+    report = Plain_Report(core=core)
+    rep_str = report.__repr__()
+
+    for each in core:
+        assert each in rep_str
+
+    assert "\n" in rep_str
+    assert len(rep_str.splitlines()) > 3
+
+    assert "Core packages" in rep_str
+    assert "Optional packages" not in rep_str
+    assert "Additional packages" not in rep_str
