@@ -1,6 +1,7 @@
 """Plotting helper for MAPDL using pyvista"""
 import numpy as np
 
+from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 
 from .theme import MapdlTheme
@@ -37,59 +38,74 @@ BCS.extend(BC_F)
 # Allowed entities to plot their boundary conditions
 ALLOWED_TARGETS = ["NODES"]
 
-# Symbols for constrains
-TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
 
-UX = pv.Arrow(
-    start=(-1, 0, 0), direction=(1, 0, 0), tip_length=1, tip_radius=0.5, scale=1.0
-)
-UY = pv.Arrow(
-    start=(0, -1, 0), direction=(0, 1, 0), tip_length=1, tip_radius=0.5, scale=1.0
-)
+if _HAS_PYVISTA:
 
-UZ = pv.Arrow(
-    start=(0, 0, -1), direction=(0, 0, 1), tip_length=1, tip_radius=0.5, scale=1.0
-)
+    import pyvista as pv
 
+    # Symbols for constrains
+    TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
 
-FX = pv.Arrow(
-    start=(-1, 0, 0), direction=(1, 0, 0), tip_length=0.5, tip_radius=0.25, scale=1.0
-)
-FY = pv.Arrow(
-    start=(0, -1, 0), direction=(0, 1, 0), tip_length=0.5, tip_radius=0.25, scale=1.0
-)
+    UX = pv.Arrow(
+        start=(-1, 0, 0), direction=(1, 0, 0), tip_length=1, tip_radius=0.5, scale=1.0
+    )
+    UY = pv.Arrow(
+        start=(0, -1, 0), direction=(0, 1, 0), tip_length=1, tip_radius=0.5, scale=1.0
+    )
 
-FZ = pv.Arrow(
-    start=(0, 0, -1), direction=(0, 0, 1), tip_length=0.5, tip_radius=0.25, scale=1.0
-)
+    UZ = pv.Arrow(
+        start=(0, 0, -1), direction=(0, 0, 1), tip_length=1, tip_radius=0.5, scale=1.0
+    )
 
+    FX = pv.Arrow(
+        start=(-1, 0, 0),
+        direction=(1, 0, 0),
+        tip_length=0.5,
+        tip_radius=0.25,
+        scale=1.0,
+    )
+    FY = pv.Arrow(
+        start=(0, -1, 0),
+        direction=(0, 1, 0),
+        tip_length=0.5,
+        tip_radius=0.25,
+        scale=1.0,
+    )
 
-def get_VOLT():
-    model_a = pv.Cylinder(
-        center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
-    ).triangulate()
+    FZ = pv.Arrow(
+        start=(0, 0, -1),
+        direction=(0, 0, 1),
+        tip_length=0.5,
+        tip_radius=0.25,
+        scale=1.0,
+    )
 
-    model_b = pv.Cylinder(
-        center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
-    ).triangulate()
+    def get_VOLT():
+        model_a = pv.Cylinder(
+            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
+        ).triangulate()
 
-    model_c = pv.Cylinder(
-        center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
-    ).triangulate()
+        model_b = pv.Cylinder(
+            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
+        ).triangulate()
 
-    result = model_a.merge(model_b).triangulate()
-    result = result.merge(model_c)
+        model_c = pv.Cylinder(
+            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
+        ).triangulate()
 
-    result.rotate_z(45.0, inplace=True)
-    result.rotate_vector(vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True)
+        result = model_a.merge(model_b).triangulate()
+        result = result.merge(model_c)
 
-    return result
+        result.rotate_z(45.0, inplace=True)
+        result.rotate_vector(
+            vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
+        )
 
+        return result
 
-VOLT = get_VOLT()
+    VOLT = get_VOLT()
 
-
-HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
+    HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
 
 BC_plot_settings = {
     "TEMP": {"color": "orange", "glyph": TEMP},
