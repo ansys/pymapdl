@@ -1,4 +1,4 @@
-.. _Technology_Showcase_Example_01:
+.. _tech_demo_01:
 
 Brake Squeal Analysis
 ---------------------
