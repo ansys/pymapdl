@@ -1081,6 +1081,60 @@ class _MapdlCore(Commands):
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
 
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
+
         **kwargs
             See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
             keyword arguments related to visualizing using ``vtk``.
@@ -1116,7 +1170,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
