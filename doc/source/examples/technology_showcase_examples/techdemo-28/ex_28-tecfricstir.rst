@@ -1,7 +1,8 @@
-.. _Technology_Showcase_Example_28:
+.. _tech_demo_28:
 
-Technology Showcase Example 28: Friction Stir Welding (FSW) Simulation
-***********************************************************************
+
+Friction Stir Welding (FSW) Simulation
+***************************************
 
 This example problem shows how to simulate the friction stir welding (FSW) process.
 Several characteristics of FSW are presented, including tool-workpiece surface interaction,
@@ -459,7 +460,11 @@ tool, as shown in this figure:
     for elem, color in zip((170, 174),('red', 'blue')):
         mapdl.esel("s", "ename","", elem)
         esurf = mapdl.mesh._grid.linear_copy().extract_surface().clean()
-        p.add_mesh(esurf, show_edges=True, show_scalar_bar=False, style='surface', color=color)
+        p.add_mesh(esurf, 
+                    show_edges=True, 
+                    show_scalar_bar=False, 
+                    style='surface', 
+                    color=color)
     
     p.show()
 
@@ -554,13 +559,37 @@ The following contact settings are used for the
 * To set the behavior of contact surface as bonded (always): ``KEYOPT(12) = 5``
 
 
-.. figure:: graphics/gtecfricstir_fig5.png
-    :align: center
-    :alt: Rigid Surface Constrained
-    :figclass: align-center
+.. .. figure:: graphics/gtecfricstir_fig5.png
+..     :align: center
+..     :alt: Rigid Surface Constrained
+..     :figclass: align-center
     
-    **Figure 28.5: Rigid Surface Constrained**
+..     **Figure 28.5: Rigid Surface Constrained**
 
+.. jupyter-execute:: 
+    :hide-code:
+
+    ## figure 28.5
+    mapdl.allsel("all")
+    mapdl.esel('s', 'mat', '', 2)
+    mapdl.nsle('s')
+
+    pl = mapdl.eplot(plot_bc=True, 
+                     bc_glyph_size=0.002,
+                     return_plotter=True)
+    pl.background_color = 'white'
+
+    for elem, color in zip((170, 174), ('red', 'blue')):
+
+        mapdl.esel('s', 'mat', '', 2)
+        mapdl.esel("r", "ename", "", elem)
+        esurf = mapdl.mesh._grid.linear_copy().extract_surface().clean()
+        pl.add_mesh(esurf, show_edges=True, show_scalar_bar=False,
+                   style='surface', color=color)
+    pl.show()
+
+**Figure 28.5: Rigid Surface Constrained. Pilot node or master with applied 
+boundary conditions and the constrained top surface of the tool (blue).**
 
 .. code:: python
 
@@ -612,12 +641,12 @@ Accurate temperature calculation is critical to the FSW process because the stre
 and strains developed in the weld are temperature-dependent. Thermal properties of the
 304L steel plates such as thermal conductivity, specific heat,
 and density are temperature-dependent. Mechanical properties of the plates such as
-Young’s modulus and the coefficient of thermal expansion are considered to be
+Young's modulus and the coefficient of thermal expansion are considered to be
 constant due to the limitations of data available in the literature.
 
 It is assumed that the plastic deformation of the material uses the von Misses yield
-criterion, as well as the associated flow rule and the work-hardening rule. Therefore, a bilinear isotropic hardening
-model (``TB,PLASTIC,,,,BISO``) is selected.
+criterion, as well as the associated flow rule and the work-hardening rule. Therefore,
+a bilinear isotropic hardening model (``TB,PLASTIC,,,,BISO``) is selected.
 
 The following table shows the material properties of the workpiece:
 
@@ -628,9 +657,9 @@ The following table shows the material properties of the workpiece:
 +==============================================================================================+=========================================+
 | Linear Properties                                                                                                                      |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
-| Young’s modulus                                                                              | 193 GPa                                 |
+| Young's modulus                                                                              | 193 GPa                                 |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
-| Poisson’s ratio                                                                              | 0.3                                     |
+| Poisson's ratio                                                                              | 0.3                                     |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 | Coefficient of thermal expansion                                                             | 18.7 µm/m °C                            |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
