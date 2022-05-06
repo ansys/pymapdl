@@ -124,6 +124,7 @@ shape tool, as shown in the following figure:
     pyvista.global_theme.axes.show = True
     pyvista.global_theme.antialiasing = True
     pyvista.global_theme.show_scalar_bar = True
+    mytheme = pyvista.global_theme
 
     cdbfile = download_tech_demo_data("td-28", "fsw.cdb")
 
@@ -333,12 +334,11 @@ shows the 3-D meshed model:
 .. jupyter-execute:: 
     :hide-code:
     
-    # Plotting geometry
-    p = pyvista.Plotter()
-    p.background_color='white'
-    for each in mapdl.geometry.areas():
-        p.add_mesh(each, show_edges=True, show_scalar_bar=False, style='surface', color='grey')
-    p.show()
+    # Plotting mesh
+    mapdl.allsel()
+    pl = mapdl.eplot(return_plotter = True, 
+    color='gray', background='white', show_edges=True, title='')
+    pl.show()
     
 
 **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
@@ -468,7 +468,8 @@ tool, as shown in this figure:
     
     p.show()
 
-**Figure 28.4: Contact Pair Between Tool and Workpiece. CONTA174 in blue, and TARGE170 in red.**
+**Figure 28.4: Contact Pair Between Tool and Workpiece.**
+CONTA174 in blue, and TARGE170 in red.
 
 
 Two real constants are specified to model friction-induced heat generation.
@@ -576,7 +577,10 @@ The following contact settings are used for the
 
     pl = mapdl.eplot(plot_bc=True, 
                      bc_glyph_size=0.002,
-                     return_plotter=True)
+                     return_plotter=True,
+                     show_axes=False,
+                     theme=mytheme,
+                     notebook='pythreejs')
     pl.background_color = 'white'
 
     for elem, color in zip((170, 174), ('red', 'blue')):
@@ -588,8 +592,10 @@ The following contact settings are used for the
                    style='surface', color=color)
     pl.show()
 
-**Figure 28.5: Rigid Surface Constrained. Pilot node or master with applied 
-boundary conditions and the constrained top surface of the tool (blue).**
+**Figure 28.5: Rigid Surface Constrained.**
+Pilot node or master with applied boundary conditions and the constrained 
+top surface of the tool (blue).**
+
 
 .. code:: python
 
@@ -765,12 +771,47 @@ rapidly into remote regions of the plates. On the top and side surfaces of the
 workpiece, convection and radiation account for heat loss to the ambient. Conduction losses also occur from the
 bottom surface of the workpiece to the backing plate.
 
-.. figure:: graphics/gtecfricstir_fig6.png
-    :align: center
-    :alt: Thermal Boundary Conditions
-    :figclass: align-center
+.. .. figure:: graphics/gtecfricstir_fig6.png
+..     :align: center
+..     :alt: Thermal Boundary Conditions
+..     :figclass: align-center
     
-    **Figure 28.6: Thermal Boundary Conditions**
+..     **Figure 28.6: Thermal Boundary Conditions**
+
+
+.. jupyter-execute:: 
+    :hide-code:
+
+    pl = mapdl.eplot(style='wireframe',
+                    edge_color='black',
+                    color = 'black',
+                    return_plotter=True,
+                    title='',
+                    background='white',
+                    theme=mytheme,
+                    notebook='pythreejs',
+                    show_axes=False)
+
+    mapdl.allsel()
+    mapdl.asel('u', 'loc', 'z', -t)
+
+    areas = mapdl.geometry.areas()
+    for each_area in areas:
+        pl.add_mesh(each_area, show_edges=False, show_scalar_bar=False,
+                    style='surface', color='red')
+
+    mapdl.asel('s', 'loc', 'z', -t)
+
+    areas = mapdl.geometry.areas()
+    for each_area in areas:
+        pl.add_mesh(each_area, show_edges=False, show_scalar_bar=False,
+                    style='surface', color='orange')
+    
+    pl.show()
+
+**Figure 28.6: Thermal Boundary Conditions.**
+Convection loads (red) and conduction loads (orange)
+
 
 
 Available data suggest that the value of the convection coefficient lies between
@@ -858,11 +899,14 @@ are constrained in the perpendicular direction (z direction).
     mapdl.allsel("all")
 
     # Plotting BC
-    pl = mapdl.eplot(plot_bc=True, off_screen=True, 
+    pl = mapdl.eplot(
+        plot_bc=True,
         return_plotter=True,
-        bc_glyph_size=0.002)
-    pl.notebook = True
-    pl
+        bc_glyph_size=0.002,
+        theme=mytheme,
+        notebook='pythreejs',
+        show_axes=False)
+    pl.show()
 
 **Figure 28.7: Mechanical Boundary Conditions:**
 X-direction (UX) in red, Y-direction (UY) in green, and Z-direction (UZ) in blue.
