@@ -1187,10 +1187,6 @@ def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
     assert fname in mapdl.list_files()
 
-    try:
-        os.remove(fname)
-    except OSError:
-        pass
 
 
 def test_tbft_not_found(mapdl):
