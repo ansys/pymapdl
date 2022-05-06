@@ -10,12 +10,21 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from warnings import warn
 import weakref
 
 import numpy as np
-import scooby
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import _HAS_PYVISTA, LOG
+
+try:
+    import scooby
+
+    _HAS_SCOOBY = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'scooby' is not installed.")
+    _HAS_SCOOBY = False
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -36,7 +45,87 @@ def get_ansys_bin(rver):
     return mapdlbin
 
 
-class Report(scooby.Report):
+class Plain_Report:
+    def __init__(self, core, optional=None, additional=None, **kwargs):
+        """
+        Base class for a plain report.
+
+
+        Based on `scooby <https://github.com/banesullivan/scooby>`_ package.
+
+        Parameters
+        ----------
+        additional : iter[str]
+            List of packages or package names to add to output information.
+        core : iter[str]
+            The core packages to list first.
+        optional : iter[str]
+            A list of packages to list if they are available. If not available,
+            no warnings or error will be thrown.
+        """
+
+        self.additional = additional
+        self.core = core
+        self.optional = optional
+        self.kwargs = kwargs
+
+    def get_version(self, package):
+        from importlib.metadata import PackageNotFoundError
+        from importlib.metadata import version as get_lib_version
+
+        package = package.replace(".", "-")
+
+        try:
+            return get_lib_version(package)
+        except PackageNotFoundError:
+            return "Package not found"
+
+    def __repr__(self):
+        header = ["\n", "Packages Requirements", "*********************"]
+
+        core = ["\nCore packages", "-------------"]
+        core.extend(
+            [
+                f"{each.ljust(20)}: {self.get_version(each)}"
+                for each in self.core
+                if self.get_version(each)
+            ]
+        )
+
+        if self.optional:
+            optional = ["\nOptional packages", "-----------------"]
+            optional.extend(
+                [
+                    f"{each.ljust(20)}: {self.get_version(each)}"
+                    for each in self.optional
+                    if self.get_version(each)
+                ]
+            )
+        else:
+            optional = [""]
+
+        if self.additional:
+            additional = ["\nAdditional packages", "-----------------"]
+            additional.extend(
+                [
+                    f"{each.ljust(20)}: {self.get_version(each)}"
+                    for each in self.additional
+                    if self.get_version(each)
+                ]
+            )
+        else:
+            additional = [""]
+
+        return "\n".join(header + core + optional + additional)
+
+
+if _HAS_SCOOBY:
+    base_report_class = scooby.Report
+else:  # pragma: no cover
+    base_report_class = Plain_Report
+
+
+class Report(base_report_class):
     """A class for custom scooby.Report."""
 
     def __init__(self, additional=None, ncol=3, text_width=80, sort=False, gpu=True):
@@ -59,7 +148,7 @@ class Report(scooby.Report):
 
         gpu : bool
             Gather information about the GPU. Defaults to ``True`` but if
-            experiencing renderinng issues, pass ``False`` to safely generate
+            experiencing rendering issues, pass ``False`` to safely generate
             a report.
 
         """
@@ -86,18 +175,17 @@ class Report(scooby.Report):
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
-        if gpu:
+        if gpu and _HAS_PYVISTA:
             from pyvista.utilities.errors import GPUInfo
 
             try:
                 extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except:
-                extra_meta = ("GPU Details", "error")
+            except Exception as e:  # pragma: no cover
+                extra_meta = ("GPU Details", f"Error: {e.message}")
         else:
             extra_meta = ("GPU Details", "None")
 
-        scooby.Report.__init__(
-            self,
+        super().__init__(
             additional=additional,
             core=core,
             optional=optional,
@@ -336,47 +424,76 @@ def no_return(func):
     return wrapper
 
 
-def load_file(mapdl, fname):
+def load_file(mapdl, fname, priority_mapdl_file=None):
     """
     Provide a file to the MAPDL instance.
 
-    If in local:
-        Checks if the file exists, if not, it raises a ``FileNotFound`` exception
+    Parameters
+    ----------
+    mapdl
+      Mapdl instance
 
-    If in not-local:
-        Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
-        If the file is local, it will be uploaded.
+    fname : str, path
+      Path to the file.
+
+    priority_mapdl_file : bool
+      In case of the file existing in the MAPDL environment and
+      in the local Python environment, this parameter specifies
+      which one has priority. Defaults to ``True``, meaning the MAPDL file
+      has priority.
+
+    Notes
+    -----
+
+    **When running MAPDL locally:**
+
+    Checks if the file is reachable or is in the MAPDL directory,
+    if not, it raises a ``FileNotFound`` exception.
+
+    If:
+
+    - The file is only the MAPDL directory, this function does nothing
+      since the file is already accessible to the MAPDL instance.
+
+    - If the file exists in both, the Python working directory and the MAPDL
+      directory, this function does nothing, as the file in the MAPDL working
+      directory has priority.
+
+    **When in remote (not-local)**
+
+    Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
+    If the file is local, it will be uploaded.
 
     """
-    if mapdl._local:  # pragma: no cover
-        base_fname = os.path.basename(fname)
-        if not os.path.exists(fname) and base_fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
-                f"nor in the MAPDL working directory ('{mapdl.directory}')."
-            )
 
-        elif os.path.exists(fname) and base_fname in mapdl.list_files():
+    base_fname = os.path.basename(fname)
+    if not os.path.exists(fname) and base_fname not in mapdl.list_files():
+        raise FileNotFoundError(
+            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+            f"nor in the MAPDL working directory ('{mapdl.directory}')."
+        )
+
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
+        if priority_mapdl_file is None:
             warn(
-                f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
+                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
                 f"and in the MAPDL working directory ('{mapdl.directory}'). "
-                "Using the one in the MAPDL directory.\n"
-                "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
+                "Using the one already in the MAPDL directory.\n"
+                "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
             )
+            priority_mapdl_file = True
 
-        elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+        if not priority_mapdl_file:
             mapdl.upload(fname)
 
-        elif not os.path.exists(fname) and base_fname in mapdl.list_files():
-            pass
+    elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+        mapdl._log.debug("File is in the Python working directory, uploading.")
+        mapdl.upload(fname)
 
-    else:
-        if not os.path.exists(fname) and fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the local client or remote working directory."
-            )
-        if os.path.exists(fname):
-            mapdl.upload(fname)
+    elif (
+        not os.path.exists(fname) and base_fname in mapdl.list_files()
+    ):  # pragma: no cover
+        mapdl._log.debug("File is already in the MAPDL working directory")
 
     # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)

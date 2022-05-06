@@ -221,6 +221,15 @@ class MapdlGrpc(_MapdlCore):
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
 
+    channel : grpc.Channel, optional
+        gRPC channel to use for the connection. Can be used as an
+        alternative to the ``ip`` and ``port`` parameters.
+
+    remote_instance : ansys.platform.instancemanagement.Instance
+        The corresponding remote instance when MAPDL is launched through
+        PyPIM. This instance will be deleted when calling
+        :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -269,10 +278,12 @@ class MapdlGrpc(_MapdlCore):
         remove_temp_files=False,
         print_com=False,
         channel=None,
+        remote_instance=None,
         **kwargs,
     ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
+        self._remote_instance = remote_instance
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -814,6 +825,10 @@ class MapdlGrpc(_MapdlCore):
         self._kill()  # sets self._exited = True
         self._close_process()
         self._remove_lock_file()
+
+        if self._remote_instance:
+            # No cover: The CI is working with a single MAPDL instance
+            self._remote_instance.delete()  # pragma: no cover
 
         if self._remove_tmp and self._local:
             self._log.debug("Removing local temporary files")
@@ -1371,6 +1386,12 @@ class MapdlGrpc(_MapdlCore):
         fpath = os.path.dirname(fname)
         fname = os.path.basename(fname)
         fext = fname.split(".")[-1]
+
+        # if there is no dirname, we are assuming the file is
+        # in the python working directory.
+        if not fpath:
+            fpath = os.getcwd()
+
         ffullpath = os.path.join(fpath, fname)
 
         if os.path.exists(ffullpath) and self._local:
@@ -1767,6 +1788,7 @@ class MapdlGrpc(_MapdlCore):
         """
         if not os.path.isfile(file_name):
             raise FileNotFoundError(f"Unable to locate filename {file_name}")
+        self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         response = self._stub.UploadFile(chunks_generator)
