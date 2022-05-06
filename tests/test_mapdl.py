@@ -1188,7 +1188,6 @@ def test_tbft(mapdl, tmpdir, option2, option3, option4):
     assert fname in mapdl.list_files()
 
 
-
 def test_tbft_not_found(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.prep7(mute=True)
