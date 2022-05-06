@@ -1183,7 +1183,7 @@ def test_tbft(mapdl, tmpdir, option2, option3, option4):
     mapdl.prep7(mute=True)
     mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
     mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
-    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, mute=True)
+    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "", mute=True)
 
     assert fname in mapdl.list_files()
 
