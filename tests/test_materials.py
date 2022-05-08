@@ -1,13 +1,49 @@
+import os
 from collections import Iterable
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 import pytest
 import numpy as np
 import numpy.testing
 
+from ansys.mapdl.core._materials._nonlinear_models import _BaseModel
 from ansys.mapdl.core._materials.common import _chunk_data, _chunk_lower_triangular_matrix, fill_upper_triangular_matrix
 from ansys.mapdl.core._materials.material import Material
 from ansys.mapdl.core._materials.property_codes import PropertyCode
+from ansys.mapdl.core._materials.tbdata_parser import TableDataParser
+from ansys.mapdl.core.mapdl import _MapdlCore
+
+HEADER_LINES = [
+    "Header",
+    "Some kind of header is present, need to actually get some output",
+    "-----------------------------",
+]
+
+ANEL_LINES = [
+    "(ANEL) Table For Material 12",
+    "1 DATA ANEL",
+    "2 DATA ANEL",
+    "3 DATA ANEL",
+    "",
+]
+
+CHAB_LINES = [
+    "(CHAB) Table For Material 12",
+    "1 DATA CHAB",
+    "2 DATA CHAB",
+    "3 DATA CHAB",
+    "4 DATA CHAB",
+    "",
+]
+
+TNM_LINES = [
+    "(TNM) Table For Material 11",
+    "1 DATA TNM",
+    "2 DATA TNM",
+    "3 DATA TNM",
+]
+
+VALID_TABLE = os.linesep.join([*HEADER_LINES, *ANEL_LINES, *CHAB_LINES, *TNM_LINES])
 
 
 class TestCommonFunctions:
@@ -83,22 +119,61 @@ class TestCommonFunctions:
             _ = fill_upper_triangular_matrix(input_data)
 
 
+def make_material_with_properties() -> Material:
+    id_ = 3
+    properties = {
+        PropertyCode.DENS: 3000.,
+        PropertyCode.EX: 6_000_000.,
+        PropertyCode.REFT: 23.0
+    }
+    return Material(material_id=id_, properties=properties)
+
+
 class TestMaterial:
     def test_create_empty_material(self):
         id_ = 3
         material = Material(material_id=id_)
         assert material.material_id == id_
 
+    def test_default_reference_temperature(self):
+        id_ = 1
+        material = Material(material_id=id_)
+        assert material.reference_temperature == pytest.approx(0.0)
+
+    def test_setting_material_id_works(self):
+        material = Material(material_id=1)
+        material.material_id = 2
+        assert material.material_id == 2
+
     def test_create_material_with_simple_properties(self):
         id_ = 3
         properties = {
             PropertyCode.DENS: 3000.,
-            PropertyCode.EX: 6_000_000.
+            PropertyCode.EX: 6_000_000.,
+            PropertyCode.REFT: 23.0
         }
         material = Material(material_id=id_, properties=properties)
         assert material.material_id == id_
+        assigned_properties = material.get_properties()
+        assert len(assigned_properties) == 3
         for k, v in properties.items():
-            assert material.properties[k] == properties[k]
+            assert assigned_properties[k] == pytest.approx(properties[k])
+
+    def test_removing_property_removes_property(self):
+        material = make_material_with_properties()
+        assert len(material.get_properties()) == 3
+        material.remove_property(PropertyCode.DENS)
+        assert len(material.get_properties()) == 2
+
+    def test_removing_invalid_property_throws(self):
+        material = make_material_with_properties()
+        with pytest.raises(KeyError):
+            material.remove_property("TEST")
+
+    def test_removing_reference_temperature_throws(self):
+        material = make_material_with_properties()
+        with pytest.raises(KeyError):
+            material.remove_property(PropertyCode.REFT)
 
     def test_create_material_with_functional_properties(self):
         id_ = 3
@@ -109,25 +184,79 @@ class TestMaterial:
         material = Material(material_id=id_, properties=properties)
         assert material.material_id == id_
         for k, v in properties.items():
-            np.testing.assert_array_equal(material.properties[k], properties[k])
+            np.testing.assert_array_equal(material.get_property(k), properties[k])
 
     def test_create_material_with_reference_temperature(self):
         id_ = 5
         ref_temperature = 25.
         material = Material(material_id=id_, reference_temperature=ref_temperature)
         assert material.material_id == id_
-        assert material.reference_temperature == ref_temperature
-        assert material.properties[PropertyCode.REFT] == ref_temperature
+        assert material.reference_temperature == pytest.approx(ref_temperature)
+        assert material.get_property(PropertyCode.REFT) == pytest.approx(ref_temperature)
 
     def test_assigning_array_reference_temperature_throws(self):
         material = Material(material_id=10)
         temperature_array = np.asarray([[0.0, 0.0], [100., 100.], [200., 200.]], dtype=float)
         with pytest.raises(AssertionError):
-            material.properties[PropertyCode.REFT] = temperature_array
+            material.set_property(PropertyCode.REFT, temperature_array)
+
+    def test_assigning_reference_temperature(self):
+        material = Material(material_id=10)
+        reference_temperature = 23.0
+        material.reference_temperature = reference_temperature
+        assert material.get_property(PropertyCode.REFT) == pytest.approx(reference_temperature)
 
     @pytest.mark.parametrize("invalid_input", ["foo", b"110", 12])
     def test_assigning_invalid_property_type_throws(self, invalid_input):
         material = Material(material_id=10)
-        property = PropertyCode.DENS
+        property_code = PropertyCode.DENS
         with pytest.raises(AssertionError):
-            material.properties[property] = invalid_input
+            material.set_property(property_code, invalid_input)
+
+    def test_create_material_with_nonlinear_model(self):
+        material = Material(material_id=1, nonlinear_models={"TEST": TestNonlinearModel()})
+        assert "TEST" in material.get_models()
+        model = material.get_model("TEST")
+        assert isinstance(model, TestNonlinearModel)
+
+    def test_removing_nonlinear_model_removes_model(self):
+        material = Material(material_id=1, nonlinear_models={"TEST": TestNonlinearModel()})
+        assert len(material.get_models()) == 1
+        material.remove_model("TEST")
+        assert len(material.get_models()) == 0
+
+    def test_removing_nonexistent_model_throws(self):
+        material = Material(material_id=1, nonlinear_models={"TEST": TestNonlinearModel()})
+        assert len(material.get_models()) == 1
+        with pytest.raises(KeyError):
+            material.remove_model("OTHER")
+
+
+class TestNonlinearModel(_BaseModel):
+    def write_model(self, mapdl: "_MapdlCore", material: "Material") -> None:
+        return None
+
+    def validate_model(self) -> "Tuple[bool, List[str]]":
+        return True, []
+
+    @classmethod
+    def deserialize_model(cls, model_code: str, model_data: List[str]) -> "_BaseModel":
+        return TestNonlinearModel()
+
+
+class TestTableDataParser:
+    def test_valid_table_with_material_id(self):
+        parsed_data = TableDataParser._get_tb_sections_with_id(VALID_TABLE, 12)
+        assert len(parsed_data) == 2
+        assert "ANEL" in parsed_data
+        anel_data = parsed_data["ANEL"]
+        assert len(anel_data) == 5
+        assert anel_data == ANEL_LINES
+        assert "CHAB" in parsed_data
+        chab_data = parsed_data["CHAB"]
+        assert len(chab_data) == 6
+        assert chab_data == CHAB_LINES
+
+    def test_valid_table_with_missing_id(self):
+        with pytest.raises(IndexError):
+            TableDataParser._get_tb_sections_with_id(VALID_TABLE, 10)
