@@ -155,10 +155,8 @@ class Report(base_report_class):
         # Mandatory packages
         core = [
             "ansys.mapdl.core",
-            "matplotlib",
             "numpy",
             "appdirs",
-            "tqdm",
             "scipy",
             "grpc",  # grpcio
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
@@ -170,7 +168,7 @@ class Report(base_report_class):
             core.extend(["pexpect"])
 
         # Optional packages
-        optional = ["matplotlib", "pyvista", "pyiges"]
+        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
         if sys.version_info[1] < 9:
             optional.append("ansys_corba")
 
