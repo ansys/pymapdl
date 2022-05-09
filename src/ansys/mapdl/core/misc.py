@@ -154,6 +154,7 @@ class Report(base_report_class):
         """
         # Mandatory packages
         core = [
+            "ansys.mapdl.core",
             "matplotlib",
             "numpy",
             "appdirs",
