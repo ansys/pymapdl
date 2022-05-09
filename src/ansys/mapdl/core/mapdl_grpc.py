@@ -1207,18 +1207,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            return super().tbft(
-                oper,
-                id_,
-                option1,
-                option2,
-                option3,
-                option4,
-                option5,
-                option6,
-                option7,
-                **kwargs,
-            )
+        return super().tbft(
+            oper,
+            id_,
+            option1,
+            option2,
+            option3,
+            option4,
+            option5,
+            option6,
+            option7,
+            **kwargs,
+        )
 
     @protect_grpc
     def input(
@@ -1788,6 +1788,7 @@ class MapdlGrpc(_MapdlCore):
         """
         if not os.path.isfile(file_name):
             raise FileNotFoundError(f"Unable to locate filename {file_name}")
+        self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         response = self._stub.UploadFile(chunks_generator)
