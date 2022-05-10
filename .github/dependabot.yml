@@ -10,5 +10,4 @@ updates:
       - "Dependencies"
     ignore:
       - dependency-name: "vtk"
-      - dependency-name: "ansys-mapdl-reader"
       - dependency-name: "grpcio"
