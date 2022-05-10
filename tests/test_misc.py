@@ -9,6 +9,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_start_instance,
+    get_ansys_bin,
 )
 
 
