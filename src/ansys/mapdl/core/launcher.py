@@ -964,7 +964,7 @@ def launch_mapdl(
     print_com=False,
     **kwargs,
 ) -> _MapdlCore:
-    """Start MAPDL locally in gRPC mode.
+    """Start MAPDL locally.
 
     Parameters
     ----------
@@ -1210,7 +1210,7 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
+    the Ansys binary.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
@@ -1220,7 +1220,7 @@ def launch_mapdl(
     mode.
 
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
-                             port=50001)
+    ...                      port=50001)
 
     Force the usage of the CORBA protocol.
 
@@ -1229,7 +1229,7 @@ def launch_mapdl(
     Run MAPDL using the console mode (available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              mode='console')
+    ...                       mode='console')
 
     """
     # These parameters are partially used for unit testing
