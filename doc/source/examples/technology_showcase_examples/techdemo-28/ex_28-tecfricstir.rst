@@ -115,7 +115,11 @@ shape tool, as shown in the following figure:
     :hide-code:
 
     # jupyterlab boilerplate setup
+    import os
     import pyvista
+    import numpy as np
+    import plotly.graph_objects as go
+    import pandas as pd
     from ansys.mapdl.core.examples import download_tech_demo_data
 
     pyvista.set_jupyter_backend('pythreejs')
@@ -1091,50 +1095,85 @@ It is important to observe the change in various quantities around the weld line
 during the FSW process. The following figure shows the deflection of the workpiece
 due to plunging of the tool in the first load step: 
 
-.. figure:: graphics/gtecfricstir_fig9.png
-    :align: center
-    :alt: Deflection at Workpiece After Load Step 1
-    :figclass: align-center
-    
-    **Figure 28.9: Deflection at Workpiece After Load Step 1**
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.9.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+
+**Figure 28.9: Deflection at Workpiece After Load Step 1**
+
+
 
 The deflection causes high stresses to develop on the workpiece beneath the tool,
 as shown in this figure:
 
-.. figure:: graphics/gtecfricstir_fig10.png
-    :align: center
-    :alt: von Mises Stress After Load Step 1
-    :figclass: align-center
     
-    **Figure 28.10: von Mises Stress After Load Step 1**
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.10.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+**Figure 28.10: von Mises Stress After Load Step 1**
+
 
 Following load step 1, the temperature remains unchanged (25 °C), as shown in
 this figure:
-
-.. figure:: graphics/gtecfricstir_fig11.png
-    :align: center
-    :alt: Temperature After Load Step 1
-    :figclass: align-center
     
-    **Figure 28.11: Temperature After Load Step 1**
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.11.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+
+**Figure 28.11: Temperature After Load Step 1**
 
 As the tool begins to rotate at this location, the frictional stresses develop and
 increase rapidly. The following two figures show the increment in contact frictional
 stresses from load step 1 to load step 2: 
 
-.. figure:: graphics/gtecfricstir_fig12.png
-    :align: center
-    :alt: Frictional Stress After Load Step 1
-    :figclass: align-center
     
-    **Figure 28.12: Frictional Stress After Load Step 1**
+.. jupyter-execute::
+   :hide-code:
 
-.. figure:: graphics/gtecfricstir_fig13.png
-    :align: center
-    :alt: Frictional Stress After Load Step 2
-    :figclass: align-center
-    
-    **Figure 28.13: Frictional Stress After Load Step 2**
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.12.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+
+**Figure 28.12: Frictional Stress After Load Step 1**
+
+
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.13.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+
+**Figure 28.13: Frictional Stress After Load Step 2**
 
 All frictional dissipated energy is converted into heat during load step 2. The
 heat is generated at the tool-workpiece interface. Most of the heat is transferred to the workpiece (FWGT is
@@ -1147,19 +1186,31 @@ compared to that of the tool.
 The following two figures shows the temperature rise due to heat generation in the
 second and third load steps:
 
-.. figure:: graphics/gtecfricstir_fig14.png
-    :align: center
-    :alt: Temperature After Load Step 2
-    :figclass: align-center
-    
-    **Figure 28.14: Temperature After Load Step 2**
+.. jupyter-execute::
+   :hide-code:
 
-.. figure:: graphics/gtecfricstir_fig15.png
-    :align: center
-    :alt: Temperature After Load Step 3
-    :figclass: align-center
-    
-    **Figure 28.15: Temperature After Load Step 3**
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.14.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+**Figure 28.14: Temperature After Load Step 2**
+
+
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.15.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.show() 
+
+**Figure 28.15: Temperature After Load Step 3**
+
 
 The maximum temperature on the workpiece occurs beneath the tool during the last
 two load steps. Heat generation is due to the mechanical loads. No external heat
@@ -1185,6 +1236,43 @@ temperature:
     
     **Figure 28.16: Maximum Temperature (on Workpiece Beneath the Tool) Variation with Time**
 
+
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['time', 'max temp']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['max temp'], y=df['time'], name='Maximum Temperature', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=True
+                       )
+       ]
+   )
+   
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Time (Sec)</b>',
+       yaxis_title='<b>Temperature (C)</b>',
+       #title='<b>Effect of friction coefficient on Mode coupling</b>',
+       title_x=0.5,
+       #legend_title='Modes',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
+
+
+**Figure 28.16: Maximum Temperature (on Workpiece Beneath the Tool) Variation with Time**
+
+
 The two plates can be welded together within this temperature range.
 
 The following figure shows the temperature distributions on the top surface of the
@@ -1196,6 +1284,47 @@ workpiece along the transverse distance (perpendicular to the weld line):
     :figclass: align-center
     
     **Figure 28.17: Temperature Distribution on the Top Surface of Workpiece at Various Locations**
+
+.. .. jupyter-execute::
+..    :hide-code:
+   
+..    columns_names = ['time', 'max temp']
+   
+..    EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+..    values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
+   
+..    df = pd.DataFrame(data=values, columns=columns_names)
+   
+..    fig = go.Figure(
+..        [
+..            go.Scatter(x=df['time'], y=df['max temp'], name='Maximum Temperature', 
+..                        mode='markers+lines',
+..                        marker=dict(color='blue', size=10),
+..                        line=dict(color='blue', width=3),
+..                        showlegend=True
+..                        ),
+..            go.Scatter(x=df['x'], y=df['mode 22'], name='Mode 22',
+..                        mode='markers+lines',
+..                        marker=dict(color='red', size=10),
+..                        line=dict(color='red', width=3),
+..                        showlegend=True
+..                        )
+..        ]
+..    )
+   
+..    fig.update_layout(
+..        template='simple_white',
+..        xaxis_title='<b>Time (Sec)</b>',
+..        yaxis_title='<b>Temperature (C)</b>',
+..        #title='<b>Effect of friction coefficient on Mode coupling</b>',
+..        title_x=0.5,
+..        #legend_title='Modes',
+..        hovermode='x',
+..        xaxis=dict(showgrid=True),
+..        yaxis=dict(showgrid=True)
+..    )
+..    fig.show()
 
 As shown in the following figure and table, the temperature plots indicate the
 temperature distribution at various locations on the weld line when the maximum
@@ -1225,12 +1354,26 @@ temperature occurs at those locations:
 The following figure shows the temperature distribution in the thickness direction
 at location 1:
 
-.. figure:: graphics/gtecfricstir_fig19.png
-    :align: center
-    :alt: Temperature Distribution in Thickness Direction at Location 1
-    :figclass: align-center
-    
-    **Figure 28.19: Temperature Distribution in Thickness Direction at Location 1**
+.. .. figure:: graphics/gtecfricstir_fig19.png
+..     :align: center
+..     :alt: Temperature Distribution in Thickness Direction at Location 1
+..     :figclass: align-center
+
+
+.. jupyter-execute::
+   :hide-code:
+
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+
+   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.19.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
+   pl.camera.position=(0,0.15,0)
+   pl.show() 
+
+**Figure 28.19: Temperature Distribution in Thickness Direction at Location 1**
+
+
 
 As expected, the highest temperature caused by heat generation appears around the
 weld line region. By comparing the above temperature results with the reference
