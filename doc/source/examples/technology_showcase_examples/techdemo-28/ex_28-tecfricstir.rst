@@ -176,43 +176,6 @@ shape tool, as shown in the following figure:
    mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
    mapdl.vglue(3, 4, 5, 6);
 
-adsf
-
-.. jupyter-execute::
-   :hide-code:
-   
-   columns_names = ['time', 'max temp']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
-   
-   df = pd.DataFrame(data=values, columns=columns_names)
-   
-   fig = go.Figure(
-       [
-           go.Scatter(x=df['max temp'], y=df['time'], name='Maximum Temperature', 
-                       mode='markers+lines',
-                       marker=dict(color='blue', size=10),
-                       line=dict(color='blue', width=3),
-                       showlegend=True
-                       )
-       ]
-   )
-   
-   fig.update_layout(
-       template='simple_white',
-       xaxis_title='<b>Time (Sec)</b>',
-       yaxis_title='<b>Temperature (C)</b>',
-       #title='<b>Effect of friction coefficient on Mode coupling</b>',
-       title_x=0.5,
-       #legend_title='Modes',
-       hovermode='x',
-       xaxis=dict(showgrid=True),
-       yaxis=dict(showgrid=True)
-   )
-   fig.show()
-
-adsf
-
-
 .. jupyter-execute:: 
     :hide-code:
     
@@ -323,13 +286,6 @@ is used instead of a tetrahedral mesh to avoid mesh-orientation dependency. For 
 accurate results, a finer mesh is used in the weld-line region. The following figure
 shows the 3-D meshed model:
 
-.. .. figure:: graphics/gtecfricstir_fig2.png
-..     :align: center
-..     :alt: 3-D Meshed Model of Workpiece and Tool
-..     :figclass: align-center
-..    
-..     **Figure 28.2: 3-D Meshed Model of Workpiece and Tool**
-
 
 .. code:: python
 
@@ -375,8 +331,9 @@ shows the 3-D meshed model:
     
     # Plotting mesh
     mapdl.allsel()
-    pl = mapdl.eplot(return_plotter = True, 
-    color='gray', background='white', show_edges=True, title='')
+    pl = pyvista.Plotter()
+    pl.background_color = "white"
+    pl.add_mesh(mapdl.mesh.grid, show_edges=True, color='gray')
     pl.show()
     
 
@@ -414,7 +371,7 @@ geometrical, material, and contact nonlinearities.
 
 The problem simulates welding using the bonding capability of contact
 elements. To achieve continuous bonding and simulate a perfect thermal contact
-between the plates, a high thermal contact conductance (TCC) of :math:`\mathrm{2\cdot 10^6}`
+between the plates, a high thermal contact conductance (TCC) of 2 ⋅ 10E6
 W/m2 °C is specified. (A small TCC value
 yields an imperfect contact and a temperature discontinuity across the
 interface.) The conductance is specified as a real constant for
@@ -813,26 +770,11 @@ rapidly into remote regions of the plates. On the top and side surfaces of the
 workpiece, convection and radiation account for heat loss to the ambient. Conduction losses also occur from the
 bottom surface of the workpiece to the backing plate.
 
-.. .. figure:: graphics/gtecfricstir_fig6.png
-..     :align: center
-..     :alt: Thermal Boundary Conditions
-..     :figclass: align-center
-    
-..     **Figure 28.6: Thermal Boundary Conditions**
-
 
 .. jupyter-execute:: 
     :hide-code:
 
-    pl = mapdl.eplot(style='wireframe',
-                    edge_color='black',
-                    color = 'black',
-                    return_plotter=True,
-                    title='',
-                    background='white',
-                    theme=mytheme,
-                    notebook='pythreejs',
-                    show_axes=False)
+    pl = pyvista.Plotter()
 
     mapdl.allsel()
     mapdl.asel('u', 'loc', 'z', -t)
@@ -847,12 +789,12 @@ bottom surface of the workpiece to the backing plate.
     areas = mapdl.geometry.areas()
     for each_area in areas:
         pl.add_mesh(each_area, show_edges=False, show_scalar_bar=False,
-                    style='surface', color='orange')
+                    style='surface', color='yellow')
     
     pl.show()
 
 **Figure 28.6: Thermal Boundary Conditions.**
-Convection loads (red) and conduction loads (orange)
+Convection loads (red) and conduction loads (yellow)
 
 
 
@@ -1253,14 +1195,6 @@ workpiece beneath the tool is well below the melting temperature of the workpiec
 material during the second and third load steps, but above 70 percent of the melting
 temperature:
 
-.. figure:: graphics/gtecfricstir_fig16.png
-    :align: center
-    :alt: Maximum Temperature (on Workpiece Beneath the Tool) Variation with Time
-    :figclass: align-center
-    
-    **Figure 28.16: Maximum Temperature (on Workpiece Beneath the Tool) Variation with Time**
-
-
 .. jupyter-execute::
    :hide-code:
    
@@ -1309,45 +1243,49 @@ workpiece along the transverse distance (perpendicular to the weld line):
     
     **Figure 28.17: Temperature Distribution on the Top Surface of Workpiece at Various Locations**
 
-.. .. jupyter-execute::
-..    :hide-code:
+.. jupyter-execute::
+   :hide-code:
    
-..    columns_names = ['time', 'max temp']
+   columns_names = ['x', 'loc1', 'loc2', 'loc3']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.17.txt"))
    
-
-..    values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
+   df = pd.DataFrame(data=values, columns=columns_names)
    
-..    df = pd.DataFrame(data=values, columns=columns_names)
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['x'], y=df['loc1'], name='Location 1 - 0.016 m', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['x'], y=df['loc2'], name='Location 2 - 0.027 m', 
+                       mode='markers+lines',
+                       marker=dict(color='red', size=10),
+                       line=dict(color='red', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['x'], y=df['loc3'], name='Location 3 - 0.040 m', 
+                       mode='markers+lines',
+                       marker=dict(color='green', size=10),
+                       line=dict(color='green', width=3),
+                       showlegend=True
+                       ),
+       ]
+   )
    
-..    fig = go.Figure(
-..        [
-..            go.Scatter(x=df['time'], y=df['max temp'], name='Maximum Temperature', 
-..                        mode='markers+lines',
-..                        marker=dict(color='blue', size=10),
-..                        line=dict(color='blue', width=3),
-..                        showlegend=True
-..                        ),
-..            go.Scatter(x=df['x'], y=df['mode 22'], name='Mode 22',
-..                        mode='markers+lines',
-..                        marker=dict(color='red', size=10),
-..                        line=dict(color='red', width=3),
-..                        showlegend=True
-..                        )
-..        ]
-..    )
-   
-..    fig.update_layout(
-..        template='simple_white',
-..        xaxis_title='<b>Time (Sec)</b>',
-..        yaxis_title='<b>Temperature (C)</b>',
-..        #title='<b>Effect of friction coefficient on Mode coupling</b>',
-..        title_x=0.5,
-..        #legend_title='Modes',
-..        hovermode='x',
-..        xaxis=dict(showgrid=True),
-..        yaxis=dict(showgrid=True)
-..    )
-..    fig.show()
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Transverse distance (m)</b>',
+       yaxis_title='<b>Temperature (C)</b>',
+       #title='<b>Temperature Distribution on the Top Surface of Workpiece at Various Locations</b>',
+       title_x=0.5,
+       #legend_title='Locations',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
 
 As shown in the following figure and table, the temperature plots indicate the
 temperature distribution at various locations on the weld line when the maximum
@@ -1377,12 +1315,6 @@ temperature occurs at those locations:
 The following figure shows the temperature distribution in the thickness direction
 at location 1:
 
-.. .. figure:: graphics/gtecfricstir_fig19.png
-..     :align: center
-..     :alt: Temperature Distribution in Thickness Direction at Location 1
-..     :figclass: align-center
-
-
 .. jupyter-execute::
    :hide-code:
 
@@ -1393,7 +1325,6 @@ at location 1:
    pl.show() 
 
 **Figure 28.19: Temperature Distribution in Thickness Direction at Location 1**
-
 
 
 As expected, the highest temperature caused by heat generation appears around the
@@ -1420,13 +1351,6 @@ at various locations on the weld line:
 +------------------+----------------------------+
 |                6 | 0.039 m                    |
 +------------------+----------------------------+
-
-.. figure:: graphics/gtecfricstir_fig20.png
-    :align: center
-    :alt: Temperature Variation with Time on Various Joint Locations
-    :figclass: align-center
-    
-    **Figure 28.20: Temperature Variation with Time on Various Joint Locations**
 
 
 .. jupyter-execute::
@@ -1502,23 +1426,37 @@ A bonding temperature of 1000 °C is already defined for the welding simulation
 at the interface of the plates. The contact status at this interface after the last
 load step is shown in the following figure:
 
-.. figure:: graphics/gtecfricstir_fig21.png
-    :align: center
-    :alt: Contact Status at Interface with Bonding Temperature 1000 °C
-    :figclass: align-center
-    
-    **Figure 28.21: Contact Status at Interface with Bonding Temperature 1000 °C**
+
+.. jupyter-execute::
+   :hide-code:
+
+   mesh = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.21.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(mesh, scalars="values", cmap='jet', show_edges=True)
+   pl.camera.position=(0.15,0.0,0)
+   pl.show() 
+
+
+**Figure 28.21: Contact Status at Interface with Bonding Temperature 1000 °C**
+Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
+
 
 The sticking portion of the interface shows the bonding or welding region of the
 plates. If the bonding temperature was assumed to be 900 °C, then the welding
 region would increase, as shown in this figure:
 
-.. figure:: graphics/gtecfricstir_fig22.png
-    :align: center
-    :alt: Contact Status at Interface with Bonding Temperature 900 °C
-    :figclass: align-center
-    
-    **Figure 28.22: Contact Status at Interface with Bonding Temperature 900 °C**
+
+.. jupyter-execute::
+   :hide-code:
+
+   mesh = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.22.vtk'))
+   pl = pyvista.Plotter()
+   pl.add_mesh(mesh, scalars="values", cmap='jet', show_edges=True)
+   pl.camera.position=(0.15,0.0,0)
+   pl.show() 
+
+**Figure 28.22: Contact Status at Interface with Bonding Temperature 900 °C**
+Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
 
 
 28.7.4. Heat Generation
@@ -1540,13 +1478,6 @@ It is possible to calculate the total frictional heat-generation rate at each
 time-step (:meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>`). 
 The following figure shows the plot of total
 frictional heat generation rate on the workpiece with time:
-
-.. figure:: graphics/gtecfricstir_fig23.png
-    :align: center
-    :alt: Total Frictional Heat Rate Variation with Time
-    :figclass: align-center
-    
-    **Figure 28.23: Total Frictional Heat Rate Variation with Time**
 
 .. jupyter-execute::
    :hide-code:
@@ -1593,7 +1524,6 @@ option.
 .. **Example 28.6: Defining the Frictional Heat Calculations**
 
 .. code:: python
-
 
     mapdl.post1()
     mapdl.set("last")
@@ -1652,12 +1582,6 @@ It is possible to calculate the total frictional heat generation rate at each
 time-step (:meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>`). The following figure shows the plot of the
 total plastic heat-generation rate with time.
 
-.. figure:: graphics/gtecfricstir_fig24.png
-    :align: center
-    :alt: Total Plastic Heat Rate Variation with Time
-    :figclass: align-center
-    
-    **Figure 28.24: Total Plastic Heat Rate Variation with Time**
 
 .. jupyter-execute::
    :hide-code:
