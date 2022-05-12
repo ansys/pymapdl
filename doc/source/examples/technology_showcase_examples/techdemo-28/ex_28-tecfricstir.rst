@@ -68,7 +68,8 @@ The temperature rises at the contact interface due to frictional contact between
 tool and workpiece. FSW generally occurs when the temperature at the weld line region
 reaches 70 to 90 percent of the melting temperature of the workpiece material. 
 The temperature obtained around the weld line
-region in this example falls within the range reported by Zhu and Chao and Prasanna and Rao,
+region in this example falls within the range reported by Zhu and Chao [Zhu2004]_ and
+Prasanna and Rao [Prasanna2010]_,
 while the maximum resulting temperature is
 well below the melting temperature of the workpiece.
 
@@ -84,16 +85,16 @@ this bonding temperature, the contact is changed to bonded.
 **The Zhu and Chao Thermomechanical Model**
 
 The model used in this example is a simplified version of the thermomechanical
-model developed by Zhu and Chao for FSW
-with 304L stainless steel. Zhu and Chao presented nonlinear thermal and
-thermomechanical simulations using the finite element analysis code WELDSIM. They
+model developed by Zhu and Chao for FSW with 304L stainless steel [Zhu2004]_. 
+Zhu and Chao presented nonlinear thermal and
+thermomechanical simulations using the finite element analysis code `WELDSIM`. They
 initially formulated a heat-transfer problem using a moving heat source, and later
 used the transient temperature outputs from the thermal analysis to determine
 residual stresses in the welded plates via a 3-D elastoplastic thermomechanical
 simulation.
 
 A direct coupled-field analysis is performed on a reduced-scale version of the Zhu and
-Chao model. Also, rather than using a moving
+Chao model [Zhu2004]_. Also, rather than using a moving
 heat source as in the reference model, a rotating and moving tool is used for a more
 realistic simulation. 
 
@@ -112,70 +113,104 @@ shape tool, as shown in the following figure:
 
 
 .. jupyter-execute::
-    :hide-code:
+   :hide-code:
 
-    # jupyterlab boilerplate setup
-    import os
-    import pyvista
-    import numpy as np
-    import plotly.graph_objects as go
-    import pandas as pd
-    from ansys.mapdl.core.examples import download_tech_demo_data
+   # jupyterlab boilerplate setup
+   import numpy as np
+   import plotly.graph_objects as go
+   import pandas as pd
+   import pyvista
+   import os
 
-    pyvista.set_jupyter_backend('pythreejs')
-    pyvista.global_theme.background = 'white'
-    pyvista.global_theme.window_size = [600, 400]
-    pyvista.global_theme.axes.show = True
-    pyvista.global_theme.antialiasing = True
-    pyvista.global_theme.show_scalar_bar = True
-    mytheme = pyvista.global_theme
+   pyvista.set_jupyter_backend('pythreejs')
+   pyvista.global_theme.background = 'white'
+   pyvista.global_theme.window_size = [600, 400]
+   pyvista.global_theme.axes.show = True
+   pyvista.global_theme.antialiasing = True
+   pyvista.global_theme.show_scalar_bar = True
+   mytheme = pyvista.global_theme
 
-    cdbfile = download_tech_demo_data("td-28", "fsw.cdb")
+   from ansys.mapdl.core import examples
+   from ansys.mapdl.core.examples import download_vtk_rotor, download_tech_demo_data
 
-    # Generating geometry, just for plotting purposes.
-    # The elements and nodes are going to be taken from the cdb file.
-    
-    from ansys.mapdl.core import launch_mapdl
-    mapdl = launch_mapdl()
-    mapdl.prep7()
+   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
+   cdbfile = download_tech_demo_data("td-28", "fsw.cdb")   
+   # Generating geometry, just for plotting purposes.
+   # The elements and nodes are going to be taken from the cdb file.
+   
+   from ansys.mapdl.core import launch_mapdl
+   mapdl = launch_mapdl(port=50055)
+   mapdl.prep7()   
+   mapdl.cdread('db', cdbfile)   
+   # ***** Problem parameters ********
+   l = 76.2e-03     # Length of each plate,m
+   w = 31.75e-03    # Width of each plate,m
+   t = 3.18e-03     # Tickness of each plate,m
+   r1 = 7.62e-03    # Shoulder radius of tool,m
+   h = 15.24e-03    # Height of tool, m
+   l1 = r1          # Starting location of tool on weldline
+   l2 = l-l1
+   tcc1 = 2e06      # Thermal contact conductance b/w plates,W/m^2'C
+   tcc2 = 10        # Thermal contact conductance b/w tool &
+   # workpiece,W/m^2'C
+   fwgt = 0.95      # weight factor for distribution of heat b/w tool
+   # & workpiece
+   fplw = 0.8       # Fraction of plastic work converted to heat
+   uz1 = t/4000     # Depth of penetration,m
+   nr1 = 3.141593*11  # No. of rotations in second load step
+   nr2 = 3.141593*45  # No. of rotations in third load step
+   uy1 = 60.96e-03  # Travelling distance along weld line
+   tsz = 0.01       # Time step size   
+   # ==========================================================
+   # * Geometry
+   # ==========================================================
+   # * Node for pilot node
+   mapdl.n(1, 0, 0, h)
+   # * Workpiece geometry (two rectangular plates)
+   mapdl.block(0, w, -l1, l2, 0, -t)
+   mapdl.block(0, -w, -l1, l2, 0, -t)
+   # * Tool geometry
+   mapdl.cyl4(0, 0, r1, 0, r1, 90, h)
+   mapdl.cyl4(0, 0, r1, 90, r1, 180, h)
+   mapdl.cyl4(0, 0, r1, 180, r1, 270, h)
+   mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
+   mapdl.vglue(3, 4, 5, 6);
 
-    mapdl.cdread('db', cdbfile)
+adsf
 
-    # ***** Problem parameters ********
-    l = 76.2e-03     # Length of each plate,m
-    w = 31.75e-03    # Width of each plate,m
-    t = 3.18e-03     # Tickness of each plate,m
-    r1 = 7.62e-03    # Shoulder radius of tool,m
-    h = 15.24e-03    # Height of tool, m
-    l1 = r1          # Starting location of tool on weldline
-    l2 = l-l1
-    tcc1 = 2e06      # Thermal contact conductance b/w plates,W/m^2'C
-    tcc2 = 10        # Thermal contact conductance b/w tool &
-    # workpiece,W/m^2'C
-    fwgt = 0.95      # weight factor for distribution of heat b/w tool
-    # & workpiece
-    fplw = 0.8       # Fraction of plastic work converted to heat
-    uz1 = t/4000     # Depth of penetration,m
-    nr1 = 3.141593*11  # No. of rotations in second load step
-    nr2 = 3.141593*45  # No. of rotations in third load step
-    uy1 = 60.96e-03  # Travelling distance along weld line
-    tsz = 0.01       # Time step size
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['time', 'max temp']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['max temp'], y=df['time'], name='Maximum Temperature', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=True
+                       )
+       ]
+   )
+   
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Time (Sec)</b>',
+       yaxis_title='<b>Temperature (C)</b>',
+       #title='<b>Effect of friction coefficient on Mode coupling</b>',
+       title_x=0.5,
+       #legend_title='Modes',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
 
-    # ==========================================================
-    # * Geometry
-    # ==========================================================
-    # * Node for pilot node
-    mapdl.n(1, 0, 0, h)
-    # * Workpiece geometry (two rectangular plates)
-    mapdl.block(0, w, -l1, l2, 0, -t)
-    mapdl.block(0, -w, -l1, l2, 0, -t)
-    # * Tool geometry
-    mapdl.cyl4(0, 0, r1, 0, r1, 90, h)
-    mapdl.cyl4(0, 0, r1, 90, r1, 180, h)
-    mapdl.cyl4(0, 0, r1, 180, r1, 270, h)
-    mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
-    mapdl.vglue(3, 4, 5, 6);
-
+adsf
 
 
 .. jupyter-execute:: 
@@ -443,7 +478,7 @@ Because the frictional contact between the tool and workpiece is primarily
 responsible for heat generation, a standard surface-to-surface contact pair is
 defined between the tool and workpiece. The ``CONTA174``
 element is used to model the contact surface on the top surface of the
-workpiece, and the TARGE170 element is used for the
+workpiece, and the ``TARGE170`` element is used for the
 tool, as shown in this figure:
 
 .. .. figure:: graphics/gtecfricstir_fig4.png
@@ -473,7 +508,7 @@ tool, as shown in this figure:
     p.show()
 
 **Figure 28.4: Contact Pair Between Tool and Workpiece.**
-CONTA174 in blue, and TARGE170 in red.
+``CONTA174`` in blue, and ``TARGE170`` in red.
 
 
 Two real constants are specified to model friction-induced heat generation.
@@ -489,7 +524,10 @@ this contact pair because most of the heat generated transfers to the workpiece.
 Some additional heat is also generated by plastic deformation of the workpiece
 material. Because the workpiece material softens and the value of friction
 coefficient drops as the temperature increases, a variable coefficient of friction
-(0.4 to 0.2) is defined (``TB,FRIC`` with ``TBTEMP`` and ``TBDATA``).
+(0.4 to 0.2) is defined (:meth:`Mapdl.tb("FRIC") <ansys.mapdl.core.Mapdl.tb>`
+with :meth:`mapdl.tbtemp() <ansys.mapdl.core.Mapdl.tbtemp>` and 
+:meth:`Mapdl.tbdata() <ansys.mapdl.core.Mapdl.tbdata>`).
+
 
 .. **Example 28.2: Specifying the Settings for the Contact Pair**
 
@@ -690,19 +728,19 @@ The following table shows the material properties of the workpiece:
 | Density (Kg/m3)                                                                              | 7894                                    |
 +----------------------------------------------------------------------------------------------+-----------------------------------------+
 
-``TBDATA`` defines the yield stress and tangent modulus.
+:meth:`Mapdl.tbdata() <ansys.mapdl.core.Mapdl.tbdata>` defines the yield stress and tangent modulus.
 
 The fraction of the plastic work dissipated as heat during FSW is about 80
 percent. Therefore, the fraction of
 plastic work converted to heat (Taylor-Quinney coefficient) is set to 0.8
-(``MP,QRATE``) for the calculation of plastic heat generation in the
-workpiece material.
+(:meth:`Mapdl.mp("QRATE") <ansys.mapdl.core.Mapdl.mp>`) for the calculation of
+plastic heat generation in the workpiece material.
 
 To weld a high-temperature material such as 304L stainless steel, a tool composed of
 hard material is required. Tools made from super-abrasive materials such as PCBN are
 suitable for such processes, and so a
 cylindrical PCBN tool is used here. The material properties of the PCBN tool are
-obtained from the references: [5] and [6]
+obtained from the references: [Ozel2008]_ and [Mishra2007]_.
 
 The following table shows the material properties of the PCBN tool:
 
@@ -913,7 +951,7 @@ are constrained in the perpendicular direction (z direction).
     pl.show()
 
 **Figure 28.7: Mechanical Boundary Conditions:**
-X-direction (UX) in red, Y-direction (UY) in green, and Z-direction (UZ) in blue.
+X-direction (``UX``) in red, Y-direction (``UY``) in green, and Z-direction (``UZ``) in blue.
 
    
 .. code:: python 
@@ -972,7 +1010,7 @@ The following table shows the details for each load step.
 The tool plunges into the workpiece at a very shallow depth, then rotates to
 generate heat. The depth and rotating speeds are the critical parameters for the
 weld temperatures. The parameters are determined based on the experimental data of
-Zhu and Chao. The tool travels from one end of the welding line to the other at a
+Zhu and Chao [Zhu2004]_. The tool travels from one end of the welding line to the other at a
 speed of 2.7 mm/s.
 
 28.6. Analysis and Solution Controls
@@ -992,28 +1030,28 @@ shown in the following table:
 
 **Table 28.4: Solution Settings**
 
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Solution Setting                | Description of Setting and Comments                                                                                                                                                                                                                                                                                                                              |
-+=================================+==================================================================================================================================================================================================================================================================================================================================================================+
-| ``ANTYPE,4``                    | Transient analysis.                                                                                                                                                                                                                                                                                                                                              |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``LNSRCH,ON``                   | For contact problems,this option is useful for enhancing convergence.                                                                                                                                                                                                                                                                                            |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``CUTCONTROL, PLSLIMIT,0.15``   | Controls the time-step cutback during a nonlinear solution and specifies the maximum equivalent plastic strain allowed within a time-step. If the calculated value exceeds the specified value, the program performs a cutback (bisection). ``PLSLIMIT`` is set at 15 percent (from the default five percent) because solution-control support is not available. |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``NLGEOM,ON``                   | Includes large-deflection effects or large strain effects, according to the element type.                                                                                                                                                                                                                                                                        |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``NROPT,UNSYM``                 | Recommended for contact elements with high friction coefficients.                                                                                                                                                                                                                                                                                                |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``TIMINT,OFF,STRUC``            | To speed up convergence in a coupled-field transient analysis, the structural dynamic effects are turned off. These structural effects are not important in the modeling of heat generation due to friction; however,the thermal dynamic effects are considered here.                                                                                            |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``KBC,0``                       | The loads applied to intermediate substeps within the load step are ramped because the structural dynamic effects are set to off.                                                                                                                                                                                                                                |
-+---------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Solution Setting                                                                 | Description of Setting and Comments                                                                                                                                                                                                                                                                                                                              |
++==================================================================================+==================================================================================================================================================================================================================================================================================================================================================================+
+| :meth:`Mapdl.antype(4) <ansys.mapdl.core.Mapdl.antype>`                          | Transient analysis.                                                                                                                                                                                                                                                                                                                                              |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.lnsrch("ON") <ansys.mapdl.core.Mapdl.lnsrch>`                       | For contact problems,this option is useful for enhancing convergence.                                                                                                                                                                                                                                                                                            |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.cutcontrol("PLSLIMIT", 0.15) <ansys.mapdl.core.Mapdl.cutcontrol>`   | Controls the time-step cutback during a nonlinear solution and specifies the maximum equivalent plastic strain allowed within a time-step. If the calculated value exceeds the specified value, the program performs a cutback (bisection). ``PLSLIMIT`` is set at 15 percent (from the default five percent) because solution-control support is not available. |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.nlgeom("ON") <ansys.mapdl.core.Mapdl.nlgeom>`                       | Includes large-deflection effects or large strain effects, according to the element type.                                                                                                                                                                                                                                                                        |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.nropt("UNSYM") <ansys.mapdl.core.Mapdl.nropt>`                      | Recommended for contact elements with high friction coefficients.                                                                                                                                                                                                                                                                                                |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.timint("OFF", "STRUC") <ansys.mapdl.core.Mapdl.timint>`             | To speed up convergence in a coupled-field transient analysis, the structural dynamic effects are turned off. These structural effects are not important in the modeling of heat generation due to friction; however,the thermal dynamic effects are considered here.                                                                                            |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| :meth:`Mapdl.kbc(0) <ansys.mapdl.core.Mapdl.kbc>`                                | The loads applied to intermediate substeps within the load step are ramped because the structural dynamic effects are set to off.                                                                                                                                                                                                                                |
++----------------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 To allow for a faster solution, automatic time-stepping is activated
-(``AUTOTS,ON``). The initial time step size
-(``DELTIM``) is set to 0.1, and the minimum time step is set to
-0.001. The maximum time step is set as 0.2 in load steps 2 and 3. 
+(:meth:`Mapdl.autots("on") <ansys.mapdl.core.Mapdl.autots>`). The initial time step size
+(:meth:`Mapdl.deltim() <ansys.mapdl.core.Mapdl.deltim>`) is set to 0.1, and the minimum 
+time step is set to 0.001. The maximum time step is set as 0.2 in load steps 2 and 3. 
 A higher maximum time-step size may result in an unconverged solution.
 
 The time step values are determined based on mesh or element size. For stability, no
@@ -1098,8 +1136,6 @@ due to plunging of the tool in the first load step:
 .. jupyter-execute::
    :hide-code:
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
-
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.9.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
@@ -1117,8 +1153,6 @@ as shown in this figure:
 .. jupyter-execute::
    :hide-code:
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
-
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.10.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
@@ -1132,8 +1166,6 @@ this figure:
     
 .. jupyter-execute::
    :hide-code:
-
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
 
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.11.vtk'))
    pl = pyvista.Plotter()
@@ -1151,8 +1183,6 @@ stresses from load step 1 to load step 2:
 .. jupyter-execute::
    :hide-code:
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
-
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.12.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
@@ -1164,8 +1194,6 @@ stresses from load step 1 to load step 2:
 
 .. jupyter-execute::
    :hide-code:
-
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
 
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.13.vtk'))
    pl = pyvista.Plotter()
@@ -1189,8 +1217,6 @@ second and third load steps:
 .. jupyter-execute::
    :hide-code:
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
-
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.14.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
@@ -1201,8 +1227,6 @@ second and third load steps:
 
 .. jupyter-execute::
    :hide-code:
-
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
 
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.15.vtk'))
    pl = pyvista.Plotter()
@@ -1290,7 +1314,6 @@ workpiece along the transverse distance (perpendicular to the weld line):
    
 ..    columns_names = ['time', 'max temp']
    
-..    EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
 
 ..    values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
    
@@ -1363,8 +1386,6 @@ at location 1:
 .. jupyter-execute::
    :hide-code:
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
-
    rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.19.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
@@ -1408,6 +1429,72 @@ at various locations on the weld line:
     **Figure 28.20: Temperature Variation with Time on Various Joint Locations**
 
 
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['time', 'loc1', 'loc2', 'loc3', 'loc4', 'loc5', 'loc6']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.20.txt"))
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['time'], y=df['loc1'], name='Location 1 (0.018 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['time'], y=df['loc2'], name='Location 2 (0.023 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='red', size=10),
+                       line=dict(color='red', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['time'], y=df['loc3'], name='Location 3 (0.027 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='green', size=10),
+                       line=dict(color='green', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['time'], y=df['loc4'], name='Location 4 (0.032 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='purple', size=10),
+                       line=dict(color='purple', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['time'], y=df['loc5'], name='Location 5 (0.035 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='orange', size=10),
+                       line=dict(color='orange', width=3),
+                       showlegend=True
+                       ),
+           go.Scatter(x=df['time'], y=df['loc6'], name='Location 6 (0.039 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='pink', size=10),
+                       line=dict(color='pink', width=3),
+                       showlegend=True
+                       ),
+       ]
+   )
+   
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Time (Sec)</b>',
+       yaxis_title='<b>Temperature (C)</b>',
+       title='<b>Temperature Variation with Time on Various Joint Locations</b>',
+       title_x=0.5,
+       legend_title='Locations',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
+
+
+**Figure 28.20: Temperature Variation with Time on Various Joint Locations**
+
+
 28.7.3. Welding Results
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1441,7 +1528,7 @@ Friction and plastic deformation generate heat. A calculation of frictional and
 plastic heat generation is performed. The generation of heat due to friction begins
 in the second load step. 
 
-The ``CONTA174`` element's FDDIS (SMISC item) output option
+The ``CONTA174`` element's ``FDDIS`` (``SMISC item``) output option
 is used to calculate frictional heat generation on the workpiece. This option gives
 the frictional energy dissipation per unit area for an element. After multiplying
 this value with the corresponding element area, the friction heat-generation rate
@@ -1450,7 +1537,8 @@ for an element is calculated. By summing the values from each
 heat generation rate is calculated for a given time. 
 
 It is possible to calculate the total frictional heat-generation rate at each
-time-step (**ETABLE**). The following figure shows the plot of total
+time-step (:meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>`). 
+The following figure shows the plot of total
 frictional heat generation rate on the workpiece with time:
 
 .. figure:: graphics/gtecfricstir_fig23.png
@@ -1460,11 +1548,46 @@ frictional heat generation rate on the workpiece with time:
     
     **Figure 28.23: Total Frictional Heat Rate Variation with Time**
 
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['time', 'fricheat']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.23.txt"))
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['time'], y=df['fricheat'], #name='Location 1 (0.018 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=False
+                       ),
+       ]
+   )
+   
+   fig.update_layout(
+       showlegend=True,
+       #template='simple_white',
+       xaxis_title='<b>Time (Sec)</b>',
+       yaxis_title='<b>Total frictional heat generation rate (W)</b>',
+       title='<b>Total Frictional Heat Rate Variation with Time</b>',
+       title_x=0.5,
+       #legend_title='Locations',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
+   
+**Figure 28.23: Total Frictional Heat Rate Variation with Time**
+
 The plot indicates that the frictional heat starts from the second load step
 (after 1 second). 
 
 The element contact area can be calculated using the
-``CONTA174`` element CAREA (NMISC, 58) output
+``CONTA174`` element ``CAREA`` (``NMISC, 58``) output
 option.
 
 .. **Example 28.6: Defining the Frictional Heat Calculations**
@@ -1519,14 +1642,14 @@ option.
 
 A similar calculation is performed to check the heat generation from plastic
 deformation on the workpiece. The ``SOLID226`` element's output
-option PHEAT (NMISC, 5) gives the plastic heat generation rate per unit volume.
+option ``PHEAT`` (``NMISC, 5``) gives the plastic heat generation rate per unit volume.
 After multiplying this value with the corresponding element volume, the plastic heat
 generation rate for an element is calculated. By summing the values from each
 element (``SOLID226``) of the workpiece, the total plastic heat
 generation rate is calculated for a particular time. 
 
 It is possible to calculate the total frictional heat generation rate at each
-time-step (**ETABLE**). The following figure shows the plot of the
+time-step (:meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>`). The following figure shows the plot of the
 total plastic heat-generation rate with time.
 
 .. figure:: graphics/gtecfricstir_fig24.png
@@ -1535,6 +1658,41 @@ total plastic heat-generation rate with time.
     :figclass: align-center
     
     **Figure 28.24: Total Plastic Heat Rate Variation with Time**
+
+.. jupyter-execute::
+   :hide-code:
+   
+   columns_names = ['time', 'fricheat']
+   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.24.txt"))
+   
+   df = pd.DataFrame(data=values, columns=columns_names)
+   
+   fig = go.Figure(
+       [
+           go.Scatter(x=df['time'], y=df['fricheat'], #name='Location 1 (0.018 m)', 
+                       mode='markers+lines',
+                       marker=dict(color='blue', size=10),
+                       line=dict(color='blue', width=3),
+                       showlegend=False
+                       ),
+       ]
+   )
+   
+   fig.update_layout(
+       template='simple_white',
+       xaxis_title='<b>Time (Sec)</b>',
+       yaxis_title='<b>Total Plastic Heat Generation Rate (W)</b>',
+       title='<b>Total Plastic Heat Rate Variation with Time</b>',
+       title_x=0.5,
+       legend_title='Locations',
+       hovermode='x',
+       xaxis=dict(showgrid=True),
+       yaxis=dict(showgrid=True)
+   )
+   fig.show()
+   
+
+**Figure 28.24: Total Plastic Heat Rate Variation with Time**
 
 
 .. **Example 28.7: Defining the Plastic Heat Calculations**
@@ -1622,11 +1780,15 @@ recommendations:
   coefficient results in temperature continuity across the interface.
 * Because the problem is nonlinear, proper solution settings are required. Set
   the following analysis controls to the appropriate values to achieve the
-  converged solution: **LNSRCH**, **CUTCONTROL**, **KBC**, **NEQIT**, **NROPT**,
-  and **AUTOTS**.
+  converged solution: :meth:`Mapdl.lnsrch() <ansys.mapdl.core.Mapdl.lnsrch>`,
+  :meth:`Mapdl.cutcontrol() <ansys.mapdl.core.Mapdl.cutcontrol>`, 
+  :meth:`Mapdl.kbc() <ansys.mapdl.core.Mapdl.kbc>`, 
+  :meth:`Mapdl.neqit() <ansys.mapdl.core.Mapdl.neqit>`, 
+  :meth:`Mapdl.nropt() <ansys.mapdl.core.Mapdl.nropt>`,
+  and :meth:`Mapdl.autots() <ansys.mapdl.core.Mapdl.autots>`.
 * Convergence at the second and third load steps is difficult to achieve. The
-  depth of penetration of the tool on the workpiece (uz), rotational speed of the
-  tool (rotz), and time-step size play crucial roles in the convergence of the
+  depth of penetration of the tool on the workpiece (``UZ``), rotational speed of the
+  tool (``ROTZ``), and time-step size play crucial roles in the convergence of the
   second load step. Use a very small time-step size if the rotational speed is
   higher than 60 RPM.
 * A symmetric mesh (about the joint line) is preferred to capture the exact
@@ -1645,28 +1807,35 @@ recommendations:
 
 The following reference works are cited in this example problem:
 
-1. Zhu, X. K. & Chao, Y. J. (2004). Numerical simulation of transient
+
+.. [Zhu2004] Zhu, X. K. & Chao, Y. J. (2004). Numerical simulation of transient
    temperature and residual stresses in friction stir welding of 304L stainless
    steel. *Journal of Materials Processing Technology*. 146(2),
    263-272.
-2. Chao, Y.J., Qi, X., & Tang, W. (2003). Heat transfer in friction stir
+
+.. [Chao2003] Chao, Y.J., Qi, X., & Tang, W. (2003). Heat transfer in friction stir
    welding - Experimental and numerical studies. *Journal of Manufacturing
    Science and Engineering-Transactions of the ASME*. 125(1),
    138-145.
-3. Prasanna, P., Rao, B. S., & Rao, G. K. (2010). Finite element modeling for
+
+.. [Prasanna2010] Prasanna, P., Rao, B. S., & Rao, G. K. (2010). Finite element modeling for
    maximum temperature in friction stir welding and its validation.
    *Journal of Advanced Manufacturing Technology*. 51,
    925-933.
-4. Sorensen, C.D. & Nelson, T. W. (2007). Friction stir welding of ferrous
+
+.. [Sorensen2007] Sorensen, C.D. & Nelson, T. W. (2007). Friction stir welding of ferrous
    and nickel alloys. (Mahoney, M. W. & Mirsha, R. S. Eds.) *Friction
    Stir Welding and Processing. Materials Park, OH: ASM
    International.* 111-121.
-5. Ozel, T., Karpat, Y., & Srivastava, A. (2008). Hard turning with variable
+
+.. [Ozel2008] Ozel, T., Karpat, Y., & Srivastava, A. (2008). Hard turning with variable
    micro-geometry PcBN tools. *CIRP Annals - Manufacturing
    Technology*. 57, 73-76.
-6. Mishra, R. S. (2007). *Friction Stir Welding and
+
+.. [Mishra2007] Mishra, R. S. (2007). *Friction Stir Welding and
    Processing*. Ed. R. S. Mishra and M. W. Mahoney. Materials Park,
    OH: ASM International.
+
 
 28.10. Input Files
 ------------------
