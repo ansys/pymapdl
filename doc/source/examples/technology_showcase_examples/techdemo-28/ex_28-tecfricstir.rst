@@ -104,13 +104,6 @@ percent of the total heat and is therefore negligible.
 The simulation welds two 304L stainless steel plates (workpiece) with a cylindrical
 shape tool, as shown in the following figure: 
 
-.. .. figure:: graphics/gtecfricstir_fig1.png
-..     :align: center
-..     :alt: 3-D Model of Workpiece and Tool
-..     :figclass: align-center
-..   
-..     **Figure 28.1: 3-D Model of Workpiece and Tool**
-
 
 .. jupyter-execute::
    :hide-code:
@@ -133,7 +126,6 @@ shape tool, as shown in the following figure:
    from ansys.mapdl.core import examples
    from ansys.mapdl.core.examples import download_vtk_rotor, download_tech_demo_data
 
-   EXTERNAL_DATA_PATH = 'C:\\Users\\gayuso\\Other_Projects\\example-data\\tech_demos\\td-28\\supporting_files'
    cdbfile = download_tech_demo_data("td-28", "fsw.cdb")   
    # Generating geometry, just for plotting purposes.
    # The elements and nodes are going to be taken from the cdb file.
@@ -1070,7 +1062,7 @@ due to plunging of the tool in the first load step:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.9.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.9.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1087,7 +1079,7 @@ as shown in this figure:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.10.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.10.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1101,7 +1093,7 @@ this figure:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.11.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.11.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1117,7 +1109,7 @@ stresses from load step 1 to load step 2:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.12.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.12.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1129,7 +1121,7 @@ stresses from load step 1 to load step 2:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.13.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.13.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1151,7 +1143,7 @@ second and third load steps:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.14.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.14.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1162,7 +1154,7 @@ second and third load steps:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.15.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.15.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.show() 
@@ -1191,7 +1183,7 @@ temperature:
    :hide-code:
    
    columns_names = ['time', 'max temp']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.16.txt"))
+   values = np.loadtxt(download_tech_demo_data("td-28/supporting_files","Figure_28.16.txt"))
    
    df = pd.DataFrame(data=values, columns=columns_names)
    
@@ -1239,7 +1231,7 @@ workpiece along the transverse distance (perpendicular to the weld line):
    :hide-code:
    
    columns_names = ['x', 'loc1', 'loc2', 'loc3']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.17.txt"))
+   values = np.loadtxt(download_tech_demo_data("td-28/supporting_files","Figure_28.17.txt"))
    
    df = pd.DataFrame(data=values, columns=columns_names)
    
@@ -1310,7 +1302,7 @@ at location 1:
 .. jupyter-execute::
    :hide-code:
 
-   rotor1 = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.19.vtk'))
+   rotor1 = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.19.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(rotor1, scalars="values", cmap='jet', show_edges=True)
    pl.camera.position=(0,0.15,0)
@@ -1349,7 +1341,7 @@ at various locations on the weld line:
    :hide-code:
    
    columns_names = ['time', 'loc1', 'loc2', 'loc3', 'loc4', 'loc5', 'loc6']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.20.txt"))
+   values = np.loadtxt(download_tech_demo_data("td-28/supporting_files","Figure_28.20.txt"))
    
    df = pd.DataFrame(data=values, columns=columns_names)
    
@@ -1422,7 +1414,7 @@ load step is shown in the following figure:
 .. jupyter-execute::
    :hide-code:
 
-   mesh = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.21.vtk'))
+   mesh = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.21.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(mesh, scalars="values", cmap='jet', show_edges=True)
    pl.camera.position=(0.15,0.0,0)
@@ -1441,7 +1433,7 @@ region would increase, as shown in this figure:
 .. jupyter-execute::
    :hide-code:
 
-   mesh = pyvista.read(os.path.join(EXTERNAL_DATA_PATH, 'Figure_28.22.vtk'))
+   mesh = pyvista.read(download_tech_demo_data("td-28/supporting_files",'Figure_28.22.vtk'))
    pl = pyvista.Plotter()
    pl.add_mesh(mesh, scalars="values", cmap='jet', show_edges=True)
    pl.camera.position=(0.15,0.0,0)
@@ -1475,7 +1467,7 @@ frictional heat generation rate on the workpiece with time:
    :hide-code:
    
    columns_names = ['time', 'fricheat']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.23.txt"))
+   values = np.loadtxt(download_tech_demo_data("td-28/supporting_files","Figure_28.23.txt"))
    
    df = pd.DataFrame(data=values, columns=columns_names)
    
@@ -1492,7 +1484,7 @@ frictional heat generation rate on the workpiece with time:
    
    fig.update_layout(
        showlegend=True,
-       #template='simple_white',
+       template='simple_white',
        xaxis_title='<b>Time (Sec)</b>',
        yaxis_title='<b>Total frictional heat generation rate (W)</b>',
        title='<b>Total Frictional Heat Rate Variation with Time</b>',
@@ -1579,7 +1571,7 @@ total plastic heat-generation rate with time.
    :hide-code:
    
    columns_names = ['time', 'fricheat']
-   values = np.loadtxt(os.path.join(EXTERNAL_DATA_PATH, "Figure_28.24.txt"))
+   values = np.loadtxt(download_tech_demo_data("td-28/supporting_files","Figure_28.24.txt"))
    
    df = pd.DataFrame(data=values, columns=columns_names)
    
