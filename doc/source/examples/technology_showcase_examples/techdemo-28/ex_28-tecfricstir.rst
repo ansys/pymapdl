@@ -1059,14 +1059,6 @@ The following results topics for the FSW simulation are available:
 *  `28.7.4. Heat Generation`_
 
 
-.. figure:: graphics/gtecfricstir-anim.gif
-    :align: center
-    :alt: Friction Stir Welding Animation
-    :figclass: align-center
-    
-    **Figure 28.8: Friction Stir Welding Animation**
-
-
 
 28.7.1. Deformation and Stresses
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
