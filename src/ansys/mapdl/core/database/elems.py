@@ -96,6 +96,12 @@ class DbElems:
         11
 
         """
+        if not self._db.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Elements."
+            )
+            return None
+
         self._itelm = ielm
         return self.next()
 
@@ -233,6 +239,12 @@ class DbElems:
         >>> elems.info(1, DBDef.DB_SELECTED)
         1
         """
+        if not self._db.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Elements."
+            )
+            return None
+
         if isinstance(ikey, DBDef):
             ikey = ikey.value
 

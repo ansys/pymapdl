@@ -124,6 +124,12 @@ class DbNodes:
         11
 
         """
+        if not self._db.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Nodes."
+            )
+            return None
+
         self._itnod = inod
         return self.next()
 
@@ -260,6 +266,12 @@ class DbNodes:
         1
 
         """
+        if not self._db.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Nodes."
+            )
+            return None
+
         if isinstance(ikey, DBDef):
             ikey = ikey.value
         request = mapdl_db_pb2.NodInqrRequest(node=inod, key=ikey)
@@ -389,6 +401,12 @@ class DbNodes:
                [0., 0., 0.]])
 
         """
+        if not self._db.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Nodes."
+            )
+            return None
+
         chunk_size = DEFAULT_CHUNKSIZE
         metadata = [("chunk_size", str(chunk_size))]
         request = anskernel.EmptyRequest()

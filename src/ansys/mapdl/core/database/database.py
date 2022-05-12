@@ -373,6 +373,12 @@ class MapdlDb:
                [0., 0., 0.]])
 
         """
+        if not self.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Nodes."
+            )
+            return None
+
         if self._nodes is None:
             from .nodes import DbNodes  # here to avoid circular import
 
@@ -417,6 +423,12 @@ class MapdlDb:
         [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
 
         """
+        if not self.active:
+            self._mapdl._log.error(
+                "Please start the MAPDL DB Server to access Elements."
+            )
+            return None
+
         if self._elems is None:
             from .elems import DbElems  # here to avoid circular import
 
