@@ -125,9 +125,7 @@ class DbNodes:
 
         """
         if not self._db.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Nodes."
-            )
+            self._mapdl._log.error("Please start the MAPDL DB Server to access Nodes.")
             return None
 
         self._itnod = inod
@@ -267,9 +265,7 @@ class DbNodes:
 
         """
         if not self._db.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Nodes."
-            )
+            self._mapdl._log.error("Please start the MAPDL DB Server to access Nodes.")
             return None
 
         if isinstance(ikey, DBDef):
@@ -402,9 +398,7 @@ class DbNodes:
 
         """
         if not self._db.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Nodes."
-            )
+            self._mapdl._log.error("Please start the MAPDL DB Server to access Nodes.")
             return None
 
         chunk_size = DEFAULT_CHUNKSIZE

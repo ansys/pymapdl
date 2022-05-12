@@ -374,9 +374,7 @@ class MapdlDb:
 
         """
         if not self.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Nodes."
-            )
+            self._mapdl._log.error("Please start the MAPDL DB Server to access Nodes.")
             return None
 
         if self._nodes is None:
