@@ -8,7 +8,7 @@ import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2
 
-from . import DBDef, MapdlDb
+from . import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
 class DbElems:
@@ -66,6 +66,7 @@ class DbElems:
         lines.append(f"    Maximum element number:      {self.max_num}")
         return "\n".join(lines)
 
+    @check_mapdl_db_is_alive
     def first(self, ielm=0):
         """
         Get the number of the first element.
@@ -96,15 +97,10 @@ class DbElems:
         11
 
         """
-        if not self._db.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Elements."
-            )
-            return None
-
         self._itelm = ielm
         return self.next()
 
+    @check_mapdl_db_is_alive
     def next(self):
         """
         Return the number of the next selected element.
@@ -160,6 +156,7 @@ class DbElems:
     #     return self._itelm
     ###########################################################################
 
+    @check_mapdl_db_is_alive
     def info(self, ielm, ikey):
         """
         Get information about a element
@@ -239,12 +236,6 @@ class DbElems:
         >>> elems.info(1, DBDef.DB_SELECTED)
         1
         """
-        if not self._db.active:
-            self._mapdl._log.error(
-                "Please start the MAPDL DB Server to access Elements."
-            )
-            return None
-
         if isinstance(ikey, DBDef):
             ikey = ikey.value
 
