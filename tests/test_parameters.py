@@ -186,3 +186,15 @@ def test_parameters_name(mapdl, func, par_name):
         # Avoiding check if indexing or starting and ending with _.
         assert mapdl.parameters[par_name]
         assert isinstance(mapdl.parameters[par_name], float)
+
+
+def test_contain_iter(mapdl, cleared):
+    mapdl.clear()  # to check that #1107 is solved
+    mapdl.parameters["TWO"] = 2.0
+    assert 2.0 == mapdl.parameters["TWO"]
+    assert "TWO" in mapdl.parameters
+
+    # iter
+    mapdl.parameters["THREE"] = 3.0
+    assert hasattr(mapdl.parameters, "__iter__")
+    assert sorted(["TWO", "THREE"]) == [each for each in mapdl.parameters]

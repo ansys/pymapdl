@@ -10,8 +10,11 @@ or automating other tasks.
 .. autosummary::
    :toctree: _autosummary
 
-   convert_script
+   
    launch_mapdl
+   convert_script
+   Information
    change_default_ansys_path
    find_ansys
    close_all_local_instances
+

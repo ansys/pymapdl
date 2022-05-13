@@ -68,14 +68,15 @@ def convert_script(
 
     add_imports : bool, optional
         If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl``
-        and ``mapdl = launch_mapdl(loglevel="WARNING")``to the beginning of the
-        output file. This option is useful if you are planning to use the output
-        script from another mapdl session. See examples section.
+        and ``mapdl = launch_mapdl(loglevel="WARNING")`` to the
+        beginning of the output file. This option is useful if you
+        are planning to use the output script from another mapdl
+        session. See examples section.
         This option overrides ``auto_exit``.
 
     comment_solve : bool, optional
         If ``True``, it will pythonically comment the lines that
-        contain ``mapdl.solve`` or ``"/EOF"``.
+        contain ``"SOLVE"`` or ``"/EOF"``.
 
     cleanup_output : bool, optional
         If ``True`` the output is formatted using ``autopep8`` before writing
@@ -103,8 +104,9 @@ def convert_script(
     >>> clines = pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
     Converting a script and using it already in the same session.
-    For this case, it is recommended to use ``convert_apdl_block``
-    from the ``converter`` module since you do not have to write the file.
+    For this case, it is recommended to use
+    :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
+    since you do not need to write the file.
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
@@ -232,7 +234,7 @@ def convert_apdl_block(
     >>> in_file = examples.vmfiles['vm10']
     >>> filename = in_file.split('\\')[-1]
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
-    >>> cmds = convert_apdl_block(file, out_file, line_ending='\n')
+    >>> cmds = convert_apdl_block(file, out_file, line_ending='\\n')
     >>> # Do any change in the text, for example:
     >>> cmds = cmds.replace('solve', '!solve')
     >>> mapdl = launch_mapdl()

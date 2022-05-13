@@ -332,6 +332,12 @@ class Parameters:
         else:
             self._set_parameter(key, value)
 
+    def __contains__(self, key):
+        return key in self._parm.keys()
+
+    def __iter__(self):
+        yield from self._parm.keys()
+
     @supress_logging
     def _set_parameter(self, name, value):
         """Set a single parameter within MAPDL
@@ -578,6 +584,10 @@ def interp_star_status(status):
     """
     parameters = {}
     st = status.find("NAME                              VALUE")
+
+    if st == -1:
+        return {}
+
     for line in status[st + 80 :].splitlines():
         items = line.split()
         if not items:
