@@ -6,6 +6,7 @@ from ansys.mapdl.reader import examples
 import numpy as np
 import pytest
 from pyvista import PolyData
+from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -20,6 +21,9 @@ directory creation.
 """,
 )
 
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
