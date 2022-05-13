@@ -965,7 +965,6 @@ def _bc_labels_checker(bc_labels):
 
 def _bc_target_checker(bc_target):
     """Make sure we have allowed parameters and data types for ``bc_labels``"""
-
     if not isinstance(bc_target, (str, list, tuple)):
         raise ValueError(
             "The parameter 'bc_target' can be only a string, a list of strings or tuple of strings."
