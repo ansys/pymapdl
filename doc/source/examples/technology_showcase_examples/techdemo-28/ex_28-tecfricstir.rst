@@ -1750,13 +1750,17 @@ The following reference works are cited in this example problem:
 
 The following files were used in this problem:
 
-* **fsw.dat** -- Input file for the friction stir welding (FSW) problem.
-* **fsw.cdb** -- Common database file containing the FSW model information (called by **fsw.dat**)
+* **fsw.py** -- Python input file for the friction stir welding (FSW) problem.
+  :download:`Download source code: fsw.py <https://github.com/pyansys/example-data/blob/master/tech_demos/td-28/fsw.py>`.
+
+* **fsw.cdb** -- Common database file containing the FSW model information (called by **fsw.py**)
+  :download:`Download source code: fsw.cdb <https://github.com/pyansys/example-data/blob/master/tech_demos/td-28/fsw.cdb>`.
+
 
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download the zipped td-28 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a />`_          |
+| `Download the zipped td-28 file set for this problem. <https://storage.ansys.com/doclinks/techdemos.html?code=td-28-DLU-N2a>`_          |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
-| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a />`_           |
+| `Download all td-nn file sets in a single zip file. <https://storage.ansys.com/doclinks/techdemos.html?code=td-all-DLU-N2a>`_           |
 +-------------------------------------------------------------------------------------------------------------------------------------------+
 
 
