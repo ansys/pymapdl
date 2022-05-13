@@ -1374,3 +1374,9 @@ def test_plot_empty_mesh(mapdl, cleared):
 
     with pytest.warns(UserWarning):
         mapdl.eplot(vtk=True)
+
+
+def test_equal_in_comments_and_title(mapdl):
+    mapdl.com("=====")
+    mapdl.title("This is = ")
+    mapdl.title("This is '=' ")
