@@ -20,7 +20,7 @@ if _HAS_TQDM:
 
 
 def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
-    """Return a list the first ``n_ports`` ports starting from ``starting_port``"""
+    """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
     port = MAPDL_DEFAULT_PORT
     ports = []
@@ -31,8 +31,7 @@ def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
 
     if len(ports) < n_ports:
         raise RuntimeError(
-            "There are not %d available ports between %d and 65536"
-            % (n_ports, starting_port)
+            f"There are not {n_ports} available ports between {starting_port} and 65536"
         )
 
     return ports
@@ -65,7 +64,7 @@ class LocalMapdlPool:
 
     progress_bar : bool, optional
         Show a progress bar when starting the pool.  Defaults to
-        ``True``.  Will not be shown when ``wait=False``
+        ``True``.  Will not be shown when ``wait=False``.
 
     restart_failed : bool, optional
         Restarts any failed instances in the pool.
@@ -73,8 +72,8 @@ class LocalMapdlPool:
     remove_temp_files : bool, optional
         Removes all temporary files on exit.  Default ``True``.
 
-    **kwargs : Additional Keyword Arguments
-        See ``help(ansys.mapdl.launcher.launch_mapdl)`` for a complete
+    **kwargs : dict, optional
+        See :func:`ansys.mapdl.core.launch_mapdl` for a complete
         listing of all additional keyword arguments.
 
     Examples
@@ -82,8 +81,8 @@ class LocalMapdlPool:
     Simply create a pool of 10 instances to run in the temporary
     directory.
 
-    >>> from ansys.mapdl import LocalMapdlPool
-    >>> pool = mapdl.LocalMapdlPool(10)
+    >>> from ansys.mapdl.core import LocalMapdlPool
+    >>> pool = LocalMapdlPool(10)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
@@ -91,19 +90,19 @@ class LocalMapdlPool:
 
     >>> import os
     >>> my_path = os.getcmd()
-    >>> pool = mapdl.LocalMapdlPool(10, nproc=1, run_location=my_path)
+    >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Windows.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/win64/ANSYS212.exe'
-    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Linux.
 
     >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
-    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     """
@@ -205,7 +204,7 @@ class LocalMapdlPool:
         timeout=None,
         wait=True,
     ):
-        """Run a function for each instance of mapdl within the pool
+        """Run a function for each instance of mapdl within the pool.
 
         Parameters
         ----------
