@@ -677,7 +677,7 @@ def general_plotter(
 
     """
     if notebook:
-        off_screen = True
+        off_screen = True  # pragma: no cover
 
     if savefig:
         off_screen = True

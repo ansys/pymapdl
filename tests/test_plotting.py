@@ -4,6 +4,8 @@ import os
 import pytest
 from pyvista.plotting import Plotter, system_supports_plotting
 
+from ansys.mapdl.core.plotting import general_plotter
+
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
@@ -15,16 +17,26 @@ def bc_example(mapdl, make_block):
     mapdl.prep7()
 
     mapdl.nsel("s", "node", "", 1)
-    mapdl.f("all", "FX", 100)
-    mapdl.f("all", "FY", 100)
-    mapdl.f("all", "FZ", 100)
+    mapdl.f("all", "FX", 0)
+    mapdl.f("all", "FY", 0)
+    mapdl.f("all", "FZ", 0)
 
     mapdl.nsel("s", "node", "", 2)
+    mapdl.f("all", "FX", 100)
+    mapdl.f("all", "FY", 200)
+    mapdl.f("all", "FZ", 100)
+
+    mapdl.nsel("s", "node", "", 3)
     mapdl.d("all", "UX", 0)
     mapdl.d("all", "UY", 0)
     mapdl.d("all", "UZ", 0)
 
-    mapdl.nsel("a", "node", "", 1)
+    mapdl.nsel("s", "node", "", 4)
+    mapdl.d("all", "UX", 1)
+    mapdl.d("all", "UY", 2)
+    mapdl.d("all", "UZ", 3)
+
+    mapdl.nsel("all")
 
 
 @skip_no_xserver
@@ -187,3 +199,42 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_target=bc_target
     )
     assert isinstance(p, Plotter)
+
+
+def test_bc_no_mapdl(mapdl):
+    with pytest.raises(ValueError):
+        general_plotter(
+            [], [], [], plot_bc=True
+        )  # mapdl should be an argument if plotting BC
+
+
+def test_bc_only_one_node(mapdl, bc_example):
+    mapdl.nsel("s", "node", "", 1)
+    mapdl.nplot(plot_bc=True)
+
+
+def test_bc_glyph(mapdl, bc_example):
+    mapdl.nplot(plot_bc=True, bc_glyph_size=19)
+    with pytest.raises(ValueError):
+        mapdl.nplot(plot_bc=True, bc_glyph_size="big")
+
+
+def test_bc_bc_labels(mapdl, bc_example):
+    """Test values for 'bc_labels' keyword argument."""
+    mapdl.nplot(plot_bc=True, bc_labels="UX")
+    mapdl.nplot(plot_bc=True, bc_labels=["Ux", "uy", "VOLT"])
+    with pytest.raises(ValueError):
+        mapdl.nplot(plot_bc=True, bc_labels=["big"])
+
+    with pytest.raises(ValueError):
+        mapdl.nplot(plot_bc=True, bc_labels={"not": "valid"})
+
+    with pytest.raises(ValueError):
+        mapdl.nplot(plot_bc=True, bc_labels=["UX", {"not": "valid"}])
+
+
+def test_all_same_values(mapdl, bc_example):
+    """Test the BC glyph size when all the BC have same magnitude."""
+    mapdl.nsel("all")
+    mapdl.f("all", "FX", 0)
+    mapdl.nplot(plot_bc=True, bc_labels="FX")
