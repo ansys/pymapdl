@@ -42,11 +42,20 @@ class WithinBeginLevel:
 def check_mapdl_db_is_alive(function):
     """
     Decorator to check that the MAPDL.DB has started.
+
+    It works for the DB object (DBDef) and for the derived object which has "_db" attribute.
     """
 
     @wraps(function)
     def wrapper(self, *args, **kwargs):
-        if not self.active:
+        if hasattr(self, "active"):
+            active = self.active
+        elif hasattr(self, "_db"):
+            active = self._db.active
+        else:  # pragma: no cover
+            raise Exception("The DB object could not be found.")
+
+        if not active:
             self._mapdl._log.error(
                 f"Please start the MAPDL DB Server to access '{function.__name__}'."
             )
