@@ -417,21 +417,9 @@ def create_geometry(mapdl):
     return areas, keypoints
 
 
-def apply_forces(mapdl):
-    for const in ["UX", "UY", "UZ", "ROTX", "ROTY", "ROTZ"]:
-        mapdl.d("all", const)
-
-    mapdl.f(1, "FX", 1000)
-    mapdl.f(2, "FY", 1000)
-    mapdl.f(3, "FZ", 1000)
-    mapdl.f(4, "MX", 1000)
-    mapdl.f(5, "MY", 1000)
-    mapdl.f(6, "MZ", 1000)
-    mapdl.d(7, "UZ")
-    mapdl.d(8, "UZ")
-
-
-def solve_simulation(mapdl):
-    mapdl.run("/solu")
-    mapdl.antype("static")
-    mapdl.solve()
+@pytest.fixture(scope="function")
+def make_block(mapdl, cleared):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.et(1, 186)
+    mapdl.esize(0.25)
+    mapdl.vmesh("ALL")

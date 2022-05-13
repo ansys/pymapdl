@@ -1254,7 +1254,7 @@ class Elements:
         This command is valid in any processor.
 
         """
-        return self.run("EPLOT")
+        return self.run("EPLOT", **kwargs)
 
     def eread(self, fname: str = "", ext: str = "", **kwargs) -> Optional[str]:
         """Reads elements from a file.
