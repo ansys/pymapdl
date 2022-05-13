@@ -131,7 +131,7 @@ shape tool, as shown in the following figure:
    # The elements and nodes are going to be taken from the cdb file.
    
    from ansys.mapdl.core import launch_mapdl
-   mapdl = launch_mapdl(port=50055)
+   mapdl = launch_mapdl()
    mapdl.prep7()   
    mapdl.cdread('db', cdbfile)   
    # ***** Problem parameters ********
