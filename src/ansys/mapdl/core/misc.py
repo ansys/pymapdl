@@ -424,7 +424,6 @@ def get_bounding_box(nodes_xyz):
     return max_ - min_
 
 
-
 def load_file(mapdl, fname, priority_mapdl_file=None):
     """
     Provide a file to the MAPDL instance.
