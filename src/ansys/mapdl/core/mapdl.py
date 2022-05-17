@@ -36,6 +36,7 @@ from ansys.mapdl.core.misc import (
     load_file,
     random_string,
     run_as_prep7,
+    select_pickable_point,
     supress_logging,
 )
 from ansys.mapdl.core.plotting import general_plotter
@@ -3276,3 +3277,11 @@ class _MapdlCore(Commands):
         return super().dim(
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
+
+    @wraps(Commands.nsel)
+    def nsel(self, *args, **kwargs):
+        @select_pickable_point(entity="node")
+        def new_nsel(self, *args, **kwargs):
+            return super().nsel(self, *args, **kwargs)
+
+        return new_nsel(self, *args, **kwargs)

@@ -968,3 +968,96 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def select_pickable_point(entity="node"):
+    """ """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+
+            if "item" in kwargs:
+                item = kwargs["item"]
+            elif len(args) > 1:
+                item = args[1]
+
+            _debug = kwargs.get("_debug", False)
+
+            if item.upper() == "P" and _HAS_PYVISTA:
+
+                if "type_" in kwargs:
+                    type_ = kwargs["type_"]
+                else:
+                    type_ = args[0]
+
+                type_ = type_.upper()
+
+                if type_ not in ["S", "R", "A", "U"]:
+                    raise ValueError(
+                        f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') does not make sense."
+                    )
+
+                if type_ == "A":
+                    mapdl.run("nsel,all")  # To make sure we can select everything
+                    # it will be nice to highlight the already selected nodes.
+
+                pl = self.nplot(return_plotter=True)
+
+                q = self.queries
+                picked_points = []
+                previous_picked_points = set(
+                    self.mesh.nnum.copy()
+                )  # set should not change any node number
+
+                def callback_(point):
+                    node_id = q.node(
+                        point[0], point[1], point[2]
+                    )  # This will only return one node. Fine for now.
+
+                    if node_id in picked_points:
+                        print(f"{entity} {node_id} already selected.")
+                    else:
+                        picked_points.append(node_id)
+                        print(f"Selected {entity}: {node_id} in location: {point}")
+
+                pl.enable_point_picking(
+                    callback=callback_,
+                    # use_mesh=True,  # for later implementation
+                    show_message=f"Type: {type_} - Please use the left mouse button to pick the {entity}s.",
+                    show_point=True,
+                    left_clicking=True,
+                )
+                if not _debug:
+                    pl.show()
+                else:
+                    _debug(pl)
+
+                picked_points = set(
+                    picked_points
+                )  # removing duplicates (although there should be none)
+
+                if type_ == "S":
+                    pass
+                elif type_ == "R":
+                    picked_points = previous_picked_points.intersection(picked_points)
+                elif type_ == "A":
+                    picked_points = previous_picked_points.union(picked_points)
+                elif type_ == "U":
+                    picked_points = previous_picked_points.difference(picked_points)
+
+                picked_points = list(picked_points)
+                self.run(
+                    f"nsel,s,node,,{picked_points[0]}"
+                )  # Using run to avoid stackoverflow
+                for each in picked_points[1:]:
+                    self.run(f"nsel,a,node,,{each}")
+
+                return picked_points
+
+            else:
+                return self.nsel(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
