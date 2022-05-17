@@ -238,3 +238,53 @@ def test_all_same_values(mapdl, bc_example):
     mapdl.nsel("all")
     mapdl.f("all", "FX", 0)
     mapdl.nplot(plot_bc=True, bc_labels="FX")
+
+
+@pytest.mark.parametrize(
+    "selection",
+    ["S", "R", "A", "U"],
+)
+def test_pick_nodes(mapdl, make_block, selection):
+    # Cleaning the model a bit
+    mapdl.modmsh("detach")  # detaching geom and fem
+    mapdl.edele("all")
+    mapdl.nsel("s", "node", "", 1)
+    mapdl.nsel("a", "node", "", 2)
+    mapdl.nsel("inver")
+    mapdl.ndele("all")
+
+    def debug_orders(pl, point=[0.5, 0.5]):
+        pl.show(auto_close=False)
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
+        pl.iren._mouse_left_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+
+    mapdl.nsel("S", "node", "", 1)
+    if selection == "R" or selection == "U":
+        point = (285 / 1024, 280 / 800)
+        mapdl.nsel("a", "node", "", 2)
+        selected = mapdl.nsel(
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        )  # Selects node 2
+    else:
+        selected = mapdl.nsel(
+            selection, "P", _debug=debug_orders, tolerance=0.2
+        )  # Selects node 2
+
+    assert selected
+    assert isinstance(selected, list)
+    assert len(selected) > 0
+    assert sorted(selected) == sorted(mapdl.mesh.nnum)
+
+    if selection == "S":
+        assert selected == [1]
+    elif selection == "R":
+        assert selected == [2]
+    elif selection == "A":
+        assert 1 in selected
+        assert 2 in selected
+    elif selection == "U":
+        assert 2 not in selected
+        assert 1 in selected
