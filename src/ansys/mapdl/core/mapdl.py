@@ -3282,6 +3282,6 @@ class _MapdlCore(Commands):
     def nsel(self, *args, **kwargs):
         @select_pickable_point(entity="node")
         def new_nsel(self, *args, **kwargs):
-            return super().nsel(self, *args, **kwargs)
+            return super().nsel(*args, **kwargs)
 
         return new_nsel(self, *args, **kwargs)

@@ -981,6 +981,8 @@ def select_pickable_point(entity="node"):
                 item = kwargs["item"]
             elif len(args) > 1:
                 item = args[1]
+            else:
+                return function(self, *args, **kwargs)
 
             _debug = kwargs.get("_debug", False)
 
@@ -999,7 +1001,7 @@ def select_pickable_point(entity="node"):
                     )
 
                 if type_ == "A":
-                    mapdl.run("nsel,all")  # To make sure we can select everything
+                    self.run("nsel,all")  # To make sure we can select everything
                     # it will be nice to highlight the already selected nodes.
 
                 pl = self.nplot(return_plotter=True)
@@ -1027,11 +1029,15 @@ def select_pickable_point(entity="node"):
                     show_message=f"Type: {type_} - Please use the left mouse button to pick the {entity}s.",
                     show_point=True,
                     left_clicking=True,
+                    tolerance=kwargs.get("tolerance", 0.025),
                 )
-                if not _debug:
+                if not _debug:  # pragma: no cover
                     pl.show()
                 else:
                     _debug(pl)
+
+                if len(picked_points) == 0:
+                    return []
 
                 picked_points = set(
                     picked_points
@@ -1047,16 +1053,14 @@ def select_pickable_point(entity="node"):
                     picked_points = previous_picked_points.difference(picked_points)
 
                 picked_points = list(picked_points)
-                self.run(
-                    f"nsel,s,node,,{picked_points[0]}"
-                )  # Using run to avoid stackoverflow
+                function(self, "S", "node", "", picked_points[0])
                 for each in picked_points[1:]:
-                    self.run(f"nsel,a,node,,{each}")
+                    function(self, "a", "node", "", each)
 
                 return picked_points
 
             else:
-                return self.nsel(*args, **kwargs)
+                function(self, *args, **kwargs)
 
         return wrapper
 
