@@ -970,97 +970,84 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def select_pickable_point(entity="node"):
-    """ """
+def allow_pickable_points(entity="node"):
+    """
+    This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
+    and feed them as a list to the NSEL.
+    """
 
-    def decorator(function):
-        @wraps(function)
+    def decorator(orig_nsel):
+        @wraps(orig_nsel)
         def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs = self._get_args_xsel(
+                *args, **kwargs
+            )
 
-            if "item" in kwargs:
-                item = kwargs["item"]
-            elif len(args) > 1:
-                item = args[1]
-            else:
-                return function(self, *args, **kwargs)
-
-            _debug = kwargs.get("_debug", False)
-
-            if item.upper() == "P" and _HAS_PYVISTA:
-
-                if "type_" in kwargs:
-                    type_ = kwargs["type_"]
-                else:
-                    type_ = args[0]
-
-                type_ = type_.upper()
-
+            if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
                     raise ValueError(
-                        f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') does not make sense."
+                        f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
                     )
 
-                if type_ == "A":
-                    self.run("nsel,all")  # To make sure we can select everything
-                    # it will be nice to highlight the already selected nodes.
+                if entity == "node":
+                    pl = self.nplot(return_plotter=True)
+                elif entity == "kp":
+                    pl = self.kplot(return_plotter=True)
 
-                pl = self.nplot(return_plotter=True)
+                vmin = self._pick_points(entity, pl, type_, **kwargs)
+                item = entity
+                comp = ""
+                kwargs[
+                    "Used_P"
+                ] = True  # to make return the array of points when using P
 
-                q = self.queries
-                picked_points = []
-                previous_picked_points = set(
-                    self.mesh.nnum.copy()
-                )  # set should not change any node number
+            return orig_nsel(self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs)
 
-                def callback_(point):
-                    node_id = q.node(
-                        point[0], point[1], point[2]
-                    )  # This will only return one node. Fine for now.
+        return wrapper
 
-                    if node_id in picked_points:
-                        print(f"{entity} {node_id} already selected.")
-                    else:
-                        picked_points.append(node_id)
-                        print(f"Selected {entity}: {node_id} in location: {point}")
+    return decorator
 
-                pl.enable_point_picking(
-                    callback=callback_,
-                    # use_mesh=True,  # for later implementation
-                    show_message=f"Type: {type_} - Please use the left mouse button to pick the {entity}s.",
-                    show_point=True,
-                    left_clicking=True,
-                    tolerance=kwargs.get("tolerance", 0.025),
+
+def wrap_point_SEL(entity="node"):
+    def decorator(original_sel_func):
+        """This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
+        This allows for example:
+
+        >>> mapdl.nsel("S", "node", "", [1,2,3])  # select nodes 1,2, and 3.
+        """
+
+        @wraps(original_sel_func)
+        def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs = self._get_args_xsel(
+                *args, **kwargs
+            )
+
+            if isinstance(vmin, (list, tuple, np.ndarray)):
+                self.run(
+                    "/com, Selecting nodes/KPs from a list/tuple/array"
+                )  # To have a clue in the apdl log file
+
+                if vmax or vinc:
+                    raise ValueError(
+                        "If a list or tuple is used as 'vmin' argument,"
+                        " it is not allowed to use 'vmax' or 'vinc' arguments."
+                    )
+
+                if len(vmin) == 0 and type_ == "S":
+                    # assuming you want to select nothing because you supplied an empty list/tuple/array
+                    return original_sel_func("none")
+
+                self._perform_entity_list_selection(
+                    entity, original_sel_func, type_, item, comp, vmin, kabs
                 )
-                if not _debug:  # pragma: no cover
-                    pl.show()
+
+                if kwargs.pop("Used_P", False):
+                    # we want to return the
+                    return vmin
                 else:
-                    _debug(pl)
-
-                if len(picked_points) == 0:
-                    return []
-
-                picked_points = set(
-                    picked_points
-                )  # removing duplicates (although there should be none)
-
-                if type_ == "S":
-                    pass
-                elif type_ == "R":
-                    picked_points = previous_picked_points.intersection(picked_points)
-                elif type_ == "A":
-                    picked_points = previous_picked_points.union(picked_points)
-                elif type_ == "U":
-                    picked_points = previous_picked_points.difference(picked_points)
-
-                picked_points = list(picked_points)
-                function(self, "S", "node", "", picked_points[0])
-                for each in picked_points[1:]:
-                    function(self, "a", "node", "", each)
-
-                return picked_points
-
+                    return
             else:
-                function(self, *args, **kwargs)
+                return original_sel_func(self, *args, **kwargs)
 
         return wrapper
 

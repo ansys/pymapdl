@@ -32,12 +32,13 @@ from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
+    allow_pickable_points,
     last_created,
     load_file,
     random_string,
     run_as_prep7,
-    select_pickable_point,
     supress_logging,
+    wrap_point_SEL,
 )
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
@@ -3278,10 +3279,146 @@ class _MapdlCore(Commands):
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
 
+    def _get_args_xsel(self, *args, **kwargs):
+        type_ = kwargs.get("type_", args[0]).upper()
+        item = kwargs.get("item", args[1] if len(args) > 1 else "").upper()
+        comp = kwargs.get("comp", args[2] if len(args) > 2 else "").upper()
+        vmin = kwargs.get("vmin", args[3] if len(args) > 3 else "")
+        vmax = kwargs.get("vmax", args[4] if len(args) > 4 else "")
+        vinc = kwargs.get("vinc", args[5] if len(args) > 5 else "")
+        kabs = kwargs.get("kabs", args[6] if len(args) > 6 else "")
+        return type_, item, comp, vmin, vmax, vinc, kabs
+
+    def _get_selected_(self, entity):  # pragma: no cover
+        """Get list of selected entities"""
+        allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
+        if entity.upper() not in allowed_values:
+            raise ValueError(
+                f"The value '{entity}' is not allowed."
+                f"Only {allowed_values} are allowed"
+            )
+
+        entity = entity.upper()
+
+        if entity == "NODE":
+            return self.mesh.nnum.copy()
+        elif entity == "ELEM":
+            return self.mesh.enum.copy()
+        elif entity == "KP":
+            return self.geometry.knum
+        elif entity == "LINE":
+            return self.geometry.lnum
+        elif entity == "AREA":
+            return self.geometry.anum
+        elif entity == "VOLU":
+            return self.geometry.vnum
+
+    def _pick_points(self, entity, pl, type_, **kwargs):
+        """Show a plot and get the selected points"""
+        if type_ == "A":
+            self.run("nsel,all")  # To make sure we can select everything
+            # it will be nice
+
+        _debug = kwargs.pop("_debug", False)  # for testing purposes
+
+        q = self.queries
+        picked_points = []
+        previous_picked_points = set(
+            self._get_selected_(entity)
+        )  # set should not change any node number
+
+        if entity.upper() == "KP":
+            selector = getattr(q, "kp")
+        else:
+            selector = getattr(q, "node")
+
+        def callback_(point):
+            node_id = selector(
+                point[0], point[1], point[2]
+            )  # This will only return one node. Fine for now.
+
+            if node_id in picked_points:
+                print(f"{entity} {node_id} already selected.")
+            else:
+                picked_points.append(node_id)
+                print(f"Selected {entity}: {node_id} in location: {point}")
+
+        pl.enable_point_picking(
+            callback=callback_,
+            # use_mesh=True,  # for later implementation
+            show_message=f"Type: {type_} - Please use the left mouse button to pick the {entity}s.",
+            show_point=True,
+            left_clicking=True,
+            tolerance=kwargs.get("tolerance", 0.025),
+        )
+        if not _debug:  # pragma: no cover
+            pl.show()
+        else:
+            _debug(pl)
+
+        if len(picked_points) == 0:
+            return ""
+
+        picked_points = set(
+            picked_points
+        )  # removing duplicates (although there should be none)
+
+        if type_ == "S":
+            pass
+        elif type_ == "R":
+            picked_points = previous_picked_points.intersection(picked_points)
+        elif type_ == "A":
+            picked_points = previous_picked_points.union(picked_points)
+        elif type_ == "U":
+            picked_points = previous_picked_points.difference(picked_points)
+
+        return list(picked_points)
+
+    def _perform_entity_list_selection(
+        self, entity, selection_function, type_, item, comp, vmin, kabs
+    ):
+        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
+
+        # Getting new selection
+        selection_function(self, "S", item, comp, vmin[0], "", "", kabs)
+        for each_ in vmin[1:]:
+            selection_function(self, "A", item, comp, each_, "", "", kabs)
+
+        self.cm(f"__temp_{entity}s_1__", f"{entity}")
+
+        self.cmsel("S", f"__temp_{entity}s__")
+        self.cmsel(type_, f"__temp_{entity}s_1__")
+
+        # Cleaning
+        self.cmdele(f"__temp_{entity}s__")
+        self.cmdele(f"__temp_{entity}s_1__")
+
     @wraps(Commands.nsel)
     def nsel(self, *args, **kwargs):
-        @select_pickable_point(entity="node")
-        def new_nsel(self, *args, **kwargs):
-            return super().nsel(*args, **kwargs)
+        """Wraps previons NSEL to allow to use a list/tuple/array for vmin. It will raise an error in case
+        vmax or vinc are used too."""
+        sel_func = (
+            super().nsel
+        )  # using super() inside the wrapped function confuses the references
 
-        return new_nsel(self, *args, **kwargs)
+        @allow_pickable_points(entity="node")
+        @wrap_point_SEL(entity="node")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.ksel)
+    def ksel(self, *args, **kwargs):
+        """Wraps previons KSEL to allow to use a list/tuple/array for vmin. It will raise an error in case
+        vmax or vinc are used too."""
+        sel_func = (
+            super().ksel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points(entity="kp")
+        @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)

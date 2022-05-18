@@ -276,7 +276,61 @@ def test_pick_nodes(mapdl, make_block, selection):
     assert selected
     assert isinstance(selected, list)
     assert len(selected) > 0
-    assert sorted(selected) == sorted(mapdl.mesh.nnum)
+    if selection != "U":
+        assert sorted(selected) == sorted(mapdl._get_selected_("node"))
+
+    if selection == "S":
+        assert selected == [1]
+    elif selection == "R":
+        assert selected == [2]
+    elif selection == "A":
+        assert 1 in selected
+        assert 2 in selected
+    elif selection == "U":
+        assert 2 not in selected
+        assert 1 in selected
+
+
+@pytest.mark.parametrize(
+    "selection",
+    ["S", "R", "A", "U"],
+)
+def test_pick_kp(mapdl, make_block, selection):
+    # Cleaning the model a bit
+    mapdl.modmsh("detach")  # detaching geom and fem
+    mapdl.vdele("all")
+    mapdl.adele("all")
+    mapdl.ldele("all")
+    mapdl.ksel("u", "kp", "", 1)
+    mapdl.ksel("u", "kp", "", 2)
+    mapdl.kdele("all")
+    mapdl.ksel("all")
+
+    def debug_orders(pl, point=[0.5, 0.5]):
+        pl.show(auto_close=False)
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
+        pl.iren._mouse_left_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+
+    mapdl.ksel("S", "node", "", 1)
+    if selection == "R" or selection == "U":
+        point = (285 / 1024, 280 / 800)
+        mapdl.ksel("a", "node", "", 2)
+        selected = mapdl.ksel(
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        )  # Selects node 2
+    else:
+        selected = mapdl.ksel(
+            selection, "P", _debug=debug_orders, tolerance=0.2
+        )  # Selects node 2
+
+    assert selected
+    assert isinstance(selected, list)
+    assert len(selected) > 0
+    if selection != "U":
+        assert sorted(selected) == sorted(mapdl._get_selected_("kp"))
 
     if selection == "S":
         assert selected == [1]
