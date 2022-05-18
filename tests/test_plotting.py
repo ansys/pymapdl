@@ -253,7 +253,7 @@ def test_pick_nodes(mapdl, make_block, selection):
     mapdl.nsel("inver")
     mapdl.ndele("all")
 
-    def debug_orders(pl, point=[0.5, 0.5]):
+    def debug_orders(pl, point):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
