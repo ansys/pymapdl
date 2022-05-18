@@ -975,14 +975,14 @@ class Information:
 
 
 def _get_args_xsel(*args, **kwargs):
-    type_ = kwargs.get("type_", args[0]).upper()
-    item = kwargs.get("item", args[1] if len(args) > 1 else "").upper()
-    comp = kwargs.get("comp", args[2] if len(args) > 2 else "").upper()
-    vmin = kwargs.get("vmin", args[3] if len(args) > 3 else "")
-    vmax = kwargs.get("vmax", args[4] if len(args) > 4 else "")
-    vinc = kwargs.get("vinc", args[5] if len(args) > 5 else "")
-    kabs = kwargs.get("kabs", args[6] if len(args) > 6 else "")
-    return type_, item, comp, vmin, vmax, vinc, kabs
+    type_ = kwargs.pop("type_", args[0]).upper()
+    item = kwargs.pop("item", args[1] if len(args) > 1 else "").upper()
+    comp = kwargs.pop("comp", args[2] if len(args) > 2 else "").upper()
+    vmin = kwargs.pop("vmin", args[3] if len(args) > 3 else "")
+    vmax = kwargs.pop("vmax", args[4] if len(args) > 4 else "")
+    vinc = kwargs.pop("vinc", args[5] if len(args) > 5 else "")
+    kabs = kwargs.pop("kabs", args[6] if len(args) > 6 else "")
+    return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
 def allow_pickable_points(entity="node"):
@@ -994,7 +994,9 @@ def allow_pickable_points(entity="node"):
     def decorator(orig_nsel):
         @wraps(orig_nsel)
         def wrapper(self, *args, **kwargs):
-            type_, item, comp, vmin, vmax, vinc, kabs = _get_args_xsel(*args, **kwargs)
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1033,7 +1035,9 @@ def wrap_point_SEL(entity="node"):
 
         @wraps(original_sel_func)
         def wrapper(self, *args, **kwargs):
-            type_, item, comp, vmin, vmax, vinc, kabs = _get_args_xsel(*args, **kwargs)
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
 
             if isinstance(vmin, (list, tuple, np.ndarray)):
                 self.run(
