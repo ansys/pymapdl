@@ -269,8 +269,9 @@ def test_pick_nodes(mapdl, make_block, selection):
             selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
         )  # Selects node 2
     else:
+        point = (0.5, 0.5)
         selected = mapdl.nsel(
-            selection, "P", _debug=debug_orders, tolerance=0.2
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
         )  # Selects node 2
 
     assert selected
@@ -306,7 +307,7 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.kdele("all")
     mapdl.ksel("all")
 
-    def debug_orders(pl, point=(0.5, 0.5)):
+    def debug_orders(pl, point):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -322,8 +323,9 @@ def test_pick_kp(mapdl, make_block, selection):
             selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
         )  # Selects node 2
     else:
+        point = (0.5, 0.5)
         selected = mapdl.ksel(
-            selection, "P", _debug=debug_orders, tolerance=0.2
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
         )  # Selects node 2
 
     assert selected

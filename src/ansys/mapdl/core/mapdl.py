@@ -3280,7 +3280,7 @@ class _MapdlCore(Commands):
         )
 
     def _get_selected_(self, entity):  # pragma: no cover
-        """Get list of selected entities"""
+        """Get list of selected entities."""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
         if entity.upper() not in allowed_values:
             raise ValueError(
@@ -3304,7 +3304,7 @@ class _MapdlCore(Commands):
             return self.geometry.vnum
 
     def _pick_points(self, entity, pl, type_, **kwargs):
-        """Show a plot and get the selected points"""
+        """Show a plot and get the selected points."""
         if type_ == "A":
             self.run("nsel,all")  # To make sure we can select everything
             # it will be nice
@@ -3367,6 +3367,7 @@ class _MapdlCore(Commands):
     def _perform_entity_list_selection(
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
+        """Select entities using CM, and the supplied selection function."""
         self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
 
         # Getting new selection
@@ -3385,8 +3386,9 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.nsel)
     def nsel(self, *args, **kwargs):
-        """Wraps previons NSEL to allow to use a list/tuple/array for vmin. It will raise an error in case
-        vmax or vinc are used too."""
+        """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too."""
         sel_func = (
             super().nsel
         )  # using super() inside the wrapped function confuses the references
@@ -3400,8 +3402,9 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.ksel)
     def ksel(self, *args, **kwargs):
-        """Wraps previons KSEL to allow to use a list/tuple/array for vmin. It will raise an error in case
-        vmax or vinc are used too."""
+        """Wraps previons KSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too."""
         sel_func = (
             super().ksel
         )  # using super() inside the wrapped function confuses the references
