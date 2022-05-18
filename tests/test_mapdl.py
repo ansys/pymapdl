@@ -13,10 +13,6 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
-
 skip_in_cloud = pytest.mark.skipif(
     not get_start_instance(),
     reason="""
@@ -25,6 +21,9 @@ directory creation.
 """,
 )
 
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -135,14 +134,6 @@ def warns_in_cdread_error_log(mapdl):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
-
-
-@pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
 
 
 @pytest.mark.skip_grpc
@@ -1374,3 +1365,9 @@ def test_plot_empty_mesh(mapdl, cleared):
 
     with pytest.warns(UserWarning):
         mapdl.eplot(vtk=True)
+
+
+def test_equal_in_comments_and_title(mapdl):
+    mapdl.com("=====")
+    mapdl.title("This is = ")
+    mapdl.title("This is '=' ")

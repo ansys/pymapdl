@@ -37,6 +37,15 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.version
 
 
+Constants
+~~~~~~~~~
+.. autosummary::
+   :toctree: _autosummary
+
+   plotting.ALLOWED_TARGETS
+   plotting.BCS
+
+
 Latest 2021R1 and newer features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
