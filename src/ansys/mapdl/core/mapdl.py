@@ -3279,16 +3279,6 @@ class _MapdlCore(Commands):
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
 
-    def _get_args_xsel(self, *args, **kwargs):
-        type_ = kwargs.get("type_", args[0]).upper()
-        item = kwargs.get("item", args[1] if len(args) > 1 else "").upper()
-        comp = kwargs.get("comp", args[2] if len(args) > 2 else "").upper()
-        vmin = kwargs.get("vmin", args[3] if len(args) > 3 else "")
-        vmax = kwargs.get("vmax", args[4] if len(args) > 4 else "")
-        vinc = kwargs.get("vinc", args[5] if len(args) > 5 else "")
-        kabs = kwargs.get("kabs", args[6] if len(args) > 6 else "")
-        return type_, item, comp, vmin, vmax, vinc, kabs
-
     def _get_selected_(self, entity):  # pragma: no cover
         """Get list of selected entities"""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]

@@ -306,7 +306,7 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.kdele("all")
     mapdl.ksel("all")
 
-    def debug_orders(pl, point=[0.5, 0.5]):
+    def debug_orders(pl, point=(0.5, 0.5)):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size

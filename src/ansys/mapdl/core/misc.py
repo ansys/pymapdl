@@ -970,6 +970,17 @@ class Information:
         return self._get_between(init_, end_string)
 
 
+def _get_args_xsel(self, *args, **kwargs):
+    type_ = kwargs.get("type_", args[0]).upper()
+    item = kwargs.get("item", args[1] if len(args) > 1 else "").upper()
+    comp = kwargs.get("comp", args[2] if len(args) > 2 else "").upper()
+    vmin = kwargs.get("vmin", args[3] if len(args) > 3 else "")
+    vmax = kwargs.get("vmax", args[4] if len(args) > 4 else "")
+    vinc = kwargs.get("vinc", args[5] if len(args) > 5 else "")
+    kabs = kwargs.get("kabs", args[6] if len(args) > 6 else "")
+    return type_, item, comp, vmin, vmax, vinc, kabs
+
+
 def allow_pickable_points(entity="node"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
@@ -979,9 +990,7 @@ def allow_pickable_points(entity="node"):
     def decorator(orig_nsel):
         @wraps(orig_nsel)
         def wrapper(self, *args, **kwargs):
-            type_, item, comp, vmin, vmax, vinc, kabs = self._get_args_xsel(
-                *args, **kwargs
-            )
+            type_, item, comp, vmin, vmax, vinc, kabs = _get_args_xsel(*args, **kwargs)
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1010,17 +1019,17 @@ def allow_pickable_points(entity="node"):
 
 def wrap_point_SEL(entity="node"):
     def decorator(original_sel_func):
-        """This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
+        """
+        This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
+
         This allows for example:
 
-        >>> mapdl.nsel("S", "node", "", [1,2,3])  # select nodes 1,2, and 3.
+        >>> mapdl.nsel("S", "node", "", [1,2,3])  # select nodes 1, 2, and 3.
         """
 
         @wraps(original_sel_func)
         def wrapper(self, *args, **kwargs):
-            type_, item, comp, vmin, vmax, vinc, kabs = self._get_args_xsel(
-                *args, **kwargs
-            )
+            type_, item, comp, vmin, vmax, vinc, kabs = _get_args_xsel(*args, **kwargs)
 
             if isinstance(vmin, (list, tuple, np.ndarray)):
                 self.run(
