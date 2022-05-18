@@ -3402,9 +3402,10 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.ksel)
     def ksel(self, *args, **kwargs):
-        """Wraps previons KSEL to allow to use a list/tuple/array for vmin.
+        """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
-        It will raise an error in case vmax or vinc are used too."""
+        It will raise an error in case vmax or vinc are used too.
+        """
         sel_func = (
             super().ksel
         )  # using super() inside the wrapped function confuses the references

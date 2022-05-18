@@ -1028,7 +1028,7 @@ def wrap_point_SEL(entity="node"):
 
         This allows for example:
 
-        >>> mapdl.nsel("S", "node", "", [1,2,3])  # select nodes 1, 2, and 3.
+        >>> mapdl.nsel("S", "node", "", [1, 2, 3])  # select nodes 1, 2, and 3.
         """
 
         @wraps(original_sel_func)
