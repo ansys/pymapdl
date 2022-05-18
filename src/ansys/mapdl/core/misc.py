@@ -974,7 +974,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def _get_args_xsel(self, *args, **kwargs):
+def _get_args_xsel(*args, **kwargs):
     type_ = kwargs.get("type_", args[0]).upper()
     item = kwargs.get("item", args[1] if len(args) > 1 else "").upper()
     comp = kwargs.get("comp", args[2] if len(args) > 2 else "").upper()
