@@ -342,3 +342,26 @@ def test_pick_kp(mapdl, make_block, selection):
     elif selection == "U":
         assert 2 not in selected
         assert 1 in selected
+
+
+def test_pick_node_failure(mapdl, make_block):
+    # Cleaning the model a bit
+    mapdl.modmsh("detach")  # detaching geom and fem
+    mapdl.edele("all")
+    mapdl.nsel("s", "node", "", 1)
+    mapdl.nsel("a", "node", "", 2)
+    mapdl.nsel("inver")
+    mapdl.ndele("all")
+
+    with pytest.raises(ValueError):
+        mapdl.nsel("X", "P")
+
+    with pytest.raises(ValueError):
+        mapdl.nsel("S", "node", "", [1, 2, 3], 1)
+
+    with pytest.raises(ValueError):
+        mapdl.nsel("S", "node", "", [1, 2, 3], "", 1)
+
+    assert mapdl.nsel("S", "node", "", [1, 2, 3], "", "")
+    assert mapdl.nsel("S", "node", "", [])  # it should select nothing
+    assert len(mapdl._get_selected_("node")) == 0
