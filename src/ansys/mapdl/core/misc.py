@@ -40,7 +40,11 @@ def get_ansys_bin(rver):
         mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
     else:
         ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
-        mapdlbin = os.path.join(*ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+        mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+
+        # rare case where the versioned binary doesn't exist
+        if not os.path.isfile(mapdlbin):
+            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
 
     return mapdlbin
 
