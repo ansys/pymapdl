@@ -345,6 +345,7 @@ def test_pick_kp(mapdl, make_block, selection):
 
 
 def test_pick_node_failure(mapdl, make_block):
+    # it should work for the KP too.
     # Cleaning the model a bit
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
@@ -362,6 +363,6 @@ def test_pick_node_failure(mapdl, make_block):
     with pytest.raises(ValueError):
         mapdl.nsel("S", "node", "", [1, 2, 3], "", 1)
 
-    assert mapdl.nsel("S", "node", "", [1, 2, 3], "", "")
+    assert mapdl.nsel("S", "node", "", [1, 2, 3], "", "") is None
     assert mapdl.nsel("S", "node", "", [])  # it should select nothing
     assert len(mapdl._get_selected_("node")) == 0

@@ -1035,7 +1035,7 @@ def wrap_point_SEL(entity="node"):
 
                 if len(vmin) == 0 and type_ == "S":
                     # assuming you want to select nothing because you supplied an empty list/tuple/array
-                    return original_sel_func("none")
+                    return original_sel_func(self, "none")
 
                 self._perform_entity_list_selection(
                     entity, original_sel_func, type_, item, comp, vmin, kabs
