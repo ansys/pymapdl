@@ -3323,11 +3323,8 @@ class _MapdlCore(Commands):
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
-            if node_id in picked_points:
-                print(f"The {entity} {node_id} is already selected.")
-            else:
+            if node_id not in picked_points:
                 picked_points.append(node_id)
-                print(f"Selected {entity}: {node_id} in location: {point}")
 
             # updating text
             pl._picking_text = pl.add_text(
