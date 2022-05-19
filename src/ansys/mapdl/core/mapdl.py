@@ -3317,7 +3317,8 @@ class _MapdlCore(Commands):
             f"Type: {type_} - Please use the left mouse button to pick the {entity}s."
         )
 
-        def callback_(point):
+        def callback_(mesh, id_):
+            point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
@@ -3328,15 +3329,25 @@ class _MapdlCore(Commands):
                 picked_points.append(node_id)
                 print(f"Selected {entity}: {node_id} in location: {point}")
 
+            # updating text
             pl._picking_text = pl.add_text(
                 text + "\n" + "Current selection: " + str(picked_points),
                 font_size=10,
                 name="_point_picking_message",
             )
 
+            pl.add_mesh(
+                point,
+                color="red",
+                point_size=10,
+                # name='_picked_point',
+                pickable=False,
+                reset_camera=False,
+            )
+
         pl.enable_point_picking(
             callback=callback_,
-            # use_mesh=True,  # for later implementation
+            use_mesh=True,
             show_message=text,
             show_point=True,
             left_clicking=True,
