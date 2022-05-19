@@ -3303,24 +3303,15 @@ class _MapdlCore(Commands):
         elif entity == "VOLU":
             return self.geometry.vnum
 
-    def _pick_points(self, entity, pl, type_, **kwargs):
+    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
         """Show a plot and get the selected points."""
-        if type_ == "A":
-            self.run("nsel,all")  # To make sure we can select everything
-            # it will be nice
-
         _debug = kwargs.pop("_debug", False)  # for testing purposes
+
+        previous_picked_points = set(previous_picked_points)
 
         q = self.queries
         picked_points = []
-        previous_picked_points = set(
-            self._get_selected_(entity)
-        )  # set should not change any node number
-
-        if entity.upper() == "KP":
-            selector = getattr(q, "kp")
-        else:
-            selector = getattr(q, "node")
+        selector = getattr(q, entity.lower())
 
         def callback_(point):
             node_id = selector(
@@ -3339,15 +3330,13 @@ class _MapdlCore(Commands):
             show_message=f"Type: {type_} - Please use the left mouse button to pick the {entity}s.",
             show_point=True,
             left_clicking=True,
+            font_size=10,
             tolerance=kwargs.get("tolerance", 0.025),
         )
         if not _debug:  # pragma: no cover
             pl.show()
         else:
             _debug(pl)
-
-        if len(picked_points) == 0:
-            return ""
 
         picked_points = set(
             picked_points
@@ -3371,9 +3360,10 @@ class _MapdlCore(Commands):
         self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
 
         # Getting new selection
-        selection_function(self, "S", item, comp, vmin[0], "", "", kabs)
-        for each_ in vmin[1:]:
-            selection_function(self, "A", item, comp, each_, "", "", kabs)
+        for id, each_ in enumerate(vmin):
+            selection_function(
+                self, "S" if id == 0 else "A", item, comp, each_, "", "", kabs
+            )
 
         self.cm(f"__temp_{entity}s_1__", f"{entity}")
 
@@ -3393,7 +3383,7 @@ class _MapdlCore(Commands):
             super().nsel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points(entity="node")
+        @allow_pickable_points()
         @wrap_point_SEL(entity="node")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -3410,7 +3400,7 @@ class _MapdlCore(Commands):
             super().ksel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points(entity="kp")
+        @allow_pickable_points(entity="kp", plot_function="kplot")
         @wrap_point_SEL(entity="kp")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
