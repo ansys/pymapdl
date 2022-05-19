@@ -3311,11 +3311,29 @@ class _MapdlCore(Commands):
 
         q = self.queries
         picked_points = []
+        picked_ids = []
+
         selector = getattr(q, entity.lower())
 
-        text = (
-            f"Type: {type_} - Please use the left mouse button to pick the {entity}s."
-        )
+        # adding selection inversor
+        pl._inver_mouse_click_selection = False
+
+        selection_text = {
+            "S": "New selection",
+            "A": "Adding to selection",
+            "R": "Reselecting from the selection",
+            "U": "Unselecting",
+        }
+
+        def get_text():
+            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            type_text = selection_text[type_]
+            return (
+                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Press the key 'u' to change between mouse selecting and unselecting.\n"
+                f"Type: {type_} - {type_text}\n"
+                f"Mouse selection: {sel_}\n"
+            )
 
         def callback_(mesh, id_):
             point = mesh.points[id_]
@@ -3323,34 +3341,66 @@ class _MapdlCore(Commands):
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
-            if node_id not in picked_points:
-                picked_points.append(node_id)
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL points mapping
+                if node_id not in picked_points:
+                    picked_points.append(node_id)
+                # Updating pyvista points mapping
+                if id_ not in picked_ids:
+                    picked_ids.append(id_)
+            else:
+                # Updating MAPDL points mapping
+                if node_id in picked_points:
+                    picked_points.remove(node_id)
+                # Updating pyvista points mapping
+                if id_ in picked_ids:
+                    picked_ids.remove(id_)
+
+            # removing title
+            pl.remove_actor("title")
 
             # updating text
+            text_ = get_text() + f"Current {entity} selection: " + str(picked_points)
+
             pl._picking_text = pl.add_text(
-                text + "\n" + "Current selection: " + str(picked_points),
+                text_,
                 font_size=10,
                 name="_point_picking_message",
             )
-
-            pl.add_mesh(
-                point,
-                color="red",
-                point_size=10,
-                # name='_picked_point',
-                pickable=False,
-                reset_camera=False,
-            )
+            if picked_ids:
+                pl.add_mesh(
+                    mesh.points[picked_ids],
+                    color="red",
+                    point_size=10,
+                    name="_picked_points",
+                    pickable=True,
+                    reset_camera=False,
+                )
+            else:
+                pl.remove_actor("_picked_points")
 
         pl.enable_point_picking(
             callback=callback_,
             use_mesh=True,
-            show_message=text,
+            show_message=get_text(),
             show_point=True,
             left_clicking=True,
             font_size=10,
             tolerance=kwargs.get("tolerance", 0.025),
         )
+
+        def callback_u():
+            # inverting bool
+            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            text_ = get_text() + f"Current {entity} selection: " + str(picked_points)
+            pl._picking_text = pl.add_text(
+                text_,
+                font_size=10,
+                name="_point_picking_message",
+            )
+
+        pl.add_key_event("u", callback_u)
+
         if not _debug:  # pragma: no cover
             pl.show()
         else:
