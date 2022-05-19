@@ -432,3 +432,40 @@ def test_pick_node_special_cases(mapdl, make_block):
         "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
     )  # Selects node 2
     assert selected is not None
+
+
+def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
+    # Cleaning the model a bit
+    mapdl.modmsh("detach")  # detaching geom and fem
+    mapdl.edele("all")
+    mapdl.nsel("s", "node", "", 1)
+    mapdl.nsel("a", "node", "", 2)
+    mapdl.nsel("inver")
+    mapdl.ndele("all")
+
+    # we pick something already picked
+    # we just make sure the number is not repeated and there is no error.
+    def debug_orders_1(pl, point):
+        pl.show(auto_close=False)
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        # First click- selecting
+        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
+        pl.iren._mouse_left_button_release(width, height)
+
+        pl.iren._simulate_keypress("u")  # changing to unselecting
+        pl._inver_mouse_click_selection = True  # making sure
+
+        # Second click- unselecting
+        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
+        pl.iren._mouse_left_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+        # so we have selected nothing
+
+    mapdl.nsel("S", "node", "", 1)
+    point = (285 / 1024, 280 / 800)
+    mapdl.nsel("a", "node", "", 2)
+    selected = mapdl.nsel(
+        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
+    )
+    assert selected == []
