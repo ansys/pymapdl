@@ -396,7 +396,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     mapdl.ndele("all")
 
     # we pick nothing
-    def debug_orders(pl, point):
+    def debug_orders_0(pl, point):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -406,14 +406,14 @@ def test_pick_node_special_cases(mapdl, make_block):
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
     selected = mapdl.nsel(
-        "S", "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        "S", "P", _debug=lambda x: debug_orders_0(x, point=point), tolerance=0.2
     )  # Selects node 2
     assert selected == []
     assert np.allclose(mapdl._get_selected_("node"), [1, 2])
 
     # we pick something already picked
     # we just make sure the number is not repeated and there is no error.
-    def debug_orders(pl, point):
+    def debug_orders_1(pl, point):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -429,6 +429,6 @@ def test_pick_node_special_cases(mapdl, make_block):
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
     selected = mapdl.nsel(
-        "S", "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.1
+        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
     )  # Selects node 2
     assert selected is not None

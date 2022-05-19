@@ -3381,9 +3381,9 @@ class _MapdlCore(Commands):
         self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
 
         # Getting new selection
-        for id, each_ in enumerate(vmin):
+        for id_, each_ in enumerate(vmin):
             selection_function(
-                self, "S" if id == 0 else "A", item, comp, each_, "", "", kabs
+                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
             )
 
         self.cm(f"__temp_{entity}s_1__", f"{entity}")
@@ -3399,7 +3399,8 @@ class _MapdlCore(Commands):
     def nsel(self, *args, **kwargs):
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
-        It will raise an error in case vmax or vinc are used too."""
+        It will raise an error in case vmax or vinc are used too.
+        """
         sel_func = (
             super().nsel
         )  # using super() inside the wrapped function confuses the references
