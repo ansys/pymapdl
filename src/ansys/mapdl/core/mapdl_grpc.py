@@ -506,10 +506,13 @@ class MapdlGrpc(_MapdlCore):
             self._timer.start()
 
         # initialize mesh, post processing, and file explorer interfaces
-        from ansys.mapdl.core.mesh_grpc import MeshGrpc
-        from ansys.mapdl.core.xpl import ansXpl
+        try:
+            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+            self._mesh_rep = MeshGrpc(self)
+        except:
+            pass
 
-        self._mesh_rep = MeshGrpc(self)
+        from ansys.mapdl.core.xpl import ansXpl
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 

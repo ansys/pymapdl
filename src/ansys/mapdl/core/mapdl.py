@@ -13,7 +13,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -1696,7 +1695,7 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self) -> Result:
+    def result(self) -> "ansys.mapdl.reader.rst.Result":
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
