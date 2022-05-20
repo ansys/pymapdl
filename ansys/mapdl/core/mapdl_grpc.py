@@ -18,6 +18,9 @@ import numpy as np
 from tqdm import tqdm
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
+from ansys.mapdl.core.client_interceptor import ClientInterceptor
+from ansys.mapdl.core.metric import Metric
+
 
 MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
 Please make sure you have the latest updated version using:
@@ -386,6 +389,13 @@ class MapdlGrpc(_MapdlCore):
                 ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
             ],
         )
+
+        otel_collector_endpoint = os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"]
+        self._log.debug(f"collector endpoint: {otel_collector_endpoint}")
+        metric = Metric(otlp_endpoint=otel_collector_endpoint,
+                name="mapdl_client", version="0.1")
+        interceptors = [ClientInterceptor(metric)]
+        self._channel = grpc.intercept_channel(self._channel, *interceptors)
 
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
