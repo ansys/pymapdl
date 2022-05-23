@@ -60,7 +60,8 @@ Contents
    Extended methods, and writing list to a file.
 
 7. **Advanced plotting:**
-   Use of `mesh.grid <ansys.mapdl.core.Mapdl.grid>`_ for additional post processing.
+   Use of `mesh.grid <https://mapdldocs.pyansys.com/mapdl_commands/graphics/_autosummary/ansys.mapdl.core.Mapdl.grid.html>`_
+   for additional post processing.
 
 
 Step 1: Launch and variables
@@ -84,7 +85,8 @@ NU = 0.27
 
 ###############################################################################
 # Often used MAPDL command line options are given Pythonic names in the
-# `launch_mapdl <ansys.mapdl.core.launch_mapdl>`_ function; for example ``-dir``
+# `launch_mapdl <https://mapdldocs.pyansys.com/api/_autosummary/ansys.mapdl.core.launch_mapdl.html>`_
+# function; for example ``-dir``
 # has become ``run_location``.
 #
 # Options without a Pythonic version can be accessed by the ``additional_switches``
@@ -336,7 +338,8 @@ mapdl.post_processing.nodal_principal_stress("1")
 ###############################################################################
 # Results to lists, arrays and DataFrames
 # ---------------------------------------
-# Using prnsol to check
+# Using `mapdl.prnsol <https://mapdldocs.pyansys.com/mapdl_commands/post1/_autosummary/ansys.mapdl.core.Mapdl.prnsol.html>`_
+# to check
 print(mapdl.prnsol("S", "PRIN"))
 
 ###############################################################################
