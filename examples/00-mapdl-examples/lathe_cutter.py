@@ -61,10 +61,10 @@ Contents
 
 7. **Advanced plotting:**
    Use of `mesh.grid <https://mapdldocs.pyansys.com/mapdl_commands/graphics/_autosummary/ansys.mapdl.core.Mapdl.grid.html>`_
-   for additional post processing.
+   for additional postprocessing.
 
 
-Step 1: Launch and variables
+Step 1: Variables and launch
 ============================
 
 Define variables and launch MAPDL:
