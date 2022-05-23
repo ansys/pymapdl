@@ -10,8 +10,8 @@ Structural Analysis of a Lathe Cutter
 Objective
 =========
 
-The objective of this example is to highlight some of the often used
-PyMAPDL categories via a lathe cutter finite element model. Lathe
+The objective of this example is to highlight some regularly used
+PyMAPDL features via a lathe cutter finite element model. Lathe
 cutters have multiple avenues of wear and failure, and the analyses
 supporting their design would most often be transient
 thermal-structural. However, for simplicity, this simulation
@@ -26,13 +26,9 @@ example uses a non-uniform load.
     **Figure 1: Lathe cutter geometry and load description.**
 
 
--  `OS <https://docs.python.org/3/library/os.html>`__ is the Python method
-   used to get the current working directory.
-
--  `Numpy <https://numpy.org/>`__ is used for Numpy arrays and functions.
 
 Contents
-=========
+========
 
 1. **Variables and launch**
    Define necessary variables and launch MAPDL.
@@ -84,9 +80,8 @@ EXX = 1.0e7
 NU = 0.27
 
 ###############################################################################
-# Often used MAPDL command line options are given Pythonic names in the
-# `launch_mapdl <https://mapdldocs.pyansys.com/api/_autosummary/ansys.mapdl.core.launch_mapdl.html>`_
-# function. For example, ``-dir``
+# Often used MAPDL command line options are exposed as Pythonic parameter names in
+# :func:`ansys.mapdl.core.launch_mapdl`. For example, ``-dir``
 # has become ``run_location``.
 #
 # Options without a Pythonic version can be accessed by the ``additional_switches``
@@ -118,8 +113,6 @@ mapdl.parameters
 ###############################################################################
 # Use pressure area per length in the load definition.
 pressure_length = mapdl.parameters["PRESS_LENGTH"]
-pressure_length
-mapdl.parameters["Presadfdfdsa"] = "123456789"
 
 mapdl.parameters
 
@@ -162,7 +155,7 @@ mapdl.cskp(11, 0, 2, 1, 13)
 mapdl.csys(1)
 mapdl.view(1, -1, 1, 1)
 mapdl.psymb("CS", 1)
-mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1])
+mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1], smooth_shading=True)
 
 ###############################################################################
 #
@@ -190,14 +183,11 @@ length_x = length_x * pressure_length / pts_1
 press = 10000 * (np.sin(PI * length_x / pressure_length))
 
 ###############################################################################
-# ``length_x`` and ``press`` are vectors; hence you can use
-# `Numpy stack function <https://numpy.org/doc/stable/reference/generated/numpy.stack.html>`_
-# to combine them into the correct
-# form needed to define the MAPDL table array
+# ``length_x`` and ``press`` are vectors. To combine them into the correct
+# form needed to define the MAPDL table array, you can use
+# `numpy.stack <https://numpy.org/doc/stable/reference/generated/numpy.stack.html>`_. 
 
 press = np.stack((length_x, press), axis=-1)
-# print(press)
-
 mapdl.load_table("MY_PRESS", press, "X", csysid=11)
 
 mapdl.asel("S", "Area", "", 14)
