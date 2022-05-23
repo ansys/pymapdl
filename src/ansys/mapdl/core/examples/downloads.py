@@ -85,7 +85,7 @@ def download_vtk_rotor():
 
 
 def _download_rotor_tech_demo_plot():
-    """Download rotor surface vtk file."""
+    """Download the rotor surface VTK file."""
     return _download_file("rotor2.vtk", "geometry")[0]
 
 
