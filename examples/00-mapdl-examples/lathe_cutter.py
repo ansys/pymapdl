@@ -1,11 +1,12 @@
 """
 .. _ref_lathe_cutter_example:
 
+=====================================
 Structural Analysis of a Lathe Cutter
 =====================================
 
 Objective
-~~~~~~~~~
+=========
 
 The objective of this example is to highlight some of the often-used
 PyMAPDL categories via a lathe cutter finite element model. Lathe
@@ -29,7 +30,7 @@ a non-uniform load.
 -  `Numpy <https://numpy.org/>`__ is used for Numpy arrays and functions
 
 Procedure
-~~~~~~~~~
+=========
 
 1. Define necessary variables and launch MAPDL.
 2. Import geometry and inspect for MAPDL parameters. Define linear
@@ -47,7 +48,7 @@ Procedure
 7. Use of `mesh.grid <ansys.mapdl.core.Mapdl.grid>`_ for additional post processing.
 
 Step 1
-------
+======
 
 Define variables and launch MAPDL:
 """
@@ -81,23 +82,24 @@ mapdl = launch_mapdl(run_location=path, additional_switches="-smp")
 
 ###############################################################################
 # Step 2
-# ------
-# Import geometry and inspect for MAPDL parameters
-# Define material, mesh, and create boundary conditions.
+# ======
+#
+# - Import geometry and inspect for MAPDL parameters,
+# - Define material, mesh, and create boundary conditions.
+#
 
-# reset the MAPDL database
+# First let's reset the MAPDL database.
 mapdl.clear()
 
 ###############################################################################
-# import the geometry file and list any MAPDL parameters
+# Importing the geometry file and list any MAPDL parameters
 lathe_cutter_geo = download_example_data("LatheCutter.anf", "geometry")
 mapdl.input(lathe_cutter_geo)
 mapdl.finish()
 mapdl.parameters
 
 ###############################################################################
-# Will use pressure area length in load definition so save as Python variable
-
+# Will use pressure area per length in load definition:
 pressure_length = mapdl.parameters["PRESS_LENGTH"]
 pressure_length
 mapdl.parameters["Presadfdfdsa"] = "123456789"
@@ -132,7 +134,7 @@ mapdl.da(10, "symm")
 
 ###############################################################################
 # Step 3
-# ------
+# ======
 #
 # Create Local Coordinate System (CS) for Applied Pressure as a function
 # of Local X
@@ -146,6 +148,7 @@ mapdl.psymb("CS", 1)
 mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1])
 
 ###############################################################################
+#
 # VTK plots do not show MAPDL plot symbols.
 # However you can use keyword option ``vtk`` equals ``False`` to use MAPDL
 # plotting capabilities.
@@ -154,10 +157,10 @@ mapdl.lplot(vtk=False)
 
 ###############################################################################
 # Step 4
-# ------
+# ======
 #
 # Create a pressure load, load it into MAPDL as a table array, verify the load,
-# and solve
+# and solve.
 
 # pressure_length = 0.055 inch
 
@@ -188,13 +191,14 @@ mapdl.allsel()
 ###############################################################################
 # It is also possible to open the MAPDL GUI to check the model.
 #
-# .. code: : ipython3
+# .. code:: python
 #
-#     #mapdl.open_gui()
+#     mapdl.open_gui()
 #
 #
 
-# Setting up solution
+###############################################################################
+# To set up the solution:
 mapdl.finish()
 mapdl.slashsolu()
 mapdl.nlgeom("On")
@@ -202,17 +206,19 @@ mapdl.psf("PRES", "NORM", 3, 0, 1)
 mapdl.view(1, -1, 1, 1)
 mapdl.eplot(vtk=False)
 
+###############################################################################
 # Solving the model
 mapdl.solve()
 mapdl.finish()
-mapdl.solution.converged
+if mapdl.solution.converged:
+    print("The solution has converged.")
 
 ###############################################################################
 # Step 5
-# ------
+# ======
 #
 # Post Processing - Plotting
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------
 #
 
 mapdl.post1()
@@ -223,7 +229,7 @@ mapdl.post_processing.plot_nodal_principal_stress("1", smooth_shading=False)
 
 ###############################################################################
 # Plotting - Part of Model
-# ~~~~~~~~~~~~~~~~~~~~~~~~
+# ------------------------
 #
 
 mapdl.csys(1)
@@ -236,7 +242,7 @@ mapdl.post_processing.plot_nodal_principal_stress(
 
 ###############################################################################
 # Plotting - Legend Options
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# -------------------------
 #
 
 mapdl.allsel()
@@ -257,10 +263,11 @@ mapdl.post_processing.plot_nodal_principal_stress(
 )
 
 ###############################################################################
-# Try out some scalar bar options from the PyVista documentation for fun.
-# Black text on Beige background seems pretty sharp.
+# Let's try out some scalar bar options from the
+# `PyVista documentation <https://docs.pyvista.org/>`_.
+# For example, let's set black text on Beige background.
 #
-# Scalar Bar Keywords defined with the Python dictionary function, an alternate
+# The scalar bar keywords defined as a Python dictionary are an alternate
 # method to using {key:value}'s.
 # The Scalar Bar can be click-dragged to a new position.
 # Left-click it and hold down the left mouse button while moving mouse to reposition.
@@ -282,6 +289,7 @@ mapdl.post_processing.plot_nodal_principal_stress(
     "1",
     cpos="xy",
     edge_color="black",
+    background="beige",
     show_edges=True,
     scalar_bar_args=sbar_kwargs,
     n_colors=256,
@@ -293,7 +301,7 @@ mapdl.post_processing.plot_nodal_principal_stress(
 
 ###############################################################################
 # Post Processing - Result Listing
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 #
 # Getting all the principal nodal stresses:
 mapdl.post_processing.nodal_principal_stress("1")
@@ -303,45 +311,36 @@ mapdl.post_processing.nodal_principal_stress("1")
 mapdl.nsel("S", "S", 1, 6700, 7720)
 mapdl.esln()
 mapdl.nsle()
+
+print("The node numbers are:")
 print(mapdl.mesh.nnum)  # get node numbers
+
+print("The principal nodal stresses are:")
 mapdl.post_processing.nodal_principal_stress("1")
 
 ###############################################################################
 # Using prnsol to check
-print(
-    mapdl.prnsol(
-        "S",
-        "PRIN",
-    )
-)
+print(mapdl.prnsol("S", "PRIN"))
 
 ###############################################################################
 # You can also use this command to obtain the data as a list:
-mapdl_s_1_list = mapdl.prnsol(
-    "S",
-    "PRIN",
-).to_list()
+mapdl_s_1_list = mapdl.prnsol("S", "PRIN").to_list()
 mapdl_s_1_list
 
 ###############################################################################
-# as an array
-mapdl_s_1_array = mapdl.prnsol(
-    "S",
-    "PRIN",
-).to_array()
+# as an array:
+mapdl_s_1_array = mapdl.prnsol("S", "PRIN").to_array()
 mapdl_s_1_array
 
 ###############################################################################
-# or as a dataframe
-mapdl_s_1_df = mapdl.prnsol(
-    "S",
-    "PRIN",
-).to_dataframe()
+# or as a dataframe:
+mapdl_s_1_df = mapdl.prnsol("S", "PRIN").to_dataframe()
 mapdl_s_1_df
 
 ###############################################################################
-# Data Frame is a Pandas data type.  Pandas module is imported now,
-# so can use its functions.
+# DataFrame is a
+# `Pandas data type <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
+# Pandas module is imported, so you can use its functions.
 # For example writing these principal stresses to a file:
 
 # mapdl_s_1_df.to_csv(path + '\prin-stresses.csv')
@@ -350,7 +349,7 @@ mapdl_s_1_df.to_html(path + "\prin-stresses.html")
 
 ###############################################################################
 # Step 6
-# -------
+# ======
 #
 # Additional post processing
 #
@@ -371,7 +370,7 @@ sbar_kwargs = {
 }
 
 ###############################################################################
-# generate a single horizontal slice slice along the XY plane
+# Generate a single horizontal slice along the XY plane
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(
     scalars="p1",
@@ -384,7 +383,7 @@ single_slice.plot(
 )
 
 ###############################################################################
-# generate plot with three slice planes
+# Generate plot with three slice planes
 slices = grid.slice_orthogonal()
 slices.plot(
     scalars="p1",
