@@ -5,7 +5,7 @@
 Structural Analysis of a Lathe Cutter
 =====================================
 
-**Summary**: Basic demonstration of PyMAPDL capabilities.
+**Summary**: Basic walk through demonstration of PyMAPDL capabilities.
 
 Objective
 =========
@@ -31,26 +31,40 @@ a non-uniform load.
 
 -  `Numpy <https://numpy.org/>`__ is used for Numpy arrays and functions
 
-Procedure
+Contents
 =========
 
-1. Define necessary variables and launch MAPDL.
-2. Import geometry and inspect for MAPDL parameters. Define linear
+1. **Launch and variables:**
+   Define necessary variables and launch MAPDL.
+
+2. **Geometry, mesh and MAPDL parameters:**
+   Import geometry and inspect for MAPDL parameters. Define linear
    elastic material model with Python variables. Mesh and apply symmetry
    boundary conditions.
-3. Create a local coordinate system for applied load and verify with
+
+3. **Coordinate system and load application:**
+   Create a local coordinate system for applied load and verify with
    plot.
-4. Define the pressure load as a sine function of the length of the
+
+4. **Pressure load application:**
+   Define the pressure load as a sine function of the length of the
    application area using numpy arrays; import the pressure array into
    MAPDL as a table array; verify the applied load, and solve.
-5. Show result plotting; plotting with selection; and working with the
-   plot legend.
-6. List a result two ways: PyMAPDL and Pythonic version of APDL.
-   Extended methods, and writing list to a file.
-7. Use of `mesh.grid <ansys.mapdl.core.Mapdl.grid>`_ for additional post processing.
 
-Step 1
-======
+5. **Plotting:**
+   Show result plotting; plotting with selection; and working with the
+   plot legend.
+
+6. **Post processing:**
+   List a result two ways: PyMAPDL and Pythonic version of APDL.
+   Extended methods, and writing list to a file.
+
+7. **Advanced plotting:**
+   Use of `mesh.grid <ansys.mapdl.core.Mapdl.grid>`_ for additional post processing.
+
+
+Step 1: Launch and variables
+============================
 
 Define variables and launch MAPDL:
 """
@@ -63,7 +77,6 @@ from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
 
 # cwd = current working directory
-
 path = os.getcwd()
 PI = np.pi
 EXX = 1.0e7
@@ -83,8 +96,8 @@ NU = 0.27
 mapdl = launch_mapdl(run_location=path, additional_switches="-smp")
 
 ###############################################################################
-# Step 2
-# ======
+# Step 2: Geometry, mesh and MAPDL parameters
+# ============================================
 #
 # - Import geometry and inspect for MAPDL parameters,
 # - Define material, mesh, and create boundary conditions.
@@ -135,8 +148,8 @@ mapdl.da(9, "symm")
 mapdl.da(10, "symm")
 
 ###############################################################################
-# Step 3
-# ======
+# Step 3: Coordinate system and load application
+# ==============================================
 #
 # Create Local Coordinate System (CS) for Applied Pressure as a function
 # of Local X
@@ -158,8 +171,8 @@ mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1])
 mapdl.lplot(vtk=False)
 
 ###############################################################################
-# Step 4
-# ======
+# Step 4: Pressure load application
+# =================================
 #
 # Create a pressure load, load it into MAPDL as a table array, verify the load,
 # and solve.
@@ -175,7 +188,7 @@ length_x = length_x * pressure_length / pts_1
 press = 10000 * (np.sin(PI * length_x / pressure_length))
 
 ###############################################################################
-# ``length_x`` and ``press`` are vectors; can use
+# ``length_x`` and ``press`` are vectors; hence you can use
 # `Numpy stack function <https://numpy.org/doc/stable/reference/generated/numpy.stack.html>`_
 # to combine them into the correct
 # form needed to define the MAPDL table array
@@ -216,11 +229,8 @@ if mapdl.solution.converged:
     print("The solution has converged.")
 
 ###############################################################################
-# Step 5
-# ======
-#
-# Post Processing - Plotting
-# --------------------------
+# Step 5: Plotting
+# ================
 #
 
 mapdl.post1()
@@ -302,8 +312,11 @@ mapdl.post_processing.plot_nodal_principal_stress(
 
 
 ###############################################################################
-# Post Processing - Result Listing
-# --------------------------------
+# Step 6: Post processing
+# =======================
+#
+# Result Listing
+# --------------
 #
 # Getting all the principal nodal stresses:
 mapdl.post_processing.nodal_principal_stress("1")
@@ -321,6 +334,8 @@ print("The principal nodal stresses are:")
 mapdl.post_processing.nodal_principal_stress("1")
 
 ###############################################################################
+# Results to lists, arrays and DataFrames
+# ---------------------------------------
 # Using prnsol to check
 print(mapdl.prnsol("S", "PRIN"))
 
@@ -335,12 +350,12 @@ mapdl_s_1_array = mapdl.prnsol("S", "PRIN").to_array()
 mapdl_s_1_array
 
 ###############################################################################
-# or as a dataframe:
+# or as a DataFrame:
 mapdl_s_1_df = mapdl.prnsol("S", "PRIN").to_dataframe()
 mapdl_s_1_df
 
 ###############################################################################
-# DataFrame is a
+# A DataFrame is a
 # `Pandas data type <https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html>`_.
 # Pandas module is imported, so you can use its functions.
 # For example writing these principal stresses to a file:
@@ -350,10 +365,8 @@ mapdl_s_1_df
 mapdl_s_1_df.to_html(path + "\prin-stresses.html")
 
 ###############################################################################
-# Step 6
-# ======
-#
-# Additional post processing
+# Step 7: Advanced plotting
+# =========================
 #
 
 mapdl.allsel()
