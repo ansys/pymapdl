@@ -5,6 +5,8 @@
 Structural Analysis of a Lathe Cutter
 =====================================
 
+**Summary**: Basic demonstration of PyMAPDL capabilities.
+
 Objective
 =========
 
