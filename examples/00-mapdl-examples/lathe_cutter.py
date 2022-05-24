@@ -5,7 +5,7 @@
 Structural Analysis of a Lathe Cutter
 =====================================
 
-**Summary**: Basic walkthrough of PyMAPDL capabilities.
+**Summary**: Basic walk through PyMAPDL capabilities.
 
 Objective
 =========
@@ -108,7 +108,7 @@ mapdl.clear()
 lathe_cutter_geo = download_example_data("LatheCutter.anf", "geometry")
 mapdl.input(lathe_cutter_geo)
 mapdl.finish()
-mapdl.parameters
+print(mapdl.parameters)
 
 ###############################################################################
 # Use pressure area per length in the load definition.
@@ -335,17 +335,17 @@ print(mapdl.prnsol("S", "PRIN"))
 ###############################################################################
 # Use this command to obtain the data as a list.
 mapdl_s_1_list = mapdl.prnsol("S", "PRIN").to_list()
-mapdl_s_1_list
+print(mapdl_s_1_list)
 
 ###############################################################################
 # Use this command to obtain the data as an array:
 mapdl_s_1_array = mapdl.prnsol("S", "PRIN").to_array()
-mapdl_s_1_array
+print(mapdl_s_1_array)
 
 ###############################################################################
 # or as a DataFrame:
 mapdl_s_1_df = mapdl.prnsol("S", "PRIN").to_dataframe()
-mapdl_s_1_df
+mapdl_s_1_df.head()
 
 ###############################################################################
 # Use this command to obtain the data as a DataFrame, which is a.
