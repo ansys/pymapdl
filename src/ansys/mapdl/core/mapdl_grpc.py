@@ -995,7 +995,7 @@ class MapdlGrpc(_MapdlCore):
 
         """
         # always redirect system output to a temporary file
-        tmp_file = "__tmp_sys_out__"
+        tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
@@ -1316,8 +1316,9 @@ class MapdlGrpc(_MapdlCore):
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells mainan to read the input
         # file.
-        tmp_name = "_input_tmp_.inp"
-        tmp_out = "_input_tmp_.out"
+        id_ = random_string()
+        tmp_name = f"_input_tmp_{id_}_.inp"
+        tmp_out = f"_input_tmp_{id_}_.out"
 
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
