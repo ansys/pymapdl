@@ -1,5 +1,5 @@
 Sphinx==4.5.0
-ansys-mapdl-reader==0.51.11
+ansys-mapdl-reader==0.51.13
 imageio-ffmpeg==0.4.7
 imageio==2.19.2
 jupyter_sphinx==0.3.2
