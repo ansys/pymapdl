@@ -161,7 +161,7 @@ mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1], smooth_shading=T
 #
 # VTK plots do not show MAPDL plot symbols.
 # However, to use MAPDL plotting capabilities, you can set the keyword
-option ``vtk`` to ``False``.
+# option ``vtk`` to ``False``.
 
 mapdl.lplot(vtk=False)
 
@@ -185,7 +185,7 @@ press = 10000 * (np.sin(PI * length_x / pressure_length))
 ###############################################################################
 # ``length_x`` and ``press`` are vectors. To combine them into the correct
 # form needed to define the MAPDL table array, you can use
-# `numpy.stack <https://numpy.org/doc/stable/reference/generated/numpy.stack.html>`_. 
+# `numpy.stack <https://numpy.org/doc/stable/reference/generated/numpy.stack.html>`_.
 
 press = np.stack((length_x, press), axis=-1)
 mapdl.load_table("MY_PRESS", press, "X", csysid=11)
