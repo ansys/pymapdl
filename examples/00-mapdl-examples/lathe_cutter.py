@@ -83,14 +83,20 @@ NU = 0.27
 # Often used MAPDL command line options are exposed as Pythonic parameter names in
 # :func:`ansys.mapdl.core.launch_mapdl`. For example, ``-dir``
 # has become ``run_location``.
+# You could use ``run_location`` to specify the MAPDL run location. For example:
+#
+# ..code:: python3
+#
+#   mapdl = launch_mapdl(run_location=path)
+#
+# Otherwise, the MAPDL working directory is stored in ``mapdl.directory``. In this
+# directory, MAPDL will create some of the images we will show later.
 #
 # Options without a Pythonic version can be accessed by the ``additional_switches``
 # parameter.
 # Here ``-smp`` is used only to keep the number of solver files to a minimum.
-# Later, files are created in the working directory and opened via
-# Jupyter Lab. The desire is to minimize the list of files.
 
-mapdl = launch_mapdl(run_location=path, additional_switches="-smp")
+mapdl = launch_mapdl(additional_switches="-smp")
 
 ###############################################################################
 # Step 2: Geometry, mesh, and MAPDL parameters
@@ -114,7 +120,7 @@ print(mapdl.parameters)
 # Use pressure area per length in the load definition.
 pressure_length = mapdl.parameters["PRESS_LENGTH"]
 
-mapdl.parameters
+print(mapdl.parameters)
 
 ###############################################################################
 # Change the units and title.
