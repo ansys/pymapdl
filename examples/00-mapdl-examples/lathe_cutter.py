@@ -327,7 +327,7 @@ mapdl.post_processing.nodal_principal_stress("1")
 
 ###############################################################################
 # Results as lists, arrays, and DataFrames
-# ---------------------------------------
+# -----------------------------------------
 # Using `mapdl.prnsol <https://mapdldocs.pyansys.com/mapdl_commands/post1/_autosummary/ansys.mapdl.core.Mapdl.prnsol.html>`_
 # to check
 print(mapdl.prnsol("S", "PRIN"))
