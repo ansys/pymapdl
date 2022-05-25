@@ -510,7 +510,7 @@ class MapdlGrpc(_MapdlCore):
             from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
             self._mesh_rep = MeshGrpc(self)
-        except:
+        except ImportError:  # pragma: no cover
             self._mesh_rep = None
 
         from ansys.mapdl.core.xpl import ansXpl
