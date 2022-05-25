@@ -511,7 +511,7 @@ class MapdlGrpc(_MapdlCore):
 
             self._mesh_rep = MeshGrpc(self)
         except:
-            pass
+            self._mesh_rep = None
 
         from ansys.mapdl.core.xpl import ansXpl
 
@@ -666,7 +666,8 @@ class MapdlGrpc(_MapdlCore):
 
     def _reset_cache(self):
         """Reset cached items"""
-        self._mesh_rep._reset_cache()
+        if self._mesh_rep != None:
+            self._mesh_rep._reset_cache()
         self._geometry._reset_cache()
 
     @property
