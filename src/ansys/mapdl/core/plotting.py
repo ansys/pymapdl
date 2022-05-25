@@ -150,9 +150,9 @@ def _general_plotter(
     render_lines_as_tubes=False,
     scalar_bar_args={},
     smooth_shading=None,
-    split_sharp_edges=None,
     feature_angle=30.0,
     show_scalar_bar=None,
+    split_sharp_edges=None,
     # labels kwargs
     font_size=None,
     font_family=None,
@@ -269,7 +269,7 @@ def _general_plotter(
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
 
-    split_sharp_edge : bool, optional
+    split_sharp_edges : bool, optional
         Split sharp edges exceeding 30 degrees when plotting with
         smooth shading.  Control the angle with the optional
         keyword argument ``feature_angle``.
@@ -430,6 +430,7 @@ def general_plotter(
     scalar_bar_args={},
     smooth_shading=None,
     show_scalar_bar=None,
+    split_sharp_edges=None,
     # labels kwargs
     font_size=None,
     font_family=None,
@@ -712,6 +713,7 @@ def general_plotter(
         scalar_bar_args=scalar_bar_args,
         smooth_shading=smooth_shading,
         show_scalar_bar=show_scalar_bar,
+        split_sharp_edges=split_sharp_edges,
         # labels kwargs
         font_size=font_size,
         font_family=font_family,
