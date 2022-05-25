@@ -3306,8 +3306,6 @@ class _MapdlCore(Commands):
     def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
         """Show a plot and get the selected points."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
-        nodes = self.mesh.nodes
-
         previous_picked_points = set(previous_picked_points)
 
         q = self.queries
@@ -3379,7 +3377,7 @@ class _MapdlCore(Commands):
             )
             if picked_ids:
                 pl.add_mesh(
-                    nodes[picked_ids],
+                    mesh.points[picked_ids],
                     color="red",
                     point_size=10,
                     name="_picked_points",
