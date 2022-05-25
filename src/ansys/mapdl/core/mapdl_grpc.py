@@ -672,7 +672,7 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def _mesh(self):
-        if self._mesh_rep is None:
+        if self._mesh_rep is None:  # pragma: no cover
             raise ImportError(
                 "Please install pyvista to use this feature with\npip install pyvista"
             )
