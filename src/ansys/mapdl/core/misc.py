@@ -40,7 +40,11 @@ def get_ansys_bin(rver):
         mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
     else:
         ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
-        mapdlbin = os.path.join(*ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+        mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+
+        # rare case where the versioned binary doesn't exist
+        if not os.path.isfile(mapdlbin):
+            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
 
     return mapdlbin
 
@@ -968,3 +972,126 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def _get_args_xsel(*args, **kwargs):
+    type_ = kwargs.pop("type_", args[0]).upper()
+    item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
+    comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()
+    vmin = kwargs.pop("vmin", args[3] if len(args) > 3 else "")
+    vmax = kwargs.pop("vmax", args[4] if len(args) > 4 else "")
+    vinc = kwargs.pop("vinc", args[5] if len(args) > 5 else "")
+    kabs = kwargs.pop("kabs", args[6] if len(args) > 6 else "")
+    return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
+
+
+def allow_pickable_points(entity="node", plot_function="nplot"):
+    """
+    This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
+    and feed them as a list to the NSEL.
+    """
+
+    def decorator(orig_nsel):
+        @wraps(orig_nsel)
+        def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
+
+            if item == "P" and _HAS_PYVISTA:
+                if type_ not in ["S", "R", "A", "U"]:
+                    raise ValueError(
+                        f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
+                    )
+
+                previous_picked_points = set(self._get_selected_(entity))
+
+                if type_ in ["S", "A"]:  # selecting all the entities
+                    orig_nsel(self, "all")
+
+                plotting_function = getattr(self, plot_function)
+                pl = plotting_function(return_plotter=True)
+
+                vmin = self._pick_points(
+                    entity, pl, type_, previous_picked_points, **kwargs
+                )
+
+                if len(vmin) == 0:
+                    # aborted picking
+                    orig_nsel(self, "S", entity, "", previous_picked_points, **kwargs)
+                    return []
+
+                item = entity
+                comp = ""
+
+                # to make return the array of points when using P
+                kwargs["Used_P"] = True
+
+                return orig_nsel(
+                    self, "S", item, comp, vmin, vmax, vinc, kabs, **kwargs
+                )
+
+            else:
+                return orig_nsel(
+                    self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs
+                )
+
+        return wrapper
+
+    return decorator
+
+
+def wrap_point_SEL(entity="node"):
+    def decorator(original_sel_func):
+        """
+        This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
+
+        This allows for example:
+
+        >>> mapdl.nsel("S", "node", "", [1, 2, 3])  # select nodes 1, 2, and 3.
+        """
+
+        @wraps(original_sel_func)
+        def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
+
+            if isinstance(vmin, (set, tuple, list, np.ndarray)):
+
+                if len(vmin) == 0 and kwargs.get("Used_P", False):
+                    # edge case where during the picking we have selected nothing.
+                    # In that case, we just silently quit NSEL command. We do **not**
+                    # want to unselect everything (case in scripting where
+                    # ``mapdl.nsel("S","node", "", [])`` unselect everything).
+                    return
+
+                self.run(
+                    f"/com, Selecting {entity}s from an iterable (i.e. set, list, tuple, or array)"
+                )  # To have a clue in the apdl log file
+
+                if vmax or vinc:
+                    raise ValueError(
+                        "If an iterable is used as 'vmin' argument,"
+                        " it is not allowed to use 'vmax' or 'vinc' arguments."
+                    )
+
+                if len(vmin) == 0 and type_ == "S":
+                    # assuming you want to select nothing because you supplied an empty list/tuple/array
+                    return original_sel_func(self, "none")
+
+                self._perform_entity_list_selection(
+                    entity, original_sel_func, type_, item, comp, vmin, kabs
+                )
+
+                if kwargs.pop("Used_P", False):
+                    # we want to return the
+                    return vmin
+                else:
+                    return
+            else:
+                return original_sel_func(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

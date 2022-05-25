@@ -161,7 +161,12 @@ mapdl.cskp(11, 0, 2, 1, 13)
 mapdl.csys(1)
 mapdl.view(1, -1, 1, 1)
 mapdl.psymb("CS", 1)
-mapdl.vplot(color_areas=True, show_lines=True, cpos=[-1, 1, 1], smooth_shading=True)
+mapdl.vplot(
+    color_areas=True,
+    show_lines=True,
+    cpos=[-1, 1, 1],
+    smooth_shading=True,
+)
 
 ###############################################################################
 #
@@ -385,11 +390,18 @@ sbar_kwargs = {
 
 ###############################################################################
 # Generate a single horizontal slice along the XY plane.
+#
+# .. note::
+#    We're using ``eye_dome_lighting`` here to enhance the plots of our slices.
+#    Read more about it at `Eye Dome Lighting
+#    <https://docs.pyvista.org/examples/02-plot/edl.html>`_
+
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(
     scalars="p1",
     background="white",
     lighting=False,
+    eye_dome_lighting=True,
     show_edges=False,
     cmap="jet",
     n_colors=9,
@@ -403,6 +415,7 @@ slices.plot(
     scalars="p1",
     background="white",
     lighting=False,
+    eye_dome_lighting=True,
     show_edges=False,
     cmap="jet",
     n_colors=9,
@@ -416,13 +429,14 @@ slices = grid.slice_along_axis(12, "x")
 slices.plot(
     scalars="p1",
     background="white",
-    lighting=False,
     show_edges=False,
+    lighting=False,
+    eye_dome_lighting=True,
     cmap="jet",
     n_colors=9,
     scalar_bar_args=sbar_kwargs,
 )
 
 ###############################################################################
-# Exit MAPDL.
+# Finally, exit MAPDL.
 mapdl.exit()

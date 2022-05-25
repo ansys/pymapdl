@@ -171,12 +171,17 @@ def test_load_file_local(mapdl, tmpdir, file_):
     Hence we cannot really test the files are being uploaded.
     So the assert in the '/' directory are commented.
     """
+    old_state = mapdl._local
     mapdl._local = True
 
     if file_ == "dumdum.dummy":
         file_path = str(tmpdir.mkdir("tmpdir").join(file_))
     else:
         file_path = file_
+
+    # remove the file in the rare case it's been left over from a failed run
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
     # When the file does not exist
     with pytest.raises(FileNotFoundError):
@@ -216,7 +221,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
             assert "not that empty" in fid.read()
 
     # File is in the MAPDL working directory
-    os.remove(file_path)  # removing local.
+    os.remove(file_path)  # removing local file
 
     assert not os.path.exists(file_path)
 
@@ -225,7 +230,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
         load_file(mapdl, file_path)
 
-    mapdl._local = False
+    mapdl._local = old_state
     if mapdl.directory != "/":
         os.remove(os.path.join(mapdl.directory, file_))
 
