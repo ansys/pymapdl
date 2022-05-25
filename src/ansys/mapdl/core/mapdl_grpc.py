@@ -674,7 +674,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         if self._mesh_rep is None:
             raise ImportError(
-                "Please intall pyvista to use this feature with\npip install pyvista"
+                "Please install pyvista to use this feature with\npip install pyvista"
             )
         return self._mesh_rep
 
