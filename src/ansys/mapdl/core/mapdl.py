@@ -3306,6 +3306,7 @@ class _MapdlCore(Commands):
     def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
         """Show a plot and get the selected points."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
+        nodes = self.mesh.nodes
 
         previous_picked_points = set(previous_picked_points)
 
@@ -3325,15 +3326,28 @@ class _MapdlCore(Commands):
             "U": "Unselecting",
         }
 
-        def get_text():
+        def gen_text(picked_points=None):
+            """Generate helpful text for the render window."""
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
-            return (
+            text = (
                 f"Please use the left mouse button to pick the {entity}s.\n"
                 f"Press the key 'u' to change between mouse selecting and unselecting.\n"
                 f"Type: {type_} - {type_text}\n"
                 f"Mouse selection: {sel_}\n"
             )
+
+            picked_points_str = ""
+            if picked_points:
+                # reverse picked point order, exclude the brackets, and limit
+                # to 40 characters
+                picked_points_str = str(picked_points[::-1])[1:-1]
+                if len(picked_points_str) > 40:
+                    picked_points_str = picked_points_str[:40]
+                    idx = picked_points_str.rfind(",") + 2
+                    picked_points_str = picked_points_str[:idx] + "..."
+
+            return text + f"Current {entity} selection: {picked_points_str}"
 
         def callback_(mesh, id_):
             point = mesh.points[id_]
@@ -3356,24 +3370,20 @@ class _MapdlCore(Commands):
                 if id_ in picked_ids:
                     picked_ids.remove(id_)
 
-            # removing title
+            # remov etitle and update text
             pl.remove_actor("title")
-
-            # updating text
-            text_ = get_text() + f"Current {entity} selection: " + str(picked_points)
-
             pl._picking_text = pl.add_text(
-                text_,
+                gen_text(picked_points),
                 font_size=10,
                 name="_point_picking_message",
             )
             if picked_ids:
                 pl.add_mesh(
-                    mesh.points[picked_ids],
+                    nodes[picked_ids],
                     color="red",
                     point_size=10,
                     name="_picked_points",
-                    pickable=True,
+                    pickable=False,
                     reset_camera=False,
                 )
             else:
@@ -3382,7 +3392,7 @@ class _MapdlCore(Commands):
         pl.enable_point_picking(
             callback=callback_,
             use_mesh=True,
-            show_message=get_text(),
+            show_message=gen_text(),
             show_point=True,
             left_clicking=True,
             font_size=10,
@@ -3392,9 +3402,8 @@ class _MapdlCore(Commands):
         def callback_u():
             # inverting bool
             pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
-            text_ = get_text() + f"Current {entity} selection: " + str(picked_points)
             pl._picking_text = pl.add_text(
-                text_,
+                gen_text(picked_points),
                 font_size=10,
                 name="_point_picking_message",
             )
