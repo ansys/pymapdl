@@ -20,7 +20,7 @@ Element Type(s):
  - Spring-Damper Elements (COMBIN14)
  - Spring-Damper Elements (COMBIN40)
 
-.. image:: ../../_static/vm9_setup_2.png
+.. image:: ../../../_static/vm9_setup_2.png
    :width: 400
    :alt: Geometry of COMBIN14 and COMBIN40
 
@@ -36,7 +36,7 @@ Loading:
  - :math:`F = 5{\sqrt[2]{2}}\,N`
  - :math:`\alpha = 45\,º`
 
-.. image:: ../../_static/vm9_setup.png
+.. image:: ../../../_static/vm9_setup.png
    :width: 400
    :alt: VM9 Problem Sketch
 

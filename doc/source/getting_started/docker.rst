@@ -40,7 +40,7 @@ with:
 .. code::
 
     GH_USERNAME=<my-github-username>
-    cat GH_TOKEN.txt | docker login docker.pkg.github.com -u $GH_USERNAME --password-stdin
+    cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
 You can now launch MAPDL directly from docker with a short script or
@@ -54,7 +54,7 @@ MAPDL with:
     LICENSE_SERVER=1055@XXX.XXX.XXX.XXX
     VERSION=v21.1.0
 
-    IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl_grpc:$VERSION
+    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
 
@@ -108,7 +108,7 @@ In the command:
 
 .. code::
 
-    IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl_grpc:$VERSION
+    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
 You can provide additional command line parameters to MAPDL by simply
@@ -118,7 +118,7 @@ with the `-np` switch.  For example:
 
 .. code::
 
-    IMAGE=docker.pkg.github.com/pyansys/mapdl/mapdl_grpc:$VERSION
+    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
 For additional command line arguments please see the ansys

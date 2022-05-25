@@ -22,7 +22,7 @@ Element Type(s):
  - 2-D 4-Node Sructural Solid Elements (PLANE182)
  - 2-D 8-Node Structural Solid Elements (PLANE183)
 
-.. image:: ../../_static/vm5_setup.png
+.. image:: ../../../_static/vm5_setup.png
    :width: 400
    :alt: VM5 Problem Sketch
 

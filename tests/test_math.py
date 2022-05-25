@@ -1,17 +1,26 @@
 """Test APDL Math functionality"""
 import os
 import re
-from shutil import copy
 
 import numpy as np
 import pytest
 from scipy import sparse
 
 from ansys.mapdl.core.errors import ANSYSDataTypeError
+from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
+from ansys.mapdl.core.misc import random_string
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+""",
+)
 
 
 @pytest.fixture(scope="module")
@@ -87,10 +96,21 @@ def test_invalid_dtype(mm):
         mm.vec(10, dtype=np.uint8)
 
 
+def test_vec(mm):
+    vec = mm.vec(10, asarray=False)
+    assert isinstance(vec, apdl_math.AnsVec)
+
+    arr = mm.vec(10, asarray=True)
+    assert isinstance(arr, np.ndarray)
+
+
 def test_vec_from_name(mm):
     vec0 = mm.vec(10)
     vec1 = mm.vec(name=vec0.id)
     assert np.allclose(vec0, vec1)
+
+    vec1 = mm.vec(name=vec0.id, asarray=True)
+    assert isinstance(vec1, np.ndarray)
 
 
 def test_vec__mul__(mm):
@@ -189,10 +209,7 @@ def test_load_stiff_mass(mm, cube_solve, tmpdir):
 
 
 def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
-    full_files = mm._mapdl.download("*.full")
-    assert os.path.exists(full_files[0])
-    full_path = os.path.join(os.getcwd(), full_files[0])
-    copy(full_path, tmpdir)
+    full_files = mm._mapdl.download("*.full", target_dir=tmpdir)
     fname_ = os.path.join(tmpdir, full_files[0])
     assert os.path.exists(fname_)
 
@@ -371,6 +388,19 @@ def test_solve_py(mapdl, mm, cube_solve):
     assert np.allclose(rhs0, rhs1)
 
 
+@pytest.mark.parametrize(
+    "vec_type", ["RHS", "BACK", pytest.param("dummy", marks=pytest.mark.xfail)]
+)
+def test_get_vec(mapdl, mm, cube_solve, vec_type):
+    if vec_type.upper() == "BACK":
+        vec = mm.get_vec(mat_id=vec_type, asarray=True)  # To test asarray arg.
+        assert vec.dtype == np.int32
+    else:
+        vec = mm.get_vec(mat_id=vec_type).asarray()
+        assert vec.dtype == np.double
+    assert vec.shape
+
+
 def test_get_vector(mm):
     vec = mm.ones(10)
     arr = vec.asarray()
@@ -522,5 +552,49 @@ def test_repr(mm):
     assert mm._status == repr(mm)
 
 
-def test_status(mm):
-    mm.status()
+def test__load_file(mm, tmpdir):  # pragma: no cover
+    # generating dummy file
+    # mm._mapdl._local = True  # Uncomment to test locally.
+    if not mm._mapdl._local:
+        return True
+
+    fname_ = random_string() + ".file"
+    fname = str(tmpdir.mkdir("tmpdir").join(fname_))
+
+    ## Checking non-exists
+    with pytest.raises(FileNotFoundError):
+        assert fname_ == mm._load_file(fname)
+
+    with open(fname, "w") as fid:
+        fid.write("# Dummy")
+
+    ## Checking case where the file is only in python folder
+    assert fname_ not in mm._mapdl.list_files()
+    assert fname_ == mm._load_file(fname)
+    assert fname_ in mm._mapdl.list_files()
+
+    ## Checking case where the file is in both.
+    with pytest.warns():
+        assert fname_ == mm._load_file(fname)
+
+    ## Checking the case where the file is only in the MAPDL folder
+    os.remove(fname)
+    assert fname_ == mm._load_file(fname)
+    assert not os.path.exists(fname)
+    assert fname_ in mm._mapdl.list_files()
+    mm._mapdl._local = False
+
+
+def test_status(mm, capsys):
+    assert mm.status() is None
+    captured = capsys.readouterr()
+    printed_output = captured.out
+
+    assert "APDLMATH PARAMETER STATUS-" in printed_output
+    assert all(
+        [each in printed_output for each in ["Name", "Type", "Dims", "Workspace"]]
+    )
+
+    # Checking also _status property
+    assert "APDLMATH PARAMETER STATUS-" in mm._status
+    assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])

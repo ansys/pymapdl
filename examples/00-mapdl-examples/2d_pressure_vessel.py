@@ -27,7 +27,7 @@ Additional Packages Used
 
 Problem Figure
 ~~~~~~~~~~~~~~
-.. image:: ../../images/2d_pressure.png
+.. image:: ../../../images/2d_pressure.png
    :width: 400
    :alt: Basic Pressure Vessel
 

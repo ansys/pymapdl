@@ -11,6 +11,8 @@ from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
 import numpy as np
 
+from ansys.mapdl.core.misc import load_file
+
 from .check_version import VersionError, meets_version, version_requires
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .errors import ANSYSDataTypeError, protect_grpc
@@ -164,7 +166,7 @@ class MapdlMath:
         """Print out the status of all APDLMath Objects"""
         return self._mapdl.run("*STATUS,MATH", mute=False)
 
-    def vec(self, size=0, dtype=np.double, init=None, name=None):
+    def vec(self, size=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create a vector.
 
         Parameters
@@ -181,13 +183,16 @@ class MapdlMath:
             or ``"rand"``.
 
         name : str, optional
-            Give the vector a name.  Otherwise one will be
-            automatically generated.
+            Give the vector a name.  Otherwise one will be automatically
+            generated.
+
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
-        ansys.mapdl.math.AnsVec
-            APDLMath Vector.
+        ansys.mapdl.math.AnsVec or numpy.ndarray
+            APDLMath Vector or :class:`numpy.ndarray`.
         """
         if dtype not in MYCTYPE:
             raise ANSYSDataTypeError
@@ -195,9 +200,18 @@ class MapdlMath:
         if not name:
             name = id_generator()
             self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
-            return AnsVec(name, self._mapdl, dtype, init)
+
+            ans_vec = AnsVec(name, self._mapdl, dtype, init)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
         else:
-            return AnsVec(name, self._mapdl)
+            ans_vec = AnsVec(name, self._mapdl)
+            if asarray:
+                return self._mapdl._vec_data(ans_vec.id)
+            else:
+                return ans_vec
 
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
         """Create an APDLMath matrix.
@@ -247,11 +261,12 @@ class MapdlMath:
                 raise ValueError(f"Invalid init method '{init}'")
         else:
             info = self._mapdl._data_info(name)
-            mtype = info.objtype
-            if mtype == 2:
+            if info.objtype == pb_types.DataType.DMAT:
                 return AnsDenseMat(name, self._mapdl)
-            else:
+            elif info.objtype == pb_types.DataType.SMAT:
                 return AnsSparseMat(name, self._mapdl)
+            else:  # pragma: no cover
+                raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
         return mat
 
@@ -430,10 +445,6 @@ class MapdlMath:
             * ``"STIFF"`` - Stiffness matrix
             * ``"MASS"`` - Mass matrix
             * ``"DAMP"`` - Damping matrix
-            * ``"NOD2BCS"`` - Mapping vector relating the full set of
-              nodal DOFs to the subset that the solver uses
-            * ``"USR2BCS"`` - Mapping vector relating the full set of
-              external nodal DOFs to the subset that the solver uses
             * ``"GMAT"`` - Constraint equation matrix
             * ``"K_RE"`` - Real part of the stiffness matrix
             * ``"K_IM"`` - Imaginary part of the stiffness matrix
@@ -457,8 +468,8 @@ class MapdlMath:
             "STIFF",
             "MASS",
             "DAMP",
-            "NOD2BCS",
-            "USR2BCS",
+            # "NOD2BCS",  # Not allowed since #990
+            # "USR2BCS",
             "GMAT",
             "K_RE",
             "K_IM",
@@ -523,19 +534,7 @@ class MapdlMath:
             If the file is local, it will be uploaded.
 
         """
-        if self._mapdl._local:  # pragma: no cover
-            if not os.path.exists(fname):
-                raise FileNotFoundError(f"The file {fname} could not be found.")
-        else:
-            if not os.path.exists(fname) and fname not in self._mapdl.list_files():
-                raise FileNotFoundError(
-                    f"The file {fname} could not be found in the local client or remote working directory."
-                )
-            if os.path.exists(fname):
-                self._mapdl.upload(fname)
-                fname = os.path.basename(fname)
-
-        return fname
+        return load_file(self._mapdl, fname)
 
     def stiff(self, dtype=np.double, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
@@ -645,7 +644,7 @@ class MapdlMath:
         fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=np.double, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(self, dtype=None, fname="file.full", mat_id="RHS", asarray=False):
         """Load a vector from a file.
 
         Parameters
@@ -661,8 +660,10 @@ class MapdlMath:
 
             * ``"RHS"`` - Load vector
             * ``"GVEC"`` - Constraint equation constant terms
-            * ``"BACK"`` - nodal mapping vector (internal to user)
+            * ``"BACK"`` - nodal mapping vector (internal to user).
+              If this is used, the default ``dtype`` is ``np.int32``.
             * ``"FORWARD"`` - nodal mapping vector (user to internal)
+              If this is used, the default ``dtype`` is ``np.int32``.
         asarray : bool, optional
             Return a `scipy` array rather than an APDLMath matrix.
 
@@ -683,13 +684,24 @@ class MapdlMath:
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
 
+        if mat_id.upper() not in ["RHS", "GVEC", "BACK", "FORWARD"]:
+            raise ValueError(
+                f"The 'mat_id' value ({mat_id}) is not allowed."
+                'Only "RHS", "GVEC", "BACK", or "FORWARD" are allowed.'
+            )
+
+        if mat_id.upper() in ["BACK", "FORWARD"] and not dtype:
+            dtype = np.int32
+        else:
+            dtype = np.double
+
         fname = self._load_file(fname)
         self._mapdl.run(
             f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
         )
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
-            return self._mapdl._vec_data(ans_vec.id)
+            return self._mapdl._vec_data(ans_vec.id).astype(dtype, copy=False)
         return ans_vec
 
     def set_vec(self, data, name=None):
@@ -1423,19 +1435,26 @@ class AnsMat(ApdlMathObj):
         """
         return (self.nrow, self.ncol)
 
-    def sym(self):  # BUG this is not always true
-        """Return if matrix is symmetric."""
+    def sym(self) -> bool:
+        """Return if matrix is symmetric.
+
+        Returns
+        -------
+        bool
+            ``True`` when this matrix is symmetric.
+
+        """
 
         info = self._mapdl._data_info(self.id)
 
         if meets_version(self._mapdl._server_version, (0, 5, 0)):  # pragma: no cover
             return info.mattype in [0, 1, 2]  # [UPPER, LOWER, DIAG] respectively
-        else:
-            warn(
-                "Call to sym() function cannot evaluate if"
-                "it is symmetric or not in this MAPDL version."
-            )
-            return True
+
+        warn(
+            "Call to ``sym`` cannot evaluate if this matrix "
+            "is symmetric with this version of MAPDL."
+        )
+        return True
 
     def asarray(self, dtype=None) -> np.ndarray:
         """Returns vector as a numpy array.

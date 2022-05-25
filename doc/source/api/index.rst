@@ -17,6 +17,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    :hidden:
 
    commands
+   database
    geometry
    helper
    inline

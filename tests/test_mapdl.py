@@ -13,10 +13,6 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
-
 skip_in_cloud = pytest.mark.skipif(
     not get_start_instance(),
     reason="""
@@ -25,6 +21,9 @@ directory creation.
 """,
 )
 
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -135,14 +134,6 @@ def warns_in_cdread_error_log(mapdl):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
-
-
-@pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
 
 
 @pytest.mark.skip_grpc
@@ -348,22 +339,23 @@ def test_invalid_input(mapdl):
 
 
 @skip_no_xserver
-def test_kplot(cleared, mapdl, tmpdir):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_kplot(cleared, mapdl, tmpdir, vtk):
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(savefig=filename)
+    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
-
-    mapdl.kplot(vtk=False)  # make sure legacy still works
+    if vtk:
+        assert os.path.isfile(filename)
 
 
 @skip_no_xserver
-def test_aplot(cleared, mapdl):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_aplot(cleared, mapdl, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -374,17 +366,14 @@ def test_aplot(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
     mapdl.al(l0, l1, l2, l3)
     mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
+    mapdl.aplot(color_areas=vtk, show_lines=True, show_line_numbering=True)
 
     mapdl.aplot(quality=100)
     mapdl.aplot(quality=-1)
 
-    # and legacy as well
-    mapdl.aplot(vtk=False)
-
 
 @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False])
+@pytest.mark.parametrize("vtk", [True, False, None])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.vplot(vtk=vtk, color_areas=True)
@@ -425,7 +414,8 @@ def test_lines(cleared, mapdl):
 
 
 @skip_no_xserver
-def test_lplot(cleared, mapdl, tmpdir):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_lplot(cleared, mapdl, tmpdir, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -436,11 +426,10 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
+    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
-
-    mapdl.lplot(vtk=False)  # make sure legacy still works
+    if vtk:
+        assert os.path.isfile(filename)
 
 
 @skip_in_cloud
@@ -556,14 +545,15 @@ def test_nodes(tmpdir, cleared, mapdl):
     mapdl.fill(1, 11, 9)
 
     basename = "tmp.nodes"
-    filename = str(tmpdir.mkdir("tmpdir").join(basename))
+    target_dir = tmpdir.mkdir("tmpdir")
+    filename = str(target_dir.join(basename))
     if mapdl._local:
         mapdl.nwrite(filename)
     else:
         mapdl.nwrite(basename)
-        mapdl.download(basename)
+        mapdl.download(basename, target_dir=str(target_dir))
 
-    assert np.allclose(mapdl.mesh.nodes, np.loadtxt(basename)[:, 1:])
+    assert np.allclose(mapdl.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl.mesh.n_node == 11
     assert np.allclose(mapdl.mesh.nnum, range(1, 12))
 
@@ -580,12 +570,13 @@ def test_enum(mapdl, make_block):
 
 
 @pytest.mark.parametrize("nnum", [True, False])
+@pytest.mark.parametrize("vtk", [True, False, None])
 @skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, nnum):
+def test_nplot_vtk(cleared, mapdl, nnum, vtk):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=True, nnum=nnum, background="w", color="k")
+    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
 
 
 @skip_no_xserver
@@ -635,9 +626,6 @@ def test_elements(cleared, mapdl):
             [1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 9, 10, 11, 12, 13, 14, 15, 16],
         ]
     )
-    if "Grpc" in str(type(mapdl)):
-        # no element number in elements
-        expected[:, 8] = 0
 
     assert np.allclose(np.array(mapdl.mesh.elem), expected)
 
@@ -707,10 +695,12 @@ def test_builtin_parameters(mapdl, cleared):
 
 
 @skip_no_xserver
-def test_eplot(mapdl, make_block):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_eplot(mapdl, make_block, vtk):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
+    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
@@ -839,8 +829,9 @@ def test_load_array_types(mapdl, array):
     assert np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
 
 
-@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(3,))])
+@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(5,))])
 def test_load_array_failure_types(mapdl, array):
+    array[0] = array[0] + 1  # This is to avoid having all elements equal #1061
     mapdl.load_array("myarr", array)
     array = np.array(array)
     assert not np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
@@ -1149,6 +1140,13 @@ def test_inquire(mapdl):
     assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
 
 
+def test_ksel(mapdl, cleared):
+    mapdl.k(1, 0, 0, 0)
+    mapdl.prep7()
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+
+
 def test_get_file_path(mapdl, tmpdir):
     fname = "dummy.txt"
     fobject = tmpdir.join(fname)
@@ -1161,35 +1159,32 @@ def test_get_file_path(mapdl, tmpdir):
     "option2,option3,option4",
     [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
 )
-def test_tbft(mapdl, option2, option3, option4):
-    try:
-        fname = "expdata.dat"
-        fpath = os.path.join(os.getcwd(), fname)
+def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
-        with open(fpath, "w") as fid:
-            fid.write(
-                """0.819139E-01 0.82788577E+00
-            0.166709E+00 0.15437247E+01
-            0.253960E+00 0.21686152E+01
-            0.343267E+00 0.27201819E+01
-            0.434257E+00 0.32129833E+0"""
-            )
+    fname = "expdata.dat"
+    dirpath = tmpdir.mkdir("tmpdir")
+    fpath = dirpath.join(fname)
 
-        if option4 == "DIR":
-            option4 = os.getcwd()
+    with open(fpath, "w") as fid:
+        fid.write(
+            """0.819139E-01 0.82788577E+00
+        0.166709E+00 0.15437247E+01
+        0.253960E+00 0.21686152E+01
+        0.343267E+00 0.27201819E+01
+        0.434257E+00 0.32129833E+0"""
+        )
 
-        mapdl.prep7(mute=True)
-        mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
-        mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
-        mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, mute=True)
+    if option4 == "DIR":
+        option4 = dirpath
+    else:
+        option2 = os.path.join(dirpath, option2)
 
-        assert fname in mapdl.list_files()
+    mapdl.prep7(mute=True)
+    mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
+    mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
+    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "", mute=True)
 
-    finally:
-        try:
-            os.remove(fname)
-        except OSError:
-            pass
+    assert fname in mapdl.list_files()
 
 
 def test_tbft_not_found(mapdl):
@@ -1275,195 +1270,111 @@ def test_extra_argument_in_get(mapdl, make_block):
     )
 
 
-@pytest.mark.parametrize(
-    "par_name",
-    [
-        "asdf124",
-        "asd",
-        "a12345",
-        "a12345_",
-        pytest.param(
-            "_a12345",
-            marks=pytest.mark.xfail,
-            id="Starting by underscore, but not ending",
-        ),
-        "_a12345_",
-        pytest.param("1asdf", marks=pytest.mark.xfail, id="Starting by number"),
-        pytest.param(
-            "123asdf", marks=pytest.mark.xfail, id="Starting by several numbers"
-        ),
-        pytest.param(
-            "asa12df+", marks=pytest.mark.xfail, id="Invalid symbol in parameter name."
-        ),
-        # function args
-        pytest.param(
-            "AR0",
-            marks=pytest.mark.xfail,
-            id="Using `AR0` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR1",
-            marks=pytest.mark.xfail,
-            id="Using `AR1` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR10",
-            marks=pytest.mark.xfail,
-            id="Using `AR10` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR99",
-            marks=pytest.mark.xfail,
-            id="Using `AR99` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR111",
-            marks=pytest.mark.xfail,
-            id="Using `AR111` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR999",
-            marks=pytest.mark.xfail,
-            id="Using `AR999` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG0",
-            marks=pytest.mark.xfail,
-            id="Using `ARG0` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG1",
-            marks=pytest.mark.xfail,
-            id="Using `ARG1` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG10",
-            marks=pytest.mark.xfail,
-            id="Using `ARG10` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG99",
-            marks=pytest.mark.xfail,
-            id="Using `ARG99` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG111",
-            marks=pytest.mark.xfail,
-            id="Using `ARG111` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG999",
-            marks=pytest.mark.xfail,
-            id="Using `ARG999` with is reserved for functions/macros",
-        ),
-        # length
-        pytest.param(
-            "a23456789012345678901234567890123",
-            marks=pytest.mark.xfail,
-            id="Name too long",
-        ),
-    ],
-)
-def test_parameters_name(mapdl, par_name):
-    mapdl.run(f"{par_name} = 123")
-
-
-@pytest.mark.parametrize(
-    "par_name",
-    [
-        "asdf124",
-        "asd",
-        "a12345",
-        "a12345_",
-        pytest.param(
-            "_a12345",
-            marks=pytest.mark.xfail,
-            id="Starting by underscore, but not ending",
-        ),
-        "_a12345_",
-        pytest.param("1asdf", marks=pytest.mark.xfail, id="Starting by number"),
-        pytest.param(
-            "123asdf", marks=pytest.mark.xfail, id="Starting by several numbers"
-        ),
-        pytest.param(
-            "asa12df+", marks=pytest.mark.xfail, id="Invalid symbol in parameter name."
-        ),
-        # function args
-        pytest.param(
-            "AR0",
-            marks=pytest.mark.xfail,
-            id="Using `AR0` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR1",
-            marks=pytest.mark.xfail,
-            id="Using `AR1` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR10",
-            marks=pytest.mark.xfail,
-            id="Using `AR10` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR99",
-            marks=pytest.mark.xfail,
-            id="Using `AR99` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR111",
-            marks=pytest.mark.xfail,
-            id="Using `AR111` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "AR999",
-            marks=pytest.mark.xfail,
-            id="Using `AR999` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG0",
-            marks=pytest.mark.xfail,
-            id="Using `ARG0` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG1",
-            marks=pytest.mark.xfail,
-            id="Using `ARG1` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG10",
-            marks=pytest.mark.xfail,
-            id="Using `ARG10` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG99",
-            marks=pytest.mark.xfail,
-            id="Using `ARG99` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG111",
-            marks=pytest.mark.xfail,
-            id="Using `ARG111` with is reserved for functions/macros",
-        ),
-        pytest.param(
-            "ARG999",
-            marks=pytest.mark.xfail,
-            id="Using `ARG999` with is reserved for functions/macros",
-        ),
-        # length
-        pytest.param(
-            "a23456789012345678901234567890123",
-            marks=pytest.mark.xfail,
-            id="Name too long",
-        ),
-    ],
-)
-def test_parameters_name_in_get(mapdl, par_name):
-    mapdl.get(par=par_name, entity="node", item1="count")
-
-
 @pytest.mark.parametrize("value", [1e-6, 1e-5, 1e-3, None])
 def test_seltol(mapdl, value):
     if value:
         assert "SELECT TOLERANCE=" in mapdl.seltol(value)
     else:
         assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
+
+
+def test_mpfunctions(mapdl, cube_solve, capsys):
+    mapdl.prep7()
+
+    # check writing to file
+    fname = "test"
+    ext = "mp1"
+
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
+    assert f"{fname}.{ext}" in mapdl.list_files()
+
+    # asserting downloading
+    ext = "mp2"
+    assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(
+        fname, ext, download_file=True
+    )
+    assert f"{fname}.{ext}" in mapdl.list_files()
+    assert os.path.exists(f"{fname}.{ext}")
+
+    ## Checking reading
+    # Uploading a local file
+    with open(f"{fname}.{ext}", "r") as fid:
+        text = fid.read()
+
+    os.remove(f"{fname}.{ext}")  # remove temp file
+
+    ext = ext + "2"
+    fname_ = f"{fname}.{ext}"
+    new_nuxy = "MPDATA,NUXY,       1,   1, 0.4000000E+00,"
+    nuxy = float(new_nuxy.split(",")[4])
+    ex = 0.2100000e12
+
+    with open(fname_, "w") as fid:
+        fid.write(text.replace("MPDATA,NUXY,       1,   1, 0.3000000E+00,", new_nuxy))
+
+    # file might be left behind from a previous test
+    if fname_ in mapdl.list_files():
+        mapdl.slashdelete(fname_)
+        assert fname_ not in mapdl.list_files()
+
+    mapdl.clear()
+    mapdl.prep7()
+    captured = capsys.readouterr()  # To flush it
+    output = mapdl.mpread(fname, ext)
+    captured = capsys.readouterr()
+    assert f"Uploading {fname}.{ext}:" in captured.err
+    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
+    assert "TEMPERATURE TABLE ERASED." in output
+    assert "0.4000000" in output
+    assert fname_ in mapdl.list_files()
+    # check if materials are read into the db
+    assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
+    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Reding file in remote
+    fname_ = f"{fname}.{ext}"
+    os.remove(fname_)
+    assert not os.path.exists(fname_)
+    assert f"{fname}.{ext}" in mapdl.list_files()
+
+    mapdl.clear()
+    mapdl.prep7()
+    output = mapdl.mpread(fname, ext)
+    assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
+    assert "TEMPERATURE TABLE ERASED." in output
+    assert "0.4000000" in output
+    assert np.allclose(mapdl.get_value("NUXY", "1", "TEMP", 0), nuxy)
+    assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
+
+    # Test non-existing file
+    with pytest.raises(FileNotFoundError):
+        mapdl.mpread(fname="dummy", ext="dummy")
+
+    # Test not implemented error
+    with pytest.raises(NotImplementedError):
+        mapdl.mpread(fname="dummy", ext="dummy", lib="something")
+
+    # Test suppliying a dir path when in remote
+    with pytest.raises(IOError):
+        mapdl.mpwrite("/test_dir/test", "mp")
+
+
+def test_mapdl_str(mapdl):
+    out = str(mapdl)
+    assert "ansys" in out.lower()
+    assert "Product" in out
+    assert "MAPDL Version" in out
+
+
+def test_plot_empty_mesh(mapdl, cleared):
+    with pytest.warns(UserWarning):
+        mapdl.nplot(vtk=True)
+
+    with pytest.warns(UserWarning):
+        mapdl.eplot(vtk=True)
+
+
+def test_equal_in_comments_and_title(mapdl):
+    mapdl.com("=====")
+    mapdl.title("This is = ")
+    mapdl.title("This is '=' ")

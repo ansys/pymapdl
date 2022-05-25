@@ -14,8 +14,9 @@ ANSYS_VALUE_TYPE = {
     4: np.float32,  # FLOAT
     5: np.float64,  # DOUBLE
     6: np.complex64,  # FCPLX
-    7: np.complex128,
-}  # DCPLX
+    7: np.complex128,  # DCPLX
+    8: np.char,
+}
 
 
 VGET_ENTITY_TYPES = [

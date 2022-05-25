@@ -12,7 +12,13 @@ LOG.debug("Loaded logging module as LOG")
 _LOCAL_PORTS = []
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
-from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+try:
+    from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+
+    _HAS_PYVISTA = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'Pyvista' is not installed.")
+    _HAS_PYVISTA = False
 
 try:
     import importlib.metadata as importlib_metadata
@@ -31,7 +37,7 @@ from ansys.mapdl.core.launcher import (
     launch_mapdl,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Report, _check_has_ansys
+from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
 from ansys.mapdl.core.pool import LocalMapdlPool
 from ansys.mapdl.core.theme import MapdlTheme
 
@@ -54,3 +60,6 @@ except:  # pragma: no cover
 # override default launcher when on pyansys.com
 if "ANSJUPHUB_VER" in os.environ:
     from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+
+
+BUILDING_GALLERY = False

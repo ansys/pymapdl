@@ -128,8 +128,14 @@ computer running MAPDL on the port 50052, you can connect to it with
 
     >>> mapdl = Mapdl('192.168.0.1', port=50052)
 
+Alternatively you can use a hostname:
+
+.. code:: python
+
+    >>> mapdl = Mapdl('myremotemachine', port=50052)
+
 Please note that you must have started MAPDL in gRPC mode in the PC with
-the mentioned IP for this to work.
+the mentioned IP/hostname for this to work.
 If you have MAPDL installed on your local host, you
 can use ``launch_mapdl`` to both start and connect to MAPDL.
 

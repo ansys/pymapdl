@@ -1,0 +1,18 @@
+Documentation:
+- doc/source/**/*
+- examples/**/*
+Maintenance:
+- .github/**/*
+- codecov.yml
+- .flake8
+- .coveragerc
+- ignore_words.txt
+- pyproject.toml
+Dependencies:
+- requirements*
+- pyproject.toml
+- requirements/*
+CI/CD:
+- docker/**/*
+- .github/**/*
+- .ci/**/*
