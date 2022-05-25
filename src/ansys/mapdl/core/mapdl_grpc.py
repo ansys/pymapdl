@@ -666,12 +666,14 @@ class MapdlGrpc(_MapdlCore):
 
     def _reset_cache(self):
         """Reset cached items"""
-        if self._mesh_rep != None:
+        if self._mesh_rep is not None:
             self._mesh_rep._reset_cache()
         self._geometry._reset_cache()
 
     @property
     def _mesh(self):
+        if self._mesh_rep is None:
+            raise ImportError("Please intall pyvista to use this feature with\npip install pyvista")
         return self._mesh_rep
 
     def _run(self, cmd, verbose=False, mute=None):
