@@ -577,6 +577,7 @@ class _MapdlCore(Commands):
         return self._info
 
     @property
+    @requires_package("pyvista", softerror=True)
     def geometry(self):
         """Geometry information.
 
@@ -619,7 +620,6 @@ class _MapdlCore(Commands):
         return self._geometry
 
     @property
-    @requires_package("pyvista", softerror=True)
     def _geometry(self):  # pragma: no cover
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry

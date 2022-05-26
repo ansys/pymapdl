@@ -2206,6 +2206,7 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(error_file).decode("latin-1")
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
         """Binary interface to the result file using ``pyansys.Result``
 
