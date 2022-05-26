@@ -1140,6 +1140,13 @@ def test_inquire(mapdl):
     assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
 
 
+def test_ksel(mapdl, cleared):
+    mapdl.k(1, 0, 0, 0)
+    mapdl.prep7()
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+
+
 def test_get_file_path(mapdl, tmpdir):
     fname = "dummy.txt"
     fobject = tmpdir.join(fname)
