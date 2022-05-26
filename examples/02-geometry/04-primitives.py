@@ -265,3 +265,8 @@ mapdl.prep7()
 
 vnum = mapdl.torus(rad1=5, rad2=1, rad3=2, theta1=0, theta2=180)
 mapdl.vplot(show_lines=False, show_bounds=True, smooth_shading=False)
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

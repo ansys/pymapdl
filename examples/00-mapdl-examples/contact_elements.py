@@ -61,3 +61,7 @@ print(output)
 
 mapdl.esel("S", "SEC", vmin=5, vmax=6)
 mapdl.eplot(style="wireframe", line_width=3)
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

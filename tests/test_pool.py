@@ -1,14 +1,14 @@
-from pathlib import Path
 import os
+from pathlib import Path
 import time
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core import LocalMapdlPool, examples
-from ansys.mapdl.core.launcher import get_start_instance
 from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.launcher import get_start_instance
+from ansys.mapdl.core.misc import get_ansys_bin
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -33,6 +33,7 @@ for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
         EXEC_FILE = get_ansys_bin(rver)
         break
+
 
 @pytest.fixture(scope="module")
 def pool():

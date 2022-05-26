@@ -84,3 +84,7 @@ mapdl.f(12, "FZ", -22840)
 mapdl.run("/solu")
 mapdl.antype("static")
 print(mapdl.solve())
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

@@ -1,9 +1,9 @@
 """Test element preprocess commands"""
-import pytest
 import numpy as np
+import pytest
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core._commands.parse import parse_et, parse_e
+from ansys.mapdl.core._commands.parse import parse_e, parse_et
 
 
 @pytest.fixture

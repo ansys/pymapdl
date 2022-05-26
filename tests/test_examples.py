@@ -1,7 +1,8 @@
-import re
 import os
+import re
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.examples.downloads import download_example_data
 
 
 def test_load_verif():
@@ -19,3 +20,8 @@ def test_bracket(mapdl, cleared):
     out = mapdl.igesin(bracket_file)
     n_ent = re.findall(r"TOTAL NUMBER OF ENTITIES \s*=\s*(\d*)", out)
     assert int(n_ent[0]) > 0
+
+
+def test_download_example_data():
+    path = download_example_data("LatheCutter.anf", "geometry")
+    assert os.path.exists(path)

@@ -16,9 +16,9 @@ Thanks SimuTech!
 """
 # sphinx_gallery_thumbnail_number = 4
 
+import matplotlib.pyplot as plt
 import numpy as np
 
-import matplotlib.pyplot as plt
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl(loglevel="ERROR")
@@ -187,7 +187,7 @@ mapdl.post1()
 
 # get the temperature of the 30th result set
 mapdl.set(1, 30)
-temp = mapdl.post_processing.nodal_temperature
+temp = mapdl.post_processing.nodal_temperature()
 
 # Load this result into the underlying VTK grid
 grid = mapdl.mesh._grid
@@ -205,7 +205,7 @@ single_slice.plot(scalars="temperature")
 
 # get the temperature of a different result set
 mapdl.set(1, 120)
-temp = mapdl.post_processing.nodal_temperature
+temp = mapdl.post_processing.nodal_temperature()
 
 # Load this result into the underlying VTK grid
 grid = mapdl.mesh._grid
@@ -255,7 +255,7 @@ idx = np.nonzero(mapdl.mesh.nnum == 12)[0][0]
 node_temp_from_post = []
 for i in range(1, 1 + nsets):
     mapdl.set(1, i)
-    node_temp_from_post.append(mapdl.post_processing.nodal_temperature[idx])
+    node_temp_from_post.append(mapdl.post_processing.nodal_temperature()[idx])
 
 # Again, the first 10 temperatures
 node_temp_from_post[:10]
@@ -269,3 +269,7 @@ plt.legend()
 plt.xlabel("Time (seconds)")
 plt.ylabel("Temperature ($^\circ$F)")
 plt.show()
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

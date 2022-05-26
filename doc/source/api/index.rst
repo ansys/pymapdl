@@ -16,15 +16,19 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    :maxdepth: 2
    :hidden:
 
+   commands
+   database
+   geometry
+   helper
+   inline
+   logging
    mapdl
    math
-   plotting
-   helper
    mesh
-   xpl
    parameters
-   geometry
+   plotting
    pool
    post
    solution
-   inline
+   xpl
+   
