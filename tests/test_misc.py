@@ -311,4 +311,4 @@ def test_requires_package_decorator():
         assert myclass.myotherfun
 
     with pytest.warns(UserWarning):
-        assert myclass.myotherfun2
+        assert myclass.myotherfun2 is None
