@@ -5,7 +5,8 @@ if _HAS_PYVISTA:
     from pyvista import themes
 
     base_class = themes.DefaultTheme
-else:
+
+else:  # pragma: no cover
 
     class myEmptyClass:
         pass

@@ -159,7 +159,7 @@ class _MapdlCore(Commands):
         self._response = None
 
         if _HAS_PYVISTA:
-            if use_vtk is not None:
+            if use_vtk is not None:  # pragma: no cover
                 self._use_vtk = use_vtk
             else:
                 self._use_vtk = True

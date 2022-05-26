@@ -989,7 +989,7 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
-    np.savetxt(filename, array, fmt="%20.12f")
+    np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
 
 
 def requires_package(package_name, softerror=False):

@@ -295,12 +295,12 @@ def test_requires_package_decorator():
         @property
         @requires_package("nuuumpy")
         def myotherfun(self):
-            return True
+            return False
 
         @property
         @requires_package("nuuumpy", softerror=True)
         def myotherfun2(self):
-            return True
+            return False
 
     myclass = myClass()
 
@@ -308,7 +308,7 @@ def test_requires_package_decorator():
     assert myclass.myfun2
 
     with pytest.raises(ModuleNotFoundError):
-        myclass.myotherfun
+        assert myclass.myotherfun
 
     with pytest.warns(UserWarning):
-        myclass.myotherfun2
+        assert myclass.myotherfun2
