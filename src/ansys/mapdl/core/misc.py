@@ -1,5 +1,6 @@
 """Module for miscellaneous functions and methods"""
 from functools import wraps
+import importlib
 import inspect
 import os
 import platform
@@ -968,3 +969,59 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def write_array(filename, array):
+    """
+    Write an array to a file.
+
+    This function aim to replace
+    ``ansys.mapdl.reader._reader write_array``.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file.
+    array : numpy.ndarray
+        Array.
+    """
+    np.savetxt(filename, array, fmt="%20.12f")
+
+
+def requires_package(package_name, softerror=False):
+    """
+    Decorator check whether a package is installed or not.
+
+    If it is not, it will return None.
+
+    Parameters
+    ----------
+    package_name : str
+        Name of the package.
+    """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+
+            try:
+                importlib.import_module(package_name)
+                return function(self, *args, **kwargs)
+
+            except ModuleNotFoundError:
+                msg = (
+                    f"To use the method '{function.__name__}', "
+                    f"the package '{package_name}' is required.\n"
+                    f"Please try to install '{package_name}' with:\n"
+                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                )
+
+                if softerror:
+                    warn(msg)
+                    return None
+                else:
+                    raise ModuleNotFoundError(msg)
+
+        return wrapper
+
+    return decorator

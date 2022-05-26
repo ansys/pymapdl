@@ -2,7 +2,6 @@
 import weakref
 
 import numpy as np
-from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
@@ -467,7 +466,7 @@ class PostProcessing:
 
     def plot_element_values(
         self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ) -> "pyvista.plotting.renderer.CameraPosition":
         """Plot element values.
 
         Displays the solution results as discontinuous element contours.
@@ -1052,7 +1051,7 @@ class PostProcessing:
 
     def plot_element_displacement(
         self, component="NORM", option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ) -> "pyvista.plotting.renderer.CameraPosition":
         """Plot element displacement.
 
         Parameters
@@ -1172,7 +1171,7 @@ class PostProcessing:
 
     def plot_element_stress(
         self, component, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ) -> "pyvista.plotting.renderer.CameraPosition":
         """Plot element component or principal stress.
 
         One value per element.  Either minimum, maximum, or average of
@@ -1277,7 +1276,7 @@ class PostProcessing:
 
     def plot_element_temperature(
         self, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ) -> "pyvista.plotting.renderer.CameraPosition":
         """Plot element temperature.
 
         One value per element.  Either minimum, maximum, or average of

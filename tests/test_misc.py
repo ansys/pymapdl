@@ -15,6 +15,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     load_file,
     no_return,
+    requires_package,
     run_as_prep7,
 )
 
@@ -273,3 +274,36 @@ def test_plain_report_no_options():
     assert "Core packages" in rep_str
     assert "Optional packages" not in rep_str
     assert "Additional packages" not in rep_str
+
+
+def test_requires_package_decorator():
+    class myClass:
+        @requires_package("numpy")
+        def myfun(self):
+            return True
+
+        @property
+        @requires_package("numpy")
+        def myfun2(self):
+            return True
+
+        @property
+        @requires_package("nuuumpy")
+        def myotherfun(self):
+            return True
+
+        @property
+        @requires_package("nuuumpy", softerror=True)
+        def myotherfun2(self):
+            return True
+
+    myclass = myClass()
+
+    assert myclass.myfun()
+    assert myclass.myfun2
+
+    with pytest.raises(ModuleNotFoundError):
+        myclass.myotherfun
+
+    with pytest.warns(UserWarning):
+        myclass.myotherfun2
