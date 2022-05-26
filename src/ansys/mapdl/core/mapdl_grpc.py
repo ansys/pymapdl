@@ -57,6 +57,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
 )
@@ -506,10 +507,15 @@ class MapdlGrpc(_MapdlCore):
             self._timer.start()
 
         # initialize mesh, post processing, and file explorer interfaces
-        from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        try:
+            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+
+            self._mesh_rep = MeshGrpc(self)
+        except ModuleNotFoundError:  # pragma: no cover
+            self._mesh_rep = None
+
         from ansys.mapdl.core.xpl import ansXpl
 
-        self._mesh_rep = MeshGrpc(self)
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
@@ -661,10 +667,14 @@ class MapdlGrpc(_MapdlCore):
 
     def _reset_cache(self):
         """Reset cached items"""
-        self._mesh_rep._reset_cache()
-        self._geometry._reset_cache()
+        if self._mesh_rep is not None:
+            self._mesh_rep._reset_cache()
+
+        if self.geometry is not None:
+            self._geometry._reset_cache()
 
     @property
+    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -2197,6 +2207,7 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(error_file).decode("latin-1")
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
         """Binary interface to the result file using ``pyansys.Result``
 

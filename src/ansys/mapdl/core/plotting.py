@@ -107,19 +107,19 @@ if _HAS_PYVISTA:
 
     HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
 
-BC_plot_settings = {
-    "TEMP": {"color": "orange", "glyph": TEMP},
-    "HEAT": {"color": "red", "glyph": HEAT},
-    "UX": {"color": "red", "glyph": UX},
-    "UY": {"color": "green", "glyph": UY},
-    "UZ": {"color": "blue", "glyph": UZ},
-    "VOLT": {"color": "yellow", "glyph": VOLT},
-    "FX": {"color": "red", "glyph": FX},
-    "FY": {"color": "green", "glyph": FY},
-    "FZ": {"color": "blue", "glyph": FZ},
-    "AMPS": {"color": "grey", "glyph": VOLT},
-    "CHRGS": {"color": "grey", "glyph": VOLT},
-}
+    BC_plot_settings = {
+        "TEMP": {"color": "orange", "glyph": TEMP},
+        "HEAT": {"color": "red", "glyph": HEAT},
+        "UX": {"color": "red", "glyph": UX},
+        "UY": {"color": "green", "glyph": UY},
+        "UZ": {"color": "blue", "glyph": UZ},
+        "VOLT": {"color": "yellow", "glyph": VOLT},
+        "FX": {"color": "red", "glyph": FX},
+        "FY": {"color": "green", "glyph": FY},
+        "FZ": {"color": "blue", "glyph": FZ},
+        "AMPS": {"color": "grey", "glyph": VOLT},
+        "CHRGS": {"color": "grey", "glyph": VOLT},
+    }
 
 # Using * to force all the following arguments to be keyword only.
 def _general_plotter(

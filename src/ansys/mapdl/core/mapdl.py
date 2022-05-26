@@ -13,7 +13,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -36,11 +35,15 @@ from ansys.mapdl.core.misc import (
     last_created,
     load_file,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
     wrap_point_SEL,
 )
-from ansys.mapdl.core.plotting import general_plotter
+
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting import general_plotter
+
 from ansys.mapdl.core.post import PostProcessing
 
 _PERMITTED_ERRORS = [
@@ -138,7 +141,7 @@ class _MapdlCore(Commands):
     def __init__(
         self,
         loglevel="DEBUG",
-        use_vtk=True,
+        use_vtk=None,
         log_apdl=None,
         log_file=False,
         local=True,
@@ -156,7 +159,10 @@ class _MapdlCore(Commands):
         self._response = None
 
         if _HAS_PYVISTA:
-            self._use_vtk = use_vtk
+            if use_vtk is not None:  # pragma: no cover
+                self._use_vtk = use_vtk
+            else:
+                self._use_vtk = True
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
@@ -573,6 +579,7 @@ class _MapdlCore(Commands):
         return self._info
 
     @property
+    @requires_package("pyvista", softerror=True)
     def geometry(self):
         """Geometry information.
 
@@ -622,6 +629,7 @@ class _MapdlCore(Commands):
         return Geometry(self)
 
     @property
+    @requires_package("pyvista", softerror=True)
     def mesh(self):
         """Mesh information.
 
@@ -668,6 +676,7 @@ class _MapdlCore(Commands):
         return self._mesh
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
     def _mesh(self):
         """Write entire archive to ASCII and read it in as an
@@ -1698,7 +1707,8 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self) -> Result:
+    @requires_package("ansys.mapdl.reader", softerror=True)
+    def result(self) -> "ansys.mapdl.reader.rst.Result":
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
