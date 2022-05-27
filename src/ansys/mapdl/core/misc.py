@@ -1032,7 +1032,7 @@ def requires_package(package_name, softerror=False):
 
 
 def _get_args_xsel(*args, **kwargs):
-    type_ = kwargs.pop("type_", args[0]).upper()
+    type_ = kwargs.pop("type_", str(args[0]) if len(args) else "").upper()
     item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
     comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()
     vmin = kwargs.pop("vmin", args[3] if len(args) > 3 else "")
