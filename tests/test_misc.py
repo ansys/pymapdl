@@ -15,6 +15,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     load_file,
     no_return,
+    requires_package,
     run_as_prep7,
 )
 
@@ -171,12 +172,17 @@ def test_load_file_local(mapdl, tmpdir, file_):
     Hence we cannot really test the files are being uploaded.
     So the assert in the '/' directory are commented.
     """
+    old_state = mapdl._local
     mapdl._local = True
 
     if file_ == "dumdum.dummy":
         file_path = str(tmpdir.mkdir("tmpdir").join(file_))
     else:
         file_path = file_
+
+    # remove the file in the rare case it's been left over from a failed run
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
     # When the file does not exist
     with pytest.raises(FileNotFoundError):
@@ -216,7 +222,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
             assert "not that empty" in fid.read()
 
     # File is in the MAPDL working directory
-    os.remove(file_path)  # removing local.
+    os.remove(file_path)  # removing local file
 
     assert not os.path.exists(file_path)
 
@@ -225,7 +231,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
         load_file(mapdl, file_path)
 
-    mapdl._local = False
+    mapdl._local = old_state
     if mapdl.directory != "/":
         os.remove(os.path.join(mapdl.directory, file_))
 
@@ -273,3 +279,36 @@ def test_plain_report_no_options():
     assert "Core packages" in rep_str
     assert "Optional packages" not in rep_str
     assert "Additional packages" not in rep_str
+
+
+def test_requires_package_decorator():
+    class myClass:
+        @requires_package("numpy")
+        def myfun(self):
+            return True
+
+        @property
+        @requires_package("numpy")
+        def myfun2(self):
+            return True
+
+        @property
+        @requires_package("nuuumpy")
+        def myotherfun(self):
+            return False
+
+        @property
+        @requires_package("nuuumpy", softerror=True)
+        def myotherfun2(self):
+            return False
+
+    myclass = myClass()
+
+    assert myclass.myfun()
+    assert myclass.myfun2
+
+    with pytest.raises(ModuleNotFoundError):
+        assert myclass.myotherfun
+
+    with pytest.warns(UserWarning):
+        assert myclass.myotherfun2 is None

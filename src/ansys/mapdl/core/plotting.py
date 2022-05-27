@@ -107,19 +107,19 @@ if _HAS_PYVISTA:
 
     HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
 
-BC_plot_settings = {
-    "TEMP": {"color": "orange", "glyph": TEMP},
-    "HEAT": {"color": "red", "glyph": HEAT},
-    "UX": {"color": "red", "glyph": UX},
-    "UY": {"color": "green", "glyph": UY},
-    "UZ": {"color": "blue", "glyph": UZ},
-    "VOLT": {"color": "yellow", "glyph": VOLT},
-    "FX": {"color": "red", "glyph": FX},
-    "FY": {"color": "green", "glyph": FY},
-    "FZ": {"color": "blue", "glyph": FZ},
-    "AMPS": {"color": "grey", "glyph": VOLT},
-    "CHRGS": {"color": "grey", "glyph": VOLT},
-}
+    BC_plot_settings = {
+        "TEMP": {"color": "orange", "glyph": TEMP},
+        "HEAT": {"color": "red", "glyph": HEAT},
+        "UX": {"color": "red", "glyph": UX},
+        "UY": {"color": "green", "glyph": UY},
+        "UZ": {"color": "blue", "glyph": UZ},
+        "VOLT": {"color": "yellow", "glyph": VOLT},
+        "FX": {"color": "red", "glyph": FX},
+        "FY": {"color": "green", "glyph": FY},
+        "FZ": {"color": "blue", "glyph": FZ},
+        "AMPS": {"color": "grey", "glyph": VOLT},
+        "CHRGS": {"color": "grey", "glyph": VOLT},
+    }
 
 # Using * to force all the following arguments to be keyword only.
 def _general_plotter(
@@ -150,9 +150,9 @@ def _general_plotter(
     render_lines_as_tubes=False,
     scalar_bar_args={},
     smooth_shading=None,
-    split_sharp_edges=None,
     feature_angle=30.0,
     show_scalar_bar=None,
+    split_sharp_edges=None,
     # labels kwargs
     font_size=None,
     font_family=None,
@@ -269,7 +269,7 @@ def _general_plotter(
         Smoothly render curved surfaces when plotting.  Not helpful
         for all meshes.
 
-    split_sharp_edge : bool, optional
+    split_sharp_edges : bool, optional
         Split sharp edges exceeding 30 degrees when plotting with
         smooth shading.  Control the angle with the optional
         keyword argument ``feature_angle``.
@@ -430,6 +430,7 @@ def general_plotter(
     scalar_bar_args={},
     smooth_shading=None,
     show_scalar_bar=None,
+    split_sharp_edges=None,
     # labels kwargs
     font_size=None,
     font_family=None,
@@ -712,6 +713,7 @@ def general_plotter(
         scalar_bar_args=scalar_bar_args,
         smooth_shading=smooth_shading,
         show_scalar_bar=show_scalar_bar,
+        split_sharp_edges=split_sharp_edges,
         # labels kwargs
         font_size=font_size,
         font_family=font_family,
@@ -877,6 +879,7 @@ def bc_nodes_plotter(
         # If absolute is True then the tolerance can be an absolute distance.
         # If None, points merging as a preprocessing step is disabled.
         glyphs = pcloud.glyph(
+            orient=False,
             scale="scale",
             # tolerance=0.05,
             geom=BC_plot_settings[each_label]["glyph"],
@@ -965,7 +968,6 @@ def _bc_labels_checker(bc_labels):
 
 def _bc_target_checker(bc_target):
     """Make sure we have allowed parameters and data types for ``bc_labels``"""
-
     if not isinstance(bc_target, (str, list, tuple)):
         raise ValueError(
             "The parameter 'bc_target' can be only a string, a list of strings or tuple of strings."
