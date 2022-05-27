@@ -1,7 +1,10 @@
 PyMAPDL
 =======
-|pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black|
+|pyansys| |pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black|
 
+.. |pyansys| image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC
+   :target: https://docs.pyansys.com/
+   :alt: PyAnsys
 
 .. |pypi| image:: https://img.shields.io/pypi/v/ansys-mapdl-core.svg?logo=python&logoColor=white
    :target: https://pypi.org/project/ansys-mapdl-core/
@@ -104,12 +107,12 @@ Alternatively, install the latest from `PyMAPDL GitHub
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
-For a local "development" version, install with:
+For a local "development" version, install with (requires pip >= 22.0):
 
 .. code::
 
    git clone https://github.com/pyansys/pymapdl.git
-   cd mapdl
+   cd pymapdl
    pip install -e .
 
 
@@ -142,8 +145,7 @@ Dependencies
 ------------
 You will need a local licenced copy of Ansys to run MAPDL prior and
 including 2021R1.  If you have the latest version of 2021R1 you do
-not need MAPDL installed locally and can connect to a remote instance
-via gRPC.
+not need MAPDL installed locally and can connect to a remote instance.
 
 
 Getting Started

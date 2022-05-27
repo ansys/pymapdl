@@ -2,7 +2,6 @@
 import weakref
 
 import numpy as np
-from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
@@ -467,7 +466,7 @@ class PostProcessing:
 
     def plot_element_values(
         self, item, comp, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ):
         """Plot element values.
 
         Displays the solution results as discontinuous element contours.
@@ -553,7 +552,7 @@ class PostProcessing:
         if show_node_numbering:
             labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
 
-        return general_plotter(meshes, [], labels, **kwargs)
+        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
 
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
@@ -596,7 +595,7 @@ class PostProcessing:
                 {"points": surf.cell_centers().points, "labels": surf["ansys_elem_num"]}
             ]
 
-        return general_plotter(meshes, [], labels, **kwargs)
+        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
 
     @property
     @supress_logging
@@ -1052,7 +1051,7 @@ class PostProcessing:
 
     def plot_element_displacement(
         self, component="NORM", option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ):
         """Plot element displacement.
 
         Parameters
@@ -1172,7 +1171,7 @@ class PostProcessing:
 
     def plot_element_stress(
         self, component, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ):
         """Plot element component or principal stress.
 
         One value per element.  Either minimum, maximum, or average of
@@ -1277,7 +1276,7 @@ class PostProcessing:
 
     def plot_element_temperature(
         self, option="AVG", show_elem_numbering=False, **kwargs
-    ) -> CameraPosition:
+    ):
         """Plot element temperature.
 
         One value per element.  Either minimum, maximum, or average of

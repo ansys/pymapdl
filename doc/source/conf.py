@@ -8,6 +8,7 @@ from pyansys_sphinx_theme import pyansys_logo_black
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
 # Manage errors
@@ -26,6 +27,7 @@ if not os.path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
+pymapdl.BUILDING_GALLERY = True
 
 # suppress annoying matplotlib bug
 warnings.filterwarnings(
@@ -65,12 +67,18 @@ extensions = [
 # Intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/dev", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/devdocs", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "pyvista": ("https://docs.pyvista.org/", None),
+    "grpc": ("https://grpc.github.io/grpc/python/", None),
+    "pypim": ("https://pypim.docs.pyansys.com/", None),
 }
+
+suppress_warnings = ["label.*"]
+# supress_warnings = ["ref.option"]
+
 
 # numpydoc configuration
 numpydoc_use_plots = True
@@ -104,7 +112,6 @@ html_favicon = "favicon.png"
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
 
-
 # static path
 html_static_path = ["_static"]
 
@@ -127,7 +134,13 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    # because we include this in examples/index.rst
+    "examples/gallery_examples/index.rst",
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -140,7 +153,6 @@ todo_include_todos = False
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
 
-
 # -- Sphinx Gallery Options ---------------------------------------------------
 sphinx_gallery_conf = {
     # convert rst to md for ipynb
@@ -148,7 +160,7 @@ sphinx_gallery_conf = {
     # path to your examples scripts
     "examples_dirs": ["../../examples/"],
     # path where to save gallery generated examples
-    "gallery_dirs": ["examples"],
+    "gallery_dirs": ["examples/gallery_examples"],
     # Patter to search for example files
     "filename_pattern": r"\.py",
     # Remove the "Download all examples" button from the top level gallery

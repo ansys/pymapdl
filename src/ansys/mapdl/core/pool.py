@@ -5,8 +5,6 @@ import shutil
 import time
 import warnings
 
-from tqdm import tqdm
-
 from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import (
@@ -14,11 +12,15 @@ from ansys.mapdl.core.launcher import (
     _version_from_path,
     port_in_use,
 )
+from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
+
+if _HAS_TQDM:
+    from tqdm import tqdm
 
 
 def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
-    """Return a list the first ``n_ports`` ports starting from ``starting_port``"""
+    """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
     port = MAPDL_DEFAULT_PORT
     ports = []
@@ -29,8 +31,7 @@ def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
 
     if len(ports) < n_ports:
         raise RuntimeError(
-            "There are not %d available ports between %d and 65536"
-            % (n_ports, starting_port)
+            f"There are not {n_ports} available ports between {starting_port} and 65536"
         )
 
     return ports
@@ -63,7 +64,7 @@ class LocalMapdlPool:
 
     progress_bar : bool, optional
         Show a progress bar when starting the pool.  Defaults to
-        ``True``.  Will not be shown when ``wait=False``
+        ``True``.  Will not be shown when ``wait=False``.
 
     restart_failed : bool, optional
         Restarts any failed instances in the pool.
@@ -71,8 +72,8 @@ class LocalMapdlPool:
     remove_temp_files : bool, optional
         Removes all temporary files on exit.  Default ``True``.
 
-    **kwargs : Additional Keyword Arguments
-        See ``help(ansys.mapdl.launcher.launch_mapdl)`` for a complete
+    **kwargs : dict, optional
+        See :func:`ansys.mapdl.core.launch_mapdl` for a complete
         listing of all additional keyword arguments.
 
     Examples
@@ -80,8 +81,8 @@ class LocalMapdlPool:
     Simply create a pool of 10 instances to run in the temporary
     directory.
 
-    >>> from ansys.mapdl import LocalMapdlPool
-    >>> pool = mapdl.LocalMapdlPool(10)
+    >>> from ansys.mapdl.core import LocalMapdlPool
+    >>> pool = LocalMapdlPool(10)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
@@ -89,19 +90,19 @@ class LocalMapdlPool:
 
     >>> import os
     >>> my_path = os.getcmd()
-    >>> pool = mapdl.LocalMapdlPool(10, nproc=1, run_location=my_path)
+    >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Windows.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/win64/ANSYS212.exe'
-    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Linux.
 
     >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
-    >>> pool = mapdl.LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     """
@@ -155,6 +156,12 @@ class LocalMapdlPool:
 
         pbar = None
         if wait and progress_bar:
+            if not _HAS_TQDM:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To avoid this message you can set 'progress_bar=False'."
+                )
+
             pbar = tqdm(total=n_instances, desc="Creating Pool")
 
         # initialize a list of dummy instances
@@ -197,7 +204,7 @@ class LocalMapdlPool:
         timeout=None,
         wait=True,
     ):
-        """Run a function for each instance of mapdl within the pool
+        """Run a function for each instance of mapdl within the pool.
 
         Parameters
         ----------
@@ -253,7 +260,7 @@ class LocalMapdlPool:
                 completed_indices.append(index)
                 return mapdl.parameters.routine
         >>> inputs = [(examples.vmfiles['vm%d' % i], i) for i in range(1, 10)]
-        >>> output = pool.map(func, inputs, progress_bar=True, wait=True)
+        >>> output = pool.map(func, inputs, progress_bar=False, wait=True)
         ['Begin level',
          'Begin level',
          'Begin level',
@@ -280,6 +287,12 @@ class LocalMapdlPool:
 
         pbar = None
         if progress_bar:
+            if not _HAS_TQDM:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To avoid this message you can set 'progress_bar=False'."
+                )
+
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon

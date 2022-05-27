@@ -1,5 +1,6 @@
 """Module for miscellaneous functions and methods"""
 from functools import wraps
+import importlib
 import inspect
 import os
 import platform
@@ -10,10 +11,12 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from warnings import warn
 import weakref
 
 import numpy as np
 
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
 
 try:
@@ -24,24 +27,25 @@ except ModuleNotFoundError:  # pragma: no cover
     LOG.debug("The module 'scooby' is not installed.")
     _HAS_SCOOBY = False
 
-from ansys.mapdl import core as pymapdl
-
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == "nt":
-        ans_root = "c:/Program Files/ANSYS Inc/"
-        mapdlbin = os.path.join(
-            ans_root, "v%s" % rver, "ansys", "bin", "winx64", "ANSYS%s.exe" % rver
+    if os.name == "nt":  # pragma: no cover
+        program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
+        ans_root = os.getenv(
+            f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
         )
+        mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
     else:
-        ans_root = "/usr/ansys_inc"
-        mapdlbin = os.path.join(
-            ans_root, "v%s" % rver, "ansys", "bin", "ansys%s" % rver
-        )
+        ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
+        mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+
+        # rare case where the versioned binary doesn't exist
+        if not os.path.isfile(mapdlbin):
+            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
 
     return mapdlbin
 
@@ -155,10 +159,9 @@ class Report(base_report_class):
         """
         # Mandatory packages
         core = [
-            "matplotlib",
+            "ansys.mapdl.core",
             "numpy",
             "appdirs",
-            "tqdm",
             "scipy",
             "grpc",  # grpcio
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
@@ -170,7 +173,7 @@ class Report(base_report_class):
             core.extend(["pexpect"])
 
         # Optional packages
-        optional = ["matplotlib", "pyvista", "pyiges"]
+        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
         if sys.version_info[1] < 9:
             optional.append("ansys_corba")
 
@@ -287,7 +290,7 @@ def supress_logging(func):
     return wrapper
 
 
-def run_as_prep7(func):
+def run_as_prep7(func):  # Pragma: no cover
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
@@ -336,12 +339,6 @@ def threaded_daemon(func):
         return thread
 
     return wrapper
-
-
-def chunks(l, n):
-    """Yield successive n-sized chunks from l"""
-    for i in range(0, len(l), n):
-        yield l[i : i + n]
 
 
 def unique_rows(a):
@@ -425,47 +422,83 @@ def no_return(func):
     return wrapper
 
 
-def load_file(mapdl, fname):
+def get_bounding_box(nodes_xyz):
+    min_ = np.min(nodes_xyz, axis=0)
+    max_ = np.max(nodes_xyz, axis=0)
+
+    return max_ - min_
+
+
+def load_file(mapdl, fname, priority_mapdl_file=None):
     """
     Provide a file to the MAPDL instance.
 
-    If in local:
-        Checks if the file exists, if not, it raises a ``FileNotFound`` exception
+    Parameters
+    ----------
+    mapdl
+      Mapdl instance
 
-    If in not-local:
-        Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
-        If the file is local, it will be uploaded.
+    fname : str, path
+      Path to the file.
+
+    priority_mapdl_file : bool
+      In case of the file existing in the MAPDL environment and
+      in the local Python environment, this parameter specifies
+      which one has priority. Defaults to ``True``, meaning the MAPDL file
+      has priority.
+
+    Notes
+    -----
+
+    **When running MAPDL locally:**
+
+    Checks if the file is reachable or is in the MAPDL directory,
+    if not, it raises a ``FileNotFound`` exception.
+
+    If:
+
+    - The file is only the MAPDL directory, this function does nothing
+      since the file is already accessible to the MAPDL instance.
+
+    - If the file exists in both, the Python working directory and the MAPDL
+      directory, this function does nothing, as the file in the MAPDL working
+      directory has priority.
+
+    **When in remote (not-local)**
+
+    Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
+    If the file is local, it will be uploaded.
 
     """
-    if mapdl._local:  # pragma: no cover
-        base_fname = os.path.basename(fname)
-        if not os.path.exists(fname) and base_fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
-                f"nor in the MAPDL working directory ('{mapdl.directory}')."
-            )
 
-        elif os.path.exists(fname) and base_fname in mapdl.list_files():
+    base_fname = os.path.basename(fname)
+    if not os.path.exists(fname) and base_fname not in mapdl.list_files():
+        raise FileNotFoundError(
+            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+            f"nor in the MAPDL working directory ('{mapdl.directory}')."
+        )
+
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
+        if priority_mapdl_file is None:
             warn(
-                f"The file '{base_fname} is present in both, the python working directory ('{os.getcwd()}')"
+                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
                 f"and in the MAPDL working directory ('{mapdl.directory}'). "
-                "Using the one in the MAPDL directory.\n"
-                "If you prefer to use the file in the Python directory, you can use `mapdl.upload` before this command to upload it."
+                "Using the one already in the MAPDL directory.\n"
+                "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
             )
+            priority_mapdl_file = True
 
-        elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+        if not priority_mapdl_file:
             mapdl.upload(fname)
 
-        elif not os.path.exists(fname) and base_fname in mapdl.list_files():
-            pass
+    elif os.path.exists(fname) and base_fname not in mapdl.list_files():
+        mapdl._log.debug("File is in the Python working directory, uploading.")
+        mapdl.upload(fname)
 
-    else:
-        if not os.path.exists(fname) and fname not in mapdl.list_files():
-            raise FileNotFoundError(
-                f"The file {fname} could not be found in the local client or remote working directory."
-            )
-        if os.path.exists(fname):
-            mapdl.upload(fname)
+    elif (
+        not os.path.exists(fname) and base_fname in mapdl.list_files()
+    ):  # pragma: no cover
+        mapdl._log.debug("File is already in the MAPDL working directory")
 
     # Simplifying name for MAPDL reads it.
     return os.path.basename(fname)
@@ -497,7 +530,14 @@ def check_valid_start_instance(start_instance):
     Parameters
     ----------
     start_instance : str
-        Value obtained from the correspondent environment variable.
+        Value obtained from the corresponding environment variable.
+
+    Returns
+    -------
+    bool
+        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
+        ``False`` if otherwise.
+
     """
     if not isinstance(start_instance, (str, bool)):
         raise ValueError("The value 'start_instance' should be an string or a boolean.")
@@ -933,3 +973,182 @@ class Information:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)
+
+
+def write_array(filename, array):
+    """
+    Write an array to a file.
+
+    This function aim to replace
+    ``ansys.mapdl.reader._reader write_array``.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file.
+    array : numpy.ndarray
+        Array.
+    """
+    np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
+
+
+def requires_package(package_name, softerror=False):
+    """
+    Decorator check whether a package is installed or not.
+
+    If it is not, it will return None.
+
+    Parameters
+    ----------
+    package_name : str
+        Name of the package.
+    """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+
+            try:
+                importlib.import_module(package_name)
+                return function(self, *args, **kwargs)
+
+            except ModuleNotFoundError:
+                msg = (
+                    f"To use the method '{function.__name__}', "
+                    f"the package '{package_name}' is required.\n"
+                    f"Please try to install '{package_name}' with:\n"
+                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                )
+
+                if softerror:
+                    warn(msg)
+                    return None
+                else:
+                    raise ModuleNotFoundError(msg)
+
+        return wrapper
+
+    return decorator
+
+
+def _get_args_xsel(*args, **kwargs):
+    type_ = kwargs.pop("type_", args[0]).upper()
+    item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
+    comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()
+    vmin = kwargs.pop("vmin", args[3] if len(args) > 3 else "")
+    vmax = kwargs.pop("vmax", args[4] if len(args) > 4 else "")
+    vinc = kwargs.pop("vinc", args[5] if len(args) > 5 else "")
+    kabs = kwargs.pop("kabs", args[6] if len(args) > 6 else "")
+    return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
+
+
+def allow_pickable_points(entity="node", plot_function="nplot"):
+    """
+    This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
+    and feed them as a list to the NSEL.
+    """
+
+    def decorator(orig_nsel):
+        @wraps(orig_nsel)
+        def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
+
+            if item == "P" and _HAS_PYVISTA:
+                if type_ not in ["S", "R", "A", "U"]:
+                    raise ValueError(
+                        f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
+                    )
+
+                previous_picked_points = set(self._get_selected_(entity))
+
+                if type_ in ["S", "A"]:  # selecting all the entities
+                    orig_nsel(self, "all")
+
+                plotting_function = getattr(self, plot_function)
+                pl = plotting_function(return_plotter=True)
+
+                vmin = self._pick_points(
+                    entity, pl, type_, previous_picked_points, **kwargs
+                )
+
+                if len(vmin) == 0:
+                    # aborted picking
+                    orig_nsel(self, "S", entity, "", previous_picked_points, **kwargs)
+                    return []
+
+                item = entity
+                comp = ""
+
+                # to make return the array of points when using P
+                kwargs["Used_P"] = True
+
+                return orig_nsel(
+                    self, "S", item, comp, vmin, vmax, vinc, kabs, **kwargs
+                )
+
+            else:
+                return orig_nsel(
+                    self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs
+                )
+
+        return wrapper
+
+    return decorator
+
+
+def wrap_point_SEL(entity="node"):
+    def decorator(original_sel_func):
+        """
+        This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
+
+        This allows for example:
+
+        >>> mapdl.nsel("S", "node", "", [1, 2, 3])  # select nodes 1, 2, and 3.
+        """
+
+        @wraps(original_sel_func)
+        def wrapper(self, *args, **kwargs):
+            type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
+                *args, **kwargs
+            )
+
+            if isinstance(vmin, (set, tuple, list, np.ndarray)):
+
+                if len(vmin) == 0 and kwargs.get("Used_P", False):
+                    # edge case where during the picking we have selected nothing.
+                    # In that case, we just silently quit NSEL command. We do **not**
+                    # want to unselect everything (case in scripting where
+                    # ``mapdl.nsel("S","node", "", [])`` unselect everything).
+                    return
+
+                self.run(
+                    f"/com, Selecting {entity}s from an iterable (i.e. set, list, tuple, or array)"
+                )  # To have a clue in the apdl log file
+
+                if vmax or vinc:
+                    raise ValueError(
+                        "If an iterable is used as 'vmin' argument,"
+                        " it is not allowed to use 'vmax' or 'vinc' arguments."
+                    )
+
+                if len(vmin) == 0 and type_ == "S":
+                    # assuming you want to select nothing because you supplied an empty list/tuple/array
+                    return original_sel_func(self, "none")
+
+                self._perform_entity_list_selection(
+                    entity, original_sel_func, type_, item, comp, vmin, kabs
+                )
+
+                if kwargs.pop("Used_P", False):
+                    # we want to return the
+                    return vmin
+                else:
+                    return
+            else:
+                return original_sel_func(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator

@@ -37,7 +37,7 @@ from ansys.mapdl.core.launcher import (
     launch_mapdl,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Report, _check_has_ansys
+from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
 from ansys.mapdl.core.pool import LocalMapdlPool
 from ansys.mapdl.core.theme import MapdlTheme
 
@@ -60,3 +60,6 @@ except:  # pragma: no cover
 # override default launcher when on pyansys.com
 if "ANSJUPHUB_VER" in os.environ:
     from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+
+
+BUILDING_GALLERY = False

@@ -1,5 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
+import atexit
 from glob import glob
 import os
 import platform
@@ -10,6 +11,7 @@ import tempfile
 import time
 import warnings
 
+import ansys.platform.instancemanagement as pypim
 import appdirs
 
 from ansys.mapdl import core as pymapdl
@@ -17,7 +19,7 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
@@ -36,7 +38,7 @@ if not os.path.isdir(SETTINGS_DIR):
     except:
         warnings.warn(
             "Unable to create settings directory.\n"
-            + "Will be unable to cache MAPDL executable location"
+            "Will be unable to cache MAPDL executable location"
         )
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
@@ -55,9 +57,24 @@ launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
 Be aware of possible errors or unexpected behavior with this configuration.
 """
 
+GALLERY_INSTANCE = [None]
+
+
+def _cleanup_gallery_instance():  # pragma: no cover
+    """This cleans up any left over instances of MAPDL from building the gallery."""
+    if GALLERY_INSTANCE[0] is not None:
+        mapdl = MapdlGrpc(
+            ip=GALLERY_INSTANCE[0]["ip"],
+            port=GALLERY_INSTANCE[0]["port"],
+        )
+        mapdl.exit(force=True)
+
+
+atexit.register(_cleanup_gallery_instance)
+
 
 def _is_ubuntu():
-    """Determine if running as Ubuntu
+    """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
@@ -503,6 +520,46 @@ def launch_grpc(
     return port, run_location
 
 
+def launch_remote_mapdl(
+    version=None,
+    cleanup_on_exit=True,
+) -> _MapdlCore:
+    """Start MAPDL remotely using the product instance management API.
+
+    When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
+    This can be verified with :func:`pypim.is_configured <ansys.platform.instancemanagement.is_configured>`.
+
+    Parameters
+    ----------
+    version : str, optional
+        The MAPDL version to run, in the 3 digits format, such as "212".
+
+        If unspecified, the version will be chosen by the server.
+
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
+
+        If unspecified, it will be cleaned up.
+
+    Returns
+    -------
+    ansys.mapdl.core.mapdl._MapdlCore
+        An instance of Mapdl.
+    """
+    pim = pypim.connect()
+    instance = pim.create_instance(product_name="mapdl", product_version=version)
+    instance.wait_for_ready()
+    channel = instance.build_grpc_channel(
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ]
+    )
+    return MapdlGrpc(
+        channel=channel, cleanup_on_exit=cleanup_on_exit, remote_instance=instance
+    )
+
+
 def get_start_instance(start_instance_default=True):
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
@@ -691,37 +748,126 @@ def change_default_ansys_path(exe_loc):
         raise FileNotFoundError("File %s is invalid or does not exist" % exe_loc)
 
 
-def save_ansys_path(exe_loc=""):
-    """Find ANSYS path or query user"""
-    # if exe_loc.strip():
-    #     print('Cached ANSYS executable %s not found' % exe_loc)
-    # else:
-    #     print('Cached ANSYS executable not found')
-    exe_loc, ver = find_ansys()
-    if os.path.isfile(exe_loc):
-        # automatically cache this path
-        # print('Found ANSYS at %s' % exe_loc)
-        # resp = input('Use this location?  [Y/n]')
-        # if resp != 'n':
+def save_ansys_path(exe_loc=None):  # pragma: no cover
+    """Find ANSYS path or query user.
+
+    If no ``exe_loc`` argument is supplied, this function attempt
+    to obtain the MAPDL executable from (and in order):
+    - The default ansys paths (i.e. 'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX')
+    - The configuration file
+    - User input
+
+    If ``exe_loc`` is supplied, this function does some checks.
+    If successful, it will write that ``exe_loc`` into the config file.
+
+    Parameters
+    ----------
+    exe_loc : str, optional
+        Path of the MAPDL executable ('ansysXXX'), by default None
+
+    Returns
+    -------
+    str
+        Path of the MAPDL executable.
+
+    Notes
+    -----
+    The configuration file location (``config.txt``) can be found in
+    ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
+
+    .. code:: python
+
+        >>> import appdirs
+        >>> import os
+        >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
+        C:/Users/gayuso/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
+
+    You can change the default ``exe_loc`` either by modifying the mentioned
+    ``config.txt`` file or by executing this function:
+
+    .. code:: python
+
+       >>> from ansys.mapdl.core.launcher import save_ansys_path
+       >>> save_ansys_path('/new/path/to/executable')
+
+    """
+    if exe_loc is None:
+        exe_loc, _ = find_ansys()
+
+    if is_valid_executable_path(exe_loc):  # pragma: not cover
+        if not is_common_executable_path(exe_loc):
+            warn_uncommon_executable_path(exe_loc)
+
         change_default_ansys_path(exe_loc)
         return exe_loc
 
     if exe_loc is not None:
-        if os.path.isfile(exe_loc):
-            return exe_loc
+        if is_valid_executable_path(exe_loc):
+            return exe_loc  # pragma: no cover
 
     # otherwise, query user for the location
-    with open(CONFIG_FILE, "w") as f:
-        print("Cached ANSYS executable not found")
-        exe_loc = input("Enter location of ANSYS executable: ")
-        if not os.path.isfile(exe_loc):
-            raise FileNotFoundError(
-                "ANSYS executable not found at this location:\n%s" % exe_loc
+    print("Cached ANSYS executable not found")
+    print(
+        "You are about to enter manually the path of the ANSYS MAPDL executable (ansysXXX, where XXX is the version"
+        "This file is very likely to contained in path ending in 'vXXX/ansys/bin/ansysXXX', but it is not required.\n"
+        "\nIf you experience problems with the input path you can overwrite the configuration file by typing:\n"
+        ">>> from ansys.mapdl.core.launcher import save_ansys_path\n"
+        ">>> save_ansys_path('/new/path/to/executable/')\n"
+    )
+    need_path = True
+    while need_path:  # pragma: no cover
+        exe_loc = input("Enter the location of an ANSYS executable (ansysXXX):")
+
+        if is_valid_executable_path(exe_loc):
+            if not is_common_executable_path(exe_loc):
+                warn_uncommon_executable_path(exe_loc)
+            with open(CONFIG_FILE, "w") as f:
+                f.write(exe_loc)
+            need_path = False
+        else:
+            print(
+                "The supplied path is either: not a valid file path, or does not match 'ansysXXX' name."
             )
 
-        f.write(exe_loc)
-
     return exe_loc
+
+
+def is_valid_executable_path(exe_loc):  # pragma: no cover
+    return (
+        os.path.isfile(exe_loc)
+        and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
+        is not None
+    )
+
+
+def is_common_executable_path(exe_loc):  # pragma: no cover
+    path = os.path.normpath(exe_loc)
+    path = path.split(os.sep)
+    if (
+        re.search("v(\d\d\d)", exe_loc) is not None
+        and re.search("ansys(\d\d\d)", exe_loc) is not None
+    ):
+        equal_version = (
+            re.search("v(\d\d\d)", exe_loc)[1] == re.search("ansys(\d\d\d)", exe_loc)[1]
+        )
+    else:
+        equal_version = False
+
+    return (
+        is_valid_executable_path(exe_loc)
+        and re.search("v\d\d\d", exe_loc)
+        and "ansys" in path
+        and "bin" in path
+        and equal_version
+    )
+
+
+def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
+    warnings.warn(
+        f"The supplied path ('{exe_loc}') does not match the usual ansys executable path style"
+        "('directory/vXXX/ansys/bin/ansysXXX'). "
+        "You might have problems at later use."
+    )
 
 
 def check_lock_file(path, jobname, override):
@@ -818,7 +964,7 @@ def launch_mapdl(
     print_com=False,
     **kwargs,
 ) -> _MapdlCore:
-    """Start MAPDL locally in gRPC mode.
+    """Start MAPDL locally.
 
     Parameters
     ----------
@@ -903,10 +1049,12 @@ def launch_mapdl(
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
     ip : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``'127.0.0.1'``. You can also override the default behavior of
-        this keyword argument with the environment variable
-        "PYMAPDL_IP=FALSE".
+        Used only when ``start_instance`` is ``False``. If provided,
+        it will force ``start_instance`` to be ``False``.
+        You can also provide a hostname as an alternative to an IP address.
+        Defaults to ``'127.0.0.1'``. You can also override the
+        default behavior of this keyword argument with the
+        environment variable "PYMAPDL_IP=FALSE".
 
     clear_on_connect : bool, optional
         Used only when ``start_instance`` is ``False``.  Defaults to
@@ -1049,6 +1197,11 @@ def launch_mapdl(
         Enables shared-memory parallelism.
         See the Parallel Processing Guide for more information.
 
+    If the environment is configured to use `PyPIM <https://pypim.docs.pyansys.com>`_
+    and ``start_instance`` is ``True``, then starting the instance will be delegated to PyPIM.
+    In this event, most of the options will be ignored and the server side configuration will
+    be used.
+
     Examples
     --------
     Launch MAPDL using the best protocol.
@@ -1057,7 +1210,7 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
+    the Ansys binary.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
@@ -1067,7 +1220,7 @@ def launch_mapdl(
     mode.
 
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
-                             port=50001)
+    ...                      port=50001)
 
     Force the usage of the CORBA protocol.
 
@@ -1076,7 +1229,7 @@ def launch_mapdl(
     Run MAPDL using the console mode (available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              mode='console')
+    ...                       mode='console')
 
     """
     # These parameters are partially used for unit testing
@@ -1084,19 +1237,72 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-        check_valid_ip(ip)
+    else:  # pragma: no cover
+        start_instance = False
+        ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
+
+    check_valid_ip(ip)  # double check
 
     if port is None:
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
         check_valid_port(port)
 
+    # Start MAPDL with PyPIM if the environment is configured for it
+    # and the user did not pass a directive on how to launch it.
+    if pypim.is_configured() and exec_file is None:
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+
     # connect to an existing instance if enabled
     if start_instance is None:
-        start_instance = os.environ.get("PYMAPDL_START_INSTANCE", True)
-        start_instance = check_valid_start_instance(start_instance)
+        start_instance = check_valid_start_instance(
+            os.environ.get("PYMAPDL_START_INSTANCE", True)
+        )
+
+        # special handling when building the gallery outside of CI. This
+        # creates an instance of mapdl the first time if PYMAPDL start instance
+        # is False.
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            # launch an instance of pymapdl if it does not already exist and
+            # we're allowed to start instances
+            if start_instance and GALLERY_INSTANCE[0] is None:
+                mapdl = launch_mapdl(
+                    start_instance=True,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
+                return mapdl
+
+                # otherwise, connect to the existing gallery instance if available
+            elif GALLERY_INSTANCE[0] is not None:
+                mapdl = MapdlGrpc(
+                    ip=GALLERY_INSTANCE[0]["ip"],
+                    port=GALLERY_INSTANCE[0]["port"],
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                if clear_on_connect:
+                    mapdl.clear()
+                return mapdl
+
+                # finally, if running on CI/CD, connect to the default instance
+            else:
+                mapdl = MapdlGrpc(
+                    ip=ip,
+                    port=port,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+            if clear_on_connect:
+                mapdl.clear()
+            return mapdl
 
     if not start_instance:
-        mapdl = MapdlGrpc(
+        return MapdlGrpc(
             ip=ip,
             port=port,
             cleanup_on_exit=False,

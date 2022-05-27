@@ -25,7 +25,7 @@ Geometric Properties(Coordinates):
  - :math:`K_{\mathrm{3(x,y,z)}} = 100, 0, 30`
  - :math:`K_{\mathrm{4(x,y,z)}} = -200,25,80`
 
-.. image:: ../../_static/vm8_setup.png
+.. image:: ../../../_static/vm8_setup.png
    :width: 300
    :alt: VM8 Problem Sketch
 

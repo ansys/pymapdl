@@ -2,7 +2,15 @@ import os
 import tempfile
 import weakref
 
-from ansys.mapdl.reader._reader import write_array
+try:
+    from ansys.mapdl.reader._reader import write_array
+
+    _HAS_READER = True
+except ModuleNotFoundError:  # pragma: no cover
+    from ansys.mapdl.core.misc import write_array
+
+    _HAS_READER = False
+
 import numpy as np
 
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -34,7 +42,12 @@ UNITS_MAP = {
 
 
 class Parameters:
-    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
+    """Collection of MAPDL parameters.
+
+    Notes
+    -----
+
+    See :ref:`ref_parameters` for additional notes.
 
     Notes
     -----
@@ -367,11 +380,6 @@ class Parameters:
             raise TypeError("Parameter name must be a string")
         key = key.upper()
 
-        # We are going to directly query the desired parameter.
-        # It is more efficient (less parsing) and
-        # you can obtain leading and trailing underscore parameters, which
-        # they don't appear in a normal ``*STATUS``
-
         with self.full_parameters_output:
             parameters = self._parm
 
@@ -397,6 +405,12 @@ class Parameters:
             self._set_parameter_array(key, value)
         else:
             self._set_parameter(key, value)
+
+    def __contains__(self, key):
+        return key in self._parm.keys()
+
+    def __iter__(self):
+        yield from self._parm.keys()
 
     @supress_logging
     def _set_parameter(self, name, value):
@@ -644,6 +658,10 @@ def interp_star_status(status):
     """
     parameters = {}
     st = status.find("NAME                              VALUE")
+
+    if st == -1:
+        return {}
+
     for line in status[st + 80 :].splitlines():
         items = line.split()
         if not items:

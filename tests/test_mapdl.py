@@ -13,10 +13,6 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
-
 skip_in_cloud = pytest.mark.skipif(
     not get_start_instance(),
     reason="""
@@ -25,6 +21,9 @@ directory creation.
 """,
 )
 
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_plotting(), reason="Requires active X Server"
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -135,14 +134,6 @@ def warns_in_cdread_error_log(mapdl):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
-
-
-@pytest.fixture(scope="function")
-def make_block(mapdl, cleared):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.25)
-    mapdl.vmesh("ALL")
 
 
 @pytest.mark.skip_grpc
@@ -838,8 +829,9 @@ def test_load_array_types(mapdl, array):
     assert np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
 
 
-@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(3,))])
+@pytest.mark.parametrize("array", [[1, 3, 10], np.random.randint(1, 20, size=(5,))])
 def test_load_array_failure_types(mapdl, array):
+    array[0] = array[0] + 1  # This is to avoid having all elements equal #1061
     mapdl.load_array("myarr", array)
     array = np.array(array)
     assert not np.allclose(mapdl.parameters["myarr"], array, rtol=1e-7)
@@ -1148,6 +1140,13 @@ def test_inquire(mapdl):
     assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
 
 
+def test_ksel(mapdl, cleared):
+    mapdl.k(1, 0, 0, 0)
+    mapdl.prep7()
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+
+
 def test_get_file_path(mapdl, tmpdir):
     fname = "dummy.txt"
     fobject = tmpdir.join(fname)
@@ -1160,35 +1159,32 @@ def test_get_file_path(mapdl, tmpdir):
     "option2,option3,option4",
     [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
 )
-def test_tbft(mapdl, option2, option3, option4):
-    try:
-        fname = "expdata.dat"
-        fpath = os.path.join(os.getcwd(), fname)
+def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
-        with open(fpath, "w") as fid:
-            fid.write(
-                """0.819139E-01 0.82788577E+00
-            0.166709E+00 0.15437247E+01
-            0.253960E+00 0.21686152E+01
-            0.343267E+00 0.27201819E+01
-            0.434257E+00 0.32129833E+0"""
-            )
+    fname = "expdata.dat"
+    dirpath = tmpdir.mkdir("tmpdir")
+    fpath = dirpath.join(fname)
 
-        if option4 == "DIR":
-            option4 = os.getcwd()
+    with open(fpath, "w") as fid:
+        fid.write(
+            """0.819139E-01 0.82788577E+00
+        0.166709E+00 0.15437247E+01
+        0.253960E+00 0.21686152E+01
+        0.343267E+00 0.27201819E+01
+        0.434257E+00 0.32129833E+0"""
+        )
 
-        mapdl.prep7(mute=True)
-        mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
-        mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
-        mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, mute=True)
+    if option4 == "DIR":
+        option4 = dirpath
+    else:
+        option2 = os.path.join(dirpath, option2)
 
-        assert fname in mapdl.list_files()
+    mapdl.prep7(mute=True)
+    mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
+    mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
+    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "", mute=True)
 
-    finally:
-        try:
-            os.remove(fname)
-        except OSError:
-            pass
+    assert fname in mapdl.list_files()
 
 
 def test_tbft_not_found(mapdl):
@@ -1376,3 +1372,9 @@ def test_plot_empty_mesh(mapdl, cleared):
 
     with pytest.warns(UserWarning):
         mapdl.eplot(vtk=True)
+
+
+def test_equal_in_comments_and_title(mapdl):
+    mapdl.com("=====")
+    mapdl.title("This is = ")
+    mapdl.title("This is '=' ")

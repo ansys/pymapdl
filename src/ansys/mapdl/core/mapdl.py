@@ -13,7 +13,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -25,19 +24,26 @@ from ansys.mapdl.core.commands import (
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
+    StringWithLiteralRepr,
     inject_docs,
 )
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
+    allow_pickable_points,
     last_created,
     load_file,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
+    wrap_point_SEL,
 )
-from ansys.mapdl.core.plotting import general_plotter
+
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting import general_plotter
+
 from ansys.mapdl.core.post import PostProcessing
 
 _PERMITTED_ERRORS = [
@@ -135,7 +141,7 @@ class _MapdlCore(Commands):
     def __init__(
         self,
         loglevel="DEBUG",
-        use_vtk=True,
+        use_vtk=None,
         log_apdl=None,
         log_file=False,
         local=True,
@@ -153,7 +159,10 @@ class _MapdlCore(Commands):
         self._response = None
 
         if _HAS_PYVISTA:
-            self._use_vtk = use_vtk
+            if use_vtk is not None:  # pragma: no cover
+                self._use_vtk = use_vtk
+            else:
+                self._use_vtk = True
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
@@ -459,15 +468,15 @@ class _MapdlCore(Commands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the ``*GET`` command or ``GET`` command.
+        """Collection of MAPDL parameters.
 
-        Returns
-        -------
-        :class:`ansys.mapdl.core.parameters.Parameters`
+        Notes
+        -----
+        See :ref:`ref_special_named_param` for additional notes regarding parameter naming in MAPDL.
 
         Examples
         --------
-        Simply list all parameters except for MAPDL MATH parameters
+        Simply list all parameters except for MAPDL MATH parameters.
 
         >>> mapdl.parameters
         ARR                              : ARRAY DIM (3, 1, 1)
@@ -487,16 +496,6 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['ARR']
         array([1., 2., 3.])
 
-        Get the current routine
-
-        >>> mapdl.parameters.routine
-        'PREP7'
-
-        >>> mapdl.parameters.units
-        'SI'
-
-        >>> mapdl.parameters.csys
-        0
         """
         return self._parameters
 
@@ -580,6 +579,7 @@ class _MapdlCore(Commands):
         return self._info
 
     @property
+    @requires_package("pyvista", softerror=True)
     def geometry(self):
         """Geometry information.
 
@@ -629,6 +629,7 @@ class _MapdlCore(Commands):
         return Geometry(self)
 
     @property
+    @requires_package("pyvista", softerror=True)
     def mesh(self):
         """Mesh information.
 
@@ -675,6 +676,7 @@ class _MapdlCore(Commands):
         return self._mesh
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
     def _mesh(self):
         """Write entire archive to ASCII and read it in as an
@@ -946,24 +948,91 @@ class _MapdlCore(Commands):
             Defaults to current ``use_vtk`` setting as set on the
             initialization of MAPDL.
 
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
+
         Examples
         --------
-        Plot using VTK while showing labels and changing the background
+        Plot using VTK while showing labels and changing the background.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(nnum=True, vtk=True, background='w', color='k',
-                        show_bounds=True)
+        >>> mapdl.nplot(
+        ...     nnum=True,
+        ...     vtk=True,
+        ...     background='w',
+        ...     color='k',
+        ...     show_bounds=True
+        ... )
 
-        Plot without using VTK
+        Plot without using VTK.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
+
+        Plot nodal boundary conditions.
+
+        >>> mapdl.nplot(
+        ...     plot_bc=True,
+        ...     plot_labels=True,
+        ...     bc_labels="mechanical",
+        ... )
 
         """
         if vtk is None:
@@ -985,7 +1054,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             labels = []
             if nnum:
@@ -996,7 +1065,7 @@ class _MapdlCore(Commands):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            return general_plotter([], points, labels, **kwargs)
+            return general_plotter([], points, labels, mapdl=self, **kwargs)
 
         # otherwise, use the built-in nplot
         if isinstance(nnum, bool):
@@ -1022,6 +1091,60 @@ class _MapdlCore(Commands):
 
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
 
         **kwargs
             See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
@@ -1058,7 +1181,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
@@ -1073,6 +1196,7 @@ class _MapdlCore(Commands):
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
                 [],
                 labels,
+                mapdl=self,
                 **kwargs,
             )
 
@@ -1583,7 +1707,8 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self) -> Result:
+    @requires_package("ansys.mapdl.reader", softerror=True)
+    def result(self) -> "ansys.mapdl.reader.rst.Result":
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -2437,7 +2562,7 @@ class _MapdlCore(Commands):
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
-            if "'" not in param_name or '"' not in param_name:
+            if "/COM" not in cmd_ and "/TITLE" not in cmd_:
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
@@ -2449,7 +2574,7 @@ class _MapdlCore(Commands):
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
-            self._response = text.strip()
+            self._response = StringWithLiteralRepr(text.strip())
             self._log.info(self._response)
         else:
             self._response = None
@@ -3000,6 +3125,56 @@ class _MapdlCore(Commands):
 
         return returns_
 
+    def get_nodal_loads(self, label=None):
+        """
+        Get the applied nodal loads.
+
+        Uses ``FLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal loads are filtered to correspondent given label.
+            Example of labels are ``FX``, ``FZ``, ``CHRGS`` or ``CSGZ``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        loads = self.flist().to_list()
+        if label:
+            loads = np.array(
+                [[each[0], each[2], each[3]] for each in loads if each[1] == label]
+            )
+        return loads
+
+    def get_nodal_constrains(self, label=None):
+        """
+        Get the applied nodal constrains:
+
+        Uses ``DLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal constrains are filtered to correspondent given label.
+            Example of labels are ``UX``, ``UZ``, ``VOLT`` or ``TEMP``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        constrains = self.dlist().to_list()
+        if label:
+            constrains = np.array(
+                [[each[0], each[2], each[3]] for each in constrains if each[1] == label]
+            )
+        return constrains
+
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
         param_name = param_name.strip()
@@ -3113,3 +3288,207 @@ class _MapdlCore(Commands):
         return super().dim(
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
+
+    def _get_selected_(self, entity):  # pragma: no cover
+        """Get list of selected entities."""
+        allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
+        if entity.upper() not in allowed_values:
+            raise ValueError(
+                f"The value '{entity}' is not allowed."
+                f"Only {allowed_values} are allowed"
+            )
+
+        entity = entity.upper()
+
+        if entity == "NODE":
+            return self.mesh.nnum.copy()
+        elif entity == "ELEM":
+            return self.mesh.enum.copy()
+        elif entity == "KP":
+            return self.geometry.knum
+        elif entity == "LINE":
+            return self.geometry.lnum
+        elif entity == "AREA":
+            return self.geometry.anum
+        elif entity == "VOLU":
+            return self.geometry.vnum
+
+    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
+        """Show a plot and get the selected points."""
+        _debug = kwargs.pop("_debug", False)  # for testing purposes
+        previous_picked_points = set(previous_picked_points)
+
+        q = self.queries
+        picked_points = []
+        picked_ids = []
+
+        selector = getattr(q, entity.lower())
+
+        # adding selection inversor
+        pl._inver_mouse_click_selection = False
+
+        selection_text = {
+            "S": "New selection",
+            "A": "Adding to selection",
+            "R": "Reselecting from the selection",
+            "U": "Unselecting",
+        }
+
+        def gen_text(picked_points=None):
+            """Generate helpful text for the render window."""
+            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            type_text = selection_text[type_]
+            text = (
+                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Press the key 'u' to change between mouse selecting and unselecting.\n"
+                f"Type: {type_} - {type_text}\n"
+                f"Mouse selection: {sel_}\n"
+            )
+
+            picked_points_str = ""
+            if picked_points:
+                # reverse picked point order, exclude the brackets, and limit
+                # to 40 characters
+                picked_points_str = str(picked_points[::-1])[1:-1]
+                if len(picked_points_str) > 40:
+                    picked_points_str = picked_points_str[:40]
+                    idx = picked_points_str.rfind(",") + 2
+                    picked_points_str = picked_points_str[:idx] + "..."
+
+            return text + f"Current {entity} selection: {picked_points_str}"
+
+        def callback_(mesh, id_):
+            point = mesh.points[id_]
+            node_id = selector(
+                point[0], point[1], point[2]
+            )  # This will only return one node. Fine for now.
+
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL points mapping
+                if node_id not in picked_points:
+                    picked_points.append(node_id)
+                # Updating pyvista points mapping
+                if id_ not in picked_ids:
+                    picked_ids.append(id_)
+            else:
+                # Updating MAPDL points mapping
+                if node_id in picked_points:
+                    picked_points.remove(node_id)
+                # Updating pyvista points mapping
+                if id_ in picked_ids:
+                    picked_ids.remove(id_)
+
+            # remov etitle and update text
+            pl.remove_actor("title")
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+            if picked_ids:
+                pl.add_mesh(
+                    mesh.points[picked_ids],
+                    color="red",
+                    point_size=10,
+                    name="_picked_points",
+                    pickable=False,
+                    reset_camera=False,
+                )
+            else:
+                pl.remove_actor("_picked_points")
+
+        pl.enable_point_picking(
+            callback=callback_,
+            use_mesh=True,
+            show_message=gen_text(),
+            show_point=True,
+            left_clicking=True,
+            font_size=10,
+            tolerance=kwargs.get("tolerance", 0.025),
+        )
+
+        def callback_u():
+            # inverting bool
+            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+
+        pl.add_key_event("u", callback_u)
+
+        if not _debug:  # pragma: no cover
+            pl.show()
+        else:
+            _debug(pl)
+
+        picked_points = set(
+            picked_points
+        )  # removing duplicates (although there should be none)
+
+        if type_ == "S":
+            pass
+        elif type_ == "R":
+            picked_points = previous_picked_points.intersection(picked_points)
+        elif type_ == "A":
+            picked_points = previous_picked_points.union(picked_points)
+        elif type_ == "U":
+            picked_points = previous_picked_points.difference(picked_points)
+
+        return list(picked_points)
+
+    def _perform_entity_list_selection(
+        self, entity, selection_function, type_, item, comp, vmin, kabs
+    ):
+        """Select entities using CM, and the supplied selection function."""
+        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
+
+        # Getting new selection
+        for id_, each_ in enumerate(vmin):
+            selection_function(
+                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
+            )
+
+        self.cm(f"__temp_{entity}s_1__", f"{entity}")
+
+        self.cmsel("S", f"__temp_{entity}s__")
+        self.cmsel(type_, f"__temp_{entity}s_1__")
+
+        # Cleaning
+        self.cmdele(f"__temp_{entity}s__")
+        self.cmdele(f"__temp_{entity}s_1__")
+
+    @wraps(Commands.nsel)
+    def nsel(self, *args, **kwargs):
+        """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().nsel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points()
+        @wrap_point_SEL(entity="node")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.ksel)
+    def ksel(self, *args, **kwargs):
+        """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().ksel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points(entity="kp", plot_function="kplot")
+        @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)

@@ -17,7 +17,6 @@ import weakref
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
-from tqdm import tqdm
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -58,10 +57,20 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
 )
 from ansys.mapdl.core.post import PostProcessing
+
+# Checking if tqdm is installed.
+# If it is, the default value for progress_bar is true.
+try:
+    from tqdm import tqdm
+
+    _HAS_TQDM = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_TQDM = False
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -87,6 +96,12 @@ def get_file_chunks(filename, progress_bar=False):
     """Serializes a file into chunks"""
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
+                "To avoid this message you can set 'progress_bar=False'."
+            )
+
         n_bytes = os.path.getsize(filename)
 
         base_name = os.path.basename(filename)
@@ -117,7 +132,7 @@ def get_file_chunks(filename, progress_bar=False):
 
 
 def save_chunks_to_file(
-    chunks, filename, progress_bar=True, file_size=None, target_name=""
+    chunks, filename, progress_bar=False, file_size=None, target_name=""
 ):
     """Saves chunks to a local file
 
@@ -126,9 +141,14 @@ def save_chunks_to_file(
     file_size : int
         File size saved in bytes.  ``0`` means no file was written.
     """
-
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
+                "To avoid this message you can set 'progress_bar=False'."
+            )
+
         pbar = tqdm(
             total=file_size,
             desc="Downloading %s" % target_name,
@@ -202,6 +222,15 @@ class MapdlGrpc(_MapdlCore):
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
 
+    channel : grpc.Channel, optional
+        gRPC channel to use for the connection. Can be used as an
+        alternative to the ``ip`` and ``port`` parameters.
+
+    remote_instance : ansys.platform.instancemanagement.Instance
+        The corresponding remote instance when MAPDL is launched through
+        PyPIM. This instance will be deleted when calling
+        :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -250,10 +279,12 @@ class MapdlGrpc(_MapdlCore):
         remove_temp_files=False,
         print_com=False,
         channel=None,
+        remote_instance=None,
         **kwargs,
     ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
+        self._remote_instance = remote_instance
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -476,10 +507,15 @@ class MapdlGrpc(_MapdlCore):
             self._timer.start()
 
         # initialize mesh, post processing, and file explorer interfaces
-        from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        try:
+            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+
+            self._mesh_rep = MeshGrpc(self)
+        except ModuleNotFoundError:  # pragma: no cover
+            self._mesh_rep = None
+
         from ansys.mapdl.core.xpl import ansXpl
 
-        self._mesh_rep = MeshGrpc(self)
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
@@ -631,10 +667,14 @@ class MapdlGrpc(_MapdlCore):
 
     def _reset_cache(self):
         """Reset cached items"""
-        self._mesh_rep._reset_cache()
-        self._geometry._reset_cache()
+        if self._mesh_rep is not None:
+            self._mesh_rep._reset_cache()
+
+        if self.geometry is not None:
+            self._geometry._reset_cache()
 
     @property
+    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -773,6 +813,12 @@ class MapdlGrpc(_MapdlCore):
             if not get_start_instance():
                 self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
                 return
+            # or building the gallery
+            from ansys.mapdl import core as pymapdl
+
+            if pymapdl.BUILDING_GALLERY:
+                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                return
 
         if self._exited:
             return
@@ -789,6 +835,10 @@ class MapdlGrpc(_MapdlCore):
         self._kill()  # sets self._exited = True
         self._close_process()
         self._remove_lock_file()
+
+        if self._remote_instance:
+            # No cover: The CI is working with a single MAPDL instance
+            self._remote_instance.delete()  # pragma: no cover
 
         if self._remove_tmp and self._local:
             self._log.debug("Removing local temporary files")
@@ -955,7 +1005,7 @@ class MapdlGrpc(_MapdlCore):
 
         """
         # always redirect system output to a temporary file
-        tmp_file = "__tmp_sys_out__"
+        tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
@@ -1042,7 +1092,6 @@ class MapdlGrpc(_MapdlCore):
                 targets = rth_files
             else:
                 remote_files_str = "\n".join("\t%s" % item for item in remote_files)
-                print("\t".join("\n%s" % item for item in ["a", "b", "c"]))
                 raise FileNotFoundError(
                     "Unable to locate any result file from the "
                     "following remote result files:\n\n" + remote_files_str
@@ -1168,18 +1217,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            return super().tbft(
-                oper,
-                id_,
-                option1,
-                option2,
-                option3,
-                option4,
-                option5,
-                option6,
-                option7,
-                **kwargs,
-            )
+        return super().tbft(
+            oper,
+            id_,
+            option1,
+            option2,
+            option3,
+            option4,
+            option5,
+            option6,
+            option7,
+            **kwargs,
+        )
 
     @protect_grpc
     def input(
@@ -1277,8 +1326,9 @@ class MapdlGrpc(_MapdlCore):
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells mainan to read the input
         # file.
-        tmp_name = "_input_tmp_.inp"
-        tmp_out = "_input_tmp_.out"
+        id_ = random_string()
+        tmp_name = f"_input_tmp_{id_}_.inp"
+        tmp_out = f"_input_tmp_{id_}_.out"
 
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
@@ -1347,6 +1397,12 @@ class MapdlGrpc(_MapdlCore):
         fpath = os.path.dirname(fname)
         fname = os.path.basename(fname)
         fext = fname.split(".")[-1]
+
+        # if there is no dirname, we are assuming the file is
+        # in the python working directory.
+        if not fpath:
+            fpath = os.getcwd()
+
         ffullpath = os.path.join(fpath, fname)
 
         if os.path.exists(ffullpath) and self._local:
@@ -1470,7 +1526,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):  # pragma: no cover
+    def download_project(self, extensions=None, target_dir=None, progress_bar=False):
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1482,6 +1538,11 @@ class MapdlGrpc(_MapdlCore):
         target_dir : Str, optional
             Path where the downloaded files will be located, by default None.
 
+        progress_bar : bool, optional
+            Display a progress bar using
+            ``tqdm`` when ``True``.  Helpful for showing download
+            progress. Default to ``False``.
+
         Returns
         -------
         List[Str]
@@ -1489,13 +1550,19 @@ class MapdlGrpc(_MapdlCore):
         """
         if not extensions:
             files = self.list_files()
-            list_of_files = self.download(files, target_dir=target_dir)
+            list_of_files = self.download(
+                files, target_dir=target_dir, progress_bar=progress_bar
+            )
 
         else:
             list_of_files = []
             for each_extension in extensions:
                 list_of_files.extend(
-                    self.download(files=f"*.{each_extension}", target_dir=target_dir)
+                    self.download(
+                        files=f"*.{each_extension}",
+                        target_dir=target_dir,
+                        progress_bar=progress_bar,
+                    )
                 )
 
         return list_of_files
@@ -1505,10 +1572,12 @@ class MapdlGrpc(_MapdlCore):
         files,
         target_dir=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        progress_bar=None,
         recursive=False,
     ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
+
+        .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
         Parameters
         ----------
@@ -1533,27 +1602,19 @@ class MapdlGrpc(_MapdlCore):
         recursive : bool
             Use recursion when using glob pattern.
 
-        .. warning::
-            This feature is only available for MAPDL 2021R1 or newer.
+        Notes
+        -----
+        There are some considerations to keep in mind when using this command:
 
-        .. note::
-            * The glob pattern search does not search recursively in remote instances.
-            * In a remote instance, it is not possible to list or download files in different
-              locations than the MAPDL working directory.
-            * If you are in local and provide a file path, downloading files
-              from a different folder is allowed.
-              However it is not a recommended approach.
+        * The glob pattern search does not search recursively in remote instances.
+        * In a remote instance, it is not possible to list or download files in different
+          locations than the MAPDL working directory.
+        * If you are in local and provide a file path, downloading files
+          from a different folder is allowed.
+          However it is not a recommended approach.
 
         Examples
         --------
-        Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
-
-        >>> mapdl.download('all')
-
-        Download every single file in the MAPDL workind directory:
-
-        >>> mapdl.download('everything')
-
         Download a single file:
 
         >>> mapdl.download('file.out')
@@ -1562,7 +1623,21 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
+        Download every single file in the MAPDL workind directory:
+
+        >>> mapdl.download('*.*')
+
+        Alternatively, you can download all the files using
+        :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
+
+        >>> mapdl.download_project()
+
         """
+        if chunk_size > 4 * 1024 * 1024:  # 4MB
+            raise ValueError(
+                f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
+                "Please decrease ``chunk_size`` value."
+            )
 
         self_files = self.list_files()  # to avoid calling it too much
 
@@ -1654,7 +1729,7 @@ class MapdlGrpc(_MapdlCore):
         target_name,
         out_file_name=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        progress_bar=None,
     ):
         """Download a file from the gRPC instance
 
@@ -1682,6 +1757,10 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file.rst', 'my_result.rst')
         """
+
+        if not progress_bar and _HAS_TQDM:
+            progress_bar = True
+
         if out_file_name is None:
             out_file_name = target_name
 
@@ -1720,6 +1799,7 @@ class MapdlGrpc(_MapdlCore):
         """
         if not os.path.isfile(file_name):
             raise FileNotFoundError(f"Unable to locate filename {file_name}")
+        self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         response = self._stub.UploadFile(chunks_generator)
@@ -2127,6 +2207,7 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(error_file).decode("latin-1")
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
         """Binary interface to the result file using ``pyansys.Result``
 
