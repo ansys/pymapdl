@@ -879,6 +879,7 @@ def bc_nodes_plotter(
         # If absolute is True then the tolerance can be an absolute distance.
         # If None, points merging as a preprocessing step is disabled.
         glyphs = pcloud.glyph(
+            orient=False,
             scale="scale",
             # tolerance=0.05,
             geom=BC_plot_settings[each_label]["glyph"],
