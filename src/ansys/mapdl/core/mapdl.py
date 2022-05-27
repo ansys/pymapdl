@@ -1202,7 +1202,7 @@ class _MapdlCore(Commands):
 
         # otherwise, use MAPDL plotter
         self._enable_interactive_plotting()
-        return self.run("EPLOT")
+        return self.run("EPLOT", **kwargs)
 
     def vplot(
         self,

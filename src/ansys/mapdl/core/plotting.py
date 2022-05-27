@@ -879,6 +879,7 @@ def bc_nodes_plotter(
         # If absolute is True then the tolerance can be an absolute distance.
         # If None, points merging as a preprocessing step is disabled.
         glyphs = pcloud.glyph(
+            orient=False,
             scale="scale",
             # tolerance=0.05,
             geom=BC_plot_settings[each_label]["glyph"],
@@ -967,7 +968,6 @@ def _bc_labels_checker(bc_labels):
 
 def _bc_target_checker(bc_target):
     """Make sure we have allowed parameters and data types for ``bc_labels``"""
-
     if not isinstance(bc_target, (str, list, tuple)):
         raise ValueError(
             "The parameter 'bc_target' can be only a string, a list of strings or tuple of strings."
