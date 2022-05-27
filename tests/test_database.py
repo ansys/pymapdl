@@ -6,8 +6,6 @@ import pytest
 from ansys.mapdl.core.database import DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
 
-pytestmark = pytest.mark.skip
-
 
 @pytest.fixture(scope="session")
 def db(mapdl):
@@ -215,3 +213,12 @@ def test__channel_str(db):
     assert ":" in db._channel_str
     assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
     assert re.search("\d{4,6}", db._channel_str)
+
+
+def test_off_db(mapdl, db):
+    """Testing that when there is no active database"""
+    if db.active:
+        db.stop()
+    assert not mapdl.db.active
+    assert mapdl.db.nodes is None
+    assert mapdl.db.elems is None
