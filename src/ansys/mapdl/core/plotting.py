@@ -318,10 +318,6 @@ def _general_plotter(
     # Lazy import
     import pyvista as pv
 
-    if savefig:
-        off_screen = True
-        notebook = False
-
     if theme is None:
         theme = MapdlTheme()
 
