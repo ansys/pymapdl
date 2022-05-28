@@ -1731,7 +1731,7 @@ class MapdlGrpc(_MapdlCore):
         chunk_size=DEFAULT_CHUNKSIZE,
         progress_bar=None,
     ):
-        """Download a file from the gRPC instance
+        """Download a file from the gRPC instance.
 
         Parameters
         ----------
@@ -1758,7 +1758,7 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download('file.rst', 'my_result.rst')
         """
 
-        if not progress_bar and _HAS_TQDM:
+        if progress_bar and _HAS_TQDM:
             progress_bar = True
 
         if out_file_name is None:
@@ -1772,7 +1772,7 @@ class MapdlGrpc(_MapdlCore):
         )
 
         if not file_size:
-            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist')
+            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist.')
 
     @protect_grpc
     def upload(self, file_name, progress_bar=True):
