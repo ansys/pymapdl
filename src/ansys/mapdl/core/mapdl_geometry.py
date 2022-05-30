@@ -2,7 +2,11 @@
 import re
 
 import numpy as np
-import pyvista as pv
+
+from ansys.mapdl.core import _HAS_PYVISTA
+
+if _HAS_PYVISTA:
+    import pyvista as pv
 
 from ansys.mapdl.core.misc import run_as_prep7, supress_logging
 

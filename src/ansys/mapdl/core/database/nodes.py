@@ -12,7 +12,7 @@ import numpy as np
 from numpy.lib import recfunctions
 
 from ..common_grpc import DEFAULT_CHUNKSIZE
-from .database import DBDef, MapdlDb
+from .database import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
 class DbNodes:
@@ -95,6 +95,7 @@ class DbNodes:
         """Return the weakly referenced instance of db."""
         return self._db_weakref()
 
+    @check_mapdl_db_is_alive
     def first(self, inod=0):
         """
         Return the number of the first node.
@@ -127,6 +128,7 @@ class DbNodes:
         self._itnod = inod
         return self.next()
 
+    @check_mapdl_db_is_alive
     def next(self):
         """
         Return the number of the next selected node.
@@ -180,6 +182,7 @@ class DbNodes:
     #     self._itnod = result.inum
     #     return self._itnod
 
+    @check_mapdl_db_is_alive
     def info(self, inod, ikey):
         """
         Return information about a node.
@@ -266,6 +269,7 @@ class DbNodes:
         result = self._db._stub.NodInqr(request)
         return result.ret
 
+    @check_mapdl_db_is_alive
     def num(self, selected=False) -> int:
         """
         Return the number of nodes, either selected or all.
@@ -295,6 +299,7 @@ class DbNodes:
         return self.info(0, DBDef.DB_NUMDEFINED.value)
 
     @property
+    @check_mapdl_db_is_alive
     def max_num(self) -> int:
         """
         Return the maximum node number.
@@ -310,6 +315,7 @@ class DbNodes:
         """
         return self.info(0, DBDef.DB_MAXDEFINED.value)
 
+    @check_mapdl_db_is_alive
     def coord(self, inod):
         """
         Return the location of a node.
@@ -345,6 +351,7 @@ class DbNodes:
         node = self._db._stub.getNod(request)
         return node.kerr, tuple(node.v)
 
+    @check_mapdl_db_is_alive
     def all_asarray(self):
         """
         Return all node indices, coordinates, and angles as arrays.
@@ -442,6 +449,7 @@ class DbNodes:
 
         return ind, coord, angle
 
+    @check_mapdl_db_is_alive
     def push(self, inod, x, y, z, xang=None, yang=None, zang=None):
         """
         Push a single node into the DB.

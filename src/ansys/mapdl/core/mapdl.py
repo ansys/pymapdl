@@ -13,7 +13,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -32,13 +31,19 @@ from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
+    allow_pickable_points,
     last_created,
     load_file,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
+    wrap_point_SEL,
 )
-from ansys.mapdl.core.plotting import general_plotter
+
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting import general_plotter
+
 from ansys.mapdl.core.post import PostProcessing
 
 _PERMITTED_ERRORS = [
@@ -136,7 +141,7 @@ class _MapdlCore(Commands):
     def __init__(
         self,
         loglevel="DEBUG",
-        use_vtk=True,
+        use_vtk=None,
         log_apdl=None,
         log_file=False,
         local=True,
@@ -154,7 +159,10 @@ class _MapdlCore(Commands):
         self._response = None
 
         if _HAS_PYVISTA:
-            self._use_vtk = use_vtk
+            if use_vtk is not None:  # pragma: no cover
+                self._use_vtk = use_vtk
+            else:
+                self._use_vtk = True
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
@@ -571,6 +579,7 @@ class _MapdlCore(Commands):
         return self._info
 
     @property
+    @requires_package("pyvista", softerror=True)
     def geometry(self):
         """Geometry information.
 
@@ -620,6 +629,7 @@ class _MapdlCore(Commands):
         return Geometry(self)
 
     @property
+    @requires_package("pyvista", softerror=True)
     def mesh(self):
         """Mesh information.
 
@@ -666,6 +676,7 @@ class _MapdlCore(Commands):
         return self._mesh
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
     def _mesh(self):
         """Write entire archive to ASCII and read it in as an
@@ -1191,7 +1202,7 @@ class _MapdlCore(Commands):
 
         # otherwise, use MAPDL plotter
         self._enable_interactive_plotting()
-        return self.run("EPLOT")
+        return self.run("EPLOT", **kwargs)
 
     def vplot(
         self,
@@ -1696,7 +1707,8 @@ class _MapdlCore(Commands):
         return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
-    def result(self) -> Result:
+    @requires_package("ansys.mapdl.reader", softerror=True)
+    def result(self) -> "ansys.mapdl.reader.rst.Result":
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -3276,3 +3288,207 @@ class _MapdlCore(Commands):
         return super().dim(
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
+
+    def _get_selected_(self, entity):  # pragma: no cover
+        """Get list of selected entities."""
+        allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
+        if entity.upper() not in allowed_values:
+            raise ValueError(
+                f"The value '{entity}' is not allowed."
+                f"Only {allowed_values} are allowed"
+            )
+
+        entity = entity.upper()
+
+        if entity == "NODE":
+            return self.mesh.nnum.copy()
+        elif entity == "ELEM":
+            return self.mesh.enum.copy()
+        elif entity == "KP":
+            return self.geometry.knum
+        elif entity == "LINE":
+            return self.geometry.lnum
+        elif entity == "AREA":
+            return self.geometry.anum
+        elif entity == "VOLU":
+            return self.geometry.vnum
+
+    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
+        """Show a plot and get the selected points."""
+        _debug = kwargs.pop("_debug", False)  # for testing purposes
+        previous_picked_points = set(previous_picked_points)
+
+        q = self.queries
+        picked_points = []
+        picked_ids = []
+
+        selector = getattr(q, entity.lower())
+
+        # adding selection inversor
+        pl._inver_mouse_click_selection = False
+
+        selection_text = {
+            "S": "New selection",
+            "A": "Adding to selection",
+            "R": "Reselecting from the selection",
+            "U": "Unselecting",
+        }
+
+        def gen_text(picked_points=None):
+            """Generate helpful text for the render window."""
+            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            type_text = selection_text[type_]
+            text = (
+                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Press the key 'u' to change between mouse selecting and unselecting.\n"
+                f"Type: {type_} - {type_text}\n"
+                f"Mouse selection: {sel_}\n"
+            )
+
+            picked_points_str = ""
+            if picked_points:
+                # reverse picked point order, exclude the brackets, and limit
+                # to 40 characters
+                picked_points_str = str(picked_points[::-1])[1:-1]
+                if len(picked_points_str) > 40:
+                    picked_points_str = picked_points_str[:40]
+                    idx = picked_points_str.rfind(",") + 2
+                    picked_points_str = picked_points_str[:idx] + "..."
+
+            return text + f"Current {entity} selection: {picked_points_str}"
+
+        def callback_(mesh, id_):
+            point = mesh.points[id_]
+            node_id = selector(
+                point[0], point[1], point[2]
+            )  # This will only return one node. Fine for now.
+
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL points mapping
+                if node_id not in picked_points:
+                    picked_points.append(node_id)
+                # Updating pyvista points mapping
+                if id_ not in picked_ids:
+                    picked_ids.append(id_)
+            else:
+                # Updating MAPDL points mapping
+                if node_id in picked_points:
+                    picked_points.remove(node_id)
+                # Updating pyvista points mapping
+                if id_ in picked_ids:
+                    picked_ids.remove(id_)
+
+            # remov etitle and update text
+            pl.remove_actor("title")
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+            if picked_ids:
+                pl.add_mesh(
+                    mesh.points[picked_ids],
+                    color="red",
+                    point_size=10,
+                    name="_picked_points",
+                    pickable=False,
+                    reset_camera=False,
+                )
+            else:
+                pl.remove_actor("_picked_points")
+
+        pl.enable_point_picking(
+            callback=callback_,
+            use_mesh=True,
+            show_message=gen_text(),
+            show_point=True,
+            left_clicking=True,
+            font_size=10,
+            tolerance=kwargs.get("tolerance", 0.025),
+        )
+
+        def callback_u():
+            # inverting bool
+            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+
+        pl.add_key_event("u", callback_u)
+
+        if not _debug:  # pragma: no cover
+            pl.show()
+        else:
+            _debug(pl)
+
+        picked_points = set(
+            picked_points
+        )  # removing duplicates (although there should be none)
+
+        if type_ == "S":
+            pass
+        elif type_ == "R":
+            picked_points = previous_picked_points.intersection(picked_points)
+        elif type_ == "A":
+            picked_points = previous_picked_points.union(picked_points)
+        elif type_ == "U":
+            picked_points = previous_picked_points.difference(picked_points)
+
+        return list(picked_points)
+
+    def _perform_entity_list_selection(
+        self, entity, selection_function, type_, item, comp, vmin, kabs
+    ):
+        """Select entities using CM, and the supplied selection function."""
+        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
+
+        # Getting new selection
+        for id_, each_ in enumerate(vmin):
+            selection_function(
+                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
+            )
+
+        self.cm(f"__temp_{entity}s_1__", f"{entity}")
+
+        self.cmsel("S", f"__temp_{entity}s__")
+        self.cmsel(type_, f"__temp_{entity}s_1__")
+
+        # Cleaning
+        self.cmdele(f"__temp_{entity}s__")
+        self.cmdele(f"__temp_{entity}s_1__")
+
+    @wraps(Commands.nsel)
+    def nsel(self, *args, **kwargs):
+        """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().nsel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points()
+        @wrap_point_SEL(entity="node")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.ksel)
+    def ksel(self, *args, **kwargs):
+        """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().ksel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points(entity="kp", plot_function="kplot")
+        @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
