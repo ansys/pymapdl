@@ -133,7 +133,7 @@ class MaterialManager:
         if material.material_id is None:
             ids = self._get_current_ids()
             material.material_id = min(set(range(max(ids) + 2)) - set(ids))
-        for property_code, value in material.properties.items():
+        for property_code, value in material.get_properties().items():
             if isinstance(property_code, PropertyCode):
                 assert isinstance(
                     value, (float, np.ndarray)

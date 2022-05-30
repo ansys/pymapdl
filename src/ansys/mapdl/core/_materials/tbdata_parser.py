@@ -1,10 +1,10 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from ._nonlinear_models import _BaseModel
 from .common import TB_MATERIAL_HEADER_REGEX
 
 
-class TableDataParser:
+class _TableDataParser:
     """
     Parses responses from the `TBLIST` command into individual non-linear models.
     """
@@ -54,6 +54,15 @@ class TableDataParser:
                 tb_chunks[material_code].append(line)
 
         return tb_chunks
+
+    def get_models_by_id(
+        self, data: str, material_id: int
+    ) -> Optional[Dict[str, _BaseModel]]:
+        material_model_data = self._get_tb_sections_with_id(data, material_id)
+        model_data_map = {}
+        for model_code, model_data in material_model_data.items():
+            model_data_map[model_code] = self.deserialize_model(model_code, model_data)
+        return model_data_map
 
     def deserialize_model(self, model_code: str, model_data: List[str]) -> _BaseModel:
         """
