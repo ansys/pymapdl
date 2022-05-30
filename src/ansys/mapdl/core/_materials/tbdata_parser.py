@@ -5,6 +5,10 @@ from .common import TB_MATERIAL_HEADER_REGEX
 
 
 class TableDataParser:
+    """
+    Parses responses from the `TBLIST` command into individual non-linear models.
+    """
+
     models: Dict[str, _BaseModel]
 
     def __init__(self, models: Dict[str, _BaseModel]):

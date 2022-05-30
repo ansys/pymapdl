@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -19,7 +19,14 @@ if TYPE_CHECKING:
 
 
 class ElasticityMode(Enum):
+    """
+    Determines which kind of coefficients are used in the model
+    """
+
+    # Indicates that the model coefficients have units of stiffness, for example GPa
     STIFFNESS = 1
+
+    # Indicates that the model coefficients have units of compliance (inverse stiffness), for example GPa^-1
     COMPLIANCE = 2
 
 
@@ -59,8 +66,8 @@ class AnisotropicElasticity(_BaseModel):
         self,
         n_dimensions: int,
         coefficient_type: ElasticityMode,
-        coefficients: np.ndarray = None,
-        temperature: Union[float, np.ndarray] = None,
+        coefficients: Optional[np.ndarray] = None,
+        temperature: Union[None, float, np.ndarray] = None,
     ) -> None:
         """
         Create an Anisotropic Elasticity model.
@@ -83,8 +90,10 @@ class AnisotropicElasticity(_BaseModel):
             raise ValueError("n_dimensions must be int 2 or 3")
         self._n_dimensions = n_dimensions
         self._coefficient_type = coefficient_type
+        self._temperature = np.array([], dtype=float)
+        self._coefficients = np.array([], dtype=float)
         if temperature is not None:
-            if isinstance(temperature, float):
+            if isinstance(temperature, (float, int)):
                 self._temperature = np.array([temperature], dtype=float)
             else:
                 self._temperature = temperature
@@ -114,7 +123,7 @@ class AnisotropicElasticity(_BaseModel):
 
     @temperature.setter
     def temperature(self, value: Union[float, np.ndarray]):
-        if isinstance(value, float):
+        if isinstance(value, (float, int)):
             self._temperature = np.array([value], dtype=float)
         else:
             self._temperature = value
