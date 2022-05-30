@@ -34,7 +34,12 @@ UNITS_MAP = {
 
 
 class Parameters:
-    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
+    """Collection of MAPDL parameters.
+
+    Notes
+    -----
+
+    See :ref:`ref_parameters` for additional notes.
 
     Examples
     --------
@@ -64,6 +69,9 @@ class Parameters:
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
+        self.show_leading_underscore_parameters = False
+        self.show_trailing_underscore_parameters = False
+        self.full_parameters_output = self._full_parameter_output(self)
 
     @property
     def _mapdl(self):
@@ -262,7 +270,17 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        return interp_star_status(self._mapdl.starstatus())
+        params = interp_star_status(self._mapdl.starstatus())
+
+        if self.show_leading_underscore_parameters:
+            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            params.update(_params)
+
+        if self.show_trailing_underscore_parameters:
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params.update(params_)
+
+        return params
 
     def __repr__(self):
         """Return the current parameters in a pretty format"""
@@ -288,7 +306,9 @@ class Parameters:
             raise TypeError("Parameter name must be a string")
         key = key.upper()
 
-        parameters = self._parm
+        with self.full_parameters_output:
+            parameters = self._parm
+
         if key not in parameters:
             raise IndexError("%s not a valid parameter_name" % key)
 
@@ -304,11 +324,19 @@ class Parameters:
 
     def __setitem__(self, key, value):
         """Set a parameter"""
+        self._mapdl._check_parameter_name(key)
+
         # parameters = self._parm  # check parameter exists
         if isinstance(value, (np.ndarray, list)):
             self._set_parameter_array(key, value)
         else:
             self._set_parameter(key, value)
+
+    def __contains__(self, key):
+        return key in self._parm.keys()
+
+    def __iter__(self):
+        yield from self._parm.keys()
 
     @supress_logging
     def _set_parameter(self, name, value):
@@ -510,6 +538,36 @@ class Parameters:
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
 
+    class _full_parameter_output:
+        """Change the show_** options to true to allow full parameter output."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.show_leading_underscore_parameters = None
+            self.show_trailing_underscore_parameters = None
+
+        def __enter__(self):
+            """Storing current state."""
+            self.show_leading_underscore_parameters = (
+                self._parent().show_leading_underscore_parameters
+            )
+            self.show_trailing_underscore_parameters = (
+                self._parent().show_trailing_underscore_parameters
+            )
+
+            # Getting full output.
+            self._parent().show_leading_underscore_parameters = True
+            self._parent().show_trailing_underscore_parameters = True
+
+        def __exit__(self, *args):
+            """Coming back to previous state."""
+            self._parent().show_leading_underscore_parameters = (
+                self.show_leading_underscore_parameters
+            )
+            self._parent().show_trailing_underscore_parameters = (
+                self.show_trailing_underscore_parameters
+            )
+
 
 def interp_star_status(status):
     """Interprets \*STATUS command output from MAPDL
@@ -526,6 +584,10 @@ def interp_star_status(status):
     """
     parameters = {}
     st = status.find("NAME                              VALUE")
+
+    if st == -1:
+        return {}
+
     for line in status[st + 80 :].splitlines():
         items = line.split()
         if not items:

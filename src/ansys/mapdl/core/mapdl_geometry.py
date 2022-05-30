@@ -221,7 +221,8 @@ class Geometry:
     @supress_logging
     @run_as_prep7
     def generate_surface(self, density=4, amin=None, amax=None, ninc=None):
-        """Generate an all-triangular surface of the active surfaces.
+        """
+        Generate an all-triangular surface of the active surfaces.
 
         Parameters
         ----------
@@ -325,18 +326,20 @@ class Geometry:
 
     @property
     def n_volu(self):
-        """Number of volumes currently selected
+        """
+        Number of volumes currently selected.
 
         Examples
         --------
-        >>> mapdl.n_area
+        >>> mapdl.n_volu
         1
         """
         return self._item_count("VOLU")
 
     @property
     def n_area(self):
-        """Number of areas currently selected
+        """
+        Number of areas currently selected.
 
         Examples
         --------
@@ -347,7 +350,8 @@ class Geometry:
 
     @property
     def n_line(self):
-        """Number of lines currently selected
+        """
+        Number of lines currently selected.
 
         Examples
         --------
@@ -358,7 +362,8 @@ class Geometry:
 
     @property
     def n_keypoint(self):
-        """Number of keypoints currently selected
+        """
+        Number of keypoints currently selected.
 
         Examples
         --------
@@ -369,12 +374,13 @@ class Geometry:
 
     @supress_logging
     def _item_count(self, entity):
-        """Return item count for a given entity"""
+        """Return item count for a given entity."""
         return int(self._mapdl.get(entity=entity, item1="COUNT"))
 
     @property
     def knum(self):
-        """Array of keypoint numbers.
+        """
+        Array of keypoint numbers.
 
         Examples
         --------
@@ -382,6 +388,9 @@ class Geometry:
         >>> mapdl.knum
         array([1, 2, 3, 4, 5, 6, 7, 8], dtype=int32)
         """
+        if self._mapdl.geometry.n_keypoint == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("KP", item1="KLIST").astype(np.int32)
 
     @property
@@ -394,6 +403,10 @@ class Geometry:
         >>> mapdl.lnum
         array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12], dtype=int32)
         """
+        # For clean exit when there is no lines.
+        if self._mapdl.geometry.n_line == 0:
+            return np.array([], dtype=np.int32)
+
         # this (weirdly) sometimes fails
         for _ in range(5):
             lnum = self._mapdl.get_array("LINES", item1="LLIST")
@@ -411,6 +424,10 @@ class Geometry:
         >>> mapdl.anum
         array([1, 2, 3, 4, 5, 6], dtype=int32)
         """
+        # Clean exit
+        if self._mapdl.geometry.n_area == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("AREA", item1="ALIST").astype(np.int32)
 
     @property
@@ -423,6 +440,9 @@ class Geometry:
         >>> mapdl.vnum
         array([1], dtype=int32)
         """
+        if self._mapdl.geometry.n_volu == 0:
+            return np.array([], dtype=np.int32)
+
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging

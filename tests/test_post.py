@@ -1047,12 +1047,11 @@ def test_general_plotter_returns(mapdl, static_solve):
         ),
         Plotter,
     )
-    assert isinstance(
+
+    with pytest.raises(ValueError):
         mapdl.post_processing.plot_nodal_displacement(
             "X", smooth_shading=True, return_cpos=True, return_plotter=True
-        ),
-        tuple,
-    )
+        )
 
     # Returns + Save figure.
     assert (
@@ -1084,16 +1083,6 @@ def test_general_plotter_returns(mapdl, static_solve):
             return_plotter=True,
         ),
         Plotter,
-    )
-    assert isinstance(
-        mapdl.post_processing.plot_nodal_displacement(
-            "X",
-            smooth_shading=True,
-            savefig=True,
-            return_cpos=True,
-            return_plotter=True,
-        ),
-        tuple,
     )
 
 

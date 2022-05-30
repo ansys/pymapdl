@@ -18,21 +18,27 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
+    StringWithLiteralRepr,
     inject_docs,
 )
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
+    Information,
+    allow_pickable_points,
     last_created,
+    load_file,
     random_string,
     run_as_prep7,
     supress_logging,
+    wrap_point_SEL,
 )
 from ansys.mapdl.core.plotting import general_plotter
 from ansys.mapdl.core.post import PostProcessing
@@ -148,7 +154,17 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
-        self._use_vtk = use_vtk
+
+        if _HAS_PYVISTA:
+            self._use_vtk = use_vtk
+        else:  # pragma: no cover
+            if use_vtk:
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                )
+            else:
+                self._use_vtk = False
+
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
@@ -159,6 +175,7 @@ class _MapdlCore(Commands):
         self._path = start_parm.get("run_location", None)
         self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
+        self._cached_routine = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -187,6 +204,8 @@ class _MapdlCore(Commands):
 
         self._wrap_listing_functions()
 
+        self._info = Information(self)
+
     @property
     def print_com(self):
         return self._print_com
@@ -206,7 +225,10 @@ class _MapdlCore(Commands):
         # Wrapping LISTING FUNCTIONS.
         def wrap_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -214,9 +236,12 @@ class _MapdlCore(Commands):
 
             return inner_wrapper
 
-        def wrap_BC_listing_function(func):
+        def wrap_bc_listing_function(func):
             # Injecting doc string modification
-            func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(func.__func__.__doc__)
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__)
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
@@ -233,7 +258,7 @@ class _MapdlCore(Commands):
 
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
-                setattr(self, name, wrap_BC_listing_function(func))
+                setattr(self, name, wrap_bc_listing_function(func))
 
     @property
     def _name(self):  # pragma: no cover
@@ -406,7 +431,7 @@ class _MapdlCore(Commands):
         """
         if self._distributed:
             raise RuntimeError(
-                "chained commands are not permitted in distributed ansys."
+                "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
 
@@ -437,15 +462,15 @@ class _MapdlCore(Commands):
 
     @property
     def parameters(self):
-        """Collection of MAPDL parameters obtainable from the ``*GET`` command or ``GET`` command.
+        """Collection of MAPDL parameters.
 
-        Returns
-        -------
-        :class:`ansys.mapdl.core.parameters.Parameters`
+        Notes
+        -----
+        See :ref:`ref_special_named_param` for additional notes regarding parameter naming in MAPDL.
 
         Examples
         --------
-        Simply list all parameters except for MAPDL MATH parameters
+        Simply list all parameters except for MAPDL MATH parameters.
 
         >>> mapdl.parameters
         ARR                              : ARRAY DIM (3, 1, 1)
@@ -465,16 +490,6 @@ class _MapdlCore(Commands):
         >>> mapdl.parameters['ARR']
         array([1., 2., 3.])
 
-        Get the current routine
-
-        >>> mapdl.parameters.routine
-        'PREP7'
-
-        >>> mapdl.parameters.units
-        'SI'
-
-        >>> mapdl.parameters.csys
-        0
         """
         return self._parameters
 
@@ -550,27 +565,12 @@ class _MapdlCore(Commands):
 
     @supress_logging
     def __str__(self):
-        try:
-            if self._exited:
-                return "MAPDL exited"
-            stats = self.slashstatus("PROD")
-        except Exception:  # pragma: no cover
-            return "MAPDL exited"
+        return self.info.__str__()
 
-        st = stats.find("*** Products ***")
-        en = stats.find("*** PrePro")
-        product = "\n".join(stats[st:en].splitlines()[1:]).strip()
-
-        # get product version
-        stats = self.slashstatus("TITLE")
-        st = stats.find("RELEASE")
-        en = stats.find("INITIAL", st)
-        mapdl_version = stats[st:en].split("CUSTOMER")[0].strip()
-
-        info = [f"Product:         {product}"]
-        info.append(f"MAPDL Version:   {mapdl_version}")
-        info.append(f"PyMAPDL Version: {pymapdl.__version__}\n")
-        return "\n".join(info)
+    @property
+    def info(self):
+        """General information"""
+        return self._info
 
     @property
     def geometry(self):
@@ -853,7 +853,7 @@ class _MapdlCore(Commands):
         # cache result file, version, and routine before closing
         resultfile = self._result_file
         version = self.version
-        prior_processor = self.parameters.routine
+        self._cache_routine()
 
         # finish, save and exit the server
         self.finish(mute=True)
@@ -891,9 +891,19 @@ class _MapdlCore(Commands):
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(tmp_database, mute=True)
-        if prior_processor is not None:
-            if "BEGIN" not in prior_processor.upper():
-                self.run(f"/{prior_processor}", mute=True)
+
+    def _cache_routine(self):
+        """Cache the current routine."""
+        self._cached_routine = self.parameters.routine
+
+    def _resume_routine(self):
+        """Resume the cached routine."""
+        if self._cached_routine is not None:
+            if "BEGIN" not in self._cached_routine:
+                self.run(f"/{self._cached_routine}", mute=True)
+            else:
+                self.finish(mute=True)
+            self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
@@ -929,18 +939,77 @@ class _MapdlCore(Commands):
             Defaults to current ``use_vtk`` setting as set on the
             initialization of MAPDL.
 
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
+
         Examples
         --------
-        Plot using VTK while showing labels and changing the background
+        Plot using VTK while showing labels and changing the background.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(nnum=True, vtk=True, background='w', color='k',
-                        show_bounds=True)
+        >>> mapdl.nplot(
+        ...     nnum=True,
+        ...     vtk=True,
+        ...     background='w',
+        ...     color='k',
+        ...     show_bounds=True
+        ... )
 
-        Plot without using VTK
+        Plot without using VTK.
 
         >>> mapdl.prep7()
         >>> mapdl.n(1, 0, 0, 0)
@@ -948,12 +1017,26 @@ class _MapdlCore(Commands):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(vtk=False)
 
-        """
-        # lazy import here to avoid top level import
-        import pyvista as pv
+        Plot nodal boundary conditions.
 
+        >>> mapdl.nplot(
+        ...     plot_bc=True,
+        ...     plot_labels=True,
+        ...     bc_labels="mechanical",
+        ... )
+
+        """
         if vtk is None:
             vtk = self._use_vtk
+
+        if vtk is True:
+            if _HAS_PYVISTA:
+                # lazy import here to avoid top level import
+                import pyvista as pv
+            else:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
@@ -962,7 +1045,7 @@ class _MapdlCore(Commands):
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                return general_plotter([], [], [], **kwargs)
+                return general_plotter([], [], [], mapdl=self, **kwargs)
 
             labels = []
             if nnum:
@@ -973,7 +1056,7 @@ class _MapdlCore(Commands):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            return general_plotter([], points, labels, **kwargs)
+            return general_plotter([], points, labels, mapdl=self, **kwargs)
 
         # otherwise, use the built-in nplot
         if isinstance(nnum, bool):
@@ -981,6 +1064,136 @@ class _MapdlCore(Commands):
 
         self._enable_interactive_plotting()
         return super().nplot(nnum, **kwargs)
+
+    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+        """Plots the currently selected elements.
+
+        APDL Command: EPLOT
+
+        .. note::
+            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            values set with the ``PNUM`` command.
+
+        Parameters
+        ----------
+        vtk : bool, optional
+            Plot the currently selected elements using ``pyvista``.
+            Defaults to current ``use_vtk`` setting.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        plot_bc : bool, optional
+            Activate the plotting of the boundary conditions.
+            Defaults to ``False``.
+
+            .. warning:: This is in alpha state.
+
+        plot_bc_legend : bool, optional
+            Shows the boundary conditions legend.
+            Defaults to ``False``
+
+        plot_bc_labels : bool, optional
+            Shows the boundary conditions label per node.
+            Defaults to ``False``.
+
+        bc_labels : List[str], Tuple(str), optional
+            List or tuple of strings with the boundary conditions
+            to plot, i.e. ``["UX", "UZ"]``.
+            You can obtain the allowed boundary conditions by
+            evaluating ``ansys.mapdl.core.plotting.BCS``.
+            You can use also the following shortcuts:
+
+            * **'mechanical'**
+              To plot the following mechanical boundary conditions: ``'UX'``,
+              ``'UY'``, ``'UZ'``, ``'FX'``, ``'FY'``, and ``'FZ'``.  Rotational
+              or momentum boundary conditions are not allowed.
+
+            * ``'thermal'``
+              To plot the following boundary conditions: 'TEMP' and
+              'HEAT'.
+
+            * ``'electrical'``
+              To plot the following electrical boundary conditions:
+              ``'VOLT'``, ``'CHRGS'``, and ``'AMPS'``.
+
+            Defaults to all the allowed boundary conditions present
+            in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
+            and :func:`ansys.mapdl.core.Mapdl.flist()`.
+
+        bc_target : List[str], Tuple(str), optional
+            Specify the boundary conditions target
+            to plot, i.e. "Nodes", "Elements".
+            You can obtain the allowed boundary conditions target by
+            evaluating ``ansys.mapdl.core.plotting.ALLOWED_TARGETS``.
+            Defaults to only ``"Nodes"``.
+
+        bc_glyph_size : float, optional
+            Specify the size of the glyph used for the boundary
+            conditions plotting.
+            By default is ratio of the bounding box dimensions.
+
+        bc_labels_font_size : float, optional
+            Size of the text on the boundary conditions labels.
+            By default it is 16.
+
+        **kwargs
+            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            keyword arguments related to visualizing using ``vtk``.
+
+        Examples
+        --------
+        >>> mapdl.clear()
+        >>> mapdl.prep7()
+        >>> mapdl.block(0, 1, 0, 1, 0, 1)
+        >>> mapdl.et(1, 186)
+        >>> mapdl.esize(0.1)
+        >>> mapdl.vmesh('ALL')
+        >>> mapdl.vgen(2, 'all')
+        >>> mapdl.eplot(show_edges=True, smooth_shading=True,
+                        show_node_numbering=True)
+
+        Save a screenshot to disk without showing the plot
+
+        >>> mapdl.eplot(background='w', show_edges=True, smooth_shading=True,
+                        window_size=[1920, 1080], savefig='screenshot.png',
+                        off_screen=True)
+
+        """
+        if vtk is None:
+            vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
+
+        if vtk:
+            kwargs.setdefault("title", "MAPDL Element Plot")
+            if not self._mesh.n_elem:
+                warnings.warn("There are no elements to plot.")
+                return general_plotter([], [], [], mapdl=self, **kwargs)
+
+            # TODO: Consider caching the surface
+            esurf = self.mesh._grid.linear_copy().extract_surface().clean()
+            kwargs.setdefault("show_edges", True)
+
+            # if show_node_numbering:
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+
+            return general_plotter(
+                [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
+                [],
+                labels,
+                mapdl=self,
+                **kwargs,
+            )
+
+        # otherwise, use MAPDL plotter
+        self._enable_interactive_plotting()
+        return self.run("EPLOT")
 
     def vplot(
         self,
@@ -1046,9 +1259,20 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Volume Plot")
+            if not self.geometry.n_volu:
+                warnings.warn(
+                    "Either no volumes have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             cm_name = "__tmp_area2__"
             self.cm(cm_name, "AREA", mute=True)
             self.aslv("S", mute=True)  # select areas attached to active volumes
@@ -1161,11 +1385,23 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
+
+            if not self.geometry.n_area:
+                warnings.warn(
+                    "Either no areas have been selected or there is nothing to plot."
+                )
+                return general_plotter([], [], [], **kwargs)
+
             if quality > 10:
                 quality = 10
             if quality < 1:
@@ -1349,13 +1585,18 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
                 warnings.warn(
-                    "Either no lines have been selected or there " "is nothing to plot"
+                    "Either no lines have been selected or there is nothing to plot."
                 )
                 return general_plotter([], [], [], **kwargs)
 
@@ -1427,6 +1668,11 @@ class _MapdlCore(Commands):
         """
         if vtk is None:
             vtk = self._use_vtk
+        elif vtk is True:
+            if not _HAS_PYVISTA:  # pragma: no cover
+                raise ModuleNotFoundError(
+                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                )
 
         if vtk:
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
@@ -1618,9 +1864,9 @@ class _MapdlCore(Commands):
         self._log_filehandler = logging.FileHandler(filepath, mode=mode)
         self._log_filehandler.setFormatter(logging.Formatter(formatstr))
         if isinstance(level, str):
-            level = level.uppder()
+            level = level.upper()
         self._log_filehandler.setLevel(level)
-        self._log.addHandler(self._log_filehandler)
+        self._log.logger.addHandler(self._log_filehandler)
         self._log.info("Added file handler at %s", filepath)
 
     def remove_file_handler(self):
@@ -1877,8 +2123,9 @@ class _MapdlCore(Commands):
             return value
 
     @property
-    def jobname(self):
-        """MAPDL job name.
+    def jobname(self) -> str:
+        """
+        MAPDL job name.
 
         This is requested from the active mapdl instance.
         """
@@ -1889,7 +2136,7 @@ class _MapdlCore(Commands):
         return self._jobname
 
     @jobname.setter
-    def jobname(self, new_jobname):
+    def jobname(self, new_jobname: str):
         """Set the jobname"""
         self.finish(mute=True)
         self.filname(new_jobname, mute=True)
@@ -1907,7 +2154,7 @@ class _MapdlCore(Commands):
         memory_option="",
         mxpand="",
         elcalc=False,
-    ):
+    ) -> str:
         """Run a modal with basic settings analysis
 
         Parameters
@@ -2072,10 +2319,12 @@ class _MapdlCore(Commands):
         self.finish(mute=True)
         return out
 
-    def run_multiline(self, commands):
+    def run_multiline(self, commands) -> str:
         """Run several commands as a single block
 
-        .. warning:: This function is being deprecated. Please use `input_strings` instead.
+        .. deprecated:: 0.61.0
+           This function is being deprecated. Please use `input_strings`
+           instead.
 
         Parameters
         ----------
@@ -2140,8 +2389,10 @@ class _MapdlCore(Commands):
         )
         return self.input_strings(commands=commands)
 
-    def input_strings(self, commands):
-        """Run several commands as a single block.
+    def input_strings(self, commands) -> str:
+        """
+        Run several commands as a single block.
+
         These commands are all in a single string or in list of strings.
 
         Parameters
@@ -2183,7 +2434,6 @@ class _MapdlCore(Commands):
          KEYOPT( 1- 6)=        0      0      0        0      0      0
          KEYOPT( 7-12)=        0      0      0        0      0      0
          KEYOPT(13-18)=        0      0      0        0      0      0
-        output continues...
 
         """
         if isinstance(commands, str):
@@ -2193,10 +2443,12 @@ class _MapdlCore(Commands):
         self._flush_stored()
         return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs):
-        """Run single APDL command.
+    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+        """
+        Run single APDL command.
 
-        For multiple commands, use :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`.
+        For multiple commands, use :func:`Mapdl.input_strings()
+        <ansys.mapdl.core.Mapdl.input_strings>`.
 
         Parameters
         ----------
@@ -2270,11 +2522,10 @@ class _MapdlCore(Commands):
             msg = f"{cmd_} is ignored: {INVAL_COMMANDS_SILENT[cmd_]}."
             self._log.info(msg)
 
-            # This very likely won't be recorded anywhere.
-
+            # This, very likely, won't be recorded anywhere.
             # But just in case, I'm adding info as /com
             command = (
-                f"/com, PyAnsys: {msg}"  # Using '!' makes the output of '_run' empty
+                f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
 
         if command[:3].upper() in INVAL_COMMANDS:
@@ -2301,18 +2552,19 @@ class _MapdlCore(Commands):
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
-            if "'" not in param_name or '"' not in param_name:
+            if "/COM" not in cmd_ and "/TITLE" not in cmd_:
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
-        text = self._run(command, mute=mute, **kwargs)
+        verbose = kwargs.get("verbose", False)
+        text = self._run(command, verbose=verbose, mute=mute)
 
         if mute:
             return
 
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
-            self._response = text.strip()
+            self._response = StringWithLiteralRepr(text.strip())
             self._log.info(self._response)
         else:
             self._response = None
@@ -2353,8 +2605,9 @@ class _MapdlCore(Commands):
         return self._response
 
     @property
-    def ignore_errors(self):
-        """Flag to ignore MAPDL errors.
+    def ignore_errors(self) -> bool:
+        """
+        Flag to ignore MAPDL errors.
 
         Normally, any string containing "*** ERROR ***" from MAPDL
         will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
@@ -2367,7 +2620,8 @@ class _MapdlCore(Commands):
         self._ignore_errors = bool(value)
 
     def load_array(self, name, array):
-        """Load an array from Python to MAPDL.
+        """
+        Load an array from Python to MAPDL.
 
         Uses ``VREAD`` to transfer the array.
         The format of the numbers used in the intermediate file is F24.18.
@@ -2450,7 +2704,7 @@ class _MapdlCore(Commands):
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to MAPDL.
 
-        Uses TREAD to transfer the table.
+        Uses ``TREAD`` to transfer the table.
         It should be noticed that PyMAPDL when query a table, it will return
         the table but not its axis (meaning it will return ``table[1:,1:]``).
 
@@ -2578,8 +2832,9 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     @property
-    def version(self):
-        """MAPDL build version
+    def version(self) -> float:
+        """
+        MAPDL build version.
 
         Examples
         --------
@@ -2590,8 +2845,9 @@ class _MapdlCore(Commands):
 
     @property
     @supress_logging
-    def directory(self):
-        """Current MAPDL directory
+    def directory(self) -> str:
+        """
+        Current MAPDL directory.
 
         Examples
         --------
@@ -2859,10 +3115,62 @@ class _MapdlCore(Commands):
 
         return returns_
 
+    def get_nodal_loads(self, label=None):
+        """
+        Get the applied nodal loads.
+
+        Uses ``FLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal loads are filtered to correspondent given label.
+            Example of labels are ``FX``, ``FZ``, ``CHRGS`` or ``CSGZ``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        loads = self.flist().to_list()
+        if label:
+            loads = np.array(
+                [[each[0], each[2], each[3]] for each in loads if each[1] == label]
+            )
+        return loads
+
+    def get_nodal_constrains(self, label=None):
+        """
+        Get the applied nodal constrains:
+
+        Uses ``DLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal constrains are filtered to correspondent given label.
+            Example of labels are ``UX``, ``UZ``, ``VOLT`` or ``TEMP``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        constrains = self.dlist().to_list()
+        if label:
+            constrains = np.array(
+                [[each[0], each[2], each[3]] for each in constrains if each[1] == label]
+            )
+        return constrains
+
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_]{0,31}$"
+        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
                 f"The parameter name `{param_name}` is an invalid parameter name."
@@ -2870,9 +3178,27 @@ class _MapdlCore(Commands):
                 "It cannot start with a number either."
             )
 
-        # invalid parameter (using ARGXX or ARXX)
+        if "(" in param_name or ")" in param_name:
+            if param_name.count("(") != param_name.count(")"):
+                raise ValueError(
+                    "The parameter name should have all the parenthesis in pairs (closed)."
+                )
+
+            if param_name[-1] != ")":
+                raise ValueError(
+                    "If using parenthesis (indexing), you cannot use any character after the closing parenthesis."
+                )
+
+            # Check recursively the parameter name without parenthesis.
+            # This is the real parameter name, however it must already exists to not raise an error.
+            sub_param_name = re.findall(r"^(.*)\(", param_name)
+            if sub_param_name:
+                self._check_parameter_name(sub_param_name[0])
+                return  # Following checks should not run against the parenthesis
+
+        # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_]{1,31}[a-zA-Z\d]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in undescore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
@@ -2881,6 +3207,7 @@ class _MapdlCore(Commands):
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
+        # invalid parameter (using ARGXX or ARXX)
         match_reserved_arg_parameter_name = r"^(AR|ARG)(\d{1,3})$"
         if re.search(
             match_reserved_arg_parameter_name, param_name
@@ -2890,3 +3217,268 @@ class _MapdlCore(Commands):
                 "Hence its use is not recommended outside them."
                 "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`."
             )
+
+    @wraps(Commands.mpread)
+    def mpread(self, fname="", ext="", lib="", **kwargs):
+        if lib:
+            raise NotImplementedError(
+                "The option 'lib' is not supported by the MAPDL gRPC server."
+            )
+
+        fname_ = fname + "." + ext
+        fname = load_file(self, fname_)
+        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
+        return self.input(fname)
+
+    @wraps(Commands.mpwrite)
+    def mpwrite(
+        self,
+        fname="",
+        ext="",
+        lib="",
+        mat="",
+        download_file=False,
+        progress_bar=True,
+        **kwargs,
+    ):
+        fname_ = fname + "." + ext
+        if not self._local:
+            if os.path.dirname(fname_):
+                raise IOError(
+                    "Only writing files to the MAPDL working directory is allowed. "
+                    f"The supplied path {fname_} is not allowed."
+                )
+
+        output = super().mpwrite(fname, ext, lib, mat, **kwargs)
+        if download_file:
+            self.download(os.path.basename(fname_), progress_bar=progress_bar)
+
+        return output
+
+    @wraps(Commands.dim)
+    def dim(
+        self,
+        par="",
+        type_="",
+        imax="",
+        jmax="",
+        kmax="",
+        var1="",
+        var2="",
+        var3="",
+        csysid="",
+        **kwargs,
+    ):
+        self._check_parameter_name(par)  # parameter name check
+        if "(" in par or ")" in par:
+            raise ValueError(
+                "Parenthesis are not allowed as parameter name in 'mapdl.dim'."
+            )
+
+        return super().dim(
+            par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
+        )
+
+    def _get_selected_(self, entity):  # pragma: no cover
+        """Get list of selected entities."""
+        allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
+        if entity.upper() not in allowed_values:
+            raise ValueError(
+                f"The value '{entity}' is not allowed."
+                f"Only {allowed_values} are allowed"
+            )
+
+        entity = entity.upper()
+
+        if entity == "NODE":
+            return self.mesh.nnum.copy()
+        elif entity == "ELEM":
+            return self.mesh.enum.copy()
+        elif entity == "KP":
+            return self.geometry.knum
+        elif entity == "LINE":
+            return self.geometry.lnum
+        elif entity == "AREA":
+            return self.geometry.anum
+        elif entity == "VOLU":
+            return self.geometry.vnum
+
+    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
+        """Show a plot and get the selected points."""
+        _debug = kwargs.pop("_debug", False)  # for testing purposes
+        previous_picked_points = set(previous_picked_points)
+
+        q = self.queries
+        picked_points = []
+        picked_ids = []
+
+        selector = getattr(q, entity.lower())
+
+        # adding selection inversor
+        pl._inver_mouse_click_selection = False
+
+        selection_text = {
+            "S": "New selection",
+            "A": "Adding to selection",
+            "R": "Reselecting from the selection",
+            "U": "Unselecting",
+        }
+
+        def gen_text(picked_points=None):
+            """Generate helpful text for the render window."""
+            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            type_text = selection_text[type_]
+            text = (
+                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Press the key 'u' to change between mouse selecting and unselecting.\n"
+                f"Type: {type_} - {type_text}\n"
+                f"Mouse selection: {sel_}\n"
+            )
+
+            picked_points_str = ""
+            if picked_points:
+                # reverse picked point order, exclude the brackets, and limit
+                # to 40 characters
+                picked_points_str = str(picked_points[::-1])[1:-1]
+                if len(picked_points_str) > 40:
+                    picked_points_str = picked_points_str[:40]
+                    idx = picked_points_str.rfind(",") + 2
+                    picked_points_str = picked_points_str[:idx] + "..."
+
+            return text + f"Current {entity} selection: {picked_points_str}"
+
+        def callback_(mesh, id_):
+            point = mesh.points[id_]
+            node_id = selector(
+                point[0], point[1], point[2]
+            )  # This will only return one node. Fine for now.
+
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL points mapping
+                if node_id not in picked_points:
+                    picked_points.append(node_id)
+                # Updating pyvista points mapping
+                if id_ not in picked_ids:
+                    picked_ids.append(id_)
+            else:
+                # Updating MAPDL points mapping
+                if node_id in picked_points:
+                    picked_points.remove(node_id)
+                # Updating pyvista points mapping
+                if id_ in picked_ids:
+                    picked_ids.remove(id_)
+
+            # remov etitle and update text
+            pl.remove_actor("title")
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+            if picked_ids:
+                pl.add_mesh(
+                    mesh.points[picked_ids],
+                    color="red",
+                    point_size=10,
+                    name="_picked_points",
+                    pickable=False,
+                    reset_camera=False,
+                )
+            else:
+                pl.remove_actor("_picked_points")
+
+        pl.enable_point_picking(
+            callback=callback_,
+            use_mesh=True,
+            show_message=gen_text(),
+            show_point=True,
+            left_clicking=True,
+            font_size=10,
+            tolerance=kwargs.get("tolerance", 0.025),
+        )
+
+        def callback_u():
+            # inverting bool
+            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl._picking_text = pl.add_text(
+                gen_text(picked_points),
+                font_size=10,
+                name="_point_picking_message",
+            )
+
+        pl.add_key_event("u", callback_u)
+
+        if not _debug:  # pragma: no cover
+            pl.show()
+        else:
+            _debug(pl)
+
+        picked_points = set(
+            picked_points
+        )  # removing duplicates (although there should be none)
+
+        if type_ == "S":
+            pass
+        elif type_ == "R":
+            picked_points = previous_picked_points.intersection(picked_points)
+        elif type_ == "A":
+            picked_points = previous_picked_points.union(picked_points)
+        elif type_ == "U":
+            picked_points = previous_picked_points.difference(picked_points)
+
+        return list(picked_points)
+
+    def _perform_entity_list_selection(
+        self, entity, selection_function, type_, item, comp, vmin, kabs
+    ):
+        """Select entities using CM, and the supplied selection function."""
+        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
+
+        # Getting new selection
+        for id_, each_ in enumerate(vmin):
+            selection_function(
+                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
+            )
+
+        self.cm(f"__temp_{entity}s_1__", f"{entity}")
+
+        self.cmsel("S", f"__temp_{entity}s__")
+        self.cmsel(type_, f"__temp_{entity}s_1__")
+
+        # Cleaning
+        self.cmdele(f"__temp_{entity}s__")
+        self.cmdele(f"__temp_{entity}s_1__")
+
+    @wraps(Commands.nsel)
+    def nsel(self, *args, **kwargs):
+        """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().nsel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points()
+        @wrap_point_SEL(entity="node")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.ksel)
+    def ksel(self, *args, **kwargs):
+        """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().ksel
+        )  # using super() inside the wrapped function confuses the references
+
+        @allow_pickable_points(entity="kp", plot_function="kplot")
+        @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)

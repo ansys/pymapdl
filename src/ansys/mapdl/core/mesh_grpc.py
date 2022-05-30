@@ -55,6 +55,7 @@ class MeshGrpc(Mesh):
             self._cache_element_desc = None
             self._grid_cache = None
             self._surf_cache = None
+            self._cached_elements = None
 
             self._node_coord = None
             self._enum = None
@@ -80,8 +81,10 @@ class MeshGrpc(Mesh):
         self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
         self._mapdl.nsle("S", mute=True)
 
+        # not thread safe
+        self._update_cache_elem().join()
+
         threads = [
-            self._update_cache_elem(),
             self._update_cache_element_desc(),
             self._update_cache_nnum(),
             self._update_node_coord(),
@@ -201,7 +204,12 @@ class MeshGrpc(Mesh):
         array([    1,     2,     3, ...,  9998,  9999, 10000])
         """
         if self._enum is None:
-            self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(np.int32)
+            if self._mapdl.mesh.n_elem == 0:
+                return np.array([], dtype=np.int32)
+            else:
+                self._enum = self._mapdl.get_array("ELEM", item1="ELIST").astype(
+                    np.int32
+                )
         return self._enum
 
     @threaded
@@ -386,7 +394,13 @@ class MeshGrpc(Mesh):
         # TODO: arrays from gRPC interface should include size of the elem array
         lst_value = np.array(elem_raw.size - n_elem, np.int32)
         offset = np.hstack((elem_off_raw - n_elem, lst_value))
-        return elem_raw[n_elem:], offset
+
+        # overwriting the last column to include element numbers
+        elems_ = elem_raw.copy()  # elem_raw is only-read
+        elems_ = elems_[n_elem:]
+        indx_elem = offset[:-1] + 8
+        elems_[indx_elem] = self.enum
+        return elems_, offset
 
     def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
         """Loads element types from the MAPDL server.

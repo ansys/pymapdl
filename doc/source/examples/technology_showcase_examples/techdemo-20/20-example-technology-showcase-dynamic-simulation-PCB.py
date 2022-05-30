@@ -17,12 +17,12 @@ Additional Packages Used
 
 ###############################################################################
 # Starting MAPDL as a service and importing an external model
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# The original FE model is given in the Ansys Mechanical APDL Technology Showcase Manual.
-# The .cdb contains a FE model of a single circuit board. The model is meshed
-# with SOLID186, SHELL181 and BEAM188 elements. All components of the PCB
-# model is assigned with linear elastic isotropic materials. Bonded and
-# flexible surface-to-surface contact pairs are used to define the contact
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The original FE model is given in the Ansys Mechanical APDL Technology
+# Showcase Manual.  The .cdb contains a FE model of a single circuit board. The
+# model is meshed with SOLID186, SHELL181 and BEAM188 elements. All components
+# of the PCB model is assigned with linear elastic isotropic materials. Bonded
+# and flexible surface-to-surface contact pairs are used to define the contact
 # between the IC packages and the circuit board.
 
 
@@ -48,7 +48,7 @@ mapdl.cmsel("all")
 
 ###############################################################################
 # Creating the complete layered model
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The original model will be duplicated to create a layered PCB of three layers
 # that are binded together.
 
@@ -173,7 +173,7 @@ mapdl_result.plot_nodal_displacement(0)
 
 ###############################################################################
 # Run PSD analysis
-# ~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~
 # The response spectrum analysis is defined, solved and post-processed.
 
 # define PSD analysis with input spectrum
@@ -222,15 +222,17 @@ print(output)
 # MAPDL POST1 postprocessor is used. Then, the MAPDL time-history
 # POST26 postprocessor is used to generate the response power spectral
 # density.
-# density.
-# .. note:: The graph generated through POST26 is exported as a picture
-#    in the working directory. Finally, the results from POST26 are saved to Python
-#    variables to be plotted in the Python environment with the use of Matplotlib library.
+#
+# .. note::
+#    The graph generated through POST26 is exported as a picture in the working
+#    directory. Finally, the results from POST26 are saved to Python variables
+#    to be plotted in the Python environment with the use of Matplotlib
+#    library.
 
 
 ###############################################################################
 # Post-process PSD analysis in POST1
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mapdl.post1()
 mapdl.set(1, 1)
@@ -240,7 +242,7 @@ mapdl.plnsol("u", "sum")
 
 ###############################################################################
 # Post-process PSD analysis in POST26 (time-history post-processing)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mapdl.post26()
 
@@ -275,7 +277,7 @@ mapdl.show("close")
 
 ###############################################################################
 # Post-process PSD analysis using Matplotlib
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)

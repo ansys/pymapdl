@@ -61,8 +61,9 @@ def launch_corba(
     verbose=False,
     additional_switches="",
     start_timeout=60,
+    **kwargs,  # ignore extra kwargs
 ):
-    """Start MAPDL in AAS mode
+    """Start MAPDL in AAS mode.
 
     Notes
     -----
@@ -184,7 +185,6 @@ class MapdlCorba(_MapdlCore):
             log_apdl=log_apdl,
             log_file=log_file,
             log_broadcast=False,
-            print_com=print_com,
             **start_parm,
         )
 
