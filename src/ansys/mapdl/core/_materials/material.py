@@ -1,5 +1,4 @@
-import collections
-from typing import Dict, Optional, Union, Set
+from typing import Dict, Optional, Set
 
 import numpy as np
 
@@ -57,7 +56,6 @@ class Material:
             for k, v in nonlinear_models.items():
                 self.set_model(k, v)
 
-
     @property
     def material_id(self) -> Optional[int]:
         """
@@ -71,7 +69,7 @@ class Material:
 
     def get_properties(
         self,
-    ) -> 'Dict[PropertyCode, model_type]':
+    ) -> "Dict[PropertyCode, model_type]":
         """
         Return the currently assigned linear material properties.
         """
@@ -91,11 +89,7 @@ class Material:
             raise KeyError("Cannot remove reference temperature property.")
         self._properties.pop(property_code)
 
-    def set_property(
-            self,
-            property_code: PropertyCode,
-            value: model_type
-        ) -> None:
+    def set_property(self, property_code: PropertyCode, value: model_type) -> None:
         """
         Set a linear material property. Either provide a single float, for properties that are treated as Isothermal,
         or provide an array of floats for properties that are to be treated as temperature dependent. For
@@ -106,29 +100,24 @@ class Material:
             value, (float, np.ndarray)
         ), "Linear material properties must be either floats or numpy arrays."
         if property_code in self._SCALAR_PROPERTIES:
-            assert isinstance(value, float), f"Property f{property_code} must be a float."
+            assert isinstance(
+                value, float
+            ), f"Property f{property_code} must be a float."
         self._properties[property_code] = value
 
-
-    def get_models(
-            self
-    ) -> 'Dict[str, _BaseModel]':
+    def get_models(self) -> "Dict[str, _BaseModel]":
         """
         Return the currently assigned nonlinear material models.
         """
         return self._nonlinear_models
 
-    def get_model(self, model_code: str) -> '_BaseModel':
+    def get_model(self, model_code: str) -> "_BaseModel":
         """
         Return the nonlinear material model with the specified model code.
         """
         return self._nonlinear_models[model_code]
 
-    def set_model(
-            self,
-            model_type: str,
-            value: _BaseModel
-    ) -> None:
+    def set_model(self, model_type: str, value: _BaseModel) -> None:
         """
         Set a nonlinear material model.
         """
