@@ -11,7 +11,13 @@ import tempfile
 import time
 import warnings
 
-import ansys.platform.instancemanagement as pypim
+try:
+    import ansys.platform.instancemanagement as pypim
+
+    _HAS_PIM = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_PIM = False
+
 import appdirs
 
 from ansys.mapdl import core as pymapdl
@@ -547,6 +553,11 @@ def launch_remote_mapdl(
     ansys.mapdl.core.mapdl._MapdlCore
         An instance of Mapdl.
     """
+    if not _HAS_PIM:  # pragma: no cover
+        raise ModuleNotFoundError(
+            "The package 'ansys-platform-instancemanagement' is required to use this function."
+        )
+
     pim = pypim.connect()
     instance = pim.create_instance(product_name="mapdl", product_version=version)
     instance.wait_for_ready()
@@ -1249,7 +1260,7 @@ def launch_mapdl(
 
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
-    if pypim.is_configured() and exec_file is None:
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
         return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
 
