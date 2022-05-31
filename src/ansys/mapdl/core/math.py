@@ -445,7 +445,7 @@ class MapdlMath:
         return AnsDenseMat(name, self._mapdl)
 
     def load_matrix_from_file(
-        self, dtype=np.double, name=False, fname="file.full", mat_id="STIFF", asarray=False
+        self, dtype=np.double, name=None, fname="file.full", mat_id="STIFF", asarray=False
     ):
         """Import a matrix from an existing FULL file.
 
@@ -954,9 +954,6 @@ class MapdlMath:
         """
         return dot(vec_a, vec_b)
 
-    def __matmul__(self, vec_a, vec_b) :
-        return dot(self, vec_a, vec_b)
-
     def add(self, obj1, obj2):
         """Add two APDLMath vectors or matrices.
 
@@ -1430,9 +1427,6 @@ class AnsVec(ApdlMathObj):
         self._mapdl.run(f"*DOT,{self.id},{vec.id},py_val")
         return self._mapdl.scalar_param("py_val")
 
-    def __matmul__(self,vec):
-        return dot(self, vec)
-
     def asarray(self) -> np.ndarray:
         """Returns vector as a numpy array
 
@@ -1579,9 +1573,6 @@ class AnsMat(ApdlMathObj):
         self._mapdl._log.info("Call Mapdl to perform MV Product")
         self._mapdl.run(f"*MULT,{self.id},,{obj.id},,{name}", mute=True)
         return objout
-
-    def __matmul__(self, obj): 
-        return dot(self, obj)
 
     def __getitem__(self, num):
         name = id_generator()
@@ -1809,5 +1800,3 @@ def dot(vec1, vec2) -> float:
     mapdl.run(f"*DOT,{vec1.id},{vec2.id},py_val", mute=True)
     return mapdl.scalar_param("py_val")
 
-def __matmul__(vec1, vec2):
-    return dot(vec1, vec2)
