@@ -11,7 +11,13 @@ import tempfile
 import time
 import warnings
 
-import ansys.platform.instancemanagement as pypim
+try:
+    import ansys.platform.instancemanagement as pypim
+
+    _HAS_PIM = True
+except ModuleNotFoundError:
+    _HAS_PIM = False
+
 import appdirs
 
 from ansys.mapdl import core as pymapdl
@@ -27,6 +33,7 @@ from ansys.mapdl.core.misc import (
     create_temp_dir,
     is_float,
     random_string,
+    requires_package,
     threaded,
 )
 
@@ -520,6 +527,7 @@ def launch_grpc(
     return port, run_location
 
 
+@requires_package("ansys-platform-instancemanagement")
 def launch_remote_mapdl(
     version=None,
     cleanup_on_exit=True,
@@ -1249,9 +1257,12 @@ def launch_mapdl(
 
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
-    if pypim.is_configured() and exec_file is None:
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+    if _HAS_PIM:
+        if pypim.is_configured() and exec_file is None:
+            LOG.info(
+                "Starting MAPDL remotely. The startup configuration will be ignored."
+            )
+            return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
 
     # connect to an existing instance if enabled
     if start_instance is None:
