@@ -189,6 +189,22 @@ def test_mul(mm):
 #     m3 = m1*m2
 #     assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
 
+def test_matrix_matmult(mm):
+    u = mm.rand(10)
+    v = mm.rand(10)
+    w = u@v
+    assert np.allclose(u.asarray() @ v.asarray(), w)
+
+    m1 = mm.rand(10, 10)
+    w = mm.rand(10)
+    v = m1@w
+    assert np.allclose(m1.asarray() @ w.asarray(), v.asarray())
+
+    m1 = mm.rand(10, 10)
+    m2 = mm.rand(10, 10)
+    m3 = m1@m2
+    assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
+
 
 def test_getitem(mm):
     size_i, size_j = (3, 3)
@@ -228,6 +244,17 @@ def test_load_stiff_mass_as_array(mm, cube_solve):
     assert sparse.issparse(m)
     assert all([each > 0 for each in k.shape])
     assert all([each > 0 for each in m.shape])
+
+def test_stiff_mass_name(mm, cube_solve):
+    kname = id_generator()
+    mname = id_generator()
+    k = mm.stiff(name=kname)
+    m = mm.mass(name=mname)
+    ktest = mm.mat(name=kname)
+    mtest = mm.mat(name=mname)
+
+    assert np.allclose(k, ktest)
+    assert np.allclose(m, mtest)
 
 
 def test_stiff_mass_as_array(mm, cube_solve):
