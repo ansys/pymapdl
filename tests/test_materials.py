@@ -13,7 +13,6 @@ from ansys.mapdl.core._materials.common import (
 )
 from ansys.mapdl.core._materials.material import Material
 from ansys.mapdl.core._materials.property_codes import PropertyCode
-from ansys.mapdl.core._materials.tbdata_parser import TableDataParser
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 HEADER_LINES = [
