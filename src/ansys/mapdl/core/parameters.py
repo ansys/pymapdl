@@ -2,7 +2,15 @@ import os
 import tempfile
 import weakref
 
-from ansys.mapdl.reader._reader import write_array
+try:
+    from ansys.mapdl.reader._reader import write_array
+
+    _HAS_READER = True
+except ModuleNotFoundError:  # pragma: no cover
+    from ansys.mapdl.core.misc import write_array
+
+    _HAS_READER = False
+
 import numpy as np
 
 from ansys.mapdl.core.mapdl import _MapdlCore

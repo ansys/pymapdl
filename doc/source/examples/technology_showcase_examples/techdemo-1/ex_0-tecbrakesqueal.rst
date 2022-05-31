@@ -23,7 +23,8 @@ The following topics are available:
 *  `1.10. Input Files`_
 
 You can also perform this example analysis entirely in the Ansys
-Mechanical Application. For more information, see Brake-Squeal Analysis in the Workbench Technology Showcase: Example Problems.
+Mechanical Application. For more information, see Brake-Squeal Analysis in the 
+Workbench Technology Showcase: Example Problems.
 
 1.1. Introduction
 -----------------
@@ -97,11 +98,11 @@ The following modeling topics are available:
 Brake-squeal problems typically require manual calculations of the unsymmetric
 terms arising from sources such as frictional sliding, and then inputting the
 unsymmetric terms using special elements (such as
-MATRIX27). It is a tedious process requiring a matched mesh
+``MATRIX27``). It is a tedious process requiring a matched mesh
 at the disc-pad interface along with assumptions related to the amount of area in
 contact and sliding.
 
-3-D contact elements (CONTA17x) offer a more efficient alternative by modeling
+3-D contact elements (``CONTA17x``) offer a more efficient alternative by modeling
 surface-to-surface contact at the pad-disc interface. With contact
 surface-to-surface contact elements, a matched mesh is unnecessary at the
 contact-target surface, and there is no need to calculate the unsymmetric
@@ -142,7 +143,8 @@ nodal point (normal-to-target surface) for MPC bonded contact pairs.
 1.3.3. Generating Internal Sliding Motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The **CMROTATE** command defines constant rotational velocities on
+The :meth:`Mapdl.cmrotate() <ansys.mapdl.core.Mapdl.cmrotate>`
+command defines constant rotational velocities on
 the contact/target nodes to generate internal sliding motion. The specified
 rotational velocity is used only to determine the sliding direction and has no
 effect on the final solution. The element component used should include only the
@@ -150,21 +152,22 @@ contact or the target elements that are on the brake disc/rotor. In this example
 the target elements are defined on the disc surface and the contact elements are
 defined on the pad surface. The target elements attached to the disc surface are
 grouped to form a component named E\_ROTOR which is then later specified on the
-**CMROTATE** command to generate a sliding frictional force.
+:meth:`Mapdl.cmrotate() <ansys.mapdl.core.Mapdl.cmrotate>`
+command to generate a sliding frictional force.
 
 1.3.4. Meshing the Brake Disc-Pad Model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The sweep method is used to generate a hexahedral dominant mesh of the brake
 system assembly. Brake discs, pads and all other associated components are meshed
-with 20-node structural solid SOLID186 elements with
+with 20-node structural solid ``SOLID186`` elements with
 uniform reduced-integration element technology. The edge sizing tool is used to
 obtains a refined mesh at the pad-disc interface to improve the solution accuracy.
 For problems with a large unsymmetric coefficient, a finer mesh should be used at
 the pad-disc interface to accurately predict the unstable modes.
-CONTA174 (3-D 8 node surface to surface contact)
+``CONTA174`` (3-D 8 node surface to surface contact)
 elements are used to define the contact surface and
-TARGE170 (3-D target segment) elements are used to
+``TARGE170`` (3-D target segment) elements are used to
 define the target surface. The brake disc-pad assembly is meshed with total of 60351
 nodes and 11473 elements.
 
@@ -287,13 +290,14 @@ is based on the initial contact status.
 Following is the process for solving a brake-squeal problem using this method:
 
 1. Perform a linear partial-element analysis with no prestress effects.
-2. Generate the unsymmetric stiffness matrix (**NROPT**,UNSYM).
-3. Generate sliding frictional force (**CMROTATE**).
-4. Perform a complex modal analysis using the QRDAMP or UNSYM   eigensolver.
+2. Generate the unsymmetric stiffness matrix 
+   (:meth:`Mapdl.nropt("UNSYM") <ansys.mapdl.core.Mapdl.nropt>`).
+3. Generate sliding frictional force (:meth:`Mapdl.cmrotate() <ansys.mapdl.core.Mapdl.cmrotate>`).
+4. Perform a complex modal analysis using the QRDAMP or UNSYM eigensolver.
 
    When using the QRDAMP solver, you can reuse the symmetric
    eigensolution from the previous load steps
-   (**QRDOPT**), effective when performing a friction-
+   (:meth:`Mapdl.qrdopt() <ansys.mapdl.core.Mapdl.qrdopt>`), effective when performing a friction-
    sensitive/parametric analysis, as it saves time by not recalculating the
    real symmetric modes after the first solve operation.
 
@@ -366,11 +370,11 @@ prestressed matrix is generated at the end of the first static solution.
 Following is the process for solving a brake-squeal problem using this method:
 
 1. Perform a nonlinear, large-deflection static analysis
-   (**NLGEOM**,ON).
+   (:meth:`Mapdl.nlgeom("ON") <ansys.mapdl.core.Mapdl.nlgeom>`).
 
    Use the unsymmetric Newton-Raphson method
-   (**NROPT**,UNSYM). Specify the restart control points needed
-   for the linear perturbation analysis (**RESCONTROL**)
+   (:meth:`Mapdl.nropt("UNSYM") <ansys.mapdl.core.Mapdl.nropt>`). Specify the restart control points needed
+   for the linear perturbation analysis (:meth:`Mapdl.rescontrol() <ansys.mapdl.core.Mapdl.rescontrol>`)
 
    Create components for use in the next step.
 
@@ -379,26 +383,26 @@ Following is the process for solving a brake-squeal problem using this method:
 
 2. Restart the previous static solution from the desired load step and
    substep, and perform the first phase of the perturbation analysis while
-   preserving the **.ldhi**, **.rnnn** and **.rst** files (**ANTYPE**,STATIC,RESTART,,,PERTURB).
+   preserving the **.ldhi**, **.rnnn** and **.rst** files (:meth:`Mapdl.antype("STATIC", "RESTART", "", "", "PERTURB") <ansys.mapdl.core.Mapdl.antype>`).
 
    Initiate a modal linear perturbation analysis
-   (**PERTURB**,MODAL).
+   (:meth:`Mapdl.perturb("MODAL") <ansys.mapdl.core.Mapdl.perturb>`).
 
-   Generate forced frictional sliding contact (**CMROTATE**),
+   Generate forced frictional sliding contact (:meth:`Mapdl.cmrotate() <ansys.mapdl.core.Mapdl.cmrotate>`),
    specifying the component names created in the previous step.
 
    The contact stiffness matrix is based only on the contact status at the
    restart point.
 
    Regenerate the element stiffness matrix at the end of the first phase of
-   the linear perturbation solution (**SOLVE**,ELFORM).
+   the linear perturbation solution (:meth:`Mapdl.solve("ELFORM") <ansys.mapdl.core.Mapdl.solve>`).
 
 3. Obtain the linear perturbation modal solution using the QRDAMP or UNSYM
-   eigensolver (**MODOPT**).
+   eigensolver (:meth:`Mapdl.modopt() <ansys.mapdl.core.Mapdl.modopt>`).
 
    When using the QRDAMP solver, you can reuse the symmetric
    eigensolution from the previous load steps
-   (**QRDOPT**), effective when performing a
+   (:meth:`Mapdl.qrdopt() <ansys.mapdl.core.Mapdl.qrdopt>`), effective when performing a
    friction-sensitive/parametric analysis, as it saves time by not
    recalculating the real symmetric modes after the first solve
    operation.
@@ -535,24 +539,29 @@ the brake-squeal problem. This method uses Newton-Raphson iterations for *both* 
 Following is the process for solving a brake-squeal problem using this method:
 
 1. Perform a nonlinear, large-deflection static analysis
-   (**NLGEOM**,ON). Use the unsymmetric Newton-Raphson method (**NROPT**,UNSYM).
-   Specify the restart control points needed for the linear perturbation analysis (**RESCONTROL**).
+   (:meth:`Mapdl.nlgeom("ON") <ansys.mapdl.core.Mapdl.nlgeom>`). 
+   Use the unsymmetric Newton-Raphson method (:meth:`Mapdl.nropt("UNSYM") <ansys.mapdl.core.Mapdl.nropt>`).
+   Specify the restart control points needed for the linear perturbation analysis
+   (:meth:`Mapdl.rescontrol() <ansys.mapdl.core.Mapdl.rescontrol>`).
 
-2. Perform a full second static analysis. Generate sliding contact (**CMROTATE**) to form an unsymmetric stiffness matrix.
+2. Perform a full second static analysis. Generate sliding contact 
+   (:meth:`Mapdl.cmrotate() <ansys.mapdl.core.Mapdl.cmrotate>`) to form an unsymmetric stiffness matrix.
 
 3. After obtaining the second static solution, postprocess the contact results.
    Determine the status (that is, whether the elements are sliding, and the sliding distance, if any).
 
-4. Restart the previous static solution from the desired load step and substep, and perform the first phase of the perturbation analysis while
-   preserving the **.ldhi**, **.rnnn** and **.rst** files (**ANTYPE**,STATIC,RESTART,,,PERTURB).
+4. Restart the previous static solution from the desired load step and substep, and perform the first 
+   phase of the perturbation analysis while preserving the **.ldhi**, **.rnnn** and 
+   **.rst** files (:meth:`Mapdl.antype("STATIC", "RESTART",,, "PERTURB") <ansys.mapdl.core.Mapdl.antype>`).
 
    Initiate a modal linear perturbation analysis
-   (**PERTURB**,MODAL).
+   (:meth:`Mapdl.perturb("MODAL") <ansys.mapdl.core.Mapdl.perturb>`).
 
    Regenerate the element stiffness matrix at the end of the first phase of
-   the linear perturbation solution (**SOLVE**,ELFORM).
+   the linear perturbation solution (:meth:`Mapdl.solve("ELFORM") <ansys.mapdl.core.Mapdl.solve>`).
 
-5. Obtain the linear perturbation modal solution using the QRDAMP or UNSYM eigensolver (**MODOPT**).
+5. Obtain the linear perturbation modal solution using the QRDAMP or UNSYM eigensolver
+   (:meth:`Mapdl.modopt() <ansys.mapdl.core.Mapdl.modopt>`).
 
 6. Expand the modes and postprocess the results (from the **Jobname.RSTP** file).
    The following inputs show the solution steps involved with this method:
@@ -683,7 +692,8 @@ Following is the process for solving a brake-squeal problem using this method:
 ---------------------------
 
 The unstable mode predictions for the brake disc-pad assembly using all three methods
-were very close due to the relatively small prestress load. The  `1.6.1. Linear Non-prestressed Modal Analysis`_ predicted
+were very close due to the relatively small prestress load. 
+The  `1.6.1. Linear Non-prestressed Modal Analysis`_ predicted
 unstable modes at 6474 Hz, while the other two solution methods predicted unstable modes
 at 6470 Hz.
 
@@ -806,7 +816,7 @@ frequency close to 6470 Hz.
 A parametric study was performed on the brake disc model using a linear
 non-prestressed modal solution with an increasing coefficient of friction. QRDAMP
 eigensolver is used to perform the parametric studies by reusing the symmetric real
-modes (**QRDOPT**,ON) obtained in the first load
+modes (:meth:`Mapdl.qrdopt("ON") <ansys.mapdl.core.Mapdl.qrdopt>`) obtained in the first load
 step.
 
 The following plot suggests that modes with similar characteristics approach each
@@ -886,7 +896,7 @@ use for a brake-squeal problem:
 +-----------------------------------+----------------------------------------------------------+----------------------------------------------+
 
 The following table provides guidelines for selecting the optimal eigensolver
-(**MODOPT**) for obtaining the brake-squeal solution:
+(:meth:`Mapdl.modopt() <ansys.mapdl.core.Mapdl.modopt>`) for obtaining the brake-squeal solution:
 
 
 
