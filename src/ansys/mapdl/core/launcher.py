@@ -33,7 +33,6 @@ from ansys.mapdl.core.misc import (
     create_temp_dir,
     is_float,
     random_string,
-    requires_package,
     threaded,
 )
 
@@ -527,7 +526,6 @@ def launch_grpc(
     return port, run_location
 
 
-@requires_package("ansys-platform-instancemanagement")
 def launch_remote_mapdl(
     version=None,
     cleanup_on_exit=True,
@@ -555,6 +553,11 @@ def launch_remote_mapdl(
     ansys.mapdl.core.mapdl._MapdlCore
         An instance of Mapdl.
     """
+    if not _HAS_PIM:
+        raise ModuleNotFoundError(
+            "The package 'ansys-platform-instancemanagement' is required to use this function."
+        )
+
     pim = pypim.connect()
     instance = pim.create_instance(product_name="mapdl", product_version=version)
     instance.wait_for_ready()
