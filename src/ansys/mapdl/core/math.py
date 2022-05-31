@@ -271,10 +271,9 @@ class MapdlMath:
                 raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
         if asarray:
-            return mat.asarray()
-        else:
-            return mat
-
+            mat = mat.asarray()
+        
+        return mat
 
     def zeros(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all zeros.
@@ -445,7 +444,12 @@ class MapdlMath:
         return AnsDenseMat(name, self._mapdl)
 
     def load_matrix_from_file(
-        self, dtype=np.double, name=None, fname="file.full", mat_id="STIFF", asarray=False
+        self,
+        dtype=np.double,
+        name=None,
+        fname="file.full",
+        mat_id="STIFF",
+        asarray=False
     ):
         """Import a matrix from an existing FULL file.
 
@@ -673,7 +677,9 @@ class MapdlMath:
         fname = self._load_file(fname)
         return self.load_matrix_from_file(dtype, name, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=None, name=None, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(
+        self, dtype=None, name=None, fname="file.full", mat_id="RHS", asarray=False
+    ):
         """Load a vector from a file.
 
         Parameters
