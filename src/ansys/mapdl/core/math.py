@@ -232,6 +232,8 @@ class MapdlMath:
             Matrix name.  If given, assigns a MAPDL matrix based on
             the existing named matrix.  Otherwise one will be
             automatically generated.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -262,19 +264,19 @@ class MapdlMath:
         else:
             info = self._mapdl._data_info(name)
             if info.objtype == pb_types.DataType.DMAT:
-                return AnsDenseMat(name, self._mapdl)
+                mat = AnsDenseMat(name, self._mapdl)
             elif info.objtype == pb_types.DataType.SMAT:
-                return AnsSparseMat(name, self._mapdl)
+                mat = AnsSparseMat(name, self._mapdl)
             else:  # pragma: no cover
                 raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
         if asarray:
-            return self._mapdl._mat_data(mat.id)
+            return mat.asarray()
         else:
             return mat
 
 
-    def zeros(self, nrow, ncol=None, dtype=np.double, name=None):
+    def zeros(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all zeros.
 
         Parameters
@@ -288,6 +290,8 @@ class MapdlMath:
             ``np.int64``, or ``np.double``.
         name : str, optional
             APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -308,10 +312,10 @@ class MapdlMath:
         >>> mat = mm.zeros(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="zeros", name=name)
-        return self.mat(nrow, ncol, dtype, init="zeros", name=name)
+            return self.vec(nrow, dtype, init="zeros", name=name, asarray=asarray)
+        return self.mat(nrow, ncol, dtype, init="zeros", name=name, asarray=asarray)
 
-    def ones(self, nrow, ncol=None, dtype=np.double, name=None):
+    def ones(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all ones
 
         Parameters
@@ -325,6 +329,8 @@ class MapdlMath:
             ``np.int64``, or ``np.double``.
         name : str, optional
             APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -346,11 +352,11 @@ class MapdlMath:
         >>> mat = mm.ones(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="ones", name=name)
+            return self.vec(nrow, dtype, init="ones", name=name, asarray=asarray)
         else:
-            return self.mat(nrow, ncol, dtype, init="ones", name=name)
+            return self.mat(nrow, ncol, dtype, init="ones", name=name, asarray=asarray)
 
-    def rand(self, nrow, ncol=None, dtype=np.double, name=None):
+    def rand(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all random values
 
         Parameters
@@ -364,6 +370,8 @@ class MapdlMath:
             ``np.int64``, or ``np.double``.
         name : str, optional
             APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -385,8 +393,8 @@ class MapdlMath:
         >>> mat = mm.rand(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="rand", name=name)
-        return self.mat(nrow, ncol, dtype, init="rand", name=name)
+            return self.vec(nrow, dtype, init="rand", name=name, asarray=asarray)
+        return self.mat(nrow, ncol, dtype, init="rand", name=name, asarray=asarray)
 
     def matrix(self, matrix, name=None, triu=False):
         """Send a scipy matrix or numpy array to MAPDL.
@@ -460,7 +468,6 @@ class MapdlMath:
             * ``"GMAT"`` - Constraint equation matrix
             * ``"K_RE"`` - Real part of the stiffness matrix
             * ``"K_IM"`` - Imaginary part of the stiffness matrix
-
         asarray : bool, optional
             Return a ``scipy`` array rather than an APDLMath matrix.
 
@@ -740,7 +747,7 @@ class MapdlMath:
         data : np.ndarray, list
             Numpy array or Python list to push to MAPDL.  Must be 1
             dimensional.
-        vname : str, optional
+        name : str, optional
             APDLMath vector name.  If unset, one will be automatically
             generated.
 
