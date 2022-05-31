@@ -15,7 +15,7 @@ try:
     import ansys.platform.instancemanagement as pypim
 
     _HAS_PIM = True
-except ModuleNotFoundError:
+except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
 import appdirs
@@ -553,7 +553,7 @@ def launch_remote_mapdl(
     ansys.mapdl.core.mapdl._MapdlCore
         An instance of Mapdl.
     """
-    if not _HAS_PIM:
+    if not _HAS_PIM:  # pragma: no cover
         raise ModuleNotFoundError(
             "The package 'ansys-platform-instancemanagement' is required to use this function."
         )
