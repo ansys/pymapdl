@@ -13,6 +13,7 @@ from ansys.mapdl.core._materials.common import (
 )
 from ansys.mapdl.core._materials.material import Material
 from ansys.mapdl.core._materials.property_codes import PropertyCode
+from ansys.mapdl.core._materials.tbdata_parser import _TableDataParser
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 HEADER_LINES = [
@@ -352,7 +353,7 @@ class TestNonlinearModel(_BaseModel):
 
 class TestTableDataParser:
     def test_valid_table_with_material_id(self):
-        parsed_data = TableDataParser._get_tb_sections_with_id(VALID_TABLE, 12)
+        parsed_data = _TableDataParser._get_tb_sections_with_id(VALID_TABLE, 12)
         assert len(parsed_data) == 2
         assert "ANEL" in parsed_data
         anel_data = parsed_data["ANEL"]
@@ -365,15 +366,15 @@ class TestTableDataParser:
 
     def test_valid_table_with_missing_id(self):
         with pytest.raises(IndexError):
-            TableDataParser._get_tb_sections_with_id(VALID_TABLE, 10)
+            _TableDataParser._get_tb_sections_with_id(VALID_TABLE, 10)
 
     def test_deserializing_model_works(self):
-        parser = TableDataParser({"STUB": TestNonlinearModel})
+        parser = _TableDataParser({"STUB": TestNonlinearModel})
         model = parser.deserialize_model("STUB", ["BLANK"])
         assert model is not None
         assert isinstance(model, TestNonlinearModel)
 
     def test_deserializing_unsupported_model_throws(self):
-        parser = TableDataParser({"STUB": TestNonlinearModel})
+        parser = _TableDataParser({"STUB": TestNonlinearModel})
         with pytest.raises(NotImplementedError):
             _ = parser.deserialize_model("NOTSTUB", ["BLANK"])
