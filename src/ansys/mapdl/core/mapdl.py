@@ -627,6 +627,7 @@ class _MapdlCore(Commands):
     def _create_geometry(self):  # pragma: no cover
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
+
         return Geometry(self)
 
     @property
