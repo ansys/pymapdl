@@ -272,7 +272,6 @@ class MapdlMath:
 
         if asarray:
             mat = mat.asarray()
-        
         return mat
 
     def zeros(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
@@ -449,7 +448,7 @@ class MapdlMath:
         name=None,
         fname="file.full",
         mat_id="STIFF",
-        asarray=False
+        asarray=False,
     ):
         """Import a matrix from an existing FULL file.
 
@@ -1305,7 +1304,7 @@ class ApdlMathObj:
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
         self._mapdl.run(f"*AXPY,-1,0,{op2.id},1,0,{opout.id}", mute=True)
         return opout
-    
+
     def __matmul__(self, op):
         return self.dot(op)
 
@@ -1805,4 +1804,3 @@ def dot(vec1, vec2) -> float:
     mapdl = vec1._mapdl
     mapdl.run(f"*DOT,{vec1.id},{vec2.id},py_val", mute=True)
     return mapdl.scalar_param("py_val")
-
