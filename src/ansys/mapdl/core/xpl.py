@@ -454,7 +454,7 @@ class ansXpl:
         -------
         ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
             A handle to the APDLMath object.
-        
+
         asarray : bool, optional
             Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
             <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
