@@ -322,6 +322,13 @@ def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
         mm.load_matrix_from_file(fname="file.full", mat_id="DUMMY")
 
 
+def test_load_matrix_from_file_incorrect_name(mm, cube_solve):
+    with pytest.raises(
+        TypeError, match=r"``name`` parameter must be a string"
+    ):
+        mm.load_matrix_from_file(name=1245)
+
+
 def test_mat_from_name(mm):
     mat0 = mm.mat(10, 10)
     mat1 = mm.mat(name=mat0.id)
@@ -435,6 +442,13 @@ def test_get_vec(mapdl, mm, cube_solve, vec_type):
     assert vec.shape
 
 
+def test_get_vec_incorrect_name(mm, cube_solve):
+    with pytest.raises(
+        TypeError, match=r"``name`` parameter must be a string"
+    ):
+        mm.get_vec(name=18536)
+
+
 def test_get_vector(mm):
     vec = mm.ones(10)
     arr = vec.asarray()
@@ -526,6 +540,13 @@ def test_invalid_matrix_size(mm):
     mat = sparse.random(10, 9, density=0.05, format="csr")
     with pytest.raises(ValueError):
         mm.matrix(mat, "NUMPY_MAT")
+
+
+def test_matrix_incorrect_name(mm, cube_solve):
+    with pytest.raises(
+        TypeError, match=r"``name`` parameter must be a string"
+    ): 
+        mm.matrix(np.ones((3,3)),name=18536)
 
 
 def test_transpose(mm):
