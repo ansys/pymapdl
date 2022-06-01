@@ -247,7 +247,6 @@ def test_load_stiff_mass_as_array(mm, cube_solve):
     assert all([each > 0 for each in m.shape])
 
 
-#Probleme ici
 def test_stiff_mass_name(mm, cube_solve):
     kname = apdl_math.id_generator()
     mname = apdl_math.id_generator()
@@ -255,11 +254,8 @@ def test_stiff_mass_name(mm, cube_solve):
     k = mm.stiff(name=kname)
     m = mm.mass(name=mname)
 
-    ktest = mm.mat(name=kname)
-    mtest = mm.mat(name=mname)
-
-    assert np.allclose(k, ktest)
-    assert np.allclose(m, mtest)
+    assert k.id == kname
+    assert m.id == mname
 
 
 def test_stiff_mass_as_array(mm, cube_solve):
@@ -330,6 +326,12 @@ def test_mat_from_name(mm):
     mat0 = mm.mat(10, 10)
     mat1 = mm.mat(name=mat0.id)
     assert np.allclose(mat0, mat1)
+
+
+def test_mat_asarray(mm):
+    mat0 = mm.mat(10, 10, asarray=True)
+    mat1 = mm.mat(10, 10)
+    assert np.allclose(mat0, mat1.asarray())
 
 
 def test_mat_from_name_sparse(mm):
