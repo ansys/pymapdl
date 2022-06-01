@@ -182,6 +182,7 @@ class _MapdlCore(Commands):
         self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
+        self._geometry = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -619,10 +620,11 @@ class _MapdlCore(Commands):
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
 
         """
+        if self._geometry == None:
+            self._geometry = self._create_geometry()
         return self._geometry
 
-    @property
-    def _geometry(self):  # pragma: no cover
+    def _create_geometry(self):  # pragma: no cover
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
 
