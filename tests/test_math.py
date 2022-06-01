@@ -539,7 +539,7 @@ def test_invalid_matrix_size(mm):
 
 
 def test_matrix_incorrect_name(mm, cube_solve):
-    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"): 
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
         mm.matrix(np.ones((3, 3)), name=18536)
 
 
