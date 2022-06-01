@@ -213,7 +213,7 @@ class MapdlMath:
             else:
                 return ans_vec
 
-    def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None):
+    def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create an APDLMath matrix.
 
         Parameters
@@ -232,6 +232,8 @@ class MapdlMath:
             Matrix name.  If given, assigns a MAPDL matrix based on
             the existing named matrix.  Otherwise one will be
             automatically generated.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -262,15 +264,17 @@ class MapdlMath:
         else:
             info = self._mapdl._data_info(name)
             if info.objtype == pb_types.DataType.DMAT:
-                return AnsDenseMat(name, self._mapdl)
+                mat = AnsDenseMat(name, self._mapdl)
             elif info.objtype == pb_types.DataType.SMAT:
-                return AnsSparseMat(name, self._mapdl)
+                mat = AnsSparseMat(name, self._mapdl)
             else:  # pragma: no cover
                 raise ValueError(f"Unhandled MAPDL matrix object type {info.objtype}")
 
+        if asarray:
+            mat = mat.asarray()
         return mat
 
-    def zeros(self, nrow, ncol=None, dtype=np.double):
+    def zeros(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all zeros.
 
         Parameters
@@ -282,6 +286,10 @@ class MapdlMath:
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -302,10 +310,10 @@ class MapdlMath:
         >>> mat = mm.zeros(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="zeros")
-        return self.mat(nrow, ncol, dtype, init="zeros")
+            return self.vec(nrow, dtype, init="zeros", name=name, asarray=asarray)
+        return self.mat(nrow, ncol, dtype, init="zeros", name=name, asarray=asarray)
 
-    def ones(self, nrow, ncol=None, dtype=np.double):
+    def ones(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all ones
 
         Parameters
@@ -317,6 +325,10 @@ class MapdlMath:
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -338,11 +350,11 @@ class MapdlMath:
         >>> mat = mm.ones(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="ones")
+            return self.vec(nrow, dtype, init="ones", name=name, asarray=asarray)
         else:
-            return self.mat(nrow, ncol, dtype, init="ones")
+            return self.mat(nrow, ncol, dtype, init="ones", name=name, asarray=asarray)
 
-    def rand(self, nrow, ncol=None, dtype=np.double):
+    def rand(self, nrow, ncol=None, dtype=np.double, name=None, asarray=False):
         """Create a vector or matrix containing all random values
 
         Parameters
@@ -354,6 +366,10 @@ class MapdlMath:
         dtype : np.dtype, optional
             Datatype of the vector.  Must be either ``np.int32``,
             ``np.int64``, or ``np.double``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
+        asarray : bool, optional
+            Return a `scipy` array rather than an APDLMath matrix.
 
         Returns
         -------
@@ -375,8 +391,8 @@ class MapdlMath:
         >>> mat = mm.rand(10, 10)
         """
         if not ncol:
-            return self.vec(nrow, dtype, init="rand")
-        return self.mat(nrow, ncol, dtype, init="rand")
+            return self.vec(nrow, dtype, init="rand", name=name, asarray=asarray)
+        return self.mat(nrow, ncol, dtype, init="rand", name=name, asarray=asarray)
 
     def matrix(self, matrix, name=None, triu=False):
         """Send a scipy matrix or numpy array to MAPDL.
@@ -427,7 +443,12 @@ class MapdlMath:
         return AnsDenseMat(name, self._mapdl)
 
     def load_matrix_from_file(
-        self, dtype=np.double, fname="file.full", mat_id="STIFF", asarray=False
+        self,
+        dtype=np.double,
+        name=None,
+        fname="file.full",
+        mat_id="STIFF",
+        asarray=False,
     ):
         """Import a matrix from an existing FULL file.
 
@@ -439,6 +460,8 @@ class MapdlMath:
             numpy data type. Defaults to ``np.double``.
         fname : str, optional
             Filename to read the matrix from.  Defaults to ``"file.full"``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         mat_id : str, optional
             Matrix type.  Defaults to ``"STIFF"``.
 
@@ -448,7 +471,6 @@ class MapdlMath:
             * ``"GMAT"`` - Constraint equation matrix
             * ``"K_RE"`` - Real part of the stiffness matrix
             * ``"K_IM"`` - Imaginary part of the stiffness matrix
-
         asarray : bool, optional
             Return a ``scipy`` array rather than an APDLMath matrix.
 
@@ -459,7 +481,11 @@ class MapdlMath:
             ``asarray``.
 
         """
-        name = id_generator()
+        if name is None:
+            name = id_generator()
+        elif not isinstance(name, str):
+            raise TypeError("``name`` parameter must be a string")
+
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s", mat_id, fname
         )
@@ -536,7 +562,7 @@ class MapdlMath:
         """
         return load_file(self._mapdl, fname)
 
-    def stiff(self, dtype=np.double, fname="file.full", asarray=False):
+    def stiff(self, dtype=np.double, name=None, fname="file.full", asarray=False):
         """Load the stiffness matrix from a full file.
 
         Parameters
@@ -545,6 +571,8 @@ class MapdlMath:
             Numpy data type to store the vector as. Only applicable if
             ``asarray=True``, otherwise the returned matrix contains
             double float numbers. Defaults to ``np.double``
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -569,9 +597,9 @@ class MapdlMath:
             with 1734 stored elements in Compressed Sparse Row format>
         """
         fname = self._load_file(fname)
-        return self.load_matrix_from_file(dtype, fname, "STIFF", asarray)
+        return self.load_matrix_from_file(dtype, name, fname, "STIFF", asarray)
 
-    def mass(self, dtype=np.double, fname="file.full", asarray=False):
+    def mass(self, dtype=np.double, name=None, fname="file.full", asarray=False):
         """Load the mass matrix from a full file.
 
         Parameters
@@ -580,6 +608,8 @@ class MapdlMath:
             Numpy data type to store the vector as. Only applicable if
             ``asarray=True``, otherwise the returned matrix contains
             double float numbers. Defaults to ``np.double``
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -605,9 +635,9 @@ class MapdlMath:
             with 1734 stored elements in Compressed Sparse Row format>
         """
         fname = self._load_file(fname)
-        return self.load_matrix_from_file(dtype, fname, "MASS", asarray)
+        return self.load_matrix_from_file(dtype, name, fname, "MASS", asarray)
 
-    def damp(self, dtype=np.double, fname="file.full", asarray=False):
+    def damp(self, dtype=np.double, name=None, fname="file.full", asarray=False):
         """Load the damping matrix from the full file.
 
         Parameters
@@ -616,6 +646,8 @@ class MapdlMath:
             Numpy data type to store the vector as. Only applicable if
             ``asarray=True``, otherwise the returned matrix contains
             double float numbers. Defaults to ``np.double``
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         fname : str, optional
             Filename to read the matrix from.
         asarray : bool, optional
@@ -642,9 +674,11 @@ class MapdlMath:
 
         """
         fname = self._load_file(fname)
-        return self.load_matrix_from_file(dtype, fname, "DAMP", asarray)
+        return self.load_matrix_from_file(dtype, name, fname, "DAMP", asarray)
 
-    def get_vec(self, dtype=None, fname="file.full", mat_id="RHS", asarray=False):
+    def get_vec(
+        self, dtype=None, name=None, fname="file.full", mat_id="RHS", asarray=False
+    ):
         """Load a vector from a file.
 
         Parameters
@@ -652,6 +686,8 @@ class MapdlMath:
         dtype : numpy.dtype, optional
             Numpy data type to store the vector as.  Defaults to
             ``np.double``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         fname : str, optional
             Filename to read the vector from.
         mat_id : str, optional
@@ -679,7 +715,11 @@ class MapdlMath:
         APDLMath Vector Size 126
 
         """
-        name = id_generator()
+        if name is None:
+            name = id_generator()
+        elif not isinstance(name, str):
+            raise TypeError("``name`` parameter must be a string")
+
         self._mapdl._log.info(
             "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
         )
@@ -712,7 +752,7 @@ class MapdlMath:
         data : np.ndarray, list
             Numpy array or Python list to push to MAPDL.  Must be 1
             dimensional.
-        vname : str, optional
+        name : str, optional
             APDLMath vector name.  If unset, one will be automatically
             generated.
 
@@ -735,13 +775,15 @@ class MapdlMath:
         self._set_vec(name, data)
         return AnsVec(name, self._mapdl)
 
-    def rhs(self, dtype=np.double, fname="file.full", asarray=False):
+    def rhs(self, dtype=np.double, name=None, fname="file.full", asarray=False):
         """Return the load vector from a full file.
 
         Parameters
         ----------
         dtype : numpy.dtype, optional
             Data type to store the vector as.  Defaults to ``np.double``.
+        name : str, optional
+            APDLMath matrix name.  Optional and defaults to a random name.
         fname : str, optional
             Filename to read the vector from.  Defaults to ``"file.full"``.
         asarray : bool, optional
@@ -759,7 +801,7 @@ class MapdlMath:
 
         """
         fname = self._load_file(fname)
-        return self.get_vec(dtype, fname, "RHS", asarray)
+        return self.get_vec(dtype, name, fname, "RHS", asarray)
 
     def svd(self, mat, thresh="", sig="", v="", **kwargs):
         """Apply an SVD Algorithm on a matrix.
@@ -1262,6 +1304,9 @@ class ApdlMathObj:
         self._mapdl._log.info("Call Mapdl to perform AXPY operation")
         self._mapdl.run(f"*AXPY,-1,0,{op2.id},1,0,{opout.id}", mute=True)
         return opout
+
+    def __matmul__(self, op):
+        return self.dot(op)
 
     def __iadd__(self, op):
         return self.axpy(op, 1, 1)

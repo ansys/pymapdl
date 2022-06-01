@@ -43,6 +43,12 @@ def test_read_double(xpl):
     assert arr.dtype == np.double
 
 
+def test_read_asarray(xpl):
+    vec1 = xpl.read("MASS", asarray=True)
+    vec2 = xpl.read("MASS")
+    assert np.allclose(vec1, vec2.asarray())
+
+
 def test_save(xpl):
     xpl.save()
     with pytest.raises(RuntimeError):

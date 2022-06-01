@@ -190,6 +190,23 @@ def test_mul(mm):
 #     assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
 
 
+def test_matrix_matmult(mm):
+    u = mm.rand(10)
+    v = mm.rand(10)
+    w = u @ v
+    assert np.allclose(u.asarray() @ v.asarray(), w)
+
+    m1 = mm.rand(10, 10)
+    w = mm.rand(10)
+    v = m1 @ w
+    assert np.allclose(m1.asarray() @ w.asarray(), v.asarray())
+
+    m1 = mm.rand(10, 10)
+    m2 = mm.rand(10, 10)
+    m3 = m1 @ m2
+    assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
+
+
 def test_getitem(mm):
     size_i, size_j = (3, 3)
     mat = mm.rand(size_i, size_j)
@@ -228,6 +245,17 @@ def test_load_stiff_mass_as_array(mm, cube_solve):
     assert sparse.issparse(m)
     assert all([each > 0 for each in k.shape])
     assert all([each > 0 for each in m.shape])
+
+
+def test_stiff_mass_name(mm, cube_solve):
+    kname = apdl_math.id_generator()
+    mname = apdl_math.id_generator()
+
+    k = mm.stiff(name=kname)
+    m = mm.mass(name=mname)
+
+    assert k.id == kname
+    assert m.id == mname
 
 
 def test_stiff_mass_as_array(mm, cube_solve):
@@ -294,10 +322,21 @@ def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
         mm.load_matrix_from_file(fname="file.full", mat_id="DUMMY")
 
 
+def test_load_matrix_from_file_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.load_matrix_from_file(name=1245)
+
+
 def test_mat_from_name(mm):
     mat0 = mm.mat(10, 10)
     mat1 = mm.mat(name=mat0.id)
     assert np.allclose(mat0, mat1)
+
+
+def test_mat_asarray(mm):
+    mat0 = mm.mat(10, 10, asarray=True)
+    mat1 = mm.mat(10, 10)
+    assert np.allclose(mat0, mat1.asarray())
 
 
 def test_mat_from_name_sparse(mm):
@@ -401,6 +440,11 @@ def test_get_vec(mapdl, mm, cube_solve, vec_type):
     assert vec.shape
 
 
+def test_get_vec_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.get_vec(name=18536)
+
+
 def test_get_vector(mm):
     vec = mm.ones(10)
     arr = vec.asarray()
@@ -492,6 +536,11 @@ def test_invalid_matrix_size(mm):
     mat = sparse.random(10, 9, density=0.05, format="csr")
     with pytest.raises(ValueError):
         mm.matrix(mat, "NUMPY_MAT")
+
+
+def test_matrix_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.matrix(np.ones((3, 3)), name=18536)
 
 
 def test_transpose(mm):

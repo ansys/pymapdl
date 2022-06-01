@@ -446,7 +446,7 @@ class ansXpl:
         )
         return self._mapdl.math.mat(dtype=dtype, name=rand_name)
 
-    def read(self, recordname):
+    def read(self, recordname, asarray=False):
         """
         Read a record and return either an APDL math matrix or an APDL math vector.
 
@@ -455,10 +455,17 @@ class ansXpl:
         ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
             A handle to the APDLMath object.
 
+        asarray : bool, optional
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
+            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+
         Examples
         --------
         >>> vec = xpl.read('MASS')
         >>> vec.asarray()
+        array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
+               46, 49, 52, 55, 58,  1], dtype=int32)
+        >>> vec = xpl.read('MASS', asarray=True)
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
@@ -473,11 +480,15 @@ class ansXpl:
 
         # return either vector or matrix type
         if data_info.objtype == mapdl_pb2.DataType.VEC:
-            return self._mapdl.math.vec(dtype=dtype, name=rand_name)
+            out = self._mapdl.math.vec(dtype=dtype, name=rand_name)
         elif data_info.objtype in [mapdl_pb2.DataType.DMAT, mapdl_pb2.DataType.SMAT]:
-            return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+            out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
         else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
+
+        if asarray:
+            out = out.asarray()
+        return out
 
     def write(self, recordname, vecname):
         """
