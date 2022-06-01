@@ -323,9 +323,7 @@ def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
 
 
 def test_load_matrix_from_file_incorrect_name(mm, cube_solve):
-    with pytest.raises(
-        TypeError, match=r"``name`` parameter must be a string"
-    ):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
         mm.load_matrix_from_file(name=1245)
 
 
@@ -443,9 +441,7 @@ def test_get_vec(mapdl, mm, cube_solve, vec_type):
 
 
 def test_get_vec_incorrect_name(mm, cube_solve):
-    with pytest.raises(
-        TypeError, match=r"``name`` parameter must be a string"
-    ):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
         mm.get_vec(name=18536)
 
 
@@ -543,9 +539,7 @@ def test_invalid_matrix_size(mm):
 
 
 def test_matrix_incorrect_name(mm, cube_solve):
-    with pytest.raises(
-        TypeError, match=r"``name`` parameter must be a string"
-    ): 
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"): 
         mm.matrix(np.ones((3,3)),name=18536)
 
 
