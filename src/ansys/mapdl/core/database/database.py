@@ -1,5 +1,6 @@
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
 from enum import Enum
+from functools import wraps
 import os
 import time
 from warnings import warn
@@ -36,6 +37,32 @@ class WithinBeginLevel:
         """Exit the begin level and reload the previous routine."""
         if "BEGIN" not in self._mapdl._cached_routine.upper():
             self._mapdl._resume_routine()
+
+
+def check_mapdl_db_is_alive(function):
+    """
+    Decorator to check that the MAPDL.DB has started.
+
+    It works for the DB object (DBDef) and for the derived object which has "_db" attribute.
+    """
+
+    @wraps(function)
+    def wrapper(self, *args, **kwargs):
+        if hasattr(self, "active"):
+            active = self.active
+        elif hasattr(self, "_db"):
+            active = self._db.active
+        else:  # pragma: no cover
+            raise Exception("The DB object could not be found.")
+
+        if not active:
+            self._mapdl._log.error(
+                f"Please start the MAPDL DB Server to access '{function.__name__}'."
+            )
+            return None
+        return function(self, *args, **kwargs)
+
+    return wrapper
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
@@ -311,6 +338,7 @@ class MapdlDb:
         return self._mapdl.run("/CLEAR,ALL")
 
     @property
+    @check_mapdl_db_is_alive
     def nodes(self):
         """
         MAPDL database nodes interface.
@@ -380,6 +408,7 @@ class MapdlDb:
         return self._nodes
 
     @property
+    @check_mapdl_db_is_alive
     def elems(self):
         """
         MAPDL database element interface.
