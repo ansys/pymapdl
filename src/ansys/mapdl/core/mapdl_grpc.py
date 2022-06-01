@@ -670,7 +670,7 @@ class MapdlGrpc(_MapdlCore):
         if self._mesh_rep is not None:
             self._mesh_rep._reset_cache()
 
-        if self.geometry is not None:
+        if self._geometry is not None:
             self._geometry._reset_cache()
 
     @property
