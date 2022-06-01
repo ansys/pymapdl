@@ -247,11 +247,14 @@ def test_load_stiff_mass_as_array(mm, cube_solve):
     assert all([each > 0 for each in m.shape])
 
 
+#Probleme ici
 def test_stiff_mass_name(mm, cube_solve):
-    kname = id_generator()
-    mname = id_generator()
+    kname = apdl_math.id_generator()
+    mname = apdl_math.id_generator()
+
     k = mm.stiff(name=kname)
     m = mm.mass(name=mname)
+
     ktest = mm.mat(name=kname)
     mtest = mm.mat(name=mname)
 
