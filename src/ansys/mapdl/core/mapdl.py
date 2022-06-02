@@ -1078,7 +1078,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.nplot(
         ...     plot_bc=True,
-        ...     plot_labels=True,
+        ...     plot_bc_labels=True,
         ...     bc_labels="mechanical",
         ... )
 
