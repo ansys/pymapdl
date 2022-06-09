@@ -1,0 +1,81 @@
+name: Nightly MAPDL check
+
+on:
+  workflow_dispatch:
+  schedule:  # UTC at 0400
+    - cron:  '0 4 * * *'
+
+env:
+  PYMAPDL_PORT: 21000  # default won't work on azure
+  PYMAPDL_START_INSTANCE: FALSE
+  PYANSYS_OFF_SCREEN: True
+  MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
+
+jobs:
+
+  check_image:
+    name: Validate latest mapdl image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-glx xvfb
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
+          restore-keys: |
+            Python-${{ runner.os }}-${{ matrix.python-version }}
+
+      - name: Install ansys-mapdl-core
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Login in Github Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull image
+        run: |
+          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
+          grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
+          python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+
+      - name: Unit Testing
+        run: |
+          pip install -r requirements/requirements_tests.txt
+          cd tests
+          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
+
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `Nightly MAPDL check (${workflow}) failed.`, 
+            }"

@@ -1,16 +1,26 @@
 """Test APDL Math functionality"""
+import os
 import re
 
-import pytest
 import numpy as np
+import pytest
 from scipy import sparse
 
-import ansys.mapdl.core.math as apdl_math
 from ansys.mapdl.core.errors import ANSYSDataTypeError
-
+from ansys.mapdl.core.launcher import get_start_instance
+import ansys.mapdl.core.math as apdl_math
+from ansys.mapdl.core.misc import random_string
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
+
+skip_in_cloud = pytest.mark.skipif(
+    not get_start_instance(),
+    reason="""
+Must be able to launch MAPDL locally. Remote execution does not allow for
+directory creation.
+""",
+)
 
 
 @pytest.fixture(scope="module")
@@ -64,7 +74,7 @@ def test_set_vec_large(mm):
     # send a vector larger than the gRPC size limit of 4 MB
     sz = 1000000
     a = np.random.random(1000000)  # 7.62 MB (as FLOAT64)
-    assert a.nbytes > 4 * 1024 ** 2
+    assert a.nbytes > 4 * 1024**2
     ans_vec = mm.set_vec(a)
     assert a[sz - 1] == ans_vec[sz - 1]
     assert np.allclose(a, ans_vec.asarray())
@@ -86,10 +96,21 @@ def test_invalid_dtype(mm):
         mm.vec(10, dtype=np.uint8)
 
 
+def test_vec(mm):
+    vec = mm.vec(10, asarray=False)
+    assert isinstance(vec, apdl_math.AnsVec)
+
+    arr = mm.vec(10, asarray=True)
+    assert isinstance(arr, np.ndarray)
+
+
 def test_vec_from_name(mm):
     vec0 = mm.vec(10)
     vec1 = mm.vec(name=vec0.id)
     assert np.allclose(vec0, vec1)
+
+    vec1 = mm.vec(name=vec0.id, asarray=True)
+    assert isinstance(vec1, np.ndarray)
 
 
 def test_vec__mul__(mm):
@@ -120,7 +141,7 @@ def test_shape(mm):
 def test_matrix(mm):
     sz = 5000
     mat = sparse.random(sz, sz, density=0.05, format="csr")
-    assert mat.data.nbytes // 1024 ** 2 > 4, "Must test over gRPC message limit"
+    assert mat.data.nbytes // 1024**2 > 4, "Must test over gRPC message limit"
 
     name = "TMP_MATRIX"
     ans_mat = mm.matrix(mat, name)
@@ -169,6 +190,23 @@ def test_mul(mm):
 #     assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
 
 
+def test_matrix_matmult(mm):
+    u = mm.rand(10)
+    v = mm.rand(10)
+    w = u @ v
+    assert np.allclose(u.asarray() @ v.asarray(), w)
+
+    m1 = mm.rand(10, 10)
+    w = mm.rand(10)
+    v = m1 @ w
+    assert np.allclose(m1.asarray() @ w.asarray(), v.asarray())
+
+    m1 = mm.rand(10, 10)
+    m2 = mm.rand(10, 10)
+    m3 = m1 @ m2
+    assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
+
+
 def test_getitem(mm):
     size_i, size_j = (3, 3)
     mat = mm.rand(size_i, size_j)
@@ -181,16 +219,124 @@ def test_getitem(mm):
             assert vec[j] == np_mat[j, i]
 
 
-def test_load_stiff_mass(mm, cube_solve):
+def test_load_stiff_mass(mm, cube_solve, tmpdir):
     k = mm.stiff()
     m = mm.mass()
     assert k.shape == m.shape
+
+
+def test_load_stiff_mass_different_location(mm, cube_solve, tmpdir):
+    full_files = mm._mapdl.download("*.full", target_dir=tmpdir)
+    fname_ = os.path.join(tmpdir, full_files[0])
+    assert os.path.exists(fname_)
+
+    k = mm.stiff(fname=fname_)
+    m = mm.mass(fname=fname_)
+    assert k.shape == m.shape
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_load_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff(asarray=True)
+    m = mm.mass(asarray=True)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+def test_stiff_mass_name(mm, cube_solve):
+    kname = apdl_math.id_generator()
+    mname = apdl_math.id_generator()
+
+    k = mm.stiff(name=kname)
+    m = mm.mass(name=mname)
+
+    assert k.id == kname
+    assert m.id == mname
+
+
+def test_stiff_mass_as_array(mm, cube_solve):
+    k = mm.stiff()
+    m = mm.mass()
+
+    k = k.asarray()
+    m = m.asarray()
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+
+
+@pytest.mark.parametrize(
+    "dtype_",
+    [
+        np.int64,
+        np.double,
+        pytest.param(np.complex64, marks=pytest.mark.xfail),
+        pytest.param("Z", marks=pytest.mark.xfail),
+        "D",
+        pytest.param("dummy", marks=pytest.mark.xfail),
+        pytest.param(np.int8, marks=pytest.mark.xfail),
+    ],
+)
+def test_load_stiff_mass_different_dtype(mm, cube_solve, dtype_):
+    # AnsMat object do not support dtype assignment, you need to convert them to array first.
+    k = mm.stiff(asarray=True, dtype=dtype_)
+    m = mm.mass(asarray=True, dtype=dtype_)
+
+    if isinstance(dtype_, str):
+        if dtype_ == "Z":
+            dtype_ = np.complex_
+        else:
+            dtype_ = np.double
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
+
+    k = mm.stiff(dtype=dtype_)
+    m = mm.mass(dtype=dtype_)
+
+    k = k.asarray(dtype=dtype_)
+    m = m.asarray(dtype=dtype_)
+
+    assert sparse.issparse(k)
+    assert sparse.issparse(m)
+    assert all([each > 0 for each in k.shape])
+    assert all([each > 0 for each in m.shape])
+    assert k.dtype == dtype_
+    assert m.dtype == dtype_
+
+
+def test_load_matrix_from_file_incorrect_mat_id(mm, cube_solve):
+    with pytest.raises(
+        ValueError, match=r"The 'mat_id' parameter supplied.*is not allowed."
+    ):
+        mm.load_matrix_from_file(fname="file.full", mat_id="DUMMY")
+
+
+def test_load_matrix_from_file_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.load_matrix_from_file(name=1245)
 
 
 def test_mat_from_name(mm):
     mat0 = mm.mat(10, 10)
     mat1 = mm.mat(name=mat0.id)
     assert np.allclose(mat0, mat1)
+
+
+def test_mat_asarray(mm):
+    mat0 = mm.mat(10, 10, asarray=True)
+    mat1 = mm.mat(10, 10)
+    assert np.allclose(mat0, mat1.asarray())
 
 
 def test_mat_from_name_sparse(mm):
@@ -279,6 +425,24 @@ def test_solve_py(mapdl, mm, cube_solve):
     rhs0 = mm.get_vec()
     rhs1 = mm.rhs()
     assert np.allclose(rhs0, rhs1)
+
+
+@pytest.mark.parametrize(
+    "vec_type", ["RHS", "BACK", pytest.param("dummy", marks=pytest.mark.xfail)]
+)
+def test_get_vec(mapdl, mm, cube_solve, vec_type):
+    if vec_type.upper() == "BACK":
+        vec = mm.get_vec(mat_id=vec_type, asarray=True)  # To test asarray arg.
+        assert vec.dtype == np.int32
+    else:
+        vec = mm.get_vec(mat_id=vec_type).asarray()
+        assert vec.dtype == np.double
+    assert vec.shape
+
+
+def test_get_vec_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.get_vec(name=18536)
 
 
 def test_get_vector(mm):
@@ -374,6 +538,11 @@ def test_invalid_matrix_size(mm):
         mm.matrix(mat, "NUMPY_MAT")
 
 
+def test_matrix_incorrect_name(mm, cube_solve):
+    with pytest.raises(TypeError, match=r"``name`` parameter must be a string"):
+        mm.matrix(np.ones((3, 3)), name=18536)
+
+
 def test_transpose(mm):
     mat = sparse.random(5, 5, density=1, format="csr")
     apdl_mat = mm.matrix(mat)
@@ -430,3 +599,51 @@ def test_free(mm):
 
 def test_repr(mm):
     assert mm._status == repr(mm)
+
+
+def test__load_file(mm, tmpdir):  # pragma: no cover
+    # generating dummy file
+    # mm._mapdl._local = True  # Uncomment to test locally.
+    if not mm._mapdl._local:
+        return True
+
+    fname_ = random_string() + ".file"
+    fname = str(tmpdir.mkdir("tmpdir").join(fname_))
+
+    ## Checking non-exists
+    with pytest.raises(FileNotFoundError):
+        assert fname_ == mm._load_file(fname)
+
+    with open(fname, "w") as fid:
+        fid.write("# Dummy")
+
+    ## Checking case where the file is only in python folder
+    assert fname_ not in mm._mapdl.list_files()
+    assert fname_ == mm._load_file(fname)
+    assert fname_ in mm._mapdl.list_files()
+
+    ## Checking case where the file is in both.
+    with pytest.warns():
+        assert fname_ == mm._load_file(fname)
+
+    ## Checking the case where the file is only in the MAPDL folder
+    os.remove(fname)
+    assert fname_ == mm._load_file(fname)
+    assert not os.path.exists(fname)
+    assert fname_ in mm._mapdl.list_files()
+    mm._mapdl._local = False
+
+
+def test_status(mm, capsys):
+    assert mm.status() is None
+    captured = capsys.readouterr()
+    printed_output = captured.out
+
+    assert "APDLMATH PARAMETER STATUS-" in printed_output
+    assert all(
+        [each in printed_output for each in ["Name", "Type", "Dims", "Workspace"]]
+    )
+
+    # Checking also _status property
+    assert "APDLMATH PARAMETER STATUS-" in mm._status
+    assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])

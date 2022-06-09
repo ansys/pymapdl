@@ -1,3 +1,6 @@
+
+.. _ref_parameters:
+
 *********************************
 Setting and Retrieving Parameters
 *********************************
@@ -42,3 +45,151 @@ ROUT``, you can access it with:
 
 For a full listing of the methods and attributes available to the
 ``Parameters`` class, please reference the :ref:`ref_parameters_api`.
+
+
+
+.. _ref_special_named_param:
+
+Specially Named Parameters
+==========================
+
+Leading Underscored Parameters
+------------------------------
+
+The parameters starting with underscore (``'_'``) are reserved parameters
+for MAPDL macros and routines. Their use is discouraged, and in PyMAPDL
+you cannot set them directly.
+
+If you need to set one of these parameters, you can use
+:attr:`Mapdl._run <ansys.mapdl.core.Mapdl._run>`
+to avoid PyMAPDL parameter name checks. For example
+
+
+.. code:: python
+
+   >>> mapdl._run('_parameter=123')
+   'PARAMETER _PARAMETER =     123.00000000'
+
+By default, this type of parameter cannot be seen when issuing
+:attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
+However, you can change this by setting
+:attr:`Mapdl.parameters.show_leading_underscore_parameters 
+<ansys.mapdl.core.Mapdl.parameters.show_leading_underscore_parameters>`
+equal to ``True``.
+For example:
+
+
+.. code:: python
+
+   >>> mapdl.parameters.show_leading_underscore_parameters=True
+   >>> mapdl.parameters
+   MAPDL Parameters
+   ----------------
+   PORT                             : 50053.0
+   _RETURN                          : 0.0
+   _STATUS                          : 0.0
+   _UIQR                            : 17.0
+
+
+Trailing Underscored Parameters
+-------------------------------
+
+Parameters ending with an underscore are recommended for user routines
+and macros.
+You can set this type of parameter in PyMAPDL, but by default,
+they cannot be seen in
+:attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`, unless
+:attr:`Mapdl.parameters.show_trailing_underscore_parameters 
+<ansys.mapdl.core.Mapdl.parameters.show_trailing_underscore_parameters>`
+is set to ``True``.
+
+
+.. code:: python
+
+   >>> mapdl.parameters['param_'] = 1.0
+   >>> mapdl.parameters
+   MAPDL Parameters
+   ----------------
+   >>> mapdl.parameters.show_trailing_underscore_parameters=True
+   >>> mapdl.parameters
+   MAPDL Parameters
+   ----------------
+   PARAM_                           : 1.0
+
+
+Parameters with Leading and Trailing Underscore
+-----------------------------------------------
+
+These are a special type of parameter. They **CANNOT** be seen in :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` under any circumstances. Their use is not recommended.
+
+You can still retrieve them using any of the normal methods
+to retrieve parameters. But you need to know the parameter name.
+For example:
+
+
+.. code:: python
+
+   >>> mapdl.parameters["_param_"] = 1.0
+   >>> mapdl.parameters
+   MAPDL Parameters
+   ----------------
+   >>> print(mapdl.parameters['_param_'])
+   1.0
+
+
+.. _ref_numpy_arrays_in_mapdl:
+
+
+Issues when Importing and Exporting Numpy Arrays in MAPDL
+=========================================================
+
+Because of the way MAPDL is designed, there is no way to store an
+array where one or more dimension is zero.
+This can happens in Numpy arrays, where its first dimension can be
+set to zero.
+
+.. code:: python
+
+   >>> import numpy
+   >>> from ansys.mapdl.core import launch_mapdl
+   >>> mapdl = launch_mapdl()
+   >>> array40 = np.reshape([1, 2, 3, 4], (4,))
+   >>> array40
+   array([1, 2, 3, 4])
+
+
+These types of array dimensions will be always converted to ``1``.
+For example:
+
+.. code:: python
+
+   >>> mapdl.parameters['mapdlarray40'] = array40
+   >>> mapdl.parameters['mapdlarray40']
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> mapdl.parameters['mapdlarray40'].shape
+   (4, 1)
+
+This means that when you pass two arrays, one with the second axis equal
+to zero (e.g. ``array40``) and another one with the second axis equal
+to one, if later retrieved, they will have the same
+shape.
+
+.. code:: python
+
+   >>> array41 = np.reshape([1, 2, 3, 4], (4,1))
+   >>> array41
+   array([[1],
+      [2],
+      [3],
+      [4]])
+   >>> mapdl.parameters['mapdlarray41'] = array41
+   >>> mapdl.parameters['mapdlarray41']
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> np.allclose(mapdl.parameters['mapdlarray40'], mapdl.parameters['mapdlarray41'])
+   True

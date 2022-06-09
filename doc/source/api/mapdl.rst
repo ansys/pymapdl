@@ -32,8 +32,18 @@ Mapdl Class Specific Classes or Attributes
    Mapdl.result
    Mapdl.run
    Mapdl.run_multiline
+   Mapdl.input_strings
    Mapdl.set_log_level
    Mapdl.version
+
+
+Constants
+~~~~~~~~~
+.. autosummary::
+   :toctree: _autosummary
+
+   plotting.ALLOWED_TARGETS
+   plotting.BCS
 
 
 Latest 2021R1 and newer features
@@ -50,3 +60,37 @@ Latest 2021R1 and newer features
    mapdl_grpc.MapdlGrpc.math
    mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.upload
+
+
+Mapdl Information Class
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: ansys.mapdl.core.misc
+
+.. autoclass:: ansys.mapdl.core.misc.Information
+
+.. autosummary::
+   :toctree: _autosummary
+
+   Information.product
+   Information.mapdl_version
+   Information.pymapdl_version
+   Information.products
+   Information.preprocessing_capabilities
+   Information.aux_capabilities
+   Information.solution_options
+   Information.post_capabilities
+   Information.title
+   Information.titles
+   Information.stitles
+   Information.units
+   Information.scratch_memory_status
+   Information.database_status
+   Information.config_values
+   Information.global_status
+   Information.job_information
+   Information.model_information
+   Information.boundary_condition_information
+   Information.routine_information
+   Information.solution_options_configuration
+   Information.load_step_options

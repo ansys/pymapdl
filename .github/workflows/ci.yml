@@ -10,33 +10,40 @@ on:
       - main
 
 env:
+  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+  PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
+  # Following env vars when changed will "reset" the mentioned cache,
+  # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
+  # You should go up in number, if you go down (or repeat a previous value)
+  # you might end up reusing a previous cache if it haven't been deleted already.
+  # It applies 7 days retention policy by default.
+  RESET_PIP_CACHE: 3
+  RESET_EXAMPLES_CACHE: 3
+  RESET_DOC_BUILD_CACHE: 3
+  RESET_AUTOSUMMARY_CACHE: 3
+  PACKAGE_NAME: PyMAPDL
   python.version: 3.8
   python.venv: 'testvenv'
 
 jobs:
+
   stylecheck:
     name: Style Check
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Python
-        uses: actions/setup-python@v2.1.4
+        uses: actions/setup-python@v2.2.2
         with:
-          python-version: 3.8
-
-      - name: Style
-        run: |
-          pip install -r requirements_style.txt --disable-pip-version-check
-          make
-
-      - name: flake8
-        if: always()
-        run: |
-          make flake8
+          python-version: 3.9
+      - name: Install pre-commit
+        run: pip install pre-commit
+      - name: Run pre-commit
+        run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
 
   testimport:
     name: Smoke Tests
@@ -44,7 +51,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
-        python-version: ['3.6', '3.7', '3.8', '3.9']
+        python-version: ['3.7', '3.8', '3.9']
 
     steps:
       - uses: actions/checkout@v2
@@ -59,27 +66,47 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
-            Python-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Window pip cache
         uses: actions/cache@v2
         if: ${{ runner.os == 'Windows' }}
         with:
           path: ~\AppData\Local\pip\Cache
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests*.txt') }}
           restore-keys: |
-            Python-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Install PyMAPDL
-        run: |
-          pip install .
+        run: pip install .
 
       - name: Test import
         working-directory: tests
+        run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+
+      - name: Retrieve PyMAPDL version
         run: |
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
+          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+        id: version
+
+      - name: Generate wheelhouse
+        run: pip wheel . -w wheelhouse
+
+      - name: Zip wheelhouse
+        uses: vimtor/action-zip@v1
+        with:
+          files: wheelhouse
+          dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
+
+      - name: Upload Wheelhouse
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
+          path: '*.zip'
+          retention-days: 7
 
   docs_build:
     name: Build Documentation
@@ -90,6 +117,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      # used for documentation deployment
+      - name: Get Bot Application Token
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        id: get_workflow_token
+        uses: peter-murray/workflow-application-token-action@v1
+        with:
+          application_id: ${{ secrets.BOT_APPLICATION_ID }}
+          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
       - name: Setup Python
         uses: actions/setup-python@v2
@@ -105,9 +141,9 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
           restore-keys: |
-            Python-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Test virtual framebuffer
         run: |
@@ -116,28 +152,61 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py bdist_wheel
+          pip install build
+          python -m build
           pip install dist/ansys*.whl
-          cd tests  # run from test directory to test installed module
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Login in Github Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:v21.2.1'
-  
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+
+      - name: Retrieve PyMAPDL version
+        run: |
+          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+        id: version
+
+      - name: Cache examples
+        uses: actions/cache@v2
+        with:
+          path: doc/source/examples
+          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: Cache docs build directory
+        uses: actions/cache@v2
+        with:
+          path: doc/build
+          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: Cache autosummary
+        uses: actions/cache@v2
+        with:
+          path: doc/source/**/_autosummary/*.rst
+          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: Install Docs Build Requirements
+        run: |
+          pip install -r requirements/requirements_docs.txt
+
       - name: Build Documentation
         run: |
-          pip install -r requirements_docs.txt
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -w build_errors.txt -N"
-
-      # Verify that sphinx generates no warnings
-      - name: Check for sphinx warnings
-        run: python doc/print_errors.py
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: Zip documentation
         run: |
@@ -151,31 +220,26 @@ jobs:
           path: doc/build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
+      - name: Deploy
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          repository-name: pyansys/pymapdl-docs
+          token: ${{ steps.get_workflow_token.outputs.token }}
+          BRANCH: gh-pages
+          FOLDER: doc/build/html
+          CLEAN: true
+
       - name: Build PDF Documentation
         working-directory: doc
-        run: |
-          # Overwrite MAPDL commands section so it doesn't show up
-          mv source/mapdl_commands/.fake source/mapdl_commands/index.rst
-          make latex
-          python validate_png.py  # clean-up GIFs mislabeled as PNG
-          cd build/latex
-          latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
-          (test -f *.pdf && echo pdf exists) || exit 1
+        run: make pdf
 
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v2
         with:
           name: PDF-Documentation
-          path: doc/build/latex/pymapdl.pdf
+          path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.5
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: doc/build/html
 
   build_test:
     name: Build and Unit Testing
@@ -186,7 +250,7 @@ jobs:
       PYMAPDL_START_INSTANCE: FALSE
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
 
     steps:
       - uses: actions/checkout@v2
@@ -199,15 +263,15 @@ jobs:
       - name: Install OS packages
         run: |
           sudo apt update
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb
+          sudo apt install libgl1-mesa-glx xvfb
 
       - name: Cache pip
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements_*.txt') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
-            Python-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Test virtual framebuffer
         run: |
@@ -216,30 +280,42 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install -r requirements_build.txt
-          python setup.py bdist_wheel
-          pip install dist/ansys*.whl
-          cd tests  # run from test directory to test installed module
+          pip install build
+          python -m build
+          pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Login in Github Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: Unit Testing
         run: |
-          pip install -r requirements_test.txt
-          pip install pytest-azurepipelines
-          xvfb-run pytest -v --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          pip install -r requirements/requirements_tests.txt
+          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
-      - name: Upload wheel
+      - uses: codecov/codecov-action@v2
+        if: matrix.mapdl-version == 'v21.2.1'
+        name: 'Upload coverage to Codecov'
+
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
         with:
-          name: PyMAPDL-wheel
+          name: PyMAPDL-packages
           path: dist/
           retention-days: 7
 
@@ -249,12 +325,13 @@ jobs:
   
   windows_build_test:
     name: Windows Build and Unit Testing
-    runs-on: Windows
-
+    needs: testimport
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: Create virtual env
+        shell: powershell
         run: |
           python -m venv testenv
           testenv\Scripts\Activate.ps1
@@ -263,6 +340,7 @@ jobs:
           python -c "import sys; print(sys.executable)"
 
       - name: Install ansys-mapdl-core
+        shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
           pip install -r requirements_build.txt
@@ -271,6 +349,7 @@ jobs:
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Test launcher
+        shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
           python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(verbose_mapdl=True, loglevel='DEBUG'))"
@@ -278,6 +357,7 @@ jobs:
           ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
 
       - name: Unit Testing
+        shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
           pip install -r requirements_test.txt
@@ -295,7 +375,6 @@ jobs:
           path: junit/test-results.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
-
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
@@ -316,6 +395,7 @@ jobs:
         run: |
           pip install twine
           twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
@@ -325,4 +405,18 @@ jobs:
         with:
           files: |
             ./**/*.whl
+            ./**/*.tar.gz
             ./**/*.pdf
+            ./**/*.zip
+
+      - name: Notify if fail
+        uses: skitionek/notify-microsoft-teams@master
+        if: ${{ failure() }}
+        with:
+          webhook_url: ${{ secrets.TEAM_HOOK }}
+          needs: ${{ toJson(needs) }}
+          job: ${{ toJson(job) }}
+          steps: ${{ toJson(steps) }}
+          overwrite: "{
+            title: `Release FAILED!`,
+            }"

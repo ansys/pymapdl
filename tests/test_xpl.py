@@ -1,9 +1,15 @@
 """Test xpl functionality"""
-import pytest
 import numpy as np
+import pytest
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
+
+
+@pytest.fixture(scope="module")
+def check_supports_extract(mapdl):
+    if mapdl._server_version < (0, 5, 0):  # 2022R1
+        pytest.skip("command not supported")
 
 
 @pytest.fixture(scope="function")
@@ -37,13 +43,18 @@ def test_read_double(xpl):
     assert arr.dtype == np.double
 
 
+def test_read_asarray(xpl):
+    vec1 = xpl.read("MASS", asarray=True)
+    vec2 = xpl.read("MASS")
+    assert np.allclose(vec1, vec2.asarray())
+
+
 def test_save(xpl):
     xpl.save()
     with pytest.raises(RuntimeError):
         xpl.list()
 
 
-# @pytest.mark.skipif(no_scheduler, reason='Cannot create instance outside of vnet')
 def test_copy(mapdl, xpl):
     filename = "tmpfile.full"
     xpl.copy(filename)
@@ -92,3 +103,19 @@ def test_up(xpl):
 def test_goto(xpl):
     xpl.goto("MASS")
     assert "Current Location : FULL::MASS" in xpl.where()
+
+
+@pytest.mark.usefixtures("check_supports_extract")
+def test_extract(xpl):
+    # expecting fixture to already have a non-result file open
+    assert xpl._filename[-3:] != "rst"
+    with pytest.raises(RuntimeError, match="result files"):
+        mat = xpl.extract("NSL")
+
+    xpl.open("file.rst")
+
+    with pytest.raises(ValueError, match="the only supported recordname is 'NSL'"):
+        xpl.extract("NOD")
+
+    mat = xpl.extract("NSL")
+    assert mat.shape == (243, 10)

@@ -1,15 +1,15 @@
+"""Sphinx documentation configuration file."""
+from datetime import datetime
 import os
 import warnings
 
-import pyvista
 import numpy as np
+from pyansys_sphinx_theme import pyansys_logo_black
+import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
-import sys
-
-sys.path.append("../..")
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
-
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -27,6 +27,7 @@ if not os.path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
+pymapdl.BUILDING_GALLERY = True
 
 # suppress annoying matplotlib bug
 warnings.filterwarnings(
@@ -39,7 +40,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = "ansys.mapdl.core"
-copyright = "(c) 2021 ANSYS, Inc. All rights reserved"
+copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
 # The short X.Y version
@@ -48,28 +49,36 @@ release = version = __version__
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.doctest",
-    "sphinx_autodoc_typehints",
-    "sphinx.ext.autosummary",
+    "jupyter_sphinx",
     "notfound.extension",
+    "numpydoc",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.coverage",
+    "sphinx.ext.doctest",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
-    "sphinx.ext.extlinks",
-    "sphinx.ext.coverage",
-    "numpydoc",
-    "sphinx.ext.intersphinx",
+    "sphinxemoji.sphinxemoji",
 ]
 
 # Intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/dev", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/devdocs", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "pyvista": ("https://docs.pyvista.org/", None),
+    "grpc": ("https://grpc.github.io/grpc/python/", None),
+    "pypim": ("https://pypim.docs.pyansys.com/", None),
 }
+
+suppress_warnings = ["label.*"]
+# supress_warnings = ["ref.option"]
+
 
 # numpydoc configuration
 numpydoc_use_plots = True
@@ -96,6 +105,13 @@ numpydoc_validation_exclude = {  # set of regex
     r"\.*MeshGrpc\.*",
 }
 
+# Favicon
+html_favicon = "favicon.png"
+
+# notfound.extension
+notfound_template = "404.rst"
+notfound_urls_prefix = "/../"
+
 # static path
 html_static_path = ["_static"]
 
@@ -118,7 +134,13 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    # because we include this in examples/index.rst
+    "examples/gallery_examples/index.rst",
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -131,7 +153,6 @@ todo_include_todos = False
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
 
-
 # -- Sphinx Gallery Options ---------------------------------------------------
 sphinx_gallery_conf = {
     # convert rst to md for ipynb
@@ -139,7 +160,7 @@ sphinx_gallery_conf = {
     # path to your examples scripts
     "examples_dirs": ["../../examples/"],
     # path where to save gallery generated examples
-    "gallery_dirs": ["examples"],
+    "gallery_dirs": ["examples/gallery_examples"],
     # Patter to search for example files
     "filename_pattern": r"\.py",
     # Remove the "Download all examples" button from the top level gallery
@@ -157,11 +178,16 @@ sphinx_gallery_conf = {
 
 
 # -- Options for HTML output -------------------------------------------------
+html_short_title = html_title = "PyMAPDL"
 html_theme = "pyansys_sphinx_theme"
-html_logo = "https://docs.pyansys.com/_static/pyansys-logo-black-cropped.png"
+html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
+    "show_breadcrumbs": True,
+    "additional_breadcrumbs": [
+        ("PyAnsys", "https://docs.pyansys.com/"),
+    ],
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
@@ -177,8 +203,13 @@ latex_elements = {}
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, f"pymapdl-Documentation-{__version__}.tex",
-     "ansys.mapdl.core Documentation", author, "manual"),
+    (
+        master_doc,
+        f"pymapdl-Documentation-{__version__}.tex",
+        "ansys.mapdl.core Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 

@@ -9,6 +9,7 @@ using Pythonic PREP7 volume commands.
 """
 
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine
@@ -273,3 +274,8 @@ mapdl.vsymm("Y", "ALL")
 
 # Plot while showing bounds and disabling extra line plotting.
 mapdl.vplot(show_bounds=True, show_lines=False, quality=5)
+
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

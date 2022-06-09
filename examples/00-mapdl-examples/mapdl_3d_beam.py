@@ -12,6 +12,7 @@ First, start by launching MAPDL as a service.
 """
 
 from ansys.mapdl.reader import examples
+
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
@@ -37,6 +38,11 @@ mapdl.emodif("ALL", "MAT", 1)
 mapdl.nsel("S", "LOC", "Z")
 mapdl.d("all", "all")
 mapdl.allsel()
+
+# plot the boundary conditions
+mapdl.nplot(plot_bc=True)
+
+###############################################################################
 
 mapdl.mxpand(elcalc="YES")
 mapdl.modal_analysis(nmode=6)
@@ -66,3 +72,7 @@ result.plot_nodal_displacement(0, show_edges=True)
 # Animate a modal result
 # result.animate_nodal_solution(0, show_edges=True, loop=False, displacement_factor=10,
 # movie_filename='demo.gif')
+
+###############################################################################
+# stop mapdl
+mapdl.exit()

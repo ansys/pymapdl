@@ -7,6 +7,5 @@ Geometry
 
 .. autosummary::
    :toctree: _autosummary
-   :template: custom-class-template.rst
 
    mapdl_geometry.Geometry

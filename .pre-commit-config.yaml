@@ -1,0 +1,44 @@
+repos:
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+  - id: black
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.10.1
+  hooks:
+  - id: isort
+    args: [
+    "--profile", "black",
+    "--force-sort-within-sections",
+    "--skip-glob", "*__init__.py",
+    ]
+- repo: https://gitlab.com/PyCQA/flake8
+  rev: 3.9.2
+  hooks:
+  - id: flake8
+
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.1.0
+  hooks:
+  - id: codespell
+
+# add this eventually
+# - repo: https://github.com/pycqa/pydocstyle
+#   rev: 6.1.1
+#   hooks:
+#   - id: pydocstyle
+#     additional_dependencies: [toml]
+#     exclude: "tests/"
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.1.0
+  hooks:
+  - id: check-merge-conflict
+  - id: debug-statements
+
+# this validates our github workflow files
+- repo: https://github.com/python-jsonschema/check-jsonschema
+  rev: 0.14.0
+  hooks:
+    - id: check-github-workflows

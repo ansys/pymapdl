@@ -1,23 +1,28 @@
-from pathlib import Path
+from collections import namedtuple
 import os
+from pathlib import Path
+import signal
 import time
 
+from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
-from ansys.mapdl.core.misc import get_ansys_bin
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.launcher import (
-    get_start_instance,
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
+    get_start_instance,
 )
-from common import get_details_of_nodes, get_details_of_elements, Node, Element
-
+from ansys.mapdl.core.misc import get_ansys_bin
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
+
+SpacedPaths = namedtuple(
+    "SpacedPaths", ["path_without_spaces", "path_with_spaces", "path_with_single_quote"]
+)
 
 
 # Check if MAPDL is installed
@@ -38,6 +43,7 @@ HAS_GRPC = int(rver) >= 211 or ON_CI
 
 
 # determine if we can launch an instance of MAPDL locally
+# start with ``False`` and always assume the remote case
 local = [False]
 
 # check if the user wants to permit pytest to start MAPDL
@@ -71,7 +77,10 @@ if START_INSTANCE and EXEC_FILE is None:
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
-        os.kill(pid, 0)
+        # There are two main options:
+        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
+        # - Kill signal (KILLTER). int=9. Hard termination
+        os.kill(pid, signal.SIGTERM)
     except OSError:
         return False
     else:
@@ -239,6 +248,14 @@ def mapdl(request, tmpdir_factory):
                 assert not check_pid(pid)
 
 
+@pytest.fixture
+def path_tests(tmpdir):
+    p1 = tmpdir.mkdir("./temp/")
+    p2 = tmpdir.mkdir("./t e m p/")
+    p3 = tmpdir.mkdir("./temp'")
+    return SpacedPaths(str(p1), str(p2), str(p3))
+
+
 @pytest.fixture(scope="function")
 def cleared(mapdl):
     mapdl.finish(mute=True)
@@ -267,6 +284,22 @@ def cube_solve(cleared, mapdl):
 
 
 @pytest.fixture
+def box_with_fields(cleared, mapdl):
+    mapdl.prep7()
+    mapdl.mp("kxx", 1, 45)
+    mapdl.mp("ex", 1, 2e10)
+    mapdl.mp("perx", 1, 1)
+    mapdl.mp("murx", 1, 1)
+    mapdl.et(1, "SOLID70")
+    mapdl.et(2, "CPT215")
+    mapdl.et(3, "SOLID122")
+    mapdl.et(4, "SOLID96")
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.esize(0.5)
+    return mapdl
+
+
+@pytest.fixture
 def box_geometry(mapdl, cleared):
     areas, keypoints = create_geometry(mapdl)
     q = mapdl.queries
@@ -275,7 +308,7 @@ def box_geometry(mapdl, cleared):
 
 @pytest.fixture
 def line_geometry(mapdl, cleared):
-    mapdl.prep7()
+    mapdl.prep7(mute=True)
     k0 = mapdl.k(1, 0, 0, 0)
     k1 = mapdl.k(2, 1, 2, 2)
     l0 = mapdl.l(k0, k1)
@@ -384,21 +417,9 @@ def create_geometry(mapdl):
     return areas, keypoints
 
 
-def apply_forces(mapdl):
-    for const in ["UX", "UY", "UZ", "ROTX", "ROTY", "ROTZ"]:
-        mapdl.d("all", const)
-
-    mapdl.f(1, "FX", 1000)
-    mapdl.f(2, "FY", 1000)
-    mapdl.f(3, "FZ", 1000)
-    mapdl.f(4, "MX", 1000)
-    mapdl.f(5, "MY", 1000)
-    mapdl.f(6, "MZ", 1000)
-    mapdl.d(7, "UZ")
-    mapdl.d(8, "UZ")
-
-
-def solve_simulation(mapdl):
-    mapdl.run("/solu")
-    mapdl.antype("static")
-    mapdl.solve()
+@pytest.fixture(scope="function")
+def make_block(mapdl, cleared):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.et(1, 186)
+    mapdl.esize(0.25)
+    mapdl.vmesh("ALL")

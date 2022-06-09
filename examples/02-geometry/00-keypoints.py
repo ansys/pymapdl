@@ -11,6 +11,7 @@ This section is focused on creating keypoints.
 """
 
 import numpy as np
+
 from ansys.mapdl.core import launch_mapdl
 
 # start MAPDL and enter the pre-processing routine
@@ -139,3 +140,7 @@ print(items)
 mapdl.kplot(
     show_keypoint_numbering=True, background="black", show_bounds=True, font_size=26
 )
+
+###############################################################################
+# stop mapdl
+mapdl.exit()
