@@ -345,7 +345,7 @@ jobs:
           testenv\Scripts\Activate.ps1
           pip install -r requirements\requirements_build.txt
           pip install -e .
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
 
       - name: Test launcher
         shell: powershell
