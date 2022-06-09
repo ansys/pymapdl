@@ -351,7 +351,7 @@ jobs:
         shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
-          python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(verbose_mapdl=True, loglevel='DEBUG'))"
+          python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(loglevel='DEBUG'))"
         env:
           ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
 
@@ -361,7 +361,7 @@ jobs:
           testenv\Scripts\Activate.ps1
           pip install -r requirements\requirements_test.txt
           pip install pytest-azurepipelines
-          pytest -vx --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
+          pytest -vx --junitxml=test-results.xml --cov --cov-report=xml --cov-report=html
         env:
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
           IGNORE_POOL: TRUE
@@ -371,7 +371,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: pytest-results
-          path: junit/test-results.xml
+          path: test-results.xml
         # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
