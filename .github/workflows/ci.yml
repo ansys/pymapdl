@@ -325,7 +325,7 @@ jobs:
   
   windows_build_test:
     name: Windows Build and Unit Testing
-    needs: testimport
+    #needs: testimport
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -344,7 +344,7 @@ jobs:
         run: |
           testenv\Scripts\Activate.ps1
           pip install -r requirements\requirements_build.txt
-          pip install . --use-feature=in-tree-build
+          pip install . -e
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Test launcher
