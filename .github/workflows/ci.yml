@@ -344,7 +344,7 @@ jobs:
         run: |
           testenv\Scripts\Activate.ps1
           pip install -r requirements\requirements_build.txt
-          pip install . -e
+          pip install -e .
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Test launcher
