@@ -354,6 +354,7 @@ jobs:
           python -c "from ansys.mapdl.core import launch_mapdl;print(launch_mapdl(loglevel='DEBUG'))"
         env:
           ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
+          PYMAPDL_START_INSTANCE: TRUE
 
       - name: Unit Testing
         shell: powershell
@@ -366,6 +367,7 @@ jobs:
           ANS_FLEXLM_DISABLE_DEFLICPATH: TRUE
           IGNORE_POOL: TRUE
           ANSYSLMD_LICENSE_FILE: ${{ secrets.LICENSE_SERVER }}
+          PYMAPDL_START_INSTANCE: TRUE
 
       - name: Upload pytest test results
         uses: actions/upload-artifact@v2
