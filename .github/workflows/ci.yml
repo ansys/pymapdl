@@ -343,9 +343,8 @@ jobs:
         shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
-          pip install -r requirements_build.txt
+          pip install -r requirements\requirements_build.txt
           pip install . --use-feature=in-tree-build
-          cd tests  # run from test directory to test installed module
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Test launcher
@@ -360,7 +359,7 @@ jobs:
         shell: powershell
         run: |
           testenv\Scripts\Activate.ps1
-          pip install -r requirements_test.txt
+          pip install -r requirements\requirements_test.txt
           pip install pytest-azurepipelines
           pytest -vx --junitxml=junit/test-results.xml --cov --cov-report=xml --cov-report=html
         env:
