@@ -80,9 +80,9 @@ many steps have been taken to ensure compatibility with legacy code
 while supporting new features.  The original python module has been
 split up into the following projects and modules:
 
- - `ansys.mapdl.core <https://github.com/pyansys/pymapdl>`_
- - `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
- - `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
+- `ansys.mapdl.core <https://github.com/pyansys/pymapdl>`_
+- `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
+- `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
 
 Please visit the GitHub pages for further details regarding each project.
 
