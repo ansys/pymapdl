@@ -29,6 +29,16 @@ PyMAPDL
   :alt: black
 
 
+Table of contents
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   *
+
+
 Overview
 --------
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
