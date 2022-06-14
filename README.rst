@@ -29,7 +29,8 @@ PyMAPDL
   :alt: black
 
 
-## Table of contents
+Table of contents
+-----------------
 
 <!--ts-->
    * [Overview](#overview)
