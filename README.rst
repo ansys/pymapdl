@@ -29,25 +29,6 @@ PyMAPDL
   :alt: black
 
 
-Table of contents
------------------
-
-<!--ts-->
-   * [Overview](#overview)
-   * [Documentation and issues](#documentation-and-issues)
-   * [Project Transition - Legacy Support](#project-transition---legacy-support)
-   * [Installation](#installation)
-      * [Offline Installation](#offline-installation) 
-   * [Dependencies](#dependencies) 
-   * [Getting Started](#getting-started)
-      * [Launch MAPDL Locally](#launch-mapdl-locally)
-      * [Launching Manually or Connecting to a Remote Instance](#launching-manually-or-connecting-to-a-remote-instance) 
-      * [Basic Usage](#basic-usage)
-      * [Run on Docker](#run-on-docker)
-   * [Citing this Module](#citing-this-module)
-   * [License and Acknowledgments](#license-and-acknowledgments)
-<!--te-->
-
 Overview
 --------
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
