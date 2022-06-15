@@ -986,39 +986,58 @@ class AnalysisOptions:
         lab
             Specifies the criteria for causing a cutback.  Valid labels are:
 
-            PLSLIMIT  - Maximum equivalent plastic strain allowed within a time-step (substep).  If the
-                        calculated value exceeds the VALUE, the program
-                        performs a cutback (bisection).  VALUE defaults to 0.15
-                        (15%).
+            PLSLIMIT
+                Maximum equivalent plastic strain allowed within a time-step (substep).  If the
+                calculated value exceeds the VALUE, the program
+                performs a cutback (bisection).  VALUE defaults to 0.15
+                (15%).
 
-            CRPLIMIT  - Set values for calculating the maximum equivalent creep ratio allowed within a
-                        time step. If the calculated maximum creep ratio
-                        exceeds the defined creep ratio limit, the program
-                        performs a cutback.
+            CRPLIMIT
+                Set values for calculating the maximum equivalent creep ratio allowed within a
+                time step. If the calculated maximum creep ratio
+                exceeds the defined creep ratio limit, the program
+                performs a cutback.
 
-            DSPLIMIT  - Maximum incremental displacement within the solution field in a time step
-                        (substep).  If the maximum calculated value exceeds
-                        VALUE, the program performs a cutback (bisection).
-                        VALUE defaults to 1.0 x 107.
+            DSPLIMIT
+                Maximum incremental displacement within the solution field in a time step
+                (substep).  If the maximum calculated value exceeds
+                VALUE, the program performs a cutback (bisection).
+                VALUE defaults to 1.0 x 107.
 
-            NPOINT  - Number of points in a cycle for a second order dynamic equation, used to
-                      control automatic time stepping.  If the number of
-                      solution points per cycle is less than VALUE, the program
-                      performs a cutback in time step size. VALUE defaults to
-                      13 for linear analysis, 5 for nonlinear analysis. A
-                      larger number of points yields a more accurate solution
-                      but also increases the solution run time.
+            NPOINT
+                Number of points in a cycle for a second order dynamic equation, used to
+                control automatic time stepping.  If the number of
+                solution points per cycle is less than VALUE, the program
+                performs a cutback in time step size. VALUE defaults to
+                13 for linear analysis, 5 for nonlinear analysis. A
+                larger number of points yields a more accurate solution
+                but also increases the solution run time.
 
-            This option works well for linear problems. For nonlinear analyses, other factors such as contact status changes and solution convergence rate can overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL Theory Reference for more information on automatic time stepping. - NOITERPREDICT
+                This option works well for linear problems. For nonlinear analyses, other
+                factors such as contact status changes and solution convergence rate can
+                overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL
+                Theory Reference for more information on automatic time stepping.
 
-            If VALUE is 0 (default), an internal auto time step scheme will predict the number of iterations for nonlinear convergence and perform a cutback earlier than the number of iterations specified by the NEQIT command. This is the recommended option. If VALUE is 1, the solution will iterate (if nonconvergent) to NEQIT number of iterations before a cutback is invoked. It is sometimes useful for poorly-convergent problems, but rarely needed in general. - Bisection is also controlled by contact status change, plasticity or creep
-                              strain limit, and other factors. If any of these
-                              factors occur, bisection will still take place,
-                              regardless of the NOITERPREDICT setting.
+            NOITERPREDICT
 
-            CUTBACKFACTOR  - Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
-                             than 0.0 and less than 1.0. This option is active
-                             only if AUTOTS,ON is set.
+                If VALUE is 0 (default), an internal auto time step scheme will predict
+                the number of iterations for nonlinear convergence and perform a cutback
+                earlier than the number of iterations specified by the NEQIT command.
+                This is the recommended option.
+
+                If VALUE is 1, the solution will iterate (if nonconvergent) to NEQIT
+                number of iterations before a cutback is invoked.
+                It is sometimes useful for poorly-convergent problems, but rarely needed in general.
+
+                Bisection is also controlled by contact status change, plasticity or creep
+                strain limit, and other factors. If any of these
+                factors occur, bisection will still take place,
+                regardless of the NOITERPREDICT setting.
+
+            CUTBACKFACTOR
+                Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
+                than 0.0 and less than 1.0. This option is active
+                only if AUTOTS,ON is set.
 
         value
             Numeric value for the specified cutback criterion. For Lab =
@@ -1027,27 +1046,31 @@ class AnalysisOptions:
         option
             Type of creep analysis. Valid for Lab = CRPLIMIT only.
 
-            IMPRATIO  - Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
-                        no creep limit control) and any positive value is
-                        valid. (See Implicit Creep Procedure in the Structural
-                        Analysis Guide for information on how to define
-                        implicit creep.)
+            IMPRATIO
+                Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
+                no creep limit control) and any positive value is
+                valid. (See Implicit Creep Procedure in the Structural
+                Analysis Guide for information on how to define
+                implicit creep.)
 
-            EXPRATIO   - Set the maximum creep ratio value for explicit creep. The default value is 0.1
-                         and any positive value up to 0.25 is allowed. (See
-                         Explicit Creep Procedure in the Structural Analysis
-                         Guide for information on how to define explicit
-                         creep.)
+            EXPRATIO
+                Set the maximum creep ratio value for explicit creep. The default value is 0.1
+                and any positive value up to 0.25 is allowed. (See
+                Explicit Creep Procedure in the Structural Analysis
+                Guide for information on how to define explicit
+                creep.)
 
-            STSLIMIT   - Stress threshold for calculating the creep ratio. For integration points with
-                         effective stress below this threshold, the creep ratio
-                         does not cause cutback. The default value is 0.0 and
-                         any positive value is valid.
+            STSLIMIT
+                Stress threshold for calculating the creep ratio. For integration points with
+                effective stress below this threshold, the creep ratio
+                does not cause cutback. The default value is 0.0 and
+                any positive value is valid.
 
-            STNLIMIT   - Elastic strain threshold for calculating the creep ratio. For integration
-                         points with effective elastic strain below this
-                         threshold, the creep ratio does not cause cutback. The
-                         default value is 0.0 and any positive value is valid.
+            STNLIMIT
+                Elastic strain threshold for calculating the creep ratio. For integration
+                points with effective elastic strain below this
+                threshold, the creep ratio does not cause cutback. The
+                default value is 0.0 and any positive value is valid.
 
         Notes
         -----
@@ -1086,12 +1109,15 @@ class AnalysisOptions:
         decomp
             Controls which domain decomposition algorithm to use.
 
-            AUTO - Use the default domain decomposition algorithm when splitting the model into
-                   domains for Distributed ANSYS (default).
+            AUTO
+                Use the default domain decomposition algorithm when splitting the model into
+                domains for Distributed ANSYS (default).
 
-            GREEDY - Use the "greedy" domain decomposition algorithm.
+            GREEDY
+                Use the "greedy" domain decomposition algorithm.
 
-            METIS - Use the METIS graph partitioning domain decomposition algorithm.
+            METIS
+                Use the METIS graph partitioning domain decomposition algorithm.
 
         Notes
         -----
