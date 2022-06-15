@@ -364,51 +364,55 @@ class AnalysisOptions:
         memory_option
             Memory allocation option:
 
-            DEFAULT - Use the default memory allocation strategy for
-                      the sparse solver. The default strategy attempts
-                      to run in the INCORE memory mode. If there is
-                      not enough available physical memory when the
-                      solver starts to run in the INCORE memory mode,
-                      the solver will then attempt to run in the
-                      OUTOFCORE memory mode.
+            DEFAULT
+                Use the default memory allocation strategy for
+                the sparse solver. The default strategy attempts
+                to run in the ``INCORE`` memory mode. If there is
+                not enough available physical memory when the
+                solver starts to run in the ``INCORE`` memory mode,
+                the solver will then attempt to run in the
+                ``OUTOFCORE`` memory mode.
 
-            INCORE - Use a memory allocation strategy in the sparse
-                     solver that will attempt to obtain enough memory
-                     to run with the entire factorized matrix in
-                     memory. This option uses the most amount of
-                     memory and should avoid doing any I/O. By
-                     avoiding I/O, this option achieves optimal solver
-                     performance. However, a significant amount of
-                     memory is required to run in this mode, and it is
-                     only recommended on machines with a large amount
-                     of memory. If the allocation for in-core memory
-                     fails, the solver will automatically revert to
-                     out-of-core memory mode.
+            INCORE
+                Use a memory allocation strategy in the sparse
+                solver that will attempt to obtain enough memory
+                to run with the entire factorized matrix in
+                memory. This option uses the most amount of
+                memory and should avoid doing any I/O. By
+                avoiding I/O, this option achieves optimal solver
+                performance. However, a significant amount of
+                memory is required to run in this mode, and it is
+                only recommended on machines with a large amount
+                of memory. If the allocation for in-core memory
+                fails, the solver will automatically revert to
+                out-of-core memory mode.
 
-            OUTOFCORE - Use a memory allocation strategy in the sparse
-                        solver that will attempt to allocate only
-                        enough work space to factor each individual
-                        frontal matrix in memory, but will store the
-                        entire factorized matrix on disk. Typically,
-                        this memory mode results in poor performance
-                        due to the potential bottleneck caused by the
-                        I/O to the various files written by the
-                        solver.
+            OUTOFCORE
+                Use a memory allocation strategy in the sparse
+                solver that will attempt to allocate only
+                enough work space to factor each individual
+                frontal matrix in memory, but will store the
+                entire factorized matrix on disk. Typically,
+                this memory mode results in poor performance
+                due to the potential bottleneck caused by the
+                I/O to the various files written by the
+                solver.
 
-            FORCE - This option, when used in conjunction with the
-                    Memory_Size option, allows you to force the sparse
-                    solver to run with a specific amount of
-                    memory. This option is only recommended for the
-                    advanced user who understands sparse solver memory
-                    requirements for the problem being solved,
-                    understands the physical memory on the system, and
-                    wants to control the sparse solver memory usage.
+            FORCE
+                This option, when used in conjunction with the
+                ``Memory_Size`` option, allows you to force the sparse
+                solver to run with a specific amount of
+                memory. This option is only recommended for the
+                advanced user who understands sparse solver memory
+                requirements for the problem being solved,
+                understands the physical memory on the system, and
+                wants to control the sparse solver memory usage.
 
         memory_size
             Initial memory size allocation for the sparse solver in
             MB. This argument allows you to tune the sparse solver
             memory and is not generally required. Although there is no
-            upper limit for Memory_Size, the Memory_Size setting
+            upper limit for ``Memory_Size``, the ``Memory_Size`` setting
             should always be well within the physical memory
             available, but not so small as to cause the sparse solver
             to run out of memory. Warnings and/or errors from the
@@ -420,16 +424,18 @@ class AnalysisOptions:
         solve_info
             Solver output option:
 
-            OFF - Turns off additional output printing from the sparse
-            solver (default).
+            OFF
+                Turns off additional output printing from the sparse
+                solver (default).
 
-            PERFORMANCE - Turns on additional output printing from the
-                          sparse solver, including a performance
-                          summary and a summary of file I/O for the
-                          sparse solver. Information on memory usage
-                          during assembly of the global matrix (that
-                          is, creation of the Jobname.FULL file) is
-                          also printed with this option.
+            PERFORMANCE
+                Turns on additional output printing from the
+                sparse solver, including a performance
+                summary and a summary of file I/O for the
+                sparse solver. Information on memory usage
+                during assembly of the global matrix (that
+                is, creation of the Jobname.FULL file) is
+                also printed with this option.
 
         Notes
         -----
@@ -447,21 +453,21 @@ class AnalysisOptions:
         solution.
 
         If you have a very large memory system, you may want to try
-        selecting the INCORE memory mode for larger jobs to improve
+        selecting the ``INCORE`` memory mode for larger jobs to improve
         performance. When running the sparse solver on a machine with
         very slow I/O performance (for example, slow hard drive
-        speed), you may want to try using the INCORE memory mode to
+        speed), you may want to try using the ``INCORE`` memory mode to
         achieve better performance. However, doing so may require much
-        more memory compared to running in the OUTOFCORE memory mode.
+        more memory compared to running in the ``OUTOFCORE`` memory mode.
 
-        Running with the INCORE memory mode is best for jobs which
+        Running with the ``INCORE`` memory mode is best for jobs which
         comfortably fit within the limits of the physical memory on a
         given system. If the sparse solver work space exceeds physical
         memory size, the system will be forced to use virtual memory
         (or the system page/swap file). In this case, it is typically
-        more efficient to run with the OUTOFCORE memory mode. Assuming
+        more efficient to run with the ``OUTOFCORE`` memory mode. Assuming
         the job fits comfortably within the limits of the machine,
-        running with the INCORE memory mode is often ideal for jobs
+        running with the ``INCORE`` memory mode is often ideal for jobs
         where repeated solves are performed for a single matrix
         factorization.  This occurs in a modal or buckling analysis or
         when doing multiple load steps in a linear, static analysis.
@@ -469,7 +475,7 @@ class AnalysisOptions:
         For repeated runs with the sparse solver, you may set the
         initial sparse solver memory allocation to the amount required
         for factorization. This strategy reduces the frequency of
-        allocation and reallocation in the run to make the INCORE
+        allocation and reallocation in the run to make the ``INCORE``
         option fully effective. If you have a very large memory
         system, you may use the Memory_Size argument to increase the
         maximum size attempted for in-core runs.
@@ -488,38 +494,48 @@ class AnalysisOptions:
             Specifies the action for defining or manipulating crack-growth
             data:
 
-            NEW - Initiate a new set of crack-growth simulation data (default).
+            NEW
+                Initiate a new set of crack-growth simulation data (default).
 
-            CID - Specify the crack-calculation (CINT) ID for energy-release rates to be used in
-                  the fracture criterion calculation.
+            CID
+                Specify the crack-calculation (CINT) ID for energy-release rates to be used in
+                the fracture criterion calculation.
 
-            FCOPTION - Specify the fracture criterion for crack-growth/delamination.
+            FCOPTION
+                Specify the fracture criterion for crack-growth/delamination.
 
-            CPATH - Specify the element component for crack growth.
+            CPATH
+                Specify the element component for crack growth.
 
-            DTIME - Specify the initial time step for crack growth.
+            DTIME
+                Specify the initial time step for crack growth.
 
-            DTMIN - Specify the minimum time step for crack growth.
+            DTMIN
+                Specify the minimum time step for crack growth.
 
-            DTMAX - Specify the maximum time step for crack growth.
+            DTMAX
+                Specify the maximum time step for crack growth.
 
-            FCRAT - Fracture criterion ratio (fc).
+            FCRAT
+                Fracture criterion ratio (fc).
 
-            STOP - Stops the analysis when the specified maximum crack extension is reached.
+            STOP
+                Stops the analysis when the specified maximum crack extension is reached.
 
-            METHOD - Define the method of crack propagation.
+            METHOD
+                Define the method of crack propagation.
 
         Notes
         -----
-        When Action = NEW, the CGROW command initializes a crack-growth
-        simulation set. Subsequent CGROW commands define the parameters
+        When ``Action = NEW``, the :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` command initializes a crack-growth
+        simulation set. Subsequent :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` commands define the parameters
         necessary for the simulation.
 
-        For multiple cracks, issue multiple CGROW,NEW commands (and any
-        subsequent CGROW commands necessary to define the parameters) for each
+        For multiple cracks, issue multiple :meth:`Mapdl.cgrow("NEW") <ansys.mapdl.core.Mapdl.cgrow>` commands (and any
+        subsequent :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` commands necessary to define the parameters) for each
         crack.
 
-        If the analysis is restarted (ANTYPE,,RESTART), the CGROW command must
+        If the analysis is restarted (:meth:`Mapdl.antype("","RESTART") <ansys.mapdl.core.Mapdl.antype>`), the :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` command must
         be re-issued.
 
         For additional details on this command, see
@@ -610,11 +626,14 @@ class AnalysisOptions:
         cmsmeth
             The component mode synthesis method to use. This value is required.
 
-            FIX - Fixed-interface method.
+            FIX
+                Fixed-interface method.
 
-            FREE - Free-interface method.
+            FREE
+                Free-interface method.
 
-            RFFB - Residual-flexible free-interface method.
+            RFFB
+                Residual-flexible free-interface method.
 
         nmode
             The number of normal modes extracted and used in the superelement
@@ -633,15 +652,19 @@ class AnalysisOptions:
             interface (CMSMETH = RFFB) CMS analysis, the method to use for
             defining free body modes:
 
-            FNUM - The number (FDBVAL) of rigid body modes in the calculation.
+            FNUM
+                The number (FDBVAL) of rigid body modes in the calculation.
 
-            FTOL - Employ a specified tolerance (FDBVAL) to determine rigid body modes in the
-                   calculation.
+            FTOL
+                Employ a specified tolerance (FDBVAL) to determine rigid body modes in the
+                calculation.
 
-            FAUTO - Automatically determine rigid body modes in the calculation. This method is the
-                    default.
+            FAUTO
+                Automatically determine rigid body modes in the calculation. This method is the
+                default.
 
-            RIGID - If no rigid body modes exist, define your own via the RIGID command.
+            RIGID
+                If no rigid body modes exist, define your own via the RIGID command.
 
         fbdval
             In a free-interface CMS analysis (CMSMETH = FREE), the number of
@@ -656,15 +679,17 @@ class AnalysisOptions:
             .TCMS file (FIX or FREE methods) or body properties to the .EXB
             file (FIX method).
 
-            TCMS - Write the transformation matrix of the nodal component defined by the OUTPR
-                   command to a .TCMS file. Refer to TCMS File Format in the
-                   Programmer's Reference for more information on the this
-                   file.
+            TCMS
+                Write the transformation matrix of the nodal component defined by the OUTPR
+                command to a .TCMS file. Refer to TCMS File Format in the
+                Programmer's Reference for more information on the this
+                file.
 
-            EXB - Write a body property input file (.EXB file) containing the condensed
-                  substructure matrices and other body properties for use with
-                  AVL EXCITE. Refer to ANSYS Interface to AVL EXCITE in the
-                  Substructuring Analysis Guide for more information.
+            EXB
+                Write a body property input file (.EXB file) containing the condensed
+                substructure matrices and other body properties for use with
+                AVL EXCITE. Refer to ANSYS Interface to AVL EXCITE in the
+                Substructuring Analysis Guide for more information.
 
         Notes
         -----
