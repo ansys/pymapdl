@@ -146,33 +146,40 @@ class AnalysisOptions:
         ----------
         antype
             Analysis type (defaults to the previously specified analysis type,
-            or to STATIC if none specified):
+            or to ``STATIC`` if none specified):
 
-            STATIC or 0 - Perform a static analysis.  Valid for all degrees of freedom.
+            * *``STATIC`` or ``0``* - Perform a static analysis.  
+              Valid for all degrees of freedom.
 
-            BUCKLE or 1 - Perform a buckling analysis.  Implies that a previous static solution was
-                          performed with prestress effects calculated
-                          (PSTRES,ON).  Valid for structural degrees of freedom
-                          only.
+            * *BUCKLE or 1* - Perform a buckling analysis.  
+              Implies that a previous static solution was performed with
+              prestress effects calculated (``PSTRES,ON``).  
+              Valid for structural degrees of freedom only.
 
-            MODAL or 2 - Perform a modal analysis.  Valid for structural and fluid degrees of freedom.
+            * *MODAL or 2* - Perform a modal analysis.
+              Valid for structural and fluid degrees of freedom.
 
-            HARMIC or 3 - Perform a harmonic analysis.  Valid for structural, fluid, magnetic, and
-                          electrical degrees of freedom.
+            * *HARMIC or 3* - Perform a harmonic analysis.
+              Valid for structural, fluid, magnetic, and electrical degrees
+              of freedom.
 
-            TRANS or 4 - Perform a transient analysis.  Valid for all degrees of freedom.
+            * *TRANS or 4* - Perform a transient analysis.
+              Valid for all degrees of freedom.
 
-            SUBSTR or 7 - Perform a substructure analysis.  Valid for all degrees of freedom.
+            * *SUBSTR or 7* - Perform a substructure analysis.
+              Valid for all degrees of freedom.
 
-            SPECTR or 8 - Perform a spectrum analysis.  Implies that a previous modal analysis was
-                          performed.  Valid for structural degrees of freedom
-                          only.
+            * *SPECTR or 8* - Perform a spectrum analysis.  
+              Implies that a previous modal analysis was
+              performed.  Valid for structural degrees of freedom
+              only.
 
         status
             Specifies the status of the analysis (new or restart):
 
-            NEW - Specifies a new analysis (default). If NEW, the remaining fields on this
-                  command are ignored.
+            NEW
+                Specifies a new analysis (default). If NEW, the remaining fields on this
+                command are ignored.
 
             RESTART - Specifies a restart of a previous analysis. Valid for static, modal, and
                       transient (full or mode-superposition method) analyses.
