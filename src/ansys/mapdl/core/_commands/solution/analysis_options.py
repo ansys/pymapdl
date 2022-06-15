@@ -148,56 +148,69 @@ class AnalysisOptions:
             Analysis type (defaults to the previously specified analysis type,
             or to ``STATIC`` if none specified):
 
-            * *``STATIC`` or ``0``* - Perform a static analysis.  
-              Valid for all degrees of freedom.
+            STATIC or 0
+                Perform a **static analysis**.
+                Valid for all degrees of freedom.
 
-            * *BUCKLE or 1* - Perform a buckling analysis.  
-              Implies that a previous static solution was performed with
-              prestress effects calculated (``PSTRES,ON``).  
-              Valid for structural degrees of freedom only.
+            BUCKLE or 1
+                Perform a buckling analysis.
+                Implies that a previous static solution was performed with
+                prestress effects calculated
+                (:meth:`Mapdl.pstres('ON') <ansys.mapdl.core.Mapdl.pstres>`).
+                Valid for structural degrees of freedom only.
 
-            * *MODAL or 2* - Perform a modal analysis.
-              Valid for structural and fluid degrees of freedom.
+            MODAL or 2
+                Perform a modal analysis.
+                Valid for structural and fluid degrees of freedom.
 
-            * *HARMIC or 3* - Perform a harmonic analysis.
-              Valid for structural, fluid, magnetic, and electrical degrees
-              of freedom.
+            HARMIC or 3
+                Perform a harmonic analysis.
+                Valid for structural, fluid, magnetic, and electrical degrees
+                of freedom.
 
-            * *TRANS or 4* - Perform a transient analysis.
-              Valid for all degrees of freedom.
+            TRANS or 4
+                Perform a transient analysis.
+                Valid for all degrees of freedom.
 
-            * *SUBSTR or 7* - Perform a substructure analysis.
-              Valid for all degrees of freedom.
+            SUBSTR or 7
+                Perform a substructure analysis.
+                Valid for all degrees of freedom.
 
-            * *SPECTR or 8* - Perform a spectrum analysis.  
-              Implies that a previous modal analysis was
-              performed.  Valid for structural degrees of freedom
-              only.
+            SPECTR or 8
+                Perform a spectrum analysis.
+                Implies that a previous modal analysis was
+                performed.  Valid for structural degrees of freedom
+                only.
 
         status
             Specifies the status of the analysis (new or restart):
 
             NEW
-                Specifies a new analysis (default). If NEW, the remaining fields on this
+                Specifies a new analysis (default). If ``NEW``, the remaining fields on this
                 command are ignored.
 
-            RESTART - Specifies a restart of a previous analysis. Valid for static, modal, and
-                      transient (full or mode-superposition method) analyses.
-                      For more information about restarting static and
-                      transient analyses, see Multiframe Restart in the Basic
-                      Analysis Guide. For more information on restarting a
-                      modal analysis, see Modal Analysis Restart in the Basic
-                      Analysis Guide.
+            RESTART
+                Specifies a restart of a previous analysis. Valid for static, modal, and
+                transient (full or mode-superposition method) analyses.
+                For more information about restarting static and
+                transient analyses, see Multiframe Restart in the Basic
+                Analysis Guide. For more information on restarting a
+                modal analysis, see Modal Analysis Restart in the Basic
+                Analysis Guide.
 
-            Multiframe restart is also valid for harmonic analysis, but is limited to 2-D magnetic analysis only. - A substructure analysis (backsubstitution method only) can be restarted for the
-                              purpose of generating additional load vectors.
-                              For more information, see the SEOPT command and
-                              Applying Loads and Creating the Superelement
-                              Matrices in the Substructuring Analysis Guide.
+                Multiframe restart is also valid for harmonic analysis, but is limited
+                to 2-D magnetic analysis only.
 
-            VTREST - Specifies the restart of a previous VT Accelerator analysis. Valid only with
-                     Antype = STATIC, HARMIC, or TRANS. For more information,
-                     see VT Accelerator Re-run in the Basic Analysis Guide.
+                A substructure analysis (`backsubstitution` method only) can be restarted for the
+                purpose of generating additional load vectors. For more information, see the
+                :meth:`Mapdl.seopt() <ansys.mapdl.core.Mapdl.seopt>` command and
+                Applying Loads and Creating the Superelement
+                Matrices in the Substructuring Analysis Guide.
+
+            VTREST
+                Specifies the restart of a previous VT Accelerator analysis. Valid only with
+                ``Antype = STATIC``, ``HARMIC``, or ``TRANS``. For more information,
+                see VT Accelerator Re-run in the Basic Analysis Guide.
 
         ldstep
             Specifies the load step at which a multiframe restart begins.
@@ -208,58 +221,68 @@ class AnalysisOptions:
         action
             Specifies the manner of a multiframe restart.
 
-            CONTINUE - The program continues the analysis based on the specified LDSTEP and SUBSTEP
-                       (default). The current load step is continued. If the
-                       end of the load step is encountered in the .Rnnn file, a
-                       new load step is started. The program deletes all .Rnnn
-                       files, or .Mnnn files for mode-superposition transient
-                       analyses, beyond the point of restart and updates the
-                       .LDHI file if a new load step is encountered.
+            CONTINUE
+                The program continues the analysis based on the specified
+                ``LDSTEP`` and ``SUBSTEP`` (default). The current load step is continued.
+                If the end of the load step is encountered in the ``.Rnnn`` file, a
+                new load step is started. The program deletes all ``.Rnnn``
+                files, or ``.Mnnn`` files for mode-superposition transient
+                analyses, beyond the point of restart and updates the
+                ``.LDHI`` file if a new load step is encountered.
 
-            ENDSTEP - At restart, force the specified load step (LDSTEP) to end at the specified
-                      substep (SUBSTEP), even though the end of the current
-                      load step has not been reached. At the end of the
-                      specified substep, all loadings are scaled to the level
-                      of the current ending and stored in the .LDHI file. A run
-                      following this ENDSTEP starts a new load step. This
-                      capability allows you to change the load level in the
-                      middle of a load step. The program updates the .LDHI file
-                      and deletes all .Rnnn files, or .Mnnn files for mode-
-                      superposition transient analyses, beyond the point of
-                      ENDSTEP. The .Rnnn or .Mnnn file at the point of ENDSTEP
-                      are rewritten to record the rescaled load level.
+            ENDSTEP
+                At restart, force the specified load step (``LDSTEP``) to end at the specified
+                substep (``SUBSTEP``), even though the end of the current
+                load step has not been reached. At the end of the
+                specified substep, all loadings are scaled to the level
+                of the current ending and stored in the ``.LDHI`` file. A run
+                following this ``ENDSTEP`` starts a new load step. This
+                capability allows you to change the load level in the
+                middle of a load step. The program updates the ``.LDHI`` file
+                and deletes all .Rnnn files, or ``.Mnnn`` files for mode-
+                superposition transient analyses, beyond the point of
+                ``ENDSTEP``. The ``.Rnnn`` or ``.Mnnn`` file at the point of ``ENDSTEP``
+                are rewritten to record the rescaled load level.
 
-            RSTCREATE - At restart, retrieve information to be written to the results file for the
-                        specified load step (LDSTEP) and substep (SUBSTEP). Be
-                        sure to use   OUTRES to write the results to the
-                        results file. This action does not affect the .LDHI or
-                        .Rnnn files. Previous items stored in the results file
-                        at and beyond the point of RSTCREATE are deleted. This
-                        option cannot be used to restart a mode-superposition
-                        transient analysis.
+            RSTCREATE
+                At restart, retrieve information to be written to the results file for the
+                specified load step (``LDSTEP``) and substep (``SUBSTEP``). Be
+                sure to use :meth:`Mapdl.outres() <ansys.mapdl.core.Mapdl.outres>`
+                to write the results to the
+                results file. This action does not affect the ``.LDHI`` or
+                ``.Rnnn`` files. Previous items stored in the results file
+                at and beyond the point of ``RSTCREATE`` are deleted. This
+                option cannot be used to restart a mode-superposition
+                transient analysis.
 
-            PERTURB - At restart, a linear perturbation analysis (static, modal, buckling, or full
-                      harmonic) is performed for the specified load step
-                      (LDSTEP) and substep (SUBSTEP). This action does not
-                      affect the .LDHI, .Rnnn, or .RST files.
+            PERTURB
+                At restart, a linear perturbation analysis (static, modal, buckling, or full
+                harmonic) is performed for the specified load step
+                (``LDSTEP``) and substep (``SUBSTEP``). This action does not
+                affect the ``.LDHI``, ``.Rnnn``, or ``.RST`` files.
 
         Notes
         -----
-        If using the ANTYPE command to change the analysis type in the same
-        SOLVE session, the program issues the following message: "Some analysis
+        If using the :meth:`Mapdl.antype() <ansys.mapdl.core.Mapdl.antype>`
+        command to change the analysis type in the same
+        :meth:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>` session,
+        the program issues the following message: `"Some analysis
         options have been reset to their defaults. Please verify current
-        settings or respecify as required." Typically, the program resets
-        commands such as NLGEOM and EQSLV to their default values.
+        settings or respecify as required."` Typically, the program resets
+        commands such as :meth:`Mapdl.nlgeom() <ansys.mapdl.core.Mapdl.nlgeom>` and
+        :meth:`Mapdl.eqslv() <ansys.mapdl.core.Mapdl.eqslv>` to their default values.
 
-        The analysis type (Antype) cannot be changed if a restart is specified.
+        The analysis type (:meth:`Mapdl.antype() <ansys.mapdl.core.Mapdl.antype>`)
+        cannot be changed if a restart is specified.
         Always save parameters before doing a restart. For more information on
         the different types of restart, see Restarting an Analysis in the Basic
         Analysis Guide.
 
-        This command is also valid in PREP7.
+        This command is also valid in :meth:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
 
         The ANSYS Professional - Nonlinear Structural (PRN) product supports
-        the Antype = TRANS option for mode-superposition (TRNOPT,MSUP) analyses
+        the ``Antype = TRANS`` option for mode-superposition (
+        :meth:`Mapdl.trnopt("MSUP") <ansys.mapdl.core.Mapdl.trnopt>`) analyses
         only.
         """
         command = f"ANTYPE,{antype},{status},{ldstep},{substep},{action}"
