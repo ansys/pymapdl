@@ -2592,21 +2592,42 @@ class _MapdlCore(Commands):
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             # remove permitted errors and allow MAPDL to continue
 
-            for err_str in _PERMITTED_ERRORS:
-                self._response = re.sub(err_str, "", self._response)
+            for index, each_line in enumerate(self._response.splitlines()):
+                if "*** ERROR ***" in each_line:
+                    error_is_fine = False
+                    complete_message = "\n".join(
+                        self._response.splitlines()[index : (index + 10)]
+                    )
+                    complete_message = re.search(
+                        r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*)",
+                        complete_message,
+                        re.DOTALL,
+                    )
 
-            if "*** ERROR ***" in self._response:
-                # We don't need to log exception because they already included in the main logger.
-                # logger.error(self._response)
-                # However, exceptions are recorded in the global logger which do not record
-                # information of the instances name, hence we edit the error message.
-                raise MapdlRuntimeError(
-                    f"\n\nError in instance {self._name}\n\n" + self._response
-                )
-            else:
-                warnings.warn(
-                    "MAPDL returned non-abort errors.  Please " "check the logs."
-                )
+                    if not complete_message:
+                        raise ValueError(
+                            "There is an '*** ERROR ***' header, but PyMAPDL couldn't find the corresponding body message."
+                        )
+                    else:
+                        complete_message = complete_message.groups()[0]
+
+                    for each_error in _PERMITTED_ERRORS:
+                        error_message = re.search(each_error, complete_message)
+
+                        if error_message:
+                            error_is_fine = True
+                            break
+
+                    if error_is_fine:
+                        continue
+                    else:
+                        # We don't need to log exception because they already included in the main logger.
+                        # logger.error(self._response)
+                        # However, exceptions are recorded in the global logger which do not record
+                        # information of the instances name, hence we edit the error message.
+                        raise MapdlRuntimeError(
+                            f"\n\nError in instance {self._name}\n\n" + complete_message
+                        )
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
