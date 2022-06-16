@@ -110,6 +110,23 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-latest
 
+    services:
+      # Label used to access the service container
+      mapdl:
+        # Docker Hub image
+        image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+        ports:
+          # Opens tcp port 6379 on the host and service container
+          - ${{ env.PYMAPDL_PORT }}:50052
+          - ${{ env.PYMAPDL_DB_PORT }}:50055
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@$${{ secrets.LICENSE_SERVER }}
+
+        options: >-
+          --restart always 
+          --name mapdl
+          -smp
+
     steps:
       - uses: actions/checkout@v2
 
@@ -159,11 +176,11 @@ jobs:
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+      # - name: Pull, launch, and validate MAPDL service
+      #   run: .ci/start_mapdl.sh
+      #   env:
+      #     LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+      #     MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: Retrieve PyMAPDL version
         run: |
@@ -244,6 +261,23 @@ jobs:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
 
+    services:
+      # Label used to access the service container
+      mapdl:
+        # Docker Hub image
+        image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+        ports:
+          # Opens tcp port 6379 on the host and service container
+          - ${{ env.PYMAPDL_PORT }}:50052
+          - ${{ env.PYMAPDL_DB_PORT }}:50055
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@$${{ secrets.LICENSE_SERVER }}
+
+        options: >-
+          --restart always 
+          --name mapdl
+          -smp
+
     steps:
       - uses: actions/checkout@v2
 
@@ -284,11 +318,11 @@ jobs:
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+      # - name: Pull, launch, and validate MAPDL service
+      #   run: .ci/start_mapdl.sh
+      #   env:
+      #     LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+      #     MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: Unit Testing
         run: |
