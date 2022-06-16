@@ -1,4 +1,4 @@
-Sphinx==5.0.1
+Sphinx==5.0.2
 ansys-mapdl-reader==0.51.14
 imageio-ffmpeg==0.4.7
 imageio==2.19.3
