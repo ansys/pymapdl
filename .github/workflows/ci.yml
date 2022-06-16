@@ -114,13 +114,13 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+        image: ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
         ports:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
           - 21001:50055
         env:
-          ANSYSLMD_LICENSE_FILE: 1055@$${{ secrets.LICENSE_SERVER }}
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
         options: >-
           --restart always 
@@ -265,13 +265,13 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+        image: ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
         ports:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
           - 21001:50055
         env:
-          ANSYSLMD_LICENSE_FILE: 1055@$${{ secrets.LICENSE_SERVER }}
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
         options: >-
           --restart always 
