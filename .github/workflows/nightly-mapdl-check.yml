@@ -9,13 +9,31 @@ env:
   PYMAPDL_PORT: 21000  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
 
 jobs:
 
   check_image:
     name: Validate latest mapdl image
     runs-on: ubuntu-latest
+
+    services:
+      # Label used to access the service container
+      mapdl:
+        # Docker Hub image
+        image: ghcr.io/pyansys/pymapdl/mapdl:latest
+        ports:
+          - 21000:50052
+          - 21001:50055
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+
+        options: >-
+          --restart always
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
+          --health-interval=5s
+          --health-retries=6
+          --health-timeout=1s
+
     steps:
       - uses: actions/checkout@v2
 
@@ -50,23 +68,33 @@ jobs:
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull image
-        run: |
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
-          grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
-          python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-
       - name: Unit Testing
         run: |
           pip install -r requirements/requirements_tests.txt
           cd tests
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
-      - name: Display MAPDL Logs
-        if: always()
-        run: cat log.txt
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs-nightly'
+
+      - name: Display files structure
+        if: failure()
+        run: |
+          ls -R
+
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs-nightly.tgz ./logs-nightly
+
+      - name: Upload logs to GitHub
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-nightly.tgz
+          path: ./logs-nightly.tgz
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master

@@ -11,10 +11,27 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
-      MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v21.2.1'
       PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_START_INSTANCE: FALSE
       PYANSYS_OFF_SCREEN: True
+
+    services:
+      # Label used to access the service container
+      mapdl:
+        # Docker Hub image
+        image: ghcr.io/pyansys/pymapdl/mapdl:v21.2.1
+        ports:
+          - 21000:50052
+          - 21001:50055
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+
+        options: >-
+          --restart always
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
+          --health-interval=5s
+          --health-retries=6
+          --health-timeout=1s
 
     steps:
       - uses: actions/checkout@v2
@@ -50,16 +67,7 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull, launch, and validate MAPDL service
-        run: |
-          docker pull $MAPDL_IMAGE
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
-          grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
-          python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-  
+ 
       - name: Build Documentation
         run: |
           pip install -r requirements/requirements_docs.txt
@@ -73,6 +81,33 @@ jobs:
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true
+
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs-nightly-docs'
+
+      - name: Display files structure
+        if: failure()
+        run: ls -R
+
+      - name: Collecting documentation logs
+        if: failure()
+        run: |
+          cp ./doc/build/latex/*.log ./logs-nightly-docs
+          cp ./doc/build/latex/*.out ./logs-nightly-docs
+
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs-docs.tgz ./logs-docs
+
+      - name: Upload logs to GitHub
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-nightly-docs.tgz
+          path: ./logs-nightly-docs.tgz
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
