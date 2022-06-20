@@ -217,7 +217,6 @@ jobs:
         run: |
           cd doc/build/html
           zip -r PyMAPDL_documentation.zip *
-          exit 1
 
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
@@ -246,11 +245,9 @@ jobs:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
-
-      - name: Returning to root folder
-        if: failure()
-        run: |
-          cd /
+      
+      - name: Failing
+        run: exit 1
 
       - name: Collect docker logs on failure
         if: failure()
@@ -258,14 +255,15 @@ jobs:
         with:
           dest: './logs'
 
-      - name: Display structure of downloaded files
+      - name: Display files structure
         if: failure()
         run: ls -R
 
-      - name: Collect MAPDL logs
+      - name: Collecting documentation logs
         if: failure()
         run: |
-          cp ./file.err ./file.log ./logs
+          cp ./doc/build/latex/*.log ./logs
+          cp ./doc/build/latex/*.out ./logs
 
       - name: Tar logs
         if: failure()
@@ -356,7 +354,6 @@ jobs:
         run: |
           pip install twine
           twine check dist/*
-          exit 1
 
       - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
@@ -365,10 +362,8 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: Returning to root folder
-        if: failure()
-        run: |
-          cd /
+      - name: Failing
+        run: exit 1
 
       - name: Collect docker logs on failure
         if: failure()
@@ -376,15 +371,10 @@ jobs:
         with:
           dest: './logs'
 
-      - name: Display structure of downloaded files
+      - name: Display files structure
         if: failure()
         run: |
           ls -R
-
-      - name: Collect MAPDL logs
-        if: failure()
-        run: |
-          cp ./file.err ./file.log ./logs        
 
       - name: Tar logs
         if: failure()
