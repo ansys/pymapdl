@@ -114,7 +114,7 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
+        image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
         ports:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
@@ -220,7 +220,7 @@ jobs:
         run: |
           cd doc/build/html
           zip -r PyMAPDL_documentation.zip *
-          exit 1
+
 
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
@@ -283,7 +283,7 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+        image: '${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}'
         ports:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
@@ -351,7 +351,7 @@ jobs:
         run: |
           pip install twine
           twine check dist/*
-          exit 1
+
 
       - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
