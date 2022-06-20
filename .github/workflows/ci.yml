@@ -245,9 +245,6 @@ jobs:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
-      
-      - name: Failing
-        run: exit 1
 
       - name: Collect docker logs on failure
         if: failure()
@@ -362,9 +359,6 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: Failing
-        run: exit 1
-
       - name: Collect docker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v1
@@ -389,7 +383,7 @@ jobs:
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, testimport]
+    needs: [docs_build, build_test, testimport, stylecheck]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
