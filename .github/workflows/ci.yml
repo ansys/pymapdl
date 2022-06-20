@@ -257,6 +257,28 @@ jobs:
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
 
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs'
+
+      - name: Collect MAPDL logs
+        if: failure()
+        run: |
+          cp file.err file.log ./logs        
+
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs.tgz ./logs
+
+      - name: Upload logs to GitHub
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs.tgz
+          path: ./logs.tgz
+
   build_test:
     name: Build and Unit Testing
     # needs: testimport
@@ -354,6 +376,28 @@ jobs:
       # - name: Display MAPDL Logs
       #   if: always()
       #   run: cat log.txt
+
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs'
+
+      - name: Collect MAPDL logs
+        if: failure()
+        run: |
+          cp file.err file.log ./logs        
+
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs.tgz ./logs
+
+      - name: Upload logs to GitHub
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs.tgz
+          path: ./logs.tgz
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
