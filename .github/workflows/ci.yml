@@ -346,9 +346,9 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: Display MAPDL Logs
-        if: always()
-        run: cat log.txt
+      # - name: Display MAPDL Logs
+      #   if: always()
+      #   run: cat log.txt
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
