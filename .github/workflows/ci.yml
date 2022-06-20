@@ -269,7 +269,7 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: ghcr.io/pyansys/pymapdl/mapdl:v21.2.1
+        image: ghcr.io/pyansys/pymapdl/mapdl:${{ matrix.mapdl-version }}
         ports:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
@@ -278,8 +278,7 @@ jobs:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
         options: >-
-          --restart always 
-          --name mapdl
+          --restart always
           --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"  # Return 0
           --health-interval=5s \
           --health-retries=6 \
