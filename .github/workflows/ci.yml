@@ -109,6 +109,8 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    env:
+      DOCKER_PACKAGE: ${{ env.DOCKER_PACKAGE }}
 
     services:
       # Label used to access the service container
@@ -220,7 +222,7 @@ jobs:
         run: |
           cd doc/build/html
           zip -r PyMAPDL_documentation.zip *
-
+          exit 1
 
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
@@ -290,6 +292,7 @@ jobs:
           - 21001:50055
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+          DOCKER_PACKAGE: ${{ env.DOCKER_PACKAGE }}
 
         options: >-
           --restart always
@@ -351,7 +354,7 @@ jobs:
         run: |
           pip install twine
           twine check dist/*
-
+          exit 1
 
       - name: Upload wheel and binaries
         uses: actions/upload-artifact@v2
