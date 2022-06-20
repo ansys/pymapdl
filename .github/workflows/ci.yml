@@ -126,7 +126,10 @@ jobs:
         options: >-
           --restart always 
           --name mapdl
-          --smp
+
+        args: >-
+          -smp
+
 
     steps:
       - uses: actions/checkout@v2
@@ -277,7 +280,9 @@ jobs:
         options: >-
           --restart always 
           --name mapdl
-          --smp
+
+        args: >-
+          -smp
 
     steps:
       - uses: actions/checkout@v2
