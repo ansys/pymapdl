@@ -109,8 +109,6 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
-    env:
-      DOCKER_PACKAGE: '${{ DOCKER_PACKAGE }}'
 
     services:
       # Label used to access the service container
