@@ -273,7 +273,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@master
         with:
-          name: logs.tgz
+          name: logs-docs.tgz
           path: ./logs-docs.tgz
 
   build_test:
@@ -384,7 +384,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@master
         with:
-          name: logs.tgz
+          name: logs-${{ matrix.mapdl-version }}.tgz
           path: ./logs-${{ matrix.mapdl-version }}.tgz
 
   Release:
