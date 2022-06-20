@@ -256,7 +256,7 @@ jobs:
       - name: Collect MAPDL logs
         if: failure()
         run: |
-          cp file.err file.log ./logs
+          cp ./file.err ./file.log ./logs
 
       - name: Tar logs
         if: failure()
@@ -365,7 +365,7 @@ jobs:
       - name: Collect MAPDL logs
         if: failure()
         run: |
-          cp file.err file.log ./logs        
+          cp ./file.err ./file.log ./logs        
 
       - name: Tar logs
         if: failure()
