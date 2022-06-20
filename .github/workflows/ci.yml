@@ -254,6 +254,7 @@ jobs:
           dest: './logs'
 
       - name: Display structure of downloaded files
+        if: failure()
         run: ls -R
 
       - name: Collect MAPDL logs
@@ -366,6 +367,7 @@ jobs:
           dest: './logs'
 
       - name: Display structure of downloaded files
+        if: failure()
         run: ls -R
 
       - name: Collect MAPDL logs
