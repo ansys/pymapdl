@@ -120,8 +120,8 @@ jobs:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
           - 21001:50055
-        # env:
-          # ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
         options: >-
           --restart always 
@@ -270,8 +270,8 @@ jobs:
           # Opens tcp port 6379 on the host and service container
           - 21000:50052
           - 21001:50055
-        # env:
-          # ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        env:
+          ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
         options: >-
           --restart always 
