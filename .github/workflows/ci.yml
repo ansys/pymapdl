@@ -126,6 +126,10 @@ jobs:
         options: >-
           --restart always 
           --name mapdl
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"  # Return 0
+          --health-interval=5s \
+          --health-retries=6 \
+          --health-timeout=1s \
 
     steps:
       - uses: actions/checkout@v2
@@ -276,6 +280,10 @@ jobs:
         options: >-
           --restart always 
           --name mapdl
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"  # Return 0
+          --health-interval=5s \
+          --health-retries=6 \
+          --health-timeout=1s \
 
     steps:
       - uses: actions/checkout@v2
