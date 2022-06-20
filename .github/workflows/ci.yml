@@ -253,7 +253,7 @@ jobs:
         if: failure()
         uses: jwalton/gh-docker-logs@v1
         with:
-          dest: './logs'
+          dest: './logs-docs'
 
       - name: Display files structure
         if: failure()
@@ -262,19 +262,19 @@ jobs:
       - name: Collecting documentation logs
         if: failure()
         run: |
-          cp ./doc/build/latex/*.log ./logs
-          cp ./doc/build/latex/*.out ./logs
+          cp ./doc/build/latex/*.log ./logs-docs
+          cp ./doc/build/latex/*.out ./logs-docs
 
       - name: Tar logs
         if: failure()
-        run: tar cvzf ./logs.tgz ./logs
+        run: tar cvzf ./logs-docs.tgz ./logs-docs
 
       - name: Upload logs to GitHub
         if: failure()
         uses: actions/upload-artifact@master
         with:
           name: logs.tgz
-          path: ./logs.tgz
+          path: ./logs-docs.tgz
 
   build_test:
     name: Build and Unit Testing
@@ -369,7 +369,7 @@ jobs:
         if: failure()
         uses: jwalton/gh-docker-logs@v1
         with:
-          dest: './logs'
+          dest: './logs-${{ matrix.mapdl-version }}'
 
       - name: Display files structure
         if: failure()
@@ -378,14 +378,14 @@ jobs:
 
       - name: Tar logs
         if: failure()
-        run: tar cvzf ./logs.tgz ./logs
+        run: tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
 
       - name: Upload logs to GitHub
         if: failure()
         uses: actions/upload-artifact@master
         with:
           name: logs.tgz
-          path: ./logs.tgz
+          path: ./logs-${{ matrix.mapdl-version }}.tgz
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
