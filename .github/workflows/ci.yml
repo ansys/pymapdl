@@ -247,6 +247,11 @@ jobs:
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
 
+      - name: Returning to root folder
+        if: failure()
+        run: |
+          cd /
+
       - name: Collect docker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v1
@@ -360,6 +365,11 @@ jobs:
           path: dist/
           retention-days: 7
 
+      - name: Returning to root folder
+        if: failure()
+        run: |
+          cd /
+
       - name: Collect docker logs on failure
         if: failure()
         uses: jwalton/gh-docker-logs@v1
@@ -368,7 +378,8 @@ jobs:
 
       - name: Display structure of downloaded files
         if: failure()
-        run: ls -R
+        run: |
+          ls -R
 
       - name: Collect MAPDL logs
         if: failure()
