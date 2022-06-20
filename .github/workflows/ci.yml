@@ -253,6 +253,9 @@ jobs:
         with:
           dest: './logs'
 
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: Collect MAPDL logs
         if: failure()
         run: |
@@ -361,6 +364,9 @@ jobs:
         uses: jwalton/gh-docker-logs@v1
         with:
           dest: './logs'
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: Collect MAPDL logs
         if: failure()
