@@ -122,7 +122,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
           ANSYS_LOCK: OFF
-          KMP_AFFINITY: DISABLE
+          KMP_AFFINITY: disabled
 
         options: >-
           --restart always
@@ -299,7 +299,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
           ANSYS_LOCK: OFF
-          KMP_AFFINITY: DISABLE
+          KMP_AFFINITY: disabled
 
         options: >-
           --restart always
