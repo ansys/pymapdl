@@ -87,8 +87,8 @@ class Plain_Report:
 
             try:
                 self.kwargs["extra_meta"] = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except Exception as e:  # pragma: no cover
-                self.kwargs["extra_meta"] = ("GPU Details", f"Error: {e.message}")
+            except RuntimeError as e:  # pragma: no cover
+                self.kwargs["extra_meta"] = ("GPU Details", f"Error: {str(e)}")
         else:
             self.kwargs["extra_meta"] = ("GPU Details", "None")
 
