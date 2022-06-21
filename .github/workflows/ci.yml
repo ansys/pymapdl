@@ -116,8 +116,13 @@ jobs:
         ports:
           - 21000:50052
           - 21001:50055
+        # ANSYS_lOCK: Whether or not create a lock file, We disable this to allow MAPDL
+        # restart without issue after it failed.
+        # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+          ANSYS_LOCK: OFF
+          KMP_AFFINITY: DISABLE
 
         options: >-
           --restart always
@@ -288,8 +293,13 @@ jobs:
         ports:
           - 21000:50052
           - 21001:50055
+        # ANSYS_lOCK: Whether or not create a lock file. We disable this to allow MAPDL
+        # restart without issue after it failed.
+        # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+          ANSYS_LOCK: OFF
+          KMP_AFFINITY: DISABLE
 
         options: >-
           --restart always
