@@ -27,6 +27,10 @@ env:
   RESET_AUTOSUMMARY_CACHE: 3
   PACKAGE_NAME: PyMAPDL
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   stylecheck:
