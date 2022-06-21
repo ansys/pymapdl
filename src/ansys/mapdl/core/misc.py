@@ -93,14 +93,14 @@ class Plain_Report:
             self.kwargs["extra_meta"] = ("GPU Details", "None")
 
     def get_version(self, package):
-        from importlib.metadata import PackageNotFoundError
-        from importlib.metadata import version as get_lib_version
-
-        package = package.replace(".", "-")
+        try:
+            import importlib.metadata as importlib_metadata
+        except ModuleNotFoundError:  # pragma: no cover
+            import importlib_metadata
 
         try:
-            return get_lib_version(package)
-        except PackageNotFoundError:
+            return importlib_metadata.version(package.replace(".", "-"))
+        except importlib_metadata.PackageNotFoundError:
             return "Package not found"
 
     def __repr__(self):
