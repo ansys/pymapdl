@@ -74,7 +74,7 @@ class Plain_Report:
         self.optional = optional
         self.kwargs = kwargs
 
-        if os.name == "linux":
+        if os.name == "posix":
             self.core.extend(["pexpect"])
 
         if self.optional is not None and sys.version_info[1] < 9:
