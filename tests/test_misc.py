@@ -243,7 +243,7 @@ def test_plain_report():
     optional = ["pyvista", "tqdm"]
     additional = ["scipy", "ger"]
 
-    report = Plain_Report(core=core, optional=optional, additional=additional)
+    report = Plain_Report(core=core, optional=optional, additional=additional, gpu=True)
     rep_str = report.__repr__()
 
     for each in core + optional + additional:
@@ -260,6 +260,9 @@ def test_plain_report():
     assert "Core packages" in rep_str
     assert "Optional packages" in rep_str
     assert "Additional packages" in rep_str
+    
+    # Plain report should not represent GPU details evenif asked for
+    assert "GPU Details" not in rep_str
 
 
 def test_plain_report_no_options():
