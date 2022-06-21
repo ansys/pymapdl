@@ -260,7 +260,7 @@ def test_plain_report():
     assert "Core packages" in rep_str
     assert "Optional packages" in rep_str
     assert "Additional packages" in rep_str
-    
+
     # Plain report should not represent GPU details evenif asked for
     assert "GPU Details" not in rep_str
 
