@@ -22,7 +22,7 @@ from ansys.mapdl.core.misc import (
 
 def test_report():
     report = pymapdl.Report(gpu=system_supports_plotting())
-    assert "PyMAPDL Software and Environment Report" in str(report)
+    assert "PyAnsys Software and Environment Report" in str(report)
 
 
 @pytest.mark.parametrize(
