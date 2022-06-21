@@ -23,7 +23,7 @@ dependencies = [
     "ansys-platform-instancemanagement~=1.0",
     "appdirs>=1.4.0",
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
-    "importlib-metadata>=4.0",
+    "importlib-metadata >=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
