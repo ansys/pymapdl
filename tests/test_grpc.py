@@ -27,6 +27,8 @@ directory creation.
 """,
 )
 
+from conftest import ON_CI
+
 
 def write_tmp(mapdl, filename, ext="txt"):
     """Write a temporary file from MAPDL."""
@@ -347,7 +349,9 @@ def test_download_project(mapdl, tmpdir):
     assert "log" in files_extensions
     assert "out" in files_extensions
     assert "err" in files_extensions
-    assert "lock" in files_extensions
+
+    if not ON_CI:
+        assert "lock" in files_extensions
 
 
 def test_download_project_extensions(mapdl, tmpdir):
@@ -358,7 +362,8 @@ def test_download_project_extensions(mapdl, tmpdir):
     assert "log" in files_extensions
     assert "out" in files_extensions
     assert "err" not in files_extensions
-    assert "lock" not in files_extensions
+    if not ON_CI:
+        assert "lock" not in files_extensions
 
 
 def test__channel_str(mapdl):
