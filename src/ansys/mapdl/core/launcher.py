@@ -220,6 +220,8 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
+    add_env_vars=None,
+    replace_env_vars=None,
     **kwargs,
 ) -> tuple:
     """Start MAPDL locally in gRPC mode.
@@ -497,9 +499,11 @@ def launch_grpc(
         )
         command = " ".join(command_parm)
 
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
     if verbose:
         print(f"Running {command}")
-        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location)
+        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
     else:
         subprocess.Popen(
             command,
@@ -508,6 +512,7 @@ def launch_grpc(
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env=env_vars,
         )
 
     # watch for the creation of temporary files at the run_directory.
@@ -973,6 +978,8 @@ def launch_mapdl(
     license_server_check=True,
     license_type=None,
     print_com=False,
+    add_env_vars=None,
+    replace_env_vars=None,
     **kwargs,
 ) -> _MapdlCore:
     """Start MAPDL locally.
@@ -1103,6 +1110,16 @@ def launch_mapdl(
     print_com : bool, optional
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
+
+    add_env_vars : dict, optional
+        The provided dictionary will be used to extend the system or process
+        environment variables. If you want to control all of the env vars,
+        please use ``replace_env_vars``. Defaults to ``None``.
+
+    replace_env_vars
+        The provided dictionary will be used to replace all the system or process
+        environment variables. To just add some env vars to the MAPDL process,
+        use ``add_env_vars``. Defaults to ``None``.
 
     Returns
     -------
@@ -1475,7 +1492,12 @@ def launch_mapdl(
             )
         elif mode == "grpc":
             port, actual_run_location = launch_grpc(
-                port=port, verbose=verbose_mapdl, ip=ip, **start_parm
+                port=port,
+                verbose=verbose_mapdl,
+                ip=ip,
+                add_env_vars=add_env_vars,
+                replace_env_vars=replace_env_vars,
+                **start_parm,
             )
             mapdl = MapdlGrpc(
                 ip=ip,
@@ -1559,3 +1581,48 @@ def check_mode(mode, version):
         warnings.warn("MAPDL as a service has not been tested on MAPDL < v13")
 
     return mode
+
+
+def update_env_vars(add_env_vars, replace_env_vars):
+    """
+    Update environment variables for MAPDL process
+
+    Parameters
+    ----------
+    add_env_vars : dict, None
+        Dictionary with a mapping of env variables.
+    replace_env_vars : dict, None
+        Dictionary with a mapping of env variables.
+
+    Raises
+    ------
+    TypeError
+        'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one.
+    TypeError
+        The variable 'add_env_vars' should be a dict with env vars.
+    TypeError
+        The variable 'replace_env_vars' should be a dict with env vars.
+    """
+
+    # Expanding/replacing env variables for the process.
+    if add_env_vars and replace_env_vars:
+        raise ValueError(
+            "'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one."
+        )
+
+    elif add_env_vars:
+        if not isinstance(add_env_vars, dict):
+            raise TypeError(
+                "The variable 'add_env_vars' should be a dict with env vars."
+            )
+
+        add_env_vars.update(os.environ)
+        return add_env_vars
+
+    elif replace_env_vars:
+        if not isinstance(replace_env_vars, dict):
+            raise TypeError(
+                "The variable 'replace_env_vars' should be a dict with env vars."
+            )
+
+        return replace_env_vars

@@ -13,6 +13,7 @@ from ansys.mapdl.core.launcher import (
     is_valid_executable_path,
     launch_mapdl,
     save_ansys_path,
+    update_env_vars,
     warn_uncommon_executable_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
@@ -299,3 +300,23 @@ def test_warn_uncommon_executable_path():
         UserWarning, match="does not match the usual ansys executable path style"
     ):
         warn_uncommon_executable_path("")
+
+
+def test_env_injection():
+
+    assert update_env_vars(None, None) is None
+
+    assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
+
+    _env_vars = update_env_vars(None, {"myenvvar": "True"})
+    assert len(_env_vars) == 1
+    assert "myenvvar" in _env_vars
+
+    with pytest.raises(ValueError):
+        update_env_vars({"myenvvar": "True"}, {"myenvvar": "True"})
+
+    with pytest.raises(TypeError):
+        update_env_vars("asdf", None)
+
+    with pytest.raises(TypeError):
+        update_env_vars(None, "asdf")
