@@ -75,14 +75,14 @@ class Plain_Report:
         self.kwargs = kwargs
 
         if os.name == "linux":
-            core.extend(["pexpect"])
+            self.core.extend(["pexpect"])
 
-        if sys.version_info[1] < 9:
-            optional.append("ansys_corba")
+        if self.optional is not None and sys.version_info[1] < 9:
+            self.optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
-        if self.kwargs["gpu"] and _HAS_PYVISTA:
+        if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
             from pyvista.utilities.errors import GPUInfo
 
             try:
@@ -253,7 +253,9 @@ class Report(base_report_class):
 
         if _HAS_PYANSYS_REPORT:
             #  Combine all packages into one
-            all_mapdl_packages = core + optional + additional
+            all_mapdl_packages = core + optional
+            if additional is not None:
+                all_mapdl_packages += additional
 
             # Call the pyansys_report.Report constructor
             super().__init__(
