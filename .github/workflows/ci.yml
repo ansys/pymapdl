@@ -126,10 +126,11 @@ jobs:
 
         options: >-
           --restart always
-          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
-          --health-interval=5s
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo 0 || echo 1"
+          --health-interval=1s
           --health-retries=6
           --health-timeout=1s
+          --health-start-period=5s
 
     steps:
       - uses: actions/checkout@v2
@@ -303,10 +304,11 @@ jobs:
 
         options: >-
           --restart always
-          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
-          --health-interval=5s
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo 0 || echo 1"
+          --health-interval=1s
           --health-retries=6
           --health-timeout=1s
+          --health-start-period=5s
 
     steps:
       - uses: actions/checkout@v2
