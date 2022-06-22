@@ -146,51 +146,71 @@ class AnalysisOptions:
         ----------
         antype
             Analysis type (defaults to the previously specified analysis type,
-            or to STATIC if none specified):
+            or to ``STATIC`` if none specified):
 
-            STATIC or 0 - Perform a static analysis.  Valid for all degrees of freedom.
+            STATIC or 0
+                Perform a **static analysis**.
+                Valid for all degrees of freedom.
 
-            BUCKLE or 1 - Perform a buckling analysis.  Implies that a previous static solution was
-                          performed with prestress effects calculated
-                          (PSTRES,ON).  Valid for structural degrees of freedom
-                          only.
+            BUCKLE or 1
+                Perform a buckling analysis.
+                Implies that a previous static solution was performed with
+                prestress effects calculated
+                (:meth:`Mapdl.pstres('ON') <ansys.mapdl.core.Mapdl.pstres>`).
+                Valid for structural degrees of freedom only.
 
-            MODAL or 2 - Perform a modal analysis.  Valid for structural and fluid degrees of freedom.
+            MODAL or 2
+                Perform a modal analysis.
+                Valid for structural and fluid degrees of freedom.
 
-            HARMIC or 3 - Perform a harmonic analysis.  Valid for structural, fluid, magnetic, and
-                          electrical degrees of freedom.
+            HARMIC or 3
+                Perform a harmonic analysis.
+                Valid for structural, fluid, magnetic, and electrical degrees
+                of freedom.
 
-            TRANS or 4 - Perform a transient analysis.  Valid for all degrees of freedom.
+            TRANS or 4
+                Perform a transient analysis.
+                Valid for all degrees of freedom.
 
-            SUBSTR or 7 - Perform a substructure analysis.  Valid for all degrees of freedom.
+            SUBSTR or 7
+                Perform a substructure analysis.
+                Valid for all degrees of freedom.
 
-            SPECTR or 8 - Perform a spectrum analysis.  Implies that a previous modal analysis was
-                          performed.  Valid for structural degrees of freedom
-                          only.
+            SPECTR or 8
+                Perform a spectrum analysis.
+                Implies that a previous modal analysis was
+                performed.  Valid for structural degrees of freedom
+                only.
 
         status
             Specifies the status of the analysis (new or restart):
 
-            NEW - Specifies a new analysis (default). If NEW, the remaining fields on this
-                  command are ignored.
+            NEW
+                Specifies a new analysis (default). If ``NEW``, the remaining fields on this
+                command are ignored.
 
-            RESTART - Specifies a restart of a previous analysis. Valid for static, modal, and
-                      transient (full or mode-superposition method) analyses.
-                      For more information about restarting static and
-                      transient analyses, see Multiframe Restart in the Basic
-                      Analysis Guide. For more information on restarting a
-                      modal analysis, see Modal Analysis Restart in the Basic
-                      Analysis Guide.
+            RESTART
+                Specifies a restart of a previous analysis. Valid for static, modal, and
+                transient (full or mode-superposition method) analyses.
+                For more information about restarting static and
+                transient analyses, see Multiframe Restart in the Basic
+                Analysis Guide. For more information on restarting a
+                modal analysis, see Modal Analysis Restart in the Basic
+                Analysis Guide.
 
-            Multiframe restart is also valid for harmonic analysis, but is limited to 2-D magnetic analysis only. - A substructure analysis (backsubstitution method only) can be restarted for the
-                              purpose of generating additional load vectors.
-                              For more information, see the SEOPT command and
-                              Applying Loads and Creating the Superelement
-                              Matrices in the Substructuring Analysis Guide.
+                Multiframe restart is also valid for harmonic analysis, but is limited
+                to 2-D magnetic analysis only.
 
-            VTREST - Specifies the restart of a previous VT Accelerator analysis. Valid only with
-                     Antype = STATIC, HARMIC, or TRANS. For more information,
-                     see VT Accelerator Re-run in the Basic Analysis Guide.
+                A substructure analysis (`backsubstitution` method only) can be restarted for the
+                purpose of generating additional load vectors. For more information, see the
+                :meth:`Mapdl.seopt() <ansys.mapdl.core.Mapdl.seopt>` command and
+                Applying Loads and Creating the Superelement
+                Matrices in the Substructuring Analysis Guide.
+
+            VTREST
+                Specifies the restart of a previous VT Accelerator analysis. Valid only with
+                ``Antype = STATIC``, ``HARMIC``, or ``TRANS``. For more information,
+                see VT Accelerator Re-run in the Basic Analysis Guide.
 
         ldstep
             Specifies the load step at which a multiframe restart begins.
@@ -201,58 +221,68 @@ class AnalysisOptions:
         action
             Specifies the manner of a multiframe restart.
 
-            CONTINUE - The program continues the analysis based on the specified LDSTEP and SUBSTEP
-                       (default). The current load step is continued. If the
-                       end of the load step is encountered in the .Rnnn file, a
-                       new load step is started. The program deletes all .Rnnn
-                       files, or .Mnnn files for mode-superposition transient
-                       analyses, beyond the point of restart and updates the
-                       .LDHI file if a new load step is encountered.
+            CONTINUE
+                The program continues the analysis based on the specified
+                ``LDSTEP`` and ``SUBSTEP`` (default). The current load step is continued.
+                If the end of the load step is encountered in the ``.Rnnn`` file, a
+                new load step is started. The program deletes all ``.Rnnn``
+                files, or ``.Mnnn`` files for mode-superposition transient
+                analyses, beyond the point of restart and updates the
+                ``.LDHI`` file if a new load step is encountered.
 
-            ENDSTEP - At restart, force the specified load step (LDSTEP) to end at the specified
-                      substep (SUBSTEP), even though the end of the current
-                      load step has not been reached. At the end of the
-                      specified substep, all loadings are scaled to the level
-                      of the current ending and stored in the .LDHI file. A run
-                      following this ENDSTEP starts a new load step. This
-                      capability allows you to change the load level in the
-                      middle of a load step. The program updates the .LDHI file
-                      and deletes all .Rnnn files, or .Mnnn files for mode-
-                      superposition transient analyses, beyond the point of
-                      ENDSTEP. The .Rnnn or .Mnnn file at the point of ENDSTEP
-                      are rewritten to record the rescaled load level.
+            ENDSTEP
+                At restart, force the specified load step (``LDSTEP``) to end at the specified
+                substep (``SUBSTEP``), even though the end of the current
+                load step has not been reached. At the end of the
+                specified substep, all loadings are scaled to the level
+                of the current ending and stored in the ``.LDHI`` file. A run
+                following this ``ENDSTEP`` starts a new load step. This
+                capability allows you to change the load level in the
+                middle of a load step. The program updates the ``.LDHI`` file
+                and deletes all .Rnnn files, or ``.Mnnn`` files for mode-
+                superposition transient analyses, beyond the point of
+                ``ENDSTEP``. The ``.Rnnn`` or ``.Mnnn`` file at the point of ``ENDSTEP``
+                are rewritten to record the rescaled load level.
 
-            RSTCREATE - At restart, retrieve information to be written to the results file for the
-                        specified load step (LDSTEP) and substep (SUBSTEP). Be
-                        sure to use   OUTRES to write the results to the
-                        results file. This action does not affect the .LDHI or
-                        .Rnnn files. Previous items stored in the results file
-                        at and beyond the point of RSTCREATE are deleted. This
-                        option cannot be used to restart a mode-superposition
-                        transient analysis.
+            RSTCREATE
+                At restart, retrieve information to be written to the results file for the
+                specified load step (``LDSTEP``) and substep (``SUBSTEP``). Be
+                sure to use :meth:`Mapdl.outres() <ansys.mapdl.core.Mapdl.outres>`
+                to write the results to the
+                results file. This action does not affect the ``.LDHI`` or
+                ``.Rnnn`` files. Previous items stored in the results file
+                at and beyond the point of ``RSTCREATE`` are deleted. This
+                option cannot be used to restart a mode-superposition
+                transient analysis.
 
-            PERTURB - At restart, a linear perturbation analysis (static, modal, buckling, or full
-                      harmonic) is performed for the specified load step
-                      (LDSTEP) and substep (SUBSTEP). This action does not
-                      affect the .LDHI, .Rnnn, or .RST files.
+            PERTURB
+                At restart, a linear perturbation analysis (static, modal, buckling, or full
+                harmonic) is performed for the specified load step
+                (``LDSTEP``) and substep (``SUBSTEP``). This action does not
+                affect the ``.LDHI``, ``.Rnnn``, or ``.RST`` files.
 
         Notes
         -----
-        If using the ANTYPE command to change the analysis type in the same
-        SOLVE session, the program issues the following message: "Some analysis
+        If using the :meth:`Mapdl.antype() <ansys.mapdl.core.Mapdl.antype>`
+        command to change the analysis type in the same
+        :meth:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>` session,
+        the program issues the following message: `"Some analysis
         options have been reset to their defaults. Please verify current
-        settings or respecify as required." Typically, the program resets
-        commands such as NLGEOM and EQSLV to their default values.
+        settings or respecify as required."` Typically, the program resets
+        commands such as :meth:`Mapdl.nlgeom() <ansys.mapdl.core.Mapdl.nlgeom>` and
+        :meth:`Mapdl.eqslv() <ansys.mapdl.core.Mapdl.eqslv>` to their default values.
 
-        The analysis type (Antype) cannot be changed if a restart is specified.
+        The analysis type (:meth:`Mapdl.antype() <ansys.mapdl.core.Mapdl.antype>`)
+        cannot be changed if a restart is specified.
         Always save parameters before doing a restart. For more information on
         the different types of restart, see Restarting an Analysis in the Basic
         Analysis Guide.
 
-        This command is also valid in PREP7.
+        This command is also valid in :meth:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
 
         The ANSYS Professional - Nonlinear Structural (PRN) product supports
-        the Antype = TRANS option for mode-superposition (TRNOPT,MSUP) analyses
+        the ``Antype = TRANS`` option for mode-superposition (
+        :meth:`Mapdl.trnopt("MSUP") <ansys.mapdl.core.Mapdl.trnopt>`) analyses
         only.
         """
         command = f"ANTYPE,{antype},{status},{ldstep},{substep},{action}"
@@ -334,51 +364,55 @@ class AnalysisOptions:
         memory_option
             Memory allocation option:
 
-            DEFAULT - Use the default memory allocation strategy for
-                      the sparse solver. The default strategy attempts
-                      to run in the INCORE memory mode. If there is
-                      not enough available physical memory when the
-                      solver starts to run in the INCORE memory mode,
-                      the solver will then attempt to run in the
-                      OUTOFCORE memory mode.
+            DEFAULT
+                Use the default memory allocation strategy for
+                the sparse solver. The default strategy attempts
+                to run in the ``INCORE`` memory mode. If there is
+                not enough available physical memory when the
+                solver starts to run in the ``INCORE`` memory mode,
+                the solver will then attempt to run in the
+                ``OUTOFCORE`` memory mode.
 
-            INCORE - Use a memory allocation strategy in the sparse
-                     solver that will attempt to obtain enough memory
-                     to run with the entire factorized matrix in
-                     memory. This option uses the most amount of
-                     memory and should avoid doing any I/O. By
-                     avoiding I/O, this option achieves optimal solver
-                     performance. However, a significant amount of
-                     memory is required to run in this mode, and it is
-                     only recommended on machines with a large amount
-                     of memory. If the allocation for in-core memory
-                     fails, the solver will automatically revert to
-                     out-of-core memory mode.
+            INCORE
+                Use a memory allocation strategy in the sparse
+                solver that will attempt to obtain enough memory
+                to run with the entire factorized matrix in
+                memory. This option uses the most amount of
+                memory and should avoid doing any I/O. By
+                avoiding I/O, this option achieves optimal solver
+                performance. However, a significant amount of
+                memory is required to run in this mode, and it is
+                only recommended on machines with a large amount
+                of memory. If the allocation for in-core memory
+                fails, the solver will automatically revert to
+                out-of-core memory mode.
 
-            OUTOFCORE - Use a memory allocation strategy in the sparse
-                        solver that will attempt to allocate only
-                        enough work space to factor each individual
-                        frontal matrix in memory, but will store the
-                        entire factorized matrix on disk. Typically,
-                        this memory mode results in poor performance
-                        due to the potential bottleneck caused by the
-                        I/O to the various files written by the
-                        solver.
+            OUTOFCORE
+                Use a memory allocation strategy in the sparse
+                solver that will attempt to allocate only
+                enough work space to factor each individual
+                frontal matrix in memory, but will store the
+                entire factorized matrix on disk. Typically,
+                this memory mode results in poor performance
+                due to the potential bottleneck caused by the
+                I/O to the various files written by the
+                solver.
 
-            FORCE - This option, when used in conjunction with the
-                    Memory_Size option, allows you to force the sparse
-                    solver to run with a specific amount of
-                    memory. This option is only recommended for the
-                    advanced user who understands sparse solver memory
-                    requirements for the problem being solved,
-                    understands the physical memory on the system, and
-                    wants to control the sparse solver memory usage.
+            FORCE
+                This option, when used in conjunction with the
+                ``Memory_Size`` option, allows you to force the sparse
+                solver to run with a specific amount of
+                memory. This option is only recommended for the
+                advanced user who understands sparse solver memory
+                requirements for the problem being solved,
+                understands the physical memory on the system, and
+                wants to control the sparse solver memory usage.
 
         memory_size
             Initial memory size allocation for the sparse solver in
             MB. This argument allows you to tune the sparse solver
             memory and is not generally required. Although there is no
-            upper limit for Memory_Size, the Memory_Size setting
+            upper limit for ``Memory_Size``, the ``Memory_Size`` setting
             should always be well within the physical memory
             available, but not so small as to cause the sparse solver
             to run out of memory. Warnings and/or errors from the
@@ -390,16 +424,18 @@ class AnalysisOptions:
         solve_info
             Solver output option:
 
-            OFF - Turns off additional output printing from the sparse
-            solver (default).
+            OFF
+                Turns off additional output printing from the sparse
+                solver (default).
 
-            PERFORMANCE - Turns on additional output printing from the
-                          sparse solver, including a performance
-                          summary and a summary of file I/O for the
-                          sparse solver. Information on memory usage
-                          during assembly of the global matrix (that
-                          is, creation of the Jobname.FULL file) is
-                          also printed with this option.
+            PERFORMANCE
+                Turns on additional output printing from the
+                sparse solver, including a performance
+                summary and a summary of file I/O for the
+                sparse solver. Information on memory usage
+                during assembly of the global matrix (that
+                is, creation of the Jobname.FULL file) is
+                also printed with this option.
 
         Notes
         -----
@@ -417,21 +453,21 @@ class AnalysisOptions:
         solution.
 
         If you have a very large memory system, you may want to try
-        selecting the INCORE memory mode for larger jobs to improve
+        selecting the ``INCORE`` memory mode for larger jobs to improve
         performance. When running the sparse solver on a machine with
         very slow I/O performance (for example, slow hard drive
-        speed), you may want to try using the INCORE memory mode to
+        speed), you may want to try using the ``INCORE`` memory mode to
         achieve better performance. However, doing so may require much
-        more memory compared to running in the OUTOFCORE memory mode.
+        more memory compared to running in the ``OUTOFCORE`` memory mode.
 
-        Running with the INCORE memory mode is best for jobs which
+        Running with the ``INCORE`` memory mode is best for jobs which
         comfortably fit within the limits of the physical memory on a
         given system. If the sparse solver work space exceeds physical
         memory size, the system will be forced to use virtual memory
         (or the system page/swap file). In this case, it is typically
-        more efficient to run with the OUTOFCORE memory mode. Assuming
+        more efficient to run with the ``OUTOFCORE`` memory mode. Assuming
         the job fits comfortably within the limits of the machine,
-        running with the INCORE memory mode is often ideal for jobs
+        running with the ``INCORE`` memory mode is often ideal for jobs
         where repeated solves are performed for a single matrix
         factorization.  This occurs in a modal or buckling analysis or
         when doing multiple load steps in a linear, static analysis.
@@ -439,7 +475,7 @@ class AnalysisOptions:
         For repeated runs with the sparse solver, you may set the
         initial sparse solver memory allocation to the amount required
         for factorization. This strategy reduces the frequency of
-        allocation and reallocation in the run to make the INCORE
+        allocation and reallocation in the run to make the ``INCORE``
         option fully effective. If you have a very large memory
         system, you may use the Memory_Size argument to increase the
         maximum size attempted for in-core runs.
@@ -458,38 +494,48 @@ class AnalysisOptions:
             Specifies the action for defining or manipulating crack-growth
             data:
 
-            NEW - Initiate a new set of crack-growth simulation data (default).
+            NEW
+                Initiate a new set of crack-growth simulation data (default).
 
-            CID - Specify the crack-calculation (CINT) ID for energy-release rates to be used in
-                  the fracture criterion calculation.
+            CID
+                Specify the crack-calculation (CINT) ID for energy-release rates to be used in
+                the fracture criterion calculation.
 
-            FCOPTION - Specify the fracture criterion for crack-growth/delamination.
+            FCOPTION
+                Specify the fracture criterion for crack-growth/delamination.
 
-            CPATH - Specify the element component for crack growth.
+            CPATH
+                Specify the element component for crack growth.
 
-            DTIME - Specify the initial time step for crack growth.
+            DTIME
+                Specify the initial time step for crack growth.
 
-            DTMIN - Specify the minimum time step for crack growth.
+            DTMIN
+                Specify the minimum time step for crack growth.
 
-            DTMAX - Specify the maximum time step for crack growth.
+            DTMAX
+                Specify the maximum time step for crack growth.
 
-            FCRAT - Fracture criterion ratio (fc).
+            FCRAT
+                Fracture criterion ratio (fc).
 
-            STOP - Stops the analysis when the specified maximum crack extension is reached.
+            STOP
+                Stops the analysis when the specified maximum crack extension is reached.
 
-            METHOD - Define the method of crack propagation.
+            METHOD
+                Define the method of crack propagation.
 
         Notes
         -----
-        When Action = NEW, the CGROW command initializes a crack-growth
-        simulation set. Subsequent CGROW commands define the parameters
+        When ``Action = NEW``, the :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` command initializes a crack-growth
+        simulation set. Subsequent :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` commands define the parameters
         necessary for the simulation.
 
-        For multiple cracks, issue multiple CGROW,NEW commands (and any
-        subsequent CGROW commands necessary to define the parameters) for each
+        For multiple cracks, issue multiple :meth:`Mapdl.cgrow("NEW") <ansys.mapdl.core.Mapdl.cgrow>` commands (and any
+        subsequent :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` commands necessary to define the parameters) for each
         crack.
 
-        If the analysis is restarted (ANTYPE,,RESTART), the CGROW command must
+        If the analysis is restarted (:meth:`Mapdl.antype("","RESTART") <ansys.mapdl.core.Mapdl.antype>`), the :meth:`Mapdl.cgrow() <ansys.mapdl.core.Mapdl.cgrow>` command must
         be re-issued.
 
         For additional details on this command, see
@@ -580,11 +626,14 @@ class AnalysisOptions:
         cmsmeth
             The component mode synthesis method to use. This value is required.
 
-            FIX - Fixed-interface method.
+            FIX
+                Fixed-interface method.
 
-            FREE - Free-interface method.
+            FREE
+                Free-interface method.
 
-            RFFB - Residual-flexible free-interface method.
+            RFFB
+                Residual-flexible free-interface method.
 
         nmode
             The number of normal modes extracted and used in the superelement
@@ -603,15 +652,19 @@ class AnalysisOptions:
             interface (CMSMETH = RFFB) CMS analysis, the method to use for
             defining free body modes:
 
-            FNUM - The number (FDBVAL) of rigid body modes in the calculation.
+            FNUM
+                The number (FDBVAL) of rigid body modes in the calculation.
 
-            FTOL - Employ a specified tolerance (FDBVAL) to determine rigid body modes in the
-                   calculation.
+            FTOL
+                Employ a specified tolerance (FDBVAL) to determine rigid body modes in the
+                calculation.
 
-            FAUTO - Automatically determine rigid body modes in the calculation. This method is the
-                    default.
+            FAUTO
+                Automatically determine rigid body modes in the calculation. This method is the
+                default.
 
-            RIGID - If no rigid body modes exist, define your own via the RIGID command.
+            RIGID
+                If no rigid body modes exist, define your own via the RIGID command.
 
         fbdval
             In a free-interface CMS analysis (CMSMETH = FREE), the number of
@@ -626,15 +679,17 @@ class AnalysisOptions:
             .TCMS file (FIX or FREE methods) or body properties to the .EXB
             file (FIX method).
 
-            TCMS - Write the transformation matrix of the nodal component defined by the OUTPR
-                   command to a .TCMS file. Refer to TCMS File Format in the
-                   Programmer's Reference for more information on the this
-                   file.
+            TCMS
+                Write the transformation matrix of the nodal component defined by the OUTPR
+                command to a .TCMS file. Refer to TCMS File Format in the
+                Programmer's Reference for more information on the this
+                file.
 
-            EXB - Write a body property input file (.EXB file) containing the condensed
-                  substructure matrices and other body properties for use with
-                  AVL EXCITE. Refer to ANSYS Interface to AVL EXCITE in the
-                  Substructuring Analysis Guide for more information.
+            EXB
+                Write a body property input file (.EXB file) containing the condensed
+                substructure matrices and other body properties for use with
+                AVL EXCITE. Refer to ANSYS Interface to AVL EXCITE in the
+                Substructuring Analysis Guide for more information.
 
         Notes
         -----
@@ -931,39 +986,58 @@ class AnalysisOptions:
         lab
             Specifies the criteria for causing a cutback.  Valid labels are:
 
-            PLSLIMIT  - Maximum equivalent plastic strain allowed within a time-step (substep).  If the
-                        calculated value exceeds the VALUE, the program
-                        performs a cutback (bisection).  VALUE defaults to 0.15
-                        (15%).
+            PLSLIMIT
+                Maximum equivalent plastic strain allowed within a time-step (substep).  If the
+                calculated value exceeds the VALUE, the program
+                performs a cutback (bisection).  VALUE defaults to 0.15
+                (15%).
 
-            CRPLIMIT  - Set values for calculating the maximum equivalent creep ratio allowed within a
-                        time step. If the calculated maximum creep ratio
-                        exceeds the defined creep ratio limit, the program
-                        performs a cutback.
+            CRPLIMIT
+                Set values for calculating the maximum equivalent creep ratio allowed within a
+                time step. If the calculated maximum creep ratio
+                exceeds the defined creep ratio limit, the program
+                performs a cutback.
 
-            DSPLIMIT  - Maximum incremental displacement within the solution field in a time step
-                        (substep).  If the maximum calculated value exceeds
-                        VALUE, the program performs a cutback (bisection).
-                        VALUE defaults to 1.0 x 107.
+            DSPLIMIT
+                Maximum incremental displacement within the solution field in a time step
+                (substep).  If the maximum calculated value exceeds
+                VALUE, the program performs a cutback (bisection).
+                VALUE defaults to 1.0 x 107.
 
-            NPOINT  - Number of points in a cycle for a second order dynamic equation, used to
-                      control automatic time stepping.  If the number of
-                      solution points per cycle is less than VALUE, the program
-                      performs a cutback in time step size. VALUE defaults to
-                      13 for linear analysis, 5 for nonlinear analysis. A
-                      larger number of points yields a more accurate solution
-                      but also increases the solution run time.
+            NPOINT
+                Number of points in a cycle for a second order dynamic equation, used to
+                control automatic time stepping.  If the number of
+                solution points per cycle is less than VALUE, the program
+                performs a cutback in time step size. VALUE defaults to
+                13 for linear analysis, 5 for nonlinear analysis. A
+                larger number of points yields a more accurate solution
+                but also increases the solution run time.
 
-            This option works well for linear problems. For nonlinear analyses, other factors such as contact status changes and solution convergence rate can overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL Theory Reference for more information on automatic time stepping. - NOITERPREDICT
+                This option works well for linear problems. For nonlinear analyses, other
+                factors such as contact status changes and solution convergence rate can
+                overwrite NPOINT. See Automatic Time Stepping in the Mechanical APDL
+                Theory Reference for more information on automatic time stepping.
 
-            If VALUE is 0 (default), an internal auto time step scheme will predict the number of iterations for nonlinear convergence and perform a cutback earlier than the number of iterations specified by the NEQIT command. This is the recommended option. If VALUE is 1, the solution will iterate (if nonconvergent) to NEQIT number of iterations before a cutback is invoked. It is sometimes useful for poorly-convergent problems, but rarely needed in general. - Bisection is also controlled by contact status change, plasticity or creep
-                              strain limit, and other factors. If any of these
-                              factors occur, bisection will still take place,
-                              regardless of the NOITERPREDICT setting.
+            NOITERPREDICT
 
-            CUTBACKFACTOR  - Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
-                             than 0.0 and less than 1.0. This option is active
-                             only if AUTOTS,ON is set.
+                If VALUE is 0 (default), an internal auto time step scheme will predict
+                the number of iterations for nonlinear convergence and perform a cutback
+                earlier than the number of iterations specified by the NEQIT command.
+                This is the recommended option.
+
+                If VALUE is 1, the solution will iterate (if nonconvergent) to NEQIT
+                number of iterations before a cutback is invoked.
+                It is sometimes useful for poorly-convergent problems, but rarely needed in general.
+
+                Bisection is also controlled by contact status change, plasticity or creep
+                strain limit, and other factors. If any of these
+                factors occur, bisection will still take place,
+                regardless of the NOITERPREDICT setting.
+
+            CUTBACKFACTOR
+                Changes the cutback value for bisection. Default is 0.5. VALUE must be greater
+                than 0.0 and less than 1.0. This option is active
+                only if AUTOTS,ON is set.
 
         value
             Numeric value for the specified cutback criterion. For Lab =
@@ -972,27 +1046,31 @@ class AnalysisOptions:
         option
             Type of creep analysis. Valid for Lab = CRPLIMIT only.
 
-            IMPRATIO  - Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
-                        no creep limit control) and any positive value is
-                        valid. (See Implicit Creep Procedure in the Structural
-                        Analysis Guide for information on how to define
-                        implicit creep.)
+            IMPRATIO
+                Set the maximum creep ratio value for implicit creep. The default is 0.0 (i.e.,
+                no creep limit control) and any positive value is
+                valid. (See Implicit Creep Procedure in the Structural
+                Analysis Guide for information on how to define
+                implicit creep.)
 
-            EXPRATIO   - Set the maximum creep ratio value for explicit creep. The default value is 0.1
-                         and any positive value up to 0.25 is allowed. (See
-                         Explicit Creep Procedure in the Structural Analysis
-                         Guide for information on how to define explicit
-                         creep.)
+            EXPRATIO
+                Set the maximum creep ratio value for explicit creep. The default value is 0.1
+                and any positive value up to 0.25 is allowed. (See
+                Explicit Creep Procedure in the Structural Analysis
+                Guide for information on how to define explicit
+                creep.)
 
-            STSLIMIT   - Stress threshold for calculating the creep ratio. For integration points with
-                         effective stress below this threshold, the creep ratio
-                         does not cause cutback. The default value is 0.0 and
-                         any positive value is valid.
+            STSLIMIT
+                Stress threshold for calculating the creep ratio. For integration points with
+                effective stress below this threshold, the creep ratio
+                does not cause cutback. The default value is 0.0 and
+                any positive value is valid.
 
-            STNLIMIT   - Elastic strain threshold for calculating the creep ratio. For integration
-                         points with effective elastic strain below this
-                         threshold, the creep ratio does not cause cutback. The
-                         default value is 0.0 and any positive value is valid.
+            STNLIMIT
+                Elastic strain threshold for calculating the creep ratio. For integration
+                points with effective elastic strain below this
+                threshold, the creep ratio does not cause cutback. The
+                default value is 0.0 and any positive value is valid.
 
         Notes
         -----
@@ -1031,12 +1109,15 @@ class AnalysisOptions:
         decomp
             Controls which domain decomposition algorithm to use.
 
-            AUTO - Use the default domain decomposition algorithm when splitting the model into
-                   domains for Distributed ANSYS (default).
+            AUTO
+                Use the default domain decomposition algorithm when splitting the model into
+                domains for Distributed ANSYS (default).
 
-            GREEDY - Use the "greedy" domain decomposition algorithm.
+            GREEDY
+                Use the "greedy" domain decomposition algorithm.
 
-            METIS - Use the METIS graph partitioning domain decomposition algorithm.
+            METIS
+                Use the METIS graph partitioning domain decomposition algorithm.
 
         Notes
         -----

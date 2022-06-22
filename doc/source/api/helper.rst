@@ -12,6 +12,7 @@ or automating other tasks.
 
    
    launch_mapdl
+   convert_apdl_block
    convert_script
    Information
    change_default_ansys_path

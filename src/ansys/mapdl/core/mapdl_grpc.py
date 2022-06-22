@@ -341,7 +341,7 @@ class MapdlGrpc(_MapdlCore):
             self._channel = channel
 
         # connect and validate to the channel
-        self._multi_connect()
+        self._multi_connect(timeout=timeout)
 
         # double check we have access to the local path if not
         # explicitly specified
