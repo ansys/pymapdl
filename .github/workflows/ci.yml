@@ -14,16 +14,16 @@ env:
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
+  PACKAGE_NAME: PyMAPDL
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 3
-  RESET_EXAMPLES_CACHE: 3
-  RESET_DOC_BUILD_CACHE: 3
-  RESET_AUTOSUMMARY_CACHE: 3
-  PACKAGE_NAME: PyMAPDL
+  RESET_PIP_CACHE: 5
+  RESET_EXAMPLES_CACHE: 5
+  RESET_DOC_BUILD_CACHE: 5
+  RESET_AUTOSUMMARY_CACHE: 5
 
 jobs:
 
