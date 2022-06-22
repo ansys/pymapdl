@@ -51,6 +51,38 @@ for version in versions:
 
 V150_EXEC = get_ansys_bin("150")
 
+
+def test_warn_uncommon_executable_path():
+    with pytest.warns(
+        UserWarning, match="does not match the usual ansys executable path style"
+    ):
+        warn_uncommon_executable_path("")
+
+
+def test_env_injection():
+
+    assert update_env_vars(None, None) is None
+
+    assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
+
+    _env_vars = update_env_vars(None, {"myenvvar": "True"})
+    assert len(_env_vars) == 1
+    assert "myenvvar" in _env_vars
+
+    with pytest.raises(ValueError):
+        update_env_vars({"myenvvar": "True"}, {"myenvvar": "True"})
+
+    with pytest.raises(TypeError):
+        update_env_vars("asdf", None)
+
+    with pytest.raises(TypeError):
+        update_env_vars(None, "asdf")
+
+
+####################################
+# Skipping all the test after this
+####################################
+
 if not valid_versions:
     pytestmark = pytest.mark.skip("Requires MAPDL")
 
@@ -293,30 +325,3 @@ def test_is_common_executable_path(tmpdir, file_path, result):
         fid.write("")
 
     assert is_common_executable_path(filename) == result
-
-
-def test_warn_uncommon_executable_path():
-    with pytest.warns(
-        UserWarning, match="does not match the usual ansys executable path style"
-    ):
-        warn_uncommon_executable_path("")
-
-
-def test_env_injection():
-
-    assert update_env_vars(None, None) is None
-
-    assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
-
-    _env_vars = update_env_vars(None, {"myenvvar": "True"})
-    assert len(_env_vars) == 1
-    assert "myenvvar" in _env_vars
-
-    with pytest.raises(ValueError):
-        update_env_vars({"myenvvar": "True"}, {"myenvvar": "True"})
-
-    with pytest.raises(TypeError):
-        update_env_vars("asdf", None)
-
-    with pytest.raises(TypeError):
-        update_env_vars(None, "asdf")
