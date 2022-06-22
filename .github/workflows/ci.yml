@@ -107,6 +107,7 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       # Label used to access the service container
@@ -282,6 +283,7 @@ jobs:
   build_test:
     name: Build and Unit Testing
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
