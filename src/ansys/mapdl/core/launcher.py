@@ -501,7 +501,7 @@ def launch_grpc(
 
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
-    if verbose:
+    if verbose:  # pragma: no cover
         print(f"Running {command}")
         subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
     else:
