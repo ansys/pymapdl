@@ -51,41 +51,6 @@ for version in versions:
 
 V150_EXEC = get_ansys_bin("150")
 
-
-def test_warn_uncommon_executable_path():
-    with pytest.warns(
-        UserWarning, match="does not match the usual ansys executable path style"
-    ):
-        warn_uncommon_executable_path("")
-
-
-def test_env_injection():
-
-    assert update_env_vars(None, None) is None
-
-    assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
-
-    _env_vars = update_env_vars(None, {"myenvvar": "True"})
-    assert len(_env_vars) == 1
-    assert "myenvvar" in _env_vars
-
-    with pytest.raises(ValueError):
-        update_env_vars({"myenvvar": "True"}, {"myenvvar": "True"})
-
-    with pytest.raises(TypeError):
-        update_env_vars("asdf", None)
-
-    with pytest.raises(TypeError):
-        update_env_vars(None, "asdf")
-
-
-####################################
-# Skipping all the test after this
-####################################
-
-if not valid_versions:
-    pytestmark = pytest.mark.skip("Requires MAPDL")
-
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
     ("C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe", 202),
@@ -96,6 +61,7 @@ paths = [
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.skipif(os.name != "nt", reason="Requires Windows")
 def test_validate_sw():
     # ensure that windows adds msmpi
@@ -108,6 +74,7 @@ def test_validate_sw():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
@@ -117,6 +84,7 @@ def test_version_from_path(path_data):
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         _version_from_path("abc")
@@ -125,8 +93,8 @@ def test_catch_version_from_path():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.skipif(os.name != "posix", reason="Requires Linux")
-@pytest.mark.skipif(not versions, reason="Requires ANSYS install")
 def test_find_ansys_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
@@ -138,6 +106,7 @@ def test_find_ansys_linux():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = get_ansys_bin(valid_versions[0])
@@ -147,6 +116,7 @@ def test_invalid_mode():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
     exec_file = get_ansys_bin("150")
@@ -157,6 +127,7 @@ def test_old_version():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.skipif(not os.name == "nt", reason="Requires windows")
 @pytest.mark.console
 def test_failed_console():
@@ -168,6 +139,7 @@ def test_failed_console():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize("version", valid_versions)
 @pytest.mark.console
 @pytest.mark.skipif(os.name != "posix", reason="Only supported on Linux")
@@ -180,6 +152,7 @@ def test_launch_console(version):
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.corba
 @pytest.mark.parametrize("version", valid_versions)
 def test_launch_corba(version):
@@ -196,6 +169,7 @@ def test_launch_corba(version):
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_keyword():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -222,6 +196,7 @@ def test_license_type_keyword():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -242,6 +217,7 @@ def test_license_type_keyword_names():
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -266,6 +242,7 @@ def test_license_type_additional_switch():
     mapdl.exit()
 
 
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize(
     "exe_loc",
     [
@@ -279,6 +256,7 @@ def test_save_ansys_path(exe_loc):
     assert os.path.exists(path_)
 
 
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize(
     "file,result",
     [
@@ -298,6 +276,7 @@ def test_is_valid_executable_path(tmpdir, file, result):
     assert is_valid_executable_path(filename) == result
 
 
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize(
     "file_path,result",
     [
@@ -325,3 +304,30 @@ def test_is_common_executable_path(tmpdir, file_path, result):
         fid.write("")
 
     assert is_common_executable_path(filename) == result
+
+
+def test_warn_uncommon_executable_path():
+    with pytest.warns(
+        UserWarning, match="does not match the usual ansys executable path style"
+    ):
+        warn_uncommon_executable_path("")
+
+
+def test_env_injection():
+
+    assert update_env_vars(None, None) is None
+
+    assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
+
+    _env_vars = update_env_vars(None, {"myenvvar": "True"})
+    assert len(_env_vars) == 1
+    assert "myenvvar" in _env_vars
+
+    with pytest.raises(ValueError):
+        update_env_vars({"myenvvar": "True"}, {"myenvvar": "True"})
+
+    with pytest.raises(TypeError):
+        update_env_vars("asdf", None)
+
+    with pytest.raises(TypeError):
+        update_env_vars(None, "asdf")
