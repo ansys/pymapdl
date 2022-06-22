@@ -258,27 +258,27 @@ jobs:
           retention-days: 7
 
       - name: Collect docker logs on failure
-        if: failure()
+        if: "!success()"
         uses: jwalton/gh-docker-logs@v1
         with:
           dest: './logs-docs'
 
       - name: Display files structure
-        if: failure()
+        if: "!success()"
         run: ls -R
 
       - name: Collecting documentation logs
-        if: failure()
+        if: "!success()"
         run: |
           cp ./doc/build/latex/*.log ./logs-docs
           cp ./doc/build/latex/*.out ./logs-docs
 
       - name: Tar logs
-        if: failure()
+        if: "!success()"
         run: tar cvzf ./logs-docs.tgz ./logs-docs
 
       - name: Upload logs to GitHub
-        if: failure()
+        if: "!success()"
         uses: actions/upload-artifact@master
         with:
           name: logs-docs.tgz
@@ -378,22 +378,22 @@ jobs:
           retention-days: 7
 
       - name: Collect docker logs on failure
-        if: failure()
+        if: "!success()"
         uses: jwalton/gh-docker-logs@v1
         with:
           dest: './logs-${{ matrix.mapdl-version }}'
 
       - name: Display files structure
-        if: failure()
+        if: "!success()"
         run: |
           ls -R
 
       - name: Tar logs
-        if: failure()
+        if: "!success()"
         run: tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
 
       - name: Upload logs to GitHub
-        if: failure()
+        if: "!success()"
         uses: actions/upload-artifact@master
         with:
           name: logs-${{ matrix.mapdl-version }}.tgz
