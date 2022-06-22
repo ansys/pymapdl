@@ -21,9 +21,11 @@ from ansys.mapdl.core.misc import (
 
 
 def test_report():
-    report = pymapdl.Report(gpu=system_supports_plotting())
+    report = pymapdl.Report(additional=["matplotlib", "pyvista", "pyiges", "tqdm"], gpu=system_supports_plotting())
     assert "PyAnsys Software and Environment Report" in str(report)
-
+    
+    # Check that when adding additional (repeated) packages, they appear only once
+    assert str(report).count("pyvista") == 1
 
 @pytest.mark.parametrize(
     "ip",
