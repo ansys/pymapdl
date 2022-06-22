@@ -25,6 +25,10 @@ env:
   RESET_DOC_BUILD_CACHE: 5
   RESET_AUTOSUMMARY_CACHE: 5
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   stylecheck:
