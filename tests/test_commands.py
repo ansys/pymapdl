@@ -307,7 +307,9 @@ def test_myger_fail():
 
 @pytest.fixture
 def fix():
-    raise Exception("oops")
+    from ansys.mapdl.core.errors import MapdlInvalidRoutineError
+
+    raise MapdlInvalidRoutineError("oops")
 
 
 def test_myger_error(fix):
