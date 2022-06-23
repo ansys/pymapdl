@@ -319,6 +319,20 @@ jobs:
         if: always()
         run: cat log.txt
 
+
+  build_test_windows:
+    name: Build and Unit Testing on Windows
+    runs-on: [self-hosted, pymapdl]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [docs_build, build_test]
