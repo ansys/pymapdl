@@ -1,0 +1,21 @@
+name: Windows tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+  
+jobs:
+  build_test_windows:
+    name: Build and Unit Testing on Windows
+    runs-on: [self-hosted, pymapdl]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
