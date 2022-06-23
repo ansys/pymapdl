@@ -21,5 +21,9 @@ jobs:
           python-version: 3.8
 
       - name: Pulling installation files
+        env:
+          ANSYS_USER: ${{ secrets.ANSYS_USER }}
+          ANSYS_PASS: ${{ secrets.ANSYS_PASS }}
+          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
         run: |
-          wget --mirror --recursive --force-directories -np -nH --cut-dirs=2 --http-user=${{ secrets.ANSYS_USER }} --http-password=${{ secrets.ANSYS_PASS }} ${{ secrets.ARTIFACTORY_URL }}/v222_Certified/linx64/
+          wget --mirror --recursive --force-directories -np -nH --cut-dirs=2 --http-user=$ANSYS_USER --http-password=$ANSYS_PASS $ARTIFACTORY_URL/v222_Certified/linx64/
