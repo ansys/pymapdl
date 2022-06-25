@@ -6,7 +6,7 @@ jupyter_sphinx==0.3.2
 jupyterlab>=3.2.8
 matplotlib==3.5.2
 numpydoc==1.4.0
-pandas==1.4.2
+pandas==1.4.3
 plotly==5.9.0
 ansys-sphinx-theme==0.4.2
 pypandoc==1.8.1
