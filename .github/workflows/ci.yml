@@ -119,8 +119,8 @@ jobs:
         # Docker Hub image
         image: ghcr.io/pyansys/pymapdl/mapdl:v21.2.1
         ports:
-          - 21000:50052
-          - 21001:50055
+          - 21000:50052  # main service
+          - 21001:50055  # DB service
         # ANSYS_lOCK: Whether or not create a lock file, We disable this to allow MAPDL
         # restart without issue after it failed.
         # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
@@ -297,8 +297,8 @@ jobs:
         # Docker Hub image
         image: 'ghcr.io/pyansys/pymapdl/mapdl:${{ matrix.mapdl-version }}'
         ports:
-          - 21000:50052
-          - 21001:50055
+          - 21000:50052  # main service
+          - 21001:50055  # DB service
         # ANSYS_lOCK: Whether or not create a lock file. We disable this to allow MAPDL
         # restart without issue after it failed.
         # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
@@ -356,7 +356,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Unit Testing
-        timeout-minutes: 9
+        timeout-minutes: 15
         run: |
           pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html

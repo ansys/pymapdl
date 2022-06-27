@@ -21,8 +21,8 @@ jobs:
         # Docker Hub image
         image: ghcr.io/pyansys/pymapdl/mapdl:v21.2.1
         ports:
-          - 21000:50052
-          - 21001:50055
+          - 21000:50052  # main service
+          - 21001:50055  # DB service
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
 
