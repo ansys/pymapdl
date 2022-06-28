@@ -53,7 +53,7 @@ jobs:
       #     echo "todo"
       
       - name: Installing silently MAPDL
-        shell: pwsh
+        shell: powershell
         working-directory: C:\Users\german.ayuso\actions-runner\_work
         run: |
           .\mapdl_extracted\setup.exe -silent -install_dir "C:\Users\german.ayuso\actions-runner\_work\installations" -mechapdl
