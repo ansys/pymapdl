@@ -26,10 +26,8 @@ SpacedPaths = namedtuple(
 
 from _pytest.terminal import TerminalReporter
 
+
 ## Changing report line length
-import pytest
-
-
 class MyReporter(TerminalReporter):
     def short_test_summary(self):
         # your own impl goes here, for example:
