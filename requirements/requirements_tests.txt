@@ -5,4 +5,5 @@ pandas==1.4.3
 pytest==7.1.2
 pytest-cov==3.0.0
 pyvista==0.34.1
+pyansys-tools-report==0.2.2
 vtk==9.0.3
