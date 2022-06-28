@@ -2,12 +2,12 @@ Sphinx==5.0.2
 ansys-mapdl-reader==0.51.14
 imageio-ffmpeg==0.4.7
 imageio==2.19.3
-jupyter_sphinx==0.3.2
+jupyter_sphinx==0.4.0
 jupyterlab>=3.2.8
 matplotlib==3.5.2
 numpydoc==1.4.0
-pandas==1.4.2
-plotly==5.8.2
+pandas==1.4.3
+plotly==5.9.0
 ansys-sphinx-theme==0.4.2
 pypandoc==1.8.1
 pytest-sphinx==0.4.0

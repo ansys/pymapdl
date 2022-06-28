@@ -20,12 +20,12 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
 
 try:
-    import scooby
+    import ansys.tools.report as pyansys_report
 
-    _HAS_SCOOBY = True
+    _HAS_PYANSYS_REPORT = True
 except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The module 'scooby' is not installed.")
-    _HAS_SCOOBY = False
+    LOG.debug("The package 'pyansys-tools-report' is not installed.")
+    _HAS_PYANSYS_REPORT = False
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -74,19 +74,44 @@ class Plain_Report:
         self.optional = optional
         self.kwargs = kwargs
 
-    def get_version(self, package):
-        from importlib.metadata import PackageNotFoundError
-        from importlib.metadata import version as get_lib_version
+        if os.name == "posix":
+            self.core.extend(["pexpect"])
 
-        package = package.replace(".", "-")
+        if self.optional is not None and sys.version_info[1] < 9:
+            self.optional.append("ansys_corba")
+
+        # Information about the GPU - bare except in case there is a rendering
+        # bug that the user is trying to report.
+        if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
+            from pyvista.utilities.errors import GPUInfo
+
+            try:
+                self.kwargs["extra_meta"] = [(t[1], t[0]) for t in GPUInfo().get_info()]
+            except RuntimeError as e:  # pragma: no cover
+                self.kwargs["extra_meta"] = ("GPU Details", f"Error: {str(e)}")
+        else:
+            self.kwargs["extra_meta"] = ("GPU Details", "None")
+
+    def get_version(self, package):
+        try:
+            import importlib.metadata as importlib_metadata
+        except ModuleNotFoundError:  # pragma: no cover
+            import importlib_metadata
 
         try:
-            return get_lib_version(package)
-        except PackageNotFoundError:
+            return importlib_metadata.version(package.replace(".", "-"))
+        except importlib_metadata.PackageNotFoundError:
             return "Package not found"
 
     def __repr__(self):
-        header = ["\n", "Packages Requirements", "*********************"]
+        header = [
+            "-" * 79,
+            "\n",
+            "PyMAPDL Software and Environment Report",
+            "\n",
+            "Packages Requirements",
+            "*********************",
+        ]
 
         core = ["\nCore packages", "-------------"]
         core.extend(
@@ -121,83 +146,7 @@ class Plain_Report:
         else:
             additional = [""]
 
-        return "\n".join(header + core + optional + additional)
-
-
-if _HAS_SCOOBY:
-    base_report_class = scooby.Report
-else:  # pragma: no cover
-    base_report_class = Plain_Report
-
-
-class Report(base_report_class):
-    """A class for custom scooby.Report."""
-
-    def __init__(self, additional=None, ncol=3, text_width=80, sort=False, gpu=True):
-        """Generate a :class:`scooby.Report` instance.
-
-        Parameters
-        ----------
-        additional : list(ModuleType), list(str)
-            List of packages or package names to add to output information.
-
-        ncol : int, optional
-            Number of package-columns in html table; only has effect if
-            ``mode='HTML'`` or ``mode='html'``. Defaults to 3.
-
-        text_width : int, optional
-            The text width for non-HTML display modes
-
-        sort : bool, optional
-            Alphabetically sort the packages
-
-        gpu : bool
-            Gather information about the GPU. Defaults to ``True`` but if
-            experiencing rendering issues, pass ``False`` to safely generate
-            a report.
-
-        """
-        # Mandatory packages
-        core = [
-            "ansys.mapdl.core",
-            "numpy",
-            "appdirs",
-            "scipy",
-            "grpc",  # grpcio
-            "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
-            "ansys.mapdl.reader",  # ansys-mapdl-reader
-            "google.protobuf",  # protobuf library
-        ]
-
-        if os.name == "linux":
-            core.extend(["pexpect"])
-
-        # Optional packages
-        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
-        if sys.version_info[1] < 9:
-            optional.append("ansys_corba")
-
-        # Information about the GPU - bare except in case there is a rendering
-        # bug that the user is trying to report.
-        if gpu and _HAS_PYVISTA:
-            from pyvista.utilities.errors import GPUInfo
-
-            try:
-                extra_meta = [(t[1], t[0]) for t in GPUInfo().get_info()]
-            except Exception as e:  # pragma: no cover
-                extra_meta = ("GPU Details", f"Error: {e.message}")
-        else:
-            extra_meta = ("GPU Details", "None")
-
-        super().__init__(
-            additional=additional,
-            core=core,
-            optional=optional,
-            ncol=ncol,
-            text_width=text_width,
-            sort=sort,
-            extra_meta=extra_meta,
-        )
+        return "\n".join(header + core + optional + additional) + self.mapdl_info()
 
     def mapdl_info(self):
         """Return information regarding the ansys environment and installation."""
@@ -232,11 +181,103 @@ class Report(base_report_class):
 
         return install_info + env_info
 
-    def __repr__(self):
-        add_text = "-" * 79 + "\nPyMAPDL Software and Environment Report"
 
-        report = add_text + super().__repr__() + self.mapdl_info()
-        return report.replace("-" * 80, "-" * 79)  # hotfix for scooby
+# Determine which type of report will be used (depending on the
+# available packages)
+if _HAS_PYANSYS_REPORT:
+    base_report_class = pyansys_report.Report
+else:  # pragma: no cover
+    base_report_class = Plain_Report
+
+
+class Report(base_report_class):
+    """A class for custom scooby.Report."""
+
+    def __init__(
+        self,
+        additional=None,
+        ncol=3,
+        text_width=80,
+        sort=False,
+        gpu=True,
+        ansys_vars=None,
+        ansys_libs=None,
+    ):
+        """Generate a :class:`scooby.Report` instance.
+
+        Parameters
+        ----------
+        additional : list(ModuleType), list(str)
+            List of packages or package names to add to output information.
+
+        ncol : int, optional
+            Number of package-columns in html table; only has effect if
+            ``mode='HTML'`` or ``mode='html'``. Defaults to 3.
+
+        text_width : int, optional
+            The text width for non-HTML display modes
+
+        sort : bool, optional
+            Alphabetically sort the packages
+
+        gpu : bool
+            Gather information about the GPU. Defaults to ``True`` but if
+            experiencing rendering issues, pass ``False`` to safely generate
+            a report.
+
+        ansys_vars : list of str, optional
+            List containing the Ansys environment variables to be reported.
+            (e.g. ["MYVAR_1", "MYVAR_2" ...]). Defaults to ``None``. Only used for
+            the `pyansys-tools-report` package.
+
+        ansys_libs : dict {str : str}, optional
+            Dictionary containing the Ansys libraries and versions to be reported.
+            (e.g. {"MyLib" : "v1.2", ...}). Defaults to ``None``. Only used for
+            the `pyansys-tools-report` package.
+
+        """
+        # Mandatory packages
+        core = [
+            "ansys.mapdl.core",
+            "numpy",
+            "appdirs",
+            "scipy",
+            "grpc",  # grpcio
+            "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
+            "ansys.mapdl.reader",  # ansys-mapdl-reader
+            "google.protobuf",  # protobuf library
+        ]
+
+        # Optional packages
+        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
+
+        if _HAS_PYANSYS_REPORT:
+            #  Combine all packages into one
+            all_mapdl_packages = core + optional
+            if additional is not None:
+                all_mapdl_packages += additional
+
+            # Call the pyansys_report.Report constructor
+            super().__init__(
+                additional=all_mapdl_packages,
+                ncol=ncol,
+                text_width=text_width,
+                sort=sort,
+                gpu=gpu,
+                ansys_vars=ansys_vars,
+                ansys_libs=ansys_libs,
+            )
+        else:
+            # Call the PlainReport constructor
+            super().__init__(
+                additional=additional,
+                core=core,
+                optional=optional,
+                ncol=ncol,
+                text_width=text_width,
+                sort=sort,
+                gpu=gpu,
+            )
 
 
 def is_float(input_string):
