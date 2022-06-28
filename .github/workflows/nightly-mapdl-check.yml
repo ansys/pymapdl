@@ -41,6 +41,7 @@ jobs:
           --health-retries=4
           --health-timeout=0.5s
           --health-start-period=10s
+          -np 2
 
     steps:
       - uses: actions/checkout@v2
