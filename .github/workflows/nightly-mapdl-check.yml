@@ -36,12 +36,15 @@ jobs:
 
         options: >-
           --restart always
-          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo '/ansys_inc/ansys/bin/mapdl -grpc' > entrypoint.sh && echo 0 || echo 1"
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo 0 || echo 1"
           --health-interval=0.5s
           --health-retries=4
           --health-timeout=0.5s
           --health-start-period=10s
-          --entrypoint=entrypoint.sh
+          
+        with:
+          entrypoint: /ansys_inc/ansys/bin/mapdl -grpc
+
 
     steps:
       - uses: actions/checkout@v2
