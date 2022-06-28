@@ -41,13 +41,15 @@ jobs:
           --health-retries=4
           --health-timeout=0.5s
           --health-start-period=10s
-          
-        with:
-          entrypoint: /ansys_inc/ansys/bin/mapdl -grpc
-
+          --entrypoint=""
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Setting entrypoint
+        run: |
+          docker exec ${{ job.services.mapdl.id }} sh -c '/ansys_inc/ansys/bin/mapdl -grpc -np 2'
+ 
 
       - name: Setup Python
         uses: actions/setup-python@v2
