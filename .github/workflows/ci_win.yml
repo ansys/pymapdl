@@ -20,27 +20,39 @@ jobs:
         with:
           python-version: 3.8
 
-      # Install jFrog CLI using
-      - name: Install git CLI
-        shell: pwsh
-        run: |
-          .\.ci\ci_win.ps1 jfrog
+      # # Install jFrog CLI using
+      # - name: Install git CLI
+      #   shell: pwsh
+      #   run: |
+      #     .\.ci\ci_win.ps1 jfrog
 
-      # Install jFrog CLI using
-      - name: Install jFrog CLI
-        shell: pwsh
-        run: |
-          .\.ci\ci_win.ps1 jfrog
+      # # Install jFrog CLI using
+      # - name: Install jFrog CLI
+      #   shell: pwsh
+      #   run: |
+      #     .\.ci\ci_win.ps1 jfrog
 
-      - name: Setting jFrog CLI
-        run: |
-          jfrog rt config --user=${{ secrets.ANSYS_USER }} --password=${{ secrets.ANSYS_PASS }} --url=${{ secrets.ARTIFACTORY_URL }}
+      # - name: Setting jFrog CLI
+      #   run: |
+      #     jfrog rt config --user=${{ secrets.ANSYS_USER }} --password=${{ secrets.ANSYS_PASS }} --url=${{ secrets.ARTIFACTORY_URL }}
 
           
-      - name: Pulling installation files
-        env:
-          ANSYS_USER: ${{ secrets.ANSYS_USER }}
-          ANSYS_PASS: ${{ secrets.ANSYS_PASS }}
-          ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+      # - name: Pulling installation files
+      #   env:
+      #     ANSYS_USER: ${{ secrets.ANSYS_USER }}
+      #     ANSYS_PASS: ${{ secrets.ANSYS_PASS }}
+      #     ARTIFACTORY_URL: ${{ secrets.ARTIFACTORY_URL }}
+      #   run: |
+      #     wget --mirror --recursive --force-directories -np -nH --cut-dirs=2 --http-user=$ANSYS_USER --http-password=$ANSYS_PASS $ARTIFACTORY_URL/v222_Certified/linx64/
+
+      - name: Unzip the downloaded files
+        # Unzipping (if needed) in the folder ``_work\mapdl_extracted``.
+        # This folder should be cleaned after each run?
+        shell: pwsh
         run: |
-          wget --mirror --recursive --force-directories -np -nH --cut-dirs=2 --http-user=$ANSYS_USER --http-password=$ANSYS_PASS $ARTIFACTORY_URL/v222_Certified/linx64/
+          echo "todo"
+      
+      - name: Installing silently MAPDL
+        shell: cmd
+        run: |
+          .\mapdl_extracted\setup.exe -silent -install_dir "C:\Users\german.ayuso\actions-runner\_work\installations" -mechapdl
