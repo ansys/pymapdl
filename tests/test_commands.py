@@ -301,23 +301,6 @@ This is for the format: {format1}-{format2}-{format3}"""
     assert isinstance(cmd_out.split("g"), list)
 
 
-def test_myger_fail():
-    assert False
-
-
-@pytest.fixture
-def fix():
-    from ansys.mapdl.core.errors import MapdlInvalidRoutineError
-
-    raise MapdlInvalidRoutineError(
-        "veeeeeeeeeeeeeryyyyyyyyyyyyyyyyyy loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong"
-    )
-
-
-def test_myger_error(fix):
-    fix == 1
-
-
 def test_cmd_class_prnsol_short():
     cmd = "PRRSOL,F"
     out = CommandListingOutput(PRNSOL_OUT, cmd=cmd)
