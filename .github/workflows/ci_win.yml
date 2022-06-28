@@ -56,4 +56,4 @@ jobs:
         shell: powershell
         working-directory: C:\Users\german.ayuso\actions-runner\_work
         run: |
-          .\mapdl_extracted\setup.exe -silent -install_dir "C:\Users\german.ayuso\actions-runner\_work\installations" -mechapdl
+          .\mapdl_extracted\setup.exe -silent -install_dir "C:\Users\german.ayuso\actions-runner\_work\installations" -mechapdl && echo "Installed"
