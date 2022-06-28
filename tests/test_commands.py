@@ -309,7 +309,9 @@ def test_myger_fail():
 def fix():
     from ansys.mapdl.core.errors import MapdlInvalidRoutineError
 
-    raise MapdlInvalidRoutineError("oops")
+    raise MapdlInvalidRoutineError(
+        "veeeeeeeeeeeeeryyyyyyyyyyyyyyyyyy loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong"
+    )
 
 
 def test_myger_error(fix):
