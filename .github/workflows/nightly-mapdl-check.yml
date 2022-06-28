@@ -22,7 +22,7 @@ jobs:
       # Label used to access the service container
       mapdl:
         # Docker Hub image
-        image: ghcr.io/pyansys/pymapdl/mapdl:latest
+        image: ghcr.io/pyansys/pymapdl/mapdl:latest -np 2
         ports:
           - 21000:50052  # main service
           - 21001:50055  # DB service
@@ -41,7 +41,7 @@ jobs:
           --health-retries=4
           --health-timeout=0.5s
           --health-start-period=10s
-          -np 2
+          
 
     steps:
       - uses: actions/checkout@v2
