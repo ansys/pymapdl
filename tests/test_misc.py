@@ -21,8 +21,14 @@ from ansys.mapdl.core.misc import (
 
 
 def test_report():
-    report = pymapdl.Report(gpu=system_supports_plotting())
-    assert "PyMAPDL Software and Environment Report" in str(report)
+    report = pymapdl.Report(
+        additional=["matplotlib", "pyvista", "pyiges", "tqdm"],
+        gpu=system_supports_plotting(),
+    )
+    assert "PyAnsys Software and Environment Report" in str(report)
+
+    # Check that when adding additional (repeated) packages, they appear only once
+    assert str(report).count("pyvista") == 1
 
 
 @pytest.mark.parametrize(
@@ -243,7 +249,7 @@ def test_plain_report():
     optional = ["pyvista", "tqdm"]
     additional = ["scipy", "ger"]
 
-    report = Plain_Report(core=core, optional=optional, additional=additional)
+    report = Plain_Report(core=core, optional=optional, additional=additional, gpu=True)
     rep_str = report.__repr__()
 
     for each in core + optional + additional:
@@ -260,6 +266,9 @@ def test_plain_report():
     assert "Core packages" in rep_str
     assert "Optional packages" in rep_str
     assert "Additional packages" in rep_str
+
+    # Plain report should not represent GPU details evenif asked for
+    assert "GPU Details" not in rep_str
 
 
 def test_plain_report_no_options():
