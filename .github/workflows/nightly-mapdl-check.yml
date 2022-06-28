@@ -41,7 +41,12 @@ jobs:
           --health-retries=4
           --health-timeout=0.5s
           --health-start-period=10s
-          --entrypoint='/ansys_inc/ansys/bin/mapdl -grpc -np 2'
+          --entrypoint=["/ansys_inc/ansys/bin/mapdl","-grpc","-np 2"]
+
+        # with:
+        #   # entrypoint: /ansys_inc/ansys/bin/mapdl -grpc -np 
+        #   args:
+        #     -grpc
           
 
     steps:
