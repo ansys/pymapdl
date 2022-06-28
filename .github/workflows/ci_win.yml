@@ -20,6 +20,23 @@ jobs:
         with:
           python-version: 3.8
 
+      # Install jFrog CLI using
+      - name: Install git CLI
+        shell: pwsh
+        run: |
+          .\.ci\ci_win.ps1 jfrog
+
+      # Install jFrog CLI using
+      - name: Install jFrog CLI
+        shell: pwsh
+        run: |
+          .\.ci\ci_win.ps1 jfrog
+
+      - name: Setting jFrog CLI
+        run: |
+          jfrog rt config --user=${{ secrets.ANSYS_USER }} --password=${{ secrets.ANSYS_PASS }} --url=${{ secrets.ARTIFACTORY_URL }}
+
+          
       - name: Pulling installation files
         env:
           ANSYS_USER: ${{ secrets.ANSYS_USER }}
