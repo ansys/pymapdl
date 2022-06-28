@@ -50,12 +50,12 @@ class MyReporter(TerminalReporter):
             )
 
 
-# @pytest.mark.trylast
-# def pytest_configure(config):
-#     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
-#     my_reporter = MyReporter(config)
-#     config.pluginmanager.unregister(vanilla_reporter)
-#     config.pluginmanager.register(my_reporter, "terminalreporter")
+@pytest.mark.trylast
+def pytest_configure(config):
+    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
+    my_reporter = MyReporter(config)
+    config.pluginmanager.unregister(vanilla_reporter)
+    config.pluginmanager.register(my_reporter, "terminalreporter")
 
 
 # Check if MAPDL is installed
