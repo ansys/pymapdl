@@ -8,6 +8,7 @@ on:
 jobs:
   nightly_docs_build:
     runs-on: ubuntu-20.04
+    timeout-minutes: 20
 
     env:
       DISPLAY: ':99.0'
@@ -23,15 +24,21 @@ jobs:
         ports:
           - 21000:50052  # main service
           - 21001:50055  # DB service
+        # ANSYS_lOCK: Whether or not create a lock file, We disable this to allow MAPDL
+        # restart without issue after it failed.
+        # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+          ANSYS_LOCK: OFF
+          KMP_AFFINITY: disabled
 
         options: >-
           --restart always
-          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
-          --health-interval=5s
-          --health-retries=6
-          --health-timeout=1s
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo 0 || echo 1"
+          --health-interval=0.5s
+          --health-retries=4
+          --health-timeout=0.5s
+          --health-start-period=10s
 
     steps:
       - uses: actions/checkout@v2
@@ -94,6 +101,7 @@ jobs:
 
       - name: Collecting documentation logs
         if: failure()
+        continue-on-error: true
         run: |
           cp ./doc/build/latex/*.log ./logs-nightly-docs
           cp ./doc/build/latex/*.out ./logs-nightly-docs

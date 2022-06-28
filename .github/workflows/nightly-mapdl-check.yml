@@ -6,7 +6,6 @@ on:
     - cron:  '0 4 * * *'
 
 env:
-  PYMAPDL_PORT: 21000  # default won't work on azure
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
 
@@ -15,6 +14,7 @@ jobs:
   check_image:
     name: Validate latest mapdl image
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     services:
       # Label used to access the service container
@@ -24,15 +24,21 @@ jobs:
         ports:
           - 21000:50052  # main service
           - 21001:50055  # DB service
+        # ANSYS_lOCK: Whether or not create a lock file. We disable this to allow MAPDL
+        # restart without issue after it failed.
+        # KMP_AFFINITY - https://github.com/pyansys/pymapdl/issues/1213
         env:
           ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+          ANSYS_LOCK: OFF
+          KMP_AFFINITY: disabled
 
         options: >-
           --restart always
-          --health-cmd="ps aux | grep "[/]ansys_inc/.*grpc" -q  && test -f file.lock && echo 0 || echo 1"
-          --health-interval=5s
-          --health-retries=6
-          --health-timeout=1s
+          --health-cmd="ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo 0 || echo 1"
+          --health-interval=0.5s
+          --health-retries=4
+          --health-timeout=0.5s
+          --health-start-period=10s
 
     steps:
       - uses: actions/checkout@v2
