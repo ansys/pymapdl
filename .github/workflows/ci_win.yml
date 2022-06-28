@@ -45,12 +45,12 @@ jobs:
       #   run: |
       #     wget --mirror --recursive --force-directories -np -nH --cut-dirs=2 --http-user=$ANSYS_USER --http-password=$ANSYS_PASS $ARTIFACTORY_URL/v222_Certified/linx64/
 
-      - name: Unzip the downloaded files
-        # Unzipping (if needed) in the folder ``_work\mapdl_extracted``.
-        # This folder should be cleaned after each run?
-        shell: pwsh
-        run: |
-          echo "todo"
+      # - name: Unzip the downloaded files
+      #   # Unzipping (if needed) in the folder ``_work\mapdl_extracted``.
+      #   # This folder should be cleaned after each run?
+      #   shell: pwsh
+      #   run: |
+      #     echo "todo"
       
       - name: Installing silently MAPDL
         shell: cmd
