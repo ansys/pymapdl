@@ -47,6 +47,9 @@ def get_ansys_bin(rver):
         if not os.path.isfile(mapdlbin):
             mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
 
+            if not os.path.isfile(mapdlbin) and os.getenv("INSIDE_CONTAINER", False):
+                mapdlbin = os.getenv("INSIDE_CONTAINER")
+
     return mapdlbin
 
 
