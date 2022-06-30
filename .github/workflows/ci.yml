@@ -249,7 +249,7 @@ jobs:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
 
     container:
-      image: ${{ DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+      image: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
       options: "--entrypoint /bin/bash"
 
     steps:
