@@ -279,7 +279,7 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          pip install -r .ci/requirements_test_xvfb.txt
+          pip3.8 install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
