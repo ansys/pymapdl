@@ -257,10 +257,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+      # - name: Setup Python
+      #   uses: actions/setup-python@v2
+      #   with:
+      #     python-version: 3.8
 
       - name: Install OS packages
         run: |
@@ -279,7 +279,7 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          pip install -r insta.ci/requirements_test_xvfb.txt
+          pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
