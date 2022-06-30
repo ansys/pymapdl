@@ -133,7 +133,9 @@ def _version_from_path(path):
     # replace \\ with / to account for possible windows path
     matches = re.findall(r"v(\d\d\d).ansys", path.replace("\\", "/"), re.IGNORECASE)
     if not matches:
-        raise RuntimeError(f"Unable to extract Ansys version from {path}")
+        matches = re.findall(r"ansys(\d\d\d)", path.replace("\\", "/"), re.IGNORECASE)
+        if not matches:
+            raise RuntimeError(f"Unable to extract Ansys version from {path}")
     return int(matches[-1])
 
 
