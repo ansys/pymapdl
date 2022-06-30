@@ -264,8 +264,8 @@ jobs:
 
       - name: Install OS packages
         run: |
-          yum update
-          yum install libgl1-mesa-glx xvfb
+          yum -y update
+          yum -y install libgl1-mesa-glx xvfb
 
       - name: Cache pip
         uses: actions/cache@v2
