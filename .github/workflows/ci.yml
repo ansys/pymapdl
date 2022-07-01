@@ -296,6 +296,11 @@ jobs:
           ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
           ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
           echo "::endgroup::"
+
+          echo "::group:: Listing python config" 
+          echo "Python version: ${python3 --version}"
+          echo "Pip packages: ${pip3 list}"
+          echo "::endgroup::"
       
       - name: Update git
         run: |
@@ -347,18 +352,20 @@ jobs:
           restore-keys: |
             Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
-      - name: Test virtual framebuffer
-        run: |
-          pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
-          pip3 install -r .ci/requirements_test_xvfb.txt && echo "Installing requirements for xvfb testing: Done"
-          xvfb-run python3 .ci/display_test.py && echo "Display testing: Done "
+      # - name: Test virtual framebuffer
+      #   run: |
+      #     pip3 install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
+      #     pip3 install -r .ci/requirements_test_xvfb.txt && echo "Installing requirements for xvfb testing: Done"
+        
+        #xvfb-run python3 .ci/display_test.py && echo "Display testing: Done "
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install build
-          python -m build
-          pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          pip3 install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
+          pip3 install build
+          python3 -m build
+          pip3 install dist/*.whl
+          xvfb-run python3 -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
         uses: docker/login-action@v1
