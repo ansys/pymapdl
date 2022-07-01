@@ -301,7 +301,8 @@ jobs:
         id: get_MAPDL_ver
         run: |
           version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
-          echo "::set-output name=mapdl_ver::$(echo ${version})\n"
+          echo "MAPDL image version is: ${version}"
+          echo "::set-output name=mapdl_ver::$(echo ${version})"
 
       - name: Linking MAPDL
         id: link_MAPDL
@@ -316,8 +317,8 @@ jobs:
           echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
           ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
-          echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)\n"
-          echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)\n"
+          echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
+          echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
           echo "::endgroup::"
 
       - name: Launching MAPDL
