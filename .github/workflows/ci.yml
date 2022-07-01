@@ -379,6 +379,7 @@ jobs:
 
       - name: Unit Testing
         run: |
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
@@ -388,6 +389,7 @@ jobs:
 
       - name: Check package
         run: |
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install twine
           twine check dist/*
 
