@@ -21,7 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover
 import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import LOG, SUPPORTED_VERSIONS
 from ansys.mapdl.core.errors import LockFileException, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -627,9 +627,8 @@ def _get_available_base_ansys():
     """
     base_path = None
     if os.name == "nt":
-        supported_versions = [194, 202, 211, 212, 221]
         awp_roots = {
-            ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
+            ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in SUPPORTED_VERSIONS
         }
         installed_versions = {
             ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)
@@ -663,6 +662,12 @@ def _get_available_base_ansys():
 
 
 def find_ansys():
+
+    if os.getenv("ANSYS_INSTALLATION_DIR_VER", False):
+        return tuple(os.getenv("ANSYS_INSTALLATION_DIR_VER").split(":"))
+
+
+def old_find_ansys():
     """Searches for ansys path within the standard install location
     and returns the path of the latest version.
 

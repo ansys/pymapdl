@@ -63,3 +63,17 @@ if "ANSJUPHUB_VER" in os.environ:
 
 
 BUILDING_GALLERY = False
+
+SUPPORTED_VERSIONS = [
+    "222",
+    "221",
+    "212",
+    "211",
+    "202",
+    "201",
+    "195",
+    "194",
+    "193",
+    "192",
+    "191",
+]
