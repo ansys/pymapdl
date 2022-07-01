@@ -299,7 +299,7 @@ jobs:
 
           echo "::group:: Listing python config" 
           python_version=$(python3 --version>&1)
-          pip_version=$(pip list)
+          pip_version=$(pip3 list)
           echo "Python version: ${python_version}"  
           echo "Pip packages: ${pip_version}"
 
