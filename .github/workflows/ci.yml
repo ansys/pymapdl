@@ -265,11 +265,13 @@ jobs:
           yum -y makecache
           yum -y install mesa-libGL xorg-x11-server-Xvfb
       
+      - name: Display structure of downloaded files
+        run: ls -R
+      
       - name: Install Dependencies
         # Needed for Scipy and xvfb
         run: |
-          yum -y install blas-devel lapack-devel
-          yum -y install which
+          yum -y install blas-devel lapack-devel which
 
       - name: Install Python
         run: |
@@ -283,10 +285,32 @@ jobs:
           ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
           echo "::endgroup::"
       
+      - name: Update git
+        run: |
+          yum -y remove git
+          yum -y remove git-*
+          yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+          yum -y install git
+
+      - name: Get MAPDL version
+        id: get_MAPDL_ver
+        run: |
+          echo "::set-output name=mapdl_ver::$(echo $MAPDL | tr -d '.'  | head -c3)\n"
+
+      - name: Linking MAPDL
+        id: link_MAPDL
+        run: |
+          new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
+          new_MAPDL_exec="${new_MAPDL_dir}ansys${{steps.get_MAPDL_ver.outputs.mapdl_ver}}"
+          mkdir -p $new_MAPDL_dir
+          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)\n"
+          echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)\n"
+
       - name: Launching MAPDL
         run: |
           mkdir -p /ansys_run
-          echo | /ansys_inc/ansys/bin/mapdl -grpc -smp -dir /ansys_run
+          echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run
 
       - name: Create and activate virtual environment
         run: |
