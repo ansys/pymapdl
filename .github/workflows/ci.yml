@@ -332,11 +332,11 @@ jobs:
           mkdir -p /ansys_run
           echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
 
-      # - name: Create and activate virtual environment
-      #   run: |
-      #     python3 -m venv venv
-      #     source venv/bin/activate
-      #     pip install pip --upgrade
+      - name: Create and activate virtual environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install pip --upgrade
 
       - name: Cache pip
         uses: actions/cache@v2
