@@ -348,11 +348,12 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
+          pip3 install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python3 .ci/display_test.py
 
       - name: Install ansys-mapdl-core
         run: |
+          pip install -r requirements/requirements_build.txt
           pip install build
           python -m build
           pip install dist/*.whl
