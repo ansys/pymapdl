@@ -304,6 +304,8 @@ jobs:
           echo "Pip packages: ${pip_version}"
 
           echo "::endgroup::"
+
+          pip3 list
       
       - name: Update git
         run: |
