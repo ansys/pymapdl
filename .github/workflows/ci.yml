@@ -362,6 +362,7 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
           pip install build
           python -m build
