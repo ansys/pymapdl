@@ -272,18 +272,23 @@ jobs:
         # Needed for Scipy and xvfb
         run: |
           yum -y install blas-devel lapack-devel which
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
 
-      - name: Install Python
-        run: |
-          echo "::group:: Installing Python" 
-          yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make sqlite-devel && yum clean all
-          cd /opt && wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz && tar xzf Python-3.8.3.tgz && cd Python-3.8*/ && ./configure --enable-optimizations --enable-loadable-sqlite-extensions && make altinstall && rm -rf /opt/Python*
-          echo "::endgroup::"
+      # - name: Install Python
+      #   run: |
+      #     echo "::group:: Installing Python" 
+      #     yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make sqlite-devel && yum clean all
+      #     cd /opt && wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz && tar xzf Python-3.8.3.tgz && cd Python-3.8*/ && ./configure --enable-optimizations --enable-loadable-sqlite-extensions && make altinstall && rm -rf /opt/Python*
+      #     echo "::endgroup::"
 
-          echo "::group:: Linking python" 
-          ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
-          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
-          echo "::endgroup::"
+      #     echo "::group:: Linking python" 
+      #     ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
+      #     ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
+      #     echo "::endgroup::"
       
       - name: Update git
         run: |
@@ -300,12 +305,19 @@ jobs:
       - name: Linking MAPDL
         id: link_MAPDL
         run: |
+          echo "::group:: Setting path variables" 
           new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
           new_MAPDL_exec="${new_MAPDL_dir}ansys${{steps.get_MAPDL_ver.outputs.mapdl_ver}}"
+          echo "The MAPDL directory is: ${new_MAPDL_dir}"
+          echo "The MAPDL executable is at: ${new_MAPDL_exec}"
+          echo "::endgroup::"
+
+          echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
           ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
           echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)\n"
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)\n"
+          echo "::endgroup::"
 
       - name: Launching MAPDL
         run: |
