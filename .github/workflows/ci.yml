@@ -370,12 +370,12 @@ jobs:
           echo "ansys-mapdl-core installed."
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-      - name: Login in Github Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Login in Github Container registry
+      #   uses: docker/login-action@v1
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ secrets.GH_USERNAME }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Unit Testing
         run: |
