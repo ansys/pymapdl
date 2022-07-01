@@ -279,14 +279,9 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Linking python" 
-          ln -fs /usr/local/bin/python3.8 /usr/bin/python3
-          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3
+          ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
+          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
           echo "::endgroup::"
-
-          echo "::group:: Upgrading pip" 
-          pip3 install pip --upgrade
-          echo "::endgroup::"
-
       
       - name: Launching MAPDL
         run: |
@@ -297,6 +292,7 @@ jobs:
         run: |
           python3 -m venv venv
           source venv/bin/activate
+          pip install pip --upgrade
 
       - name: Cache pip
         uses: actions/cache@v2
