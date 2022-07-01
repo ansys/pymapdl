@@ -334,9 +334,9 @@ jobs:
 
       - name: Create and activate virtual environment
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install pip --upgrade
+          python3 -m venv venv && echo "Created virtual environment"
+          source venv/bin/activate && echo "Activated virtual environment"
+          pip install pip --upgrade && echo "Upgraded pip"
 
       - name: Cache pip
         uses: actions/cache@v2
