@@ -300,14 +300,15 @@ jobs:
       - name: Get MAPDL version
         id: get_MAPDL_ver
         run: |
-          echo "::set-output name=mapdl_ver::$(echo $MAPDL | tr -d '.'  | head -c3)\n"
+          version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
+          echo "::set-output name=mapdl_ver::$(echo ${version})\n"
 
       - name: Linking MAPDL
         id: link_MAPDL
         run: |
           echo "::group:: Setting path variables" 
           new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
-          new_MAPDL_exec="${new_MAPDL_dir}ansys${{steps.get_MAPDL_ver.outputs.mapdl_ver}}"
+          new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
           echo "The MAPDL directory is: ${new_MAPDL_dir}"
           echo "The MAPDL executable is at: ${new_MAPDL_exec}"
           echo "::endgroup::"
