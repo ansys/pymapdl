@@ -300,6 +300,7 @@ jobs:
           echo "::group:: Listing python config" 
           python_version=$(python3 --version>&1) 
           echo "Python version: ${python_version}"
+          echo "::set-output name=python_version::$(echo ${python_version})"
           echo "::endgroup::"
       
       - name: Update git
