@@ -272,6 +272,7 @@ jobs:
         # Needed for Scipy and xvfb
         run: |
           yum -y install blas-devel lapack-devel which
+          yum -y install make automake gcc g++ subversion python3-dev
       
       # - name: Setup Python
       #   uses: actions/setup-python@v4
