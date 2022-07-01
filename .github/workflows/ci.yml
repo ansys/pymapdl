@@ -355,19 +355,19 @@ jobs:
 
       # - name: Test virtual framebuffer
       #   run: |
-      #     pip3 install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
-      #     pip3 install -r .ci/requirements_test_xvfb.txt && echo "Installing requirements for xvfb testing: Done"
+      #     pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
+      #     pip install -r .ci/requirements_test_xvfb.txt && echo "Installing requirements for xvfb testing: Done"
         
         #xvfb-run python3 .ci/display_test.py && echo "Display testing: Done "
 
       - name: Install ansys-mapdl-core
         run: |
-          pip3 install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
-          pip3 install build
-          python3 -m build
-          pip3 install dist/*.whl
+          pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
+          pip install build
+          python -m build
+          pip install dist/*.whl
           echo "ansys-mapdl-core installed."
-          xvfb-run python3 -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
         uses: docker/login-action@v1
