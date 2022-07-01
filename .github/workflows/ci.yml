@@ -253,25 +253,41 @@ jobs:
       options: "--entrypoint /bin/bash"
       env:
         ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        PYMAPDL_PORT: 50052  # to use CI mode at the moment
+        PYMAPDL_START_INSTANCE: FALSE
+        PYANSYS_OFF_SCREEN: True
 
     steps:
       - uses: actions/checkout@v2
-
-      # - name: Setup Python
-      #   uses: actions/setup-python@v2
-      #   with:
-      #     python-version: 3.8
 
       - name: Install OS packages
         run: |
           yum -y makecache
           yum -y install mesa-libGL xorg-x11-server-Xvfb
+      
+      - name: Install Dependencies
+        # Needed for Scipy and xvfb
+        run: |
+          yum -y install blas-devel lapack-devel
+          yum -y install which
 
       - name: Install Python
         run: |
-          yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make && yum clean all
-          cd /opt && wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz && tar xzf Python-3.8.3.tgz && cd Python-3.8*/ && ./configure --enable-optimizations && make altinstall && rm -rf /opt/Python*
-          python3.8 pip install pip --upgrade
+          yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make sqlite-devel && yum clean all
+          cd /opt && wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz && tar xzf Python-3.8.3.tgz && cd Python-3.8*/ && ./configure --enable-optimizations --enable-loadable-sqlite-extensions && make altinstall && rm -rf /opt/Python*
+          pip3.8 install pip --upgrade
+          ln -fs /usr/local/bin/python3.8 /usr/bin/python3
+          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3
+      
+      - name: Launching MAPDL
+        run: |
+          mkdir -p /ansys_run
+          echo | /ansys_inc/ansys/bin/mapdl -grpc -smp -dir /ansys_run
+
+      - name: Create and activate virtual environment
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -283,7 +299,7 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          pip3.8 install -r .ci/requirements_test_xvfb.txt
+          pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
@@ -320,6 +336,13 @@ jobs:
           name: PyMAPDL-packages
           path: dist/
           retention-days: 7
+      
+      - name: Display logs
+        if: always()
+        run: |
+          for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
