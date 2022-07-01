@@ -324,7 +324,7 @@ jobs:
       - name: Launching MAPDL
         run: |
           mkdir -p /ansys_run
-          echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run
+          echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt &
 
       - name: Create and activate virtual environment
         run: |
@@ -382,7 +382,8 @@ jobs:
       
       - name: Display logs
         if: always()
-        run: |
+        run: |          
+          echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
           for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
           for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
           for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
