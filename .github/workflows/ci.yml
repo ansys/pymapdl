@@ -298,8 +298,11 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Listing python config" 
-          echo "Python version: ${python3 --version}"
-          echo "Pip packages: ${pip3 list}"
+          python_version=$(python3 --version>&1)
+          pip_version=$(pip list)
+          echo "Python version: ${python_version}"  
+          echo "Pip packages: ${pip_version}"
+
           echo "::endgroup::"
       
       - name: Update git
