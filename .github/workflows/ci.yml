@@ -298,14 +298,9 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Listing python config" 
-          python_version=$(python3 --version>&1)
-          pip_version=$(pip3 list)
-          echo "Python version: ${python_version}"  
-          echo "Pip packages: ${pip_version}"
-
+          python_version=$(python3 --version>&1) 
+          echo "Python version: ${python_version}"
           echo "::endgroup::"
-
-          pip3 list
       
       - name: Update git
         run: |
@@ -370,6 +365,7 @@ jobs:
           pip3 install build
           python3 -m build
           pip3 install dist/*.whl
+          echo "ansys-mapdl-core installed."
           xvfb-run python3 -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
