@@ -30,9 +30,9 @@ def _decompress(filename):
 def _get_file_url(filename, directory=None):
     if directory:
         return (
-            f"https://github.com/smedikon/example-data/raw/master/{directory}/{filename}"
+            f"https://github.com/pyansys/example-data/raw/master/{directory}/{filename}"
         )
-    return f"https://github.com/smedikon/example-data/raw/master/{filename}"
+    return f"https://github.com/pyansys/example-data/raw/master/{filename}"
 
 
 def _retrieve_file(url, filename):
