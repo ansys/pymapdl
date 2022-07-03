@@ -100,13 +100,13 @@ def download_manifold_example_data() -> dict:
     re-downloading the same file twice.
     Returns
     -------
-    dict[int:str]
+    dict[str:str]
         Path to the example files.
     Examples
     --------
     Download the manifold geometry, ans file and return the path of the file
     >>> from ansys.mapdl.core.examples import download_manifold_example_data
-    >>> paths = examples.download_manifold_example_data()
+    >>> paths = download_manifold_example_data()
     >>> paths
     {geometry: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_geometry.anf',
      mapping_data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_cht-final_temp.csv'} 
