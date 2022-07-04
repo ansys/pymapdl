@@ -6,28 +6,109 @@ on:
     - cron:  '0 4 * * *'
 
 env:
-  PYMAPDL_PORT: 21000  # default won't work on azure
-  PYMAPDL_START_INSTANCE: FALSE
-  PYANSYS_OFF_SCREEN: True
-  MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
+  ON_CI: True
 
 jobs:
 
   check_image:
     name: Validate latest mapdl image
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mapdl-version: ['latest', 'latest_ge']
+    
+    container:
+      image: ghcr.io/pyansys/pymapdl/mapdl:${{ matrix.mapdl-version }}
+      options: "--entrypoint /bin/bash"
+      env:
+        ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        PYMAPDL_PORT: 50052  # to use CI mode at the moment
+        PYMAPDL_START_INSTANCE: FALSE
+        PYANSYS_OFF_SCREEN: True
+
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
       - name: Install OS packages
         run: |
-          sudo apt update
-          sudo apt install libgl1-mesa-glx xvfb
+          yum -y makecache
+          yum -y install mesa-libGL xorg-x11-server-Xvfb
+      
+      - name: Display structure of downloaded files
+        run: ls -R   
+
+      - name: Install Dependencies
+        # Needed for Scipy and xvfb
+        run: |
+          yum -y install blas-devel lapack-devel which
+          yum -y install make automake gcc g++ subversion python3-dev
+
+      - name: Install Python
+        run: |
+          echo "::group:: Installing Python" 
+          yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make sqlite-devel && yum clean all
+          cd /opt 
+          wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz 
+          tar xzf Python-3.8.3.tgz 
+          cd Python-3.8*/ 
+          ./configure --enable-optimizations --enable-loadable-sqlite-extensions 
+          make altinstall 
+          rm -rf /opt/Python*
+          echo "::endgroup::"
+
+          echo "::group:: Linking python" 
+          ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
+          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
+          echo "::endgroup::"
+
+          echo "::group:: Listing python config" 
+          python_version=$(python3 --version>&1) 
+          echo "Python version: ${python_version}"
+          echo "::set-output name=python_version::$(echo ${python_version})"
+          echo "::endgroup::"
+      
+      - name: Update git
+        run: |
+          yum -y remove git
+          yum -y remove git-*
+          yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+          yum -y install git
+
+      - name: Get MAPDL version
+        id: get_MAPDL_ver
+        run: |
+          version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
+          echo "MAPDL image version is: ${version}"
+          echo "::set-output name=mapdl_ver::$(echo ${version})"
+
+      - name: Linking MAPDL
+        id: link_MAPDL
+        run: |
+          echo "::group:: Setting path variables" 
+          new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
+          new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
+          echo "The MAPDL directory is: ${new_MAPDL_dir}"
+          echo "The MAPDL executable is at: ${new_MAPDL_exec}"
+          echo "::endgroup::"
+
+          echo "::group:: Linking files" 
+          mkdir -p $new_MAPDL_dir
+          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
+          echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
+          echo "::endgroup::"
+
+      - name: Launching MAPDL
+        run: |
+          mkdir -p /ansys_run
+          echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
+
+      - name: Create and activate virtual environment
+        run: |
+          python3 -m venv venv && echo "Created virtual environment"
+          source venv/bin/activate && echo "Activated virtual environment"
+          pip install pip --upgrade && echo "Upgraded pip"
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -39,34 +120,44 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          python -m pip install --upgrade pip
+          echo "::group:: Installing PyMAPDL and dependencies" 
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install .
+          echo "ansys-mapdl-core installed."
+          echo "::endgroup::"
+
+          echo "::group:: Smoke test" 
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          echo "::endgroup::"
 
-      - name: Login in Github Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull image
+      - name: Checking display settings
         run: |
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
-          grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
-          python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          source venv/bin/activate && echo "Activated virtual environment"
+          python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())"
 
-      - name: Unit Testing
+      - name: Installing dependencies for unit testing
         run: |
+          echo "::group:: Installing test requirements" 
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install -r requirements/requirements_tests.txt
-          cd tests
-          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          echo "::endgroup::"
 
-      - name: Display MAPDL Logs
+      - name: Running unit tests
+        run: |
+          echo "::group:: Running tests" 
+          source venv/bin/activate && echo "Activated virtual environment"
+          xvfb-run -e xvfb_error.log pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          echo "::endgroup::"
+
+      - name: Display logs
         if: always()
-        run: cat log.txt
+        run: |
+          echo "::group:: Files listing" && ls -R && echo "::endgroup::"
+          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::"
+          echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
+          for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
