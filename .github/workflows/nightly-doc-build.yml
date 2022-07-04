@@ -44,6 +44,8 @@ jobs:
         run: |
           yum -y install blas-devel lapack-devel which
           yum -y install make automake gcc g++ subversion python3-dev
+          yum -y install epel-release
+          yum -y install pandoc --enablerepo=epel
 
       # used for documentation deployment
       - name: Get Bot Application Token
@@ -76,7 +78,6 @@ jobs:
           echo "Python version: ${python_version}"
           echo "::set-output name=python_version::$(echo ${python_version})"
           echo "::endgroup::"
-
 
       - name: Update git
         run: |
@@ -119,7 +120,6 @@ jobs:
           python3 -m venv venv && echo "Created virtual environment"
           source venv/bin/activate && echo "Activated virtual environment"
           pip install pip --upgrade && echo "Upgraded pip"
-
 
       - name: Install ansys-mapdl-core
         run: |
