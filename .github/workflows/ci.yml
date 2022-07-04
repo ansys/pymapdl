@@ -411,7 +411,7 @@ jobs:
       - name: Running unit tests
         run: |
           echo "::group:: Running tests" 
-          /usr/bin/Xvfb :99 -screen 0 1280x1024x24 &
+          source venv/bin/activate && echo "Activated virtual environment"
           xvfb-run -e xvfb_error.log pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
           echo "::endgroup::"
 
