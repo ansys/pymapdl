@@ -10,10 +10,6 @@ on:
       - main
 
 env:
-  PYMAPDL_START_INSTANCE: FALSE
-  PYANSYS_OFF_SCREEN: True
-  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
   ON_CI: True
   PACKAGE_NAME: PyMAPDL
   # Following env vars when changed will "reset" the mentioned cache,
@@ -114,13 +110,14 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/pyansys/pymapdl/mapdl:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
+      image: ghcr.io/pyansys/pymapdl/mapdl:v21.2.1
       options: "--entrypoint /bin/bash"
       env:
         ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
         PYMAPDL_PORT: 50052  # to use CI mode at the moment
         PYMAPDL_START_INSTANCE: FALSE
         PYANSYS_OFF_SCREEN: True
+        ON_CI: True
 
     env:
       PYMAPDL_PORT: 50052  # to use CI mode at the moment
@@ -343,11 +340,7 @@ jobs:
         PYMAPDL_PORT: 50052  # to use CI mode at the moment
         PYMAPDL_START_INSTANCE: FALSE
         PYANSYS_OFF_SCREEN: True
-
-    env:
-      PYMAPDL_PORT: 50052  # to use CI mode at the moment
-      PYMAPDL_START_INSTANCE: FALSE
-      PYANSYS_OFF_SCREEN: True
+        ON_CI: True
 
     steps:
       - uses: actions/checkout@v2

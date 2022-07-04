@@ -18,12 +18,7 @@ jobs:
         PYMAPDL_START_INSTANCE: FALSE
         PYANSYS_OFF_SCREEN: True
         DISPLAY: ':99.0'
-
-    env:
-      DISPLAY: ':99.0'
-      PYMAPDL_PORT: 50052  # to use CI mode at the moment
-      PYMAPDL_START_INSTANCE: FALSE
-      PYANSYS_OFF_SCREEN: True
+        ON_CI: True
 
     steps:
       - uses: actions/checkout@v2
