@@ -388,6 +388,12 @@ jobs:
       #     username: ${{ secrets.GH_USERNAME }}
       #     password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checking display settings
+        run: |
+          source venv/bin/activate && echo "Activated virtual environment"
+          xset -q
+          python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())"
+
       - name: Installing dependencies for unit testing
         run: |
           echo "::group:: Installing test requirements" 
