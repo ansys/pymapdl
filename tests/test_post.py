@@ -1,4 +1,6 @@
 """Test post-processing module for ansys.mapdl.core"""
+import os
+
 import numpy as np
 import pytest
 from pyvista import Plotter
