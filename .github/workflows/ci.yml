@@ -396,7 +396,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Running tests" 
-          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run -e xvfb_error.log pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
           echo "::endgroup::"
 
       - uses: codecov/codecov-action@v2
@@ -420,6 +420,7 @@ jobs:
         if: always()
         run: |
           echo "::group:: Files listing" && ls -R && echo "::endgroup::"
+          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::"
           echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
           for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
           for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
