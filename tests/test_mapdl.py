@@ -1380,6 +1380,7 @@ def test_mapdl_str(mapdl):
     assert "MAPDL Version" in out
 
 
+@skip_no_xserver
 def test_plot_empty_mesh(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.nplot(vtk=True)
