@@ -15,9 +15,8 @@ def system_supports_pymapdl_plotting():
         return system_supports_plotting()  # Using pyvista function
 
 
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_pymapdl_plotting(), reason="Requires active X Server"
-)
+if not system_supports_pymapdl_plotting():
+    pytestmark = pytest.mark.skip("Requires plotting support (active X Server)")
 
 
 @pytest.fixture
@@ -48,7 +47,6 @@ def bc_example(mapdl, make_block):
     mapdl.nsel("all")
 
 
-@skip_no_xserver
 def test_kplot(cleared, mapdl, tmpdir):
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
@@ -63,7 +61,6 @@ def test_kplot(cleared, mapdl, tmpdir):
     mapdl.kplot(vtk=False)  # make sure legacy still works
 
 
-@skip_no_xserver
 def test_lplot(cleared, mapdl, tmpdir):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -82,7 +79,6 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.lplot(vtk=False)  # make sure legacy still works
 
 
-@skip_no_xserver
 def test_aplot(cleared, mapdl):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
@@ -103,14 +99,12 @@ def test_aplot(cleared, mapdl):
     mapdl.aplot(vtk=False)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.vplot(vtk=vtk, color_areas=True)
 
 
-@skip_no_xserver
 def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
@@ -119,7 +113,6 @@ def test_nplot(cleared, mapdl):
 
 
 @pytest.mark.parametrize("nnum", [True, False])
-@skip_no_xserver
 def test_nplot_vtk(cleared, mapdl, nnum):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
@@ -127,7 +120,6 @@ def test_nplot_vtk(cleared, mapdl, nnum):
     mapdl.nplot(vtk=True, nnum=nnum, background="w", color="k")
 
 
-@skip_no_xserver
 def test_eplot(mapdl, make_block):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -136,7 +128,6 @@ def test_eplot(mapdl, make_block):
     assert mapdl.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
 def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl.eplot(
@@ -149,7 +140,6 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
@@ -169,7 +159,6 @@ def test_bc_plot_options(
         assert p is None
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_labels",
     [
@@ -191,7 +180,6 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     assert isinstance(p, Plotter)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_target",
     [
