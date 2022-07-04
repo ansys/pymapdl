@@ -46,7 +46,6 @@ Boundary Conditions
 # Import all necessary modules and launch an instance of MAPDL
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 import numpy as np
 import pandas as pd
 import pyvista as pv

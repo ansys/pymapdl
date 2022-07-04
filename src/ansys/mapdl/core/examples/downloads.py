@@ -109,10 +109,15 @@ def download_manifold_example_data() -> dict:
     >>> paths = download_manifold_example_data()
     >>> paths
     {geometry: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_geometry.anf',
-     mapping_data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_cht-final_temp.csv'} 
+     mapping_data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_cht-final_temp.csv'}
     """
+
     files_dir = "pymapdl/manifold"
     return {
-        "geometry": _download_file(filename="manifold_geometry.anf", directory=files_dir)[0],
-        "mapping_data": _download_file(filename="manifold_cht-final_temp.csv", directory=files_dir)[0],
+        "geometry": _download_file(
+            filename="manifold_geometry.anf", directory=files_dir
+        )[0],
+        "mapping_data": _download_file(
+            filename="manifold_cht-final_temp.csv", directory=files_dir
+        )[0],
     }
