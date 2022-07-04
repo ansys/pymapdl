@@ -391,7 +391,6 @@ jobs:
       - name: Checking display settings
         run: |
           source venv/bin/activate && echo "Activated virtual environment"
-          xset -q
           python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())"
 
       - name: Installing dependencies for unit testing
