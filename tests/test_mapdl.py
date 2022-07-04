@@ -25,6 +25,9 @@ skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
 
+on_ci_skip = pytest.mark.skipif(bool(os.getenv("ON_CI", False)), reason="Running on CI")
+
+
 CMD_BLOCK = """/prep7
 ! Mat
 MP,EX,1,200000
@@ -339,6 +342,7 @@ def test_invalid_input(mapdl):
 
 
 @skip_no_xserver
+@on_ci_skip
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_kplot(cleared, mapdl, tmpdir, vtk):
     mapdl.k("", 0, 0, 0)
