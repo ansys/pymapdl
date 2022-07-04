@@ -20,11 +20,11 @@ def system_supports_pymapdl_plotting():
     if os.getenv("PYANSYS_OFF_SCREEN", "False").lower() == "true":
         return False
     else:
-        return not system_supports_plotting()  # Using pyvista function
+        return system_supports_plotting()  # Using pyvista function
 
 
 skip_no_xserver = pytest.mark.skipif(
-    system_supports_pymapdl_plotting(), reason="Requires active X Server"
+    not system_supports_pymapdl_plotting(), reason="Requires active X Server"
 )
 
 # skip entire module unless --console is enabled
