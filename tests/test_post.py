@@ -2,6 +2,7 @@
 import numpy as np
 import pytest
 from pyvista import Plotter
+from pyvista.plotting import system_supports_plotting
 from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core import examples
@@ -13,6 +14,18 @@ from ansys.mapdl.core.post import COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_
 # def test_nodal_eqv_stress_fail(mapdl, static_solve):
 #     with pytest.raises(MapdlRuntimeError):
 #         mapdl.post_processing.nodal_eqv_stress
+
+
+def system_supports_pymapdl_plotting():
+    if os.getenv("PYANSYS_OFF_SCREEN", "False").lower() == "true":
+        return False
+    else:
+        return system_supports_plotting()  # Using pyvista function
+
+
+skip_no_xserver = pytest.mark.skipif(
+    not system_supports_pymapdl_plotting(), reason="Requires active X Server"
+)
 
 
 @pytest.fixture(scope="module")
@@ -447,6 +460,7 @@ def test_disp_norm_all(mapdl, static_solve):
     assert np.allclose(disp.T, mapdl.post_processing.nodal_displacement("ALL"))
 
 
+@skip_no_xserver
 @pytest.mark.parametrize("comp", ["X", "Y", "z", "norm"])  # lowercase intentional
 def test_disp_plot(mapdl, static_solve, comp):
     assert (
@@ -454,6 +468,7 @@ def test_disp_plot(mapdl, static_solve, comp):
     )
 
 
+@skip_no_xserver
 def test_disp_plot_subselection(mapdl, static_solve):
     mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
     mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
@@ -480,6 +495,7 @@ def test_nodal_eqv_stress(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_eqv_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True) is None
 
@@ -516,6 +532,7 @@ def test_rot(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, 0)
 
 
+@skip_no_xserver
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_plot_rot(mapdl, static_solve, comp):
     assert mapdl.post_processing.plot_nodal_rotation(comp) is None
@@ -535,11 +552,13 @@ def test_element_temperature(mapdl, static_solve):
     assert np.allclose(values, 0)
 
 
+@skip_no_xserver
 def test_plot_element_temperature(mapdl, static_solve):
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_temperature() is None
 
 
+@skip_no_xserver
 def test_plot_temperature(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_temperature() is None
 
@@ -550,6 +569,7 @@ def test_pressure(mapdl, static_solve):
     assert np.allclose(from_grpc, 0)
 
 
+@skip_no_xserver
 def test_plot_pressure(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_pressure() is None
 
@@ -560,6 +580,7 @@ def test_voltage(mapdl, static_solve):
     assert np.allclose(from_grpc, 0)
 
 
+@skip_no_xserver
 def test_plot_voltage(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_voltage() is None
 
@@ -581,6 +602,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_component_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
@@ -602,6 +624,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_principal_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
@@ -620,6 +643,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
@@ -641,6 +665,7 @@ def test_nodal_total_component_strain(mapdl, static_solve, comp):
     assert np.allclose(data_ans, data)
 
 
+@skip_no_xserver
 def test_plot_nodal_total_component_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_component_strain("x") is None
 
@@ -662,6 +687,7 @@ def test_nodal_principal_total_strain(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_principal_total_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_principal_strain(1) is None
 
@@ -680,6 +706,7 @@ def test_nodal_total_strain_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_total_strain_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_strain_intensity() is None
 
@@ -698,6 +725,7 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_total_eqv_strain(mapdl, static_solve):
     assert (
         mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True) is None
@@ -722,6 +750,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_component_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
@@ -742,6 +771,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns, atol=1e-5)
 
 
+@skip_no_xserver
 def test_plot_nodal_principal_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
@@ -760,6 +790,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
@@ -781,6 +812,7 @@ def test_nodal_elastic_component_strain(mapdl, static_solve, comp):
     assert np.allclose(data_ans, data)
 
 
+@skip_no_xserver
 def test_plot_nodal_elastic_component_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_component_strain("x") is None
 
@@ -802,6 +834,7 @@ def test_nodal_elastic_principal_strain(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_elastic_principal_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_principal_strain(1) is None
 
@@ -820,6 +853,7 @@ def test_nodal_elastic_strain_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_elastic_strain_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_strain_intensity() is None
 
@@ -838,6 +872,7 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
     assert (
         mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True) is None
@@ -886,6 +921,7 @@ def test_elem_disp_norm(mapdl, static_solve):
     assert np.allclose(norm_disp, disp_from_grpc)
 
 
+@skip_no_xserver
 @pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM"])
 def test_elem_disp_plot(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
@@ -908,12 +944,14 @@ def test_element_stress(mapdl, static_solve, component, option):
 
 
 @pytest.mark.parametrize("comp", ["X", "1", "INT", "EQV"])
+@skip_no_xserver
 def test_plot_element_stress(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_stress(comp) is None
 
 
+@skip_no_xserver
 def test_plot_element_values(mapdl, static_solve):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
@@ -938,6 +976,7 @@ def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
     assert np.allclose(data_ans, data)
 
 
+@skip_no_xserver
 def test_plot_nodal_plastic_component_strain(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_component_strain("x") is None
 
@@ -958,6 +997,7 @@ def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
+@skip_no_xserver
 def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_principal_strain(1) is None
 
@@ -973,6 +1013,7 @@ def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_strain_intensity() is None
 
@@ -988,6 +1029,7 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
+@skip_no_xserver
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     assert (
         mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True) is None
@@ -1013,6 +1055,7 @@ def test_nodal_contact_friction_stress(mapdl, contact_solve):
     assert np.allclose(sfric_prn, sfric_nod)
 
 
+@skip_no_xserver
 def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     assert (
         mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
@@ -1020,16 +1063,19 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     )
 
 
+@skip_no_xserver
 def test_plot_incomplete_element_selection(mapdl, contact_solve):
     mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
     assert mapdl.post_processing.plot_element_displacement() is None
 
 
+@skip_no_xserver
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
     mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
     assert mapdl.post_processing.plot_nodal_displacement() is None
 
 
+@skip_no_xserver
 def test_general_plotter_returns(mapdl, static_solve):
     # Returns
     assert (
@@ -1102,6 +1148,8 @@ def test_general_plotter_returns(mapdl, static_solve):
 #     assert np.allclose(data_ans, data)
 
 
+#
+# @skip_no_xserver
 # def test_plot_nodal_thermal_component_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_component_strain('x') is None
 
@@ -1122,6 +1170,8 @@ def test_general_plotter_returns(mapdl, static_solve):
 #     assert np.allclose(from_grpc, from_prns)
 
 
+#
+# @skip_no_xserver
 # def test_plot_nodal_thermal_principal_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_principal_strain(1) is None
 
@@ -1137,6 +1187,8 @@ def test_general_plotter_returns(mapdl, static_solve):
 #     assert np.allclose(sint_ans, sint_aligned)
 
 
+#
+# @skip_no_xserver
 # def test_plot_nodal_thermal_strain_intensity(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_strain_intensity() is None
 
@@ -1152,6 +1204,8 @@ def test_general_plotter_returns(mapdl, static_solve):
 #     assert np.allclose(seqv_ans, seqv_aligned)
 
 
+#
+# @skip_no_xserver
 # def test_plot_nodal_thermal_eqv_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True) is None
 
