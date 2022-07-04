@@ -7,8 +7,16 @@ from pyvista.plotting import Plotter, system_supports_plotting
 
 from ansys.mapdl.core.plotting import general_plotter
 
+
+def system_supports_pymapdl_plotting():
+    if os.getenv("PYANSYS_OFF_SCREEN", "False").lower() == "true":
+        return False
+    else:
+        return not system_supports_plotting()  # Using pyvista function
+
+
 skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
+    system_supports_pymapdl_plotting(), reason="Requires active X Server"
 )
 
 
