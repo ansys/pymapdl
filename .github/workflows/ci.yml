@@ -10,13 +10,12 @@ on:
       - main
 
 env:
-  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
   ON_CI: True
+  PACKAGE_NAME: PyMAPDL
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
@@ -26,7 +25,6 @@ env:
   RESET_EXAMPLES_CACHE: 3
   RESET_DOC_BUILD_CACHE: 3
   RESET_AUTOSUMMARY_CACHE: 3
-  PACKAGE_NAME: PyMAPDL
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -115,8 +113,43 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-latest
 
+    container:
+      image: ghcr.io/pyansys/pymapdl/mapdl:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
+      options: "--entrypoint /bin/bash"
+      env:
+        ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        PYMAPDL_PORT: 50052  # to use CI mode at the moment
+        PYMAPDL_START_INSTANCE: FALSE
+        PYANSYS_OFF_SCREEN: True
+
+    env:
+      PYMAPDL_PORT: 50052  # to use CI mode at the moment
+      PYMAPDL_START_INSTANCE: FALSE
+      PYANSYS_OFF_SCREEN: True
+
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install OS packages
+        run: |
+          yum -y makecache
+          yum -y install mesa-libGL xorg-x11-server-Xvfb
+          yum -y update
+          yum -y install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
+      
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.8      
+
+      - name: Install Dependencies
+        # Needed for Scipy and xvfb
+        run: |
+          yum -y install blas-devel lapack-devel which
+          yum -y install make automake gcc g++ subversion python3-dev
 
       # used for documentation deployment
       - name: Get Bot Application Token
@@ -127,15 +160,71 @@ jobs:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
-
-      - name: Install OS packages
+      - name: Install Python
         run: |
-          sudo apt update
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
+          echo "::group:: Installing Python" 
+          yum -y update && yum -y install gcc openssl-devel bzip2-devel libffi-devel wget make sqlite-devel && yum clean all
+          cd /opt 
+          wget --no-check-certificate https://www.python.org/ftp/python/3.8.3/Python-3.8.3.tgz 
+          tar xzf Python-3.8.3.tgz 
+          cd Python-3.8*/ 
+          ./configure --enable-optimizations --enable-loadable-sqlite-extensions 
+          make altinstall 
+          rm -rf /opt/Python*
+          echo "::endgroup::"
+
+          echo "::group:: Linking python" 
+          ln -fs /usr/local/bin/python3.8 /usr/bin/python3 && echo "Linked Python3.8 to Python3"
+          ln -fs /usr/local/bin/pip3.8 /usr/bin/pip3 && echo "Linked pip3.8 to pip3"
+          echo "::endgroup::"
+
+          echo "::group:: Listing python config" 
+          python_version=$(python3 --version>&1) 
+          echo "Python version: ${python_version}"
+          echo "::set-output name=python_version::$(echo ${python_version})"
+          echo "::endgroup::"
+
+      - name: Update git
+        run: |
+          yum -y remove git
+          yum -y remove git-*
+          yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
+          yum -y install git
+
+      - name: Get MAPDL version
+        id: get_MAPDL_ver
+        run: |
+          version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
+          echo "MAPDL image version is: ${version}"
+          echo "::set-output name=mapdl_ver::$(echo ${version})"
+
+      - name: Linking MAPDL
+        id: link_MAPDL
+        run: |
+          echo "::group:: Setting path variables" 
+          new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
+          new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
+          echo "The MAPDL directory is: ${new_MAPDL_dir}"
+          echo "The MAPDL executable is at: ${new_MAPDL_exec}"
+          echo "::endgroup::"
+
+          echo "::group:: Linking files" 
+          mkdir -p $new_MAPDL_dir
+          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
+          echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
+          echo "::endgroup::"
+
+      - name: Launching MAPDL
+        run: |
+          mkdir -p /ansys_run
+          echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
+
+      - name: Create and activate virtual environment
+        run: |
+          python3 -m venv venv && echo "Created virtual environment"
+          source venv/bin/activate && echo "Activated virtual environment"
+          pip install pip --upgrade && echo "Upgraded pip"
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -145,31 +234,26 @@ jobs:
           restore-keys: |
             Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
-      - name: Test virtual framebuffer
-        run: |
-          pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
-
       - name: Install ansys-mapdl-core
         run: |
+          echo "::group:: Installing PyMAPDL and dependencies" 
+          source venv/bin/activate && echo "Activated virtual environment"
+          pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
           pip install build
           python -m build
-          pip install dist/ansys*.whl
+          pip install dist/*.whl
+          echo "ansys-mapdl-core installed."
+          echo "::endgroup::"
+
+          echo "::group:: Smoke test" 
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          echo "::endgroup::"
 
-      - name: Login in Github Container registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
-
+      - name: Checking display settings
+        run: |
+          source venv/bin/activate && echo "Activated virtual environment"
+          python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())
+  
       - name: Retrieve PyMAPDL version
         run: |
           echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
@@ -200,9 +284,12 @@ jobs:
           restore-keys: |
             autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
-      - name: Install Docs Build Requirements
+      - name: Installing dependencies for docs building
         run: |
+          echo "::group:: Installing docs requirements" 
+          source venv/bin/activate && echo "Activated virtual environment"
           pip install -r requirements/requirements_docs.txt
+          echo "::endgroup::"
 
       - name: Build Documentation
         run: |
@@ -243,7 +330,6 @@ jobs:
 
   build_test:
     name: Build and Unit Testing
-    # needs: testimport
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -273,18 +359,18 @@ jobs:
       
       - name: Display structure of downloaded files
         run: ls -R
-      
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.8      
+
       - name: Install Dependencies
         # Needed for Scipy and xvfb
         run: |
           yum -y install blas-devel lapack-devel which
           yum -y install make automake gcc g++ subversion python3-dev
       
-      # - name: Setup Python
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: 3.8
-
       - name: Install Python
         run: |
           echo "::group:: Installing Python" 
@@ -358,13 +444,6 @@ jobs:
           key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
           restore-keys: |
             Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
-
-      # - name: Test virtual framebuffer
-      #   run: |
-      #     pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
-      #     pip install -r .ci/requirements_test_xvfb.txt && echo "Installing requirements for xvfb testing: Done"
-        
-        #xvfb-run python3 .ci/display_test.py && echo "Display testing: Done "
 
       - name: Install ansys-mapdl-core
         run: |
