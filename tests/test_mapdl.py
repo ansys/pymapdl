@@ -21,11 +21,21 @@ directory creation.
 """,
 )
 
+
+def system_supports_pymapdl_plotting():
+    if os.getenv("PYANSYS_OFF_SCREEN", "False").lower() == "true":
+        return False
+    else:
+        return not system_supports_plotting()  # Using pyvista function
+
+
 skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
+    system_supports_pymapdl_plotting(), reason="Requires active X Server"
 )
 
-on_ci_skip = pytest.mark.skipif(bool(os.getenv("ON_CI", False)), reason="Running on CI")
+on_ci_skip = pytest.mark.skipif(
+    os.getenv("ON_CI", "False").lower() == "true", reason="Running on CI"
+)
 
 
 CMD_BLOCK = """/prep7
