@@ -381,13 +381,6 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
           echo "::endgroup::"
 
-      # - name: Login in Github Container registry
-      #   uses: docker/login-action@v1
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ secrets.GH_USERNAME }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Checking display settings
         run: |
           source venv/bin/activate && echo "Activated virtual environment"
@@ -399,13 +392,6 @@ jobs:
           source venv/bin/activate && echo "Activated virtual environment"
           pip install -r requirements/requirements_tests.txt
           echo "::endgroup::"
-
-      # - name: Running unit tests
-      #   uses: GabrielBB/xvfb-action@v1
-      #   with:
-      #     run: pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
-      #     #working-directory: ./ #optional
-      #     #options: #optional
 
       - name: Running unit tests
         run: |

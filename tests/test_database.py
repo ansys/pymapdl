@@ -9,8 +9,10 @@ from ansys.mapdl.core.misc import random_string
 
 @pytest.fixture(scope="session")
 def db(mapdl):
-    if mapdl._server_version < (0, 4, 1):  # 2021R2
-        pytest.skip("requires 2021R2 or newer")
+    # server_version = 2021R2
+    if not (mapdl._server_version >= (0, 4, 1) and mapdl.version > 22.2):
+        pytest.skip("requires MAPDL 2021R2 or newer, and 'ansys-api-mapdl' >= 0.4.1")
+
     return mapdl.db
 
 
@@ -36,8 +38,8 @@ def elems(gen_block, db):
 
 
 def test_database_start_stop(mapdl):
-    if mapdl._server_version < (0, 4, 1):  # 2021R2
-        pytest.skip("requires 2021R2 or newer")
+    if not (mapdl._server_version >= (0, 4, 1) and mapdl.version > 22.2):  # 2021R2
+        pytest.skip("requires MAPDL 2021R2 or newer, and 'ansys-api-mapdl' >= 0.4.1")
 
     # verify it can be created twice
     mapdl.prep7()
