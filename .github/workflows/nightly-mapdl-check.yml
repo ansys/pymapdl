@@ -91,7 +91,7 @@ jobs:
           new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
           new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
 
-          test -e ${{steps.link_MAPDL.outputs.mapdl_exec}} && echo "Ansys executable exists." || echo "Ansys executable does NOT exist." && exit 1
+          test -e new_MAPDL_exec && echo "Ansys executable exists." || (echo "Ansys executable does NOT exist." && exit 1)
 
           echo "The MAPDL directory is: ${new_MAPDL_dir}"
           echo "The MAPDL executable is at: ${new_MAPDL_exec}"

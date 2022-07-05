@@ -101,6 +101,8 @@ jobs:
           echo "The MAPDL directory is: ${new_MAPDL_dir}"
           echo "The MAPDL executable is at: ${new_MAPDL_exec}"
           echo "::endgroup::"
+          
+          (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
 
           echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
@@ -138,7 +140,7 @@ jobs:
       - name: Checking display settings
         run: |
           source venv/bin/activate && echo "Activated virtual environment"
-          python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())
+          python -c "from pyvista.plotting import system_supports_plotting; print(f'The system support plotting: {system_supports_plotting()}')"
   
       - name: Retrieve PyMAPDL version
         run: |
