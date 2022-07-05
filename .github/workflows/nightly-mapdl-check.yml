@@ -91,8 +91,6 @@ jobs:
           new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
           new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
 
-          test -e new_MAPDL_exec && echo "Ansys executable exists." || (echo "Ansys executable does NOT exist." && exit 1)
-
           echo "The MAPDL directory is: ${new_MAPDL_dir}"
           echo "The MAPDL executable is at: ${new_MAPDL_exec}"
           echo "::endgroup::"
@@ -102,6 +100,10 @@ jobs:
           ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
           echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
+          echo "::endgroup::"
+
+          echo "::group:: Testing linked files" 
+          (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL

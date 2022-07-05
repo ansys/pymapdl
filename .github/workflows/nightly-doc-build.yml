@@ -109,7 +109,7 @@ jobs:
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
           echo "::endgroup::"
 
-          echo "::group:: Linking files" 
+          echo "::group:: Testing linked files" 
           (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo "::endgroup::"
 
