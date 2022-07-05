@@ -215,6 +215,7 @@ jobs:
       - name: Launching MAPDL
         run: |
           mkdir -p /ansys_run
+          test -e ${{steps.link_MAPDL.outputs.mapdl_exec}} && echo "Ansys executable exists." || echo "Ansys executable does NOT exist." && exit 1
           echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
 
       - name: Create and activate virtual environment
@@ -238,7 +239,7 @@ jobs:
           pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
           pip install build
           python -m build
-          pip install dist/*.whl
+          pip install distS/*.whl
           echo "ansys-mapdl-core installed."
           echo "::endgroup::"
 
@@ -290,6 +291,7 @@ jobs:
 
       - name: Build Documentation
         run: |
+          source venv/bin/activate && echo "Activated virtual environment"
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: Zip documentation
@@ -316,7 +318,9 @@ jobs:
 
       - name: Build PDF Documentation
         working-directory: doc
-        run: make pdf
+        run: |
+          source venv/bin/activate && echo "Activated virtual environment"
+          make pdf
 
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v2
