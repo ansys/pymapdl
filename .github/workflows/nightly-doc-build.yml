@@ -88,7 +88,7 @@ jobs:
       - name: Get MAPDL version
         id: get_MAPDL_ver
         run: |
-          version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
+          version=$(echo "v21.2.1" | tr -d '.' | tr -d 'v' | head -c3)
           echo "MAPDL image version is: ${version}"
           echo "::set-output name=mapdl_ver::$(echo ${version})"
 

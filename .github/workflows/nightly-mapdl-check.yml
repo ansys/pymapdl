@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['latest', 'latest_ge']
+        mapdl-version: ['latest']
     
     container:
       image: ghcr.io/pyansys/pymapdl/mapdl:${{ matrix.mapdl-version }}
