@@ -25,6 +25,9 @@ jobs:
         PYANSYS_OFF_SCREEN: True
         ON_CI: True
 
+    env:
+      default_mapdl: 222
+
     steps:
       - uses: actions/checkout@v2
 
@@ -77,6 +80,7 @@ jobs:
         id: get_MAPDL_ver
         run: |
           version=$(echo ${{ matrix.mapdl-version }} | tr -d '.' | tr -d 'v' | head -c3)
+          [ ! -z "${version##*[!0-9]*}" ] && echo "Version is an integer" || echo "Version is not a positive integer" && version=${{ env.default_mapdl }};
           echo "MAPDL image version is: ${version}"
           echo "::set-output name=mapdl_ver::$(echo ${version})"
 
@@ -86,6 +90,9 @@ jobs:
           echo "::group:: Setting path variables" 
           new_MAPDL_dir=/ansys_inc/v${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}/ansys/bin/
           new_MAPDL_exec="${new_MAPDL_dir}ansys${{ steps.get_MAPDL_ver.outputs.mapdl_ver }}"
+
+          test -e ${{steps.link_MAPDL.outputs.mapdl_exec}} && echo "Ansys executable exists." || echo "Ansys executable does NOT exist." && exit 1
+
           echo "The MAPDL directory is: ${new_MAPDL_dir}"
           echo "The MAPDL executable is at: ${new_MAPDL_exec}"
           echo "::endgroup::"
