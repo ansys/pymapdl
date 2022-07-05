@@ -241,7 +241,7 @@ jobs:
           pip install -r requirements/requirements_build.txt && echo "Installing requirements for build: Done"
           pip install build
           python -m build
-          pip install distS/*.whl
+          pip install dist/*.whl
           echo "ansys-mapdl-core installed."
           echo "::endgroup::"
 
