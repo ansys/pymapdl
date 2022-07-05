@@ -122,8 +122,14 @@ jobs:
 
       - name: Launching MAPDL
         run: |
+          echo "::group:: Launching MAPDL" 
           mkdir -p /ansys_run
           echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
+          echo "::endgroup::"
+          
+          echo "::group:: Testing if MAPDL is launched" 
+          (ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo "'ansys' process exists") || (echo "'ansys' process does NOT exists" && exit 1)
+          echo "::endgroup::"
 
       - name: Create and activate virtual environment
         run: |
@@ -166,6 +172,7 @@ jobs:
 
       - name: Build Documentation
         run: |
+          source venv/bin/activate && echo "Activated virtual environment"
           xvfb-run -e xvfb_error.log make -C doc html
           echo "HTML docs built."
 
