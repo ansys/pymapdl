@@ -126,6 +126,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      
+      - name: Display structure of files
+        run: |
+          echo "::group:: PyMAPDL repo"
+          ls -R
+          echo "::endgroup::"
+
+          echo "::group:: Ansys installation"
+          ls -R ansys_inc/
+          echo "::endgroup::"
 
       - name: Install OS packages
         run: |
@@ -135,9 +145,7 @@ jobs:
           yum -y install epel-release
           yum -y install pandoc --enablerepo=epel
           yum -y install zip libgl1-mesa-glx xvfb texlive-latex-extra latexmk
-      
-      - name: Display structure of downloaded files
-        run: ls -R
+
 
       # - name: Setup Python
       #   uses: actions/setup-python@v4
@@ -297,7 +305,7 @@ jobs:
       - name: Build Documentation
         run: |
           source venv/bin/activate && echo "Activated virtual environment"
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+          xvfb-run -e xvfb_error.log make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: Zip documentation
         run: |
@@ -333,6 +341,16 @@ jobs:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
+      
+      - name: Display logs
+        if: always()
+        run: |
+          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::"
+          echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
+          for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
+
 
   build_test:
     name: Build and Unit Testing
@@ -354,13 +372,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Display structure of files
+        run: |
+          echo "::group:: PyMAPDL repo"
+          ls -R
+          echo "::endgroup::"
+
+          echo "::group:: Ansys installation"
+          ls -R ansys_inc/
+          echo "::endgroup::"
+
       - name: Install OS packages
         run: |
           yum -y makecache
           yum -y install mesa-libGL xorg-x11-server-Xvfb
-      
-      - name: Display structure of downloaded files
-        run: ls -R
 
       # - name: Setup Python
       #   uses: actions/setup-python@v4
@@ -505,7 +530,6 @@ jobs:
       - name: Display logs
         if: always()
         run: |
-          echo "::group:: Files listing" && ls -R && echo "::endgroup::"
           echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::"
           echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
           for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done

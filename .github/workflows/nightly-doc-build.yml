@@ -23,6 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Display structure of files
+        run: |
+          echo "::group:: PyMAPDL repo"
+          ls -R
+          echo "::endgroup::"
+
+          echo "::group:: Ansys installation"
+          ls -R ansys_inc/
+          echo "::endgroup::"
+
       - name: Install OS packages
         run: |
           yum -y makecache
@@ -31,9 +41,6 @@ jobs:
           yum -y install epel-release
           yum -y install pandoc --enablerepo=epel
           yum -y install zip libgl1-mesa-glx xvfb texlive-latex-extra latexmk
-      
-      - name: Display structure of downloaded files
-        run: ls -R
 
       # - name: Setup Python
       #   uses: actions/setup-python@v4
@@ -159,7 +166,7 @@ jobs:
 
       - name: Build Documentation
         run: |
-          xvfb-run make -C doc html
+          xvfb-run -e xvfb_error.log make -C doc html
           echo "HTML docs built."
 
       - name: Deploy
@@ -170,6 +177,15 @@ jobs:
           BRANCH: gh-pages
           FOLDER: doc/build/html
           CLEAN: true
+
+      - name: Display logs
+        if: always()
+        run: |
+          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::"
+          echo "::group:: Terminal output 'console_output.txt'" && cat console_output.txt && echo "::endgroup::"
+          for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
