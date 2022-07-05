@@ -104,13 +104,13 @@ jobs:
 
           echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
-          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          ln -fs /ansys_inc/ansys/bin/mapdl $new_MAPDL_exec && echo "Linked MAPDL to default paths"
           echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL

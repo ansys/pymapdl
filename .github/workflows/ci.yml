@@ -209,19 +209,18 @@ jobs:
 
           echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
-          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          ln -fs /ansys_inc/ansys/bin/mapdl $new_MAPDL_exec && echo "Linked MAPDL to default paths"
           echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL
         run: |
           mkdir -p /ansys_run
-          (test -e ${{steps.link_MAPDL.outputs.mapdl_exec}} && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo | ${{steps.link_MAPDL.outputs.mapdl_exec}} -grpc -smp -dir /ansys_run > console_output.txt && echo "MAPDL started" &
 
       - name: Create and activate virtual environment
@@ -424,13 +423,13 @@ jobs:
 
           echo "::group:: Linking files" 
           mkdir -p $new_MAPDL_dir
-          ln -fs /ansys_inc/ansys/bin/mapdl new_MAPDL_exec && echo "Linked MAPDL to default paths"
+          ln -fs /ansys_inc/ansys/bin/mapdl $new_MAPDL_exec && echo "Linked MAPDL to default paths"
           echo "::set-output name=mapdl_dir::$(echo $new_MAPDL_dir)"
           echo "::set-output name=mapdl_exec::$(echo $new_MAPDL_exec)"
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL
@@ -470,7 +469,7 @@ jobs:
       - name: Checking display settings
         run: |
           source venv/bin/activate && echo "Activated virtual environment"
-          python -c "from pyvista.plotting import system_supports_plotting; print(system_supports_plotting())"
+          python -c "from pyvista.plotting import system_supports_plotting; print(f'The system support plotting: {system_supports_plotting()}')"
 
       - name: Installing dependencies for unit testing
         run: |
