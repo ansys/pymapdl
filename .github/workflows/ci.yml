@@ -132,7 +132,8 @@ jobs:
           yum -y makecache
           yum -y update
           yum -y install mesa-libGL xorg-x11-server-Xvfb
-          yum -y install pandoc -qy
+          yum -y install epel-release
+          yum -y install pandoc --enablerepo=epel
           yum -y install zip libgl1-mesa-glx xvfb texlive-latex-extra latexmk
       
       - name: Display structure of downloaded files
