@@ -30,7 +30,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Ansys installation"
-          ls -R ansys*
+          ls -R /ansys*
           echo "::endgroup::"
 
       - name: Install OS packages
