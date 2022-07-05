@@ -234,6 +234,9 @@ jobs:
           echo "::endgroup::"
           
           echo "::group:: Testing if MAPDL is launched" 
+          sleep 1
+          ps aux
+          ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc"
           (ps aux | grep "[/]ansys_inc/.*ansys\.e.*grpc" -q && echo "'ansys' process exists") || (echo "'ansys' process does NOT exists" && exit 1)
           echo "::endgroup::"
 
