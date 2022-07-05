@@ -110,7 +110,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -L $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && ls -R /ansys*  && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL

@@ -223,7 +223,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -L $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && ls -R /ansys*  && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL
@@ -350,6 +350,7 @@ jobs:
           for f in /ansys_run/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
           for f in /ansys_run/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
           for f in /ansys_run/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
+          for f in doc/build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done
 
 
   build_test:
@@ -454,7 +455,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group:: Testing linked files" 
-          (test -e $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && exit 1)
+          (test -L $new_MAPDL_exec && echo "Ansys executable exists.") || (echo "Ansys executable does NOT exist." && ls -R /ansys* && exit 1)
           echo "::endgroup::"
 
       - name: Launching MAPDL
