@@ -65,7 +65,7 @@ jobs:
       # Execute only when no labels have been applied to the pull request
       if: toJSON(github.event.pull_request.labels.*.name) == '{}'
       with:
-        issue-number: ${{ github.event.pull_request.number }}
+        issue-number: ${{ github.event.pull_request.number }} #
         body: |
           Please add one of the following labels to add this contribution to the Release Notes :point_down:
           - [BUG](https://github.com/pyansys/pymapdl/pulls?q=label%3Abug+)
