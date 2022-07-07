@@ -64,7 +64,7 @@ empty_log = """
         pytest.param(
             error_highly_distorted,
             None,
-            id="Failed because of shape error limits.",
+            id="Failed because of highly distorted elements.",
         ),
         pytest.param(
             error_shape_error_limits,
