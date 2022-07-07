@@ -60,7 +60,7 @@ jobs:
 
   commenter:
     runs-on: ubuntu-latest
-    needs: labeler
+    # needs: labeler
     steps:
     - name: Test
       run: |
