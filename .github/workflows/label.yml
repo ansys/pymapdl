@@ -9,54 +9,54 @@ concurrency:
 
 jobs:
 
-  labeler:
-    permissions:
-      contents: read
-      pull-requests: write
-    runs-on: ubuntu-latest
-    steps:
+  # labeler:
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-    # Label based on modified files
-    - name: Label based on changed files
-      uses: actions/labeler@v4
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        sync-labels: ''
+    # # Label based on modified files
+    # - name: Label based on changed files
+    #   uses: actions/labeler@v4
+    #   with:
+    #     repo-token: "${{ secrets.GITHUB_TOKEN }}"
+    #     sync-labels: ''
 
-    # Label based on branch name
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: |
-        startsWith(github.event.pull_request.head.ref, 'doc') || 
-        startsWith(github.event.pull_request.head.ref, 'docs')
-      with:
-        labels: Documentation
+    # # Label based on branch name
+    # - uses: actions-ecosystem/action-add-labels@v1
+    #   if: |
+    #     startsWith(github.event.pull_request.head.ref, 'doc') || 
+    #     startsWith(github.event.pull_request.head.ref, 'docs')
+    #   with:
+    #     labels: Documentation
 
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: |
-        startsWith(github.event.pull_request.head.ref, 'docker') ||
-        startsWith(github.event.pull_request.head.ref, 'no-ci') ||
-        startsWith(github.event.pull_request.head.ref, 'ci')
-      with:
-        labels: CI/CD
+    # - uses: actions-ecosystem/action-add-labels@v1
+    #   if: |
+    #     startsWith(github.event.pull_request.head.ref, 'docker') ||
+    #     startsWith(github.event.pull_request.head.ref, 'no-ci') ||
+    #     startsWith(github.event.pull_request.head.ref, 'ci')
+    #   with:
+    #     labels: CI/CD
 
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'maint')
-      with:
-        labels: Maintenance
+    # - uses: actions-ecosystem/action-add-labels@v1
+    #   if: startsWith(github.event.pull_request.head.ref, 'maint')
+    #   with:
+    #     labels: Maintenance
 
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'feat')
-      with:
-        labels: |
-          Enhancement
-          NEW FEATURE
+    # - uses: actions-ecosystem/action-add-labels@v1
+    #   if: startsWith(github.event.pull_request.head.ref, 'feat')
+    #   with:
+    #     labels: |
+    #       Enhancement
+    #       NEW FEATURE
 
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: |
-        startsWith(github.event.pull_request.head.ref, 'fix') ||
-        startsWith(github.event.pull_request.head.ref, 'patch')
-      with:
-        labels: BUG
+    # - uses: actions-ecosystem/action-add-labels@v1
+    #   if: |
+    #     startsWith(github.event.pull_request.head.ref, 'fix') ||
+    #     startsWith(github.event.pull_request.head.ref, 'patch')
+    #   with:
+    #     labels: BUG
 
   commenter:
     runs-on: ubuntu-latest
@@ -69,7 +69,7 @@ jobs:
     - name: Suggest to add labels
       uses: peter-evans/create-or-update-comment@v2
       # Execute only when no labels have been applied to the pull request
-      if: toJSON(github.event.pull_request.labels.*.name) == '{}'
+      if: toJSON(github.event.pull_request.labels.*.name) == '[]'
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
