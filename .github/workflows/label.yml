@@ -64,7 +64,7 @@ jobs:
     steps:
     - name: Test
       run: |
-        toJSON(github.event.pull_request.labels.*.name)
+        ${{ toJSON(github.event.pull_request.labels.*.name) }}
 
     - name: Suggest to add labels
       uses: peter-evans/create-or-update-comment@v2
