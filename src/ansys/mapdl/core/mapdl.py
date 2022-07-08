@@ -3489,8 +3489,6 @@ class _MapdlCore(Commands):
 
         Raises
         ------
-        ValueError
-            _description_
         MapdlRuntimeError
             For most of the errors.
         """
