@@ -2636,23 +2636,7 @@ class _MapdlCore(Commands):
 
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
-            # remove permitted errors and allow MAPDL to continue
-
-            for err_str in _PERMITTED_ERRORS:
-                self._response = re.sub(err_str, "", self._response)
-
-            if "*** ERROR ***" in self._response:
-                # We don't need to log exception because they already included in the main logger.
-                # logger.error(self._response)
-                # However, exceptions are recorded in the global logger which do not record
-                # information of the instances name, hence we edit the error message.
-                raise MapdlRuntimeError(
-                    f"\n\nError in instance {self._name}\n\n" + self._response
-                )
-            else:
-                warnings.warn(
-                    "MAPDL returned non-abort errors.  Please " "check the logs."
-                )
+            self._raise_output_errors(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -3540,3 +3524,68 @@ class _MapdlCore(Commands):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
+
+    def _raise_output_errors(self, response):
+        """Raise errors in the MAPDL response.
+
+        Parameters
+        ----------
+        response : str
+            Response from MAPDL.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            For most of the errors.
+        """
+        # The logic is to iterate for each line. If the error header is found,
+        # we analyse the following 'lines_number' in other to get the full error method.
+        # Then with regex, we collect the error message, and raise it.
+        for index, each_line in enumerate(response.splitlines()):
+            if "*** ERROR ***" in each_line:
+                error_is_fine = False
+
+                # Extracting only the first 'lines_number' lines.
+                # This is important. Regex has problems parsing long messages.
+                lines_number = 10
+                partial_output = "\n".join(
+                    response.splitlines()[index : (index + lines_number)]
+                )
+
+                # Find the error message.
+                # Either ends with the beginning of another error message or with double empty line.
+                error_message = re.search(
+                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*\n)",  # we might consider to use only one \n.
+                    partial_output,
+                    re.DOTALL,
+                )
+
+                if not error_message:
+                    # Since we couldn't find an error message, the full partial message (10 lines) is analysed
+                    self._log.debug(
+                        f"PyMAPDL could not identify the error message, the full partial message ({lines_number} lines) is analysed"
+                    )
+                    error_message = partial_output
+                else:
+                    error_message = error_message.groups()[0]
+
+                # Checking for permitted error.
+                for each_error in _PERMITTED_ERRORS:
+                    permited_error_message = re.search(each_error, error_message)
+
+                    if permited_error_message:
+                        error_is_fine = True
+                        break
+
+                # Raising errors
+                if error_is_fine:
+                    self._log.warn("PERMITTED ERROR: " + permited_error_message.string)
+                    continue
+                else:
+                    # We don't need to log exception because they already included in the main logger.
+                    # logger.error(response)
+                    # However, exceptions are recorded in the global logger which do not record
+                    # information of the instances name, hence we edit the error message.
+                    raise MapdlRuntimeError(
+                        f"\n\nError in instance {self._name}\n\n" + error_message
+                    )
