@@ -24,6 +24,37 @@ SpacedPaths = namedtuple(
     "SpacedPaths", ["path_without_spaces", "path_with_spaces", "path_with_single_quote"]
 )
 
+from _pytest.terminal import TerminalReporter
+
+
+## Changing report line length
+class MyReporter(TerminalReporter):
+    def short_test_summary(self):
+        # your own impl goes here, for example:
+        self.write_sep("=", "PyMAPDL Pytest short summary")
+
+        failed = self.stats.get("failed", [])
+        for rep in failed:
+            # breakpoint()
+            self.write_line(
+                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
+
+        errored = self.stats.get("error", [])
+        for rep in errored:
+            # breakpoint()
+            self.write_line(
+                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
+
+
+@pytest.mark.trylast
+def pytest_configure(config):
+    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
+    my_reporter = MyReporter(config)
+    config.pluginmanager.unregister(vanilla_reporter)
+    config.pluginmanager.register(my_reporter, "terminalreporter")
+
 
 # Check if MAPDL is installed
 # NOTE: checks in this order to get the newest installed version
