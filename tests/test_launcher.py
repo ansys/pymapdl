@@ -299,3 +299,8 @@ def test_warn_uncommon_executable_path():
         UserWarning, match="does not match the usual ansys executable path style"
     ):
         warn_uncommon_executable_path("")
+
+
+@pytest.mark.requires_gui
+def test_open_gui(mapdl):
+    assert False
