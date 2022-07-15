@@ -813,6 +813,12 @@ class _MapdlCore(Commands):
         ----------
         include_result : bool, optional
             Allow the result file to be post processed in the GUI.
+            By default, it is ``True``.
+
+        inplace : bool, optional
+            Open the GUI on the current working directory, instead of create
+            a new temporary directory and copy the results files over there.
+            By default, it is ``False``.
 
         Examples
         --------
