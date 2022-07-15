@@ -75,11 +75,18 @@ class LockFileException(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
-class LicenseServerConnectionError(RuntimeError):
-    """Error when the license server is not available."""
+class MapdlDidNotStart(RuntimeError):
+    """Error when the MAPDL process does not start"""
 
     def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
+
+
+class LicenseServerConnectionError(MapdlDidNotStart):
+    """Error when the license server is not available."""
+
+    def __init__(self, msg=""):
+        MapdlDidNotStart.__init__(self, msg)
 
 
 # handler for protect_grpc
@@ -144,3 +151,44 @@ def protect_grpc(func):
         return out
 
     return wrapper
+
+
+"""
+-2=caution
+-1=no label (used for u/i pop-ups) timed as a note message
+0=no label (used for u/i pop-ups)
+1=note,
+2=warning,
+3=error,
+4=fatal,
+"""
+
+
+class MapdlException(MapdlRuntimeError):
+    """General MAPDL exception."""
+
+    pass
+
+
+class MapdlError(MapdlException):
+    """General MAPDL Error"""
+
+    pass
+
+
+class MapdlWarning(MapdlException):
+    """General MAPDL warning"""
+
+    pass
+
+
+class MapdlNote(MapdlException):
+    """General MAPDL note"""
+
+    pass
+
+
+class MapdlInfo(MapdlException):
+    """General MAPDL info message"""
+
+    pass
