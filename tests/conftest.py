@@ -125,6 +125,10 @@ def pytest_addoption(parser):
     parser.addoption(
         "--console", action="store_true", default=False, help="run console tests"
     )
+    parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
+    parser.addoption(
+        "--only_gui", action="store_true", default=False, help="run only GUI tests"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -147,6 +151,21 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
+
+    only_gui_filter = config.getoption("--only_gui")
+    if only_gui_filter:
+        new_items = []
+        for item in items:
+            mark = item.get_closest_marker("requires_gui")
+            if mark and mark.name == "requires_gui":
+                new_items.append(item)
+        items[:] = new_items
+
+    if not config.getoption("--gui") and not only_gui_filter:
+        skip_gui = pytest.mark.skip(reason="Requires to launch MAPDL GUI interface.")
+        for item in items:
+            if "requires_gui" in item.keywords:
+                item.add_marker(skip_gui)
 
 
 @pytest.fixture(scope="session")
