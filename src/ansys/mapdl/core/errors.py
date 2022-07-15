@@ -166,7 +166,7 @@ class MapdlError(MapdlException):
     """General MAPDL Error"""
 
     def __init__(self, msg=""):
-        super().__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlWarning(MapdlException):
@@ -174,7 +174,7 @@ class MapdlWarning(MapdlException):
     """General MAPDL warning"""
 
     def __init__(self, msg=""):
-        super().__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlNote(MapdlException):
@@ -182,7 +182,7 @@ class MapdlNote(MapdlException):
     """General MAPDL note"""
 
     def __init__(self, msg=""):
-        super().__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlInfo(MapdlException):
@@ -190,4 +190,4 @@ class MapdlInfo(MapdlException):
     """General MAPDL info message"""
 
     def __init__(self, msg=""):
-        super().__init__(self, msg)
+        MapdlException.__init__(self, msg)
