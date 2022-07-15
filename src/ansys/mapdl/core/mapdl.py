@@ -813,11 +813,13 @@ class _MapdlCore(Commands):
         ----------
         include_result : bool, optional
             Allow the result file to be post processed in the GUI.
+            It is ignored if 'inplace' is ``True``.
             By default, it is ``True``.
 
         inplace : bool, optional
             Open the GUI on the current working directory, instead of create
             a new temporary directory and copy the results files over there.
+            If ``True``, it ignores 'include_result' kwarg.
             By default, it is ``False``.
 
         Examples
@@ -861,7 +863,7 @@ class _MapdlCore(Commands):
                 "'inplace' and 'include_result' kwargs are not compatible."
             )
 
-        if include_result is None and inplace:
+        if inplace and include_result is None:
             include_result = False
 
         elif not include_result:
