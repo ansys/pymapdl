@@ -1,11 +1,11 @@
 """Module for licensing and license serve checks."""
 
-import logging
 import os
 import socket
 import subprocess
 import time
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
@@ -33,10 +33,6 @@ ALLOWABLE_LICENSES = list(LICENSES)
 # To keep very general, and since we need just to be able to solve, we are going to check against the lower license (``mech_1``).
 
 # TODO: Implement a warning for insufficient license rights.
-
-
-LOG = logging.getLogger(__name__)
-LOG.setLevel("CRITICAL")
 
 
 def check_license_file(timeout=30, verbose=False):
