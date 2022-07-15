@@ -806,7 +806,7 @@ class _MapdlCore(Commands):
         self.igesout(filename, att=1, mute=True)
         return filename
 
-    def open_gui(self, include_result=True, inplace=False):  # pragma: no cover
+    def open_gui(self, include_result=None, inplace=None):  # pragma: no cover
         """Saves existing database and opens up the APDL GUI.
 
         Parameters
@@ -860,6 +860,15 @@ class _MapdlCore(Commands):
             raise ValueError(
                 "'inplace' and 'include_result' kwargs are not compatible."
             )
+
+        if include_result is None and inplace:
+            include_result = False
+
+        elif not include_result:
+            include_result = True
+
+        if not inplace:
+            inplace = False
 
         name = self.jobname
 
