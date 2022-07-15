@@ -153,42 +153,36 @@ def protect_grpc(func):
     return wrapper
 
 
-"""
--2=caution
--1=no label (used for u/i pop-ups) timed as a note message
-0=no label (used for u/i pop-ups)
-1=note,
-2=warning,
-3=error,
-4=fatal,
-"""
-
-
 class MapdlException(MapdlRuntimeError):
     """General MAPDL exception."""
 
-    pass
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
 
 
 class MapdlError(MapdlException):
     """General MAPDL Error"""
 
-    pass
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
 
 
 class MapdlWarning(MapdlException):
     """General MAPDL warning"""
 
-    pass
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
 
 
 class MapdlNote(MapdlException):
     """General MAPDL note"""
 
-    pass
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
 
 
 class MapdlInfo(MapdlException):
     """General MAPDL info message"""
 
-    pass
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
