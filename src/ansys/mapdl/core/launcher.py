@@ -519,12 +519,14 @@ def launch_grpc(
         files = os.listdir(run_location)
         has_ans = any([filename for filename in files if ".err" in filename])
         if has_ans:
-            LOG.info(f"MAPDL session successfully started (Error file found)")
+            LOG.info("MAPDL session successfully started (Error file found)")
             break
         time.sleep(sleep_time)
 
     if not has_ans:
-        raise MapdlDidNotStart(f"MAPDL failed to start (No err file generated)")
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start (No err file generated in '{run_location}')"
+        )
 
     return port, run_location
 
