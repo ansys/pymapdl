@@ -280,7 +280,7 @@ class MapdlGrpc(_MapdlCore):
         print_com=False,
         channel=None,
         remote_instance=None,
-        **kwargs,
+        **start_parm,
     ):
         """Initialize connection to the mapdl server"""
         self.__distributed = None
@@ -302,7 +302,7 @@ class MapdlGrpc(_MapdlCore):
             log_apdl=log_apdl,
             log_file=log_file,
             print_com=print_com,
-            **kwargs,
+            **start_parm,
         )
 
         # gRPC request specific locks as these gRPC request are not thread safe
@@ -314,17 +314,22 @@ class MapdlGrpc(_MapdlCore):
         self._stub = None
         self._cleanup = cleanup_on_exit
         self._remove_tmp = remove_temp_files
-        self._jobname = kwargs.pop("jobname", "file")
-        self._path = kwargs.pop("run_location", None)
+        self._jobname = start_parm.get("jobname", "file")
+        self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        if "local" in kwargs:  # pragma: no cover  # allow this to be overridden
-            self._local = kwargs["local"]
+        if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
+            self._local = start_parm["local"]
         self._health_response_queue = None
         self._exiting = False
         self._exited = None
         self._mute = False
         self._db = None
+
+        # saving for later use (for example open_gui)
+        start_parm["ip"] = ip
+        start_parm["port"] = port
+        self._start_parm = start_parm
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
@@ -345,11 +350,11 @@ class MapdlGrpc(_MapdlCore):
 
         # double check we have access to the local path if not
         # explicitly specified
-        if "local" not in kwargs:
+        if "local" not in start_parm:
             self._verify_local()
 
         # only cache process IDs if launched locally
-        if self._local and "exec_file" in kwargs:
+        if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
     def _create_channel(self, ip, port):
