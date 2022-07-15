@@ -127,7 +127,7 @@ def pytest_addoption(parser):
     )
     parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
     parser.addoption(
-        "--only_gui", action="store_true", default=False, help="run only GUI tests"
+        "--only-gui", action="store_true", default=False, help="run only GUI tests"
     )
 
 
@@ -152,7 +152,7 @@ def pytest_collection_modifyitems(config, items):
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
 
-    only_gui_filter = config.getoption("--only_gui")
+    only_gui_filter = config.getoption("--only-gui")
     if only_gui_filter:
         new_items = []
         for item in items:

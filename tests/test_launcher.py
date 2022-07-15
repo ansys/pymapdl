@@ -303,4 +303,16 @@ def test_warn_uncommon_executable_path():
 
 @pytest.mark.requires_gui
 def test_open_gui(mapdl):
-    assert False
+
+    mapdl.open_gui()
+    mapdl.open_gui(include_result=True)
+    mapdl.open_gui(inplace=True)  #
+
+    mapdl.open_gui(include_result=False)
+    mapdl.open_gui(inplace=False)  #
+
+    mapdl.open_gui(include_result=True, inplace=False)
+    mapdl.open_gui(include_result=False, inplace=True)
+
+    mapdl.open_gui(include_result=False, inplace=False)  #
+    mapdl.open_gui(include_result=True, inplace=True)
