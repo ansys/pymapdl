@@ -154,6 +154,7 @@ def protect_grpc(func):
 
 
 class MapdlException(MapdlRuntimeError):
+
     """General MAPDL exception."""
 
     def __init__(self, msg=""):
@@ -161,28 +162,32 @@ class MapdlException(MapdlRuntimeError):
 
 
 class MapdlError(MapdlException):
+
     """General MAPDL Error"""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlWarning(MapdlException):
+
     """General MAPDL warning"""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlNote(MapdlException):
+
     """General MAPDL note"""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        MapdlException.__init__(self, msg)
 
 
 class MapdlInfo(MapdlException):
+
     """General MAPDL info message"""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        MapdlException.__init__(self, msg)
