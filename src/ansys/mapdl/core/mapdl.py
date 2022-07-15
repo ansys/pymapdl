@@ -7,6 +7,7 @@ import os
 import pathlib
 import re
 from shutil import copyfile, rmtree
+from subprocess import DEVNULL, call
 import tempfile
 import time
 import warnings
@@ -805,7 +806,7 @@ class _MapdlCore(Commands):
         self.igesout(filename, att=1, mute=True)
         return filename
 
-    def open_gui(self, include_result=True):  # pragma: no cover
+    def open_gui(self, include_result=True, inplace=False):  # pragma: no cover
         """Saves existing database and opens up the APDL GUI.
 
         Parameters
@@ -849,17 +850,29 @@ class _MapdlCore(Commands):
                 "``open_gui`` can only be called from a local " "MAPDL instance"
             )
 
-        # specify a path for the temporary database
-        temp_dir = tempfile.gettempdir()
-        save_path = os.path.join(temp_dir, f"ansys_{random_string(10)}")
-        if os.path.isdir(save_path):
-            rmtree(save_path)
-        os.mkdir(save_path)
+        if inplace and include_result:
+            raise ValueError(
+                "'inplace' and 'include_result' kwargs are not compatible."
+            )
 
-        name = "tmp"
-        tmp_database = os.path.join(save_path, "%s.db" % name)
-        if os.path.isfile(tmp_database):
-            os.remove(tmp_database)
+        name = self.jobname
+
+        # specify a path for the temporary database if any.
+        if inplace:
+            run_dir = self._start_parm["run_location"]
+
+        else:
+            temp_dir = tempfile.gettempdir()
+            run_dir = os.path.join(temp_dir, f"ansys_{random_string(10)}")
+
+            # Sanity checks
+            if os.path.isdir(run_dir):
+                rmtree(run_dir)
+            os.mkdir(run_dir)
+
+        database_file = os.path.join(run_dir, "%s.db" % name)
+        if os.path.isfile(database_file) and not inplace:
+            os.remove(database_file)
 
         # cache result file, version, and routine before closing
         resultfile = self._result_file
@@ -868,40 +881,56 @@ class _MapdlCore(Commands):
 
         # finish, save and exit the server
         self.finish(mute=True)
-        self.save(tmp_database, mute=True)
+        self.save(database_file, mute=True)
         self.exit()
 
         # copy result file to temp directory
-        if include_result and self._result_file is not None:
-            if os.path.isfile(resultfile):
-                tmp_resultfile = os.path.join(save_path, "%s.rst" % name)
-                copyfile(resultfile, tmp_resultfile)
+        if not inplace:
+            if include_result and self._result_file is not None:
+                if os.path.isfile(resultfile):
+                    tmp_resultfile = os.path.join(run_dir, "%s.rst" % name)
+                    copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
-        start_file = os.path.join(save_path, "start%s.ans" % version)
+        start_file = os.path.join(run_dir, "start%s.ans" % version)
         with open(start_file, "w") as f:
             f.write("RESUME\n")
 
         # some versions of ANSYS just look for "start.ans" when starting
-        other_start_file = os.path.join(save_path, "start.ans")
+        other_start_file = os.path.join(run_dir, "start.ans")
         with open(other_start_file, "w") as f:
             f.write("RESUME\n")
 
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
-        os.chdir(save_path)
+        os.chdir(run_dir)
         exec_file = self._start_parm.get("exec_file", get_ansys_path(allow_input=False))
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
-        os.system(
-            f'cd "{save_path}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}'
+
+        if inplace:
+            warn(
+                "MAPDL GUI is opened using 'inplace' kwarg."
+                f"Hence the changes you do will overwrite the files in {run_dir}."
+            )
+
+        call(
+            f'cd "{run_dir}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}',
+            shell=True,
+            stdout=DEVNULL,
         )
+
+        # Going back
         os.chdir(cwd)
-        # Consider removing this temporary directory
+
+        # Clearing
+        os.remove(start_file)
+        os.remove(other_start_file)
 
         # reattach to a new session and reload database
         self._launch(self._start_parm)
-        self.resume(tmp_database, mute=True)
+        self.resume(database_file, mute=True)
+        self.save()
 
     def _cache_routine(self):
         """Cache the current routine."""
