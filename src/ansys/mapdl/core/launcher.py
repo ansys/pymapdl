@@ -22,7 +22,7 @@ import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
-from ansys.mapdl.core.errors import LockFileException, VersionError
+from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -223,7 +223,7 @@ def launch_grpc(
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
-) -> tuple:
+) -> tuple:  # pragma: no cover
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -501,9 +501,11 @@ def launch_grpc(
 
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
+    LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
+
     if verbose:  # pragma: no cover
-        print(f"Running {command}")
         subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
+
     else:
         subprocess.Popen(
             command,
@@ -525,8 +527,14 @@ def launch_grpc(
         files = os.listdir(run_location)
         has_ans = any([filename for filename in files if ".err" in filename])
         if has_ans:
+            LOG.info("MAPDL session successfully started (Error file found)")
             break
         time.sleep(sleep_time)
+
+    if not has_ans:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start (No err file generated in '{run_location}')"
+        )
 
     return port, run_location
 
