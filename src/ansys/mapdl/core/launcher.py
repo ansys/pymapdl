@@ -1074,8 +1074,8 @@ def launch_mapdl(
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
-        connecting to MAPDL. Except if ``start_instance`` is specified
-        then, it defaults to ``False``.
+        connecting to MAPDL. When if ``start_instance`` is specified
+        it defaults to ``False``.
 
     log_apdl : str, optional
         Enables logging every APDL command to the local disk.  This
