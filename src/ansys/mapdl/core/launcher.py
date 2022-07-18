@@ -1318,7 +1318,7 @@ def launch_mapdl(
             return mapdl
 
     if not start_instance:
-        if clear_on_connect is None:
+        if clear_on_connect is None:  # pragma: no cover
             clear_on_connect = False
 
         mapdl = MapdlGrpc(
