@@ -328,8 +328,8 @@ class Parameters:
                 # allow a second attempt
                 return self._get_parameter_array(key, parm["shape"])
         else:
-            if "grpc" in self._mapdl.name.lower():
-                return self._mapdl.scalar_param(key)
+            if "grpc" in self._mapdl.name.lower() and parm["type"] not in ["CHARACTER"]:
+                return self._mapdl.scalar_param(key)  # Only works with numbers
             else:
                 return parm["value"]
 
