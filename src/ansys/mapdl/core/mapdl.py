@@ -150,6 +150,7 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
+        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -269,9 +270,12 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_bc_listing_function(func))
 
     @property
-    def _name(self):  # pragma: no cover
-        """Implemented by child class"""
-        raise NotImplementedError("Implemented by child class")
+    def name(self):
+        raise NotImplementedError("Implemented by child classes.")
+
+    @name.setter
+    def name(self, name):
+        raise ValueError("The name of an instance cannot be changed.")
 
     @property
     def queries(self):

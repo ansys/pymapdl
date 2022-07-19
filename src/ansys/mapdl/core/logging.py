@@ -183,7 +183,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         kwargs["extra"][
             "instance_name"
         ] = (
-            self.extra.get_name()
+            self.extra.name()
         )  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
@@ -476,7 +476,7 @@ class Logger:
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger(name, level), mapdl_instance
             )
-        elif isinstance(name, None):
+        elif not name:
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger("NO_NAMED_YET", level), mapdl_instance
             )

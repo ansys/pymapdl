@@ -235,6 +235,8 @@ class MapdlConsole(_MapdlCore):
                 self._log.debug("Killed process %d", self._process.pid)
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        return f"Console_PID_{self._process.pid}"
+        if not self._name:
+            self._name = f"Console_PID_{self._process.pid}"
+        return self._name

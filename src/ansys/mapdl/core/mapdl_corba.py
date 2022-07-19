@@ -401,8 +401,10 @@ class MapdlCorba(_MapdlCore):
         self._outfile = None
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        if hasattr(self, "_corba_key"):
-            return f"CORBA_PID_{self._corba_key}"
-        return f"CORBA_INSTANCE_{id(self)}"
+        if not self._name:
+            if hasattr(self, "_corba_key"):
+                self._name = f"CORBA_PID_{self._corba_key}"
+            self._name = f"CORBA_INSTANCE_{id(self)}"
+        return self._name
