@@ -275,7 +275,7 @@ class _MapdlCore(Commands):
 
     @name.setter
     def name(self, name):
-        raise ValueError("The name of an instance cannot be changed.")
+        raise AttributeError("The name of an instance cannot be changed.")
 
     @property
     def queries(self):
