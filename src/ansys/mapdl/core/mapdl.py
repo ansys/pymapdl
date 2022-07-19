@@ -270,11 +270,11 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_bc_listing_function(func))
 
     @property
-    def name(self):
+    def name(self):  # pragma: no cover
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, name):
+    def name(self, name):  # pragma: no cover
         raise AttributeError("The name of an instance cannot be changed.")
 
     @property

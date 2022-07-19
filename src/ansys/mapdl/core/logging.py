@@ -474,7 +474,7 @@ class Logger:
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger(name, level), mapdl_instance
             )
-        elif not name:
+        elif not name:  # pragma: no cover
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger("NO_NAMED_YET", level), mapdl_instance
             )
