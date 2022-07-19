@@ -277,7 +277,7 @@ def test_log_to_file(tmpdir):
 
 def test_log_instance_name(mapdl):
     # verify we can access via an instance name
-    LOG[mapdl._name] == mapdl._log
+    LOG[mapdl.name] == mapdl._log
 
 
 def test_instance_log_to_file(mapdl, tmpdir):
