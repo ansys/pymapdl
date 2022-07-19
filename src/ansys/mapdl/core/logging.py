@@ -182,9 +182,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         # This are the extra parameters sent to log
         kwargs["extra"][
             "instance_name"
-        ] = (
-            self.extra.name()
-        )  # here self.extra is the argument pass to the log records.
+        ] = self.extra.name  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):

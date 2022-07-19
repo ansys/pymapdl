@@ -656,6 +656,8 @@ def test_set_get_parameters(mapdl, parm):
 
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
+    elif isinstance(parm, (int, float)):
+        assert np.allclose(mapdl.parameters[parm_name], parm)
     else:
         # For the cases where shape is (X,) # Empty second dimension
         parm = np.array(parm)
