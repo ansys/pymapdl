@@ -15,7 +15,7 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
