@@ -150,6 +150,7 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
+        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
@@ -187,7 +188,7 @@ class _MapdlCore(Commands):
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
-            self._name, self, level=loglevel
+            self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
         if log_file:
@@ -269,9 +270,12 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_bc_listing_function(func))
 
     @property
-    def _name(self):  # pragma: no cover
-        """Implemented by child class"""
-        raise NotImplementedError("Implemented by child class")
+    def name(self):  # pragma: no cover
+        raise NotImplementedError("Implemented by child classes.")
+
+    @name.setter
+    def name(self, name):  # pragma: no cover
+        raise AttributeError("The name of an instance cannot be changed.")
 
     @property
     def queries(self):
@@ -3587,5 +3591,5 @@ class _MapdlCore(Commands):
                     # However, exceptions are recorded in the global logger which do not record
                     # information of the instances name, hence we edit the error message.
                     raise MapdlRuntimeError(
-                        f"\n\nError in instance {self._name}\n\n" + error_message
+                        f"\n\nError in instance {self.name}\n\n" + error_message
                     )

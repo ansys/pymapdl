@@ -138,9 +138,16 @@ def warns_in_cdread_error_log(mapdl):
 
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
-    assert str(mapdl._ip) in mapdl._name
-    assert str(mapdl._port) in mapdl._name
-    assert "GRPC" in mapdl._name
+
+    assert str(mapdl._ip) in mapdl.name
+    assert str(mapdl._port) in mapdl.name
+    assert "GRPC" in mapdl.name
+
+    assert mapdl.name
+    assert mapdl.name == mapdl._name
+
+    with pytest.raises(AttributeError):
+        mapdl.name = "asfd"
 
 
 def test_jobname(mapdl, cleared):
@@ -649,6 +656,8 @@ def test_set_get_parameters(mapdl, parm):
 
     if isinstance(parm, str):
         assert mapdl.parameters[parm_name] == parm
+    elif isinstance(parm, (int, float)):
+        assert np.allclose(mapdl.parameters[parm_name], parm)
     else:
         # For the cases where shape is (X,) # Empty second dimension
         parm = np.array(parm)

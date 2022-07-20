@@ -198,3 +198,29 @@ def test_contain_iter(mapdl, cleared):
     mapdl.parameters["THREE"] = 3.0
     assert hasattr(mapdl.parameters, "__iter__")
     assert sorted(["TWO", "THREE"]) == [each for each in mapdl.parameters]
+
+
+@pytest.mark.parametrize("number", [1 / 3, 1 / 7, 0.0181681816816816168168168])
+def test_double_parameter_get(mapdl, number):
+    # Running grpc method
+    mapdl.parameters["value"] = number
+
+    precision_single = 9
+    precision_double = 12
+    assert np.around(mapdl.parameters["value"], precision_single) == np.around(
+        number, precision_single
+    )
+    assert np.around(mapdl.parameters["value"], precision_double) == np.around(
+        number, precision_double
+    )
+
+    # to use the alternative method (single precision)
+    mapdl_name = mapdl._name
+    mapdl._name = "dummy"
+    assert np.around(mapdl.parameters["value"], precision_single) == np.around(
+        number, precision_single
+    )
+    assert np.around(mapdl.parameters["value"], precision_double) != np.around(
+        number, precision_double
+    )
+    mapdl._name = mapdl_name

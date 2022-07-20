@@ -321,14 +321,17 @@ class Parameters:
             raise IndexError("%s not a valid parameter_name" % key)
 
         parm = parameters[key]
-        if parm["type"] in ["ARRAY", "TABLE"]:
+        if parm["type"] in ["ARRAY", "TABLE"]:  # Array case
             try:
                 return self._get_parameter_array(key, parm["shape"])
             except ValueError:
                 # allow a second attempt
                 return self._get_parameter_array(key, parm["shape"])
-
-        return parm["value"]
+        else:
+            if "grpc" in self._mapdl.name.lower() and parm["type"] not in ["CHARACTER"]:
+                return self._mapdl.scalar_param(key)  # Only works with numbers
+            else:
+                return parm["value"]
 
     def __setitem__(self, key, value):
         """Set a parameter"""
