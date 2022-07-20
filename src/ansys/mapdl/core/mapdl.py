@@ -1833,6 +1833,10 @@ class _MapdlCore(Commands):
         return read_binary(result_path)
 
     @property
+    def result_file(self):
+        return self._result_file
+
+    @property
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
