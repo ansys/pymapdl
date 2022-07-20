@@ -81,5 +81,6 @@ Recommended links
 =================
 
 * `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside Ansys - PADT Inc. <https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/>`_.
+* `Ansys Innovation Space - Courses <https://courses.ansys.com/>`_
 
 Feel free to email any educational or learning resources to `PyAnsys Support <pyansys.support@ansys.com>`_.
