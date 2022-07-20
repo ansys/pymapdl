@@ -9,8 +9,7 @@ Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
 Resources
 =========
 
-- View and download `PyMAPDL cheatsheet <../_assets/Cheat_Sheet_PyMAPDL.pdf>`_. 
-
+- View and download `PyMAPDL cheatsheet <../_static/Cheat_Sheet_PyMAPDL.pdf>`_.
 Courses
 =======
 
