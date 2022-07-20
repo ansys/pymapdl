@@ -10,6 +10,8 @@ Resources
 =========
 
 - View and download `PyMAPDL cheatsheet <../_static/Cheat_Sheet_PyMAPDL.pdf>`_.
+
+
 Courses
 =======
 
