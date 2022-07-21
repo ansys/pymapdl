@@ -200,9 +200,9 @@ directory as MAPDL creates a several temporary files.
 
 If this command doesn't launch, you could have a variety of issues, including:
 
-  - License server setup
-  - Running behind a VPN
-  - Missing dependencies
+- License server setup
+- Running behind a VPN
+- Missing dependencies
 
 
 Licensing Issues

@@ -2322,13 +2322,13 @@ class MapdlGrpc(_MapdlCore):
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        if self._ip or self._port:
-            return f"GRPC_{self._ip}:{self._port}"
-        return f"GRPC_instance_{id(self)}"
-
-    def get_name(self):
+        if not self._name:
+            if self._ip or self._port:
+                self._name = f"GRPC_{self._ip}:{self._port}"
+            else:
+                self._name = f"GRPC_instance_{id(self)}"
         return self._name
 
     @property
