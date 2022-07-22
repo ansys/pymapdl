@@ -73,7 +73,7 @@ jobs:
           xvfb-run make -C doc html
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@4.4.0
         with:
           repository-name: pyansys/pymapdl-dev-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
