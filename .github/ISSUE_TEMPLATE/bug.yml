@@ -33,7 +33,18 @@ body:
     id: steps-to-reproduce
     attributes:
       label: Steps To Reproduce
-      placeholder: Please write the steps in a list form
+      placeholder: |
+        Please write the steps in a list form i.e.:
+        * Install this package...
+        * Run this input file (attached)
+        * Run the following commands:
+        ```py
+        mapdl.command1()
+        mapdl.command2()
+        ...
+        ```
+        * Check obtained error...
+
     validations:
       required: true
 
@@ -72,6 +83,9 @@ body:
     attributes:
       label: Installed packages
       description: Run `python -m pip freeze` to list installed packages
-      placeholder: Paste the output of `python -m pip freeze` here
+      placeholder: |
+        ```text
+        Paste the output of `python -m pip freeze` here
+        ```
     validations:
       required: true
