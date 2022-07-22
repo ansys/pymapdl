@@ -277,7 +277,9 @@ for i, hindex in zip(range(result.n_results), result.harmonic_indices):
 # Note how you can clearly see two nodal lines for this mode shape since it's
 # nodal diameter 2.
 
-result.plot_nodal_displacement(12, cpos="xy", cmap="jet", show_scalar_bar=False)
+result.plot_nodal_displacement(
+    12, cpos="xy", cmap="jet", show_scalar_bar=False, add_text=False
+)
 
 
 ###############################################################################
