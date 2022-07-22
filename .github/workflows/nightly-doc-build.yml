@@ -27,9 +27,9 @@ jobs:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
+      # - name: Get tag
+      #   id: tag
+      #   uses: dawidd6/action-get-tag@v1
         # with:
           # Optionally strip `v` prefix
           # strip_v: true
@@ -80,7 +80,7 @@ jobs:
           branch: gh-pages
           folder: doc/build/html
           clean: true
-          tag: ${{steps.tag.outputs.tag}}
+          tag: "v0.62.2"  #${{steps.tag.outputs.tag}}
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
