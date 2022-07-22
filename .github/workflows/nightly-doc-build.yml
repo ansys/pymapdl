@@ -80,7 +80,7 @@ jobs:
           branch: gh-pages
           folder: doc/build/html
           clean: true
-          tag: "v0.62.2"  #${{steps.tag.outputs.tag}}
+          tag: "dev"  #${{steps.tag.outputs.tag}}
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
