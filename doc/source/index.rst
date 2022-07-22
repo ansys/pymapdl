@@ -10,6 +10,7 @@ PyMAPDL Documentation |version|
    api/index
    mapdl_commands/index
    examples/index
+   learning/index
    contributing
 
 

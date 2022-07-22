@@ -1083,9 +1083,9 @@ def launch_mapdl(
         environment variable "PYMAPDL_IP=FALSE".
 
     clear_on_connect : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``True``, giving you a fresh environment when connecting to
-        MAPDL.
+        Defaults to ``True``, giving you a fresh environment when
+        connecting to MAPDL. When if ``start_instance`` is specified
+        it defaults to ``False``.
 
     log_apdl : str, optional
         Enables logging every APDL command to the local disk.  This
@@ -1338,7 +1338,10 @@ def launch_mapdl(
             return mapdl
 
     if not start_instance:
-        return MapdlGrpc(
+        if clear_on_connect is None:  # pragma: no cover
+            clear_on_connect = False
+
+        mapdl = MapdlGrpc(
             ip=ip,
             port=port,
             cleanup_on_exit=False,

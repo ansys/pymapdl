@@ -182,9 +182,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         # This are the extra parameters sent to log
         kwargs["extra"][
             "instance_name"
-        ] = (
-            self.extra.get_name()
-        )  # here self.extra is the argument pass to the log records.
+        ] = self.extra.name  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
     def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
@@ -476,7 +474,7 @@ class Logger:
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger(name, level), mapdl_instance
             )
-        elif isinstance(name, None):
+        elif not name:  # pragma: no cover
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger("NO_NAMED_YET", level), mapdl_instance
             )

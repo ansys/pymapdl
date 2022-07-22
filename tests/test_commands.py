@@ -351,7 +351,7 @@ def test_inquire_functions(mapdl, func):
         ARGS_INQ_FUNC[each_arg] for each_arg in func_args if each_arg not in ["self"]
     ]
     output = func_(*args)
-    if "GRPC" in mapdl._name:
+    if "GRPC" in mapdl.name:
         assert isinstance(output, (float, int))
     else:
         assert isinstance(output, str)
