@@ -1,8 +1,10 @@
 import os
 import re
 
+import pytest
+
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.examples.downloads import download_example_data
+from ansys.mapdl.core.examples.downloads import _download_file, download_example_data
 
 
 def test_load_verif():
@@ -25,3 +27,9 @@ def test_bracket(mapdl, cleared):
 def test_download_example_data():
     path = download_example_data("LatheCutter.anf", "geometry")
     assert os.path.exists(path)
+
+
+def test_failed_download():
+    filename = "non_existing_file"
+    with pytest.raises(Exception):
+        _download_file(filename, directory=None)
