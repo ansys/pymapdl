@@ -282,8 +282,9 @@ result.plot_nodal_displacement(12, cpos="xy", cmap="jet", show_scalar_bar=False)
 
 ###############################################################################
 # Animate Nodal First Bend for Nodal Diameter 2
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Let's end this example by animating mode 12, which corresponds to first bend
+# 2nd nodal diameter for this example.
 
 _ = result.animate_nodal_displacement(
     12,
