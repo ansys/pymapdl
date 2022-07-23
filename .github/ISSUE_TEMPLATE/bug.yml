@@ -34,7 +34,7 @@ body:
     attributes:
       label: Steps To Reproduce
       placeholder: |
-        Please write the steps in a list form i.e.:
+        Please write the steps in a list form e.g.:
         * Install this package...
         * Run this input file (attached)
         * Run the following commands:
