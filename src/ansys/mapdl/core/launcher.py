@@ -1121,13 +1121,13 @@ def launch_mapdl(
 
     add_env_vars : dict, optional
         The provided dictionary will be used to extend the system or process
-        environment variables. If you want to control all of the env vars,
-        please use ``replace_env_vars``. Defaults to ``None``.
+        environment variables. If you want to control all of the environment
+        variables, use ``replace_env_vars``. Defaults to ``None``.
 
-    replace_env_vars
+    replace_env_vars : dict, optional
         The provided dictionary will be used to replace all the system or process
-        environment variables. To just add some env vars to the MAPDL process,
-        use ``add_env_vars``. Defaults to ``None``.
+        environment variables. To just add some environment variables to the MAPDL
+        process, use ``add_env_vars``. Defaults to ``None``.
 
     Returns
     -------
@@ -1596,7 +1596,7 @@ def check_mode(mode, version):
 
 def update_env_vars(add_env_vars, replace_env_vars):
     """
-    Update environment variables for MAPDL process
+    Update environment variables for the MAPDL process.
 
     Parameters
     ----------
