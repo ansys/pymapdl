@@ -78,9 +78,9 @@ def gen_sector(mapdl, sectors):
     mapdl.k(0, *kp_end_outer)
 
     # inner arc
-    lnum_left = mapdl.l(1, 2)
-    lnum_right = mapdl.l(1, 3)
-    lnum_inter = mapdl.l(2, 3)
+    mapdl.l(1, 2)  # left line
+    mapdl.l(1, 3)  # right line
+    mapdl.l(2, 3)  # internal line
     mapdl.al("all")
 
     # outer "blade"
@@ -124,7 +124,7 @@ mapdl.eplot()
 
 output = mapdl.cyclic()
 print(f"Expected Sectors: {sectors}")
-output
+print(output)
 
 
 ###############################################################################
@@ -155,7 +155,11 @@ output
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Visualize a traveling wave from the modal analysis.
 #
-# For more details, see `Validation of a Modal Work Approach for Forced Response Analysis of Bladed Disks <https://www.mdpi.com/2076-3417/11/12/5437/pdf>`_, or the `Cyclic Symmetry Analysis Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v222/en/pdf/Ansys_Mechanical_APDL_Cyclic_Symmetry_Analysis_Guide.pdf>`_
+# For more details, see `Validation of a Modal Work Approach for Forced
+# Response Analysis of Bladed Disks
+# <https://www.mdpi.com/2076-3417/11/12/5437/pdf>`_, or the `Cyclic Symmetry
+# Analysis Guide
+# <https://ansyshelp.ansys.com/Views/Secured/corp/v222/en/pdf/Ansys_Mechanical_APDL_Cyclic_Symmetry_Analysis_Guide.pdf>`_
 #
 # .. note::
 #    This uses the legacy result reader, which will be deprecated at some point
@@ -167,7 +171,7 @@ output
 
 # grab the result object from MAPDL
 result = mapdl.result
-result
+print(result)
 
 
 ###############################################################################
@@ -175,10 +179,9 @@ result
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This is the table of harmonic indices. This table provides the corresponding
 # harmonic index for each cumulative mode.
-
-print(f"Rst.  Harmonic Index")
+print("C. Index   Harmonic Index")
 for i, hindex in zip(range(result.n_results), result.harmonic_indices):
-    print(f"{i:3d}    {hindex:3d}")
+    print(f"{i:3d}      {hindex:3d}")
 
 
 ###############################################################################
@@ -266,7 +269,7 @@ result
 # the number of sectors.
 #
 
-print(f"Rst.  Harmonic Index")
+print("C. Index   Harmonic Index")
 for i, hindex in zip(range(result.n_results), result.harmonic_indices):
     print(f"{i:3d}    {hindex:3d}")
 
