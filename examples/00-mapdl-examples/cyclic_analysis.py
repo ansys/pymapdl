@@ -80,7 +80,7 @@ def gen_sector(mapdl, sectors):
     # inner arc
     mapdl.l(1, 2)  # left line
     mapdl.l(1, 3)  # right line
-    mapdl.l(2, 3)  # internal line
+    lnum_inter = mapdl.l(2, 3)  # internal line
     mapdl.al("all")
 
     # outer "blade"
@@ -100,6 +100,18 @@ mapdl.vplot()
 
 
 ###############################################################################
+# Make the Model Cyclic
+# ~~~~~~~~~~~~~~~~~~~~~
+# Make the model cyclic by running :func:`Mapdl.cyclic`
+#
+# Note how the number of sectors matches
+
+output = mapdl.cyclic()
+print(f"Expected Sectors: {sectors}")
+print(output)
+
+
+###############################################################################
 # Generate the mesh
 # ~~~~~~~~~~~~~~~~~
 # Generate the finite element mesh using quadritic hexahedrals, SOLID186.
@@ -113,18 +125,6 @@ mapdl.vsweep("all")
 
 # plot the finite element mesh
 mapdl.eplot()
-
-
-###############################################################################
-# Make the Model Cyclic
-# ~~~~~~~~~~~~~~~~~~~~~
-# Make the model cyclic by running :func:`Mapdl.cyclic`
-#
-# Note how the number of sectors matches
-
-output = mapdl.cyclic()
-print(f"Expected Sectors: {sectors}")
-print(output)
 
 
 ###############################################################################
@@ -236,17 +236,17 @@ _ = result.animate_nodal_displacement(
 mapdl.clear()
 mapdl.prep7()
 
-# Generate a 20 sector model
+# Generate a single sector of a 20 sector model
 gen_sector(mapdl, 20)
+
+# make it cyclic
+mapdl.cyclic()
 
 # Mesh it
 esize = 0.001
 mapdl.et(1, 186)
 mapdl.esize(esize)
 mapdl.vsweep("all")
-
-# make it cyclic
-mapdl.cyclic()
 
 # apply materials
 mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
