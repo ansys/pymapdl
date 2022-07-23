@@ -147,7 +147,7 @@ mapdl.emodif("ALL", "MAT", 1)
 # ``(sectors/2)*nmode`` based on the cyclic boundary conditions.
 
 output = mapdl.modal_analysis(nmode=10, freqb=1)
-output
+print(output)
 
 
 ###############################################################################
@@ -259,7 +259,7 @@ output = mapdl.modal_analysis(nmode=6, freqb=1)
 
 # grab the result object from MAPDL
 result = mapdl.result
-result
+print(result)
 
 
 ###############################################################################
