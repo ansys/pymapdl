@@ -1,5 +1,7 @@
 Sphinx==5.0.2
 ansys-mapdl-reader==0.51.14
+ansys-sphinx-theme==0.4.2
+grpcio==1.43.0
 imageio-ffmpeg==0.4.7
 imageio==2.19.5
 jupyter_sphinx==0.4.0
@@ -8,11 +10,10 @@ matplotlib==3.5.2
 numpydoc==1.4.0
 pandas==1.4.3
 plotly==5.9.0
-ansys-sphinx-theme==0.4.2
 pypandoc==1.8.1
 pytest-sphinx==0.4.0
 pythreejs==2.3.0
-https://github.com/pyvista/pyvista/archive/main.zip  # need latest
+pyvista==0.35.2
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.18.3
 sphinx-copybutton==0.5.0
@@ -21,4 +22,3 @@ sphinx-notfound-page==0.8.3
 sphinxcontrib-websupport==1.2.4
 sphinxemoji==0.2.0
 vtk==9.0.3
-grpcio==1.43.0
