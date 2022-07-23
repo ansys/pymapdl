@@ -56,7 +56,17 @@ def _retrieve_file(url, filename):
 
 def _download_file(filename, directory=None):
     url = _get_file_url(filename, directory)
-    return _retrieve_file(url, filename)
+    try:
+        return _retrieve_file(url, filename)
+    except Exception as e:  # Genering exception
+        raise RuntimeError(
+            "For the reason mentioned below, retrieving the file from internet failed.\n"
+            "You can download this file from:\n"
+            f"{url}\n"
+            "\n"
+            "The reported error message is:\n"
+            f"{str(e)}"
+        )
 
 
 def download_bracket():
