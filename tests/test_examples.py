@@ -31,5 +31,5 @@ def test_download_example_data():
 
 def test_failed_download():
     filename = "non_existing_file"
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         _download_file(filename, directory=None)

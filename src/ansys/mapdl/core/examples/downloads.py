@@ -59,7 +59,7 @@ def _download_file(filename, directory=None):
     try:
         return _retrieve_file(url, filename)
     except Exception as e:  # Genering exception
-        raise Exception(
+        raise RuntimeError(
             "For the reason mentioned below, retrieving the file from internet failed.\n"
             "You can download this file from:\n"
             f"{url}\n"

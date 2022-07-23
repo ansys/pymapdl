@@ -51,7 +51,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 Download Example Files
 ======================
 
-Each example should contain all the necessary resources to run each example.
+Each example should contain all the necessary resources to run the example.
 However in some cases, external files are needed. A link to those files is
 available at each example page.
 These links refers to the following GitHub repository where you can find all of them:
