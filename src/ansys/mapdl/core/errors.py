@@ -191,3 +191,11 @@ class MapdlInfo(MapdlException):
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)
+
+
+class MapdlVersionError(MapdlException):
+
+    """Incompatible MAPDL version"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)

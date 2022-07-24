@@ -205,6 +205,12 @@ class MapdlDb:
         --------
         >>> mapdl.db.start()
         """
+        if self._mapdl._server_version != (0, 4, 1):
+            from ansys.mapdl.core.errors import MapdlVersionError
+
+            raise MapdlVersionError(
+                "This version of MAPDL is not compatible with 'database' module."
+            )
 
         # only start if not already running
         is_running = self.active
