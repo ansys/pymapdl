@@ -1576,7 +1576,7 @@ class MapdlGrpc(_MapdlCore):
         self,
         files,
         target_dir=None,
-        chunk_size=DEFAULT_CHUNKSIZE,
+        chunk_size=None,
         progress_bar=None,
         recursive=False,
     ):  # pragma: no cover
@@ -1638,6 +1638,9 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_project()
 
         """
+        if chunk_size is None:
+            chunk_size = DEFAULT_CHUNKSIZE
+
         if chunk_size > 4 * 1024 * 1024:  # 4MB
             raise ValueError(
                 f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
