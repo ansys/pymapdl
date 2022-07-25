@@ -1387,3 +1387,8 @@ def test_equal_in_comments_and_title(mapdl):
     mapdl.com("=====")
     mapdl.title("This is = ")
     mapdl.title("This is '=' ")
+
+
+def test_result_file(mapdl):
+    assert mapdl.result_file
+    assert isinstance(mapdl.result_file, str)
