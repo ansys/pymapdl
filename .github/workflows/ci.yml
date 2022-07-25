@@ -15,7 +15,7 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
@@ -126,6 +126,14 @@ jobs:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
+      - name: Get tag
+        id: tag
+        uses: dawidd6/action-get-tag@v1
+        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+        with:
+          # Optionally strip `v` prefix
+          strip_v: false
+
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -221,13 +229,14 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@v4.4.0
         with:
           repository-name: pyansys/pymapdl-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/build/html
-          CLEAN: true
+          branch: gh-pages
+          folder: doc/build/html
+          clean: true
+          tag: ${{steps.tag.outputs.tag}}
 
       - name: Build PDF Documentation
         working-directory: doc
@@ -246,7 +255,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0']
 
     steps:
       - uses: actions/checkout@v2

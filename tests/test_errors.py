@@ -7,6 +7,7 @@ from ansys.mapdl.core.errors import (
     MapdlInfo,
     MapdlNote,
     MapdlRuntimeError,
+    MapdlVersionError,
     MapdlWarning,
 )
 
@@ -91,7 +92,15 @@ def test_raise_output_errors(mapdl, response, expected_error):
 
 @pytest.mark.parametrize(
     "error_class",
-    [MapdlDidNotStart, MapdlException, MapdlError, MapdlWarning, MapdlNote, MapdlInfo],
+    [
+        MapdlDidNotStart,
+        MapdlException,
+        MapdlError,
+        MapdlWarning,
+        MapdlNote,
+        MapdlInfo,
+        MapdlVersionError,
+    ],
 )
 def test_exception_classes(error_class):
     message = "Exception message"
