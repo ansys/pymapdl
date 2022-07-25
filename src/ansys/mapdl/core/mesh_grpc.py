@@ -4,7 +4,19 @@ import time
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
-from ansys.mapdl.reader.mesh import Mesh
+
+from ansys.mapdl.core.reader import HAS_DPF_CORE
+
+if HAS_DPF_CORE:
+    from ansys.mapdl.core.reader import DPFMapdlMesh as Mesh
+else:
+    try:
+        from ansys.mapdl.reader.mesh import Mesh
+
+        HAS_PYMAPDL_READER = True
+    except ModuleNotFoundError:
+        HAS_PYMAPDL_READER = False
+
 import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
@@ -19,7 +31,7 @@ class MeshGrpc(Mesh):
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""
-        super().__init__()
+        super().__init__(mapdl)
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("Must be initialized using MapdlGrpc class")
         self._mapdl_weakref = weakref.ref(mapdl)
