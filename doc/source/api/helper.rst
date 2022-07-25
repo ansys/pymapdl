@@ -9,7 +9,6 @@ or automating other tasks.
 
 .. autosummary::
    :toctree: _autosummary
-
    
    launch_mapdl
    convert_apdl_block
@@ -18,4 +17,4 @@ or automating other tasks.
    change_default_ansys_path
    find_ansys
    close_all_local_instances
-
+   save_ansys_path
