@@ -15,10 +15,11 @@
 
 .. rst-class:: sphx-glr-example-title
 
-.. _sphx_glr_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
+.. _sphx_glr_download_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
 
 .. _ref_dynamic_simulation_printed_circuit_board:
 .. _tech_demo_20:
+
 Dynamic simulation of a printed circuit board assembly
 ======================================================
 
@@ -2596,17 +2597,6 @@ Post-process PSD analysis using Matplotlib
    :alt: 20 example technology showcase dynamic simulation PCB
    :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_007.png
    :class: sphx-glr-single-img
-
-
-.. rst-class:: sphx-glr-script-out
-
- Out:
-
- .. code-block:: none
-
-
-    Text(31.226314019097217, 0.5, 'Response power spectral density')
-
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 323-324
