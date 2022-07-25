@@ -205,7 +205,7 @@ class MapdlDb:
         --------
         >>> mapdl.db.start()
         """
-        if self._mapdl._server_version != (0, 4, 1):
+        if self._mapdl._server_version != (0, 4, 1):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 
             raise MapdlVersionError(

@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from ansys.mapdl.core.database import DBDef, MapdlDb
-from ansys.mapdl.core.errors import MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 
 # We are skipping all these test until 0.5.X gets fixed.
@@ -225,17 +224,3 @@ def test_off_db(mapdl, db):
     assert not mapdl.db.active
     assert mapdl.db.nodes is None
     assert mapdl.db.elems is None
-
-
-@pytest.mark.parametrize(
-    "mapdl_version",
-    ((0, 4, 0), (0, 4, 1), (0, 4, 2), (0, 5, 0)),
-)
-def test_invalid_mapdl_version(mapdl, mapdl_version):
-    tmp_mapdl_version = mapdl._server_version
-    mapdl.__server_version = mapdl_version
-    with pytest.raises(MapdlVersionError):
-        mapdl.db.start()
-
-    mapdl.db.stop()
-    mapdl.__server_version = tmp_mapdl_version
