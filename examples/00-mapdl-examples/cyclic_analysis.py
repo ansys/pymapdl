@@ -267,7 +267,6 @@ print(result)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Note how the harmonic indices of these modes goes up to 10, or N/2 where N is
 # the number of sectors.
-#
 
 print("C. Index   Harmonic Index")
 for i, hindex in zip(range(result.n_results), result.harmonic_indices):
@@ -275,8 +274,8 @@ for i, hindex in zip(range(result.n_results), result.harmonic_indices):
 
 
 ###############################################################################
-# Plot Nodal First Bend for Nodal Diameter 2
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot First Bend for Nodal Diameter 2
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Note how you can clearly see two nodal lines for this mode shape since it's
 # nodal diameter 2.
 
@@ -286,10 +285,10 @@ result.plot_nodal_displacement(
 
 
 ###############################################################################
-# Animate Nodal First Bend for Nodal Diameter 2
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Animate First Bend for Nodal Diameter 2
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Let's end this example by animating mode 12, which corresponds to first bend
-# 2nd nodal diameter for this example.
+# for the 2nd nodal diameter of this example model.
 
 _ = result.animate_nodal_displacement(
     12,
