@@ -812,7 +812,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     You can change the default ``exe_loc`` either by modifying the mentioned
     ``config.txt`` file or by executing:
 
-    >>> from ansys.mapdl.core.launcher import save_ansys_path
+    >>> from ansys.mapdl.core import save_ansys_path
     >>> save_ansys_path('/new/path/to/executable')
 
     """
