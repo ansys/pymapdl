@@ -773,11 +773,12 @@ def change_default_ansys_path(exe_loc):
 
 
 def save_ansys_path(exe_loc=None):  # pragma: no cover
-    """Find ANSYS path or query user.
+    """Find MAPDL's path or query user.
 
     If no ``exe_loc`` argument is supplied, this function attempt
     to obtain the MAPDL executable from (and in order):
-    - The default ansys paths (i.e. 'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX')
+
+    - The default ansys paths (i.e. ``'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX'``)
     - The configuration file
     - User input
 
@@ -787,7 +788,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     Parameters
     ----------
     exe_loc : str, optional
-        Path of the MAPDL executable ('ansysXXX'), by default None
+        Path of the MAPDL executable ('ansysXXX'), by default ``None``.
 
     Returns
     -------
@@ -804,15 +805,15 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
         >>> import appdirs
         >>> import os
         >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
-        C:/Users/gayuso/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
+        C:/Users/user/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
 
+    Examples
+    --------
     You can change the default ``exe_loc`` either by modifying the mentioned
-    ``config.txt`` file or by executing this function:
+    ``config.txt`` file or by executing:
 
-    .. code:: python
-
-       >>> from ansys.mapdl.core.launcher import save_ansys_path
-       >>> save_ansys_path('/new/path/to/executable')
+    >>> from ansys.mapdl.core import save_ansys_path
+    >>> save_ansys_path('/new/path/to/executable')
 
     """
     if exe_loc is None:
