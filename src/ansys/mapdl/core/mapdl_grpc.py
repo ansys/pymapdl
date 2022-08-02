@@ -98,8 +98,9 @@ def get_file_chunks(filename, progress_bar=False):
     if progress_bar:
         if not _HAS_TQDM:  # pragma: no cover
             raise ModuleNotFoundError(
-                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
-                "To avoid this message you can set 'progress_bar=False'."
+                f"To use the keyword argument 'progress_bar', you need to have "
+                "installed the 'tqdm' package. "
+                "To avoid this message you can set `progress_bar=False`."
             )
 
         n_bytes = os.path.getsize(filename)
@@ -107,7 +108,7 @@ def get_file_chunks(filename, progress_bar=False):
         base_name = os.path.basename(filename)
         pbar = tqdm(
             total=n_bytes,
-            desc="Uploading %s" % base_name,
+            desc=f"Uploading {base_name}",
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
@@ -211,8 +212,9 @@ class MapdlGrpc(_MapdlCore):
         Default ``True``.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit if MAPDL is local.  Default
-        ``False``.
+        When this parameter is ``True``, the MAPDL working directory will be
+        deleted when MAPDL is exited provided that it is within the temporary
+        user directory. Default ``False``.
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
@@ -845,12 +847,29 @@ class MapdlGrpc(_MapdlCore):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()  # pragma: no cover
 
-        if self._remove_tmp and self._local:
-            self._log.debug("Removing local temporary files")
-            shutil.rmtree(self.directory, ignore_errors=True)
+        self._remove_temp_files()
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
+
+    def _remove_temp_files(self):
+        """Removes the temporary directory created by the launcher.
+
+        This only runs if MAPDL is within the temporary directory.
+
+        """
+        if self._remove_tmp and self._local:
+            path = self.directory
+            tmp_dir = tempfile.gettempdir()
+            ans_temp_dir = os.path.join(tmp_dir, "ansys_")
+            if path.startswith(tempfile.gettempdir()):
+                self._log.debug("Removing the MAPDL temporary directory %s", path)
+                shutil.rmtree(path, ignore_errors=True)
+            else:
+                self._log.debug(
+                    "MAPDL working directory is not in the temporary directory '%s'"
+                    ", not removing the MAPDL working directory."
+                )
 
     def _kill(self):
         """Call exit(0) on the server."""

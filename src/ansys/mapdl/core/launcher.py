@@ -1096,7 +1096,11 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit.  Default ``False``.
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the temporary user directory, obtainable with
+        ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -1386,6 +1390,9 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
+        if remove_temp_files:
+            LOG.info("`run_location` set. Disabling the removal of temporary files.")
+            remove_temp_files = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
