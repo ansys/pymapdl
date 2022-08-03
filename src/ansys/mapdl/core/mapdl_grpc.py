@@ -855,7 +855,8 @@ class MapdlGrpc(_MapdlCore):
     def _remove_temp_files(self):
         """Removes the temporary directory created by the launcher.
 
-        This only runs if MAPDL is within the temporary directory.
+        This only runs if the current working directory of MAPDL is within the
+        user temporary directory.
 
         """
         if self._remove_tmp and self._local:
