@@ -98,7 +98,7 @@ def get_file_chunks(filename, progress_bar=False):
     if progress_bar:
         if not _HAS_TQDM:  # pragma: no cover
             raise ModuleNotFoundError(
-                f"To use the keyword argument 'progress_bar', you need to have "
+                "To use the keyword argument 'progress_bar', you need to have "
                 "installed the 'tqdm' package. "
                 "To avoid this message you can set `progress_bar=False`."
             )
@@ -862,13 +862,14 @@ class MapdlGrpc(_MapdlCore):
             path = self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
-            if path.startswith(tempfile.gettempdir()):
+            if path.startswith(ans_temp_dir):
                 self._log.debug("Removing the MAPDL temporary directory %s", path)
                 shutil.rmtree(path, ignore_errors=True)
             else:
                 self._log.debug(
                     "MAPDL working directory is not in the temporary directory '%s'"
-                    ", not removing the MAPDL working directory.", tmp_dir
+                    ", not removing the MAPDL working directory.",
+                    tmp_dir,
                 )
 
     def _kill(self):

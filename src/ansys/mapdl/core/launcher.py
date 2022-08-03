@@ -983,6 +983,7 @@ def launch_mapdl(
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1524,7 +1525,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                remove_temp_files=remove_temp_files,
                 log_apdl=log_apdl,
                 **start_parm,
             )
