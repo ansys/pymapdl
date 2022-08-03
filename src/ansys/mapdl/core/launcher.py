@@ -1098,8 +1098,8 @@ def launch_mapdl(
 
     remove_temp_files : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
-        working directory within the temporary user directory, obtainable with
-        ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
 

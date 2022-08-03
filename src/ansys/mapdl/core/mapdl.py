@@ -903,8 +903,8 @@ class _MapdlCore(Commands):
         self.finish(mute=True)
         self.save(database_file, mute=True)
 
-        # Exit and do not remove the temporary directory. This backwards
-        # compatibility with CONSOLE and CORBA
+        # Exit and do not remove the temporary directory. This is backwards
+        # compatible with CONSOLE and CORBA modes.
         remove_tmp = False
         if hasattr(self, "_remove_tmp"):
             remove_tmp = self._remove_tmp
@@ -938,7 +938,7 @@ class _MapdlCore(Commands):
         if inplace:
             warn(
                 "MAPDL GUI has been opened using 'inplace' kwarg. "
-                f"Hence the changes you do will overwrite the files in {run_dir}."
+                f"The changes you make will overwrite the files in {run_dir}."
             )
 
         call(

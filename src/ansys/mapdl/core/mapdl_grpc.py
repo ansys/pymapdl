@@ -99,8 +99,8 @@ def get_file_chunks(filename, progress_bar=False):
         if not _HAS_TQDM:  # pragma: no cover
             raise ModuleNotFoundError(
                 "To use the keyword argument 'progress_bar', you need to have "
-                "installed the 'tqdm' package. "
-                "To avoid this message you can set `progress_bar=False`."
+                "installed the `tqdm` package. "
+                "To avoid this message set `progress_bar=False`."
             )
 
         n_bytes = os.path.getsize(filename)
