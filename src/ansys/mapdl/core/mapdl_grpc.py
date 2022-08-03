@@ -868,7 +868,7 @@ class MapdlGrpc(_MapdlCore):
             else:
                 self._log.debug(
                     "MAPDL working directory is not in the temporary directory '%s'"
-                    ", not removing the MAPDL working directory."
+                    ", not removing the MAPDL working directory.", tmp_dir
                 )
 
     def _kill(self):
