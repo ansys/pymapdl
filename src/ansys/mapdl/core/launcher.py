@@ -983,6 +983,7 @@ def launch_mapdl(
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1096,7 +1097,11 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit.  Default ``False``.
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -1386,6 +1391,9 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
+        if remove_temp_files:
+            LOG.info("`run_location` set. Disabling the removal of temporary files.")
+            remove_temp_files = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
@@ -1517,7 +1525,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                remove_temp_files=remove_temp_files,
                 log_apdl=log_apdl,
                 **start_parm,
             )

@@ -811,27 +811,26 @@ class _MapdlCore(Commands):
         return filename
 
     def open_gui(self, include_result=None, inplace=None):  # pragma: no cover
-        """Saves existing database and opens up the APDL GUI.
+        """Save the existing database and open it up in the MAPDL GUI.
 
         Parameters
         ----------
         include_result : bool, optional
-            Allow the result file to be post processed in the GUI.
-            It is ignored if 'inplace' is ``True``.
-            By default, it is ``True``.
+            Allow the result file to be post processed in the GUI.  It is
+            ignored if ``inplace`` is ``True``.  By default, ``True``.
 
         inplace : bool, optional
-            Open the GUI on the current working directory, instead of create
-            a new temporary directory and copy the results files over there.
-            If ``True``, it ignores 'include_result' kwarg.
-            By default, it is ``False``.
+            Open the GUI on the current MAPDL working directory, instead of
+            creating a new temporary directory and coping the results files
+            over there.  If ``True``, ignores ``include_result`` parameter.  By
+            default, this ``False``.
 
         Examples
         --------
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
 
-        Create a square area using keypoints
+        Create a square area using keypoints.
 
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 0, 0)
@@ -844,11 +843,11 @@ class _MapdlCore(Commands):
         >>> mapdl.l(4, 1)
         >>> mapdl.al(1, 2, 3, 4)
 
-        Open up the gui
+        Open up the gui.
 
         >>> mapdl.open_gui()
 
-        Resume where you left off
+        Resume where you left off.
 
         >>> mapdl.et(1, 'MESH200', 6)
         >>> mapdl.amesh('all')
@@ -859,7 +858,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             raise RuntimeError(
-                "``open_gui`` can only be called from a local " "MAPDL instance"
+                "``open_gui`` can only be called from a local MAPDL instance."
             )
 
         if inplace and include_result:
@@ -891,7 +890,7 @@ class _MapdlCore(Commands):
                 rmtree(run_dir)
             os.mkdir(run_dir)
 
-        database_file = os.path.join(run_dir, "%s.db" % name)
+        database_file = os.path.join(run_dir, f"{name}.db")
         if os.path.isfile(database_file) and not inplace:
             os.remove(database_file)
 
@@ -903,6 +902,13 @@ class _MapdlCore(Commands):
         # finish, save and exit the server
         self.finish(mute=True)
         self.save(database_file, mute=True)
+
+        # Exit and do not remove the temporary directory. This is backwards
+        # compatible with CONSOLE and CORBA modes.
+        remove_tmp = False
+        if hasattr(self, "_remove_tmp"):
+            remove_tmp = self._remove_tmp
+        self._remove_tmp = False
         self.exit()
 
         # copy result file to temp directory
@@ -913,7 +919,7 @@ class _MapdlCore(Commands):
                     copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
-        start_file = os.path.join(run_dir, "start%s.ans" % version)
+        start_file = os.path.join(run_dir, f"start{version}.ans")
         with open(start_file, "w") as f:
             f.write("RESUME\n")
 
@@ -931,8 +937,8 @@ class _MapdlCore(Commands):
 
         if inplace:
             warn(
-                "MAPDL GUI is opened using 'inplace' kwarg."
-                f"Hence the changes you do will overwrite the files in {run_dir}."
+                "MAPDL GUI has been opened using 'inplace' kwarg. "
+                f"The changes you make will overwrite the files in {run_dir}."
             )
 
         call(
@@ -951,7 +957,9 @@ class _MapdlCore(Commands):
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(database_file, mute=True)
-        self.save()
+
+        # restore remove tmp state
+        self._remove_tmp = remove_tmp
 
     def _cache_routine(self):
         """Cache the current routine."""

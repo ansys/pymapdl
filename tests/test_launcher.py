@@ -243,6 +243,26 @@ def test_license_type_additional_switch():
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+def test_remove_temp_files():
+    """Ensure the working directory is removed when run_location is not set."""
+    mapdl = launch_mapdl(remove_temp_files=True)
+    path = mapdl.directory
+    mapdl.exit()
+    assert not os.path.isdir(path)
+
+
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+def test_remove_temp_files_fail(tmpdir):
+    """Ensure the working directory is not removed when the cwd is changed."""
+    mapdl = launch_mapdl(remove_temp_files=True)
+    assert os.path.isdir(str(tmpdir))
+    mapdl.cwd(str(tmpdir))
+    path = mapdl.directory
+    mapdl.exit()
+    assert os.path.isdir(path)
+
+
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.parametrize(
     "exe_loc",
     [
