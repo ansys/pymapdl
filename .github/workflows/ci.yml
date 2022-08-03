@@ -225,9 +225,9 @@ jobs:
         with:
           repository-name: pyansys/pymapdl-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/build/html
-          CLEAN: true
+          branch: gh-pages
+          folder: doc/build/html
+          clean: true
 
       - name: Build PDF Documentation
         working-directory: doc

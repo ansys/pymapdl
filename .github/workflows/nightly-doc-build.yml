@@ -70,9 +70,9 @@ jobs:
         with:
           repository-name: pyansys/pymapdl-dev-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/build/html
-          CLEAN: true
+          branch: gh-pages
+          folder: doc/build/html
+          clean: true
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
