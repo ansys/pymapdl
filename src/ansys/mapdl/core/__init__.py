@@ -35,6 +35,7 @@ from ansys.mapdl.core.launcher import (
     find_ansys,
     get_ansys_path,
     launch_mapdl,
+    save_ansys_path,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
