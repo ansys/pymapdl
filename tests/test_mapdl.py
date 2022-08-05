@@ -1387,3 +1387,40 @@ def test_equal_in_comments_and_title(mapdl):
     mapdl.com("=====")
     mapdl.title("This is = ")
     mapdl.title("This is '=' ")
+
+
+@skip_in_cloud
+def test_file_command_local(mapdl, cube_solve, tmpdir):
+    rst_file = mapdl._result_file
+
+    # check for raise of non-exising file
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    # change directory
+    mapdl.directory = str(tmpdir)
+    assert mapdl.directory == str(tmpdir)
+
+    mapdl.post1()
+    mapdl.file(rst_file)
+
+
+def test_file_command_remote(mapdl, cube_solve, tmpdir):
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    mapdl.post1()
+    # this file already exists remotely
+    mapdl.file("file.rst")
+
+    with pytest.raises(FileNotFoundError):
+        mapdl.file()
+
+    tmpdir = str(tmpdir)
+    mapdl.download("file.rst", tmpdir)
+    local_file = os.path.join(tmpdir, "file.rst")
+    new_local_file = os.path.join(tmpdir, "myrst.rst")
+    os.rename(local_file, new_local_file)
+
+    output = mapdl.file(new_local_file)
+    assert "myrst.rst" in output
