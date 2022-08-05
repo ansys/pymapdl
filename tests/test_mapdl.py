@@ -1423,4 +1423,4 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     os.rename(local_file, new_local_file)
 
     output = mapdl.file(new_local_file)
-    assert "myrst.rst" in output
+    assert "DATA FILE CHANGED TO FILE" in output
