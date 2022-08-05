@@ -839,9 +839,12 @@ class MapdlGrpc(_MapdlCore):
             except:
                 pass
 
-        self._kill()  # sets self._exited = True
-        self._close_process()
-        self._remove_lock_file()
+        if self._local:
+            self._close_process()
+            self._remove_lock_file()
+        else:
+            self._kill_server()
+        self._exited = True
 
         if self._remote_instance:
             # No cover: The CI is working with a single MAPDL instance
@@ -873,13 +876,28 @@ class MapdlGrpc(_MapdlCore):
                     tmp_dir,
                 )
 
-    def _kill(self):
-        """Call exit(0) on the server."""
-        self._ctrl("EXIT")
-        self._exited = True
+    def _kill_server(self):  # pragma: no cover
+        """Call exit(0) on the server.
 
-    def _close_process(self):
-        """Close all MAPDL processes"""
+        Notes
+        -----
+        This only shuts down the mapdl server process and leaves the other
+        processes orphaned. This is useful for killing a remote process but not
+        a local process.
+
+        """
+        self._ctrl("EXIT")
+
+    def _close_process(self):  # pragma: no cover
+        """Close all MAPDL processes.
+
+        Notes
+        -----
+        This is effectively the only way to completely close down MAPDL
+        locally. Just killing the server with ``_kill_server`` leaves orphaned
+        processes making this method ineffective for a local instance of MAPDL.
+
+        """
         if self._local:
             for pid in self._pids:
                 try:
@@ -888,7 +906,13 @@ class MapdlGrpc(_MapdlCore):
                     pass
 
     def _cache_pids(self):
-        """Store the process IDs used when launching MAPDL"""
+        """Store the process IDs used when launching MAPDL.
+
+        These PIDs are stored in a "cleanup<GUID>.sh/bat" file and are the PIDs
+        of the MAPDL process. Killing these kills all dependent MAPDL
+        processes.
+
+        """
         for filename in self.list_files():
             if "cleanup" in filename:
                 script = os.path.join(self.directory, filename)
@@ -904,7 +928,7 @@ class MapdlGrpc(_MapdlCore):
     def _remove_lock_file(self):
         """Removes the lock file.
 
-        Necessary to call this as a segfault of MAPDL or sys(0) will
+        Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
         mapdl_path = self.directory
@@ -2314,7 +2338,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             if not os.path.isfile(fname):
                 raise FileNotFoundError(
-                    f"Unable to find {fname}.  You may need to"
+                    f"Unable to find {fname}.  You may need to "
                     "input the full path to the file."
                 )
 
@@ -2478,3 +2502,25 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.file)
+    def file(self, fname="", ext="", **kwargs):
+        """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
+        filename = fname + ext
+        if self._local:  # pragma: no cover
+            out = super().file(fname, ext, **kwargs)
+        elif filename in self.list_files():
+            # this file is already remote
+            out = self._file(filename)
+        else:
+            if not os.path.isfile(filename):
+                raise FileNotFoundError(
+                    f"Unable to find '{filename}'. You may need to "
+                    "input the full path to the file."
+                )
+
+            progress_bar = kwargs.pop("progress_bar", False)
+            basename = self.upload(filename, progress_bar=progress_bar)
+            out = self._file(basename, **kwargs)
+
+        return out

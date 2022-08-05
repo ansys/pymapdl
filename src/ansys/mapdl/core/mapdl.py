@@ -2941,9 +2941,9 @@ class _MapdlCore(Commands):
     @supress_logging
     def directory(self, path):
         """Change the directory using ``Mapdl.cwd``"""
-        self.cwd(
-            path
-        )  # this has been wrapped in Mapdl to show a warning if the file does not exist.
+        # this has been wrapped in Mapdl to show a warning if the file does
+        # not exist.
+        self.cwd(path)
 
     @property
     def _lockfile(self):
@@ -3160,7 +3160,7 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.cwd)
     def cwd(self, *args, **kwargs):
-        """Wraps cwd"""
+        """Wraps cwd."""
         returns_ = super().cwd(*args, **kwargs)
 
         if returns_:  # if successful, it should be none.
@@ -3601,3 +3601,55 @@ class _MapdlCore(Commands):
                     raise MapdlRuntimeError(
                         f"\n\nError in instance {self.name}\n\n" + error_message
                     )
+
+    def file(self, fname="", ext="", **kwargs):
+        """Specifies the data file where results are to be found.
+
+        APDL Command: FILE
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the
+            characters needed for the directory path).  An unspecified
+            directory path defaults to the working directory; in this case, you
+            can use all 248 characters for the file name.
+
+        ext : str, default: "rst"
+            Filename extension (eight-character maximum). If ``fname`` has an
+            extension this is ignored.
+
+        Notes
+        -----
+        Specifies the Ansys data file where the results are to be found for
+        postprocessing.
+
+        Examples
+        --------
+        Load a result file that is outside of the current working directory.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.post1()
+        >>> mapdl.file('/tmp/file.rst')
+
+        """
+        # MAPDL always adds the "rst" extension onto the name, even if already
+        # has one, so here we simply reconstruct it.
+        filename = pathlib.Path(fname + ext)
+
+        if not filename.exists():
+            # potential that the user is relying on the default "rst"
+            filename_rst = filename.parent / (filename.name + ".rst")
+            if not filename_rst.exists():
+                raise FileNotFoundError(f"Unable to locate {filename}")
+
+        return self._file(filename, **kwargs)
+
+    def _file(self, filename, **kwargs):
+        """Run the MAPDL ``file`` command with a proper filename."""
+        filename = pathlib.Path(filename)
+        ext = filename.suffix
+        fname = str(filename).replace(ext, "")
+        ext = ext.replace(".", "")
+        return self.run(f"FILE,{fname},{ext}", **kwargs)

@@ -415,30 +415,6 @@ class Setup:
         command = f"ESOL,{nvar},{elem},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def file(self, fname="", ext="", **kwargs):
-        """Specifies the data file where results are to be found.
-
-        APDL Command: FILE
-
-        Parameters
-        ----------
-        fname
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-        Specifies the ANSYS data file where the results are to be found for
-        postprocessing.
-        """
-        command = f"FILE,{fname},{ext}"
-        return self.run(command, **kwargs)
-
     def gapf(self, nvar="", num="", name="", **kwargs):
         """Defines the gap force data to be stored in a variable.
 
