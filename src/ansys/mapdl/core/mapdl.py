@@ -1796,7 +1796,9 @@ class _MapdlCore(Commands):
         RF  : Nodal reaction forces
         """
         from ansys.mapdl.reader import read_binary
-        from ansys.mapdl.reader.rst import Result
+
+        # from ansys.mapdl.reader.rst import Result
+        from ansys.mapdl.core.reader import DPFResult as Result
 
         if not self._local:
             # download to temporary directory
