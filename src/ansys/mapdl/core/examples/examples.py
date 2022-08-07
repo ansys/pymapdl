@@ -4,11 +4,16 @@ import os
 from matplotlib.colors import ListedColormap
 import numpy as np
 
+from ansys.mapdl.core.examples import vmfiles
+
 # get location of this folder and the example files
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # add any files you'd like to import here.  For example:
 wing_model = os.path.join(dir_path, "wing.dat")
+static_example = vmfiles["vm5"]
+shell_static_example = vmfiles["vm6"]
+
 
 # be sure to add the input file directly in this directory
 # This way, files can be loaded with:
