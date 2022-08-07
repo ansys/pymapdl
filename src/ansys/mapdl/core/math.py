@@ -1583,8 +1583,13 @@ class AnsMat(ApdlMathObj):
         return objout
 
     def __getitem__(self, num):
+        """Return a vector from a given index."""
         name = id_generator()
-        self._mapdl.run(f"*VEC,{name},D,LINK,{self.id},{num+1}", mute=True)
+        info = self._mapdl._data_info(self.id)
+        dtype = ANSYS_VALUE_TYPE[info.stype]
+        self._mapdl.run(
+            f"*VEC,{name},{MYCTYPE[dtype]},LINK,{self.id},{num+1}", mute=True
+        )
         return AnsVec(name, self._mapdl)
 
     @property
