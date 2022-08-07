@@ -527,6 +527,14 @@ def test_copy(mm):
     assert np.allclose(k, kcopy)
 
 
+def test_copy_complex(mm):
+    data_a = np.random.random(10) + np.random.random(10) * 1j
+    vec_a = mm.set_vec(data_a)
+    data_b = vec_a.copy().asarray()
+    assert data_b.dtype == data_a.dtype
+    assert np.allclose(data_a, data_b)
+
+
 def test_sparse_repr(mm):
     k = mm.stiff()
     assert "Sparse APDLMath Matrix" in repr(k)
