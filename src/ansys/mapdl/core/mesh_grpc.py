@@ -511,28 +511,6 @@ class Mesh2():
             self._node_coord = np.ascontiguousarray(self._nodes[:, :3])
         return self._node_coord
 
-    @property
-    def node_angles(self):
-        """Node angles from the archive file.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
-        >>> archive.nodes
-        [[0.   0.   0.  ]
-         [0.   0.   0.  ]
-         [0.   0.   0.  ]
-         ...,
-         [0.   0.   0.  ]
-         [0.   0.   0.  ]
-         [0.   0.   0.  ]]
-        """
-        if self._node_angles is None:
-            self._node_angles = np.ascontiguousarray(self._nodes[:, 3:])
-        return self._node_angles
-
     def __repr__(self):
         txt = 'ANSYS Mesh\n'
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
