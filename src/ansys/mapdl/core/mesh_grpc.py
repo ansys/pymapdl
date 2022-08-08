@@ -457,28 +457,6 @@ class Mesh2():
         """
         return self._rnum
 
-    @property
-    def nodes(self):
-        """Array of nodes.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
-        >>> archive.nodes
-        [[0.   0.   0.  ]
-         [1.   0.   0.  ]
-         [0.25 0.   0.  ]
-         ...,
-         [0.75 0.5  3.5 ]
-         [0.75 0.5  4.  ]
-         [0.75 0.5  4.5 ]]
-        """
-        if self._node_coord is None:
-            self._node_coord = np.ascontiguousarray(self._nodes[:, :3])
-        return self._node_coord
-
     def __repr__(self):
         txt = 'ANSYS Mesh\n'
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
@@ -581,13 +559,6 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 """End"""
-
-
-
-
-#intersection
-#{'nodes'}
-
 
 
 class MeshGrpc(Mesh2):
