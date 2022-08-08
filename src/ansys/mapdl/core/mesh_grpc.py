@@ -593,7 +593,6 @@ class Mesh2():
                                null_unallowed=null_unallowed)
         return grid.save(str(filename), binary=binary)
 
-
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     """Adds missing midside nodes to cells.
 
@@ -903,12 +902,12 @@ class MeshGrpc(Mesh2):
         """Element key description"""
         self._update_cache_element_desc().join()
 
-        # convert to ekey format
+        # convert to e_key format
         if self._cache_element_desc:
-            ekey = []
+            e_key = []
             for einfo in self._cache_element_desc:
-                ekey.append(einfo[:2])
-            return np.vstack(ekey).astype(np.int32)
+                e_key.append(einfo[:2])
+            return np.vstack(e_key).astype(np.int32)
         return []
 
     @_ekey.setter
