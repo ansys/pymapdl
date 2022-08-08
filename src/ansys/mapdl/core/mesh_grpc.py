@@ -48,7 +48,6 @@ class Mesh2():
     def __init__(self):
         self._etype = None  # internal element type reference
         self._surf_cache = None  # cached external surface
-        self._enum = None  # cached element numbering
         self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
         self._mtype = None  # cached ansys material type
@@ -407,22 +406,6 @@ class Mesh2():
         return self._cached_elements
 
     @property
-    def enum(self):
-        """ANSYS element numbers.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
-        >>> archive.enum
-        array([    1,     2,     3, ...,  9998,  9999, 10000])
-        """
-        if self._enum is None:
-            self._enum = self._elem[self._elem_off[:-1] + 8]
-        return self._enum
-
-    @property
     def ekey(self):
         """Element type key
 
@@ -604,12 +587,6 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 
-
-#intersection
-#{'enum', 'nodes'}
-
-
-
 class MeshGrpc(Mesh2):
     """Provides an interface to the gRPC mesh from MAPDL."""
 
@@ -654,7 +631,6 @@ class MeshGrpc(Mesh2):
             self._cached_elements = None
 
             self._node_coord = None
-            self._enum = None
             self._nnum = None
             self._elem = None
             self._elem_off = None
