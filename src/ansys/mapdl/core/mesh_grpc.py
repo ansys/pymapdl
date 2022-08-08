@@ -47,17 +47,20 @@ class Mesh2():
 
     def __init__(self):
         self._etype = None  # internal element type reference
+        self._grid = None  # VTK grid
         self._surf_cache = None  # cached external surface
         self._enum = None  # cached element numbering
         self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
         self._mtype = None  # cached ansys material type
+        self._node_angles = None  # cached node angles
         self._node_coord = None  # cached node coordinates
         self._cached_elements = None  # cached list of elements
         self._secnum = None  # cached section number
         self._esys = None  # cached element coordinate system
 
         # Always set on init
+        self._nnum = None
         self._nodes = None
         self._elem = None
         self._elem_off = None
@@ -69,6 +72,13 @@ class Mesh2():
         self._rdat = []
         self._rnum = []
         self._keyopt = {}
+
+    @property
+    def _surf(self):
+        """External surface"""
+        if self._surf_cache is None:
+            self._surf_cache = self._grid.extract_surface()
+        return self._surf_cache
 
     @property
     def _has_nodes(self):
@@ -154,49 +164,49 @@ class Mesh2():
             # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
         if VTK9:
-            this_grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
+            grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
         else:
-            this_grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes,
+            grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes,
                                        deep=True)
 
         # Store original ANSYS element and node information
-        this_grid.point_data['ansys_node_num'] = nnum
-        this_grid.cell_data['ansys_elem_num'] = self.enum
-        this_grid.cell_data['ansys_real_constant'] = self.elem_real_constant
-        this_grid.cell_data['ansys_material_type'] = self.material_type
-        this_grid.cell_data['ansys_etype'] = self._ans_etype
-        this_grid.cell_data['ansys_elem_type_num'] = self.etype
+        grid.point_data['ansys_node_num'] = nnum
+        grid.cell_data['ansys_elem_num'] = self.enum
+        grid.cell_data['ansys_real_constant'] = self.elem_real_constant
+        grid.cell_data['ansys_material_type'] = self.material_type
+        grid.cell_data['ansys_etype'] = self._ans_etype
+        grid.cell_data['ansys_elem_type_num'] = self.etype
 
         # add components
         # Add element components to unstructured grid
         for key, item in self.element_components.items():
             mask = np.in1d(self.enum, item, assume_unique=True)
-            this_grid.cell_data[key] = mask
+            grid.cell_data[key] = mask
 
         # Add node components to unstructured grid
         for key, item in self.node_components.items():
             mask = np.in1d(nnum, item, assume_unique=True)
-            this_grid.point_data[key] = mask
+            grid.point_data[key] = mask
 
         # store node angles
         if angles is not None:
             if angles.shape[1] == 3:
-                this_grid.point_data['angles'] = angles
+                grid.point_data['angles'] = angles
 
         if not null_unallowed:
-            this_grid = this_grid.extract_cells(this_grid.celltypes != 0)
+            grid = grid.extract_cells(grid.celltypes != 0)
 
         if force_linear:
             # only run if the grid has points or cells
-            if this_grid.n_points:
-                this_grid = this_grid.linear_copy()
+            if grid.n_points:
+                grid = grid.linear_copy()
 
         # map over element types
         # Add tracker for original node numbering
-        ind = np.arange(this_grid.n_points)
-        this_grid.point_data['origid'] = ind
-        this_grid.point_data['VTKorigID'] = ind
-        return this_grid
+        ind = np.arange(grid.n_points)
+        grid.point_data['origid'] = ind
+        grid.point_data['VTKorigID'] = ind
+        return grid
 
     @property
     def key_option(self):
@@ -438,6 +448,20 @@ class Mesh2():
         return self._enum
 
     @property
+    def nnum(self):
+        """Array of node numbers.
+
+        Examples
+        --------
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> from ansys.mapdl.reader import examples
+        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
+        >>> archive.nnum
+        array([    1,     2,     3, ..., 19998, 19999, 20000])
+        """
+        return self._nnum
+
+    @property
     def ekey(self):
         """Element type key
 
@@ -510,6 +534,28 @@ class Mesh2():
             self._node_coord = np.ascontiguousarray(self._nodes[:, :3])
         return self._node_coord
 
+    @property
+    def node_angles(self):
+        """Node angles from the archive file.
+
+        Examples
+        --------
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> from ansys.mapdl.reader import examples
+        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
+        >>> archive.nodes
+        [[0.   0.   0.  ]
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]
+         ...,
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]
+         [0.   0.   0.  ]]
+        """
+        if self._node_angles is None:
+            self._node_angles = np.ascontiguousarray(self._nodes[:, 3:])
+        return self._node_angles
+
     def __repr__(self):
         txt = 'ANSYS Mesh\n'
         txt += '  Number of Nodes:              %d\n' % len(self.nnum)
@@ -561,6 +607,22 @@ class Mesh2():
                                force_linear=force_linear,
                                null_unallowed=null_unallowed)
         return grid.save(str(filename), binary=binary)
+
+    @property
+    def n_node(self):
+        """Number of nodes"""
+        if not self._has_nodes:
+            return 0
+        return self.nodes.shape[0]
+
+    @property
+    def n_elem(self):
+        """Number of nodes"""
+        if not self._has_elements:
+            return 0
+            
+        return len(self.enum)
+
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     """Adds missing midside nodes to cells.
@@ -623,8 +685,8 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 
-#intersection
-#{'enum', 'nodes', 'key_option'}
+
+
 
 
 
@@ -677,6 +739,7 @@ class MeshGrpc(Mesh2):
             self._elem = None
             self._elem_off = None
             self._grid = None
+            self._node_angles = None
             self._enum = None
             self._rcon = None
             self._mtype = None
@@ -870,12 +933,12 @@ class MeshGrpc(Mesh2):
         """Element key description"""
         self._update_cache_element_desc().join()
 
-        # convert to e_key format
+        # convert to ekey format
         if self._cache_element_desc:
-            e_key = []
+            ekey = []
             for einfo in self._cache_element_desc:
-                e_key.append(einfo[:2])
-            return np.vstack(e_key).astype(np.int32)
+                ekey.append(einfo[:2])
+            return np.vstack(ekey).astype(np.int32)
         return []
 
     @_ekey.setter
@@ -999,18 +1062,18 @@ class MeshGrpc(Mesh2):
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
         elem_raw = parse_chunks(chunks, np.int32)
-        num_elem = elem_raw[0]
+        n_elem = elem_raw[0]
 
         # ignore zeros
-        elem_off_raw = elem_raw[:num_elem]
+        elem_off_raw = elem_raw[:n_elem]
         elem_off_raw = elem_off_raw[elem_off_raw != 0]
         # TODO: arrays from gRPC interface should include size of the elem array
-        lst_value = np.array(elem_raw.size - num_elem, np.int32)
-        offset = np.hstack((elem_off_raw - num_elem, lst_value))
+        lst_value = np.array(elem_raw.size - n_elem, np.int32)
+        offset = np.hstack((elem_off_raw - n_elem, lst_value))
 
         # overwriting the last column to include element numbers
         elems_ = elem_raw.copy()  # elem_raw is only-read
-        elems_ = elems_[num_elem:]
+        elems_ = elems_[n_elem:]
         indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
         return elems_, offset
