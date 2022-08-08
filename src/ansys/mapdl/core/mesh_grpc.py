@@ -22,7 +22,16 @@ from .mesh_element_types import ETYPE_MAP
 
 
 from ansys.mapdl.reader import _relaxmidside, _reader
-from ansys.mapdl.reader.misc import unique_rows
+
+def unique_rows(a):
+    """ Returns unique rows of a and indices of those rows """
+    if not a.flags.c_contiguous:
+        a = np.ascontiguousarray(a)
+
+    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    _, idx, idx2 = np.unique(b, True, True)
+
+    return a[idx], idx, idx2
 
 
 INVALID_ALLOWABLE_TYPES = TypeError('`allowable_types` must be an array '
