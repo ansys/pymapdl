@@ -1040,18 +1040,18 @@ class MeshGrpc(Mesh2):
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
         elem_raw = parse_chunks(chunks, np.int32)
-        n_elem = elem_raw[0]
+        num_elem = elem_raw[0]
 
         # ignore zeros
-        elem_off_raw = elem_raw[:n_elem]
+        elem_off_raw = elem_raw[:num_elem]
         elem_off_raw = elem_off_raw[elem_off_raw != 0]
         # TODO: arrays from gRPC interface should include size of the elem array
-        lst_value = np.array(elem_raw.size - n_elem, np.int32)
-        offset = np.hstack((elem_off_raw - n_elem, lst_value))
+        lst_value = np.array(elem_raw.size - num_elem, np.int32)
+        offset = np.hstack((elem_off_raw - num_elem, lst_value))
 
         # overwriting the last column to include element numbers
         elems_ = elem_raw.copy()  # elem_raw is only-read
-        elems_ = elems_[n_elem:]
+        elems_ = elems_[num_elem:]
         indx_elem = offset[:-1] + 8
         elems_[indx_elem] = self.enum
         return elems_, offset
