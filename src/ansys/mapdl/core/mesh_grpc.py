@@ -13,15 +13,26 @@ from ansys.mapdl.core.misc import supress_logging, threaded
 TMP_NODE_CM = "__NODE__"
 
 
-
-
 """Copied from reader mesh"""
+
 import pyvista as pv
 from pyvista._vtk import VTK9
 from .mesh_element_types import ETYPE_MAP
 
 
-from ansys.mapdl.reader import _relaxmidside, _reader
+"""These are the only two real dependencies on mapdl reader. Notes on how to eliminate these
+references are below"""
+
+# uses ans_vtk_convert, need a way outside of legacy reader to convert
+# arrays of elements to vtk polydata efficiently
+# we can use dpf for that if the operator to generate vtk data
+from ansys.mapdl.reader import _reader #ans_vtk_convert
+
+
+# this is just computation that is done in cython for performance
+# we can use numba to jit the computation so we don't depend on cython
+from ansys.mapdl.reader import _relaxmidside #reset_midside
+
 
 def unique_rows(a):
     """ Returns unique rows of a and indices of those rows """
