@@ -18,10 +18,11 @@ TMP_NODE_CM = "__NODE__"
 """Copied from reader mesh"""
 import pyvista as pv
 from pyvista._vtk import VTK9
+from .mesh_element_types import ETYPE_MAP
+
 
 from ansys.mapdl.reader import _relaxmidside, _reader
 from ansys.mapdl.reader.misc import unique_rows
-from ansys.mapdl.reader.elements import ETYPE_MAP
 
 
 INVALID_ALLOWABLE_TYPES = TypeError('`allowable_types` must be an array '
