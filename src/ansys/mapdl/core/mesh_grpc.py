@@ -594,13 +594,6 @@ class Mesh2():
         return grid.save(str(filename), binary=binary)
 
     @property
-    def n_node(self):
-        """Number of nodes"""
-        if not self._has_nodes:
-            return 0
-        return self.nodes.shape[0]
-
-    @property
     def n_elem(self):
         """Number of nodes"""
         if not self._has_elements:
