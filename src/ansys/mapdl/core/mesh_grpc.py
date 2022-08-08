@@ -593,14 +593,6 @@ class Mesh2():
                                null_unallowed=null_unallowed)
         return grid.save(str(filename), binary=binary)
 
-    @property
-    def n_elem(self):
-        """Number of nodes"""
-        if not self._has_elements:
-            return 0
-            
-        return len(self.enum)
-
 
 def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     """Adds missing midside nodes to cells.
