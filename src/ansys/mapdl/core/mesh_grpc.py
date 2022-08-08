@@ -60,7 +60,6 @@ class Mesh2():
         self._esys = None  # cached element coordinate system
 
         # Always set on init
-        self._nnum = None
         self._nodes = None
         self._elem = None
         self._elem_off = None
@@ -446,20 +445,6 @@ class Mesh2():
         if self._enum is None:
             self._enum = self._elem[self._elem_off[:-1] + 8]
         return self._enum
-
-    @property
-    def nnum(self):
-        """Array of node numbers.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
-        >>> archive.nnum
-        array([    1,     2,     3, ..., 19998, 19999, 20000])
-        """
-        return self._nnum
 
     @property
     def ekey(self):
