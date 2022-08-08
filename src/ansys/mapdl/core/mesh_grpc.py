@@ -163,49 +163,49 @@ class Mesh2():
             # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
         if VTK9:
-            grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
+            this_grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
         else:
-            grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes,
+            this_grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes,
                                        deep=True)
 
         # Store original ANSYS element and node information
-        grid.point_data['ansys_node_num'] = nnum
-        grid.cell_data['ansys_elem_num'] = self.enum
-        grid.cell_data['ansys_real_constant'] = self.elem_real_constant
-        grid.cell_data['ansys_material_type'] = self.material_type
-        grid.cell_data['ansys_etype'] = self._ans_etype
-        grid.cell_data['ansys_elem_type_num'] = self.etype
+        this_grid.point_data['ansys_node_num'] = nnum
+        this_grid.cell_data['ansys_elem_num'] = self.enum
+        this_grid.cell_data['ansys_real_constant'] = self.elem_real_constant
+        this_grid.cell_data['ansys_material_type'] = self.material_type
+        this_grid.cell_data['ansys_etype'] = self._ans_etype
+        this_grid.cell_data['ansys_elem_type_num'] = self.etype
 
         # add components
         # Add element components to unstructured grid
         for key, item in self.element_components.items():
             mask = np.in1d(self.enum, item, assume_unique=True)
-            grid.cell_data[key] = mask
+            this_grid.cell_data[key] = mask
 
         # Add node components to unstructured grid
         for key, item in self.node_components.items():
             mask = np.in1d(nnum, item, assume_unique=True)
-            grid.point_data[key] = mask
+            this_grid.point_data[key] = mask
 
         # store node angles
         if angles is not None:
             if angles.shape[1] == 3:
-                grid.point_data['angles'] = angles
+                this_grid.point_data['angles'] = angles
 
         if not null_unallowed:
-            grid = grid.extract_cells(grid.celltypes != 0)
+            this_grid = this_grid.extract_cells(this_grid.celltypes != 0)
 
         if force_linear:
             # only run if the grid has points or cells
-            if grid.n_points:
-                grid = grid.linear_copy()
+            if this_grid.n_points:
+                this_grid = this_grid.linear_copy()
 
         # map over element types
         # Add tracker for original node numbering
-        ind = np.arange(grid.n_points)
-        grid.point_data['origid'] = ind
-        grid.point_data['VTKorigID'] = ind
-        return grid
+        ind = np.arange(this_grid.n_points)
+        this_grid.point_data['origid'] = ind
+        this_grid.point_data['VTKorigID'] = ind
+        return this_grid
 
     @property
     def key_option(self):
