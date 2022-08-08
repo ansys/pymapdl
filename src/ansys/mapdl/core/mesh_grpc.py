@@ -602,6 +602,14 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 
+
+
+
+#intersection
+#{'enum', 'nodes'}
+
+
+
 class MeshGrpc(Mesh2):
     """Provides an interface to the gRPC mesh from MAPDL."""
 
@@ -740,16 +748,16 @@ class MeshGrpc(Mesh2):
         self._mapdl.cm("__ELEM__", "ELEM", mute=True)
         self._mapdl.esel("all", mute=True)
 
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        enum = enum.astype(np.int32)
-        if enum.size == 1:
-            if enum[0] == 0:
-                enum = np.empty(0, np.int32)
+        this_enum = self._mapdl.get_array("ELEM", item1="ELIST")
+        this_enum = this_enum.astype(np.int32)
+        if this_enum.size == 1:
+            if this_enum[0] == 0:
+                this_enum = np.empty(0, np.int32)
 
         self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
         self._ignore_cache_reset = False
 
-        return enum
+        return this_enum
 
     @property
     @supress_logging
