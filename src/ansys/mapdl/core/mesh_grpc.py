@@ -584,6 +584,8 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 
+#intersection
+#{'nodes'}
 
 
 
@@ -883,8 +885,8 @@ class MeshGrpc(Mesh2):
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.Nodes(request)
-        nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
-        return nodes
+        loaded_nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
+        return loaded_nodes
 
     @threaded
     def _update_cache_elem(self):
