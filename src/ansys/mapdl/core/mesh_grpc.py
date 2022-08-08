@@ -52,7 +52,6 @@ class Mesh2():
         self._etype_cache = None  # cached ansys element type numbering
         self._rcon = None  # cached ansys element real constant
         self._mtype = None  # cached ansys material type
-        self._node_angles = None  # cached node angles
         self._node_coord = None  # cached node coordinates
         self._cached_elements = None  # cached list of elements
         self._secnum = None  # cached section number
@@ -69,7 +68,6 @@ class Mesh2():
         self._elem_comps = {}
         self._rdat = []
         self._rnum = []
-        self._keyopt = {}
 
     @property
     def _has_nodes(self):
@@ -198,20 +196,6 @@ class Mesh2():
         this_grid.point_data['origid'] = ind
         this_grid.point_data['VTKorigID'] = ind
         return this_grid
-
-    @property
-    def key_option(self):
-        """Additional key options for element types
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> archive = pymapdl_reader.Archive(examples.hexarchivefile)
-        >>> archive.key_option
-        {1: [[1, 11]]}
-        """
-        return self._keyopt
 
     @property
     def material_type(self):
@@ -618,17 +602,6 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 class MeshGrpc(Mesh2):
     """Provides an interface to the gRPC mesh from MAPDL."""
 
@@ -678,13 +651,11 @@ class MeshGrpc(Mesh2):
             self._elem = None
             self._elem_off = None
             self._grid = None
-            self._node_angles = None
             self._enum = None
             self._rcon = None
             self._mtype = None
             self._etype_cache = None
             self._etype = None
-            self._keyopt = None
 
     def _update_cache(self):
         """Threaded local cache update.
