@@ -26,6 +26,10 @@ references are below"""
 # uses ans_vtk_convert, need a way outside of legacy reader to convert
 # arrays of elements to vtk polydata efficiently
 # we can use dpf for that if the operator to generate vtk data
+# there is a vtk_export operator in dpf that needs an abstract mesh, which
+# should be possible to generate from an array of element data.
+# ideally, we can do this without exporting a file but that can be
+# enhanced inside of dpf later.
 from ansys.mapdl.reader import _reader #ans_vtk_convert
 
 
