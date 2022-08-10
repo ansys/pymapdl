@@ -648,7 +648,7 @@ def _get_available_base_ansys():
         }
         if installed_versions:
             return installed_versions
-        else:
+        else:  # pragma: no cover
             LOG.debug(
                 "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
             )
@@ -670,7 +670,8 @@ def _get_available_base_ansys():
 
     paths = glob(os.path.join(base_path, "v*"))
 
-    if not paths:  # Testing for ANSYS STUDENT version
+    # Testing for ANSYS STUDENT version
+    if not paths:  # pragma: no cover
         paths = glob(os.path.join(base_path, "ANSYS*"))
 
     if not paths:
