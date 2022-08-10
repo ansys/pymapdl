@@ -550,9 +550,10 @@ class Parameters:
             self._mapdl.upload(filename, progress_bar=False)
 
     def __delitem__(self, parameter):
+        parameter = parameter.upper()
         if parameter in self:
-            self.run(f"{parameter}=")  # Deleting parameter in MAPDL.
             self._parm.__delitem__(parameter)
+            self._mapdl.run(f"{parameter}=")  # Deleting parameter in MAPDL.
         else:
             raise KeyError(f"The parameter '{parameter}' does not exist.")
 
