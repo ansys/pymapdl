@@ -1424,3 +1424,13 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     output = mapdl.file(new_local_file)
     assert "DATA FILE CHANGED TO FILE" in output
+
+
+@pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
+def test_parameter_deletion(mapdl, value):
+    mapdl.parameters["mypar"] = value
+    assert "mypar".upper() in mapdl.starstatus()
+    del mapdl.parameters["mypar"]
+
+    assert "mypar" not in mapdl.starstatus()
+    assert "mypar" not in mapdl.parameters
