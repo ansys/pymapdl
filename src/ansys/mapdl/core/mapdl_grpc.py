@@ -2533,7 +2533,31 @@ class MapdlGrpc(_MapdlCore):
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         return self.parameters[par]
 
-    def get_variable(self, ir="", tstrt="", kcplx="", **kwargs):
+    def get_variable(self, ir, tstrt="", kcplx="", **kwargs):
+        """
+        Obtain the variable values.
+
+        Parameters
+        ----------
+        ir : str, optional
+            Reference number of the variable (1 to NV [NUMVAR]).
+
+        tstrt : str, optional
+            Time (or frequency) corresponding to start of IR data.  If between
+            values, the nearer value is used. By default it is the first value.
+
+        kcplx : str, optional
+            Complex number key:
+
+            * ``0`` - Use the real part of the IR data. Default.
+
+            * ``1`` - Use the imaginary part of the IR data.
+
+        Returns
+        -------
+        np.array
+            Variable values as array.
+        """
         par = "temp_var"
         variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         del self.parameters[par]
