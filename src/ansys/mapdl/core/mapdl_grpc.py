@@ -2532,7 +2532,7 @@ class MapdlGrpc(_MapdlCore):
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         output = self.parameters[par]
-        del self.parameter[par]
+        del self.parameters[par]
         return output
 
     @wraps(_MapdlCore.nsol)
