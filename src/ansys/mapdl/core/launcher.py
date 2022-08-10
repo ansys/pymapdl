@@ -638,7 +638,7 @@ def _get_available_base_ansys():
      211: '/usr/ansys_inc/v211'}
     """
     base_path = None
-    if os.name == "nt":
+    if os.name == "nt":  # pragma: no cover
         supported_versions = SUPPORTED_ANSYS_VERSIONS
         awp_roots = {
             ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
