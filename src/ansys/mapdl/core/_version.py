@@ -17,4 +17,5 @@ except ModuleNotFoundError:  # pragma: no cover
 # major, minor, patch
 __version__ = importlib_metadata.version("ansys-mapdl-core")
 
-SUPPORTED_ANSYS_VERSIONS = [194, 202, 211, 212, 221, 222]
+# In descending order
+SUPPORTED_ANSYS_VERSIONS = [222, 221, 212, 211, 202, 201, 195, 194, 193, 192, 191]
