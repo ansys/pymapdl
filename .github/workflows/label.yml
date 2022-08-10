@@ -1,7 +1,8 @@
 name: "Pull Request Labeler"
 on:
-  pull_request:
-    types: [unlabeled]    
+  pull_request: 
+    types:
+      - unlabeled 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
