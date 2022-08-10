@@ -16,3 +16,5 @@ except ModuleNotFoundError:  # pragma: no cover
 # Read from the pyproject.toml
 # major, minor, patch
 __version__ = importlib_metadata.version("ansys-mapdl-core")
+
+SUPPORTED_ANSYS_VERSIONS = [194, 202, 211, 212, 221, 222]
