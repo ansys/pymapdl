@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import Optional
 from warnings import warn
 import weakref
 
@@ -53,6 +54,7 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
 from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl_types import MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
@@ -2524,3 +2526,54 @@ class MapdlGrpc(_MapdlCore):
             out = self._file(basename, **kwargs)
 
         return out
+
+    @wraps(_MapdlCore.vget)
+    def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
+        """Wraps VGET"""
+        super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
+        output = self.parameters[par]
+        del self.parameter[par]
+        return output
+
+    @wraps(_MapdlCore.nsol)
+    def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
+        """Wraps NSOL to return also the variable as an array."""
+        if nvar == "":
+            self.numvar(200)
+            nvar = 199
+        super().nsol(
+            nvar=nvar,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+        return self.vget("_temp", nvar)
+
+    @wraps(_MapdlCore.esol)
+    def esol(
+        self,
+        nvar: MapdlInt = "",
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        **kwargs,
+    ) -> Optional[str]:
+        """Wraps ESOL to return also the variable as an array."""
+        if nvar == "":
+            self.numvar(200)
+            nvar = 199
+        super().esol(
+            nvar=nvar,
+            elem=elem,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            kwargs=kwargs,
+        )
+        return self.vget("_temp", nvar)
