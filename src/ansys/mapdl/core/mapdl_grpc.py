@@ -2531,9 +2531,13 @@ class MapdlGrpc(_MapdlCore):
     def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        output = self.parameters[par]
+        return self.parameters[par]
+
+    def get_variable(self, ir="", tstrt="", kcplx="", **kwargs):
+        par = "temp_var"
+        variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         del self.parameters[par]
-        return output
+        return variable
 
     @wraps(_MapdlCore.nsol)
     def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
