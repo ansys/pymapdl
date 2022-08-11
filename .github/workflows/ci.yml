@@ -245,10 +245,10 @@ jobs:
         run: |
           mkdir logs-build-docs
           docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec mapdl /bin/bash -c "if [[-e *.out ]] ;then cp -f /file*.out /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[-e *.err ]] ;then cp -f /file*.err /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[-e *.log ]] ;then cp -f /file*.log /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[-e *.crash ]] ;then cp -f /*.crash /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs && echo "Successfully copied 'out' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs && echo "Successfully copied 'err' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs && echo "Successfully copied 'log' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs && echo "Successfully copied 'crash' files."; fi"
           docker cp mapdl:/mapdl_logs/. ./logs-build-docs/.
 
       - name: Display files structure
@@ -260,8 +260,8 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
-          cp -f doc/build/latex/*.log /logs-build-docs/
-          cp xvfb_error.log /logs-build-docs/
+          cp -f doc/build/latex/*.log ./logs-build-docs/
+          cp xvfb_error.log ./logs-build-docs/
           cp log.txt ./logs-build-docs/
           tar cvzf ./logs-build-docs.tgz ./logs-build-docs
 
@@ -365,10 +365,10 @@ jobs:
         run: |
           mkdir logs-${{ matrix.mapdl-version }}
           docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs && echo "Successfully copied 'out' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs && echo "Successfully copied 'err' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs && echo "Successfully copied 'log' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs && echo "Successfully copied 'crash' files."; fi"
           docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
 
       - name: Display files structure
@@ -382,10 +382,6 @@ jobs:
         run: |
           cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
           tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
-
-      - name: Tar logs
-        if: always()
-        run: tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
 
       - name: Upload logs to GitHub
         if: always()
