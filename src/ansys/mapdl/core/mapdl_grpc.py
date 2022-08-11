@@ -80,6 +80,8 @@ VOID_REQUEST = anskernel.EmptyRequest()
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
+VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
+
 
 def chunk_raw(raw, save_as):
     with io.BytesIO(raw) as f:
@@ -541,6 +543,9 @@ class MapdlGrpc(_MapdlCore):
         if set_no_abort:
             self._set_no_abort()
 
+        # executing some commands if needed.
+        self._run_at_connect()
+        self.finish()  # To move out from processors.
         return True
 
     @property
@@ -673,6 +678,11 @@ class MapdlGrpc(_MapdlCore):
     def _set_no_abort(self):
         """Do not abort MAPDL"""
         self.nerr(abort=-1, mute=True)
+
+    def _run_at_connect(self):
+        """Run the following commands on connecting to the MAPDL."""
+        self.post26()
+        self.numvar(200)
 
     def _reset_cache(self):
         """Reset cached items"""
@@ -2567,8 +2577,7 @@ class MapdlGrpc(_MapdlCore):
     def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
         """Wraps NSOL to return also the variable as an array."""
         if nvar == "":
-            self.numvar(200)
-            nvar = 199
+            nvar = VAR_IR
         super().nsol(
             nvar=nvar,
             node=node,
@@ -2594,7 +2603,7 @@ class MapdlGrpc(_MapdlCore):
         """Wraps ESOL to return also the variable as an array."""
         if nvar == "":
             self.numvar(200)
-            nvar = 199
+            nvar = VAR_IR
         super().esol(
             nvar=nvar,
             elem=elem,
@@ -2605,3 +2614,171 @@ class MapdlGrpc(_MapdlCore):
             kwargs=kwargs,
         )
         return self.vget("_temp", nvar)
+
+    def get_nsol(self, node, item, comp, name="", sector="", **kwargs):
+        """
+        Get NSOL solutions
+
+        Parameters
+        ----------
+        node
+            Node for which data are to be stored.
+
+        item
+            Label identifying the item.  Valid item labels are shown in the
+            table below.  Some items also require a component label.
+
+        comp
+            Component of the item (if required).  Valid component labels are
+            shown in the table below.
+
+        name
+            Thirty-two character name identifying the item on printouts and
+            displays.  Defaults to a label formed by concatenating the first
+            four characters of the Item and Comp labels.
+
+        sector
+            For a full harmonic cyclic symmetry solution, the sector number for
+            which the results from NODE are to be stored.
+
+        Returns
+        -------
+        np.array
+            Variable values
+
+        Notes
+        -----
+        By default, this command store temporally the variable on the
+        variable number set by ``VAR_IR`` in the class MapdlGrpc.
+        Therefore, any variable in that slot will be deleted when using
+        this command.
+
+        Stores nodal degree of freedom and solution results in a variable. For
+        more information, see Data Interpreted in the Nodal Coordinate System
+        in the Modeling and Meshing Guide.
+
+        For SECTOR>1, the result is in the nodal coordinate system of the base
+        sector, and it is rotated to the expanded sector’s location. Refer to
+        Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide for
+        more information.
+
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
+
+        """
+        return self.nsol(
+            VAR_IR,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+
+    def get_esol(
+        self, elem, node, item, comp, name="", sector="", tstrt="", kcplx="", **kwargs
+    ):
+        """Get ESOL data.
+
+        /POST26 APDL Command: ESOL
+
+        Parameters
+        ----------
+        elem
+            Element for which data are to be stored.
+
+        node
+            Node number on this element for which data are to be
+            stored. If blank, store the average element value (except
+            for FMAG values, which are summed instead of averaged).
+
+        item
+            Label identifying the item. General item labels are shown
+            in Table 134: ESOL - General Item and Component Labels
+            below. Some items also require a component label.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in Table 134: ESOL - General Item and
+            Component Labels below.  If Comp is a sequence number (n),
+            the NODE field will be ignored.
+
+        name
+            Thirty-two character name for identifying the item on the
+            printout and displays.  Defaults to a label formed by
+            concatenating the first four characters of the Item and
+            Comp labels.
+
+        tstrt : str, optional
+            Time (or frequency) corresponding to start of IR data.  If between
+            values, the nearer value is used. By default it is the first value.
+
+        kcplx : str, optional
+            Complex number key:
+
+            * ``0`` - Use the real part of the IR data. Default.
+
+            * ``1`` - Use the imaginary part of the IR data.
+
+        Returns
+        -------
+        np.array
+            Variable values
+
+        Notes
+        -----
+        By default, this command store temporally the variable on the
+        variable number set by ``VAR_IR`` in the class MapdlGrpc.
+        Therefore, any variable in that slot will be deleted when using
+        this command.
+
+        See Table: 134:: ESOL - General Item and Component Labels for
+        a list of valid item and component labels for element (except
+        line element) results.
+
+        The ESOL command defines element results data to be stored
+        from a results file (FILE). Not all items are valid for all
+        elements. To see the available items for a given element,
+        refer to the input and output summary tables in the
+        documentation for that element.
+
+        Two methods of data access are available via the ESOL
+        command. You can access some simply by using a generic label
+        (component name method), while others require a label and
+        number (sequence number method).
+
+        Use the component name method to access general element data
+        (that is, element data generally available to most element
+        types or groups of element types).
+
+        The sequence number method is required for data that is not
+        averaged (such as pressures at nodes and temperatures at
+        integration points), or data that is not easily described in a
+        generic fashion (such as all derived data for structural line
+        elements and contact elements, all derived data for thermal
+        line elements, and layer data for layered elements).
+
+        Element results are in the element coordinate system, except
+        for layered elements where results are in the layer coordinate
+        system.  Element forces and moments are in the nodal
+        coordinate system. Results are obtainable for an element at a
+        specified node. Further location specifications can be made
+        for some elements via the SHELL, LAYERP26, and FORCE commands.
+
+        For more information on the meaning of contact status and its
+        possible values, see Reviewing Results in POST1 in the Contact
+        Technology Guide.
+        """
+        self.esol(
+            VAR_IR,
+            elem=elem,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+        # Using get_variable because it deletes the intermediate parameter after using it.
+        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
