@@ -1434,3 +1434,25 @@ def test_parameter_deletion(mapdl, value):
 
     assert "mypar" not in mapdl.starstatus()
     assert "mypar" not in mapdl.parameters
+
+
+def test_get_variable(mapdl, coupled_example):
+    mapdl.post26()
+    nsol_1 = mapdl.nsol(2, 1, "U", "X")
+    assert nsol_1[0] > 0
+    assert nsol_1[1] > 0
+
+    variable = mapdl.get_variable(2)
+    assert np.allclose(variable, nsol_1)
+
+    variable = mapdl.get_nsol(1, "U", "X")
+    assert np.allclose(variable, nsol_1)
+
+    esol_1 = mapdl.esol(3, 1, 1, "S", "Y")
+    assert esol_1[0] > 0
+    assert esol_1[1] > 0
+    variable = mapdl.get_variable(3)
+    assert np.allclose(variable, esol_1)
+
+    variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert np.allclose(variable, esol_1)

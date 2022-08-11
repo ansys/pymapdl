@@ -488,6 +488,6 @@ def make_block(mapdl, cleared):
     mapdl.vmesh("ALL")
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def coupled_example(mapdl, cleared):
     mapdl.input(vmfiles["vm33"])
