@@ -315,9 +315,48 @@ jobs:
           path: dist/
           retention-days: 7
 
+      - name: Collect MAPDL logs on failure
+        if: always()
+        run: |
+          mkdir logs-${{ matrix.mapdl-version }}
+          docker exec -it mapdl /bin/bash -c "mkdir -p /mapdl_logs"
+          docker exec -it mapdl /bin/bash -c "cp -f /file*.out /mapdl_logs"
+          docker exec -it mapdl /bin/bash -c "cp -f /file*.log /mapdl_logs"
+          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
+
+      - name: Display files structure
+        if: always()
+        run: |
+          ls -R
+          ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
+
+      - name: Tar logs
+        if: always()
+        run: |
+          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
+          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
+
+      - name: Tar logs
+        if: always()
+        run: tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
+
+      - name: Upload logs to GitHub
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-${{ matrix.mapdl-version }}.tgz
+
       - name: Display MAPDL Logs
         if: always()
         run: cat log.txt
+
+      - name: List main files
+        if: always()
+        run: |
+          for f in ./logs-${{ matrix.mapdl-version }}/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
