@@ -2,8 +2,19 @@
 Replacing Result in PyMAPDL.
 """
 
+
+""" Comments
+
+DPF-Post needs quite a few things:
+- components support
+
+
+Check #todos
+"""
+
 from functools import wraps
 import os
+import pathlib
 import tempfile
 import weakref
 
@@ -11,9 +22,9 @@ from ansys.dpf import post
 
 # from ansys.dpf.core import Model
 from ansys.mapdl.reader.rst import Result
+import numpy as np
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import random_string
 
 
@@ -60,6 +71,8 @@ class DPFResult(Result):
             self._mapdl_weakref = None
 
         elif mapdl is not None:
+            from ansys.mapdl.core.mapdl import _MapdlCore  # avoid circular import fail.
+
             if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
                 raise TypeError("Must be initialized using Mapdl instance")
             self._mapdl_weakref = weakref.ref(mapdl)
@@ -170,7 +183,7 @@ class DPFResult(Result):
         return self._cached_dpf_model
 
     @update_result
-    def _get_node_result(self, rnum, result_type, data_type_, nodes=None):
+    def _get_node_result(self, rnum, result_type, data_type_=None, nodes=None):
         if isinstance(rnum, list):
             set_ = rnum[0]  # todo: implement subresults
         elif isinstance(rnum, (int, float)):
@@ -188,12 +201,16 @@ class DPFResult(Result):
             result_type = result_types[1]
 
         # todo: make nodes accepts components
+        # added +1 because DPF follows MAPDL indexing
+        field = getattr(model, result_type)(set=set_ + 1, node_scoping=nodes)
 
-        field = getattr(model, result_type)(set=set_, node_scoping=nodes)
-        field_dir = getattr(
-            field, data_type_
-        )  # this can give an error if the results are not in the RST.
-        # Use a try and except and give more clear info?
+        if data_type_ is not None:  # Sometimes there is no X, Y, Z, scalar or tensor
+            field_dir = getattr(
+                field, data_type_
+            )  # this can give an error if the results are not in the RST.
+            # Use a try and except and give more clear info?
+        else:
+            field_dir = field
         return field_dir.get_data_at_field(0)  # it needs to return also the nodes id.
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
@@ -262,6 +279,10 @@ class DPFResult(Result):
             )
 
         return self._get_node_result(rnum, "displacement", "vector", nodes)
+
+    @wraps(nodal_displacement)
+    def nodal_solution(self, *args, **kwargs):
+        return self.nodal_displacement(*args, **kwargs)
 
     def nodal_elastic_strain(self, rnum, nodes=None):
         """Nodal component elastic strains.  This record contains
@@ -715,17 +736,303 @@ class DPFResult(Result):
         """
         return self._get_node_result(rnum, "misc.nodal_force", "vector", nodes)
 
-    # def animate_nodal_displacement(self):
-    #     pass
+    @property
+    def n_results(self):
+        """Number of results"""
+        return self.model.get_result_info().n_results
 
-    # def animate_nodal_solution(self):
-    #     pass
+    @property
+    def filename(self) -> str:
+        """String form of the filename. This property is read-only."""
+        return self._rst  # in the reader, this contains the complete path.
 
-    # def animate_nodal_solution_set(self):
-    #     pass
+    @property
+    def pathlib_filename(self) -> pathlib.Path:
+        """Return the ``pathlib.Path`` version of the filename. This property can not be set."""
+        return pathlib.Path(self._rst)
 
-    # def available_results(self):
-    #     pass
+    @property
+    def mesh(self):
+        """Mesh from result file."""
+        return (
+            self.model.mesh
+        )  # todo: this should be a class equivalent to reader.mesh class.
+
+    @property
+    def grid(self):
+        return self.model.mesh.grid
+
+    def nsets(self):
+        return self.model.time_freq_support.n_sets
+
+    def parse_step_substep(self, user_input):
+        """Converts (step, substep) to a cumulative index"""
+
+        if isinstance(user_input, int):
+            return self.model.time_freq_support.get_cumulative_index(
+                user_input
+            )  # todo: should it be 1 or 0 based indexing?
+
+        elif isinstance(user_input, (list, tuple)):
+            return self.model.time_freq_support.get_cumulative_index(
+                user_input[0], user_input[1]
+            )
+
+        else:
+            raise TypeError("Input must be either an int or a list")
+
+    @property
+    def version(self):
+        """The version of MAPDL used to generate this result file.
+
+        Examples
+        --------
+        >>> mapdl.result.version
+        20.1
+        """
+        return float(self.model.get_result_info().solver_version)
+
+    @property
+    def available_results(self):
+        text = "Available Results:\n"
+        for each_available_result in self.model.get_result_info().available_results:
+            text += (
+                each_available_result.native_location
+                + " "
+                + each_available_result.name
+                + "\n"
+            )
+
+    @property
+    def n_sector(self):
+        """Number of sectors"""
+        return self.model.get_result_info().has_cyclic
+
+    @property
+    def title(self):
+        """Title of model in database"""
+        return self.model.get_result_info().main_title
+
+    @property
+    def is_cyclic(self):  # Todo: DPF should implement this.
+        return self.n_sector > 1
+
+    @property
+    def units(self):
+        return self.model.get_result_info().unit_system_name
+
+    def __repr__(self):
+        if False or self.is_distributed:
+            rst_info = ["PyMAPDL Reader Distributed Result"]
+        else:
+            rst_info = ["PyMAPDL Result"]
+
+        rst_info.append("{:<12s}: {:s}".format("title".capitalize(), self.title))
+        rst_info.append("{:<12s}: {:s}".format("subtitle".capitalize(), self.subtitle))
+        rst_info.append("{:<12s}: {:s}".format("units".capitalize(), self.units))
+
+        rst_info.append("{:<12s}: {:s}".format("Version", self.version))
+        rst_info.append("{:<12s}: {:s}".format("Cyclic", self.is_cyclic))
+        rst_info.append("{:<12s}: {:d}".format("Result Sets", self.nsets))
+
+        rst_info.append("{:<12s}: {:d}".format("Nodes", self.model.mesh.nodes.n_nodes))
+        rst_info.append(
+            "{:<12s}: {:d}".format("Elements", self.model.mesh.elements.n_elements)
+        )
+
+        rst_info.append("\n")
+        rst_info.append(self.available_results)
+        return "\n".join(rst_info)
+
+    def nodal_time_history(self, solution_type="NSL", in_nodal_coord_sys=None):
+        """The DOF solution for each node for all result sets.
+
+        The nodal results are returned returned in the global
+        cartesian coordinate system or nodal coordinate system.
+
+        Parameters
+        ----------
+        solution_type: str, optional
+            The solution type.  Must be either nodal displacements
+            (``'NSL'``), nodal velocities (``'VEL'``) or nodal
+            accelerations (``'ACC'``).
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate system.
+            Default ``False``.
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Nodal solution for all result sets.  Array is sized
+            ``rst.nsets x nnod x Sumdof``, which is the number of
+            time steps by number of nodes by degrees of freedom.
+        """
+        if not isinstance(solution_type, str):
+            raise TypeError("Solution type must be a string")
+
+        if solution_type == "NSL":
+            func = self.nodal_solution
+        elif solution_type == "VEL":
+            func = self.nodal_velocity
+        elif solution_type == "ACC":
+            func = self.nodal_acceleration
+        else:
+            raise ValueError(
+                "Argument 'solution type' must be either 'NSL', " "'VEL', or 'ACC'"
+            )
+
+        # size based on the first result
+        nnum, sol = func(0, in_nodal_coord_sys)
+        data = np.empty((self.nsets, sol.shape[0], sol.shape[1]), np.float64)
+        for i in range(self.nsets):
+            data[i] = func(i)[1]
+
+        return nnum, data
+
+    @property
+    def time_values(self):
+        "Values for the time/frequency"
+        return self.model.time_freq_support.time_frequencies.data_as_list
+
+    def save_as_vtk(
+        self, filename, rsets=None, result_types=["ENS"], progress_bar=True
+    ):
+        """Writes results to a vtk readable file.
+
+        Nodal results will always be written.
+
+        The file extension will select the type of writer to use.
+        ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
+        select the VTK XML writer.
+
+        Parameters
+        ----------
+        filename : str, pathlib.Path
+            Filename of grid to be written.  The file extension will
+            select the type of writer to use.  ``'.vtk'`` will use the
+            legacy writer, while ``'.vtu'`` will select the VTK XML
+            writer.
+
+        rsets : collections.Iterable
+            List of result sets to write.  For example ``range(3)`` or
+            [0].
+
+        result_types : list
+            Result type to write.  For example ``['ENF', 'ENS']``
+            List of some or all of the following:
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        progress_bar : bool, optional
+            Display a progress bar using ``tqdm``.
+
+        Notes
+        -----
+        Binary files write much faster than ASCII, but binary files
+        written on one system may not be readable on other systems.
+        Binary can only be selected for the legacy writer.
+
+        Examples
+        --------
+        Write nodal results as a binary vtk file.
+
+        >>> rst.save_as_vtk('results.vtk')
+
+        Write using the xml writer
+
+        >>> rst.save_as_vtk('results.vtu')
+
+        Write only nodal and elastic strain for the first result
+
+        >>> rst.save_as_vtk('results.vtk', [0], ['EEL', 'EPL'])
+
+        Write only nodal results (i.e. displacements) for the first result.
+
+        >>> rst.save_as_vtk('results.vtk', [0], [])
+
+        """
+        raise NotImplementedError  # This should probably be included a part of the ansys.dpf.post.result_data.ResultData class
+        # model.displacement().x.get_vtk()
+
+        # Copy grid as to not write results to original object
+        grid = self.quadgrid.copy()
+
+        if rsets is None:
+            rsets = range(self.nsets)
+        elif isinstance(rsets, int):
+            rsets = [rsets]
+        elif not isinstance(rsets, Iterable):
+            raise TypeError("rsets must be an iterable like [0, 1, 2] or range(3)")
+
+        if result_types is None:
+            result_types = ELEMENT_INDEX_TABLE_KEYS
+        elif not isinstance(result_types, list):
+            raise TypeError("result_types must be a list of solution types")
+        else:
+            for item in result_types:
+                if item not in ELEMENT_INDEX_TABLE_KEYS:
+                    raise ValueError(f'Invalid result type "{item}"')
+
+        pbar = None
+        if progress_bar:
+            pbar = tqdm(total=len(rsets), desc="Saving to file")
+
+        for i in rsets:
+            # Nodal results
+            _, val = self.nodal_solution(i)
+            grid.point_data["Nodal Solution {:d}".format(i)] = val
+
+            # Nodal results
+            for rtype in self.available_results:
+                if rtype in result_types:
+                    _, values = self._nodal_result(i, rtype)
+                    desc = element_index_table_info[rtype]
+                    grid.point_data["{:s} {:d}".format(desc, i)] = values
+
+            if pbar is not None:
+                pbar.update(1)
+
+        grid.save(str(filename))
+        if pbar is not None:
+            pbar.close()
+
+    @property
+    def subtitle(self):
+        raise NotImplementedError(
+            "To be implemented"
+        )  # Todo: DPF should implement this.
+
+    @property
+    def is_distributed(self):  # Todo: DPF should implement this.
+        raise NotImplementedError
 
     # def cs_4x4(self):
     #     pass
@@ -745,117 +1052,7 @@ class DPFResult(Result):
     # def element_stress(self):
     #     pass
 
-    # def filename(self):
-    #     pass
-
-    # def grid(self):
-    #     pass
-
     # def materials(self):
-    #     pass
-
-    # def mesh(self):
-    #     pass
-
-    # def n_results(self):
-    #     pass
-
-    # def n_sector(self):
-    #     pass
-
-    # def nodal_boundary_conditions(self):
-    #     pass
-
-    # def nodal_input_force(self):
-    #     pass
-
-    # def nodal_solution(self):
-    #     pass
-
-    # def nodal_static_forces(self):
-    #     pass
-
-    # def nodal_time_history(self):
-    #     pass
-
-    # def node_components(self):
-    #     pass
-
-    # def nsets(self):
-    #     pass
-
-    # def overwrite_element_solution_record(self):
-    #     pass
-
-    # def overwrite_element_solution_records(self):
-    #     pass
-
-    # def parse_coordinate_system(self):
-    #     pass
-
-    # def parse_step_substep(self):
-    #     pass
-
-    # def pathlib_filename(self):
-    #     pass
-
-    # def plot(self):
-    #     pass
-
-    # def plot_cylindrical_nodal_stress(self):
-    #     pass
-
-    # def plot_element_result(self):
-    #     pass
-
-    # def plot_nodal_displacement(self,
-    #     rnum,
-    #     comp=None,
-    #     show_displacement=False,
-    #     displacement_factor=1.0,
-    #     node_components=None,
-    #     element_components=None,
-    #     **kwargs):
-    #     pass
-
-    #     if kwargs.pop("sel_type_all", None):
-    #         warn(f"The kwarg 'sel_type_all' is being deprecated.")
-
-    #     if kwargs.pop("treat_nan_as_zero", None):
-    #         warn(f"The kwarg 'treat_nan_as_zero' is being deprecated.")
-
-    #     if isinstance(rnum, list):
-    #         set_ = rnum[0]  # todo: implement subresults
-    #     elif isinstance(rnum, (int, float)):
-    #         set_ = rnum
-    #     else:
-    #         raise ValueError(f"Please use 'int', 'float' or  'list' for the parameter 'rnum'.")
-
-    #     disp = self.model.displacement(set=set_)
-    #     if not comp:
-    #         comp = 'norm'
-    #     disp_dir = getattr(disp, comp)
-    #     disp_dir.plot_contour(**kwargs)
-
-    # def plot_nodal_elastic_strain(self):
-    #     pass
-
-    # def plot_nodal_plastic_strain(self):
-    #     pass
-
-    # def plot_nodal_solution(self):
-    #     pass
-
-    # def plot_nodal_stress(self):
-    #     pass
-
-    # def plot_nodal_temperature(self):
-    #     pass
-
-    # def plot_nodal_thermal_strain(self):
-    #     pass
-
-    # def plot_principal_nodal_stress(self):
     #     pass
 
     # def principal_nodal_stress(self):
@@ -870,9 +1067,6 @@ class DPFResult(Result):
     # def result_dof(self):
     #     pass
 
-    # def save_as_vtk(self):
-    #     pass
-
     # def section_data(self):
     #     pass
 
@@ -882,11 +1076,98 @@ class DPFResult(Result):
     # def text_result_table(self):
     #     pass
 
-    # def time_values(self):
-    #     pass
-
-    # def version(self):
-    #     pass
-
     # def write_table(self):
     #     pass
+
+    # def nodal_boundary_conditions(self):
+    #     pass
+
+    # def nodal_input_force(self):
+    #     pass
+
+    # def nodal_static_forces(self):
+    #     pass
+
+    # def node_components(self):
+    #     pass
+
+    # def parse_coordinate_system(self):
+    #     pass
+
+
+#### overwriting
+# def overwrite_element_solution_record(self):
+#     pass
+
+# def overwrite_element_solution_records(self):
+#     pass
+
+### plotting
+
+# def animate_nodal_displacement(self):
+#     pass
+
+# def animate_nodal_solution(self):
+#     pass
+
+# def animate_nodal_solution_set(self):
+#     pass
+
+# def plot(self):
+#     pass
+
+# def plot_cylindrical_nodal_stress(self):
+#     pass
+
+# def plot_element_result(self):
+#     pass
+
+# def plot_nodal_displacement(self,
+#     rnum,
+#     comp=None,
+#     show_displacement=False,
+#     displacement_factor=1.0,
+#     node_components=None,
+#     element_components=None,
+#     **kwargs):
+#     pass
+
+#     if kwargs.pop("sel_type_all", None):
+#         warn(f"The kwarg 'sel_type_all' is being deprecated.")
+
+#     if kwargs.pop("treat_nan_as_zero", None):
+#         warn(f"The kwarg 'treat_nan_as_zero' is being deprecated.")
+
+#     if isinstance(rnum, list):
+#         set_ = rnum[0]  # todo: implement subresults
+#     elif isinstance(rnum, (int, float)):
+#         set_ = rnum
+#     else:
+#         raise ValueError(f"Please use 'int', 'float' or  'list' for the parameter 'rnum'.")
+
+#     disp = self.model.displacement(set=set_)
+#     if not comp:
+#         comp = 'norm'
+#     disp_dir = getattr(disp, comp)
+#     disp_dir.plot_contour(**kwargs)
+
+# def plot_nodal_elastic_strain(self):
+#     pass
+
+# def plot_nodal_plastic_strain(self):
+#     pass
+
+# def plot_nodal_solution(self):
+#     pass
+
+# def plot_nodal_stress(self):
+#     pass
+
+# def plot_nodal_temperature(self):
+#     pass
+
+# def plot_nodal_thermal_strain(self):
+#     pass
+
+# def plot_principal_nodal_stress(self):
+#     pass
