@@ -2243,12 +2243,18 @@ class MapdlGrpc(_MapdlCore):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.reader import read_binary
-        from ansys.mapdl.reader.rst import Result
+        # from ansys.mapdl.reader import read_binary
+
+        # from ansys.mapdl.reader.rst import Result
+        from ansys.mapdl.core.reader import DPFResult as Result
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
+            save_path = os.path.join(
+                tempfile.gettempdir(), f"ansys_tmp_{random_string()}"
+            )
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
@@ -2278,7 +2284,7 @@ class MapdlGrpc(_MapdlCore):
         if not os.path.isfile(result_path):
             raise FileNotFoundError("No results found at %s" % result_path)
 
-        return read_binary(result_path)
+        return Result(result_path)
 
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):

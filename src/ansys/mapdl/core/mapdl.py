@@ -1795,7 +1795,7 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.reader import read_binary
+        # from ansys.mapdl.reader import read_binary
 
         # from ansys.mapdl.reader.rst import Result
         from ansys.mapdl.core.reader import DPFResult as Result
@@ -1832,7 +1832,8 @@ class _MapdlCore(Commands):
         if not os.path.isfile(result_path):
             raise FileNotFoundError("No results found at %s" % result_path)
 
-        return read_binary(result_path)
+        # return read_binary(result_path)
+        return Result(result_path)
 
     @property
     def _result_file(self):
