@@ -240,6 +240,51 @@ jobs:
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
 
+      - name: Collect MAPDL logs on failure
+        if: always()
+        run: |
+          mkdir logs-build-docs
+          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.out && cp -f /file*.out /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.err && cp -f /file*.err /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.log && cp -f /file*.log /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.crash && cp -f /*.crash /mapdl_logs"
+          docker cp mapdl:/mapdl_logs/. ./logs-build-docs/.
+
+      - name: Display files structure
+        if: always()
+        run: |
+          ls -R
+          ls -R > ./logs-build-docs/files_structure.txt
+
+      - name: Tar logs
+        if: always()
+        run: |
+          cp -f doc/build/latex/*.log /logs-build-docs/
+          cp xvfb_error.log /logs-build-docs/
+          cp log.txt ./logs-build-docs/
+          tar cvzf ./logs-build-docs.tgz ./logs-build-docs
+
+      - name: Upload logs to GitHub
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-build-docs.tgz
+          path: ./logs-build-docs.tgz
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
+
+      - name: List main files
+        if: always()
+        run: |
+          for f in doc/build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done
+          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::" ; done
+          for f in ./logs-build-docs/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
+          for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
+          for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
+
   build_test:
     name: Build and Unit Testing
     needs: testimport
@@ -319,11 +364,11 @@ jobs:
         if: always()
         run: |
           mkdir logs-${{ matrix.mapdl-version }}
-          docker exec -it mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec -it mapdl /bin/bash -c "cp -f /file*.out /mapdl_logs"
-          docker exec -it mapdl /bin/bash -c "cp -f /file*.err /mapdl_logs"
-          docker exec -it mapdl /bin/bash -c "cp -f /file*.log /mapdl_logs"
-          docker exec -it mapdl /bin/bash -c "cp -f /*.crash /mapdl_logs"
+          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.out && cp -f /file*.out /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.err && cp -f /file*.err /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.log && cp -f /file*.log /mapdl_logs"
+          docker exec mapdl /bin/bash -c "test -f /*.crash && cp -f /*.crash /mapdl_logs"
           docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
 
       - name: Display files structure
