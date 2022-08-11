@@ -1436,7 +1436,7 @@ def test_parameter_deletion(mapdl, value):
     assert "mypar" not in mapdl.parameters
 
 
-def test_get_variable(mapdl, coupled_example):
+def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     mapdl.post26()
     nsol_1 = mapdl.nsol(2, 1, "U", "X")
     assert nsol_1[0] > 0
