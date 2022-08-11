@@ -19,6 +19,7 @@ maintainers = [
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
     "ansys-corba; python_version < '3.9'",
+    "ansys-dpf-post",
     "ansys-mapdl-reader>=0.51.7",
     "ansys-platform-instancemanagement~=1.0",
     "appdirs>=1.4.0",
