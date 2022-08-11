@@ -377,6 +377,12 @@ jobs:
           ls -R
           ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
 
+      - name: Display docker files structures
+        if: always()
+        run: |
+          docker exec mapdl /bin/bash -c "ls -R"
+          docker exec mapdl /bin/bash -c "ls -R" > ./logs-${{ matrix.mapdl-version }}/docker_files_structure.txt
+
       - name: Tar logs
         if: always()
         run: |
