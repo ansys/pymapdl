@@ -321,7 +321,9 @@ jobs:
           mkdir logs-${{ matrix.mapdl-version }}
           docker exec -it mapdl /bin/bash -c "mkdir -p /mapdl_logs"
           docker exec -it mapdl /bin/bash -c "cp -f /file*.out /mapdl_logs"
+          docker exec -it mapdl /bin/bash -c "cp -f /file*.err /mapdl_logs"
           docker exec -it mapdl /bin/bash -c "cp -f /file*.log /mapdl_logs"
+          docker exec -it mapdl /bin/bash -c "cp -f /*.crash /mapdl_logs"
           docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
 
       - name: Display files structure
