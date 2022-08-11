@@ -245,10 +245,10 @@ jobs:
         run: |
           mkdir logs-build-docs
           docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.out && cp -f /file*.out /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.err && cp -f /file*.err /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.log && cp -f /file*.log /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.crash && cp -f /*.crash /mapdl_logs"
+          docker exec mapdl /bin/bash -c "if [[-e *.out ]] ;then cp -f /file*.out /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[-e *.err ]] ;then cp -f /file*.err /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[-e *.log ]] ;then cp -f /file*.log /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[-e *.crash ]] ;then cp -f /*.crash /mapdl_logs; fi"
           docker cp mapdl:/mapdl_logs/. ./logs-build-docs/.
 
       - name: Display files structure
@@ -365,10 +365,10 @@ jobs:
         run: |
           mkdir logs-${{ matrix.mapdl-version }}
           docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.out && cp -f /file*.out /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.err && cp -f /file*.err /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.log && cp -f /file*.log /mapdl_logs"
-          docker exec mapdl /bin/bash -c "test -f /*.crash && cp -f /*.crash /mapdl_logs"
+          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs; fi"
           docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
 
       - name: Display files structure
