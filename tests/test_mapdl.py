@@ -1456,3 +1456,11 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
 
     variable = mapdl.get_esol(1, 1, "S", "Y")
     assert np.allclose(variable, esol_1)
+
+
+def test_retain_routine(mapdl):
+    mapdl.prep7()
+    routine = 'POST26'
+    with mapdl.run_as_routine(routine):
+        assert mapdl.parameters.routine == routine
+    assert mapdl.parameters.routine == 'PREP7'

@@ -543,9 +543,7 @@ class MapdlGrpc(_MapdlCore):
         if set_no_abort:
             self._set_no_abort()
 
-        # executing some commands if needed.
         self._run_at_connect()
-        self.finish()  # To move out from processors.
         return True
 
     @property
@@ -676,16 +674,17 @@ class MapdlGrpc(_MapdlCore):
 
     @supress_logging
     def _set_no_abort(self):
-        """Do not abort MAPDL"""
+        """Do not abort MAPDL."""
         self.nerr(abort=-1, mute=True)
 
     def _run_at_connect(self):
-        """Run the following commands on connecting to the MAPDL."""
-        self.post26()
-        self.numvar(200)
+        """Run house-keeping commands when initially connecting to MAPDL."""
+        # increase the number of variables allowed in POST26 to the maximum
+        with self.run_as_routine('POST26'):
+            self.numvar(200, mute=True)
 
     def _reset_cache(self):
-        """Reset cached items"""
+        """Reset cached items."""
         if self._mesh_rep is not None:
             self._mesh_rep._reset_cache()
 
@@ -2574,10 +2573,8 @@ class MapdlGrpc(_MapdlCore):
         return variable
 
     @wraps(_MapdlCore.nsol)
-    def nsol(self, nvar="", node="", item="", comp="", name="", sector="", **kwargs):
-        """Wraps NSOL to return also the variable as an array."""
-        if nvar == "":
-            nvar = VAR_IR
+    def nsol(self, nvar=VAR_IR, node="", item="", comp="", name="", sector="", **kwargs):
+        """Wraps NSOL to return the variable as an array."""
         super().nsol(
             nvar=nvar,
             node=node,
@@ -2592,7 +2589,7 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.esol)
     def esol(
         self,
-        nvar: MapdlInt = "",
+        nvar: MapdlInt = VAR_IR,
         elem: MapdlInt = "",
         node: MapdlInt = "",
         item: str = "",
@@ -2600,10 +2597,7 @@ class MapdlGrpc(_MapdlCore):
         name: str = "",
         **kwargs,
     ) -> Optional[str]:
-        """Wraps ESOL to return also the variable as an array."""
-        if nvar == "":
-            self.numvar(200)
-            nvar = VAR_IR
+        """Wraps ESOL to return the variable as an array."""
         super().esol(
             nvar=nvar,
             elem=elem,

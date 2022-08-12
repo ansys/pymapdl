@@ -8,6 +8,7 @@ from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import (
+    check_valid_routine,
     check_valid_ip,
     check_valid_port,
     check_valid_start_instance,
@@ -321,3 +322,11 @@ def test_requires_package_decorator():
 
     with pytest.warns(UserWarning):
         assert myclass.myotherfun2 is None
+
+
+def test_check_valid_routine():
+    assert check_valid_routine('prep7')
+    assert check_valid_routine('PREP7')
+    assert check_valid_routine('begin level')
+    with pytest.raises(ValueError, match="Invalid routine"):
+        check_valid_routine('invalid')

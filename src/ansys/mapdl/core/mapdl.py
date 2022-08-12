@@ -31,6 +31,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
+    check_valid_routine,
     Information,
     allow_pickable_points,
     last_created,
@@ -534,13 +535,70 @@ class _MapdlCore(Commands):
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
+    class _RetainRoutine:
+        """Store MAPDL's routine when entering and reverts it when exiting."""
+
+        def __init__(self, parent, routine):
+            self._parent = weakref.ref(parent)
+
+            # check the routine is valid since we're muting the output
+            check_valid_routine(routine)
+            self._requested_routine = routine
+
+        def __enter__(self):
+            """Store the current routine and enter the requested routine."""
+            self._cached_routine = self._parent().parameters.routine
+            self._parent()._log.debug("Caching routine %s", self._cached_routine)
+            if self._requested_routine.lower() != self._cached_routine.lower():
+                self._enter_routine(self._requested_routine)
+
+        def __exit__(self, *args):
+            """Restore the original routine."""
+            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
+            self._enter_routine(self._cached_routine)
+
+        def _enter_routine(self, routine):
+            """Enter a routine."""
+            if routine.lower() == "begin level":
+                self._parent().finish(mute=True)
+            else:
+                self._parent().run(f"/{routine}", mute=True)
+            
+
+    def run_as_routine(self, routine):
+        """
+        Runs a command or commands at a routine and then revert to the prior routine.
+
+        This can be useful to avoid constantly changing between routines.
+
+        Parameters
+        ----------
+        routine : str
+            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
+
+        Examples
+        --------
+        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
+        revert to the prior routine.
+
+        >>> mapdl.prep7()
+        >>> mapdl.parameters.routine
+        'PREP7'
+        >>> with mapdl.run_as_routine('POST26'):
+        ...     mapdl.numvar(200)
+        >>> mapdl.parameters.routine
+        'PREP7'
+
+        """
+        return self._RetainRoutine(self, routine)
+
     @property
     def last_response(self):
         """Returns the last response from MAPDL.
 
         Examples
         --------
-        >>> mapdl.last_response()
+        >>> mapdl.last_response
         'KEYPOINT      1   X,Y,Z=   1.00000       1.00000       1.00000'
         """
         return self._response
