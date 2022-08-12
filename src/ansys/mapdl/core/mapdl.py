@@ -31,9 +31,9 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
-    check_valid_routine,
     Information,
     allow_pickable_points,
+    check_valid_routine,
     last_created,
     load_file,
     random_string,
@@ -563,7 +563,6 @@ class _MapdlCore(Commands):
                 self._parent().finish(mute=True)
             else:
                 self._parent().run(f"/{routine}", mute=True)
-            
 
     def run_as_routine(self, routine):
         """

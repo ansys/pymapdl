@@ -227,5 +227,5 @@ def test_double_parameter_get(mapdl, number):
 
 
 def test_parameter_delete_raise(mapdl):
-    with pytest.raises(KeyError, match='does not exist'):
-        del mapdl.parameters['not-a-parm']
+    with pytest.raises(KeyError, match="does not exist"):
+        del mapdl.parameters["not-a-parm"]

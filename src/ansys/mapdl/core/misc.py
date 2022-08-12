@@ -34,7 +34,7 @@ MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 class ROUTINES(Enum):
     """MAPDL routines."""
-    
+
     BEGIN_LEVEL = 0
     PREP7 = 17
     SOLUTION = 21
@@ -67,15 +67,15 @@ def check_valid_routine(routine):
         Raised when a routine is invalid.
 
     """
-    if routine.lower().startswith('begin'):
+    if routine.lower().startswith("begin"):
         return True
     if not hasattr(ROUTINES, routine.upper()):
         valid_routines = []
         for item in dir(ROUTINES):
-            if not item.startswith('_') and not item.startswith('BEGIN'):
+            if not item.startswith("_") and not item.startswith("BEGIN"):
                 valid_routines.append(item)
-        valid_routines.append('Begin level')
-        valid_routines_str = '\n'.join([f'\t- "{item}"' for item in valid_routines])
+        valid_routines.append("Begin level")
+        valid_routines_str = "\n".join([f'\t- "{item}"' for item in valid_routines])
         raise ValueError(
             f"Invalid routine {routine}. Should be one of:\n{valid_routines_str}"
         )

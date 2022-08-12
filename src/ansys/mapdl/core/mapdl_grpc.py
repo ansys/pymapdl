@@ -680,7 +680,7 @@ class MapdlGrpc(_MapdlCore):
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
-        with self.run_as_routine('POST26'):
+        with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
     def _reset_cache(self):
@@ -2573,7 +2573,9 @@ class MapdlGrpc(_MapdlCore):
         return variable
 
     @wraps(_MapdlCore.nsol)
-    def nsol(self, nvar=VAR_IR, node="", item="", comp="", name="", sector="", **kwargs):
+    def nsol(
+        self, nvar=VAR_IR, node="", item="", comp="", name="", sector="", **kwargs
+    ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
             nvar=nvar,
