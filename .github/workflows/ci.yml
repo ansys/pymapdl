@@ -104,7 +104,7 @@ jobs:
           dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
 
       - name: Upload Wheelhouse
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
           path: '*.zip'
@@ -213,7 +213,7 @@ jobs:
           zip -r PyMAPDL_documentation.zip *
 
       - name: Upload HTML Documentation
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: HTML-Documentation
           path: doc/build/html/PyMAPDL_documentation.zip
@@ -234,7 +234,7 @@ jobs:
         run: make pdf
 
       - name: Upload PDF Documentation
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
@@ -309,7 +309,7 @@ jobs:
           twine check dist/*
 
       - name: Upload wheel and binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PyMAPDL-packages
           path: dist/
