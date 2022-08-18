@@ -64,7 +64,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Linux pip cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: ${{ runner.os == 'Linux' }}
         with:
           path: ~/.cache/pip
@@ -73,7 +73,7 @@ jobs:
             Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Window pip cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: ${{ runner.os == 'Windows' }}
         with:
           path: ~\AppData\Local\pip\Cache
@@ -137,7 +137,7 @@ jobs:
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
@@ -176,7 +176,7 @@ jobs:
         id: version
 
       - name: Cache examples
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -184,7 +184,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache docs build directory
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -192,7 +192,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -262,7 +262,7 @@ jobs:
           sudo apt install libgl1-mesa-glx xvfb
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
