@@ -299,7 +299,7 @@ jobs:
           pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         if: matrix.mapdl-version == 'v21.2.1'
         name: 'Upload coverage to Codecov'
 
