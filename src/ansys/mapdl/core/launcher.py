@@ -22,6 +22,7 @@ import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -637,8 +638,8 @@ def _get_available_base_ansys():
      211: '/usr/ansys_inc/v211'}
     """
     base_path = None
-    if os.name == "nt":
-        supported_versions = [194, 202, 211, 212, 221]
+    if os.name == "nt":  # pragma: no cover
+        supported_versions = SUPPORTED_ANSYS_VERSIONS
         awp_roots = {
             ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
         }
@@ -647,19 +648,31 @@ def _get_available_base_ansys():
         }
         if installed_versions:
             return installed_versions
-        else:
+        else:  # pragma: no cover
+            LOG.debug(
+                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
+            )
             base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
+            if not os.path.exists(base_path):
+                LOG.debug(
+                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
+                )
+                return {}
     elif os.name == "posix":
         for path in ["/usr/ansys_inc", "/ansys_inc"]:
             if os.path.isdir(path):
                 base_path = path
-    else:
+    else:  # pragma: no cover
         raise OSError(f"Unsupported OS {os.name}")
 
     if base_path is None:
         return {}
 
     paths = glob(os.path.join(base_path, "v*"))
+
+    # Testing for ANSYS STUDENT version
+    if not paths:  # pragma: no cover
+        paths = glob(os.path.join(base_path, "ANSYS*"))
 
     if not paths:
         return {}

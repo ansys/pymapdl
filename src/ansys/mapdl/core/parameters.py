@@ -549,6 +549,14 @@ class Parameters:
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
 
+    def __delitem__(self, parameter):
+        parameter = parameter.upper()
+        if parameter in self:
+            self._parm.__delitem__(parameter)
+            self._mapdl.run(f"{parameter}=")  # Deleting parameter in MAPDL.
+        else:
+            raise KeyError(f"The parameter '{parameter}' does not exist.")
+
     class _full_parameter_output:
         """Change the show_** options to true to allow full parameter output."""
 
