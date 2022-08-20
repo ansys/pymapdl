@@ -1424,3 +1424,23 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     output = mapdl.file(new_local_file)
     assert "DATA FILE CHANGED TO FILE" in output
+
+
+def test_lgwrite(mapdl, tmpdir):
+    filename = str(tmpdir.join("file.txt"))
+
+    # include some muted and unmuted commands to ensure all /OUT and
+    # /OUT,anstmp are removed
+    mapdl.prep7(mute=True)
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    # test the extension
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove")
+
+    with open(filename) as fid:
+        lines = [line.strip() for line in fid.readlines()]
+
+    assert "K,1,0,0,0" in lines
+    for line in lines:
+        assert "OUT" not in line
