@@ -346,7 +346,7 @@ def test_format_output():
     non_formatted = "def(a,b):return a + b"
     converted = FileTranslator().format_using_autopep8(non_formatted)
     if converted:
-        assert converted == "def(a, b): return a + b\n"
+        assert converted == "def (a, b): return a + b\n"
         assert isinstance(converted, str)
     else:
         assert converted is None
