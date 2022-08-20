@@ -851,7 +851,10 @@ class MapdlGrpc(_MapdlCore):
                 pass
 
         if self._local:
-            self._close_process()
+            if os.name == 'nt':
+                self._kill_server()
+            else:
+                self._close_process()
             self._remove_lock_file()
         else:
             self._kill_server()
@@ -904,8 +907,8 @@ class MapdlGrpc(_MapdlCore):
 
         Notes
         -----
-        This is effectively the only way to completely close down MAPDL
-        locally. Just killing the server with ``_kill_server`` leaves orphaned
+        This is effectively the only way to completely close down MAPDL locally on
+        linux. Just killing the server with ``_kill_server`` leaves orphaned
         processes making this method ineffective for a local instance of MAPDL.
 
         """
