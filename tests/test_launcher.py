@@ -1,5 +1,7 @@
 """Test the mapdl launcher"""
+
 import os
+import tempfile
 import weakref
 
 import pytest
@@ -246,20 +248,33 @@ def test_license_type_additional_switch():
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(remove_temp_files=True)
+
+    # possible MAPDL is installed but running in "remote" mode
     path = mapdl.directory
     mapdl.exit()
-    assert not os.path.isdir(path)
+
+    tmp_dir = tempfile.gettempdir()
+    ans_temp_dir = os.path.join(tmp_dir, "ansys_")
+    if path.startswith(ans_temp_dir):
+        assert not os.path.isdir(path)
+    else:
+        assert os.path.isdir(path)
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
-    mapdl = launch_mapdl(remove_temp_files=True)
-    assert os.path.isdir(str(tmpdir))
-    mapdl.cwd(str(tmpdir))
-    path = mapdl.directory
-    mapdl.exit()
-    assert os.path.isdir(path)
+    try:
+        mapdl = launch_mapdl(remove_temp_files=True)
+        old_path = mapdl.directory
+        assert os.path.isdir(str(tmpdir))
+        mapdl.cwd(str(tmpdir))
+        path = mapdl.directory
+        mapdl.exit()
+        assert os.path.isdir(path)
+    finally:
+        # ensure no state change
+        mapdl.cwd(old_path)
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
