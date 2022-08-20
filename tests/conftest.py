@@ -10,6 +10,7 @@ import pyvista
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
@@ -485,3 +486,8 @@ def make_block(mapdl, cleared):
     mapdl.et(1, 186)
     mapdl.esize(0.25)
     mapdl.vmesh("ALL")
+
+
+@pytest.fixture(scope="function")
+def coupled_example(mapdl, cleared):
+    mapdl.input(vmfiles["vm33"])

@@ -1424,3 +1424,43 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     output = mapdl.file(new_local_file)
     assert "DATA FILE CHANGED TO FILE" in output
+
+
+@pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
+def test_parameter_deletion(mapdl, value):
+    mapdl.parameters["mypar"] = value
+    assert "mypar".upper() in mapdl.starstatus()
+    del mapdl.parameters["mypar"]
+
+    assert "mypar" not in mapdl.starstatus()
+    assert "mypar" not in mapdl.parameters
+
+
+def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
+    mapdl.post26()
+    nsol_1 = mapdl.nsol(2, 1, "U", "X")
+    assert nsol_1[0] > 0
+    assert nsol_1[1] > 0
+
+    variable = mapdl.get_variable(2)
+    assert np.allclose(variable, nsol_1)
+
+    variable = mapdl.get_nsol(1, "U", "X")
+    assert np.allclose(variable, nsol_1)
+
+    esol_1 = mapdl.esol(3, 1, 1, "S", "Y")
+    assert esol_1[0] > 0
+    assert esol_1[1] > 0
+    variable = mapdl.get_variable(3)
+    assert np.allclose(variable, esol_1)
+
+    variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert np.allclose(variable, esol_1)
+
+
+def test_retain_routine(mapdl):
+    mapdl.prep7()
+    routine = "POST26"
+    with mapdl.run_as_routine(routine):
+        assert mapdl.parameters.routine == routine
+    assert mapdl.parameters.routine == "PREP7"
