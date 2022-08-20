@@ -1,7 +1,7 @@
 """Test MAPDL interface"""
 import os
-import time
 from pathlib import Path
+import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
@@ -1440,7 +1440,7 @@ def test_lgwrite(mapdl, tmpdir):
     mapdl.k(2, 2, 0, 0)
 
     # test the extension
-    mapdl.lgwrite(filename[:-4], "txt", kedit="remove")
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
 
     with open(filename) as fid:
         lines = [line.strip() for line in fid.readlines()]
@@ -1448,6 +1448,10 @@ def test_lgwrite(mapdl, tmpdir):
     assert "K,1,0,0,0" in lines
     for line in lines:
         assert "OUT" not in line
+
+    # must test with no filename
+    mapdl.lgwrite()
+    assert mapdl.jobname + ".lgw" in mapdl.list_files()
 
 
 @pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])

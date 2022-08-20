@@ -3002,9 +3002,7 @@ class _MapdlCore(Commands):
     @supress_logging
     def directory(self, path):
         """Change the directory using ``Mapdl.cwd``"""
-        # this has been wrapped in Mapdl to show a warning if the file does
-        # not exist.
-        output = self.cwd(path)
+        self.cwd(path)
 
     @property
     def _lockfile(self):
