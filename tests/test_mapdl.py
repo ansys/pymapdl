@@ -1110,15 +1110,18 @@ def test_path_with_single_quote(mapdl, path_tests):
 
 
 @skip_in_cloud
-def test_cwd_directory(mapdl, tmpdir):
-    mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir).replace("\\", "/")
+def test_cwd(mapdl, tmpdir):
+    old_path = mapdl.directory
+    try:
+        mapdl.directory = str(tmpdir)
+        assert mapdl.directory == str(tmpdir).replace("\\", "/")
 
-    wrong_path = "wrong_path"
-    with pytest.warns(Warning) as record:
-        mapdl.directory = wrong_path
-        assert "The working directory specified" in record.list[-1].message.args[0]
-        assert "is not a directory on" in record.list[-1].message.args[0]
+        wrong_path = "wrong_path"
+        with pytest.raises(FileNotFoundError, match="working directory"):
+            mapdl.directory = wrong_path
+
+    finally:
+        mapdl.cwd(old_path)
 
 
 @skip_in_cloud
