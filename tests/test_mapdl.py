@@ -1,6 +1,7 @@
 """Test MAPDL interface"""
 import os
 import time
+from pathlib import Path
 
 from ansys.mapdl.reader import examples
 import numpy as np
@@ -1402,7 +1403,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
 
     # change directory
     mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir)
+    assert Path(mapdl.directory) == tmpdir
 
     mapdl.post1()
     mapdl.file(rst_file)
