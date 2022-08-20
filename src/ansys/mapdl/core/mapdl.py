@@ -625,7 +625,7 @@ class _MapdlCore(Commands):
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
 
         """
-        if self._geometry == None:
+        if self._geometry is None:
             self._geometry = self._create_geometry()
         return self._geometry
 
@@ -2067,7 +2067,7 @@ class _MapdlCore(Commands):
         item3="",
         **kwargs,
     ):
-        """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
+        r"""Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
 
@@ -2111,7 +2111,7 @@ class _MapdlCore(Commands):
         Parameters
         ----------
         par : str, optional
-            The name of the resulting parameter. See \*SET for name
+            The name of the resulting parameter. See *SET for name
             restrictions.
 
         entity

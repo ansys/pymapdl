@@ -2524,25 +2524,3 @@ class MapdlGrpc(_MapdlCore):
             out = self._file(basename, **kwargs)
 
         return out
-
-    @wraps(_MapdlCore.file)
-    def file(self, fname="", ext="", **kwargs):
-        """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
-        filename = fname + ext
-        if self._local:  # pragma: no cover
-            out = super().file(fname, ext, **kwargs)
-        elif filename in self.list_files():
-            # this file is already remote
-            out = self._file(filename)
-        else:
-            if not os.path.isfile(filename):
-                raise FileNotFoundError(
-                    f"Unable to find '{filename}'. You may need to "
-                    "input the full path to the file."
-                )
-
-            progress_bar = kwargs.pop("progress_bar", False)
-            basename = self.upload(filename, progress_bar=progress_bar)
-            out = self._file(basename, **kwargs)
-
-        return out
