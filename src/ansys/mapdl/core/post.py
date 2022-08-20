@@ -615,10 +615,10 @@ class PostProcessing:
     def _all_enum(self):
         self._mapdl.cm("__TMP_ELEM__", "ELEM")
         self._mapdl.allsel()
-        nnum = self._mapdl.get_array("ELEM", item1="ELIST")
+        enum = self._mapdl.get_array("ELEM", item1="ELIST")
 
         # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        if enum[0] == -1:
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
         self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
         return enum.astype(np.int32, copy=False)

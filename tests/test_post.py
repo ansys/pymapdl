@@ -431,6 +431,19 @@ def test_disp(mapdl, static_solve, comp):
     assert np.allclose(disp_from_grpc, disp_from_prns)
 
 
+def test_enum_all(mapdl, static_solve):
+    # ensure that element selection status has no effect on the all_enum
+    try:
+        n_elem = mapdl.mesh.n_elem
+        mapdl.esel("S", "ELEM", vmin=10, vmax=19, mute=True)
+        mapdl.post_processing._all_enum
+        assert len(mapdl.post_processing._all_enum) == n_elem
+    finally:
+        # static solve is a module fixture, change in state here will affect
+        # downstream tests unless reset
+        mapdl.allsel(mute=True)
+
+
 def test_disp_norm_all(mapdl, static_solve):
 
     # test norm
