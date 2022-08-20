@@ -1426,6 +1426,26 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
+def test_lgwrite(mapdl, tmpdir):
+    filename = str(tmpdir.join("file.txt"))
+
+    # include some muted and unmuted commands to ensure all /OUT and
+    # /OUT,anstmp are removed
+    mapdl.prep7(mute=True)
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    # test the extension
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove")
+
+    with open(filename) as fid:
+        lines = [line.strip() for line in fid.readlines()]
+
+    assert "K,1,0,0,0" in lines
+    for line in lines:
+        assert "OUT" not in line
+
+
 @pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
 def test_parameter_deletion(mapdl, value):
     mapdl.parameters["mypar"] = value
@@ -1464,3 +1484,12 @@ def test_retain_routine(mapdl):
     with mapdl.run_as_routine(routine):
         assert mapdl.parameters.routine == routine
     assert mapdl.parameters.routine == "PREP7"
+
+
+def test_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        mapdl.prep7()
+        mapdl.k(1, 1, 1, 1)
+        mapdl.k(2, 2, 2, 2)
+
+    assert mapdl.geometry.keypoints.shape == (2, 3)

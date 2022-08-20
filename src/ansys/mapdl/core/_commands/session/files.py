@@ -1,5 +1,6 @@
-"""These SESSION commands are for file operations, such as deleting,
-copying, and listing."""
+"""These SESSION commands are for file operations, such as deleting, copying, and listing."""
+
+import os
 
 
 class Files:
@@ -409,14 +410,14 @@ class Files:
         """
         return self.run(f"/FCOMP,{ident},{level}", **kwargs)
 
-    def lgwrite(self, fname="", ext="", kedit="", **kwargs):
+    def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
         """Writes the database command log to a file.
 
         APDL Command: LGWRITE
 
         Parameters
         ----------
-        fname
+        fname : str, optional
             File name and directory path (248 characters maximum, including the
             characters needed for the directory path).  An unspecified
             directory path defaults to the working directory; in this case, you
@@ -424,17 +425,19 @@ class Files:
 
             The file name defaults to Jobname.
 
-        ext
+        ext : str, optional
             Filename extension (eight-character maximum).
 
-        kedit
+        kedit : str, optional
             Flag to suppress nonessential commands:
 
-            NONE - Do not suppress any commands (default).
+            * ``"NONE"`` - Do not suppress any commands (default).
+            * ``"COMMENT"`` - Write nonessential commands as comments (starting with !).
+            * ``"REMOVE"`` - Do not write nonessential commands or comments.
 
-            COMMENT - Write nonessential commands as comments (starting with !).
-
-            REMOVE - Do not write nonessential commands or comments.
+        remove_grpc_extra : bool, default: True
+            Remove gRPC related content (like ``/OUT,anstmp``). This will be
+            ignored when MAPDL is not in gRPC mode.
 
         Notes
         -----
@@ -452,8 +455,54 @@ class Files:
         interactive session, has been lost or corrupted.
 
         This command is valid in any processor.
+
+        Examples
+        --------
+        Output the database command log to the local directory.
+
+        >>> import os
+        >>> mapdl.prep7()
+        >>> mapdl.k(1, 0, 0, 0, mute=True)
+        >>> mapdl.k(2, 2, 0, 0)
+        >>> filename = os.path.join(os.getcwd(), 'log.txt')
+        >>> mapdl.lgwrite(filename, kedit='REMOVE')
+
+        Print the output from the log file.
+
+        >>> with open(filename) as fid:
+        ...     lines = fid.readlines()
+        >>> print(''.join(lines))
+        /BATCH
+        /PREP7,
+        K,1,0,0,0
+        K,2,2,0,0
+
         """
-        return self.run(f"LGWRITE,{fname},{ext},,{kedit}", **kwargs)
+        # always add extension to fname
+        if ext:
+            fname = fname + f".{ext}"
+
+        # seamlessly deal with remote instances in gRPC mode
+        target_dir = None
+        is_grpc = "Grpc" in type(self).__name__
+        if is_grpc:
+            if not self._local and os.path.basename(fname) != fname:
+                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
+
+        # generate the log and download if necessary
+        output = self.run(f"LGWRITE,{fname},,,{kedit}", **kwargs)
+        if target_dir is not None:
+            self.download(fname, target_dir=target_dir)
+
+        # remove extra grpc /OUT commands
+        if remove_grpc_extra and is_grpc:
+            filename = os.path.join(target_dir, fname)
+            with open(filename, "r") as fid:
+                lines = [line for line in fid if not line.startswith("/OUT")]
+            with open(filename, "w") as fid:
+                fid.writelines(lines)
+
+        return output
 
     def starlist(self, fname="", ext="", **kwargs):
         """Displays the contents of an external, coded file.

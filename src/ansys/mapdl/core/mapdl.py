@@ -682,7 +682,7 @@ class _MapdlCore(Commands):
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
 
         """
-        if self._geometry == None:
+        if self._geometry is None:
             self._geometry = self._create_geometry()
         return self._geometry
 
@@ -2001,21 +2001,25 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):
-        """Writes stored commands to an input file and runs the input
-        file.  Used with non_interactive.
+    def _flush_stored(self):  # pragma: no cover
+        """Writes stored commands to an input file and runs the input file.
+
+        Used with ``non_interactive``.
+
+        Overridden by gRPC.
+
         """
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
-        tmp_out = os.path.join(tempfile.gettempdir(), "tmp_%s.out" % rnd_str)
-        self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
+        tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
+        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), "tmp_%s.inp" % rnd_str)
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
         self._log.debug(
             "Writing the following commands to a temporary " "apdl input file:\n%s",
             commands,
