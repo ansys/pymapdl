@@ -1402,11 +1402,16 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     # change directory
-    mapdl.directory = str(tmpdir)
-    assert Path(mapdl.directory) == tmpdir
+    try:
+        old_path = mapdl.directory
+        mapdl.directory = str(tmpdir)
+        assert Path(mapdl.directory) == tmpdir
 
-    mapdl.post1()
-    mapdl.file(rst_file)
+        mapdl.post1()
+        mapdl.file(rst_file)
+    finally:
+        # always revert to preserve state
+        mapdl.directory = old_path
 
 
 def test_file_command_remote(mapdl, cube_solve, tmpdir):
@@ -1430,7 +1435,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-def test_lgwrite(mapdl, tmpdir):
+def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
     # include some muted and unmuted commands to ensure all /OUT and
