@@ -2127,7 +2127,7 @@ class _MapdlCore(Commands):
         item3="",
         **kwargs,
     ):
-        r"""Retrieves a value and stores it as a scalar parameter or part of an array parameter.
+        """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
 
@@ -2171,7 +2171,7 @@ class _MapdlCore(Commands):
         Parameters
         ----------
         par : str, optional
-            The name of the resulting parameter. See *SET for name
+            The name of the resulting parameter. See \*SET for name
             restrictions.
 
         entity
