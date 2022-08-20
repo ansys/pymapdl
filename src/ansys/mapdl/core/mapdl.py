@@ -2001,10 +2001,13 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):
+    def _flush_stored(self):  # pragma: no cover
         """Writes stored commands to an input file and runs the input file.
 
         Used with ``non_interactive``.
+
+        Overridden by gRPC.
+
         """
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()

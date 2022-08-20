@@ -1484,3 +1484,12 @@ def test_retain_routine(mapdl):
     with mapdl.run_as_routine(routine):
         assert mapdl.parameters.routine == routine
     assert mapdl.parameters.routine == "PREP7"
+
+
+def test_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        mapdl.prep7()
+        mapdl.k(1, 1, 1, 1)
+        mapdl.k(2, 2, 2, 2)
+
+    assert mapdl.geometry.keypoints.shape == (2, 3)
