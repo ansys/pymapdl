@@ -851,7 +851,7 @@ class MapdlGrpc(_MapdlCore):
                 pass
 
         if self._local:
-            if os.name == 'nt':
+            if os.name == "nt":
                 self._kill_server()
             else:
                 self._close_process()

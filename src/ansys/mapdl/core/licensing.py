@@ -123,7 +123,7 @@ def get_licdebug_path():
     return os.path.join(folder, ".ansys")
 
 
-def get_ansysli_util_path():
+def get_ansysli_util_path():  # pragma: no cover
     """Return the ansys licencing utilities path."""
     ansyslic_dir = get_ansyslic_dir()
     if os.name == "nt":
