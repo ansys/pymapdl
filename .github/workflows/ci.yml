@@ -240,16 +240,12 @@ jobs:
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
 
-      - name: Collect MAPDL logs on failure
+      - name: List files on Docker image
         if: always()
         run: |
-          mkdir logs-build-docs
-          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
-          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs && echo "Successfully copied 'out' files."; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs && echo "Successfully copied 'err' files."; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs && echo "Successfully copied 'log' files."; fi"
-          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs && echo "Successfully copied 'crash' files."; fi"
-          docker cp mapdl:/mapdl_logs/. ./logs-build-docs/.
+          echo "::group:: List files in docker folder"
+          docker exec mapdl /bin/bash -c "ls -R"
+          echo "::endgroup::"
 
       - name: Display files structure
         if: always()
@@ -257,11 +253,21 @@ jobs:
           ls -R
           ls -R > ./logs-build-docs/files_structure.txt
 
+      - name: Collect MAPDL logs on failure
+        if: always()
+        run: |
+          mkdir logs-build-docs
+          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs" && echo "Successfully created directory inside docker container."
+          docker exec mapdl /bin/bash -c "if [[ -e *.out ]] ;then cp -f /file*.out /mapdl_logs && echo "Successfully copied 'out' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.err ]] ;then cp -f /file*.err /mapdl_logs && echo "Successfully copied 'err' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.log ]] ;then cp -f /file*.log /mapdl_logs && echo "Successfully copied 'log' files."; fi"
+          docker exec mapdl /bin/bash -c "if [[ -e *.crash ]] ;then cp -f /*.crash /mapdl_logs && echo "Successfully copied 'crash' files."; fi"
+          docker cp mapdl:/mapdl_logs/. ./logs-build-docs/.
+
       - name: Tar logs
         if: always()
         run: |
           cp -f doc/build/latex/*.log ./logs-build-docs/
-          cp xvfb_error.log ./logs-build-docs/
           cp log.txt ./logs-build-docs/
           tar cvzf ./logs-build-docs.tgz ./logs-build-docs
 
@@ -280,7 +286,6 @@ jobs:
         if: always()
         run: |
           for f in doc/build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done
-          echo "::group:: Xvfb error 'xvfb_error.log'" && cat xvfb_error.log && echo "::endgroup::" ; done
           for f in ./logs-build-docs/*.err; do echo "::group:: Error file $f" && cat f && echo "::endgroup::" ; done
           for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat f && echo "::endgroup::" ; done
           for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done
