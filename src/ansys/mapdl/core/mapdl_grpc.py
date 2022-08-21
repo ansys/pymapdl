@@ -838,9 +838,15 @@ class MapdlGrpc(_MapdlCore):
             except:
                 pass
 
-        self._kill()  # sets self._exited = True
-        self._close_process()
-        self._remove_lock_file()
+        if self._local:
+            if os.name == "nt":
+                self._kill_server()
+            else:
+                self._close_process()
+            self._remove_lock_file()
+        else:
+            self._kill_server()
+        self._exited = True
 
         if self._remote_instance:
             # No cover: The CI is working with a single MAPDL instance
@@ -877,8 +883,16 @@ class MapdlGrpc(_MapdlCore):
         self._ctrl("EXIT")
         self._exited = True
 
-    def _close_process(self):
-        """Close all MAPDL processes"""
+    def _close_process(self):  # pragma: no cover
+        """Close all MAPDL processes.
+
+        Notes
+        -----
+        This is effectively the only way to completely close down MAPDL locally on
+        linux. Just killing the server with ``_kill_server`` leaves orphaned
+        processes making this method ineffective for a local instance of MAPDL.
+
+        """
         if self._local:
             for pid in self._pids:
                 try:

@@ -123,6 +123,17 @@ def get_licdebug_path():
     return os.path.join(folder, ".ansys")
 
 
+def get_ansysli_util_path():  # pragma: no cover
+    """Return the ansys licencing utilities path."""
+    ansyslic_dir = get_ansyslic_dir()
+    if os.name == "nt":
+        ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
+    else:
+        ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
+
+    return ansysli_util_path
+
+
 def get_licdebug_name():
     """Get license client log file name.
 
@@ -310,11 +321,7 @@ def checkout_license(lic, host=None, port=2325, verbose=False):
     if lic.lower() not in ALLOWABLE_LICENSES:
         raise ValueError(f"Invalid license '{lic}'")
 
-    ansyslic_dir = get_ansyslic_dir()
-    if os.name == "nt":
-        ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
-    else:
-        ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
+    ansysli_util_path = get_ansysli_util_path()
 
     if not os.path.isfile(ansysli_util_path):
         raise FileNotFoundError(

@@ -539,13 +539,69 @@ class _MapdlCore(Commands):
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
+    class _RetainRoutine:
+        """Store MAPDL's routine when entering and reverts it when exiting."""
+
+        def __init__(self, parent, routine):
+            self._parent = weakref.ref(parent)
+
+            # check the routine is valid since we're muting the output
+            check_valid_routine(routine)
+            self._requested_routine = routine
+
+        def __enter__(self):
+            """Store the current routine and enter the requested routine."""
+            self._cached_routine = self._parent().parameters.routine
+            self._parent()._log.debug("Caching routine %s", self._cached_routine)
+            if self._requested_routine.lower() != self._cached_routine.lower():
+                self._enter_routine(self._requested_routine)
+
+        def __exit__(self, *args):
+            """Restore the original routine."""
+            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
+            self._enter_routine(self._cached_routine)
+
+        def _enter_routine(self, routine):
+            """Enter a routine."""
+            if routine.lower() == "begin level":
+                self._parent().finish(mute=True)
+            else:
+                self._parent().run(f"/{routine}", mute=True)
+
+    def run_as_routine(self, routine):
+        """
+        Runs a command or commands at a routine and then revert to the prior routine.
+
+        This can be useful to avoid constantly changing between routines.
+
+        Parameters
+        ----------
+        routine : str
+            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
+
+        Examples
+        --------
+        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
+        revert to the prior routine.
+
+        >>> mapdl.prep7()
+        >>> mapdl.parameters.routine
+        'PREP7'
+        >>> with mapdl.run_as_routine('POST26'):
+        ...     mapdl.numvar(200)
+        >>> mapdl.parameters.routine
+        'PREP7'
+
+        """
+        return self._RetainRoutine(self, routine)
+
     @property
     def last_response(self):
         """Returns the last response from MAPDL.
 
         Examples
         --------
-        >>> mapdl.last_response()
+        >>> mapdl.last_response
         'KEYPOINT      1   X,Y,Z=   1.00000       1.00000       1.00000'
         """
         return self._response
@@ -630,7 +686,7 @@ class _MapdlCore(Commands):
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
 
         """
-        if self._geometry == None:
+        if self._geometry is None:
             self._geometry = self._create_geometry()
         return self._geometry
 
@@ -1949,21 +2005,25 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):
-        """Writes stored commands to an input file and runs the input
-        file.  Used with non_interactive.
+    def _flush_stored(self):  # pragma: no cover
+        """Writes stored commands to an input file and runs the input file.
+
+        Used with ``non_interactive``.
+
+        Overridden by gRPC.
+
         """
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
-        tmp_out = os.path.join(tempfile.gettempdir(), "tmp_%s.out" % rnd_str)
-        self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
+        tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
+        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), "tmp_%s.inp" % rnd_str)
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
         self._log.debug(
             "Writing the following commands to a temporary " "apdl input file:\n%s",
             commands,
@@ -2766,9 +2826,11 @@ class _MapdlCore(Commands):
             os.remove(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
-        """Load a table from Python to into MAPDL.
+        """Load a table from Python to MAPDL.
 
-        Uses :func:`tread <Mapdl.tread>` to transfer the table.
+        Uses ``TREAD`` to transfer the table.
+        It should be noticed that PyMAPDL when query a table, it will return
+        the table but not its axis (meaning it will return ``table[1:,1:]``).
 
         Parameters
         ----------
@@ -3167,14 +3229,14 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.cwd)
     def cwd(self, *args, **kwargs):
-        """Wraps cwd"""
-        returns_ = super().cwd(*args, **kwargs)
+        """Wraps cwd."""
+        output = super().cwd(*args, mute=False, **kwargs)
 
-        if returns_:  # if successful, it should be none.
-            if "*** WARNING ***" in self._response:
-                warn("\n" + self._response)
+        if output is not None:
+            if "*** WARNING ***" in output:
+                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
 
-        return returns_
+        return output
 
     def get_nodal_loads(self, label=None):
         """
