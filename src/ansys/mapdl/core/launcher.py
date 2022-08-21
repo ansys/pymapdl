@@ -22,6 +22,7 @@ import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -637,8 +638,8 @@ def _get_available_base_ansys():
      211: '/usr/ansys_inc/v211'}
     """
     base_path = None
-    if os.name == "nt":
-        supported_versions = [194, 202, 211, 212, 221]
+    if os.name == "nt":  # pragma: no cover
+        supported_versions = SUPPORTED_ANSYS_VERSIONS
         awp_roots = {
             ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
         }
@@ -647,19 +648,31 @@ def _get_available_base_ansys():
         }
         if installed_versions:
             return installed_versions
-        else:
+        else:  # pragma: no cover
+            LOG.debug(
+                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
+            )
             base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
+            if not os.path.exists(base_path):
+                LOG.debug(
+                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
+                )
+                return {}
     elif os.name == "posix":
         for path in ["/usr/ansys_inc", "/ansys_inc"]:
             if os.path.isdir(path):
                 base_path = path
-    else:
+    else:  # pragma: no cover
         raise OSError(f"Unsupported OS {os.name}")
 
     if base_path is None:
         return {}
 
     paths = glob(os.path.join(base_path, "v*"))
+
+    # Testing for ANSYS STUDENT version
+    if not paths:  # pragma: no cover
+        paths = glob(os.path.join(base_path, "ANSYS*"))
 
     if not paths:
         return {}
@@ -773,11 +786,12 @@ def change_default_ansys_path(exe_loc):
 
 
 def save_ansys_path(exe_loc=None):  # pragma: no cover
-    """Find ANSYS path or query user.
+    """Find MAPDL's path or query user.
 
     If no ``exe_loc`` argument is supplied, this function attempt
     to obtain the MAPDL executable from (and in order):
-    - The default ansys paths (i.e. 'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX')
+
+    - The default ansys paths (i.e. ``'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX'``)
     - The configuration file
     - User input
 
@@ -787,7 +801,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     Parameters
     ----------
     exe_loc : str, optional
-        Path of the MAPDL executable ('ansysXXX'), by default None
+        Path of the MAPDL executable ('ansysXXX'), by default ``None``.
 
     Returns
     -------
@@ -804,15 +818,15 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
         >>> import appdirs
         >>> import os
         >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
-        C:/Users/gayuso/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
+        C:/Users/user/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
 
+    Examples
+    --------
     You can change the default ``exe_loc`` either by modifying the mentioned
-    ``config.txt`` file or by executing this function:
+    ``config.txt`` file or by executing:
 
-    .. code:: python
-
-       >>> from ansys.mapdl.core.launcher import save_ansys_path
-       >>> save_ansys_path('/new/path/to/executable')
+    >>> from ansys.mapdl.core import save_ansys_path
+    >>> save_ansys_path('/new/path/to/executable')
 
     """
     if exe_loc is None:
@@ -982,6 +996,7 @@ def launch_mapdl(
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1095,7 +1110,11 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit.  Default ``False``.
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -1385,6 +1404,9 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
+        if remove_temp_files:
+            LOG.info("`run_location` set. Disabling the removal of temporary files.")
+            remove_temp_files = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
@@ -1516,7 +1538,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                remove_temp_files=remove_temp_files,
                 log_apdl=log_apdl,
                 **start_parm,
             )

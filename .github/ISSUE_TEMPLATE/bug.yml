@@ -62,7 +62,7 @@ body:
        - 'MacOS'
        - 'Linux'
     validations:
-      required: true
+      required: false
 
   - type: dropdown
     id: python-version
@@ -75,6 +75,18 @@ body:
        - '3.8'
        - '3.9'
        - '3.10'
+    validations:
+      required: false
+
+  - type: textarea
+    id: pymapdl-report
+    attributes:
+      label: PyMAPDL Report
+      description: Run `python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"` to get the PyMAPDL Report
+      placeholder: |
+        ```text
+        Paste the output of `python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"` here
+        ```
     validations:
       required: true
 

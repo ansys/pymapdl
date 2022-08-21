@@ -17,10 +17,10 @@ jobs:
     name: Validate latest mapdl image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: 3.8
 
@@ -30,7 +30,7 @@ jobs:
           sudo apt install libgl1-mesa-glx xvfb
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
@@ -44,7 +44,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}

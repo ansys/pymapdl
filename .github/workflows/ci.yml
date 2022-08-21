@@ -37,9 +37,9 @@ jobs:
     name: Style Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v2.2.2
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: 3.9
       - name: Install pre-commit
@@ -56,15 +56,15 @@ jobs:
         python-version: ['3.7', '3.8', '3.9']
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Linux pip cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: ${{ runner.os == 'Linux' }}
         with:
           path: ~/.cache/pip
@@ -73,7 +73,7 @@ jobs:
             Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
 
       - name: Window pip cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         if: ${{ runner.os == 'Windows' }}
         with:
           path: ~\AppData\Local\pip\Cache
@@ -104,7 +104,7 @@ jobs:
           dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
 
       - name: Upload Wheelhouse
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
           path: '*.zip'
@@ -115,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       # used for documentation deployment
       - name: Get Bot Application Token
@@ -126,16 +126,8 @@ jobs:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
-      - name: Get tag
-        id: tag
-        uses: dawidd6/action-get-tag@v1
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        with:
-          # Optionally strip `v` prefix
-          strip_v: false
-
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: 3.8
 
@@ -145,7 +137,7 @@ jobs:
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
@@ -165,7 +157,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -184,7 +176,7 @@ jobs:
         id: version
 
       - name: Cache examples
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -192,7 +184,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache docs build directory
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -200,7 +192,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: Cache autosummary
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -221,7 +213,7 @@ jobs:
           zip -r PyMAPDL_documentation.zip *
 
       - name: Upload HTML Documentation
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: HTML-Documentation
           path: doc/build/html/PyMAPDL_documentation.zip
@@ -236,14 +228,13 @@ jobs:
           branch: gh-pages
           folder: doc/build/html
           clean: true
-          tag: ${{steps.tag.outputs.tag}}
 
       - name: Build PDF Documentation
         working-directory: doc
         run: make pdf
 
       - name: Upload PDF Documentation
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PDF-Documentation
           path: doc/build/latex/pymapdl*.pdf
@@ -258,10 +249,10 @@ jobs:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0']
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: 3.8
 
@@ -271,7 +262,7 @@ jobs:
           sudo apt install libgl1-mesa-glx xvfb
 
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
@@ -291,7 +282,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -308,7 +299,7 @@ jobs:
           pip install -r requirements/requirements_tests.txt
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
-      - uses: codecov/codecov-action@v2
+      - uses: codecov/codecov-action@v3
         if: matrix.mapdl-version == 'v21.2.1'
         name: 'Upload coverage to Codecov'
 
@@ -318,7 +309,7 @@ jobs:
           twine check dist/*
 
       - name: Upload wheel and binaries
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: PyMAPDL-packages
           path: dist/
@@ -334,11 +325,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4.2.0
         with:
           python-version: 3.9
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v3
 
       - name: Display structure of downloaded files
         run: ls -R

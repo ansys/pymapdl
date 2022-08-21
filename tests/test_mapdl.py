@@ -1,5 +1,6 @@
 """Test MAPDL interface"""
 import os
+from pathlib import Path
 import time
 
 from ansys.mapdl.reader import examples
@@ -20,6 +21,8 @@ Must be able to launch MAPDL locally. Remote execution does not allow for
 directory creation.
 """,
 )
+
+skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -1093,14 +1096,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_without_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_without_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
 def test_path_with_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_with_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_with_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
@@ -1110,15 +1121,18 @@ def test_path_with_single_quote(mapdl, path_tests):
 
 
 @skip_in_cloud
-def test_cwd_directory(mapdl, tmpdir):
-    mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir).replace("\\", "/")
+def test_cwd(mapdl, tmpdir):
+    old_path = mapdl.directory
+    try:
+        mapdl.directory = str(tmpdir)
+        assert mapdl.directory == str(tmpdir).replace("\\", "/")
 
-    wrong_path = "wrong_path"
-    with pytest.warns(Warning) as record:
-        mapdl.directory = wrong_path
-        assert "The working directory specified" in record.list[-1].message.args[0]
-        assert "is not a directory on" in record.list[-1].message.args[0]
+        wrong_path = "wrong_path"
+        with pytest.raises(FileNotFoundError, match="working directory"):
+            mapdl.directory = wrong_path
+
+    finally:
+        mapdl.cwd(old_path)
 
 
 @skip_in_cloud
@@ -1396,3 +1410,119 @@ def test_result_file(mapdl, cube_solve):
 
 def test_empty_result_file(mapdl, cleared):
     assert mapdl.result_file is None
+
+
+@skip_in_cloud
+def test_file_command_local(mapdl, cube_solve, tmpdir):
+    rst_file = mapdl._result_file
+
+    # check for raise of non-exising file
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    # change directory
+    try:
+        old_path = mapdl.directory
+        mapdl.directory = str(tmpdir)
+        assert Path(mapdl.directory) == tmpdir
+
+        mapdl.post1()
+        mapdl.file(rst_file)
+    finally:
+        # always revert to preserve state
+        mapdl.directory = old_path
+
+
+def test_file_command_remote(mapdl, cube_solve, tmpdir):
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    mapdl.post1()
+    # this file already exists remotely
+    mapdl.file("file.rst")
+
+    with pytest.raises(FileNotFoundError):
+        mapdl.file()
+
+    tmpdir = str(tmpdir)
+    mapdl.download("file.rst", tmpdir)
+    local_file = os.path.join(tmpdir, "file.rst")
+    new_local_file = os.path.join(tmpdir, "myrst.rst")
+    os.rename(local_file, new_local_file)
+
+    output = mapdl.file(new_local_file)
+    assert "DATA FILE CHANGED TO FILE" in output
+
+
+@skip_windows
+def test_lgwrite(mapdl, cleared, tmpdir):
+    filename = str(tmpdir.join("file.txt"))
+
+    # include some muted and unmuted commands to ensure all /OUT and
+    # /OUT,anstmp are removed
+    mapdl.prep7(mute=True)
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    # test the extension
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
+
+    with open(filename) as fid:
+        lines = [line.strip() for line in fid.readlines()]
+
+    assert "K,1,0,0,0" in lines
+    for line in lines:
+        assert "OUT" not in line
+
+    # must test with no filename
+    mapdl.lgwrite()
+    assert mapdl.jobname + ".lgw" in mapdl.list_files()
+
+
+@pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
+def test_parameter_deletion(mapdl, value):
+    mapdl.parameters["mypar"] = value
+    assert "mypar".upper() in mapdl.starstatus()
+    del mapdl.parameters["mypar"]
+
+    assert "mypar" not in mapdl.starstatus()
+    assert "mypar" not in mapdl.parameters
+
+
+def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
+    mapdl.post26()
+    nsol_1 = mapdl.nsol(2, 1, "U", "X")
+    assert nsol_1[0] > 0
+    assert nsol_1[1] > 0
+
+    variable = mapdl.get_variable(2)
+    assert np.allclose(variable, nsol_1)
+
+    variable = mapdl.get_nsol(1, "U", "X")
+    assert np.allclose(variable, nsol_1)
+
+    esol_1 = mapdl.esol(3, 1, 1, "S", "Y")
+    assert esol_1[0] > 0
+    assert esol_1[1] > 0
+    variable = mapdl.get_variable(3)
+    assert np.allclose(variable, esol_1)
+
+    variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert np.allclose(variable, esol_1)
+
+
+def test_retain_routine(mapdl):
+    mapdl.prep7()
+    routine = "POST26"
+    with mapdl.run_as_routine(routine):
+        assert mapdl.parameters.routine == routine
+    assert mapdl.parameters.routine == "PREP7"
+
+
+def test_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        mapdl.prep7()
+        mapdl.k(1, 1, 1, 1)
+        mapdl.k(2, 2, 2, 2)
+
+    assert mapdl.geometry.keypoints.shape == (2, 3)
