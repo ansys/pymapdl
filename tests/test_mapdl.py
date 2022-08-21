@@ -1094,14 +1094,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_without_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_without_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
 def test_path_with_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_with_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_with_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
