@@ -1916,20 +1916,23 @@ class _MapdlCore(Commands):
         except Exception:  # check if rth file exists
             ext = ""
 
-        if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
+        if self._local:  # pragma: no cover
+            if ext == "":
+                rth_file = os.path.join(self.directory, f"{filename}.rth")
+                rst_file = os.path.join(self.directory, f"{filename}.rst")
 
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
+                if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+                    return last_created([rth_file, rst_file])
+                elif os.path.isfile(rth_file):
+                    return rth_file
+                elif os.path.isfile(rst_file):
+                    return rst_file
+            else:
+                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                if os.path.isfile(filename):
+                    return filename
         else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
-                return filename
+            return os.path.join(filename, ext)
 
     @property
     def _distributed_result_file(self):
