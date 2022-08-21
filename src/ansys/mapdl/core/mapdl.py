@@ -1899,6 +1899,7 @@ class _MapdlCore(Commands):
 
     @property
     def result_file(self):
+        """Return the RST file path."""
         return self._result_file
 
     @property
@@ -1932,7 +1933,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return os.path.join(filename, ext)
+            return os.path.join(filename, ext)  # pragma: no cover
 
     @property
     def _distributed_result_file(self):
