@@ -3002,8 +3002,6 @@ class _MapdlCore(Commands):
     @supress_logging
     def directory(self, path):
         """Change the directory using ``Mapdl.cwd``"""
-        # this has been wrapped in Mapdl to show a warning if the file does
-        # not exist.
         self.cwd(path)
 
     @property
@@ -3222,13 +3220,13 @@ class _MapdlCore(Commands):
     @wraps(Commands.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        returns_ = super().cwd(*args, **kwargs)
+        output = super().cwd(*args, mute=False, **kwargs)
 
-        if returns_:  # if successful, it should be none.
-            if "*** WARNING ***" in self._response:
-                warn("\n" + self._response)
+        if output is not None:
+            if "*** WARNING ***" in output:
+                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
 
-        return returns_
+        return output
 
     def get_nodal_loads(self, label=None):
         """

@@ -1,5 +1,6 @@
 """Test MAPDL interface"""
 import os
+from pathlib import Path
 import time
 
 from ansys.mapdl.reader import examples
@@ -20,6 +21,8 @@ Must be able to launch MAPDL locally. Remote execution does not allow for
 directory creation.
 """,
 )
+
+skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
 
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
@@ -1093,14 +1096,22 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
 
 @skip_in_cloud
 def test_path_without_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_without_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_without_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
 def test_path_with_spaces(mapdl, path_tests):
-    resp = mapdl.cwd(path_tests.path_with_spaces)
-    assert resp is None
+    old_path = mapdl.directory
+    try:
+        resp = mapdl.cwd(path_tests.path_with_spaces)
+        assert resp is None
+    finally:
+        mapdl.directory = old_path
 
 
 @skip_in_cloud
@@ -1110,15 +1121,18 @@ def test_path_with_single_quote(mapdl, path_tests):
 
 
 @skip_in_cloud
-def test_cwd_directory(mapdl, tmpdir):
-    mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir).replace("\\", "/")
+def test_cwd(mapdl, tmpdir):
+    old_path = mapdl.directory
+    try:
+        mapdl.directory = str(tmpdir)
+        assert mapdl.directory == str(tmpdir).replace("\\", "/")
 
-    wrong_path = "wrong_path"
-    with pytest.warns(Warning) as record:
-        mapdl.directory = wrong_path
-        assert "The working directory specified" in record.list[-1].message.args[0]
-        assert "is not a directory on" in record.list[-1].message.args[0]
+        wrong_path = "wrong_path"
+        with pytest.raises(FileNotFoundError, match="working directory"):
+            mapdl.directory = wrong_path
+
+    finally:
+        mapdl.cwd(old_path)
 
 
 @skip_in_cloud
@@ -1398,11 +1412,16 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     # change directory
-    mapdl.directory = str(tmpdir)
-    assert mapdl.directory == str(tmpdir)
+    try:
+        old_path = mapdl.directory
+        mapdl.directory = str(tmpdir)
+        assert Path(mapdl.directory) == tmpdir
 
-    mapdl.post1()
-    mapdl.file(rst_file)
+        mapdl.post1()
+        mapdl.file(rst_file)
+    finally:
+        # always revert to preserve state
+        mapdl.directory = old_path
 
 
 def test_file_command_remote(mapdl, cube_solve, tmpdir):
@@ -1426,7 +1445,8 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-def test_lgwrite(mapdl, tmpdir):
+@skip_windows
+def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
     # include some muted and unmuted commands to ensure all /OUT and
@@ -1436,7 +1456,7 @@ def test_lgwrite(mapdl, tmpdir):
     mapdl.k(2, 2, 0, 0)
 
     # test the extension
-    mapdl.lgwrite(filename[:-4], "txt", kedit="remove")
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
 
     with open(filename) as fid:
         lines = [line.strip() for line in fid.readlines()]
@@ -1444,6 +1464,10 @@ def test_lgwrite(mapdl, tmpdir):
     assert "K,1,0,0,0" in lines
     for line in lines:
         assert "OUT" not in line
+
+    # must test with no filename
+    mapdl.lgwrite()
+    assert mapdl.jobname + ".lgw" in mapdl.list_files()
 
 
 @pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
