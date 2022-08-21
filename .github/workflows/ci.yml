@@ -240,12 +240,11 @@ jobs:
           path: doc/build/latex/pymapdl*.pdf
           retention-days: 7
 
-      - name: List files on Docker image
+      - name: Display docker files structures
         if: always()
         run: |
-          echo "::group:: List files in docker folder"
           docker exec mapdl /bin/bash -c "ls -R"
-          echo "::endgroup::"
+          docker exec mapdl /bin/bash -c "ls -R" > ./logs-${{ matrix.mapdl-version }}/docker_files_structure.txt
 
       - name: Display files structure
         if: always()
@@ -369,7 +368,7 @@ jobs:
         if: always()
         run: |
           mkdir logs-${{ matrix.mapdl-version }}
-          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs"
+          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs" && echo 'Successfully created directory inside docker container'"
           docker exec mapdl /bin/bash -c "if compgen -G '*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi"
           docker exec mapdl /bin/bash -c "if compgen -G '*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi"
           docker exec mapdl /bin/bash -c "if compgen -G '*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi"
