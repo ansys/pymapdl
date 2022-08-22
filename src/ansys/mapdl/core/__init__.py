@@ -39,7 +39,7 @@ from ansys.mapdl.core.launcher import (
 )
 
 # override default launcher when on pyansys.com
-if "ANSJUPHUB_VER" in os.environ:
+if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
     from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
 else:
     from ansys.mapdl.core.launcher import launch_mapdl
