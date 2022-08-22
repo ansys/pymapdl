@@ -317,7 +317,7 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.iren._mouse_left_button_release(width, height)
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
-    mapdl.ksel("S", "node", "", 1)
+    mapdl.ksel("S", "KP", "", 1)
     if selection == "R" or selection == "U":
         point = (285 / 1024, 280 / 800)
         mapdl.ksel("a", "node", "", 2)
