@@ -1544,7 +1544,7 @@ def test_lsread(mapdl, cleared):
     mapdl.run("ddele,all,all")  # delete all disps
     out = mapdl.lsread(1)  # read load step 1.
     assert "file.s01" in out
-    assert "READ ANSYS LOADS DATA FROM FILE"
+    assert "READ ANSYS LOADS DATA FROM FILE" in out
 
     out = mapdl.run("flist")  # list all loads
     assert "NODE" in out
