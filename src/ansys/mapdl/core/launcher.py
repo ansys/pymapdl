@@ -1509,7 +1509,7 @@ def launch_mapdl(
             try:
                 # pending deprecation to ansys-mapdl-corba
                 from ansys.mapdl.core.mapdl_corba import MapdlCorba
-            except ModuleNotFoundError:
+            except ModuleNotFoundError:  # pragma: no cover
                 raise ModuleNotFoundError(
                     "To use this feature, install the MAPDL CORBA package"
                     " with:\n\npip install ansys_corba"
