@@ -78,6 +78,7 @@ INVAL_COMMANDS = {
     "*IF": "Use a python ``if`` or run as non_interactive",
     "CMAT": "Run `CMAT` as ``non_interactive``.",
     "*REP": "Run '*REPEAT' in ``non_interactive``.",
+    "LSRE": "Run 'LSREAD' in ``non_interactive``.",
 }
 
 ## Soft-invalid commands
@@ -3660,6 +3661,14 @@ class _MapdlCore(Commands):
                     raise MapdlRuntimeError(
                         f"\n\nError in instance {self.name}\n\n" + error_message
                     )
+
+    @wraps(Commands.lsread)
+    def lsread(self, lsnum="", **kwargs):
+        """Wraps the ``LSREAD`` which does not work in interactive mode."""
+        self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
+        with self.non_interactive:
+            super().lsread(lsnum, **kwargs)
+        return self._response.strip()
 
     def file(self, fname="", ext="", **kwargs):
         """Specifies the data file where results are to be found.
