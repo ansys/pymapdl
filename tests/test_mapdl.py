@@ -10,7 +10,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -1075,12 +1075,13 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
-def test_inval_commands(mapdl, cleared):
+@pytest.mark.parametrize(
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread"]
+)
+def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    cmds = ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT"]
-    for each_cmd in cmds:
-        with pytest.raises(RuntimeError):
-            mapdl.run(each_cmd)
+    with pytest.raises(RuntimeError):
+        mapdl.run(each_cmd)
 
 
 def test_inval_commands_silent(mapdl, tmpdir, cleared):
@@ -1517,3 +1518,24 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(2, 2, 2, 2)
 
     assert mapdl.geometry.keypoints.shape == (2, 3)
+
+
+def test_ignored_command(mapdl, cleared):
+    mapdl.prep7(mute=True)
+    mapdl.n(mute=True)
+    with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
+        mapdl.f(1, 1, 1, 1)
+
+
+def test_lsread(mapdl, cleared):
+    mapdl.n(1, mute=True)
+    mapdl.n(2, 1, 0, 0, mute=True)
+    mapdl.et(1, 188, mute=True)
+    mapdl.e(1, 2, mute=True)
+    mapdl.slashsolu(mute=True)
+    mapdl.f("all", "FX", 1, mute=True)
+    mapdl.lswrite(mute=True)
+    mapdl.fdele("all", "all", mute=True)
+    assert "No nodal" in mapdl.flist()
+    mapdl.lsread(mute=True)
+    assert "No nodal" not in mapdl.flist()
