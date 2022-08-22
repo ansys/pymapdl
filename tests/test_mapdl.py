@@ -1536,10 +1536,13 @@ def test_lsread(mapdl, cleared):
     mapdl.run("/solu")
     mapdl.run("antype,static")
     mapdl.run("f,node(2,2,0),fz,-10")  # define force at (2,2,0)
+
     mapdl.run("lswrite,1")  # write load out as load step 1
+    assert "file.s01" in mapdl.list_files()
+
     mapdl.run("fdele,all,all")  # delete all loads
     mapdl.run("ddele,all,all")  # delete all disps
-    out = mapdl.lsread(1)  # read load step 1. This doesn't work!
+    out = mapdl.lsread(1)  # read load step 1.
     assert "file.s01" in out
     assert "READ ANSYS LOADS DATA FROM FILE"
 
