@@ -9,7 +9,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -1053,12 +1053,13 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
-def test_inval_commands(mapdl, cleared):
+@pytest.mark.parametrize(
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread"]
+)
+def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    cmds = ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT"]
-    for each_cmd in cmds:
-        with pytest.raises(RuntimeError):
-            mapdl.run(each_cmd)
+    with pytest.raises(RuntimeError):
+        mapdl.run(each_cmd)
 
 
 def test_inval_commands_silent(mapdl, tmpdir, cleared):
@@ -1368,3 +1369,140 @@ def test_equal_in_comments_and_title(mapdl):
     mapdl.com("=====")
     mapdl.title("This is = ")
     mapdl.title("This is '=' ")
+
+
+@skip_in_cloud
+def test_file_command_local(mapdl, cube_solve, tmpdir):
+    rst_file = mapdl._result_file
+
+    # check for raise of non-exising file
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    # change directory
+    try:
+        old_path = mapdl.directory
+        mapdl.directory = str(tmpdir)
+        assert Path(mapdl.directory) == tmpdir
+
+        mapdl.post1()
+        mapdl.file(rst_file)
+    finally:
+        # always revert to preserve state
+        mapdl.directory = old_path
+
+
+def test_file_command_remote(mapdl, cube_solve, tmpdir):
+    with pytest.raises(FileNotFoundError):
+        mapdl.file("potato")
+
+    mapdl.post1()
+    # this file already exists remotely
+    mapdl.file("file.rst")
+
+    with pytest.raises(FileNotFoundError):
+        mapdl.file()
+
+    tmpdir = str(tmpdir)
+    mapdl.download("file.rst", tmpdir)
+    local_file = os.path.join(tmpdir, "file.rst")
+    new_local_file = os.path.join(tmpdir, "myrst.rst")
+    os.rename(local_file, new_local_file)
+
+    output = mapdl.file(new_local_file)
+    assert "DATA FILE CHANGED TO FILE" in output
+
+
+@skip_windows
+def test_lgwrite(mapdl, cleared, tmpdir):
+    filename = str(tmpdir.join("file.txt"))
+
+    # include some muted and unmuted commands to ensure all /OUT and
+    # /OUT,anstmp are removed
+    mapdl.prep7(mute=True)
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    # test the extension
+    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
+
+    with open(filename) as fid:
+        lines = [line.strip() for line in fid.readlines()]
+
+    assert "K,1,0,0,0" in lines
+    for line in lines:
+        assert "OUT" not in line
+
+    # must test with no filename
+    mapdl.lgwrite()
+    assert mapdl.jobname + ".lgw" in mapdl.list_files()
+
+
+@pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
+def test_parameter_deletion(mapdl, value):
+    mapdl.parameters["mypar"] = value
+    assert "mypar".upper() in mapdl.starstatus()
+    del mapdl.parameters["mypar"]
+
+    assert "mypar" not in mapdl.starstatus()
+    assert "mypar" not in mapdl.parameters
+
+
+def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
+    mapdl.post26()
+    nsol_1 = mapdl.nsol(2, 1, "U", "X")
+    assert nsol_1[0] > 0
+    assert nsol_1[1] > 0
+
+    variable = mapdl.get_variable(2)
+    assert np.allclose(variable, nsol_1)
+
+    variable = mapdl.get_nsol(1, "U", "X")
+    assert np.allclose(variable, nsol_1)
+
+    esol_1 = mapdl.esol(3, 1, 1, "S", "Y")
+    assert esol_1[0] > 0
+    assert esol_1[1] > 0
+    variable = mapdl.get_variable(3)
+    assert np.allclose(variable, esol_1)
+
+    variable = mapdl.get_esol(1, 1, "S", "Y")
+    assert np.allclose(variable, esol_1)
+
+
+def test_retain_routine(mapdl):
+    mapdl.prep7()
+    routine = "POST26"
+    with mapdl.run_as_routine(routine):
+        assert mapdl.parameters.routine == routine
+    assert mapdl.parameters.routine == "PREP7"
+
+
+def test_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        mapdl.prep7()
+        mapdl.k(1, 1, 1, 1)
+        mapdl.k(2, 2, 2, 2)
+
+    assert mapdl.geometry.keypoints.shape == (2, 3)
+
+
+def test_ignored_command(mapdl, cleared):
+    mapdl.prep7(mute=True)
+    mapdl.n(mute=True)
+    with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
+        mapdl.f(1, 1, 1, 1)
+
+
+def test_lsread(mapdl, cleared):
+    mapdl.n(1, mute=True)
+    mapdl.n(2, 1, 0, 0, mute=True)
+    mapdl.et(1, 188, mute=True)
+    mapdl.e(1, 2, mute=True)
+    mapdl.slashsolu(mute=True)
+    mapdl.f("all", "FX", 1, mute=True)
+    mapdl.lswrite(mute=True)
+    mapdl.fdele("all", "all", mute=True)
+    assert "No nodal" in mapdl.flist()
+    mapdl.lsread(mute=True)
+    assert "No nodal" not in mapdl.flist()

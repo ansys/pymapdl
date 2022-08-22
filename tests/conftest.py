@@ -373,6 +373,7 @@ def query(mapdl, cleared):
 
 @pytest.fixture
 def solved_box(mapdl, cleared):
+    mapdl.mute = True  # improve stability
     mapdl.prep7()
     mapdl.et(1, "SOLID5")
     mapdl.block(0, 10, 0, 20, 0, 30)
@@ -395,6 +396,8 @@ def solved_box(mapdl, cleared):
     mapdl.antype("STATIC")
     mapdl.solve()
     mapdl.finish()
+    mapdl.mute = False
+
     q = mapdl.queries
     return q, get_details_of_nodes(mapdl)
 
