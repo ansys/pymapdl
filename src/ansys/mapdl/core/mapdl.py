@@ -28,7 +28,11 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
     inject_docs,
 )
-from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlInvalidRoutineError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
@@ -2708,6 +2712,11 @@ class _MapdlCore(Commands):
                 text += "\n\nIgnore these messages by setting allow_ignore=True"
                 raise MapdlInvalidRoutineError(text)
 
+        if "command is ignored" in text:
+            if not self.allow_ignore:
+                text += "\n\nIgnore these messages by setting allow_ignore=True"
+                raise MapdlCommandIgnoredError(text)
+
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             self._raise_output_errors(self._response)
@@ -3663,11 +3672,11 @@ class _MapdlCore(Commands):
                     )
 
     @wraps(Commands.lsread)
-    def lsread(self, lsnum="", **kwargs):
+    def lsread(self, *args, **kwargs):
         """Wraps the ``LSREAD`` which does not work in interactive mode."""
         self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
         with self.non_interactive:
-            super().lsread(lsnum, **kwargs)
+            super().lsread(*args, **kwargs)
         return self._response.strip()
 
     def file(self, fname="", ext="", **kwargs):

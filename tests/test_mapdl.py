@@ -10,7 +10,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -1520,32 +1520,22 @@ def test_non_interactive(mapdl, cleared):
     assert mapdl.geometry.keypoints.shape == (2, 3)
 
 
+def test_ignored_command(mapdl, cleared):
+    mapdl.prep7(mute=True)
+    mapdl.n(mute=True)
+    with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
+        mapdl.f(1, 1, 1, 1)
+
+
 def test_lsread(mapdl, cleared):
-    # build a 5 x 5 flat plate out of shell181 elements...
-    mapdl.run("rect,0,5,0,5")
-    mapdl.run("et,1,shell181")
-    mapdl.run("mp,ex,1,10.0e5")
-    mapdl.run("sect,1,shell")
-    mapdl.run("secdata,0.1")  # 0.1 thick
-    mapdl.run("esize,1")
-    mapdl.run("amesh,all")
-    mapdl.run("d,node(0,0,0),all")  # fix at corner 1
-    mapdl.run("d,node(0,5,0),all")  # fix at corner 2
-    mapdl.run("d,node(5,5,0),all")  # fix at corner 3
-    mapdl.run("d,node(5,0,0),all")  # fix at corner 4
-    mapdl.run("/solu")
-    mapdl.run("antype,static")
-    mapdl.run("f,node(2,2,0),fz,-10")  # define force at (2,2,0)
-
-    mapdl.run("lswrite,1")  # write load out as load step 1
-    assert "file.s01" in mapdl.list_files()
-
-    mapdl.run("fdele,all,all")  # delete all loads
-    mapdl.run("ddele,all,all")  # delete all disps
-    out = mapdl.lsread(1)  # read load step 1.
-    assert "file.s01" in out
-    assert "READ ANSYS LOADS DATA FROM FILE" in out
-
-    out = mapdl.run("flist")  # list all loads
-    assert "NODE" in out
-    assert "26" in out
+    mapdl.n(1, mute=True)
+    mapdl.n(2, 1, 0, 0, mute=True)
+    mapdl.et(1, 188, mute=True)
+    mapdl.e(1, 2, mute=True)
+    mapdl.slashsolu(mute=True)
+    mapdl.f("all", "FX", 1, mute=True)
+    mapdl.lswrite(mute=True)
+    mapdl.fdele("all", "all", mute=True)
+    assert "No nodal" in mapdl.flist()
+    mapdl.lsread(mute=True)
+    assert "No nodal" not in mapdl.flist()
