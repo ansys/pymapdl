@@ -1075,12 +1075,13 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
 
-def test_inval_commands(mapdl, cleared):
+@pytest.mark.parametrize(
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread"]
+)
+def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    cmds = ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT"]
-    for each_cmd in cmds:
-        with pytest.raises(RuntimeError):
-            mapdl.run(each_cmd)
+    with pytest.raises(RuntimeError):
+        mapdl.run(each_cmd)
 
 
 def test_inval_commands_silent(mapdl, tmpdir, cleared):
@@ -1517,3 +1518,31 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(2, 2, 2, 2)
 
     assert mapdl.geometry.keypoints.shape == (2, 3)
+
+
+def test_lsread(mapdl, cleared):
+    # build a 5 x 5 flat plate out of shell181 elements...
+    mapdl.run("rect,0,5,0,5")
+    mapdl.run("et,1,shell181")
+    mapdl.run("mp,ex,1,10.0e5")
+    mapdl.run("sect,1,shell")
+    mapdl.run("secdata,0.1")  # 0.1 thick
+    mapdl.run("esize,1")
+    mapdl.run("amesh,all")
+    mapdl.run("d,node(0,0,0),all")  # fix at corner 1
+    mapdl.run("d,node(0,5,0),all")  # fix at corner 2
+    mapdl.run("d,node(5,5,0),all")  # fix at corner 3
+    mapdl.run("d,node(5,0,0),all")  # fix at corner 4
+    mapdl.run("/solu")
+    mapdl.run("antype,static")
+    mapdl.run("f,node(2,2,0),fz,-10")  # define force at (2,2,0)
+    mapdl.run("lswrite,1")  # write load out as load step 1
+    mapdl.run("fdele,all,all")  # delete all loads
+    mapdl.run("ddele,all,all")  # delete all disps
+    out = mapdl.lsread(1)  # read load step 1. This doesn't work!
+    assert "file.s01" in out
+    assert "READ ANSYS LOADS DATA FROM FILE"
+
+    out = mapdl.run("flist")  # list all loads
+    assert "NODE" in out
+    assert "26" in out
