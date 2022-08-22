@@ -79,7 +79,8 @@ jobs:
     - name: Suggest to add labels
       uses: peter-evans/create-or-update-comment@v2
       # Execute only when no labels have been applied to the pull request
-      if: toJSON(github.event.pull_request.labels.*.name) == '[]'
+      # if: toJSON(github.event.pull_request.labels.*.name) == '[]'
+      if: github.event.pull_request.labels[0] == null # Empty labels
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
