@@ -1,18 +1,43 @@
+import os
 import re
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.database import DBDef, MapdlDb
+## Checking MAPDL versions
+from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS, DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
+
+ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
+
+if ON_CI:  # Docker image seems to not support DB, but local does.
+    VALID_MAPDL_VERSIONS.remove(22.2)
 
 # We are skipping all these test until 0.5.X gets fixed.
 
 
 @pytest.fixture(scope="session")
 def db(mapdl):
-    if mapdl._server_version != (0, 4, 1):  # 2021R2
-        pytest.skip("requires 2021R2 or newer")
+    from ansys.api.mapdl import __version__ as api_version
+
+    api_version = tuple(int(each) for each in api_version.split("."))
+    if api_version < (0, 5, 1):
+        pytest.skip("Requires 'ansys.api.mapdl' package to at least v0.5.1.")
+
+    ## Checking MAPDL versions
+
+    mapdl_version = mapdl.version
+    if mapdl_version not in VALID_MAPDL_VERSIONS:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
+
+    if mapdl._server_version < (0, 4, 1):  # 2021R2
+        ver_ = ".".join([str(each) for each in mapdl._server_version])
+        pytest.skip(
+            f"This version of MAPDL gRPC API version ('ansys.api.mapdl' == {ver_}) is not compatible with 'database' module."
+        )
+
     return mapdl.db
 
 
@@ -38,8 +63,14 @@ def elems(gen_block, db):
 
 
 def test_database_start_stop(mapdl):
-    if mapdl._server_version != (0, 4, 1):  # 2021R2
+    if mapdl._server_version < (0, 4, 1):  # 2021R2
         pytest.skip("requires 2021R2 or newer")
+
+    mapdl_version = mapdl.version
+    if mapdl_version not in VALID_MAPDL_VERSIONS:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
 
     # verify it can be created twice
     mapdl.prep7()
@@ -224,3 +255,36 @@ def test_off_db(mapdl, db):
     assert not mapdl.db.active
     assert mapdl.db.nodes is None
     assert mapdl.db.elems is None
+
+
+def test_wrong_api_version(mapdl, db):
+    mapdl.db.stop()
+    mapdl.__server_version = (0, 1, 1)
+    mapdl._MapdlGrpc__server_version = (0, 1, 1)
+
+    from ansys.mapdl.core.errors import MapdlVersionError
+
+    with pytest.raises(MapdlVersionError):
+        mapdl.db.start()
+
+    mapdl.__sever_version = None
+    mapdl._MapdlGrpc__server_version = None
+
+    mapdl._server_version  # resetting
+    mapdl.db.start()
+
+    assert "is currently running" in mapdl.db._status()
+
+
+def test_repr(mapdl, db):
+    elems = mapdl.db.elems
+    nodes = mapdl.db.nodes
+
+    assert elems
+    assert nodes
+
+    assert isinstance(elems.__repr__(), str)
+    assert isinstance(nodes.__repr__(), str)
+
+    assert isinstance(elems.__str__(), str)
+    assert isinstance(nodes.__str__(), str)

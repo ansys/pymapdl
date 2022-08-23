@@ -66,6 +66,9 @@ class DbElems:
         lines.append(f"    Maximum element number:      {self.max_num}")
         return "\n".join(lines)
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
     @check_mapdl_db_is_alive
     def first(self, ielm=0):
         """

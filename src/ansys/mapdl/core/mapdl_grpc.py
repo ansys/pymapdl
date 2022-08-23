@@ -331,6 +331,7 @@ class MapdlGrpc(_MapdlCore):
         self._exited = None
         self._mute = False
         self._db = None
+        self.__server_version = None
 
         # saving for later use (for example open_gui)
         start_parm["ip"] = ip
@@ -533,8 +534,6 @@ class MapdlGrpc(_MapdlCore):
         # enable health check
         if enable_health_check:
             self._enable_health_check()
-
-        self.__server_version = None
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
@@ -2037,7 +2036,6 @@ class MapdlGrpc(_MapdlCore):
         return MapdlMath(self)
 
     @property
-    @check_version.version_requires((0, 4, 1))
     def db(self):
         """
         MAPDL database interface.
