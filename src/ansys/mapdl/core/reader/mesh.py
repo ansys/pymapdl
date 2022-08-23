@@ -156,6 +156,8 @@ class DPFMapdlMesh:
         self._update_required = False
 
     def _build_dpf_object(self):
+        from ansys.dpf.core import Model
+
         self.logger.debug("Building DPF Model object.")
         self._cached_dpf_model = Model(self._rst)
 
