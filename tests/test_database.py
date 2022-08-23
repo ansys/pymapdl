@@ -20,6 +20,10 @@ def db(mapdl):
     ## Checking MAPDL versions
     from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS
 
+    VALID_MAPDL_VERSIONS.remove(
+        22.2
+    )  # Docker image seems to not support DB, but local does.
+
     mapdl_version = mapdl.version
     if mapdl_version not in VALID_MAPDL_VERSIONS:
         pytest.skip(
@@ -262,3 +266,17 @@ def test_wrong_api_version(mapdl, db):
     mapdl.db.start()
 
     assert "is currently running" in mapdl.db._status()
+
+
+def test_repr(mapdl, db):
+    elems = mapdl.db.elems
+    nodes = mapdl.db.nodes
+
+    assert elems
+    assert nodes
+
+    assert isinstance(elems.__repr__(), str)
+    assert isinstance(nodes.__repr__(), str)
+
+    assert isinstance(elems.__str__(), str)
+    assert isinstance(nodes.__str__(), str)
