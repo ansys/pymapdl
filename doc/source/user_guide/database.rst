@@ -1,7 +1,7 @@
 Accessing MAPDL Database
 ========================
 
-.. warning:: This feature is still in Beta stage. Please report any errors or suggestions to pyansys.support@ansys.com.
+.. warning:: This feature is still in beta. Please report any errors or suggestions to pyansys.support@ansys.com.
 
 
 From PyMAPDL v0.61.2, you can access elements and nodes data from the MAPDL database using the DB module.
@@ -10,7 +10,7 @@ From PyMAPDL v0.61.2, you can access elements and nodes data from the MAPDL data
 Usage
 ~~~~~
 
-Getting elems and nodes objects:
+Getting the elems and nodes objects:
 
 .. code:: py
 
@@ -105,7 +105,7 @@ To use ``DB`` feature, you need to meet the following requirements:
 * ``ansys.api.mapdl`` package version should be 0.5.1 or higher.
 * ANSYS MAPDL version should be 2021R1 or newer.
 
-.. warning:: This feature does not work in the latest ANSYS2023.
+.. warning:: This feature does not work in the latest Ansys 2023R1.
 
 
 
