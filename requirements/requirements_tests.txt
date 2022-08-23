@@ -7,3 +7,5 @@ pytest-cov==3.0.0
 pyvista==0.35.2
 pyansys-tools-report==0.2.2
 vtk==9.0.3
+ansys-dpf-core>=0.4.0
+ansys-dpf-post>=0.2.0
