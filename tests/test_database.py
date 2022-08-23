@@ -1,10 +1,17 @@
+import os
 import re
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.database import DBDef, MapdlDb
+## Checking MAPDL versions
+from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS, DBDef, MapdlDb
 from ansys.mapdl.core.misc import random_string
+
+ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
+
+if ON_CI:  # Docker image seems to not support DB, but local does.
+    VALID_MAPDL_VERSIONS.remove(22.2)
 
 # We are skipping all these test until 0.5.X gets fixed.
 
@@ -18,11 +25,6 @@ def db(mapdl):
         pytest.skip("Requires 'ansys.api.mapdl' package to at least v0.5.1.")
 
     ## Checking MAPDL versions
-    from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS
-
-    VALID_MAPDL_VERSIONS.remove(
-        22.2
-    )  # Docker image seems to not support DB, but local does.
 
     mapdl_version = mapdl.version
     if mapdl_version not in VALID_MAPDL_VERSIONS:
@@ -63,6 +65,12 @@ def elems(gen_block, db):
 def test_database_start_stop(mapdl):
     if mapdl._server_version < (0, 4, 1):  # 2021R2
         pytest.skip("requires 2021R2 or newer")
+
+    mapdl_version = mapdl.version
+    if mapdl_version not in VALID_MAPDL_VERSIONS:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
 
     # verify it can be created twice
     mapdl.prep7()
