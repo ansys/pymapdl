@@ -71,6 +71,8 @@ class MapdlMesh:
         self._tshape = None
         self._tshape_key = None
         self._keyopt = {}
+        self._rdat = None
+        self._rnum = None
 
         # optionals from Reader Mesh
         self._node_comps = {}
@@ -120,7 +122,7 @@ class MapdlMesh:
         if isinstance(self._elem, np.ndarray):
             return self._elem.size
 
-        return len(self._elem)
+        return len(self._elem)  # pragma: no cover
 
     @property
     def n_node(self):
@@ -153,7 +155,7 @@ class MapdlMesh:
         return self._tshape
 
     @property
-    def tshape_key(self, as_array=False):
+    def tshape_key(self):
         """Dict with the mapping between element type and element shape.
 
         TShape is only applicable to contact elements.
@@ -161,8 +163,6 @@ class MapdlMesh:
         if self._tshape_key is None:
             self._tshape_key = np.unique(np.vstack((self.et_id, self.tshape)), axis=1).T
 
-        if as_array:
-            return self._tshape_key
         return {elem_id: tshape for elem_id, tshape in self._tshape_key}
 
     def save(
@@ -170,7 +170,7 @@ class MapdlMesh:
         filename,
         binary=True,
         force_linear=False,
-        allowable_types=[],
+        allowable_types=None,
         null_unallowed=False,
     ):
         """Save the geometry as a vtk file
@@ -290,6 +290,7 @@ class MapdlMesh:
             self._secnum = self._elem[self._elem_off[:-1] + 3]  # FIELD 3
         return self._secnum
 
+    @property
     def element_coord_system(self):
         """Element coordinate system number"""
         if self._esys is None:
@@ -345,12 +346,18 @@ class MapdlMesh:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        return self._rdat
+        # if not self._rdat:
+        #     pass # todo: fix this
+        # return self._rdat
+        raise NotImplementedError
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        return self._rnum
+        # if not self._rnum:
+        #     pass # todo: to fix
+        # return self._rnum
+        raise NotImplementedError
 
     @property
     def nodes(self):
@@ -362,9 +369,10 @@ class MapdlMesh:
     @property
     def node_angles(self):
         """Node angles from the archive file."""
-        if self._node_angles is None:
-            self._node_angles = np.ascontiguousarray(self._nodes[:, 3:])
-        return self._node_angles
+        # if self._node_angles is None:
+        #     self._node_angles = np.ascontiguousarray(self._nodes[:, 3:])
+        # return self._node_angles
+        raise NotImplementedError
 
     def _parse_vtk(
         self,

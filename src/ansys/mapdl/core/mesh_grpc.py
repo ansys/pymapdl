@@ -9,7 +9,7 @@ from ansys.mapdl.core.reader import HAS_DPF_CORE
 
 if HAS_DPF_CORE:
     from ansys.mapdl.core.reader import MapdlMesh as Mesh
-else:
+else:  # pragma: no cover
     try:
         from ansys.mapdl.reader.mesh import Mesh
 
