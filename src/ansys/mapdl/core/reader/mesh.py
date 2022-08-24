@@ -1,8 +1,6 @@
 """
 Module to replace mapdl reader mesh.
-"""
 
-"""
 List of methods to replace
 [
  '_ans_etype',
@@ -42,7 +40,6 @@ from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 class MapdlMesh:
     """
-
     This class assumes that is going to be used together with MapdlGrpc class
     """
 
@@ -50,7 +47,7 @@ class MapdlMesh:
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("Must be initialized using MapdlGrpc class")
         self._mapdl_weakref = weakref.ref(mapdl)
-        mapdl._log.debug("Attached MAPDL object to DPFMapdlMesh.")
+        mapdl._log.debug("Attached MAPDL object to MapdlMesh.")
         self.logger = mapdl._log
 
         self._elem = None

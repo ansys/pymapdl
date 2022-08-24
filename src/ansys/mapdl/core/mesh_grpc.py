@@ -4,24 +4,12 @@ import time
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
-
-from ansys.mapdl.core.reader import HAS_DPF_CORE
-
-if HAS_DPF_CORE:
-    from ansys.mapdl.core.reader import MapdlMesh as Mesh
-else:  # pragma: no cover
-    try:
-        from ansys.mapdl.reader.mesh import Mesh
-
-        HAS_PYMAPDL_READER = True
-    except ModuleNotFoundError:
-        HAS_PYMAPDL_READER = False
-
 import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 from ansys.mapdl.core.misc import supress_logging, threaded
+from ansys.mapdl.core.reader import MapdlMesh as Mesh
 
 TMP_NODE_CM = "__NODE__"
 
