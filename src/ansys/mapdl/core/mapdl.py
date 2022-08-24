@@ -2827,12 +2827,9 @@ class _MapdlCore(Commands):
             os.remove(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
-        """Load a table from Python to MAPDL.
+        """Load a table from Python to into MAPDL.
 
-        Uses ``TREAD`` to transfer the table.
-
-        It should be noted that when query a table only the second column of
-        the table will be returned. For example, ``table[1:,1:]``.
+        Uses :func:`tread <Mapdl.tread>` to transfer the table.
 
         Parameters
         ----------
@@ -2843,20 +2840,19 @@ class _MapdlCore(Commands):
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
         array : numpy.ndarray or List
-            List as a table or ``numpy`` array.
+            List as a table or :class:`numpy.ndarray` array.
 
         var1 : str, optional
             Variable name corresponding to the first dimension (row).
-            Default Row
+            Default ``"Row"``.
 
             A primary variable (listed below) or can be an independent
-            parameter. If specifying an independent parameter, then
-            you must define an additional table for the independent
-            parameter. The additional table must have the same name as
-            the independent parameter and may be a function of one or
-            more primary variables or another independent
-            parameter. All independent parameters must relate to a
-            primary variable.
+            parameter. If specifying an independent parameter, then you must
+            define an additional table for the independent parameter. The
+            additional table must have the same name as the independent
+            parameter and may be a function of one or more primary variables or
+            another independent parameter. All independent parameters must
+            relate to a primary variable.
 
             - ``"TIME"``: Time
             - ``"FREQ"``: Frequency
