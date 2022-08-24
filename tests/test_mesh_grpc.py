@@ -135,4 +135,14 @@ def test_nodes(mapdl, cube_solve):
 
 def test_node_angles(mapdl, cube_solve):
     with pytest.raises(NotImplementedError):
-        mapdl.mesh.node_angles
+        out = mapdl.mesh.node_angles
+
+
+def test_rlblock(mapdl, cube_solve):
+    with pytest.raises(NotImplementedError):
+        out = mapdl.mesh.rlblock
+
+
+def test_rlblock_num(mapdl, cube_solve):
+    with pytest.raises(NotImplementedError):
+        out = mapdl.mesh.rlblock_num
