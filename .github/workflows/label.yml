@@ -1,7 +1,10 @@
 name: "Pull Request Labeler"
 on:
-  pull_request:
-    types: [unlabeled]    
+  pull_request: 
+  push:
+    branches: [ main ]
+    paths:
+      - '../labels.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -9,7 +12,18 @@ concurrency:
 
 jobs:
 
+  label-syncer:
+    name: Syncer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: micnncim/action-label-syncer@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   labeler:
+    name: Set labels
+    needs: [label-syncer]
     permissions:
       contents: read
       pull-requests: write
@@ -65,7 +79,8 @@ jobs:
     - name: Suggest to add labels
       uses: peter-evans/create-or-update-comment@v2
       # Execute only when no labels have been applied to the pull request
-      if: toJSON(github.event.pull_request.labels.*.name) == '[]'
+      # if: toJSON(github.event.pull_request.labels.*.name) == '[]'
+      if: github.event.pull_request.labels[0] == null # Empty labels
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |

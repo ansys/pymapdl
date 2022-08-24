@@ -1219,6 +1219,9 @@ class ApdlMathObj:
     def copy(self):
         """Returns the name of the copy of this object"""
         name = id_generator()  # internal name of the new vector
+        info = self._mapdl._data_info(self.id)
+        dtype = ANSYS_VALUE_TYPE[info.stype]
+
         if self.type == ObjType.VEC:
             acmd = "*VEC"
         elif self.type == ObjType.DMAT:
@@ -1229,7 +1232,7 @@ class ApdlMathObj:
             raise TypeError(f"Copy aborted: Unknown obj type {self.type}")
 
         # APDLMath cmd to COPY vin to vout
-        self._mapdl.run(f"{acmd},{name},D,COPY,{self.id}", mute=True)
+        self._mapdl.run(f"{acmd},{name},{MYCTYPE[dtype]},COPY,{self.id}", mute=True)
         return name
 
     def _init(self, method):
@@ -1580,8 +1583,13 @@ class AnsMat(ApdlMathObj):
         return objout
 
     def __getitem__(self, num):
+        """Return a vector from a given index."""
         name = id_generator()
-        self._mapdl.run(f"*VEC,{name},D,LINK,{self.id},{num+1}", mute=True)
+        info = self._mapdl._data_info(self.id)
+        dtype = ANSYS_VALUE_TYPE[info.stype]
+        self._mapdl.run(
+            f"*VEC,{name},{MYCTYPE[dtype]},LINK,{self.id},{num+1}", mute=True
+        )
         return AnsVec(name, self._mapdl)
 
     @property

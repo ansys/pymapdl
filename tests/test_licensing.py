@@ -47,7 +47,7 @@ def write_log(path):
 
 
 try:
-    LIC_INSTALLED = licensing.get_ansyslic_dir()
+    LIC_INSTALLED = os.path.isfile(licensing.get_ansysli_util_path())
 except:
     LIC_INSTALLED = None
 
