@@ -5,4 +5,4 @@ try:
 except ModuleNotFoundError:
     HAS_DPF_CORE = False
 
-from .mesh import DPFMapdlMesh
+from .mesh import MapdlMesh

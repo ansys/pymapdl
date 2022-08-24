@@ -8,7 +8,7 @@ from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.mapdl.core.reader import HAS_DPF_CORE
 
 if HAS_DPF_CORE:
-    from ansys.mapdl.core.reader import DPFMapdlMesh as Mesh
+    from ansys.mapdl.core.reader import MapdlMesh as Mesh
 else:
     try:
         from ansys.mapdl.reader.mesh import Mesh
