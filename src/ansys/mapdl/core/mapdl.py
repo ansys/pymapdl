@@ -2885,6 +2885,9 @@ class _MapdlCore(Commands):
 
         Examples
         --------
+        Transfer a table to MAPDL. The first column is time values and must be
+        ascending in order.
+
         >>> my_conv = np.array([[0, 0.001],
                                 [120, 0.001],
                                 [130, 0.005],
@@ -2893,7 +2896,12 @@ class _MapdlCore(Commands):
                                 [1000, 0.002]])
         >>> mapdl.load_table('MY_TABLE', my_conv, 'TIME')
         >>> mapdl.parameters['MY_TABLE']
-        array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
+        array([[0.001],
+               [0.001],
+               [0.005],
+               [0.005],
+               [0.002],
+               [0.002]])
         """
         if not isinstance(array, np.ndarray):
             raise ValueError("The table should be a Numpy array")
