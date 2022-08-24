@@ -780,35 +780,16 @@ def test_cyclic_solve(mapdl, cleared):
 )
 def test_load_table(mapdl, dim_rows, dim_cols):
     my_conv = np.random.rand(dim_rows, dim_cols)
-    my_conv[:, 0] = np.arange(dim_rows)
-    my_conv[0, :] = np.arange(dim_cols)
+    my_conv[:, 0] = np.arange(dim_rows)  # "time" values
 
-    mapdl.load_table("my_conv", my_conv)
-    if (
-        dim_cols == 2
-    ):  # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
-        assert np.allclose(
-            mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows - 1, 1)), 1e-7
-        )
-    else:
-        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1e-7)
-
-
-def test_load_table_error_ascending_row(mapdl):
-    my_conv = np.ones((3, 3))
-    my_conv[0, 1] = 4
-    with pytest.raises(
-        ValueError, match="requires that the axis 0 is in ascending order."
-    ):
-        mapdl.load_table("my_conv", my_conv)
+    mapdl.load_table("my_conv", my_conv, "TIME")
+    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], 1e-7)
 
 
 def test_load_table_error_ascending_row(mapdl):
     my_conv = np.ones((3, 3))
     my_conv[1, 0] = 4
-    with pytest.raises(
-        ValueError, match="requires that the axis 1 is in ascending order."
-    ):
+    with pytest.raises(ValueError, match="requires that the first column is in"):
         mapdl.load_table("my_conv", my_conv)
 
 
