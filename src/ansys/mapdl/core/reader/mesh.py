@@ -346,7 +346,7 @@ class MapdlMesh:
         # if not self._rdat:
         #     pass # todo: fix this
         # return self._rdat
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def rlblock_num(self):
@@ -354,7 +354,7 @@ class MapdlMesh:
         # if not self._rnum:
         #     pass # todo: to fix
         # return self._rnum
-        raise NotImplementedError
+        raise NotImplementedError()
 
     @property
     def nodes(self):
@@ -369,7 +369,7 @@ class MapdlMesh:
         # if self._node_angles is None:
         #     self._node_angles = np.ascontiguousarray(self._nodes[:, 3:])
         # return self._node_angles
-        raise NotImplementedError
+        raise NotImplementedError()
 
     def _parse_vtk(
         self,
