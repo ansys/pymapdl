@@ -56,25 +56,17 @@ def test_local(mapdl):
 
 
 def test_empty_mesh(mapdl, cleared):
-    assert not mapdl.mesh._has_elements
     assert mapdl.mesh.n_node == 0
     assert mapdl.mesh.n_elem == 0
-    assert mapdl.mesh.nodes is None
+    assert mapdl.mesh.nodes.size == 0
 
 
 def test_non_empty_mesh(mapdl, cube_solve):
-    haselem = mapdl.mesh._has_elements
-    assert isinstance(haselem, np.ndarray)
-    assert haselem.size > 0
-
     assert mapdl.mesh.n_node > 0
     assert mapdl.mesh.n_elem > 0
 
-
-def test__has_elements(mapdl, cube_solve):
-    haselem = mapdl.mesh._has_elements
-    assert isinstance(haselem, np.ndarray)
-    assert haselem.size > 0
+    assert mapdl.mesh.nodes is not None
+    assert isinstance(mapdl.mesh.nodes, np.ndarray)
 
 
 def test_tshape_key(mapdl, contact_solve):
@@ -87,13 +79,14 @@ def test_tshape_key(mapdl, contact_solve):
     assert tshape.size > 0
 
 
-@pytest.mark.parametrize("binary_", [True, False])
-def test_save(mapdl, cube_solve, binary_):
+def test_save(mapdl, cube_solve):
+    # This test seems to fail when paralelized.
     fname = "mesh.vtk"
-    mapdl.mesh.save(fname, binary_)
-    assert os.path.exists(fname)
+    for binary_ in [True, False]:
+        mapdl.mesh.save(fname, binary_)
+        assert os.path.exists(fname)
 
-    os.remove(fname)
+        os.remove(fname)
 
 
 def test_key_option(mapdl, contact_solve):
