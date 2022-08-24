@@ -190,6 +190,11 @@ class MeshGrpc(Mesh):
         return int(self._mapdl.get(entity="ELEM", item1="COUNT"))
 
     @property
+    def node_angles(self):
+        """Not yet implemented"""
+        return
+
+    @property
     def enum(self) -> np.ndarray:
         """Element numbers of currently selected elements
 

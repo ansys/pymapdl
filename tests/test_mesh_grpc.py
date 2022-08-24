@@ -133,11 +133,6 @@ def test_nodes(mapdl, cube_solve):
     assert mapdl.mesh.nodes.shape == (81, 3)
 
 
-def test_node_angles(mapdl, cube_solve):
-    with pytest.raises(NotImplementedError):
-        out = mapdl.mesh.node_angles
-
-
 def test_rlblock(mapdl, cube_solve):
     with pytest.raises(NotImplementedError):
         out = mapdl.mesh.rlblock
