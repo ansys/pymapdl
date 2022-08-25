@@ -31,7 +31,7 @@ def requires_model(output=None):
                     return []
                 elif output == "dict":
                     return {}
-                else:
+                else:  # pragma: no cover
                     raise ValueError("Output type not allowed.")
 
         return wrapper
@@ -81,15 +81,11 @@ class MeshGrpc:
         """Returns True when has nodes"""
         # if isinstance(self._nodes, np.ndarray):
         # return bool(self._nodes.size)
-        if self.nodes is None:
-            return False
         return self.nodes.size != 0
 
     @property
     def _has_elements(self):
         """Returns True when geometry has elements"""
-        if self._elem is None:
-            return False
         return self._elem.size != 0
 
     def _set_log_level(self, level):
@@ -205,10 +201,6 @@ class MeshGrpc:
                 ekey.append(einfo[:2])
             return np.vstack(ekey).astype(np.int32)
         return np.array([])
-
-    @_ekey.setter
-    def _ekey(self, value):
-        self._cache_element_desc = value
 
     @threaded
     def _update_node_coord(self):
