@@ -244,14 +244,3 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     nnum_new[:nnodes] = nnum
     nnum_new[nnodes:] = -1
     return nodes_new, new_angles, nnum_new
-
-
-def unique_rows(a):
-    """Returns unique rows of a and indices of those rows"""
-    if not a.flags.c_contiguous:
-        a = np.ascontiguousarray(a)
-
-    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
-    _, idx, idx2 = np.unique(b, True, True)
-
-    return a[idx], idx, idx2
