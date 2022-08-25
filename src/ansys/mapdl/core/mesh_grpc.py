@@ -766,9 +766,9 @@ class MeshGrpc:
         fix_midside=True,
         additional_checking=False,
     ):
-        from ansys.mapdl.reader.mesh import Mesh
+        from ansys.mapdl.core.mesh.mesh import _parse_vtk
 
-        return Mesh._parse_vtk(
+        return _parse_vtk(
             self,
             allowable_types,
             force_linear,
