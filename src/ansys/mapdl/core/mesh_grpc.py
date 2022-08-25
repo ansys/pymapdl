@@ -1,4 +1,5 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+from functools import wraps
 import os
 import time
 import weakref
@@ -13,6 +14,31 @@ from ansys.mapdl.core.misc import supress_logging, threaded
 TMP_NODE_CM = "__NODE__"
 
 
+def requires_model(output=None):
+    def decorator(method):
+        """
+        This function wrap some methods to check if the model contains elements or nodes.
+        """
+
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            if self._has_nodes and self._has_elements:
+                return method(self, *args, **kwargs)
+            else:
+                if not output or output == "array":
+                    return np.array([])
+                elif output == "list":
+                    return []
+                elif output == "dict":
+                    return {}
+                else:
+                    raise ValueError("Output type not allowed.")
+
+        return wrapper
+
+    return decorator
+
+
 class MeshGrpc:
     """Provides an interface to the gRPC mesh from MAPDL."""
 
@@ -22,48 +48,12 @@ class MeshGrpc:
             raise TypeError("Must be initialized using MapdlGrpc class")
         self._mapdl_weakref = weakref.ref(mapdl)
         mapdl._log.debug("Attached MAPDL object to MapdlMesh.")
+
         self.logger = mapdl._log
+        self._log = mapdl._log
 
-        self._elem = None
-        self._elem_off = None
-
-        # For compatibility with child class
-        # Most of them are used for cache flags
-        self._enum = None  # cached element numbering
-        self._etype_cache = None  # cached ansys element type numbering
-        self._rcon = None  # cached ansys element real constant
-        self._mtype = None  # cached ansys material type
-        self._node_angles = None  # cached node angles
-        self._node_coord = None  # cached node coordinates
-        self._cached_elements = None  # cached list of elements
-        self._secnum = None  # cached section number
-        self._esys = None  # cached element coordinate system
-        self._etype_id = None  # cached element type id
-        self._tshape = None
-        self._tshape_key = None
-        self._keyopt = {}
-        self._rdat = None
-        self._rnum = None
-
-        # optionals from Reader Mesh
-        self._node_comps = {}
-        self._elem_comps = {}
-
-        # For compatibility but not used.
-        self._surf_cache = None
-
-        # allow default chunk_size to be overridden
-        self._chunk_size = None
-
-        # local cache
-        self._surf_cache = None
-        self._cache_nnum = None
-        self._cache_elem = None
-        self._cache_elem_off = None
-        self._cache_element_desc = None
-        self._grid_cache = None
-        self._log = self._mapdl._log
         self._ignore_cache_reset = False
+        self._reset_cache()
 
     def __repr__(self):
         txt = "ANSYS Mesh\n"
@@ -91,18 +81,16 @@ class MeshGrpc:
         """Returns True when has nodes"""
         # if isinstance(self._nodes, np.ndarray):
         # return bool(self._nodes.size)
-        return len(self.nodes) != 0
+        if self._node_coord is None:
+            return False
+        return self.nodes.size != 0
 
     @property
     def _has_elements(self):
         """Returns True when geometry has elements"""
         if self._elem is None:
             return False
-
-        if isinstance(self._elem, np.ndarray):
-            return self._elem.size
-
-        return len(self._elem)  # pragma: no cover
+        return self._elem.size != 0
 
     def _set_log_level(self, level):
         """Wraps set_log_level"""
@@ -111,33 +99,44 @@ class MeshGrpc:
     def _reset_cache(self):
         """Reset entire mesh cache"""
         if not self._ignore_cache_reset:
-            self._cache_nnum = None
+            self.logger.debug("Resetting cache")
+
             self._cache_elem = None
             self._cache_elem_off = None
             self._cache_element_desc = None
-            self._grid_cache = None
-            self._surf_cache = None
-            self._cached_elements = None
-
-            self._node_coord = None
-            self._enum = None
-            self._nnum = None
+            self._cache_nnum = None
+            self._cached_elements = None  # cached list of elements
+            self._chunk_size = None
             self._elem = None
+            self._elem_comps = {}
             self._elem_off = None
-            self._grid = None
-            self._node_angles = None
-            self._enum = None
-            self._rcon = None
-            self._mtype = None
-            self._etype_cache = None
+            self._enum = None  # cached element numbering
+            self._esys = None  # cached element coordinate system
             self._etype = None
-            self._keyopt = None
+            self._etype_cache = None  # cached ansys element type numbering
+            self._etype_id = None  # cached element type id
+            self._grid = None
+            self._grid_cache = None
+            self._keyopt = {}
+            self._mtype = None  # cached ansys material type
+            self._nnum = None
+            self._node_angles = None  # cached node angles
+            self._node_comps = {}
+            self._node_coord = None  # cached node coordinates
+            self._rcon = None  # cached ansys element real constant
+            self._rdat = None
+            self._rnum = None
+            self._secnum = None  # cached section number
+            self._surf_cache = None
+            self._tshape = None
+            self._tshape_key = None
 
     def _update_cache(self):
         """Threaded local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
+        self.logger.debug("Updating cache")
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
         self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
@@ -171,6 +170,7 @@ class MeshGrpc:
     @threaded
     def _update_cache_nnum(self):
         if self._cache_nnum is None:
+            self.logger.debug("Updating nodes cache")
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
             self._cache_nnum = nnum.astype(np.int32)
         if self._cache_nnum.size == 1:
@@ -190,6 +190,7 @@ class MeshGrpc:
     @threaded
     def _update_cache_element_desc(self):
         if self._cache_element_desc is None:
+            self.logger.debug("Updating elements (desc) cache")
             self._cache_element_desc = self._load_element_types()
 
     @property
@@ -203,7 +204,7 @@ class MeshGrpc:
             for einfo in self._cache_element_desc:
                 ekey.append(einfo[:2])
             return np.vstack(ekey).astype(np.int32)
-        return []
+        return np.array([])
 
     @_ekey.setter
     def _ekey(self, value):
@@ -226,6 +227,7 @@ class MeshGrpc:
         return self._mapdl._local
 
     @property
+    @requires_model()
     def et_id(self):
         """Element type id (ET) for each element."""
         if self._etype_id is None:
@@ -234,6 +236,7 @@ class MeshGrpc:
         return self._etype_id
 
     @property
+    @requires_model()
     def tshape(self):
         """Tshape of contact elements."""
         if self._tshape is None:
@@ -242,6 +245,7 @@ class MeshGrpc:
         return self._tshape
 
     @property
+    @requires_model("dict")
     def tshape_key(self):
         """Dict with the mapping between element type and element shape.
 
@@ -249,10 +253,10 @@ class MeshGrpc:
         """
         if self._tshape_key is None:
             self._tshape_key = np.unique(np.vstack((self.et_id, self.tshape)), axis=1).T
-
         return {elem_id: tshape for elem_id, tshape in self._tshape_key}
 
     @property
+    @requires_model()
     def material_type(self):
         """Material type index of each element in the archive."""
         # FIELD 0 : material reference number
@@ -261,6 +265,7 @@ class MeshGrpc:
         return self._mtype
 
     @property
+    @requires_model()
     def etype(self):
         """Element type of each element.
 
@@ -280,6 +285,7 @@ class MeshGrpc:
         return self._etype
 
     @property
+    @requires_model()
     def section(self):
         """Section number"""
         if self._secnum is None:
@@ -287,6 +293,7 @@ class MeshGrpc:
         return self._secnum
 
     @property
+    @requires_model()
     def element_coord_system(self):
         """Element coordinate system number"""
         if self._esys is None:
@@ -294,6 +301,7 @@ class MeshGrpc:
         return self._esys
 
     @property
+    @requires_model("list")
     def elem(self):
         """List of elements containing raw ansys information.
 
@@ -338,6 +346,7 @@ class MeshGrpc:
         return self._node_comps
 
     @property
+    @requires_model()
     def elem_real_constant(self):
         """Real constant reference for each element.
 
@@ -609,6 +618,9 @@ class MeshGrpc:
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
         elem_raw = parse_chunks(chunks, np.int32)
+
+        if len(elem_raw) == 0:  # for empty mesh.
+            return np.array([]), np.array([])
         n_elem = elem_raw[0]
 
         # ignore zeros
@@ -749,7 +761,10 @@ class MeshGrpc:
             force_linear=force_linear,
             null_unallowed=null_unallowed,
         )
-        return grid.save(str(filename), binary=binary)
+        if grid:
+            return grid.save(str(filename), binary=binary)
+        else:
+            raise ValueError("The mesh is empty, hence no file has been written.")
 
     def _parse_vtk(
         self,
