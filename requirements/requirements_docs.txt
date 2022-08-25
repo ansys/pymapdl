@@ -12,7 +12,7 @@ pandas==1.4.3
 plotly==5.10.0
 pypandoc==1.8.1
 pytest-sphinx==0.4.0
-pythreejs==2.3.0
+pythreejs==2.4.1
 pyvista==0.36.1
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.19.2
