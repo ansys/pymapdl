@@ -71,13 +71,6 @@ class MapdlMesh:
         self._rdat = None
         self._rnum = None
 
-        # optionals from Reader Mesh
-        self._node_comps = {}
-        self._elem_comps = {}
-
-        # For compatibility but not used.
-        self._surf_cache = None
-
     def __repr__(self):
         txt = "ANSYS Mesh\n"
         txt += f"  Number of Nodes:              {len(self.nnum)}\n"
