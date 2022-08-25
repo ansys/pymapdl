@@ -48,7 +48,7 @@ class MapCommand:
         command = f"FTYPE,{filetype},{prestype}"
         return self.run(command, **kwargs)
 
-    def map_(self, kdim="", kout="", limit="", **kwargs):
+    def map(self, kdim="", kout="", limit="", **kwargs):
         """Maps pressures from source points to target surface elements.
 
         APDL Command: MAP
