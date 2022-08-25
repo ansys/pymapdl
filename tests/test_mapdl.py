@@ -1129,7 +1129,7 @@ def test_cwd(mapdl, tmpdir):
         assert mapdl.directory == str(tmpdir).replace("\\", "/")
 
         wrong_path = "wrong_path"
-        with pytest.raises(FileNotFoundError, match="working directory"):
+        with pytest.raises(MapdlCommandIgnoredError, match="working directory"):
             mapdl.directory = wrong_path
 
     finally:

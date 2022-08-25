@@ -240,7 +240,9 @@ def test_read_input_file(mapdl, file_name):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file)
-    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+    assert re.search(
+        "\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
+    ) or re.search("\*\*\*\*\*ANSYS VERIFICATION RUN ONLY\*\*\*\*\*", response)
 
 
 def test_no_get_value_non_interactive(mapdl):
