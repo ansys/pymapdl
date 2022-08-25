@@ -81,7 +81,7 @@ class MeshGrpc:
         """Returns True when has nodes"""
         # if isinstance(self._nodes, np.ndarray):
         # return bool(self._nodes.size)
-        if self._node_coord is None:
+        if self.nodes is None:
             return False
         return self.nodes.size != 0
 
