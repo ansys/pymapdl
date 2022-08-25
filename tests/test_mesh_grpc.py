@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 import pytest
+import pyvista as pv
 
 
 def test_empty_model(mapdl):
@@ -58,15 +59,84 @@ def test_local(mapdl):
 def test_empty_mesh(mapdl, cleared):
     assert mapdl.mesh.n_node == 0
     assert mapdl.mesh.n_elem == 0
+    assert mapdl.mesh.nnum_all.size == 0
+    assert mapdl.mesh.enum_all.size == 0
+    assert mapdl.mesh.nnum.size == 0
+    assert mapdl.mesh.enum.size == 0
     assert mapdl.mesh.nodes.size == 0
+    # assert mapdl.mesh.node_angles.size == 0 Not implemented
+
+    # elem is a list
+    assert len(mapdl.mesh.elem) == 0
+
+    # Using size because it should be empty arrays
+    assert mapdl.mesh.ekey.size == 0
+    assert mapdl.mesh.et_id.size == 0
+    assert mapdl.mesh.tshape.size == 0
+    assert mapdl.mesh.material_type.size == 0
+    assert mapdl.mesh.etype.size == 0
+    assert mapdl.mesh.section.size == 0
+    assert mapdl.mesh.element_coord_system.size == 0
+    assert mapdl.mesh.elem_real_constant.size == 0
+    assert mapdl.mesh.ekey.size == 0
+
+    # should be empty dicts
+    assert not mapdl.mesh.key_option
+    assert not mapdl.mesh.tshape_key
+    assert not mapdl.mesh.element_components
+    assert not mapdl.mesh.node_components
+
+    # bools
+    assert not mapdl.mesh._has_elements
+    assert not mapdl.mesh._has_nodes
+
+    # Others
+    assert mapdl.mesh.grid is None
+    with pytest.raises(ValueError):
+        mapdl.mesh.save("file.vtk")
 
 
-def test_non_empty_mesh(mapdl, cube_solve):
+def test_non_empty_mesh(mapdl, contact_solve):
     assert mapdl.mesh.n_node > 0
     assert mapdl.mesh.n_elem > 0
+    assert mapdl.mesh.nnum_all.size > 0
+    assert mapdl.mesh.enum_all.size > 0
+    assert mapdl.mesh.nnum.size > 0
+    assert mapdl.mesh.enum.size > 0
+    assert mapdl.mesh.nodes.size > 0
+    # assert mapdl.mesh.node_angles.size > 0 Not implemented
 
-    assert mapdl.mesh.nodes is not None
-    assert isinstance(mapdl.mesh.nodes, np.ndarray)
+    # This should be a list of arrays.
+    assert len(mapdl.mesh.elem) > 0
+    assert mapdl.mesh.elem[0].size > 0
+
+    # Using size because it should be non-empty arrays
+    assert mapdl.mesh.ekey.size > 0
+    assert mapdl.mesh.et_id.size > 0
+    assert mapdl.mesh.tshape.size > 0
+    assert mapdl.mesh.material_type.size > 0
+    assert mapdl.mesh.etype.size > 0
+    assert mapdl.mesh.section.size > 0
+    assert mapdl.mesh.element_coord_system.size > 0
+    assert mapdl.mesh.elem_real_constant.size > 0
+
+    # should be non empty dicts
+    assert mapdl.mesh.key_option
+    assert len(mapdl.mesh.key_option.keys()) > 0
+    assert mapdl.mesh.tshape_key
+    assert len(mapdl.mesh.tshape_key.keys()) > 0
+
+    # assert mapdl.mesh.element_components #Not implemented
+    # assert mapdl.mesh.node_components # Not implemented
+
+    # bools
+    assert mapdl.mesh._has_elements
+    assert mapdl.mesh._has_nodes
+
+    # Others
+    assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
+    assert mapdl.mesh.grid.n_cells > 0
+    assert mapdl.mesh.grid.n_points > 0
 
 
 def test_tshape_key(mapdl, contact_solve):
