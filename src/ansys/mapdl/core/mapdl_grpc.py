@@ -1579,7 +1579,7 @@ class MapdlGrpc(_MapdlCore):
         if getresponse.type == 0:
             # Fall back to run to get most verbose output.
             out = self.run("*GET,__temp__," + cmd)
-            self.run("__temp__=") # deleting parameter
+            self.run("__temp__=", mute=False)  # deleting parameter
             raise ValueError(out)
 
         if getresponse.type == 1:

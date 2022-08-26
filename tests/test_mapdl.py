@@ -1522,9 +1522,9 @@ def test_lsread(mapdl, cleared):
     assert "No nodal" not in mapdl.flist()
 
 
-def test_get_fallback(mapdl,cleared):
+def test_get_fallback(mapdl, cleared):
     with pytest.raises(ValueError, match="There are no NODES defined"):
-        mapdl.get_value("node",0,"num","maxd")
+        mapdl.get_value("node", 0, "num", "maxd")
 
     with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
         mapdl.get_value("elem", 0, "num", "maxd")
