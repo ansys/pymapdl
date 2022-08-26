@@ -1577,11 +1577,11 @@ class MapdlGrpc(_MapdlCore):
             self._get_lock = False
 
         if getresponse.type == 0:
-            raise ValueError(
-                "This is either an invalid get request, or MAPDL is set"
-                " to the wrong processor (e.g. on BEGIN LEVEL vs."
-                " POST26)"
-            )
+            # Fall back to run to get most verbose output.
+            out = self.run("*GET,__temp__," + cmd)
+            self.run("__temp__=") # deleting parameter
+            raise ValueError(out)
+
         if getresponse.type == 1:
             return getresponse.dval
         elif getresponse.type == 2:
