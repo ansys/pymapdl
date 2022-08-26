@@ -845,7 +845,7 @@ for node_id, dof in dof_list:
     mapdl.d(node_id, dof, 1)
     mapdl.solve()
 
-mapdl.finish(mute=True)
+mapdl.finish()
 
 ###############################################################################
 # The columns of the stiffness matrix appear as nodal force reactions
