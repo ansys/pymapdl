@@ -58,7 +58,7 @@ mapdl.d("ALL", "UY")
 mapdl.d("ALL", "UZ")
 mapdl.nsel("S", "LOC", "Z", 0)
 mapdl.f("ALL", "FX", 10000)
-mapdl.finish()
+mapdl.finish(mute=True)
 
 ###############################################################################
 # Setup Boundary Conditions
@@ -73,7 +73,7 @@ mapdl.run("/SOLU")
 mapdl.antype("STATIC")
 mapdl.nsel("ALL")
 mapdl.solve()
-mapdl.finish()
+mapdl.finish(mute=True)
 
 ###############################################################################
 # Post-Processing

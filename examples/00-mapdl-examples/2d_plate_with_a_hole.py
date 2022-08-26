@@ -71,7 +71,7 @@ circ_anum = mapdl.cyl4(length / 2, width / 2, radius)
 plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 
 # finally, plot the lines of the plate
-_ = mapdl.lplot(cpos="xy", line_width=3, font_size=26, color_lines=True, background="w")
+mapdl.lplot(cpos="xy", line_width=3, font_size=26, color_lines=True, background="w")
 
 ###############################################################################
 # Meshing
@@ -97,7 +97,7 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
-_ = mapdl.eplot(
+mapdl.eplot(
     vtk=True, cpos="xy", show_edges=True, show_axes=False, line_width=2, background="w"
 )
 
@@ -137,7 +137,7 @@ mapdl.nsel("R", "LOC", "Y", width / 2)
 mapdl.f("ALL", "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
-_ = mapdl.allsel()
+mapdl.allsel(mute=True)
 
 
 ###############################################################################
