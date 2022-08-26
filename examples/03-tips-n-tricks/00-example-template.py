@@ -66,7 +66,6 @@ print(mapdl)
 mapdl.clear()
 mapdl.prep7()
 print(mapdl)
-print(mapdl)
 
 ###############################################################################
 # Plots and images
