@@ -451,7 +451,7 @@ model the contact surface on the top surface of the workpiece, and the
     p.show()
 
 **Figure 28.4: Contact Pair Between Tool and Workpiece.**
-``CONTA174`` in blue, and ``TARGE170`` in red.
+``CONTA174`` in <font color='blue'>blue</font>, and ``TARGE170`` in <font color='red'>red</font>.
 
 
 Two real constants are specified to model friction-induced heat generation.
@@ -570,7 +570,7 @@ The following contact settings are used for the ``CONTA174`` elements:
 
 **Figure 28.5: Rigid Surface Constrained.**
 Pilot node or master with applied boundary conditions and the constrained 
-top surface of the tool (blue).**
+top surface of the tool (<font color='blue'>blue</font>).**
 
 
 .. code:: python
@@ -858,7 +858,7 @@ perpendicular direction (z direction).
     pl.show()
 
 **Figure 28.7: Mechanical Boundary Conditions:**
-X-direction (``UX``) in red, Y-direction (``UY``) in green, and Z-direction (``UZ``) in blue.
+X-direction (``UX``) in <font color='red'>red</font>, Y-direction (``UY``) in green, and Z-direction (``UZ``) in <font color='blue'>blue</font>.
 
    
 .. code:: python 
@@ -1392,7 +1392,7 @@ load step is shown in the following figure:
 
 
 **Figure 28.21: Contact Status at Interface with Bonding Temperature 1000 °C**
-Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
+Elements can be in near-contact (<font color='blue'>blue</font>), sliding (<font color='green'>green</font>) or sticking (<font color='red'>red</font>) states.
 
 
 The sticking portion of the interface shows the bonding or welding region of
@@ -1410,7 +1410,7 @@ welding region would increase, as shown in this figure:
    pl.show() 
 
 **Figure 28.22: Contact Status at Interface with Bonding Temperature 900 °C**
-Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
+Elements can be in near-contact (<font color='blue'>blue</font>), sliding (<font color='green'>green</font>) or sticking (<font color='red'>red</font>) states.
 
 
 28.7.4. Heat Generation
