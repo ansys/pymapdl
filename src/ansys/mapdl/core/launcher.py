@@ -642,24 +642,24 @@ def _get_available_base_ansys():
         supported_versions = SUPPORTED_ANSYS_VERSIONS
         # The student version overwrites the AWP_ROOT env var (if it is installed later)
         # However the priority should be given to the non-student version.
-        awp_roots = {}
+        awp_roots = []
+        awp_roots_student = []
+
         for ver in supported_versions:
             path_ = os.environ.get(f"AWP_ROOT{ver}", "")
             path_non_student = path_.replace("\\ANSYS Student", "")
 
             if "student" in path_.lower() and os.path.exists(path_non_student):
                 # Check if also exist a non-student version
-                awp_roots[ver] = path_non_student
-                awp_roots[-1 * ver] = path_
+                awp_roots.append([ver, path_non_student])
+                awp_roots_student.insert(0, [-1 * ver, path_])
 
             else:
-                awp_roots[ver] = path_
+                awp_roots.append([ver, path_])
 
-        # sorting
+        awp_roots.extend(awp_roots_student)
         installed_versions = {
-            each_key: awp_roots[each_key]
-            for each_key in sorted(awp_roots.keys(), reverse=True)
-            if awp_roots[each_key] and os.path.isdir(awp_roots[each_key])
+            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
         }
 
         if installed_versions:
