@@ -214,7 +214,7 @@ class Plain_Report:
             lines.append("Version   Location")
             lines.append("------------------")
             for key in sorted(mapdl_install.keys()):
-                lines.append(f"{key}       {mapdl_install[key]}")
+                lines.append(f"{abs(key)}       {mapdl_install[key]}")
         install_info = "\n".join(lines)
 
         env_info_lines = [
