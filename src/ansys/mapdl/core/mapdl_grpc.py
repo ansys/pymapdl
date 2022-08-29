@@ -1577,11 +1577,13 @@ class MapdlGrpc(_MapdlCore):
             self._get_lock = False
 
         if getresponse.type == 0:
-            self._log.debug("The 'grpc' get method seems to have failed. Trying old implementation for more verbose output.")
+            self._log.debug(
+                "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
+            )
             try:
                 out = self.run("*GET,__temp__," + cmd)
             except MapdlRuntimeError:
-                # Get can thrown some errors, in that case, they are catched in the default run method.
+                # Get can thrown some errors, in that case, they are caught in the default run method.
                 raise
             else:
                 # Here we catch the rest of the errors and warnings
