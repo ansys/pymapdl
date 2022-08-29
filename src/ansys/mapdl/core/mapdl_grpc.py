@@ -1577,10 +1577,18 @@ class MapdlGrpc(_MapdlCore):
             self._get_lock = False
 
         if getresponse.type == 0:
-            # Fall back to run to get most verbose output.
-            out = self.run("*GET,__temp__," + cmd)
-            self.run("__temp__=", mute=False)  # deleting parameter
-            raise ValueError(out)
+            self._log.debug("The 'grpc' get method seems to have failed. Trying old implementation for more verbose output.")
+            try:
+                out = self.run("*GET,__temp__," + cmd)
+            except MapdlRuntimeError:
+                # Get can thrown some errors, in that case, they are catched in the default run method.
+                raise
+            else:
+                # Here we catch the rest of the errors and warnings
+                raise ValueError(out)
+            finally:
+                # deleting parameter
+                self.run("__temp__=", mute=False)
 
         if getresponse.type == 1:
             return getresponse.dval
