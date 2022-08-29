@@ -270,7 +270,7 @@ If this command doesn't launch, please pay attention to the command output:
 
 .. code:: pwsh
 
-    (base) PS C:\Users\gayuso\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
     *** ERROR ***
     Another ANSYS job with the same job name (file) is already running in this
     directory or the file.lock file has not been deleted from an abnormally
@@ -286,7 +286,7 @@ There is a variety of issues that can make ANSYS not launching, including:
 
   .. code:: pwsh
 
-    (base) PS C:\Users\gayuso\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
    
     ANSYS LICENSE MANAGER ERROR:
 
@@ -298,7 +298,7 @@ There is a variety of issues that can make ANSYS not launching, including:
     Request name mech_2 does not exist in the licensing pool.
     No such feature exists.
     Feature:       mech_2
-    License path:  C:\Users\gayuso\AppData\Local\Temp\\cb0400ba-6edb-4bb9-a333-41e7318c007d;
+    License path:  C:\Users\user\AppData\Local\Temp\\cb0400ba-6edb-4bb9-a333-41e7318c007d;
     FlexNet Licensing error:-5,357
 
 
@@ -312,11 +312,6 @@ There is a variety of issues that can make ANSYS not launching, including:
 
     C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
 
-  On linux:
-
-  .. code:: text
-    
-    /usr/
 
 - Incorrect environment variables.
   The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
