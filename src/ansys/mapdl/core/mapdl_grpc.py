@@ -1577,11 +1577,18 @@ class MapdlGrpc(_MapdlCore):
             self._get_lock = False
 
         if getresponse.type == 0:
-            raise ValueError(
-                "This is either an invalid get request, or MAPDL is set"
-                " to the wrong processor (e.g. on BEGIN LEVEL vs."
-                " POST26)"
+            self._log.debug(
+                "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
+            try:
+                out = self.run("*GET,__temp__," + cmd)
+            except MapdlRuntimeError:
+                # Get can thrown some errors, in that case, they are caught in the default run method.
+                raise
+            else:
+                # Here we catch the rest of the errors and warnings
+                raise ValueError(out)
+
         if getresponse.type == 1:
             return getresponse.dval
         elif getresponse.type == 2:

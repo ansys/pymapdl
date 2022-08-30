@@ -6,6 +6,7 @@ import pytest
 
 from ansys.mapdl.core import examples, launch_mapdl
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -122,7 +123,7 @@ def test_clear_multiple(mapdl):
 
 
 def test_invalid_get(mapdl):
-    with pytest.raises(ValueError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
