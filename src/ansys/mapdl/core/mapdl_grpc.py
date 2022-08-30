@@ -1588,9 +1588,6 @@ class MapdlGrpc(_MapdlCore):
             else:
                 # Here we catch the rest of the errors and warnings
                 raise ValueError(out)
-            finally:
-                # deleting parameter
-                self.run("__temp__=", mute=False)
 
         if getresponse.type == 1:
             return getresponse.dval
