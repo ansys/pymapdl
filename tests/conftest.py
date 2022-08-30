@@ -184,6 +184,7 @@ def mapdl_console(request):
     # find a valid version of corba
     console_path = None
     for version in ansys_base_paths:
+        version = abs(version)
         if version < 211:
             console_path = get_ansys_bin(str(version))
 
@@ -218,6 +219,7 @@ def mapdl_corba(request):
     # find a valid version of corba
     corba_path = None
     for version in ansys_base_paths:
+        version = abs(version)
         if version >= 170 and version < 202:
             corba_path = get_ansys_bin(str(version))
 

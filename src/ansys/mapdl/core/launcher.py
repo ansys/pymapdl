@@ -640,12 +640,28 @@ def _get_available_base_ansys():
     base_path = None
     if os.name == "nt":  # pragma: no cover
         supported_versions = SUPPORTED_ANSYS_VERSIONS
-        awp_roots = {
-            ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
-        }
+        # The student version overwrites the AWP_ROOT env var (if it is installed later)
+        # However the priority should be given to the non-student version.
+        awp_roots = []
+        awp_roots_student = []
+
+        for ver in supported_versions:
+            path_ = os.environ.get(f"AWP_ROOT{ver}", "")
+            path_non_student = path_.replace("\\ANSYS Student", "")
+
+            if "student" in path_.lower() and os.path.exists(path_non_student):
+                # Check if also exist a non-student version
+                awp_roots.append([ver, path_non_student])
+                awp_roots_student.insert(0, [-1 * ver, path_])
+
+            else:
+                awp_roots.append([ver, path_])
+
+        awp_roots.extend(awp_roots_student)
         installed_versions = {
-            ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)
+            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
         }
+
         if installed_versions:
             return installed_versions
         else:  # pragma: no cover
@@ -716,6 +732,7 @@ def find_ansys():
         return "", ""
     version = max(versions.keys())
     ans_path = versions[version]
+    version = abs(version)
     if os.name == "nt":
         ansys_bin = os.path.join(
             ans_path, "ansys", "bin", "winx64", f"ansys{version}.exe"
