@@ -170,9 +170,65 @@ For Linux:
 Should this fail to launch or hang while launching, pass
 ``verbose_mapdl=True`` when using ``launch_mapdl``.  This will print
 the output of MAPDL within Python and can be used to debug why MAPDL
-isn't launching.  Output will be limited on Windows due to the way
-MAPDL launches on Windows.
+isn't launching. On Windows, output is limited due to the way
+MAPDL launches.
 
+Default Executable Location
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The first time that you run PyMAPDL, it detects the
+available ANSYS installations.
+
+On Windows, Ansys installations are normally under:
+
+.. code:: text
+
+    C:/Program Files/ANSYS Inc/vXXX
+
+On Linux, Ansys installations are normally under:
+
+.. code:: text
+
+    /usr/ansys_inc/vXXX
+
+If PyMAPDL finds a valid ANSYS installation, it caches its
+path in the configuration file, ``config.txt``, whose path is shown in the
+following code:
+
+.. code:: python
+
+    >>> from ansys.mapdl.core.launcher import CONFIG_FILE
+    >>> print(CONFIG_FILE)
+    'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\config.txt'
+
+
+In certain cases, this configuration might become obsolete. For example, when a new
+Ansys version is installed and an earlier installation is removed.
+To update this configuration file with the latest path, use:
+
+.. code:: python
+
+    >>> from ansys.mapdl.core import save_ansys_path
+    >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
+    'C:\\Program Files\\ANSYS Inc\\v222\\ansys\\bin\\winx64\\ansys222.exe'
+
+If you want to check which Ansys installations PyMAPDL has detected, use:
+
+.. code:: python
+
+    >>> from ansys.mapdl.core.launcher import _get_available_base_ansys
+    >>> _get_available_base_ansys()
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+    212: 'C:\\Program Files\\ANSYS Inc\\v212',
+    -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
+
+Student versions are provided as negative versions because the Python dictionary
+does not accept two equal keys. The result of the ``_get_available_base_ansys()`` method
+lists higher versions first and student versions last.
+
+.. warning::
+    You should not have the same Ansys product version and student version installed. For more
+    information, see `Debug Launch Issues`_.
 
 Debug Launch Issues
 ~~~~~~~~~~~~~~~~~~~
@@ -195,22 +251,76 @@ For Linux:
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
-Note that you should probably startup MAPDL in a temporary working
-directory as MAPDL creates a several temporary files.
+You should start MAPDL in a temporary working directory because MAPDL creates
+several temporary files.
 
-If this command doesn't launch, you could have a variety of issues, including:
+You can specify a directory by launching MAPDL from the temporary directory:
+
+.. code:: pwsh
+
+    mkdir temporary_directory
+    cd temporary_directory
+     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+
+Or, you can specify the directory using the ``-dir`` flag:
+
+.. code:: pwsh
+
+    mkdir temporary_directory
+    & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe' -dir "C:\ansys_job\mytest1"
+
+
+If this command doesn't launch MAPDL, look at the command output:
+
+.. code:: pwsh
+
+    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+    *** ERROR ***
+    Another Ansys job with the same job name (file) is already running in this
+    directory or the file.lock file has not been deleted from an abnormally
+    terminated Ansys run. To disable this check, set the ANSYS_LOCK environment
+    variable to OFF.
+
+
+There are many issues that can cause Ansys not to launch, including:
 
 - License server setup
 - Running behind a VPN
 - Missing dependencies
+- Conflicts with a student version
 
 
 Licensing Issues
 ----------------
 
-PADT generally has a great blog regarding ANSYS issues, and licensing is always a common issue (for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys, please check the online Ansys licensing documentation at `Installation and Licensing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
+Incorrect license server configuration can prevent Ansys from being able to get a valid license.
+In those cases, you might see output **similar** to:
 
-For an in-depth explanation, please see the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
+.. code:: pwsh
+
+   (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+
+   ANSYS LICENSE MANAGER ERROR:
+
+   Maximum licensed number of demo users already reached.
+
+
+   ANSYS LICENSE MANAGER ERROR:
+
+   Request name mech_2 does not exist in the licensing pool.
+   No such feature exists.
+   Feature:          mech_2
+   License path:  C:\Users\user\AppData\Local\Temp\\cb0400ba-6edb-4bb9-a333-41e7318c007d;
+   FlexNet Licensing error:-5,357
+
+
+PADT generally has a great blog regarding ANSYS issues, and licensing is always a common issue 
+(for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  
+Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys,
+please check the online Ansys licensing documentation at 
+`Installation and Licensing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
+
+For more comprehensive information, download the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
 
 
 VPN Issues
@@ -226,6 +336,34 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
     >>> mapdl = launch_mapdl(additional_switches='-smp')
 
 While this approach has the disadvantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
+
+
+In addition, if your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly
+resolve the IP of the license server. Please do check that the hostname or IP of the license server
+is correct.
+In Windows, you can find the license configuration file that points to the license server in:
+
+.. code:: text
+
+    C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
+
+
+Incorrect environment variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
+You can check the value of this environment variable by issuing on Windows:
+
+  .. code:: pwsh
+    
+    $env:ANSYSLMD_LICENSE_FILE
+    1055@1.1.1.1
+
+  And on linux:
+
+  .. code:: bash
+
+    printenv | grep ANSYSLMD_LICENSE_FILE
 
 
 Missing Dependencies on Linux
@@ -275,3 +413,41 @@ then installs it via ``dpkg``.
     sudo bash -c "tar c postinst postrm md5sums control | gzip -c > control.tar.gz"
     sudo ar rcs libxp6_1.0.2-2_amd64_mod.deb debian-binary control.tar.gz data.tar.xz
     sudo dpkg -i ./libxp6_1.0.2-2_amd64_mod.deb
+
+
+
+Conflicts with Student Version
+------------------------------
+
+Although you can install Ansys together with other Ansys products or versions, on Windows, you
+should not install a student version of an Ansys product together with its non-student version.
+For example, installing both the Ansys MAPDL 202 2R2 Student Version and Ansys MAPDL 2022
+R2 might cause license conflicts due to overwriting of environment variables. Having different
+versions, for example the Ansys MAPDL 2022 R2 Student Version and Ansys MAPDL 2021 R1,
+is fine.
+
+If you experience issues, you should edit these environment variables to remove any
+reference to the student version: ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
+``CADOE_LIBDIRXXX``. The three-digit MAPDL version appears where ``XXX`` is
+shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
+
+.. code:: pwsh
+
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222
+    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This will overwrite the env var for the terminal session only.
+    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This will change the env var permanently.
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\v222
+
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\ANSYS
+    PS [System.Environment]::SetEnvironmentVariable('ANSYS222_DIR','C:\Program Files\ANSYS Inc\v222\ANSYS',[System.EnvironmentVariableTarget]::User)
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\v222\ANSYS
+
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\CommonFiles\Language\en-us
+    PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR222','C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
