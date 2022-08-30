@@ -284,139 +284,35 @@ If this command doesn't launch, please pay attention to the command output:
 
 There is a variety of issues that can make ANSYS not launching, including:
 
-- License server setup.
-  Incorrect license server configuration can make ANSYS not able to get a valid license.
-  In those cases, you might see output **similar** to:
-
-  .. code:: pwsh
-
-    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
-   
-    ANSYS LICENSE MANAGER ERROR:
-
-    Maximum licensed number of demo users already reached.
-
-
-    ANSYS LICENSE MANAGER ERROR:
-
-    Request name mech_2 does not exist in the licensing pool.
-    No such feature exists.
-    Feature:       mech_2
-    License path:  C:\Users\user\AppData\Local\Temp\\cb0400ba-6edb-4bb9-a333-41e7318c007d;
-    FlexNet Licensing error:-5,357
-
-
-- Running behind a VPN.
-  If your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly
-  resolve the IP of the license server. Please do check that the hostname or IP of the license server
-  is correct.
-  In Windows, you can find the license configuration file which points to the license server in:
-
-  .. code:: text
-
-    C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
-
-
-- Incorrect environment variables.
-  The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-  You can check the value of this environment variable by issuing on Windows:
-
-  .. code:: pwsh
-    
-    $env:ANSYSLMD_LICENSE_FILE
-    1055@1.1.1.1
-
-  And on linux:
-
-  .. code:: bash
-
-    printenv | grep ANSYSLMD_LICENSE_FILE
-
-- Conflicts with Student Version.
-  Although you can install Ansys together with any other Ansys products or versions, on Windows it is **highly**
-  recommended to not install an ANSYS Product Student version together with its non-student version.
-  For example, *Ansys MAPDL 2022R2* and *Ansys MAPDL 2022R2 Student version* installed together might cause
-  some license conflicts due to overwriting of the environment variables.
-  Having different versions, for example *Ansys MAPDL 2021R1* and *Ansys MAPDL 2022R2 Student version* is
-  completely fine.
-
-  If you experience those issues, we recommend you to edit the environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``,
-  and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)
-  to remove any reference to the student version.
-
-  .. code:: pwsh
-
-    PS echo $env:AWP_ROOT222
-    C:\Program Files\ANSYS Inc\ANSYS Student\v222
-    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This will overwrite the env var for the terminal session only.
-    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This will change the env var permanently.
-    PS echo $env:AWP_ROOT222
-    C:\Program Files\ANSYS Inc\v222
-
-    PS echo $env:ANSYS222_DIR
-    C:\Program Files\ANSYS Inc\ANSYS Student\v222\ANSYS
-    PS [System.Environment]::SetEnvironmentVariable('ANSYS222_DIR','C:\Program Files\ANSYS Inc\v222\ANSYS',[System.EnvironmentVariableTarget]::User)
-    PS echo $env:ANSYS222_DIR
-    C:\Program Files\ANSYS Inc\v222\ANSYS
-
-    PS echo $env:CADOE_LIBDIR222
-    C:\Program Files\ANSYS Inc\ANSYS Student\v222\CommonFiles\Language\en-us
-    PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR222','C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
-    PS echo $env:CADOE_LIBDIR222
-    C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
-
-
-- Missing dependencies.
-  Normally missing dependencies will be shown by Python by raising an error.
-  For example, if the library `Numpy <https://numpy.org/>`_ is missing, Python
-  will show the following error:
-
-  .. code:: python
-
-    from ansys.mapdl.core import launch_mapdl
-    ---------------------------------------------------------------------------
-    ModuleNotFoundError                       Traceback (most recent call last)
-    <ipython-input-1-87b295f34a95> in <module>
-    ----> 1 from ansys.mapdl.core import launch_mapdl
-
-    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\__init__.py in <module>
-        28 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
-        29
-    ---> 30 from ansys.mapdl.core import examples
-        31 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-        32 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
-
-    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\examples\__init__.py in <module>
-        1 from .downloads import *
-        2 from .downloads import _download_rotor_tech_demo_plot
-    ----> 3 from .examples import *
-        4 from .verif_files import vmfiles
-
-    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\examples\examples.py in <module>
-        2 import os
-        3
-    ----> 4 from matplotlib.colors import ListedColormap
-        5 import numpy as np
-        6
-
-    C:\ProgramData\Miniconda3\envs\pymapdl_0\lib\site-packages\matplotlib\__init__.py in <module>
-        102 import warnings
-        103
-    --> 104 import numpy
-        105 from packaging.version import parse as parse_version
-        106
-
-    ModuleNotFoundError: No module named 'numpy'
-
-  In this cases, the best option is to reinstall the library using:
-
-  .. code:: bash
-
-    python -m pip install ansys-mapdl-core
+- License server setup
+- Running behind a VPN
+- Missing dependencies
+- Conflicts with Student Version
 
 
 Licensing Issues
 ----------------
+
+Incorrect license server configuration can make ANSYS not being able to get a valid license.
+In those cases, you might see output **similar** to:
+
+.. code:: pwsh
+
+   (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+
+   ANSYS LICENSE MANAGER ERROR:
+
+   Maximum licensed number of demo users already reached.
+
+
+   ANSYS LICENSE MANAGER ERROR:
+
+   Request name mech_2 does not exist in the licensing pool.
+   No such feature exists.
+   Feature:          mech_2
+   License path:  C:\Users\user\AppData\Local\Temp\\cb0400ba-6edb-4bb9-a333-41e7318c007d;
+   FlexNet Licensing error:-5,357
+
 
 PADT generally has a great blog regarding ANSYS issues, and licensing is always a common issue 
 (for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  
@@ -440,6 +336,34 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
     >>> mapdl = launch_mapdl(additional_switches='-smp')
 
 While this approach has the disadvantage of using the potentially slower shared memory parallel mode, you'll at least be able to run MAPDL.  For more details on shared vs distributed memory, see `High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
+
+
+In addition, if your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly
+resolve the IP of the license server. Please do check that the hostname or IP of the license server
+is correct.
+In Windows, you can find the license configuration file which points to the license server in:
+
+.. code:: text
+
+    C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
+
+
+Incorrect environment variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
+You can check the value of this environment variable by issuing on Windows:
+
+  .. code:: pwsh
+    
+    $env:ANSYSLMD_LICENSE_FILE
+    1055@1.1.1.1
+
+  And on linux:
+
+  .. code:: bash
+
+    printenv | grep ANSYSLMD_LICENSE_FILE
 
 
 Missing Dependencies on Linux
@@ -489,3 +413,40 @@ then installs it via ``dpkg``.
     sudo bash -c "tar c postinst postrm md5sums control | gzip -c > control.tar.gz"
     sudo ar rcs libxp6_1.0.2-2_amd64_mod.deb debian-binary control.tar.gz data.tar.xz
     sudo dpkg -i ./libxp6_1.0.2-2_amd64_mod.deb
+
+
+
+Conflicts with Student Version
+------------------------------
+
+Although you can install Ansys together with any other Ansys products or versions, on Windows it is **highly**
+recommended to not install an ANSYS Product Student version together with its non-student version.
+For example, *Ansys MAPDL 2022R2* and *Ansys MAPDL 2022R2 Student version* installed together might cause
+some license conflicts due to overwriting of the environment variables.
+Having different versions, for example *Ansys MAPDL 2021R1* and *Ansys MAPDL 2022R2 Student version* is
+completely fine.
+
+If you experience those issues, we recommend you to edit the environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``,
+and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)
+to remove any reference to the student version.
+
+.. code:: pwsh
+
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222
+    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This will overwrite the env var for the terminal session only.
+    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This will change the env var permanently.
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\v222
+
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\ANSYS
+    PS [System.Environment]::SetEnvironmentVariable('ANSYS222_DIR','C:\Program Files\ANSYS Inc\v222\ANSYS',[System.EnvironmentVariableTarget]::User)
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\v222\ANSYS
+
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\CommonFiles\Language\en-us
+    PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR222','C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
