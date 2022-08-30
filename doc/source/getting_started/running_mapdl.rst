@@ -170,20 +170,20 @@ For Linux:
 Should this fail to launch or hang while launching, pass
 ``verbose_mapdl=True`` when using ``launch_mapdl``.  This will print
 the output of MAPDL within Python and can be used to debug why MAPDL
-isn't launching.  Output will be limited on Windows due to the way
+isn't launching.  Output is limited on Windows due to the way
 MAPDL launches on Windows.
 
 Default executable Location
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The first time you run PyMAPDL it will detect the
+The first time that you run PyMAPDL, it detects the
 available ANSYS installations, normally under:
 
 .. code:: text
 
     C:/Program Files/ANSYS Inc/vXXX
 
-in windows, and:
+on Windows, and:
 
 .. code:: text
 
@@ -191,9 +191,9 @@ in windows, and:
 
 on Linux.
 
-If PyMAPDL successfully find a valid ANSYS installation, it will cache its
-path in the configuration file ``config.txt`` which can be found by following
-the next code:
+If PyMAPDL successfully finds a valid ANSYS installation, it caches its
+path in the configuration file, ``config.txt``, whose path is shown in the
+following code:
 
 .. code:: python
 
@@ -203,8 +203,8 @@ the next code:
 
 
 In certain cases, this configuration might become obsolete. For example, when a new
-ANSYS version is installed, and the old one is removed.
-To update this configuration file with the latest path you can the following:
+Ansys version is installed, and the old one is removed.
+To update this configuration file with the latest path, do the following:
 
 .. code:: python
 
@@ -212,7 +212,7 @@ To update this configuration file with the latest path you can the following:
     >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
     'C:\\Program Files\\ANSYS Inc\\v222\\ansys\\bin\\winx64\\ansys222.exe'
 
-If you want to check which ANSYS installations is PyMAPDL detecting you can issue:
+If you want to check which Ansys installations PyMAPDL has detected, run:
 
 .. code:: python
 
@@ -222,14 +222,12 @@ If you want to check which ANSYS installations is PyMAPDL detecting you can issu
     212: 'C:\\Program Files\\ANSYS Inc\\v212',
     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
-It should be noticed that the student versions are provided as negative version (Python ``dict``
-does not accept two equal keys.
-The result of ``_get_available_base_ansys()`` is in order, higher version first and student versions
-at last.
+Student versions are provided as negative versions because the Python dictionary
+does not accept two equal keys. The result of the ``_get_available_base_ansys()`` method
+listing higher versions first and student versions last.
 
 .. warning::
-    It is not recommended to have installed Ansys product and Ansys student products with the same version.
-    See `Debug Launch Issues`_
+    You should not have the same Ansys product version and student version. For more information, see `Debug Launch Issues`_.
 
 Debug Launch Issues
 ~~~~~~~~~~~~~~~~~~~
@@ -252,9 +250,9 @@ For Linux:
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
-Note that you should probably startup MAPDL in a temporary working
-directory as MAPDL creates a several temporary files.
-You can specify a directory by either launching MAPDL from the temporary directory:
+You should start MAPDL in a temporary working directory because MAPDL creates
+several temporary files.
+You can specify a directory by launching MAPDL from the temporary directory:
 
 .. code:: pwsh
 
@@ -262,7 +260,7 @@ You can specify a directory by either launching MAPDL from the temporary directo
     cd temporary_directory
      & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
 
-Or specifying the ``-dir`` flag:
+Or, you can specify the directory using the ``-dir`` flag:
 
 .. code:: pwsh
 
@@ -270,19 +268,19 @@ Or specifying the ``-dir`` flag:
     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe' -dir "C:\ansys_job\mytest1"
 
 
-If this command doesn't launch, please pay attention to the command output:
+If this command doesn't launch, look at the command output:
 
 .. code:: pwsh
 
     (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
     *** ERROR ***
-    Another ANSYS job with the same job name (file) is already running in this
+    Another Ansys job with the same job name (file) is already running in this
     directory or the file.lock file has not been deleted from an abnormally
-    terminated ANSYS run.  To disable this check, set the ANSYS_LOCK environment
+    terminated Ansys run.  To disable this check, set the ANSYS_LOCK environment
     variable to OFF.
 
 
-There is a variety of issues that can make ANSYS not launching, including:
+There are many issues that can cause Ansys not to launch, including:
 
 - License server setup
 - Running behind a VPN
