@@ -1385,6 +1385,16 @@ def test_equal_in_comments_and_title(mapdl):
     mapdl.title("This is '=' ")
 
 
+@pytest.mark.xfail
+def test_result_file(mapdl, solved_box):
+    assert mapdl.result_file
+    assert isinstance(mapdl.result_file, str)
+
+
+def test_empty_result_file(mapdl, cleared):
+    assert mapdl.result_file is None
+
+
 @skip_in_cloud
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl._result_file
