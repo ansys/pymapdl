@@ -227,6 +227,10 @@ does not accept two equal keys.
 The result of ``_get_available_base_ansys()`` is in order, higher version first and student versions
 at last.
 
+.. warning::
+    It is not recommended to have installed Ansys product and Ansys student products with the same version.
+    See `Debug Launch Issues`_
+
 Debug Launch Issues
 ~~~~~~~~~~~~~~~~~~~
 In some cases, it may be necessary to debug why MAPDL isn't launching
@@ -328,8 +332,85 @@ There is a variety of issues that can make ANSYS not launching, including:
 
     printenv | grep ANSYSLMD_LICENSE_FILE
 
+- Conflicts with Student Version.
+  Although you can install Ansys together with any other Ansys products or versions, on Windows it is **highly**
+  recommended you do not install the Student version together with its non-student version.
+  For example, *Ansys MAPDL 2022R2* and *Ansys MAPDL 2022R2 Student version* installed together might cause
+  some license conflicts due to overwriting of the environment variables.
+  Having different versions, for example *Ansys MAPDL 2021R1* and *Ansys MAPDL 2022R2 Student version* is
+  completely fine.
+
+  If you experience those issues, we recommend you to edit the environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``,
+  and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)  to remove any reference to the student version.
+
+  .. code:: pwsh
+
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222
+    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"
+    PS echo $env:AWP_ROOT222
+    C:\Program Files\ANSYS Inc\v222
+
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\ANSYS
+    PS $env:ANSYS222_DIR = "C:\Program Files\ANSYS Inc\v222\ANSYS"
+    PS echo $env:ANSYS222_DIR
+    C:\Program Files\ANSYS Inc\v222\ANSYS
+
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\ANSYS Student\v222\CommonFiles\Language\en-us
+    PS $env:CADOE_LIBDIR222 = "C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us"
+    PS echo $env:CADOE_LIBDIR222
+    C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
+
+
 - Missing dependencies.
-  
+  Normally missing dependencies will be shown by Python by raising an error.
+  For example, if the library `Numpy <https://numpy.org/>`_ is missing, Python
+  will show the following error:
+
+  .. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+    ---------------------------------------------------------------------------
+    ModuleNotFoundError                       Traceback (most recent call last)
+    <ipython-input-1-87b295f34a95> in <module>
+    ----> 1 from ansys.mapdl.core import launch_mapdl
+
+    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\__init__.py in <module>
+        28 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
+        29
+    ---> 30 from ansys.mapdl.core import examples
+        31 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+        32 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
+
+    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\examples\__init__.py in <module>
+        1 from .downloads import *
+        2 from .downloads import _download_rotor_tech_demo_plot
+    ----> 3 from .examples import *
+        4 from .verif_files import vmfiles
+
+    ~\Others_pymapdls\pymapdl_0\pymapdl\src\ansys\mapdl\core\examples\examples.py in <module>
+        2 import os
+        3
+    ----> 4 from matplotlib.colors import ListedColormap
+        5 import numpy as np
+        6
+
+    C:\ProgramData\Miniconda3\envs\pymapdl_0\lib\site-packages\matplotlib\__init__.py in <module>
+        102 import warnings
+        103
+    --> 104 import numpy
+        105 from packaging.version import parse as parse_version
+        106
+
+    ModuleNotFoundError: No module named 'numpy'
+
+  In this cases, the best option is to reinstall the library using:
+
+  .. code:: bash
+
+    python -m pip install ansys-mapdl-core
 
 
 Licensing Issues
