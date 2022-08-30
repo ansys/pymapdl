@@ -170,28 +170,28 @@ For Linux:
 Should this fail to launch or hang while launching, pass
 ``verbose_mapdl=True`` when using ``launch_mapdl``.  This will print
 the output of MAPDL within Python and can be used to debug why MAPDL
-isn't launching.  Output is limited on Windows due to the way
-MAPDL launches on Windows.
+isn't launching. On Windows, output is limited due to the way
+MAPDL launches.
 
-Default executable Location
+Default Executable Location
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first time that you run PyMAPDL, it detects the
-available ANSYS installations, normally under:
+available ANSYS installations.
+
+On Windows, Ansys installations are normally under:
 
 .. code:: text
 
     C:/Program Files/ANSYS Inc/vXXX
 
-on Windows, and:
+On Linux, Ansys installations are normally under:
 
 .. code:: text
 
     /usr/ansys_inc/vXXX
 
-on Linux.
-
-If PyMAPDL successfully finds a valid ANSYS installation, it caches its
+If PyMAPDL finds a valid ANSYS installation, it caches its
 path in the configuration file, ``config.txt``, whose path is shown in the
 following code:
 
@@ -203,8 +203,8 @@ following code:
 
 
 In certain cases, this configuration might become obsolete. For example, when a new
-Ansys version is installed, and the old one is removed.
-To update this configuration file with the latest path, do the following:
+Ansys version is installed and an earlier installation is removed.
+To update this configuration file with the latest path, use:
 
 .. code:: python
 
@@ -212,7 +212,7 @@ To update this configuration file with the latest path, do the following:
     >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
     'C:\\Program Files\\ANSYS Inc\\v222\\ansys\\bin\\winx64\\ansys222.exe'
 
-If you want to check which Ansys installations PyMAPDL has detected, run:
+If you want to check which Ansys installations PyMAPDL has detected, use:
 
 .. code:: python
 
@@ -224,10 +224,11 @@ If you want to check which Ansys installations PyMAPDL has detected, run:
 
 Student versions are provided as negative versions because the Python dictionary
 does not accept two equal keys. The result of the ``_get_available_base_ansys()`` method
-listing higher versions first and student versions last.
+lists higher versions first and student versions last.
 
 .. warning::
-    You should not have the same Ansys product version and student version. For more information, see `Debug Launch Issues`_.
+    You should not have the same Ansys product version and student version installed. For more
+    information, see `Debug Launch Issues`_.
 
 Debug Launch Issues
 ~~~~~~~~~~~~~~~~~~~
@@ -252,6 +253,7 @@ For Linux:
 
 You should start MAPDL in a temporary working directory because MAPDL creates
 several temporary files.
+
 You can specify a directory by launching MAPDL from the temporary directory:
 
 .. code:: pwsh
@@ -268,7 +270,7 @@ Or, you can specify the directory using the ``-dir`` flag:
     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe' -dir "C:\ansys_job\mytest1"
 
 
-If this command doesn't launch, look at the command output:
+If this command doesn't launch MAPDL, look at the command output:
 
 .. code:: pwsh
 
@@ -276,7 +278,7 @@ If this command doesn't launch, look at the command output:
     *** ERROR ***
     Another Ansys job with the same job name (file) is already running in this
     directory or the file.lock file has not been deleted from an abnormally
-    terminated Ansys run.  To disable this check, set the ANSYS_LOCK environment
+    terminated Ansys run. To disable this check, set the ANSYS_LOCK environment
     variable to OFF.
 
 
@@ -285,13 +287,13 @@ There are many issues that can cause Ansys not to launch, including:
 - License server setup
 - Running behind a VPN
 - Missing dependencies
-- Conflicts with Student Version
+- Conflicts with a student version
 
 
 Licensing Issues
 ----------------
 
-Incorrect license server configuration can make ANSYS not being able to get a valid license.
+Incorrect license server configuration can prevent Ansys from being able to get a valid license.
 In those cases, you might see output **similar** to:
 
 .. code:: pwsh
@@ -318,7 +320,7 @@ Should you be responsible for maintaining Ansys licensing or have a personal ins
 please check the online Ansys licensing documentation at 
 `Installation and Licensing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
 
-For an in-depth explanation, please see the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
+For more comprehensive information, download the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
 
 
 VPN Issues
@@ -339,7 +341,7 @@ While this approach has the disadvantage of using the potentially slower shared 
 In addition, if your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly
 resolve the IP of the license server. Please do check that the hostname or IP of the license server
 is correct.
-In Windows, you can find the license configuration file which points to the license server in:
+In Windows, you can find the license configuration file that points to the license server in:
 
 .. code:: text
 
@@ -417,16 +419,17 @@ then installs it via ``dpkg``.
 Conflicts with Student Version
 ------------------------------
 
-Although you can install Ansys together with any other Ansys products or versions, on Windows it is **highly**
-recommended to not install an ANSYS Product Student version together with its non-student version.
-For example, *Ansys MAPDL 2022R2* and *Ansys MAPDL 2022R2 Student version* installed together might cause
-some license conflicts due to overwriting of the environment variables.
-Having different versions, for example *Ansys MAPDL 2021R1* and *Ansys MAPDL 2022R2 Student version* is
-completely fine.
+Although you can install Ansys together with other Ansys products or versions, on Windows, you
+should not install a student version of an Ansys product together with its non-student version.
+For example, installing both the Ansys MAPDL 202 2R2 Student Version and Ansys MAPDL 2022
+R2 might cause license conflicts due to overwriting of environment variables. Having different
+versions, for example the Ansys MAPDL 2022 R2 Student Version and Ansys MAPDL 2021 R1,
+is fine.
 
-If you experience those issues, we recommend you to edit the environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``,
-and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)
-to remove any reference to the student version.
+If you experience issues, you should edit these environment variables to remove any
+reference to the student version: ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
+``CADOE_LIBDIRXXX``. The three-digit MAPDL version appears where ``XXX`` is
+shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
 .. code:: pwsh
 
