@@ -334,7 +334,7 @@ There is a variety of issues that can make ANSYS not launching, including:
 
 - Conflicts with Student Version.
   Although you can install Ansys together with any other Ansys products or versions, on Windows it is **highly**
-  recommended you do not install the Student version together with its non-student version.
+  recommended to not install an ANSYS Product Student version together with its non-student version.
   For example, *Ansys MAPDL 2022R2* and *Ansys MAPDL 2022R2 Student version* installed together might cause
   some license conflicts due to overwriting of the environment variables.
   Having different versions, for example *Ansys MAPDL 2021R1* and *Ansys MAPDL 2022R2 Student version* is
@@ -348,19 +348,20 @@ There is a variety of issues that can make ANSYS not launching, including:
 
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\ANSYS Student\v222
-    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"
+    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This will overwrite the env var for the terminal session only.
+    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This will change the env var permanently.
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\v222
 
     PS echo $env:ANSYS222_DIR
     C:\Program Files\ANSYS Inc\ANSYS Student\v222\ANSYS
-    PS $env:ANSYS222_DIR = "C:\Program Files\ANSYS Inc\v222\ANSYS"
+    PS [System.Environment]::SetEnvironmentVariable('ANSYS222_DIR','C:\Program Files\ANSYS Inc\v222\ANSYS',[System.EnvironmentVariableTarget]::User)
     PS echo $env:ANSYS222_DIR
     C:\Program Files\ANSYS Inc\v222\ANSYS
 
     PS echo $env:CADOE_LIBDIR222
     C:\Program Files\ANSYS Inc\ANSYS Student\v222\CommonFiles\Language\en-us
-    PS $env:CADOE_LIBDIR222 = "C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us"
+    PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR222','C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
     PS echo $env:CADOE_LIBDIR222
     C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
 
