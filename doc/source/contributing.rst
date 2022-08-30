@@ -105,6 +105,7 @@ This way, it's not possible for you to push code that fails the style checks. Fo
 
 .. toctree::
    :maxdepth: 3
+   :hidden:
 
    api/index
 

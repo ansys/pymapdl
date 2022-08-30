@@ -135,7 +135,7 @@ In Windows, you can find the license configuration file that points to the licen
 
 
 Incorrect environment variables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===============================
 
 The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
 You can check the value of this environment variable by issuing on Windows:
@@ -162,6 +162,7 @@ dependencies.
 
 CentOS
 ------
+
 On CentOS 7, you can install these with:
 
 .. code::
@@ -171,6 +172,7 @@ On CentOS 7, you can install these with:
 
 Ubuntu
 ------
+
 Since MAPDL isn't officially supported on Ubuntu, it's a bit more
 difficult to setup, but it's still possible.  On Ubuntu 20.04 with
 Ansys 2021R1, install the following:
@@ -202,6 +204,7 @@ then installs it via ``dpkg``.
     sudo dpkg -i ./libxp6_1.0.2-2_amd64_mod.deb
 
 
+.. _conflicts_student_version:
 
 Conflicts with Student Version
 ==============================
@@ -333,7 +336,7 @@ lists higher versions first and student versions last.
 
 .. warning::
     You should not have the same Ansys product version and student version installed. For more
-    information, see `Debug Launch Issues`_.
+    information, see :ref:`conflicts_student_version`.
 
 
 
