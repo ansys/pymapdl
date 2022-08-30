@@ -334,3 +334,38 @@ lists higher versions first and student versions last.
 .. warning::
     You should not have the same Ansys product version and student version installed. For more
     information, see `Debug Launch Issues`_.
+
+
+
+.. _ref_pymapdl_stability:
+
+*****************
+PyMAPDL Stability
+*****************
+
+Recommendations
+===============
+
+When connecting to an instance of MAPDL using grpc (default), there are some cases
+where the MAPDL server might exit unexpectedly.  There
+are several ways to improve performance and stability of MADPL:
+
+- When possible, pass ``mute=True`` to individual MAPDL commands or
+  set it globally with :func:`Mapdl.mute
+  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`.  This disables streaming
+  back the response from MAPDL for each command and will marginally
+  improve performance and stability.  Consider having a debug flag in
+  your program or script so you can enable or disable logging and
+  verbosity when needed.
+
+
+Issues
+======
+
+.. note::
+   MAPDL 2021R1 has a stability issue with :func:`Mapdl.input()
+   <ansys.mapdl.core.Mapdl.input>`.  Avoid using input files if
+   possible.  Attempt to :func:`Mapdl.upload()
+   <ansys.mapdl.core.Mapdl.upload>` nodes and elements and read them
+   in via :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>`.
