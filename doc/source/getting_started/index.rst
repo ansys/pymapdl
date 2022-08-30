@@ -17,7 +17,6 @@ getting a licensed copy of Ansys.
    versioning
    docker
    using_julia
-   faq
    wsl
 
 ************

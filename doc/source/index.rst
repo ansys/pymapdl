@@ -11,6 +11,7 @@ PyMAPDL Documentation |version|
    mapdl_commands/index
    examples/index
    learning/index
+   troubleshoot/index
    contributing
 
 
