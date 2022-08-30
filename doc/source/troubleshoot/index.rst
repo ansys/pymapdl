@@ -9,8 +9,7 @@ some of the most common problems and frequently asked questions are posted here.
 
 
 .. toctree::
-   :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
 
    troubleshoot
    faq

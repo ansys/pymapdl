@@ -104,10 +104,9 @@ This way, it's not possible for you to push code that fails the style checks. Fo
 
 
 .. toctree::
-   :hidden:
    :maxdepth: 3
 
    api/index
 
 
-.. include:: api/index
+.. include:: api/index.rst

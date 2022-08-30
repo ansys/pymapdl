@@ -52,7 +52,8 @@ For an in-depth explanation, please see the :download:`ANSYS Licensing Guide <AN
 
 
 VPN Issues
-----------
+==========
+
 Sometimes, MAPDL has issues starting when VPN software is running.  One
 issue stems from MPI communication and can be solved by passing
 the ``-smp`` option that sets the execution mode to "Shared Memory
