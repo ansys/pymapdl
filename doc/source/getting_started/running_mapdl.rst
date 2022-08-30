@@ -341,7 +341,8 @@ There is a variety of issues that can make ANSYS not launching, including:
   completely fine.
 
   If you experience those issues, we recommend you to edit the environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``,
-  and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)  to remove any reference to the student version.
+  and ``CADOE_LIBDIRXXX`` where ``XXX`` is the MAPDL numeric version (i.e. ``222`` for *Ansys MAPDL 2022R2*)
+  to remove any reference to the student version.
 
   .. code:: pwsh
 
