@@ -369,3 +369,70 @@ Issues
    <ansys.mapdl.core.Mapdl.upload>` nodes and elements and read them
    in via :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
    :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>`.
+
+
+
+
+
+.. _ref_pymapdl_limitations:
+
+*******************
+PyMAPDL Limitations
+*******************
+
+
+.. _ref_numpy_arrays_in_mapdl:
+
+Issues when Importing and Exporting Numpy Arrays in MAPDL
+=========================================================
+
+Because of the way MAPDL is designed, there is no way to store an
+array where one or more dimension is zero.
+This can happens in Numpy arrays, where its first dimension can be
+set to zero.
+
+.. code:: python
+
+   >>> import numpy
+   >>> from ansys.mapdl.core import launch_mapdl
+   >>> mapdl = launch_mapdl()
+   >>> array40 = np.reshape([1, 2, 3, 4], (4,))
+   >>> array40
+   array([1, 2, 3, 4])
+
+
+These types of array dimensions will be always converted to ``1``.
+For example:
+
+.. code:: python
+
+   >>> mapdl.parameters['mapdlarray40'] = array40
+   >>> mapdl.parameters['mapdlarray40']
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> mapdl.parameters['mapdlarray40'].shape
+   (4, 1)
+
+This means that when you pass two arrays, one with the second axis equal
+to zero (e.g. ``array40``) and another one with the second axis equal
+to one, if later retrieved, they will have the same
+shape.
+
+.. code:: python
+
+   >>> array41 = np.reshape([1, 2, 3, 4], (4,1))
+   >>> array41
+   array([[1],
+      [2],
+      [3],
+      [4]])
+   >>> mapdl.parameters['mapdlarray41'] = array41
+   >>> mapdl.parameters['mapdlarray41']
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> np.allclose(mapdl.parameters['mapdlarray40'], mapdl.parameters['mapdlarray41'])
+   True
