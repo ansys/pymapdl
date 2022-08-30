@@ -210,7 +210,7 @@ class Plain_Report:
         mapdl_install = _get_available_base_ansys()
         if not mapdl_install:
             lines.append("Unable to locate any Ansys installations")
-        else:
+        else:  # pragma: no cover
             lines.append("Version   Location")
             lines.append("------------------")
             for key in sorted(mapdl_install.keys()):
