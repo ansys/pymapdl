@@ -248,7 +248,7 @@ jobs:
           ls -R > ./logs-build-docs/files_structure.txt
 
       - name: Stopping restarting docker image
-        if: failure()
+        if: always()
         run: |
           echo "Changing restarting policy"
           docker update --restart=no mapdl
@@ -383,7 +383,7 @@ jobs:
           ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
 
       - name: Stopping restarting docker image
-        if: failure()
+        if: always()
         run: |
           echo "Changing restarting policy"
           docker update --restart=no mapdl
