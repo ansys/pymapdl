@@ -232,18 +232,17 @@ def test_read_input_file_verbose(mapdl):
     assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
-test_files = ["full26.dat", "static.dat"]
-
-
-@pytest.mark.parametrize("file_name", test_files)
+@pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
 def test_read_input_file(mapdl, file_name):
     test_file = os.path.join(PATH, "test_files", file_name)
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file)
-    assert re.search(
-        "\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
-    ) or re.search("\*\*\*\*\*ANSYS VERIFICATION RUN ONLY\*\*\*\*\*", response)
+
+    assert (
+        re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+        or "PyMAPDL: Simulation Finished." in response
+    )
 
 
 def test_no_get_value_non_interactive(mapdl):
