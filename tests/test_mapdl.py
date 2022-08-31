@@ -1530,3 +1530,18 @@ def test_lsread(mapdl, cleared):
     assert "No nodal" in mapdl.flist()
     mapdl.lsread(mute=True)
     assert "No nodal" not in mapdl.flist()
+
+
+def test_get_available_ansys_installations():
+    from ansys.mapdl.core.launcher import (
+        _get_available_base_ansys,
+        get_available_ansys_installations,
+    )
+
+    _get_doc = _get_available_base_ansys.__doc__
+    get_doc = get_available_ansys_installations.__doc__
+
+    assert _get_doc == get_doc.replace(
+        "get_available_ansys_installations", "_get_available_base_ansys"
+    )
+    assert _get_available_base_ansys() == get_available_ansys_installations()

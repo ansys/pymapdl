@@ -324,15 +324,16 @@ If you want to check which Ansys installations PyMAPDL has detected, use:
 
 .. code:: python
 
-    >>> from ansys.mapdl.core.launcher import _get_available_base_ansys
-    >>> _get_available_base_ansys()
+    >>> from ansys.mapdl.core.launcher import get_available_ansys_installations
+    >>> get_available_ansys_installations()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
     212: 'C:\\Program Files\\ANSYS Inc\\v212',
     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
-Student versions are provided as negative versions because the Python dictionary
-does not accept two equal keys. The result of the ``_get_available_base_ansys()`` method
-lists higher versions first and student versions last.
+Student versions are provided as **negative** versions because the Python dictionary
+does not accept two equal keys. The result of the
+:func:`get_available_ansys_installations() <ansys.mapdl.core.get_available_ansys_installations>`
+method lists higher versions first and student versions last.
 
 .. warning::
     You should not have the same Ansys product version and student version installed. For more

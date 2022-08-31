@@ -621,14 +621,21 @@ def get_start_instance(start_instance_default=True):
 def _get_available_base_ansys():
     """Return a dictionary of available ANSYS versions with their base paths.
 
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
+
     Returns
     -------
     Return all installed ANSYS paths in Windows
 
     >>> _get_available_base_ansys()
-    {194: 'C:\\Program Files\\ANSYS INC\\v194',
-     202: 'C:\\Program Files\\ANSYS INC\\v202',
-     211: 'C:\\Program Files\\ANSYS INC\\v211'}
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
     Within Linux
 
@@ -700,6 +707,35 @@ def _get_available_base_ansys():
             ansys_paths[int(ver_str)] = path
 
     return ansys_paths
+
+
+def get_available_ansys_installations():
+    """Return a dictionary of available ANSYS versions with their base paths.
+
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
+
+    Returns
+    -------
+    Return all installed ANSYS paths in Windows
+
+    >>> get_available_ansys_installations()
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
+
+    Within Linux
+
+    >>> get_available_ansys_installations()
+    {194: '/usr/ansys_inc/v194',
+     202: '/usr/ansys_inc/v202',
+     211: '/usr/ansys_inc/v211'}
+    """
+    return _get_available_base_ansys()
 
 
 def find_ansys():
