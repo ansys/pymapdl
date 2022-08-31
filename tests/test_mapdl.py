@@ -139,6 +139,10 @@ def warns_in_cdread_error_log(mapdl):
         return any(warns)
 
 
+def test_kill_server(mapdl):
+    mapdl._run("/eof")
+
+
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
 
