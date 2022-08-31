@@ -96,7 +96,7 @@ In those cases, you might see output **similar** to:
    FlexNet Licensing error:-5,357
 
 
-PADT generally has a great blog regarding ANSYS issues, and licensing is always a common issue 
+PADT has a great blog regarding ANSYS issues, and licensing is always a common issue 
 (for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  
 Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys,
 please check the online Ansys licensing documentation at 
@@ -211,7 +211,7 @@ Conflicts with Student Version
 
 Although you can install Ansys together with other Ansys products or versions, on Windows, you
 should not install a student version of an Ansys product together with its non-student version.
-For example, installing both the Ansys MAPDL 202 2R2 Student Version and Ansys MAPDL 2022
+For example, installing both the Ansys MAPDL2022 R2 Student Version and Ansys MAPDL 2022
 R2 might cause license conflicts due to overwriting of environment variables. Having different
 versions, for example the Ansys MAPDL 2022 R2 Student Version and Ansys MAPDL 2021 R1,
 is fine.
@@ -257,7 +257,7 @@ Manually Set the Executable Location
 ====================================
 If you have a non-standard install, ``pymapdl`` may be unable find
 your installation.  If that's the case, provide the location of MAPDL
-as the first parameter to ``launch_mapdl``.  For example, on Windows,
+as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  For example, on Windows,
 this will be:
 
 .. code:: python
@@ -275,7 +275,7 @@ For Linux:
     >>> mapdl = launch_mapdl(exec_loc)
 
 Should this fail to launch or hang while launching, pass
-``verbose_mapdl=True`` when using ``launch_mapdl``.  This will print
+``verbose_mapdl=True`` when using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  This will print
 the output of MAPDL within Python and can be used to debug why MAPDL
 isn't launching. On Windows, output is limited due to the way
 MAPDL launches.
@@ -285,7 +285,7 @@ Default Executable Location
 ===========================
 
 The first time that you run PyMAPDL, it detects the
-available ANSYS installations.
+available Ansys installations.
 
 On Windows, Ansys installations are normally under:
 
@@ -299,7 +299,7 @@ On Linux, Ansys installations are normally under:
 
     /usr/ansys_inc/vXXX
 
-If PyMAPDL finds a valid ANSYS installation, it caches its
+If PyMAPDL finds a valid Ansys installation, it caches its
 path in the configuration file, ``config.txt``, whose path is shown in the
 following code:
 
@@ -390,17 +390,17 @@ Issues when Importing and Exporting Numpy Arrays in MAPDL
 =========================================================
 
 Because of the way MAPDL is designed, there is no way to store an
-array where one or more dimension is zero.
+array where one or more dimensions are zero.
 This can happens in Numpy arrays, where its first dimension can be
-set to zero.
+set to zero. For example:
 
 .. code:: python
 
    >>> import numpy
    >>> from ansys.mapdl.core import launch_mapdl
    >>> mapdl = launch_mapdl()
-   >>> array40 = np.reshape([1, 2, 3, 4], (4,))
-   >>> array40
+   >>> my_array = np.reshape([1, 2, 3, 4], (4,))
+   >>> my_array
    array([1, 2, 3, 4])
 
 
@@ -409,33 +409,32 @@ For example:
 
 .. code:: python
 
-   >>> mapdl.parameters['mapdlarray40'] = array40
-   >>> mapdl.parameters['mapdlarray40']
+   >>> mapdl.parameters['mapdlarray'] = my_array
+   >>> mapdl.parameters['mapdlarray']
    array([[1.],
       [2.],
       [3.],
       [4.]])
-   >>> mapdl.parameters['mapdlarray40'].shape
+   >>> mapdl.parameters['mapdlarray'].shape
    (4, 1)
 
 This means that when you pass two arrays, one with the second axis equal
-to zero (e.g. ``array40``) and another one with the second axis equal
-to one, if later retrieved, they will have the same
-shape.
+to zero (e.g. ``my_array``) and another one with the second axis equal
+to one, if later retrieved, they will have the same shape.
 
 .. code:: python
 
-   >>> array41 = np.reshape([1, 2, 3, 4], (4,1))
-   >>> array41
+   >>> my_other_array = np.reshape([1, 2, 3, 4], (4,1))
+   >>> my_other_array
    array([[1],
       [2],
       [3],
       [4]])
-   >>> mapdl.parameters['mapdlarray41'] = array41
-   >>> mapdl.parameters['mapdlarray41']
+   >>> mapdl.parameters['mapdlarray_b'] = my_other_array
+   >>> mapdl.parameters['mapdlarray_b']
    array([[1.],
       [2.],
       [3.],
       [4.]])
-   >>> np.allclose(mapdl.parameters['mapdlarray40'], mapdl.parameters['mapdlarray41'])
+   >>> np.allclose(mapdl.parameters['mapdlarray'], mapdl.parameters['mapdlarray_b'])
    True
