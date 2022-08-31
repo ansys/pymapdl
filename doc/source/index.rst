@@ -11,7 +11,7 @@ PyMAPDL Documentation |version|
    examples/index
    learning/index
    troubleshoot/index
-   contributing
+   contribution_and_api/index
 
 
 
