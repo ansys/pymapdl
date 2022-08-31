@@ -377,12 +377,12 @@ jobs:
           echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
           ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
 
-      - name: Stopping restarting docker image
-        if: always()
-        run: |
-          docker update --restart=no mapdl && echo "Changing restarting policy"
-          docker stop --time 3 mapdl && echo "Stopping docker container"
-          docker start mapdl && echo "Starting docker container"
+      # - name: Stopping restarting docker image
+      #   if: always()
+      #   run: |
+      #     docker update --restart=no mapdl && echo "Changing restarting policy"
+      #     docker stop --time 3 mapdl && echo "Stopping docker container"
+      #     docker start mapdl && echo "Starting docker container"
 
       - name: Display docker files structures
         if: always()
