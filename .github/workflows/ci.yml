@@ -247,6 +247,18 @@ jobs:
           echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
           ls -R > ./logs-build-docs/files_structure.txt
 
+      - name: Stopping restarting docker image
+        if: failure()
+        run: |
+          echo "Changing restarting policy"
+          docker update --restart=no mapdl
+
+          echo "Stopping docker container"
+          docker stop --time 3 mapdl
+
+          echo "Starting docker container"
+          docker start mapdl
+
       - name: Display docker files structures
         if: always()
         run: |
@@ -369,6 +381,18 @@ jobs:
           mkdir logs-${{ matrix.mapdl-version }} && echo "Successfully generated directory ${{ matrix.mapdl-version }}"
           echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
           ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
+
+      - name: Stopping restarting docker image
+        if: failure()
+        run: |
+          echo "Changing restarting policy"
+          docker update --restart=no mapdl
+
+          echo "Stopping docker container"
+          docker stop --time 3 mapdl
+
+          echo "Starting docker container"
+          docker start mapdl
 
       - name: Display docker files structures
         if: always()
