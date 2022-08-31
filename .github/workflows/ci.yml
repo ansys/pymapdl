@@ -21,10 +21,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 4
-  RESET_EXAMPLES_CACHE: 4
-  RESET_DOC_BUILD_CACHE: 4
-  RESET_AUTOSUMMARY_CACHE: 4
+  RESET_PIP_CACHE: 5
+  RESET_EXAMPLES_CACHE: 5
+  RESET_DOC_BUILD_CACHE: 5
+  RESET_AUTOSUMMARY_CACHE: 5
   PACKAGE_NAME: PyMAPDL
 
 concurrency:
