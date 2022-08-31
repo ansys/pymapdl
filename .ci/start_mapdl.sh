@@ -1,7 +1,6 @@
 #!/bin/bash
 docker pull $MAPDL_IMAGE
 docker run \
-    --restart always \
     --name mapdl \
     --restart always \
     --health-cmd="ps aux | grep \"[/]ansys_inc/.*ansys\.e.*grpc\" -q && echo 0 || echo 1" \
