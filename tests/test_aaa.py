@@ -1,3 +1,6 @@
+import os
+
+
 def test_is_running(mapdl):
     mapdl.prep7()
     assert isinstance(mapdl.prep7(), str)
