@@ -54,7 +54,7 @@ jobs:
       - name: Pull, launch, and validate MAPDL service
         run: |
           docker pull $MAPDL_IMAGE
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e ANS_DEBUG_CRASH=1 --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
+          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e ANS_DEBUG_CRASH=1 -e ANSYS_LOCK="OFF" --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
           grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
           python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
         env:
@@ -80,6 +80,13 @@ jobs:
           mkdir logs-nightly-docs
           echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
           ls -R > ./logs-nightly-docs/files_structure.txt
+
+      - name: Stopping restarting docker image
+        if: always()
+        run: |
+          docker update --restart=no mapdl && echo "Changing restarting policy"
+          docker stop --time 3 mapdl && echo "Stopping docker container"
+          docker start mapdl && echo "Starting docker container"
 
       - name: Display docker files structures
         if: always()
