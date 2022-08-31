@@ -1545,3 +1545,11 @@ def test_get_available_ansys_installations():
         "get_available_ansys_installations", "_get_available_base_ansys"
     )
     assert _get_available_base_ansys() == get_available_ansys_installations()
+
+
+def test_get_fallback(mapdl, cleared):
+    with pytest.raises(ValueError, match="There are no NODES defined"):
+        mapdl.get_value("node", 0, "num", "maxd")
+
+    with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
+        mapdl.get_value("elem", 0, "num", "maxd")
