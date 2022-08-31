@@ -11,6 +11,7 @@ docker run \
     --health-start-period=10s \
     -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
     -e ANS_DEBUG_CRASH=1 \
+    -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
     $MAPDL_IMAGE \
