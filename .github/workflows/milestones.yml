@@ -1,0 +1,28 @@
+# Trigger the workflow on milestone events
+on: 
+  # milestone:
+  #   types: [closed]
+  workflow_dispatch:
+      inputs:
+        milestone:
+          description: 'Log level'
+          required: true
+
+jobs:
+  log-the-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get milestone data
+        uses: Beakyn/gha-get-milestone-data@v1.0.1
+        id: milestone-data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          repository: ${{ github.repository }}
+          milestone: ${{ inputs.milestone }}
+
+      - name: Debug milestone title value
+        run: echo "Title ${{ fromJson(steps.milestone-data.outputs.data).title }}"
+
+      - name:  Print milestone value
+        run: echo "Data ${{ fromJson(steps.milestone-data.outputs.data) }}"
