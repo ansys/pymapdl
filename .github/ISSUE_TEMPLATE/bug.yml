@@ -20,6 +20,8 @@ body:
         required: true
       - label: I am using a Python virtual environment
         required: true
+      - label: I have a fully updated virtual environment (i.e. ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``)
+        required: true
 
   - type: textarea
     id: bug-description
