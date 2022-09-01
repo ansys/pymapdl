@@ -60,11 +60,6 @@ class LoadStepOperations:
     def lsread(self, lsnum="", **kwargs):
         """Reads load and load step option data into the database.
 
-        .. warning:: This command can only run in non-interactive mode.
-            Please visit `Unsupported "Interactive" Commands
-            <https://mapdl.docs.pyansys.com/user_guide/mapdl.html#unsupported-interactive-commands>`_
-            for further information.
-
         APDL Command: LSREAD
 
         Parameters
@@ -88,62 +83,6 @@ class LoadStepOperations:
         existing SFGRAD specification.
 
         This command is also valid in PREP7.
-
-        Examples
-        --------
-        Demonstrate writing out load steps using :func:`lswrite
-        <ansys.mapdl.core.Mapdl.lswrite> and reading them back in using
-        ``lsread``.
-
-        >>> from ansys.mapdl.core import launch_mapdl
-        >>> mapdl = launch_mapdl()
-        >>> mapdl.clear()
-        >>> mapdl.prep7()
-
-        Build a 5 x 5 flat plate out of shell181 elements.
-
-        >>> mapdl.rectng(0, 5, 0, 5)
-        >>> mapdl.et(1, 'SHELL181')
-        >>> mapdl.mp('ex', 1, 10.0e5)
-        >>> mapdl.sectype(1, 'shell')
-        >>> mapdl.secdata(0.1)  #  0.1 thick
-        >>> mapdl.esize(1)
-        >>> mapdl.amesh('all')
-
-        Fix the four corners
-
-        >>> mapdl.d('node(0,0,0)', 'all')
-        >>> mapdl.d('node(0,5,0)', 'all')
-        >>> mapdl.d('node(5,5,0)', 'all')
-        >>> mapdl.d('node(5,0,0)', 'all')
-
-        Enter the solution routine and define a force at (2,2,0).
-
-        >>> mapdl.slashsolu()
-        >>> mapdl.antype('static')
-        >>> mapdl.f('node(2,2,0)', 'fz', -10)
-
-        Write load out as load step 1 and delete all loads and displacements.
-
-        >>> mapdl.lswrite(1)
-        >>> mapdl.fdele('all', 'all')
-        >>> mapdl.ddele('all', 'all')
-
-        Read back in the loads and list them.
-
-        >>> mapdl.lsread(1)
-        >>> mapdl.flist()
-        LIST NODAL FORCES FOR SELECTED NODES         1 TO       36 BY        1
-        CURRENTLY SELECTED NODAL LOAD SET= FX   FY   FZ   MX   MY   MZ
-
-        *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE 2022 R2          22.2     ***
-        Ansys Mechanical Enterprise
-        00000000  VERSION=LINUX x64     10:15:14  AUG 22, 2022 CP=      0.561
-
-            NODE  LABEL     REAL           IMAG
-               26  FZ     -10.0000000      0.00000000
-
-
         """
         command = f"LSREAD,{lsnum}"
         return self.run(command, **kwargs)

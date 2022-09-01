@@ -317,18 +317,18 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.iren._mouse_left_button_release(width, height)
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
-    mapdl.ksel("S", "KP", "", 1)
+    mapdl.ksel("S", "node", "", 1)
     if selection == "R" or selection == "U":
         point = (285 / 1024, 280 / 800)
-        mapdl.ksel("a", "kp", "", 2)  # Selects node 2
-    elif selection == "A":
-        point = (285 / 1024, 280 / 800)
+        mapdl.ksel("a", "node", "", 2)
+        selected = mapdl.ksel(
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        )  # Selects node 2
     else:
         point = (0.5, 0.5)
-
-    selected = mapdl.ksel(
-        selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
-    )
+        selected = mapdl.ksel(
+            selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        )  # Selects node 2
 
     assert selected
     assert isinstance(selected, list)
