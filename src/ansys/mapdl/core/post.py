@@ -418,7 +418,7 @@ class PostProcessing:
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl.get_array("ELEM", 1, "ETAB", tmp_table)[
+        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[
             self.selected_elements
         ]
 
