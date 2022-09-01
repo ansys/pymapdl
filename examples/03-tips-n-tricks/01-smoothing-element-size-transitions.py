@@ -17,7 +17,7 @@ First, start MAPDL as a service.
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
-print(mapdl)
+mapdl
 
 ###############################################################################
 # The Geometry (a box)
@@ -102,7 +102,9 @@ mapdl.aclear("ALL")
 for k in [k2, k3, k6, k7]:
     mapdl.kesize(k, 0.2)
 mapdl.amesh("ALL")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
+_ = mapdl.eplot(
+    vtk=True, show_edges=True, show_axes=False, line_width=2, background="w"
+)
 
 
 ###############################################################################

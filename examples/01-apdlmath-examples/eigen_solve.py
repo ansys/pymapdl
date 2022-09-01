@@ -171,7 +171,7 @@ plt.ylim([10e-13, 10e-7])
 plt.xlabel("Frequency #")
 plt.ylabel("Errors (%)")
 ax.bar(x, mapdl_acc, label="MAPDL Results")
-plt.show()
+
 
 ###############################################################################
 # stop mapdl

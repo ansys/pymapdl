@@ -96,7 +96,7 @@ mapdl.keyopt(1, 3, 3)  # Cubic shape function
 # Output control for values extrapolated to the element
 # and section nodes:
 # Same as KEYOPT(9) = 1 plus stresses and strains at all section nodes
-mapdl.keyopt(1, 9, 3, mute=True)
+_ = mapdl.keyopt(1, 9, 3)
 
 
 ###############################################################################

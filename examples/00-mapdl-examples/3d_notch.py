@@ -77,7 +77,7 @@ thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
 # Checking volume plot
-mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
+_ = mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
 
 
 ###############################################################################
@@ -124,7 +124,9 @@ if esize > thickness / 2:
 mapdl.esize()  # this is tough to automate
 mapdl.et(1, "SOLID186")
 mapdl.vsweep("all")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
+_ = mapdl.eplot(
+    vtk=True, show_edges=True, show_axes=False, line_width=2, background="w"
+)
 
 
 ###############################################################################
@@ -173,7 +175,7 @@ mapdl.nsel("S", "NODE", vmin=single_node, vmax=single_node)
 mapdl.f("ALL", "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
-mapdl.allsel(mute=True)
+_ = mapdl.allsel(mute=True)
 
 
 ###############################################################################
@@ -183,7 +185,7 @@ mapdl.allsel(mute=True)
 mapdl.run("/SOLU")
 mapdl.antype("STATIC")
 mapdl.solve()
-mapdl.finish(mute=True)
+_ = mapdl.finish()
 
 
 ###############################################################################
