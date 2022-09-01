@@ -1494,10 +1494,10 @@ def launch_mapdl(
             mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
         elif mode == "corba":
             try:
-                # pending deprecation to ansys-mapdl-corba
+                # pending deprication to ansys-mapdl-corba
                 from ansys.mapdl.core.mapdl_corba import MapdlCorba
-            except ModuleNotFoundError:  # pragma: no cover
-                raise ModuleNotFoundError(
+            except ImportError:
+                raise ImportError(
                     "To use this feature, install the MAPDL CORBA package"
                     " with:\n\npip install ansys_corba"
                 ) from None
