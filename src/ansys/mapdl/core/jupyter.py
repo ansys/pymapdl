@@ -49,7 +49,7 @@ def launch_mapdl_on_cluster(
         may segfault.
     loglevel : str, optional
         Sets which messages are printed to the console.  Default
-        ``'INFO'`` logs out all MAPDL messages, ``'WARNING'`` prints only
+        ``'INFO'`` logs out all MAPDL messages, ``'WARNING``` prints only
         messages containing MAPDL warnings, and ``'ERROR'`` prints only
         error messages.
     additional_switches : str, optional
