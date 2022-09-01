@@ -90,9 +90,6 @@ class DbNodes:
         lines.append(f"    Maximum node number:      {self.max_num}")
         return "\n".join(lines)
 
-    def __repr__(self) -> str:
-        return self.__str__()
-
     @property
     def _db(self):
         """Return the weakly referenced instance of db."""

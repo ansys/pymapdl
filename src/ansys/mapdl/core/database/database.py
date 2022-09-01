@@ -6,12 +6,17 @@ import time
 from warnings import warn
 import weakref
 
-from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
+try:
+    from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
+except ImportError:  # pragma: no cover
+    raise ImportError(
+        "Please upgrade the 'ansys.api.mapdl' package to at least v0.5.1."
+        "You can use 'pip install ansys-api-mapdl --upgrade"
+    )
+
 import grpc
 
 from ..mapdl_grpc import MapdlGrpc
-
-VALID_MAPDL_VERSIONS = [21.1, 21.2, 22.1, 22.2]
 
 
 class WithinBeginLevel:
@@ -200,34 +205,11 @@ class MapdlDb:
         --------
         >>> mapdl.db.start()
         """
-        # checking MAPDL API
-        from ansys.api.mapdl import __version__ as api_version
-
-        api_version = tuple(int(each) for each in api_version.split("."))
-
-        if api_version < (0, 5, 1):  # pragma: no cover
-            raise ImportError(
-                "Please upgrade the 'ansys.api.mapdl' package to at least v0.5.1."
-                "You can use 'pip install ansys-api-mapdl --upgrade"
-            )
-
-        ## Checking MAPDL versions
-        mapdl_version = self._mapdl.version
-        if mapdl_version not in VALID_MAPDL_VERSIONS:  # pragma: no cover
+        if self._mapdl._server_version != (0, 4, 1):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 
             raise MapdlVersionError(
-                f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
-                "Please check the online documentation regarding Database Module at 'mapdl.docs.pyansys.com'."
-            )
-
-        if self._mapdl._server_version < (0, 4, 1):
-            from ansys.mapdl.core.errors import MapdlVersionError
-
-            ver_ = ".".join([str(each) for each in self._mapdl._server_version])
-            raise MapdlVersionError(
-                f"This version of MAPDL gRPC API version ('ansys.api.mapdl' == {ver_}) is not compatible with 'database' module.\n"
-                "Please check the online documentation at 'mapdl.docs.pyansys.com' "
+                "This version of MAPDL is not compatible with 'database' module."
             )
 
         # only start if not already running
