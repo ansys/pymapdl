@@ -27,10 +27,7 @@ skip_requires_194 = pytest.mark.skipif(
 
 TWAIT = 90
 
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-
-valid_rver = [str(each) for each in SUPPORTED_ANSYS_VERSIONS]
-
+valid_rver = ["221", "212", "211", "202", "201", "195", "194", "193", "192", "191"]
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):

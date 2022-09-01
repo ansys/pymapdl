@@ -28,7 +28,6 @@ except ModuleNotFoundError:  # pragma: no cover
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import (
     change_default_ansys_path,
