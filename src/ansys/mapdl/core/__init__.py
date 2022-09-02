@@ -35,6 +35,7 @@ from ansys.mapdl.core.launcher import (
     close_all_local_instances,
     find_ansys,
     get_ansys_path,
+    get_available_ansys_installations,
     save_ansys_path,
 )
 

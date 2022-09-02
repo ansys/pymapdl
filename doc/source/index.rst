@@ -7,11 +7,11 @@ PyMAPDL Documentation |version|
 
    getting_started/index
    user_guide/index
-   api/index
    mapdl_commands/index
    examples/index
    learning/index
-   contributing
+   troubleshoot/index
+   contribution_and_api/index
 
 
 

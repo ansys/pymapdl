@@ -46,7 +46,8 @@ ROUT``, you can access it with:
 For a full listing of the methods and attributes available to the
 ``Parameters`` class, please reference the :ref:`ref_parameters_api`.
 
-
+Please visit :ref:`ref_numpy_arrays_in_mapdl` for further information about 
+PyMAPDL array limitations.
 
 .. _ref_special_named_param:
 
@@ -136,60 +137,3 @@ For example:
    >>> print(mapdl.parameters['_param_'])
    1.0
 
-
-.. _ref_numpy_arrays_in_mapdl:
-
-
-Issues when Importing and Exporting Numpy Arrays in MAPDL
-=========================================================
-
-Because of the way MAPDL is designed, there is no way to store an
-array where one or more dimension is zero.
-This can happens in Numpy arrays, where its first dimension can be
-set to zero.
-
-.. code:: python
-
-   >>> import numpy
-   >>> from ansys.mapdl.core import launch_mapdl
-   >>> mapdl = launch_mapdl()
-   >>> array40 = np.reshape([1, 2, 3, 4], (4,))
-   >>> array40
-   array([1, 2, 3, 4])
-
-
-These types of array dimensions will be always converted to ``1``.
-For example:
-
-.. code:: python
-
-   >>> mapdl.parameters['mapdlarray40'] = array40
-   >>> mapdl.parameters['mapdlarray40']
-   array([[1.],
-      [2.],
-      [3.],
-      [4.]])
-   >>> mapdl.parameters['mapdlarray40'].shape
-   (4, 1)
-
-This means that when you pass two arrays, one with the second axis equal
-to zero (e.g. ``array40``) and another one with the second axis equal
-to one, if later retrieved, they will have the same
-shape.
-
-.. code:: python
-
-   >>> array41 = np.reshape([1, 2, 3, 4], (4,1))
-   >>> array41
-   array([[1],
-      [2],
-      [3],
-      [4]])
-   >>> mapdl.parameters['mapdlarray41'] = array41
-   >>> mapdl.parameters['mapdlarray41']
-   array([[1.],
-      [2.],
-      [3.],
-      [4.]])
-   >>> np.allclose(mapdl.parameters['mapdlarray40'], mapdl.parameters['mapdlarray41'])
-   True
