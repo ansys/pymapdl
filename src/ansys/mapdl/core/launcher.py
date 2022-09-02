@@ -619,7 +619,7 @@ def get_start_instance(start_instance_default=True):
 
 
 def _get_available_base_ansys():
-    """Return a dictionary of available ANSYS versions with their base paths.
+    """Return a dictionary of available Ansys versions with their base paths.
 
     Notes
     -----
@@ -630,14 +630,14 @@ def _get_available_base_ansys():
 
     Returns
     -------
-    Return all installed ANSYS paths in Windows
+    Return all installed Ansys paths in Windows.
 
     >>> _get_available_base_ansys()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
      212: 'C:\\Program Files\\ANSYS Inc\\v212',
      -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
-    Within Linux
+    Return all installed Ansys paths in Linux.
 
     >>> _get_available_base_ansys()
     {194: '/usr/ansys_inc/v194',
