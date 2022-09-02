@@ -9,12 +9,64 @@ from ansys.mapdl.core.misc import is_float
 
 # Because the APDL version has empty arguments, whereas the PyMAPDL
 # doesn't have them. Hence the order of arguments is messed up.
-COMMANDS_TO_NOT_BE_CONVERTED = {"INT1"}
 
 FORMAT_OPTIONS = {
     "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
     "max-line-length": 100,
 }
+
+# This commands have "--" as one or some arguments
+COMMANDS_WITH_EMPTY_ARGS = [
+    "THOPT",
+    "TINTP",
+    "SESYMM",
+    "SETFGAP",
+    "SETRAN",
+    "SMALL",
+    "SNOPTION",
+    "SURESU",
+    "RACE",
+    "REALVAR",
+    "REMESH",
+    "QRDOPT",
+    "QUOT",
+    "PLMAP",
+    "PRED",
+    "PROD",
+    "/PBF",
+    "/PMORE",
+    "NLOG",
+    "/NERR",
+    "MAP",
+    "MORPH",
+    "MPCOPY",
+    "LARGE",
+    "LATT",
+    "IMAGIN",
+    "INT1",
+    "GMATRIX",
+    "FCLIST",
+    "FILEAUX2",
+    "FLUREAD",
+    "ENERSOL",
+    "ENSYM",
+    "ESYM",
+    "EXP",
+    "EXPAND",
+    "DERIV",
+    "DSPOPTION",
+    "CLOG",
+    "CONJUG",
+    "/CMAP",
+    "BCSOPTION",
+    "ANTYPE",
+    "ASBL",
+    "ATAN",
+]
+
+
+COMMANDS_TO_NOT_BE_CONVERTED = []
+COMMANDS_TO_NOT_BE_CONVERTED.extend(COMMANDS_WITH_EMPTY_ARGS)
 
 
 def convert_script(
