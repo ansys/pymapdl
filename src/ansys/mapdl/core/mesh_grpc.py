@@ -1,10 +1,10 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+from functools import wraps
 import os
 import time
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
-from ansys.mapdl.reader.mesh import Mesh
 import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
@@ -14,33 +14,79 @@ from ansys.mapdl.core.misc import supress_logging, threaded
 TMP_NODE_CM = "__NODE__"
 
 
-class MeshGrpc(Mesh):
+def requires_model(output=None):
+    def decorator(method):
+        """
+        This function wrap some methods to check if the model contains elements or nodes.
+        """
+
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            if self._has_nodes and self._has_elements:
+                return method(self, *args, **kwargs)
+            else:
+                if not output or output == "array":
+                    return np.array([])
+                elif output == "list":
+                    return []
+                elif output == "dict":
+                    return {}
+                else:  # pragma: no cover
+                    raise ValueError("Output type not allowed.")
+
+        return wrapper
+
+    return decorator
+
+
+class MeshGrpc:
     """Provides an interface to the gRPC mesh from MAPDL."""
 
     def __init__(self, mapdl):
         """Initialize grpc geometry data"""
-        super().__init__()
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("Must be initialized using MapdlGrpc class")
         self._mapdl_weakref = weakref.ref(mapdl)
+        mapdl._log.debug("Attached MAPDL object to MapdlMesh.")
 
-        # allow default chunk_size to be overridden
-        self._chunk_size = None
+        self.logger = mapdl._log
+        self._log = mapdl._log
 
-        # local cache
-        self._surf_cache = None
-        self._cache_nnum = None
-        self._cache_elem = None
-        self._cache_elem_off = None
-        self._cache_element_desc = None
-        self._grid_cache = None
-        self._log = self._mapdl._log
         self._ignore_cache_reset = False
+        self._reset_cache()
+
+    def __repr__(self):
+        txt = "ANSYS Mesh\n"
+        txt += f"  Number of Nodes:              {len(self.nnum)}\n"
+        txt += f"  Number of Elements:           {len(self.enum)}\n"
+        txt += f"  Number of Element Types:      {len(self.ekey)}\n"
+        txt += f"  Number of Node Components:    {len(self.node_components)}\n"
+        txt += f"  Number of Element Components: {len(self.element_components)}\n"
+        return txt
 
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
+
+    @property
+    def _surf(self):
+        """External surface"""
+        if self._surf_cache is None:
+            self._surf_cache = self._grid.extract_surface()
+        return self._surf_cache
+
+    @property
+    def _has_nodes(self):
+        """Returns True when has nodes"""
+        # if isinstance(self._nodes, np.ndarray):
+        # return bool(self._nodes.size)
+        return self.nodes.size != 0
+
+    @property
+    def _has_elements(self):
+        """Returns True when geometry has elements"""
+        return self._elem.size != 0
 
     def _set_log_level(self, level):
         """Wraps set_log_level"""
@@ -49,33 +95,44 @@ class MeshGrpc(Mesh):
     def _reset_cache(self):
         """Reset entire mesh cache"""
         if not self._ignore_cache_reset:
-            self._cache_nnum = None
+            self.logger.debug("Resetting cache")
+
             self._cache_elem = None
             self._cache_elem_off = None
             self._cache_element_desc = None
-            self._grid_cache = None
-            self._surf_cache = None
-            self._cached_elements = None
-
-            self._node_coord = None
-            self._enum = None
-            self._nnum = None
+            self._cache_nnum = None
+            self._cached_elements = None  # cached list of elements
+            self._chunk_size = None
             self._elem = None
+            self._elem_comps = {}
             self._elem_off = None
-            self._grid = None
-            self._node_angles = None
-            self._enum = None
-            self._rcon = None
-            self._mtype = None
-            self._etype_cache = None
+            self._enum = None  # cached element numbering
+            self._esys = None  # cached element coordinate system
             self._etype = None
-            self._keyopt = None
+            self._etype_cache = None  # cached ansys element type numbering
+            self._etype_id = None  # cached element type id
+            self._grid = None
+            self._grid_cache = None
+            self._keyopt = {}
+            self._mtype = None  # cached ansys material type
+            self._nnum = None
+            self._node_angles = None  # cached node angles
+            self._node_comps = {}
+            self._node_coord = None  # cached node coordinates
+            self._rcon = None  # cached ansys element real constant
+            self._rdat = None
+            self._rnum = None
+            self._secnum = None  # cached section number
+            self._surf_cache = None
+            self._tshape = None
+            self._tshape_key = None
 
     def _update_cache(self):
         """Threaded local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
+        self.logger.debug("Updating cache")
         # elements must have their underlying nodes selected to avoid
         # VTK segfault
         self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
@@ -105,6 +162,219 @@ class MeshGrpc(Mesh):
         time.sleep(0.05)
         self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
+
+    @threaded
+    def _update_cache_nnum(self):
+        if self._cache_nnum is None:
+            self.logger.debug("Updating nodes cache")
+            nnum = self._mapdl.get_array("NODE", item1="NLIST")
+            self._cache_nnum = nnum.astype(np.int32)
+        if self._cache_nnum.size == 1:
+            if self._cache_nnum[0] == 0:
+                self._cache_nnum = np.empty(0, np.int32)
+
+    @property
+    def _nnum(self):
+        """Return node number cache"""
+        self._update_cache_nnum().join()
+        return self._cache_nnum
+
+    @_nnum.setter
+    def _nnum(self, value):
+        self._cache_nnum = value
+
+    @threaded
+    def _update_cache_element_desc(self):
+        if self._cache_element_desc is None:
+            self.logger.debug("Updating elements (desc) cache")
+            self._cache_element_desc = self._load_element_types()
+
+    @property
+    def _ekey(self):
+        """Element key description"""
+        self._update_cache_element_desc().join()
+
+        # convert to ekey format
+        if self._cache_element_desc:
+            ekey = []
+            for einfo in self._cache_element_desc:
+                ekey.append(einfo[:2])
+            return np.vstack(ekey).astype(np.int32)
+        return np.array([])
+
+    @threaded
+    def _update_node_coord(self):
+        if self._node_coord is None:
+            self._node_coord = self._load_nodes()
+
+    @property
+    def _ans_etype(self):
+        """FIELD 1 : element type number"""
+        if self._etype_cache is None:
+            self._etype_cache = self._elem[self._elem_off[:-1] + 1]
+        return self._etype_cache
+
+    @property
+    def local(self):
+        return self._mapdl._local
+
+    @property
+    @requires_model()
+    def et_id(self):
+        """Element type id (ET) for each element."""
+        if self._etype_id is None:
+            etype_elem_id = self._elem_off[:-1] + 1
+            self._etype_id = self._elem[etype_elem_id]
+        return self._etype_id
+
+    @property
+    @requires_model()
+    def tshape(self):
+        """Tshape of contact elements."""
+        if self._tshape is None:
+            shape_elem_id = self._elem_off[:-1] + 7
+            self._tshape = self._elem[shape_elem_id]
+        return self._tshape
+
+    @property
+    @requires_model("dict")
+    def tshape_key(self):
+        """Dict with the mapping between element type and element shape.
+
+        TShape is only applicable to contact elements.
+        """
+        if self._tshape_key is None:
+            self._tshape_key = np.unique(np.vstack((self.et_id, self.tshape)), axis=1).T
+        return {elem_id: tshape for elem_id, tshape in self._tshape_key}
+
+    @property
+    @requires_model()
+    def material_type(self):
+        """Material type index of each element in the archive."""
+        # FIELD 0 : material reference number
+        if self._mtype is None:
+            self._mtype = self._elem[self._elem_off[:-1]]
+        return self._mtype
+
+    @property
+    @requires_model()
+    def etype(self):
+        """Element type of each element.
+
+        This is the ansys element type for each element.
+
+        Notes
+        -----
+        Element types are listed below.  Please see the APDL Element
+        Reference for more details:
+
+        https://www.mm.bme.hu/~gyebro/files/vem/ansys_14_element_reference.pdf
+        """
+        if self._etype is None:
+            arr = np.empty(self._ekey[:, 0].max() + 1, np.int32)
+            arr[self._ekey[:, 0]] = self._ekey[:, 1]
+            self._etype = arr[self._ans_etype]
+        return self._etype
+
+    @property
+    @requires_model()
+    def section(self):
+        """Section number"""
+        if self._secnum is None:
+            self._secnum = self._elem[self._elem_off[:-1] + 3]  # FIELD 3
+        return self._secnum
+
+    @property
+    @requires_model()
+    def element_coord_system(self):
+        """Element coordinate system number"""
+        if self._esys is None:
+            self._esys = self._elem[self._elem_off[:-1] + 4]  # FIELD 4
+        return self._esys
+
+    @property
+    @requires_model("list")
+    def elem(self):
+        """List of elements containing raw ansys information.
+
+        Each element contains 10 items plus the nodes belonging to the
+        element.  The first 10 items are:
+
+        - FIELD 0 : material reference number
+        - FIELD 1 : element type number
+        - FIELD 2 : real constant reference number
+        - FIELD 3 : section number
+        - FIELD 4 : element coordinate system
+        - FIELD 5 : death flag (0 - alive, 1 - dead)
+        - FIELD 6 : solid model reference
+        - FIELD 7 : coded shape key
+        - FIELD 8 : element number
+        - FIELD 9 : base element number (applicable to reinforcing elements only)
+        - FIELDS 10 - 30 : The nodes belonging to the element in ANSYS numbering.
+
+        """
+        if self._cached_elements is None:
+            self._cached_elements = np.split(self._elem, self._elem_off[1:-1])
+        return self._cached_elements
+
+    @property
+    def element_components(self):
+        """Element components for the archive.
+
+        Output is a dictionary of element components.  Each entry is an
+        array of MAPDL element numbers corresponding to the element
+        component.  The keys are element component names.
+        """
+        return self._elem_comps
+
+    @property
+    def node_components(self):
+        """Node components for the archive.
+
+        Output is a dictionary of node components.  Each entry is an
+        array of MAPDL node numbers corresponding to the node
+        component.  The keys are node component names.
+        """
+        return self._node_comps
+
+    @property
+    @requires_model()
+    def elem_real_constant(self):
+        """Real constant reference for each element.
+
+        Use the data within ``rlblock`` and ``rlblock_num`` to get the
+        real constant datat for each element.
+        """
+        # FIELD 2 : real constant reference number
+        if self._rcon is None:
+            self._rcon = self._elem[self._elem_off[:-1] + 2]
+        return self._rcon
+
+    @property
+    def ekey(self):
+        """Element type key
+
+        Array containing element type numbers in the first column and
+        the element types (like SURF154) in the second column.
+
+        """
+        return self._ekey
+
+    @property
+    def rlblock(self):
+        """Real constant data from the RLBLOCK."""
+        # if not self._rdat:
+        #     pass # todo: fix this
+        # return self._rdat
+        raise NotImplementedError()
+
+    @property
+    def rlblock_num(self):
+        """Indices from the real constant data"""
+        # if not self._rnum:
+        #     pass # todo: to fix
+        # return self._rnum
+        raise NotImplementedError()
 
     @property
     def nnum(self) -> np.ndarray:
@@ -212,30 +482,6 @@ class MeshGrpc(Mesh):
                 )
         return self._enum
 
-    @threaded
-    def _update_cache_nnum(self):
-        if self._cache_nnum is None:
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-            self._cache_nnum = nnum.astype(np.int32)
-        if self._cache_nnum.size == 1:
-            if self._cache_nnum[0] == 0:
-                self._cache_nnum = np.empty(0, np.int32)
-
-    @property
-    def _nnum(self):
-        """Return node number cache"""
-        self._update_cache_nnum().join()
-        return self._cache_nnum
-
-    @_nnum.setter
-    def _nnum(self, value):
-        self._cache_nnum = value
-
-    @threaded
-    def _update_cache_element_desc(self):
-        if self._cache_element_desc is None:
-            self._cache_element_desc = self._load_element_types()
-
     @property
     def key_option(self):
         """Key options of selected element types."""
@@ -251,28 +497,6 @@ class MeshGrpc(Mesh):
                 key_opt[einfo[0]] = ans_keyopt.T.tolist()
 
         return key_opt
-
-    @property
-    def _ekey(self):
-        """Element key description"""
-        self._update_cache_element_desc().join()
-
-        # convert to ekey format
-        if self._cache_element_desc:
-            ekey = []
-            for einfo in self._cache_element_desc:
-                ekey.append(einfo[:2])
-            return np.vstack(ekey).astype(np.int32)
-        return []
-
-    @_ekey.setter
-    def _ekey(self, value):
-        self._cache_element_desc = value
-
-    @threaded
-    def _update_node_coord(self):
-        if self._node_coord is None:
-            self._node_coord = self._load_nodes()
 
     @property
     def nodes(self) -> np.ndarray:
@@ -386,6 +610,9 @@ class MeshGrpc(Mesh):
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
         elem_raw = parse_chunks(chunks, np.int32)
+
+        if len(elem_raw) == 0:  # for empty mesh.
+            return np.array([]), np.array([])
         n_elem = elem_raw[0]
 
         # ignore zeros
@@ -480,3 +707,72 @@ class MeshGrpc(Mesh):
     @_grid.setter
     def _grid(self, value):
         self._grid_cache = value
+
+    def save(
+        self,
+        filename,
+        binary=True,
+        force_linear=False,
+        allowable_types=None,
+        null_unallowed=False,
+    ):
+        """Save the geometry as a vtk file
+
+        Parameters
+        ----------
+        filename : str, pathlib.Path
+            Filename of output file. Writer type is inferred from
+            the extension of the filename.
+
+        binary : bool, optional
+            If ``True``, write as binary, else ASCII.
+
+        force_linear : bool, optional
+            This parser creates quadratic elements if available.  Set
+            this to True to always create linear elements.  Defaults
+            to False.
+
+        allowable_types : list, optional
+            Allowable element types.  Defaults to all valid element
+            types in ``ansys.mapdl.reader.elements.valid_types``
+
+            See ``help(ansys.mapdl.reader.elements)`` for available element types.
+
+        null_unallowed : bool, optional
+            Elements types not matching element types will be stored
+            as empty (null) elements.  Useful for debug or tracking
+            element numbers.  Default False.
+
+        Notes
+        -----
+        Binary files write much faster than ASCII and have a smaller
+        file size.
+        """
+        grid = self._parse_vtk(
+            allowable_types=allowable_types,
+            force_linear=force_linear,
+            null_unallowed=null_unallowed,
+        )
+        if grid:
+            return grid.save(str(filename), binary=binary)
+        else:
+            raise ValueError("The mesh is empty, hence no file has been written.")
+
+    def _parse_vtk(
+        self,
+        allowable_types=None,
+        force_linear=False,
+        null_unallowed=False,
+        fix_midside=True,
+        additional_checking=False,
+    ):
+        from ansys.mapdl.core.mesh.mesh import _parse_vtk
+
+        return _parse_vtk(
+            self,
+            allowable_types,
+            force_linear,
+            null_unallowed,
+            fix_midside,
+            additional_checking,
+        )

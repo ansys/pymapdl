@@ -1110,7 +1110,7 @@ def test_cwd(mapdl, tmpdir):
         assert mapdl.directory == str(tmpdir).replace("\\", "/")
 
         wrong_path = "wrong_path"
-        with pytest.raises(FileNotFoundError, match="working directory"):
+        with pytest.raises(MapdlCommandIgnoredError, match="working directory"):
             mapdl.directory = wrong_path
 
     finally:
@@ -1385,6 +1385,16 @@ def test_equal_in_comments_and_title(mapdl):
     mapdl.title("This is '=' ")
 
 
+@pytest.mark.xfail
+def test_result_file(mapdl, solved_box):
+    assert mapdl.result_file
+    assert isinstance(mapdl.result_file, str)
+
+
+def test_empty_result_file(mapdl, cleared):
+    assert mapdl.result_file is None
+
+
 @skip_in_cloud
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl._result_file
@@ -1520,3 +1530,26 @@ def test_lsread(mapdl, cleared):
     assert "No nodal" in mapdl.flist()
     mapdl.lsread(mute=True)
     assert "No nodal" not in mapdl.flist()
+
+
+def test_get_available_ansys_installations():
+    from ansys.mapdl.core.launcher import (
+        _get_available_base_ansys,
+        get_available_ansys_installations,
+    )
+
+    _get_doc = _get_available_base_ansys.__doc__
+    get_doc = get_available_ansys_installations.__doc__
+
+    assert _get_doc == get_doc.replace(
+        "get_available_ansys_installations", "_get_available_base_ansys"
+    )
+    assert _get_available_base_ansys() == get_available_ansys_installations()
+
+
+def test_get_fallback(mapdl, cleared):
+    with pytest.raises(ValueError, match="There are no NODES defined"):
+        mapdl.get_value("node", 0, "num", "maxd")
+
+    with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
+        mapdl.get_value("elem", 0, "num", "maxd")

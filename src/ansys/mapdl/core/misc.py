@@ -1,4 +1,5 @@
 """Module for miscellaneous functions and methods"""
+from enum import Enum
 from functools import wraps
 import importlib
 import inspect
@@ -29,6 +30,56 @@ except ModuleNotFoundError:  # pragma: no cover
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+
+
+class ROUTINES(Enum):
+    """MAPDL routines."""
+
+    BEGIN_LEVEL = 0
+    PREP7 = 17
+    SOLUTION = 21
+    POST1 = 31
+    POST26 = 36
+    AUX2 = 52
+    AUX3 = 53
+    AUX12 = 62
+    AUX15 = 65
+
+
+def check_valid_routine(routine):
+    """Check if a routine is valid.
+
+    Acceptable aliases for "Begin level" include "begin".
+
+    Parameters
+    ----------
+    routine : str
+        Routine. For example "PREP7".
+
+    Returns
+    -------
+    bool
+        ``True`` when routine is valid.
+
+    Raises
+    ------
+    ValueError
+        Raised when a routine is invalid.
+
+    """
+    if routine.lower().startswith("begin"):
+        return True
+    if not hasattr(ROUTINES, routine.upper()):
+        valid_routines = []
+        for item in dir(ROUTINES):
+            if not item.startswith("_") and not item.startswith("BEGIN"):
+                valid_routines.append(item)
+        valid_routines.append("Begin level")
+        valid_routines_str = "\n".join([f'\t- "{item}"' for item in valid_routines])
+        raise ValueError(
+            f"Invalid routine {routine}. Should be one of:\n{valid_routines_str}"
+        )
+    return True
 
 
 def get_ansys_bin(rver):
@@ -159,11 +210,11 @@ class Plain_Report:
         mapdl_install = _get_available_base_ansys()
         if not mapdl_install:
             lines.append("Unable to locate any Ansys installations")
-        else:
+        else:  # pragma: no cover
             lines.append("Version   Location")
             lines.append("------------------")
             for key in sorted(mapdl_install.keys()):
-                lines.append(f"{key}       {mapdl_install[key]}")
+                lines.append(f"{abs(key)}       {mapdl_install[key]}")
         install_info = "\n".join(lines)
 
         env_info_lines = [

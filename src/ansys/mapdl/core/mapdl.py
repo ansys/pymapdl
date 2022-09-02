@@ -37,6 +37,7 @@ from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
     allow_pickable_points,
+    check_valid_routine,
     last_created,
     load_file,
     random_string,
@@ -1902,6 +1903,11 @@ class _MapdlCore(Commands):
         return read_binary(result_path)
 
     @property
+    def result_file(self):
+        """Return the RST file path."""
+        return self._result_file
+
+    @property
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
@@ -1916,20 +1922,23 @@ class _MapdlCore(Commands):
         except Exception:  # check if rth file exists
             ext = ""
 
-        if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
+        if self._local:  # pragma: no cover
+            if ext == "":
+                rth_file = os.path.join(self.directory, f"{filename}.rth")
+                rst_file = os.path.join(self.directory, f"{filename}.rst")
 
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
+                if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+                    return last_created([rth_file, rst_file])
+                elif os.path.isfile(rth_file):
+                    return rth_file
+                elif os.path.isfile(rst_file):
+                    return rst_file
+            else:
+                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                if os.path.isfile(filename):
+                    return filename
         else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
-                return filename
+            return os.path.join(filename, ext)  # pragma: no cover
 
     @property
     def _distributed_result_file(self):
@@ -2826,11 +2835,9 @@ class _MapdlCore(Commands):
             os.remove(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
-        """Load a table from Python to MAPDL.
+        """Load a table from Python to into MAPDL.
 
-        Uses ``TREAD`` to transfer the table.
-        It should be noticed that PyMAPDL when query a table, it will return
-        the table but not its axis (meaning it will return ``table[1:,1:]``).
+        Uses :func:`tread <Mapdl.tread>` to transfer the table.
 
         Parameters
         ----------
@@ -3010,9 +3017,7 @@ class _MapdlCore(Commands):
     @supress_logging
     def directory(self, path):
         """Change the directory using ``Mapdl.cwd``"""
-        self.cwd(
-            path
-        )  # this has been wrapped in Mapdl to show a warning if the file does not exist.
+        self.cwd(path)
 
     @property
     def _lockfile(self):
@@ -3670,14 +3675,6 @@ class _MapdlCore(Commands):
                     raise MapdlRuntimeError(
                         f"\n\nError in instance {self.name}\n\n" + error_message
                     )
-
-    @wraps(Commands.lsread)
-    def lsread(self, *args, **kwargs):
-        """Wraps the ``LSREAD`` which does not work in interactive mode."""
-        self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
-        with self.non_interactive:
-            super().lsread(*args, **kwargs)
-        return self._response.strip()
 
     @wraps(Commands.lsread)
     def lsread(self, *args, **kwargs):

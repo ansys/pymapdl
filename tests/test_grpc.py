@@ -6,6 +6,7 @@ import pytest
 
 from ansys.mapdl.core import examples, launch_mapdl
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -122,7 +123,7 @@ def test_clear_multiple(mapdl):
 
 
 def test_invalid_get(mapdl):
-    with pytest.raises(ValueError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -343,23 +344,19 @@ def test_download_recursive(mapdl, tmpdir):
 def test_download_project(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(target_dir=target_dir)
-    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    assert "log" in files_extensions
-    assert "out" in files_extensions
-    assert "err" in files_extensions
-    assert "lock" in files_extensions
+    expected = {"log", "out", "err", "lock"}
+    assert expected.intersection(files_extensions) == expected
 
 
 def test_download_project_extensions(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(extensions=["log", "out"], target_dir=target_dir)
-    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    assert "log" in files_extensions
-    assert "out" in files_extensions
-    assert "err" not in files_extensions
-    assert "lock" not in files_extensions
+    expected = {"log", "out", "err", "lock"}
+    assert expected.intersection(files_extensions) == {"log", "out"}
 
 
 def test__channel_str(mapdl):

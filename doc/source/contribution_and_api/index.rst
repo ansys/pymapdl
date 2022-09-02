@@ -1,8 +1,9 @@
 .. _ref_contributing:
 
-============
-Contributing
-============
+====================
+Contributing and API
+====================
+
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <https://dev.docs.pyansys.com/overview/contributing.html>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
@@ -12,8 +13,10 @@ contribute to PyMAPDL.
  
 The following contribution information is specific to PyMAPDL.
 
+
 Cloning the PyMAPDL Repository
-------------------------------
+==============================
+
 Run this code to clone and install the latest version of PyMAPDL in development mode:
 
 .. code::
@@ -25,7 +28,8 @@ Run this code to clone and install the latest version of PyMAPDL in development 
 
 
 Posting Issues
---------------
+==============
+
 Use the `PyMAPDL Issues <https://github.com/pyansys/pymapdl/issues>`_
 page to submit questions, report bugs, and request new features. When possible, we
 recommend that you use these issue templates:
@@ -38,7 +42,8 @@ If your issue does not fit into one of these categories, create your own issue.
 To reach the project support team, email `pyansys.support@ansys.com <pyansys.support@ansys.com>`_.
 
 Viewing PyMAPDL Documentation
------------------------------
+=============================
+
 Documentation for the latest stable release of PyMAPDL is hosted at
 `PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.
 
@@ -47,7 +52,8 @@ Documentation for the latest development version, which tracks the
 This version is automatically kept up to date via GitHub actions.
 
 Testing MAPDL
--------------
+=============
+
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
@@ -72,7 +78,8 @@ MAPDL service by default when the ``launch_mapdl`` function is used.
 
 
 Code Style
-----------
+==========
+
 PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
 <https://dev.docs.pyansys.com>`_ and implements style checking using
 `pre-commit <https://pre-commit.com/>`_.
@@ -94,3 +101,38 @@ This way, it's not possible for you to push code that fails the style checks. Fo
   isort....................................................................Passed
   flake8...................................................................Passed
   codespell................................................................Passed
+
+
+.. _ref_index_api:
+
+API Reference
+=============
+This section gives an overview of the API of several public PyMAPDL
+classes, functions, and attributes.
+
+These methods may include some MAPDL commands but are generally
+specific to pymapdl specific methods and classes (i.e. methods that
+extend existing MAPDL methods in a pythonic manner).  For classic
+MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
+
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   commands
+   database
+   geometry
+   helper
+   inline
+   logging
+   mapdl
+   math
+   mesh
+   parameters
+   plotting
+   pool
+   post
+   solution
+   xpl
+   

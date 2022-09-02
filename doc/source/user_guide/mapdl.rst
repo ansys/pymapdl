@@ -361,6 +361,12 @@ Will write the following to ``"apdl.log"``
 This allows for the translation of a Python script to an APDL script
 except for conditional statements, loops, or functions.
 
+Using ``lgwrite``
+~~~~~~~~~~~~~~~~~
+Alternatively, if you just want the database command output, you can use
+:func:`Mapdl.lgwrite <Mapdl.ansys.mapdl.core.Mapdl.lgwrite>` to write all the
+database command log to a file.
+
 
 Interactive Breakpoint
 ----------------------
