@@ -346,7 +346,7 @@ def test_download_project(mapdl, tmpdir):
     mapdl.download_project(target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    expected = {"log", "out", "err", "lock"}
+    expected = {"log", "out", "err"}
     assert expected.intersection(files_extensions) == expected
 
 
