@@ -1388,7 +1388,7 @@ class MapdlGrpc(_MapdlCore):
         ]
 
         # since we can't directly run /INPUT, we have to write a
-        # temporary input file that tells mainan to read the input
+        # temporary input file that tells MAPDL to read the input
         # file.
         id_ = random_string()
         tmp_name = f"_input_tmp_{id_}_.inp"
