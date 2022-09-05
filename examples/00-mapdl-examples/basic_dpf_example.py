@@ -18,6 +18,7 @@ included examples file.
 
 """
 import os
+import tempfile
 
 from ansys.dpf import core as dpf
 
@@ -36,9 +37,9 @@ output = mapdl.input(vm5)
 print(output)
 
 # If you are working locally, you don't need to perform the following steps
-current_folder = os.getcwd()
+temp_directory = tempfile.gettempdir()
 # Downloading RST file to the current folder
-rst_path = mapdl.download_result(current_folder)
+rst_path = mapdl.download_result(temp_directory)
 
 ###############################################################################
 # Next, open the generated RST file and print out the ``model`` object.  The
