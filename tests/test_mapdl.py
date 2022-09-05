@@ -526,6 +526,11 @@ def test_apdl_logging(mapdl, tmpdir):
         mapdl.slashsolu()
         mapdl.prep7()
 
+    file_input = str(tmp_dir.join("input.inp"))
+    str_not_in_apdl_logger = "/com, this input should not appear"
+    with open(file_input, "w") as fid:
+        fid.write(str_not_in_apdl_logger)
+
     mapdl._apdl_log.flush()
     with open(file_path, "r") as fid:
         log = fid.read()
@@ -537,6 +542,24 @@ def test_apdl_logging(mapdl, tmpdir):
     assert "This is a comment" in log
     assert "This is a non-interactive command" in log
     assert "/SOLU" in log
+
+    # The input of the ``non_interactive`` should not write to the apdl_logger.
+    assert "/INP," not in log
+    assert "'input.inp'" not in log
+    assert "/OUT,_input_tmp_" not in log
+    assert str_not_in_apdl_logger not in log
+
+    # Testing /input, i
+    mapdl.input(file_input)
+    mapdl._apdl_log.flush()
+    with open(file_path, "r") as fid:
+        log = fid.read()
+
+    # Testing /input #
+    assert "/INP," in log
+    assert "'input.inp'" in log
+    assert "/OUT,_input_tmp_" in log
+    assert str_not_in_apdl_logger not in log
 
     # Closing
     mapdl._close_apdl_log()
