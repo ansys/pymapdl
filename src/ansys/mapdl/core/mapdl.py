@@ -1912,17 +1912,13 @@ class _MapdlCore(Commands):
         """Path of the non-distributed result file"""
         try:
             filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
             ext = self.inquire("", "RSTEXT")
-            if not ext:
-                ext = "rst"
-        except Exception:  # check if rth file exists
-            ext = ""
+        except Exception:
+            ext = "rst"
 
         if self._local:  # pragma: no cover
             if ext == "":
@@ -1943,7 +1939,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return f"{filename}.{ext}"  # pragma: no cover
+            return f"{filename}.{ext}"
 
     @property
     def _distributed_result_file(self):
