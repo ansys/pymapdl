@@ -17,7 +17,6 @@ included examples file.
 
 
 """
-import os
 import tempfile
 
 from ansys.dpf import core as dpf
@@ -115,6 +114,3 @@ model.metadata.meshed_region.plot(fields, cpos="xy")
 #
 # Stop mapdl
 mapdl.exit()
-
-# Deleting RST file
-os.remove(rst_path)
