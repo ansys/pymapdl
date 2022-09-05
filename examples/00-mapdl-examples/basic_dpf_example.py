@@ -58,7 +58,10 @@ rst_path = mapdl.download_result(temp_directory)
 # want to connect to an existing server (either local or remote), use
 # :func:`dpf.connect_to_server`.
 
-model = dpf.Model(rst_path)
+dpf.connect_to_server()
+
+server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+model = dpf.Model(server_file_path)
 print(model)
 
 ###############################################################################
