@@ -3,7 +3,7 @@ import os
 
 from ansys.dpf import core as dpf_core
 
-DPF_PORT = os.environ.get("DPF_PORT", 21002)
+DPF_PORT = os.environ.get("DPF_PORT", 21002)  # Set in ci.yaml
 
 
 def test_dpf_connection():
