@@ -1911,17 +1911,22 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("", "RSTFILE")
+            with self.run_as_routine("POST1"):
+                filename = self.inquire("", "RSTFILE")
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire("", "RSTEXT")
+            with self.run_as_routine("POST1"):
+                ext = self.inquire("", "RSTEXT")
         except Exception:
             ext = "rst"
 
         if self._local:  # pragma: no cover
             if ext == "":
+                # Case where there is RST extension because it is thermal for example
+                filename = self.jobname
+
                 rth_file = os.path.join(self.directory, f"{filename}.rth")
                 rst_file = os.path.join(self.directory, f"{filename}.rst")
 
