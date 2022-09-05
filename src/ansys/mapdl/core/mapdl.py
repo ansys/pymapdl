@@ -1913,13 +1913,13 @@ class _MapdlCore(Commands):
         try:
             with self.run_as_routine("POST1"):
                 filename = self.inquire("", "RSTFILE")
-        except Exception:
+        except Exception:  # pragma: no cover
             filename = self.jobname
 
         try:
             with self.run_as_routine("POST1"):
                 ext = self.inquire("", "RSTEXT")
-        except Exception:
+        except Exception:  # pragma: no cover
             ext = "rst"
 
         if self._local:  # pragma: no cover
