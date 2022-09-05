@@ -1911,16 +1911,14 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            with self.run_as_routine("POST1"):  # needs to be run in post1
-                filename = self.inquire("", "RSTFILE")
+            filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            with self.run_as_routine("POST1"):
-                ext = self.inquire("", "RSTEXT")
+            ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
             ext = ""
 
