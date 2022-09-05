@@ -1,4 +1,4 @@
-"""Test the DPF implementation"""
+# Test the DPF implementation
 from ansys.dpf import core as dpf_core
 
 
