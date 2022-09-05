@@ -1,4 +1,4 @@
-Sphinx==5.1.1
+ansys-dpf-core==0.6.0
 ansys-mapdl-reader==0.52.0
 ansys-sphinx-theme==0.5.2
 grpcio==1.43.0
@@ -19,6 +19,7 @@ sphinx-autodoc-typehints==1.19.2
 sphinx-copybutton==0.5.0
 sphinx-gallery==0.11.1
 sphinx-notfound-page==0.8.3
+Sphinx==5.1.1
 sphinxcontrib-websupport==1.2.4
 sphinxemoji==0.2.0
 vtk==9.0.3
