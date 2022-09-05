@@ -1911,14 +1911,16 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("", "RSTFILE")
+            with self.run_as_routine("POST1"):  # needs to be run in post1
+                filename = self.inquire("", "RSTFILE")
             if not filename:
                 filename = self.jobname
         except Exception:
             filename = self.jobname
 
         try:
-            ext = self.inquire("", "RSTEXT")
+            with self.run_as_routine("POST1"):
+                ext = self.inquire("", "RSTEXT")
         except Exception:  # check if rth file exists
             ext = ""
 
@@ -1926,6 +1928,9 @@ class _MapdlCore(Commands):
             if ext == "":
                 rth_file = os.path.join(self.directory, f"{filename}.rth")
                 rst_file = os.path.join(self.directory, f"{filename}.rst")
+
+                if self._prioritize_thermal and os.path.isfile(rth_file):
+                    return rth_file
 
                 if os.path.isfile(rth_file) and os.path.isfile(rst_file):
                     return last_created([rth_file, rst_file])
