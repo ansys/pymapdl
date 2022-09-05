@@ -205,6 +205,10 @@ jobs:
         run: |
           pip install -r requirements/requirements_docs.txt
 
+      - name: DPF Server Activation
+        run: |
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1 && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
       - name: Build Documentation
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
@@ -350,7 +354,7 @@ jobs:
 
       - name: DPF Server Activation
         run: |
-          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1 && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |
