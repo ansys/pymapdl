@@ -358,7 +358,7 @@ jobs:
 
       - name: Unit Testing
         run: |
-          xvfb-run pytest -v --durations=0 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --durations=10 --maxfail=10 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         if: matrix.mapdl-version == 'v21.2.1'
