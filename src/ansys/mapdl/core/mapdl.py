@@ -1943,7 +1943,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return os.path.join(filename, ext)  # pragma: no cover
+            return f"{filename}.{ext}"  # pragma: no cover
 
     @property
     def _distributed_result_file(self):
