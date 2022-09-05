@@ -14,8 +14,6 @@ env:
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  DPF_START_SERVER: False
-  DPF_PORT: 50054
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   # Following env vars when changed will "reset" the mentioned cache,
@@ -344,15 +342,9 @@ jobs:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
-      - name: Unit Testing Requirements Installation
+      - name: Unit Testing
         run: |
           pip install -r requirements/requirements_tests.txt
-
-      - name: DPF Server Activation
-        run: |
-          docker run -it --rm -v `pwd`:/dpf -p 50054:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
-
-      - name: Unit Testing
           xvfb-run pytest -v --durations=0 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
