@@ -202,6 +202,10 @@ An example of this file is noted below:
       /lib64/libc.so.6(__libc_start_main+0xf5) [0x7fa39b286555]
       /ansys_inc/v211/ansys/bin/linx64/ansys.e() [0x4100f9]
 
+You can submit this file to ANSYS customer support to help to improving MAPDL.
+It is also recommended to attach with this file any other useful or related file, such as
+input files (``inp``, ``dat``), models (``db``), error files (``err``), output files (``out``), etc.
+
 To include this feature in your docker image just add the ``ANS_DEBUG_CRASH``
 environment variable to your ``docker run`` command as:
 
