@@ -1392,7 +1392,7 @@ def test_result_file(mapdl, solved_box):
 
 
 def test_empty_result_file(mapdl, cleared):
-    assert mapdl.result_file is None
+    assert mapdl.result_file is "file.rst"
 
 
 @skip_in_cloud

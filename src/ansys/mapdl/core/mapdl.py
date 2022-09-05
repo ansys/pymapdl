@@ -1919,6 +1919,8 @@ class _MapdlCore(Commands):
 
         try:
             ext = self.inquire("", "RSTEXT")
+            if not ext:
+                ext = "rst"
         except Exception:  # check if rth file exists
             ext = ""
 
