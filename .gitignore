@@ -89,3 +89,6 @@ venv/
 
 # Pycharm local settings
 .idea/
+
+.vs
+.gitignore
