@@ -15,7 +15,7 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
-  DPF_PORT: 21002
+  DPF_PORT: 50054
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   # Following env vars when changed will "reset" the mentioned cache,
@@ -350,7 +350,7 @@ jobs:
 
       - name: DPF Server Activation
         run: |
-          docker run -it --rm -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1 > dpf_log.log && echo "DPF Server Started at port ${{ env.DPF_PORT }} "
+          docker run -it --rm -v `pwd`:/dpf -p 50054:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
 
       - name: Unit Testing
         run: |
