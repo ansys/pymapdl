@@ -345,7 +345,7 @@ jobs:
       - name: Unit Testing
         run: |
           pip install -r requirements/requirements_tests.txt
-          xvfb-run pytest -v --durations=0 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --maxfail=10 --durations=0 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         if: matrix.mapdl-version == 'v21.2.1'
