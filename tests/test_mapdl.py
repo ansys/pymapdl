@@ -555,7 +555,7 @@ def test_apdl_logging(mapdl, tmpdir):
     with open(file_path, "r") as fid:
         log = fid.read()
 
-    # Testing /input #
+    # Testing /input PR #1455
     assert "/INP," in log
     assert "'input.inp'" in log
     assert "/OUT,_input_tmp_" in log
