@@ -161,63 +161,6 @@ You can do that in your ``docker run`` command as:
       $IMAGE
 
 
-Using ``ANS_DEBUG_CRASH`` environment variable for debugging
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-*This an internal procedure not intended for public use, please be cautious*
-
-You can run the MAPDL process with the environment variable ``ANS_DEBUG_CRASH=1``,
-in that case, MAPDL creates a crash file named after the jobname (i.e. ``file.crash``).
-This file contains information about the crash such as the memory object and files called.
-An example of this file is noted below:
-
-.. code:: text
-
-  Dumping the crash data for the current analysis.
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0x4432f8c) [0x7fa3b1fa5f8c]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0xc63bbb6) [0x7fa3ba1aebb6]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(sytrap7_+0x13) [0x7fa3b6c60483]
-      /ansys_inc/v211/tp/IntelCompiler/2019.3.199/linx64/lib/intel64/libifport.so.5(portlib_handler+0x2d) [0x7fa3d7e8c1bd]
-      /lib64/libc.so.6(+0x36400) [0x7fa39b29a400]
-      /ansys_inc/v211/commonfiles/MPI/Intel/2018.3.222/linx64/lib/release/libmpi.so.12(+0x12f287) [0x7fa399fa5287]
-      /ansys_inc/v211/commonfiles/MPI/Intel/2018.3.222/linx64/lib/release/libmpi.so.12(+0x12dea6) [0x7fa399fa3ea6]
-      /ansys_inc/v211/commonfiles/MPI/Intel/2018.3.222/linx64/lib/release/libmpi.so.12(+0x13fcbc) [0x7fa399fb5cbc]
-      /ansys_inc/v211/commonfiles/MPI/Intel/2018.3.222/linx64/lib/release/libmpi.so.12(+0x35e6a0) [0x7fa39a1d46a0]
-      /ansys_inc/v211/commonfiles/MPI/Intel/2018.3.222/linx64/lib/release/libmpi.so.12(PMPI_Send+0x40f) [0x7fa39a2c1acf]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(cMPI_Send+0x98) [0x7fa3b314efd8]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(cansMPI_Send+0x6) [0x7fa3b2b84926]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0x8112003) [0x7fa3b5c85003]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0xab4c4a0) [0x7fa3b86bf4a0]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0x560133c) [0x7fa3b317433c]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(fastbegin_+0x142) [0x7fa3b5d41592]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0xbea4fdf) [0x7fa3b9a17fdf]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(+0xc558a96) [0x7fa3ba0cba96]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(slvrun_+0x792) [0x7fa3b9c2c9b2]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(solvcl_+0x2086) [0x7fa3b9ce9b36]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(slvdriver_+0x1d) [0x7fa3b9c0885d]
-      /ansys_inc/v211/ansys/lib/linx64/libansys.so(modcmd_+0x18b) [0x7fa3b7916fdb]
-      /ansys_inc/v211/ansys/bin/linx64/ansys.e() [0x410d15]
-      /ansys_inc/v211/ansys/bin/linx64/ansys.e(MAIN__+0xe8) [0x4102e8]
-      /ansys_inc/v211/ansys/bin/linx64/ansys.e(main+0x32) [0x4101e2]
-      /lib64/libc.so.6(__libc_start_main+0xf5) [0x7fa39b286555]
-      /ansys_inc/v211/ansys/bin/linx64/ansys.e() [0x4100f9]
-
-You can submit this file to ANSYS customer support to help to improving MAPDL.
-It is also recommended to attach with this file any other useful or related file, such as
-input files (``inp``, ``dat``), models (``db``), error files (``err``), output files (``out``), etc.
-
-To include this feature in your docker image just add the ``ANS_DEBUG_CRASH``
-environment variable to your ``docker run`` command as:
-
-.. code:: bash
-
-  docker run \
-      --restart always \
-      -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
-      -e ANS_DEBUG_CRASH=1 \
-      -p 50052:50052 \
-      $IMAGE
-
 Getting useful files after abnormal termination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
