@@ -35,7 +35,7 @@ ALLOWABLE_LICENSES = list(LICENSES)
 # TODO: Implement a warning for insufficient license rights.
 
 
-def check_license_file(timeout=30, verbose=False):
+def check_license_file(timeout=30, verbose=False, notify_at_second=3):
     """Check the output of the license client log for connection error.
 
     Expect type of errors with 'DENIED' in the header such as:
@@ -74,7 +74,17 @@ def check_license_file(timeout=30, verbose=False):
     file_iterator = get_licdebug_tail(licdebug_file)
 
     max_time = time.time() + timeout
+    notification_time = time.time() + notify_at_second
+    notification_bool = True
+
     while time.time() < max_time:
+        if time.time() > notification_time and notification_bool:
+            print(
+                "PyMAPDL is taking more time than expected to connect to an MAPDL session.\n"
+                "We are checking the available licenses..."
+            )
+            notification_bool = False
+
         msg = next(file_iterator)
         if msg:
             LOG.info(msg)
