@@ -89,7 +89,7 @@ mapdl.csys(2)
 mapdl.asel("s", "loc", "x", 0.5)
 mapdl.csys(0)
 mapdl.nsla("S", 1)
-mapdl.sf("all", "SHLD", 0.05)
+mapdl.sf("all", "SHLD", 5)
 mapdl.allsel()
 
 ###############################################################################
