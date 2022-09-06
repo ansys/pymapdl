@@ -167,8 +167,9 @@ jobs:
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
           DEBUG_FLAG: ${{ secrets.DEBUG_FLAG }}
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+
 
       - name: Retrieve PyMAPDL version
         run: |
