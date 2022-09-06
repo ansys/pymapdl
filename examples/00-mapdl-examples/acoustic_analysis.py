@@ -130,28 +130,26 @@ print(mapdl.set("LIST"))
 
 mapdl.post26()
 freqs = mapdl.post_processing.time_values[::2]
+node_ = 276
 
-nodes = [276, 400]
+# Getting results
+node_pressure = mapdl.nsol(3, node_, "spl")
+node_sound_pressure_level = mapdl.nsol(4, node_, "SPLA")
 
-for node_ in nodes:
+# Plotting
+fig, ax = plt.subplots(1, 2)
 
-    # Getting results
-    node_pressure = mapdl.nsol(3, node_, "spl")
-    node_sound_pressure_level = mapdl.nsol(4, node_, "SPLA")
+ax[0].plot(freqs, node_pressure)
+ax[0].set_xlabel("Frequencies (Hz)")
+ax[0].set_ylabel("Sound pressure level (Pa)")
 
-    # Plotting
-    fig, ax = plt.subplots(1, 2)
+ax[1].plot(freqs, node_sound_pressure_level, label="Nodal Sound Pressure")
+ax[1].set_xlabel("Frequencies (Hz)")
+ax[1].set_ylabel("A-weighted sound\npressure level (dBA)")
 
-    ax[0].plot(freqs, node_pressure)
-    ax[0].set_xlabel("Frequencies (Hz)")
-    ax[0].set_ylabel("Sound pressure level (Pa)")
-
-    ax[1].plot(freqs, node_sound_pressure_level, label="Nodal Sound Pressure")
-    ax[1].set_xlabel("Frequencies (Hz)")
-    ax[1].set_ylabel("A-weighted sound pressure level (dBA)")
-
-    fig.suptitle(f"Node {node_} Results")
-    fig.show()
+fig.suptitle(f"Node {node_} Results")
+fig.tight_layout()
+fig.show()
 
 ###############################################################################
 # Stop MAPDL
