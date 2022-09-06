@@ -793,6 +793,18 @@ def test_general_plotter_returns(mapdl, static_solve):
     )
 
 
+def test_time_frequency_values(mapdl, contact_solve):
+    assert np.allclose(
+        mapdl.post_processing.time_values, mapdl.post_processing.frequency_values
+    )
+
+
+def test_time_values(mapdl, contact_solve):
+    assert np.allclose(
+        mapdl.post_processing.time_values, np.array([0.2, 0.4, 0.7, 1.0])
+    )
+
+
 ###############################################################################
 # @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
 # def test_nodal_thermal_component_strain(mapdl, thermal_solve, comp):

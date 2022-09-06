@@ -169,8 +169,30 @@ class PostProcessing:
          75.20949687626468]
         """
         self._mapdl.post1(mute=True)
-        list_rsp = self._mapdl.set("LIST")
+        with self._mapdl.run_as_routine("POST1"):
+            list_rsp = self._mapdl.set("LIST")
         return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
+
+    @property
+    def frequency_values(self) -> np.ndarray:
+        """Return an array of the frequency values for all result sets.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array of the frequency values for all result sets.
+
+        Examples
+        --------
+        Get all the time values after loading POST1.
+
+        >>> mapdl.post1()
+        >>> mapdl.post_processing.frequency_values
+        array([ 220.,  240.,  260.,  280.,  300.,  320.,  340.,  360.,  380.,
+        400.,  420.,  440.])
+        """
+        # Because in MAPLD is the same.
+        return self.time_values
 
     def _reset_cache(self):
         """Reset local cache"""
