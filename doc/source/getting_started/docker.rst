@@ -45,7 +45,7 @@ with:
 
 You can now launch MAPDL directly from docker with a short script or
 directly from the command line.  Since this image contains no license
-server, you need to enter in your license server IP address the
+server, you must enter your license server IP address in the
 ``LICENSE_SERVER`` environment variable.  With that, you can launch
 MAPDL with:
 
@@ -106,7 +106,7 @@ Verify your connection with:
 Additional Considerations
 -------------------------
 
-Appending MAPDL options to the container process
+Appending MAPDL Options to the Container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the command:
@@ -133,23 +133,23 @@ be sure to have the appropriate license for additional HPC features.
 Using ``--restart`` policy with MAPDL products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, MAPDL creates a ``LOCK`` file at the working directory when starts
-and deletes it if it exits normally. This file is used to avoid overwriting the
-files such as database files (``db``) or result files (``rst``) when starting
-MAPDL after an abnormal termination.
+By default, MAPDL creates a ``LOCK`` file in the working directory when it starts
+and deletes this file if it exits normally. The file is used to avoid overwriting files
+such as database (DB) files or result (RST) files when starting MAPDL after an
+abnormal termination.
 
-Because of this behaviour, when using the docker flag ``--restart`` in ``docker run``,
-you might enter in an infinite loop if you specify the docker image to reboot after an
-abnormal termination (i.e. ``--restart always``). 
-Because of the presence of the ``LOCK``, MAPDL exits attempting to not overwrite
-the files from the previous crash, while the docker process keeps attempting to
+Because of this behavior, when using the Docker ``--restart`` flag in the ``docker run``
+command, you might enter into an infinite loop if you specify the Docker image to
+reboot after an abnormal termination. For example, ``--restart always``. 
+Because of the presence of the ``LOCK`` file, MAPDL exits, attempting to not overwrite
+the files from the previous crash, while the Docker process keeps attempting to
 restart the MAPDL container (and the MAPDL process with it).
 
-In those cases, it is recommended to not use the ``--restart`` option.
-In case you really need to use that option, you can avoid MAPDL checks and create
-the lock file by starting the process with the environment variable ``ANSYS_LOCK``
-set to ``"OFF"``. 
-You can do that in your ``docker run`` command as:
+In such cases, you should not use the ``--restart`` option. If you really need to use
+this option, you can avoid MAPDL checks and create the ``LOCK`` file by starting
+the process with the environment variable ``ANSYS_LOCK`` set to ``"OFF"``. 
+
+You can do this in your ``docker run`` command:
 
 .. code:: bash
 
@@ -161,15 +161,14 @@ You can do that in your ``docker run`` command as:
       $IMAGE
 
 
-Getting useful files after abnormal termination
+Getting Useful Files After Abnormal Termination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In some cases, MAPDL container might crash after the MAPDL process experience an
-abnormal termination.
-In those cases it is interesting to retrieve log files, output files, etc.
-Docker provides you the required tools to do that.
+In some cases, the MAPDL container might crash after the MAPDL process experiences an
+abnormal termination. In these cases, you can retrieve log files and output files using 
+tools that Docker provides.
 
-Firstly you need to get the docker container name.
+First, get the Docker container name:
 
 .. code:: pwsh
 
@@ -184,14 +183,14 @@ You can then use the ``name`` in the following command:
 
   PS docker exec -it mapdl /bin/bash
 
-This command execute the command shell (``/bin/bash``) of the container and attach your current terminal to it (interactive ``-it``).
+This command executes the command shell (``/bin/bash``) of the container and attaches your current terminal to it (interactive ``-it``).
 
 .. code:: pwsh
 
   PS C:\Users\user> docker exec -it mapdl /bin/bash
   [root@c14560bff70f /]#
 
-Now you can commands inside the docker image an navigate inside it.
+Now you can enter commands inside the Docker container and navigate inside it.
 
 .. code:: pwsh
 
@@ -211,7 +210,7 @@ Exit the container terminal using ``exit``:
   exit
   (base) PS C:\Users\user>
 
-You can copy the noted files using the following script:
+You can copy the noted files using this script:
 
 .. code:: pwsh
 
@@ -219,7 +218,7 @@ You can copy the noted files using the following script:
   docker cp mapdl:/file1.err .
   docker cp mapdl:/file1.out .
 
-In case you want to retrieve multiple files, the most efficient approach is to get back inside the docker container:
+If you want to retrieve multiple files, the most efficient approach is to get back inside the Docker container:
 
 .. code:: pwsh
 
@@ -236,16 +235,9 @@ Create a folder where you are going to copy all the desired files:
   [root@c14560bff70f /]# ls mapdl_logs/
   file0.err  file1.err  file1.out  file2.err  file2.out  file3.err  file3.out
 
-Then you can copy all the folder content at once:
+Then copy the entire folder content at once:
 
 .. code:: pwsh
 
   docker cp mapdl:/mapdl_logs/. .
-
-
-  
-
-
-
-
 
