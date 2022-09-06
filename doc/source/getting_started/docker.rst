@@ -244,6 +244,7 @@ You can then use the ``name`` in the following command:
 This command execute the command shell (``/bin/bash``) of the container and attach your current terminal to it (interactive ``-it``).
 
 .. code:: pwsh
+
   PS C:\Users\user> docker exec -it mapdl /bin/bash
   [root@c14560bff70f /]#
 
