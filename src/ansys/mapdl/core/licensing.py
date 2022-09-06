@@ -35,7 +35,9 @@ ALLOWABLE_LICENSES = list(LICENSES)
 # TODO: Implement a warning for insufficient license rights.
 
 
-def check_license_file(timeout=30, verbose=False, notify_at_second=5):
+def check_license_file(
+    timeout=30, verbose=False, notify_at_second=5
+):  # pragma: no cover
     """Check the output of the license client log for connection error.
 
     Expect type of errors with 'DENIED' in the header such as:
