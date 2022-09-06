@@ -54,11 +54,12 @@ jobs:
       - name: Pull, launch, and validate MAPDL service
         run: |
           docker pull $MAPDL_IMAGE
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e ANS_DEBUG_CRASH=1 -e ANSYS_LOCK="OFF" --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
+          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e $DEBUG_FLAG -e ANSYS_LOCK="OFF" --restart always --name mapdl -p $PYMAPDL_PORT:50052 $MAPDL_IMAGE -smp > log.txt &
           grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
           python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          DEBUG_FLAG: ${{ secrets.DEBUG_FLAG }}
   
       - name: Build Documentation
         run: |
@@ -100,6 +101,7 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
+          cp -f runner-diagnostic-logs/* ./logs-nightly-docs/
           cp -f doc/build/latex/*.log ./logs-nightly-docs/
           cp log.txt ./logs-nightly-docs/
           tar cvzf ./logs-nightly-docs.tgz ./logs-nightly-docs

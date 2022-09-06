@@ -168,6 +168,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+          DEBUG_FLAG: ${{ secrets.DEBUG_FLAG }}
 
       - name: Retrieve PyMAPDL version
         run: |
