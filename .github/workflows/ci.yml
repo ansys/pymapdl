@@ -266,6 +266,7 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
+          cp -f runner-diagnostic-logs/* ./logs-build-docs/
           cp -f doc/build/latex/*.log ./logs-build-docs/
           cp log.txt ./logs-build-docs/
           tar cvzf ./logs-build-docs.tgz ./logs-build-docs
@@ -389,6 +390,7 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
+          cp -f runner-diagnostic-logs/* ./logs-${{ matrix.mapdl-version }}/
           cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
           tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
 
