@@ -2221,39 +2221,6 @@ class MapdlGrpc(_MapdlCore):
             return rst_file
 
     @property
-    def _result_file(self):
-        """Path of the non-distributed result file"""
-        try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except:
-            filename = self.jobname
-
-        try:
-            ext = self.inquire("", "RSTEXT")
-        except:  # check if rth file exists
-            ext = ""
-
-        if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
-
-            if self._prioritize_thermal and os.path.isfile(rth_file):
-                return rth_file
-
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
-        else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
-                return filename
-
-    @property
     def thermal_result(self):
         """The thermal result object"""
         self._prioritize_thermal = True
