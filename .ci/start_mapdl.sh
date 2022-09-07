@@ -9,7 +9,7 @@ docker run \
     --health-timeout=0.5s \
     --health-start-period=10s \
     -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
-    -e $DEBUG_FLAG=1 \
+    -e $DEBUG_ANS_FLAG=1 \
     -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
