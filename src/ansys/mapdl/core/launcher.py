@@ -1049,6 +1049,7 @@ def launch_mapdl(
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=None,
     remove_temp_dir_on_exit=False,
     verbose_mapdl=False,
     license_server_check=True,
@@ -1161,6 +1162,15 @@ def launch_mapdl(
         MAPDL via PyMAPDL so a script can be run within MAPDL without
         PyMAPDL. This string is the path of the output file (e.g.
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
+
+    remove_temp_files : bool, optional
+        Deprecated option, please use ``remove_temp_dir_on_exit``.
+
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
@@ -1340,6 +1350,16 @@ def launch_mapdl(
     ...                       mode='console')
 
     """
+    if remove_temp_files is not None:  # pragma: no cover
+        warnings.warn(
+            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "Please use ``remove_temp_dir_on_exit`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        remove_temp_dir_on_exit = remove_temp_files
+        remove_temp_files = None
+
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
 
