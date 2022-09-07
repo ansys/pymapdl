@@ -32,21 +32,17 @@ mapdl.units("SI")  # SI - International system (m, kg, s, K).
 # Define the ``FLUID30`` and ``FLUID130`` element types.
 
 mapdl.et(1, "FLUID30", kop1=2)
-mapdl.et(2, "FLUID130", kop1=1)
 
 
 # Define the material properties
 
 mapdl.mp("SONC", 1, 1500)  # sonc in m/s
 mapdl.mp("DENS", 1, 1000)  # Density in kg/m3
-mapdl.mp("SONC", 2, 1500)  # sonc in m/s
-mapdl.mp("DENS", 2, 1000)  # Density in kg/m3
 print(mapdl.mplist())
 
 
 # Define the real const
 mapdl.r("1", "1e-6")  # Reference pressure for R set 1
-mapdl.r("2", "1")  # Reference pressure for R set 2
 print(mapdl.rlist())
 
 
@@ -103,7 +99,6 @@ mapdl.antype(3)
 mapdl.harfrq(freqb=200, freqe=1000)
 mapdl.autots("off")
 mapdl.nsubst(40)
-# mapdl.deltim(10)
 mapdl.kbc(0)
 
 mapdl.outres("erase")  # Save less data in order to reduce the size of .rst file
