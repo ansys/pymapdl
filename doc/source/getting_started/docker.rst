@@ -126,7 +126,7 @@ with the `-np` switch.  For example:
     IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
-For additional command line arguments please see the ansys
+For additional command-line arguments, see the Ansys
 documentation at `ANSYS help <https://ansyshelp.ansys.com>`_.  Also,
 be sure to have the appropriate license for additional HPC features.
 
@@ -176,7 +176,8 @@ First, get the Docker container name:
   CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
   c14560bff70f   ghcr.io/pyansys/pymapdl/mapdl:v22.2.0   "/ansys_inc/ansys/bi…"   9 seconds ago    Up 8 seconds    0.0.0.0:50053->50052/tcp   mapdl
 
-The container should be running to appear in ``docker ps``.
+To appear in ``docker ps``, the container should be running.
+
 You can then use the ``name`` in the following command:
 
 .. code:: pwsh
