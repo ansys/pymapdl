@@ -1911,21 +1911,27 @@ class _MapdlCore(Commands):
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except Exception:
+            with self.run_as_routine("POST1"):
+                filename = self.inquire("", "RSTFILE")
+        except Exception:  # pragma: no cover
             filename = self.jobname
 
         try:
-            ext = self.inquire("", "RSTEXT")
-        except Exception:  # check if rth file exists
-            ext = ""
+            with self.run_as_routine("POST1"):
+                ext = self.inquire("", "RSTEXT")
+        except Exception:  # pragma: no cover
+            ext = "rst"
 
         if self._local:  # pragma: no cover
             if ext == "":
+                # Case where there is RST extension because it is thermal for example
+                filename = self.jobname
+
                 rth_file = os.path.join(self.directory, f"{filename}.rth")
                 rst_file = os.path.join(self.directory, f"{filename}.rst")
+
+                if self._prioritize_thermal and os.path.isfile(rth_file):
+                    return rth_file
 
                 if os.path.isfile(rth_file) and os.path.isfile(rst_file):
                     return last_created([rth_file, rst_file])
@@ -1938,7 +1944,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return os.path.join(filename, ext)  # pragma: no cover
+            return f"{filename}.{ext}"
 
     @property
     def _distributed_result_file(self):

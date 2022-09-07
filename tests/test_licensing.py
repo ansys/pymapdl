@@ -28,6 +28,31 @@ FAKE_CHECKOUT_SUCCESS = """
 2021/09/17 14:08:21    CHECKOUT            HPC_PARALLEL                    21.2 (2021.0512)             2/2/2/4                 1/1/1/1   3423788:FEAT_ANSYS:USER@HOST:linx64                         25:127.0.1.1
 """
 
+MSG_LIC_DENIED = """
+        2021/09/06 22:39:38    DENIED              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
+                    Request name ansys does not exist in the licensing pool.
+                    Cannot connect to license server system.
+                    The license server manager (lmgrd) has not been started yet,
+                    the wrong port@host or license file is being used, or the
+                    port or hostname in the license file has been changed.
+                    Feature:       ansys
+                    Server name:   192.168.18.10
+                    License path:  1055@AAPDDqVK5WqNLrt;
+                    FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
+"""
+MSG_LIC_CHECKOUT = """
+        2021/09/06 22:39:38    CHECKOUT              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
+                    Request name ansys does not exist in the licensing pool.
+                    Cannot connect to license server system.
+                    The license server manager (lmgrd) has not been started yet,
+                    the wrong port@host or license file is being used, or the
+                    port or hostname in the license file has been changed.
+                    Feature:       ansys
+                    Server name:   192.168.18.10
+                    License path:  1055@AAPDDqVK5WqNLrt;
+                    FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
+"""
+
 
 # TEST-NET-3 (not quite a black hole, but set aside by RFC 5737)
 test_net_3 = "203.0.113.0"
@@ -142,3 +167,33 @@ def test_check_license_file(tmpdir):
         assert not checker._license_file_success
     else:
         assert checker._license_file_success
+
+
+def test_check_iterator(tmpdir):
+    file_name = "lic.log"
+    file_ = tmpdir.join(file_name)
+
+    def create_log_file(file_, msg):
+        file_iterator = licensing.get_licdebug_tail(file_, debug=True)
+        with open(file_, "w") as fid:
+            fid.write(msg)
+        return file_iterator
+
+    # making it fail
+    notify_at_second = 1  # sec
+    timeout = -1
+    file_iterator = create_log_file(file_, MSG_LIC_DENIED)
+    with pytest.raises(TimeoutError):
+        licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
+
+    # Running it with message.
+    notify_at_second = 0
+    timeout = 10
+    file_iterator = create_log_file(file_, MSG_LIC_DENIED)
+    with pytest.raises(errors.LicenseServerConnectionError):
+        licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
+
+    notify_at_second = 0
+    timeout = 10
+    file_iterator = create_log_file(file_, MSG_LIC_CHECKOUT)
+    assert licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
