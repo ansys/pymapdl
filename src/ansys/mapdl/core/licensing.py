@@ -35,7 +35,9 @@ ALLOWABLE_LICENSES = list(LICENSES)
 # TODO: Implement a warning for insufficient license rights.
 
 
-def check_license_file(timeout=30, verbose=False):
+def check_license_file(
+    timeout=30, verbose=False, notify_at_second=5
+):  # pragma: no cover
     """Check the output of the license client log for connection error.
 
     Expect type of errors with 'DENIED' in the header such as:
@@ -73,8 +75,25 @@ def check_license_file(timeout=30, verbose=False):
     licdebug_file = os.path.join(get_licdebug_path(), get_licdebug_name())
     file_iterator = get_licdebug_tail(licdebug_file)
 
+    if check_iterator(file_iterator, licdebug_file, timeout, notify_at_second, verbose):
+        return True
+
+
+def check_iterator(
+    file_iterator, licdebug_file, timeout=30, notify_at_second=5, verbose=False
+):
+    """Loop over iterator"""
     max_time = time.time() + timeout
+    notification_time = time.time() + notify_at_second
+    notification_bool = True
     while time.time() < max_time:
+        if time.time() > notification_time and notification_bool:
+            print(
+                "PyMAPDL is taking longer than expected to connect to an MAPDL session.\n"
+                "Checking if there are any available licenses..."
+            )
+            notification_bool = False
+
         msg = next(file_iterator)
         if msg:
             LOG.info(msg)
@@ -173,7 +192,7 @@ def get_licdebug_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_licdebug_tail(licdebug_file, start_timeout=10):
+def get_licdebug_tail(licdebug_file, start_timeout=10, debug=False):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -204,7 +223,8 @@ def get_licdebug_tail(licdebug_file, start_timeout=10):
 
     with open(licdebug_file) as fid:
         # Going to the end of the file.
-        fid.seek(0, 2)
+        if not debug:  # pragma: no cover
+            fid.seek(0, 2)
         while True:
             lines = "".join(fid.readlines())
             yield lines
