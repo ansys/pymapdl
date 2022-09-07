@@ -378,8 +378,9 @@ class Lines(list):
 
     def append(self, item, mute=True):
         # append the item to itself (the list)
-        if not self._mute:
-            self._log.info(msg=f"Converted: '{item}'")
+        if not self._mute and item:
+            stripped_msg = item.replace("\n", "\\n")
+            self._log.info(msg=f"Converted: '{stripped_msg}'")
         super(Lines, self).append(item)
 
     def _setup_logger(self):

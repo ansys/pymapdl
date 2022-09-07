@@ -216,7 +216,7 @@ def test_logger(capsys):
         translator.translate_line(line)
     std = capsys.readouterr()
     assert all(
-        ["Converted" in each for each in std.err.split("\n")[:-1]]
+        ["Converted" in each for each in std.err.split("\n") if each]
     )  # last one is an empty line.
 
 
