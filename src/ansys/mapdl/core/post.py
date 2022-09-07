@@ -180,7 +180,7 @@ class PostProcessing:
         Returns
         -------
         numpy.ndarray
-            Numpy array of the frequency values for all result sets.
+            Frequency values for all result sets.
 
         Examples
         --------
@@ -191,7 +191,7 @@ class PostProcessing:
         array([ 220.,  240.,  260.,  280.,  300.,  320.,  340.,  360.,  380.,
         400.,  420.,  440.])
         """
-        # Because in MAPLD is the same.
+        # Because in MAPDL it is the same.
         return self.time_values
 
     def _reset_cache(self):
