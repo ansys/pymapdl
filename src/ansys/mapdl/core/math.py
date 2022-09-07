@@ -199,19 +199,15 @@ class MapdlMath:
 
         if not name:
             name = id_generator()
-            self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
 
-            ans_vec = AnsVec(name, self._mapdl, dtype, init)
-            if asarray:
-                return self._mapdl._vec_data(ans_vec.id)
-            else:
-                return ans_vec
+        self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
+
+        ans_vec = AnsVec(name, self._mapdl, dtype, init)
+
+        if asarray:
+            return self._mapdl._vec_data(ans_vec.id)
         else:
-            ans_vec = AnsVec(name, self._mapdl)
-            if asarray:
-                return self._mapdl._vec_data(ans_vec.id)
-            else:
-                return ans_vec
+            return ans_vec
 
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create an APDLMath matrix.
