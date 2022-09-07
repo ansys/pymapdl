@@ -540,7 +540,6 @@ class MeshGrpc:
         nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
         return nodes
 
-    # @threaded
     def _update_cache_elem(self):
         """Update the element and element offset cache"""
         if self._cache_elem is None:
