@@ -655,3 +655,16 @@ def test_status(mm, capsys):
     # Checking also _status property
     assert "APDLMATH PARAMETER STATUS-" in mm._status
     assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])
+
+
+def test_mult(mapdl, mm):
+    rand_ = np.random.rand(100, 100)
+    AA = mm.matrix(rand_, name="AA")
+
+    BB = mm.vec(size=rand_.shape[1])
+    CC = mm.vec(size=rand_.shape[1], init="zeros")
+    BB_trans = mm.matrix(np.random.rand(1, 100), "BBtrans")
+
+    assert mapdl.mult(m1=AA.id, m2=BB.id, m3=CC.id)
+    assert mapdl.mult(m1=BB.id, t1="Trans", m2=AA.id, m3=CC.id)
+    assert mapdl.mult(m1=AA.id, m2=BB_trans.id, t2="Trans", m3=CC.id)

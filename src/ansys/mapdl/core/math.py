@@ -1388,7 +1388,7 @@ class AnsVec(ApdlMathObj):
             Hadamard product between this vector and the other vector.
         """
         if not meets_version(self._mapdl._server_version, (0, 4, 0)):
-            raise VersionError(f"``{func.__name__}`` requires MAPDL version 2021R2")
+            raise VersionError("``AnsVec`` requires MAPDL version 2021R2")
 
         if not isinstance(vec, AnsVec):
             raise TypeError("Must be an Ansys vector object")
