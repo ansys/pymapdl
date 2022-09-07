@@ -100,7 +100,6 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
-          cp -f doc/build/latex/*.log ./logs-nightly-docs/
           cp log.txt ./logs-nightly-docs/
           tar cvzf ./logs-nightly-docs.tgz ./logs-nightly-docs
 
