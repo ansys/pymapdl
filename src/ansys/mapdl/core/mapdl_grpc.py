@@ -1302,6 +1302,7 @@ class MapdlGrpc(_MapdlCore):
         time_step_stream=None,
         chunk_size=512,
         orig_cmd="/INP",
+        write_to_log=True,
         **kwargs,
     ):
         """Stream a local input file to a remote mapdl instance.
@@ -1387,7 +1388,7 @@ class MapdlGrpc(_MapdlCore):
         ]
 
         # since we can't directly run /INPUT, we have to write a
-        # temporary input file that tells mainan to read the input
+        # temporary input file that tells MAPDL to read the input
         # file.
         id_ = random_string()
         tmp_name = f"_input_tmp_{id_}_.inp"
@@ -1400,6 +1401,10 @@ class MapdlGrpc(_MapdlCore):
         else:
             # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+
+        if write_to_log and self._apdl_log is not None:
+            if not self._apdl_log.closed:
+                self._apdl_log.write(tmp_dat)
 
         if self._local:
             local_path = self.directory
