@@ -1,5 +1,5 @@
 """
-.. _ref_acoustic_analysis:
+.. _acoustic_analysis_example:
 
 ====================
 3D Acoustic Analysis
@@ -11,15 +11,13 @@ This example shows how to perform an acoustic analysis using PyMAPDL and ``FLUID
 """
 
 ###############################################################################
-# Launching PyMAPDL
-# =================
-#
-# loading libraries.
+# Launch PyMAPDL
+# ==============
+# Launch PyMAPDL and load ``matplotlib``.
 from matplotlib import pyplot as plt
 
 from ansys.mapdl.core import launch_mapdl
 
-# Launching PyMAPDL
 mapdl = launch_mapdl()
 
 mapdl.clear()
@@ -35,7 +33,6 @@ mapdl.et(1, "FLUID30", kop1=2)
 
 
 # Define the material properties
-
 mapdl.mp("SONC", 1, 1500)  # sonc in m/s
 mapdl.mp("DENS", 1, 1000)  # Density in kg/m3
 print(mapdl.mplist())
@@ -49,8 +46,7 @@ print(mapdl.rlist())
 ###############################################################################
 # Geometry Definition
 # ===================
-# Create a simple sphere
-#
+# Create a simple sphere.
 
 vnum = mapdl.sphere(rad1=0.5, rad2=1.0)
 mapdl.vsbw("all")
@@ -59,7 +55,7 @@ mapdl.vplot(show_area_numbering=True)
 ###############################################################################
 # Geometry Meshing
 # ================
-# First the material and elements are selected
+# First select the material and elements.
 #
 
 mapdl.type(itype=1)
@@ -67,9 +63,8 @@ mapdl.real(nset=1)
 mapdl.mat(mat=1)
 mapdl.mshape(1, "3D")
 
-
 ###############################################################################
-# Then we choose the element size and perform the mesh.
+# Then choose the element size and perform the mesh.
 
 mapdl.esize(0.25)
 mapdl.vmesh("all")
@@ -125,11 +120,11 @@ print(mapdl.set("LIST"))
 
 mapdl.post26()
 freqs = mapdl.post_processing.time_values[::2]
-node_ = 276
+node = 276
 
 # Getting results
-node_pressure = mapdl.nsol(3, node_, "spl")
-node_sound_pressure_level = mapdl.nsol(4, node_, "SPLA")
+node_pressure = mapdl.nsol(3, node, "spl")
+node_sound_pressure_level = mapdl.nsol(4, node, "SPLA")
 
 # Plotting
 fig, ax = plt.subplots(1, 2)
@@ -142,7 +137,7 @@ ax[1].plot(freqs, node_sound_pressure_level, label="Nodal Sound Pressure")
 ax[1].set_xlabel("Frequencies (Hz)")
 ax[1].set_ylabel("A-weighted sound\npressure level (dBA)")
 
-fig.suptitle(f"Node {node_} Results")
+fig.suptitle(f"Node {node} Results")
 fig.tight_layout()
 fig.show()
 
