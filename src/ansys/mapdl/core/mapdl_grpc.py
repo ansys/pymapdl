@@ -331,7 +331,7 @@ class MapdlGrpc(_MapdlCore):
         self._locked = False  # being used within MapdlPool
         self._stub = None
         self._cleanup = cleanup_on_exit
-        self._remove_temp_dir_on_exit = remove_temp_dir_on_exit
+        self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
         self._jobname = start_parm.get("jobname", "file")
         self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
@@ -887,7 +887,7 @@ class MapdlGrpc(_MapdlCore):
         user temporary directory.
 
         """
-        if self._remove_temp_dir_on_exit and self._local:  # pragma: no cover
+        if self.__remove_temp_dir_on_exit and self._local:  # pragma: no cover
             path = self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
