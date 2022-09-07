@@ -215,7 +215,7 @@ class MapdlGrpc(_MapdlCore):
         Sets MAPDL to not abort at the first error within /BATCH mode.
         Default ``True``.
 
-    remove_temp_files : bool, optional
+    remove_temp_dir : bool, optional
         When this parameter is ``True``, the MAPDL working directory will be
         deleted when MAPDL is exited provided that it is within the temporary
         user directory. Default ``False``.
@@ -282,7 +282,7 @@ class MapdlGrpc(_MapdlCore):
         cleanup_on_exit=False,
         log_apdl=None,
         set_no_abort=True,
-        remove_temp_files=False,
+        _remove_tmp_dir_on_exit=False,
         print_com=False,
         channel=None,
         remote_instance=None,
@@ -319,7 +319,7 @@ class MapdlGrpc(_MapdlCore):
         self._locked = False  # being used within MapdlPool
         self._stub = None
         self._cleanup = cleanup_on_exit
-        self._remove_tmp = remove_temp_files
+        self._remove_tmp_dir_on_exit = _remove_tmp_dir_on_exit
         self._jobname = start_parm.get("jobname", "file")
         self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
@@ -353,7 +353,7 @@ class MapdlGrpc(_MapdlCore):
             self._channel = channel
 
         # connect and validate to the channel
-        self._multi_connect(timeout=timeout)
+        self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
 
         # double check we have access to the local path if not
         # explicitly specified
@@ -863,19 +863,19 @@ class MapdlGrpc(_MapdlCore):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()  # pragma: no cover
 
-        self._remove_temp_files()
+        self._remove_temp_dir_on_exit()
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
 
-    def _remove_temp_files(self):
+    def _remove_temp_dir_on_exit(self):
         """Removes the temporary directory created by the launcher.
 
         This only runs if the current working directory of MAPDL is within the
         user temporary directory.
 
         """
-        if self._remove_tmp and self._local:
+        if self._remove_tmp_dir_on_exit and self._local:
             path = self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
