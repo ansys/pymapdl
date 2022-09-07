@@ -89,8 +89,8 @@ def check_iterator(
     while time.time() < max_time:
         if time.time() > notification_time and notification_bool:
             print(
-                "PyMAPDL is taking more time than expected to connect to an MAPDL session.\n"
-                "Checking if there are available licenses to connect to..."
+                "PyMAPDL is taking longer than expected to connect to an MAPDL session.\n"
+                "Checking if there are any available licenses..."
             )
             notification_bool = False
 
