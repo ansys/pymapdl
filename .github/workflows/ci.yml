@@ -167,7 +167,7 @@ jobs:
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          ANS_DEBUG_FLAG: '${{ secrets.DEBUG_FLAG }}=1'
+          ANS_DEBUG_FLAG: '${{ secrets.DEBUG_FLAG }}'
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE  }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
 
