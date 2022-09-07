@@ -1042,7 +1042,7 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=120,
+    start_timeout=15,
     port=None,
     cleanup_on_exit=True,
     start_instance=None,
