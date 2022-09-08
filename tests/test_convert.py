@@ -396,3 +396,63 @@ def test_print_com_in_converter():
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,")  # Default
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,", print_com=True)
     assert "print_com=True" not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
+
+
+## CLI testing
+
+
+@pytest.fixture
+def run_cli():
+    def do_run(*args):
+        args = ["convertscript"] + list(args)
+        return os.system(" ".join(args))
+
+    return do_run
+
+
+def test_converter_cli(tmpdir, run_cli):
+    input_file = tmpdir.join("mapdl.dat")
+    output_file = tmpdir.join("mapdl.py")
+
+    content = """
+    /prep7
+    K,1,1,1,1
+    SOLVE
+    /post1
+    /eof
+    """
+
+    with input_file.open("w") as f:
+        f.write(content)
+
+    assert run_cli(str(input_file)) == 0
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert "mapdl.prep7()" in newcontent
+    assert "mapdl.exit()" in newcontent
+    assert "launch_mapdl" in newcontent
+
+    # This one overwrite the previous file
+    assert (
+        run_cli(
+            str(input_file),
+            "-o",
+            str(output_file),
+            "--auto_exit",
+            "False",
+            "--add_imports",
+            "False",
+        )
+        == 0
+    )
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert "mapdl.prep7()" in newcontent
+    assert "mapdl.exit()" not in newcontent
+    assert "launch_mapdl" not in newcontent
