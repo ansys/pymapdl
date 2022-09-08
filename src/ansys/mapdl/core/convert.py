@@ -9,12 +9,64 @@ from ansys.mapdl.core.misc import is_float
 
 # Because the APDL version has empty arguments, whereas the PyMAPDL
 # doesn't have them. Hence the order of arguments is messed up.
-COMMANDS_TO_NOT_BE_CONVERTED = {"INT1"}
 
 FORMAT_OPTIONS = {
     "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
     "max-line-length": 100,
 }
+
+# This commands have "--" as one or some arguments
+COMMANDS_WITH_EMPTY_ARGS = [
+    "/CMA",  # "/CMAP,
+    "/NER",  # "/NERR,
+    "/PBF",  # "/PBF,
+    "/PMO",  # "/PMORE,
+    "ANTY",  # ANTYPE,
+    "ASBL",  # ASBL,
+    "ATAN",  # ATAN,
+    "BCSO",  # BCSOPTION,
+    "CLOG",  # CLOG,
+    "CONJ",  # CONJUG,
+    "DERI",  # DERIV,
+    "DSPO",  # DSPOPTION,
+    "ENER",  # ENERSOL,
+    "ENSY",  # ENSYM,
+    "ESYM",  # ESYM,
+    "EXP",  # EXP,
+    "EXPA",  # EXPAND,
+    "FCLI",  # FCLIST,
+    "FILE",  # FILEAUX2,
+    "FLUR",  # FLUREAD,
+    "GMAT",  # GMATRIX,
+    "IMAG",  # IMAGIN,
+    "INT1",  # INT1,
+    "LARG",  # LARGE,
+    "LATT",  # LATT,
+    "MAP",  # MAP,
+    "MORP",  # MORPH,
+    "MPCO",  # MPCOPY,
+    "NLOG",  # NLOG,
+    "PLMA",  # PLMAP,
+    "PRED",  # PRED,
+    "PROD",  # PROD,
+    "QRDO",  # QRDOPT,
+    "QUOT",  # QUOT,
+    "RACE",  # RACE,
+    "REAL",  # REALVAR,
+    "REME",  # REMESH,
+    "SESY",  # SESYMM,
+    "SETF",  # SETFGAP,
+    "SETR",  # SETRAN,
+    "SMAL",  # SMALL,
+    "SNOP",  # SNOPTION,
+    "SURE",  # SURESU,
+    "THOP",  # THOPT,
+    "TINT",  # TINTP,
+]
+
+
+COMMANDS_TO_NOT_BE_CONVERTED = []
+COMMANDS_TO_NOT_BE_CONVERTED.extend(COMMANDS_WITH_EMPTY_ARGS)
 
 
 def convert_script(
