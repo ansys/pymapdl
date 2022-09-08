@@ -15,6 +15,7 @@ from typing import Optional
 from warnings import warn
 import weakref
 
+from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
@@ -45,7 +46,7 @@ except ImportError:  # pragma: no cover
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__, check_version
+from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -575,7 +576,7 @@ class MapdlGrpc(_MapdlCore):
         sver = (0, 0, 0)
         verstr = self._ctrl("VERSION")
         if verstr:
-            sver = check_version.version_tuple(verstr)
+            sver = version_string_as_tuple(verstr)
         return sver
 
     def _enable_health_check(self):

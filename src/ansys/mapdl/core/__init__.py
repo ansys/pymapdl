@@ -66,3 +66,13 @@ except:  # pragma: no cover
     pass
 
 BUILDING_GALLERY = False
+
+VERSION_MAP = {
+    (0, 0, 0): "2020R2",
+    (0, 3, 0): "2021R1",
+    (0, 4, 0): "2021R2",
+    (0, 4, 1): "2021R2",
+    (0, 5, 0): "2022R1",
+    (0, 5, 1): "2022R2",  # as of 21 Mar 2022 unreleased
+}
+"""A dictionary relating PyMAPDL server versions with the unified install ones."""

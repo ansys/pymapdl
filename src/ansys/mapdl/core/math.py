@@ -9,11 +9,12 @@ import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
+from ansys.tools.versioning import requires_version
 import numpy as np
 
+from ansys.mapdl.core import VERSION_MAP
 from ansys.mapdl.core.misc import load_file
 
-from .check_version import VersionError, meets_version, version_requires
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc
@@ -1137,7 +1138,7 @@ class MapdlMath:
         else:  # must be dense matrix
             self._send_dense(mname, arr, dtype, chunk_size)
 
-    @version_requires((0, 4, 0))
+    @requires_version((0, 4, 0), VERSION_MAP)
     def _send_dense(self, mname, arr, dtype, chunk_size):
         """Send a dense numpy array/matrix to MAPDL."""
         if dtype is not None:
