@@ -936,3 +936,29 @@ class FileTranslator:
             return True
 
         return False
+
+
+import click
+
+
+@click.command()
+@click.option("-i", help="Name of the input MAPDL script file.")
+@click.option("-o", default=None, help="Name of the output Python script.")
+@click.option(
+    "--auto-exit",
+    default=True,
+    help="Adds a line to the end of the script to exit MAPDL. Default ``True``",
+)
+def cli(
+    i,
+    o,
+    auto_exit,
+):
+    """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
+
+    Example
+    =======
+
+    $ convertscript -i mapdl.dat -o python.py
+    """
+    convert_script(filename_in=i, filename_out=o, auto_exit=auto_exit)
