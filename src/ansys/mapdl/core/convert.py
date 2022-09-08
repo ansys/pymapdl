@@ -1028,24 +1028,29 @@ def cli(
 ):
     """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
 
-    Usage
-    =====
+    USAGE:
 
-    $ convertscript mapdl.dat -o python.py
-    File mapdl.dat successfully converted to python.py.
+    The main usage is:
+
+        $ convertscript mapdl.dat -o python.py
+
+        File mapdl.dat successfully converted to python.py.
 
     The output argument is completely optional, in that case, it will just change the extension to "py".
 
-    $ convertscript mapdl.dat
-    File mapdl.dat successfully converted to mapdl.py.
+        $ convertscript mapdl.dat
 
-    You can use any option from ``ansys.mapdl.core.convert.convert_script`` function.
+        File mapdl.dat successfully converted to mapdl.py.
 
-    $ convertscript mapdl.dat --auto-exit False
-    File mapdl.dat successfully converted to mapdl.py.
+    You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
 
-    $ convertscript.exe mapdl.dat --filename_out mapdl.out --add_imports False
-    File mapdl.dat successfully converted to mapdl.out.
+        $ convertscript mapdl.dat --auto-exit False
+
+        File mapdl.dat successfully converted to mapdl.py.
+
+        $ convertscript.exe mapdl.dat --filename_out mapdl.out --add_imports False
+
+        File mapdl.dat successfully converted to mapdl.out.
 
 
     """
