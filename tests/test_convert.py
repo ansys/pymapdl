@@ -220,7 +220,7 @@ def test_logger(capsys):
     )  # last one is an empty line.
 
 
-def test_add_import():
+def test_add_imports():
     assert "launch_mapdl" in convert_apdl_block(APDL_CMDS, add_imports=True)
     assert "ansys.mapdl.core" in convert_apdl_block(APDL_CMDS, add_imports=True)
 
@@ -245,6 +245,17 @@ def test_auto_exit():
     )
     assert "mapdl.exit" not in convert_apdl_block(
         APDL_CMDS, auto_exit=False, add_imports=False
+    )
+
+
+def test_exec_file():
+    my_own_exec = "my/own/path/to/ansys/exec"
+
+    assert f'exec_file="{my_own_exec}"' in convert_apdl_block(
+        APDL_CMDS, exec_file=my_own_exec
+    )
+    assert f'exec_file="{my_own_exec}"' not in convert_apdl_block(
+        APDL_CMDS, exec_file=my_own_exec, add_imports=False
     )
 
 
