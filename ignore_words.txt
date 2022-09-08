@@ -19,4 +19,5 @@ struc
 emiss
 vise
 sur
-
+LARG
+SMAL
