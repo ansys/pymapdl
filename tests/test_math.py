@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from scipy import sparse
 
+from ansys.mapdl.core.check_version import VersionError, meets_version
 from ansys.mapdl.core.errors import ANSYSDataTypeError
 from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
@@ -658,13 +659,87 @@ def test_status(mm, capsys):
 
 
 def test_mult(mapdl, mm):
+
+    rand_ = np.random.rand(100, 100)
+
+    if not meets_version(mapdl._server_version, (0, 4, 0)):
+        with pytest.raises(VersionError):
+            AA = mm.matrix(rand_, name="AA")
+
+    else:
+        AA = mm.matrix(rand_, name="AA")
+
+        BB = mm.vec(size=rand_.shape[1])
+        CC = mm.vec(size=rand_.shape[1], init="zeros")
+        BB_trans = mm.matrix(np.random.rand(1, 100), "BBtrans")
+
+        assert mapdl.mult(m1=AA.id, m2=BB.id, m3=CC.id)
+        assert mapdl.mult(m1=BB.id, t1="Trans", m2=AA.id, m3=CC.id)
+        assert mapdl.mult(m1=AA.id, m2=BB_trans.id, t2="Trans", m3=CC.id)
+
+
+def test__parm(mm):
+    sz = 5000
+    mat = sparse.ones(sz, sz, density=0.05, format="csr")
+
     rand_ = np.random.rand(100, 100)
     AA = mm.matrix(rand_, name="AA")
+    assert AA.id == "AA"
+    BB = mm.vec(size=rand_.shape[1], name="BB")
+    assert BB.id == "BB"
+    CC = mm.matrix(mat, "CC")
+    assert CC.id == "CC"
 
-    BB = mm.vec(size=rand_.shape[1])
-    CC = mm.vec(size=rand_.shape[1], init="zeros")
-    BB_trans = mm.matrix(np.random.rand(1, 100), "BBtrans")
+    assert isinstance(mm._parm, dict)
+    AA_parm = mm._parm["AA"]
+    assert AA_parm["type"] == "DMAT"
+    assert AA_parm["dimensions"] == AA.shape
+    assert AA_parm["workspace"] == 1
 
-    assert mapdl.mult(m1=AA.id, m2=BB.id, m3=CC.id)
-    assert mapdl.mult(m1=BB.id, t1="Trans", m2=AA.id, m3=CC.id)
-    assert mapdl.mult(m1=AA.id, m2=BB_trans.id, t2="Trans", m3=CC.id)
+    BB_parm = mm._parm["BB"]
+    assert BB_parm["type"] == "VEC"
+    assert BB_parm["dimensions"] == BB.size
+    assert BB_parm["workspace"] == 1
+
+    # Sparse matrices are made of three matrices
+    assert "CC_DATA" in mm._parm
+    assert "CC_IND" in mm._parm
+    assert "CC_PTR" in mm._parm
+
+    assert mm._parm["CC_DATA"]["dimensions"] == mat.indices.shape[0]
+    assert mm._parm["CC_DATA"]["type"] == "VEC"
+    assert mm._parm["CC_IND"]["dimensions"] == sz + 1
+    assert mm._parm["CC_IND"]["type"] == "VEC"
+    assert mm._parm["CC_PTR"]["dimensions"] == mat.indices.shape[0]
+    assert mm._parm["CC_PTR"]["type"] == "VEC"
+
+
+def test_vec(mm, mapdl):
+    mapdl.clear()
+
+    assert mm._parm == {}
+
+    # Create a new vector if no name is provided
+    mm.vec(100)
+    assert mm._parm != {}
+    assert len(mm._parm.keys()) == 1
+    name_ = list(mm._parm.keys())[0]
+    parameter_ = mm._parm[name_]
+    assert parameter_["type"] == "VEC"
+    assert parameter_["dimensions"] == 100
+
+    # retrieve a vector if the name is given and exists
+    vec = mm.vec(10, name=name_)
+    assert vec.size != 10
+    assert vec.size == 100
+    assert vec.id == name_
+
+    parameter_ = mm._parm[name_]
+    assert parameter_["type"] == "VEC"
+    assert parameter_["dimensions"] == 100
+
+    # Create a new vector if a name is given and doesn't exist
+    vec_ = mm.vec(20, name="ASDF")
+    parameter_ = mm._parm["ASDF"]
+    assert parameter_["type"] == "VEC"
+    assert parameter_["dimensions"] == vec_.size
