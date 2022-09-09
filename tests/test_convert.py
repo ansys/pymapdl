@@ -244,10 +244,11 @@ def test_comment_solve():
 
 
 def test_macro_to_function():
-    assert "def SLV(" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "SLV()" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\ndef SLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\nSLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    output = convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "def SLV(" in output
+    assert "SLV()" in output
+    assert "\n\n\ndef SLV" in output
+    assert "\n\n\nSLV" in output
 
 
 def test_out():
