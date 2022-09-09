@@ -640,6 +640,11 @@ def interp_star_status(status):
                     "dimensions": get_apdl_math_dimensions(items[3]),
                     "workspace": int(items[4]),
                 }
+            elif items[1] in ["LSENGINE"]:
+                parameters[name] = {
+                    "type": items[1],
+                    "workspace": int(items[4]),
+                }
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
                 parameters[name] = {"type": items[1], "shape": shape}
