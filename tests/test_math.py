@@ -411,15 +411,29 @@ def test_solve_py(mapdl, mm, cube_solve):
     assert np.allclose(w_n, eigval, atol=0.1)
 
 
-def test_dense_solver(mm):
+def test_copy2(mm):
     dim = 1000
     m2 = mm.rand(dim, dim)
     m3 = m2.copy()
+
+    assert np.allclose(m2.asarray(), m3.asarray())
+
+
+def test_dense_solver(mm):
+    dim = 1000
+    m2 = mm.rand(dim, dim)
+
     solver = mm.factorize(m2)
 
     v = mm.ones(dim)
-    solver.solve(v)
+    C = solver.solve(v)
+
     # TODO: we need to verify this works
+    m2_ = m2.asarray()
+    v_ = v.asarray()
+    x = np.linalg.solve(m2_, v_)
+
+    assert np.allclose(C, x)
 
 
 def test_solve_py(mapdl, mm, cube_solve):
@@ -680,7 +694,7 @@ def test_mult(mapdl, mm):
 
 def test__parm(mm):
     sz = 5000
-    mat = sparse.ones(sz, sz, density=0.05, format="csr")
+    mat = sparse.random(sz, sz, density=0.05, format="csr")
 
     rand_ = np.random.rand(100, 100)
     AA = mm.matrix(rand_, name="AA")
@@ -714,7 +728,7 @@ def test__parm(mm):
     assert mm._parm["CC_PTR"]["type"] == "VEC"
 
 
-def test__parm(mm, mapdl):
+def test_vec2(mm, mapdl):
     mapdl.clear()
 
     assert mm._parm == {}
