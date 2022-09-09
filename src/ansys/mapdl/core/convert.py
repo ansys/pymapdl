@@ -84,6 +84,7 @@ def convert_script(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -144,6 +145,12 @@ def convert_script(
         Print command ``/COM`` arguments to python console.
         Defaults to ``True``.
 
+    only_commands : bool, optional
+        If ``True``, it converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.
+
     Returns
     -------
     list
@@ -190,6 +197,7 @@ def convert_script(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        only_commands=only_commands,
     )
 
     translator.save(filename_out)
@@ -210,6 +218,7 @@ def convert_apdl_block(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -273,6 +282,12 @@ def convert_apdl_block(
         Print command ``/COM`` arguments to python console.
         Defaults to ``True``.
 
+    only_commands : bool, optional
+        If ``True``, it converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.
+
     Returns
     -------
     list
@@ -308,6 +323,7 @@ def convert_apdl_block(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        only_commands=only_commands,
     )
 
     if isinstance(apdl_strings, str):
@@ -329,7 +345,13 @@ def _convert(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
+
+    if only_commands:
+        auto_exit = False
+        add_imports = False
+        header = False
 
     translator = FileTranslator(
         loglevel,
@@ -586,6 +608,7 @@ class FileTranslator:
         # Cleaning ending empty arguments.
         # Because of an extra comma added to toffst command when generating ds.dat.
         line_ = line.split(",")[::-1]  # inverting order
+
         for ind, each in enumerate(line_):
             if each:
                 break
@@ -739,7 +762,7 @@ class FileTranslator:
             return
 
         # check valid command
-        if command not in self._valid_commands:
+        if self._pymapdl_command(command) not in self._valid_commands:
             cmd = line[:4].upper()
             if cmd == "*CRE":  # creating a function
                 if self.macros_as_functions:
@@ -776,9 +799,27 @@ class FileTranslator:
                 self.store_run_command(line)
 
         elif self.use_function_names:
+            if command[0] == "/":
+                slash_command = f"slash{command[1:]}"
+                if slash_command in dir(Commands):
+                    command = slash_command
+                else:
+                    command = command[1:]
+            elif command[0] == "*":
+                star_command = f"star{command[1:]}"
+                if star_command in dir(Commands):
+                    command = star_command
+                else:
+                    command = command[1:]
+
             self.store_command(command, parameters)
         else:
             self.store_run_command(line)
+
+    def _pymapdl_command(self, command):
+        if command[0] in ["/", "*"]:
+            command = command[1:]
+        return command
 
     def start_function(self, func_name):
         self._functions.append(func_name)
