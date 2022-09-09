@@ -1393,7 +1393,9 @@ class AnsVec(ApdlMathObj):
         AnsVec
             Hadamard product between this vector and the other vector.
         """
-        if not meets_version(self._mapdl._server_version, (0, 4, 0)):
+        if not meets_version(
+            self._mapdl._server_version, (0, 4, 0)
+        ):  # pragma: no cover
             raise VersionError("``AnsVec`` requires MAPDL version 2021R2")
 
         if not isinstance(vec, AnsVec):
