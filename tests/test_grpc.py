@@ -232,6 +232,7 @@ def test_read_input_file_verbose(mapdl):
     assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
+# @pytest.mark.flaky(reruns=2, reruns_delay=2)
 @pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
 def test_read_input_file(mapdl, file_name):
     test_file = os.path.join(PATH, "test_files", file_name)
