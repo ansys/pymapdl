@@ -714,7 +714,7 @@ def test__parm(mm):
     assert mm._parm["CC_PTR"]["type"] == "VEC"
 
 
-def test_vec(mm, mapdl):
+def test__parm(mm, mapdl):
     mapdl.clear()
 
     assert mm._parm == {}
