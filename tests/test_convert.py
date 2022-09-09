@@ -361,3 +361,37 @@ def test_print_com_in_converter():
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,")  # Default
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,", print_com=True)
     assert "print_com=True" not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
+
+
+def test_only_commands():
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=True,
+        add_imports=True,
+        auto_exit=True,
+        header="asdf",
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" not in output
+    assert "import" not in output
+    assert "mapdl.exit" not in output
+
+
+@pytest.mark.parametrize(
+    "parameters",
+    [
+        ["/view,1,1,1", "mapdl.view(1, 1, 1)"],
+        ["/view,1,,1,1", 'mapdl.view(1, "", 1, 1)'],
+        ["/view,1,,1,  ,1", 'mapdl.view(1, "", 1, "", 1)'],
+        ["*get,1,1,1", "mapdl.starget(1,1,1)"],
+        ["*get,1,asdf,,1,qwer", 'mapdl.starget(1,"asdf","",1,"qwert"'],
+        ["*get,1,asdf,,1,qwer", 'mapdl.starget(1,"asdf","",1,"qwert"'],
+        ["vget,1,,'asdf',", 'mapdl.vget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',", 'mapdl.starvget(1, "", "asdf")'],
+        ["solve", "mapdl.solve()"],
+        ["/solu", "mapdl.slashsolu()"],
+        ["solu", "mapdl.solu()"],
+    ],
+)
+def test_convert_star_slash(parameters):
+    assert parameters[1] == convert_apdl_block(parameters[0], only_commands=True)
