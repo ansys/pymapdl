@@ -22,7 +22,7 @@ sectype,2,shell
 secdata,0.0005,2
 
 block,,0.02,,0.03,,0.015
-esize,0.005
+esize,0.5
 vmesh,all
 
 type,2
