@@ -610,7 +610,7 @@ class FileTranslator:
         line_ = line.split(",")[::-1]  # inverting order
 
         for ind, each in enumerate(line_):
-            if each:
+            if each.strip():  # strip to remove spaces in empty arguments
                 break
 
         line = ",".join(line_[ind:][::-1])
