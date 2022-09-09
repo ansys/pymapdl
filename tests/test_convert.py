@@ -383,15 +383,20 @@ def test_only_commands():
         ["/view,1,1,1", "mapdl.view(1, 1, 1)"],
         ["/view,1,,1,1", 'mapdl.view(1, "", 1, 1)'],
         ["/view,1,,1,  ,1", 'mapdl.view(1, "", 1, "", 1)'],
-        ["*get,1,1,1", "mapdl.starget(1,1,1)"],
-        ["*get,1,asdf,,1,qwer", 'mapdl.starget(1,"asdf","",1,"qwert"'],
-        ["*get,1,asdf,,1,qwer", 'mapdl.starget(1,"asdf","",1,"qwert"'],
+        ["*get,1,1,1", "mapdl.get(1, 1, 1)"],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
         ["vget,1,,'asdf',", 'mapdl.vget(1, "", "asdf")'],
         ["*vget,1,,'asdf',", 'mapdl.starvget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',,,,,", 'mapdl.starvget(1, "", "asdf")'],
+        [
+            "*vget,1,,,,,,,'asdf',,,,,",
+            'mapdl.starvget(1, "", "", "", "", "", "", "asdf")',
+        ],
         ["solve", "mapdl.solve()"],
         ["/solu", "mapdl.slashsolu()"],
         ["solu", "mapdl.solu()"],
     ],
 )
 def test_convert_star_slash(parameters):
-    assert parameters[1] == convert_apdl_block(parameters[0], only_commands=True)
+    assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]

@@ -609,12 +609,11 @@ class FileTranslator:
         # Because of an extra comma added to toffst command when generating ds.dat.
         line_ = line.split(",")[::-1]  # inverting order
 
-        for ind, each in enumerate(line_):
+        for ind, each in enumerate(line_.copy()):
             if each:
                 break
-            else:
-                line_.pop(ind)
-        line = ",".join(line_[::-1])
+
+        line = ",".join(line_[ind:][::-1])
 
         # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
