@@ -55,4 +55,4 @@ name = "ansys.mapdl.core"
 Source = "https://github.com/pyansys/pymapdl"
 
 [project.scripts]
-convertscript = "ansys.mapdl.core.convert:cli"
+pymapdl_convert_script = "ansys.mapdl.core.convert:cli"
