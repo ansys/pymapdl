@@ -336,7 +336,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
