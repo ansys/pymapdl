@@ -695,40 +695,45 @@ def test_mult(mapdl, mm):
         assert mapdl.mult(m1=AA.id, m2=BB_trans.id, t2="Trans", m3=CC.id)
 
 
-def test__parm(mm):
+def test__parm(mm, mapdl):
     sz = 5000
     mat = sparse.random(sz, sz, density=0.05, format="csr")
 
     rand_ = np.random.rand(100, 100)
-    AA = mm.matrix(rand_, name="AA")
-    assert AA.id == "AA"
-    BB = mm.vec(size=rand_.shape[1], name="BB")
-    assert BB.id == "BB"
-    CC = mm.matrix(mat, "CC")
-    assert CC.id == "CC"
+    if not meets_version(mapdl._server_version, (0, 4, 0)):
 
-    assert isinstance(mm._parm, dict)
-    AA_parm = mm._parm["AA"]
-    assert AA_parm["type"] == "DMAT"
-    assert AA_parm["dimensions"] == AA.shape
-    assert AA_parm["workspace"] == 1
+        with pytest.raises(VersionError):
+            AA = mm.matrix(rand_, name="AA")
 
-    BB_parm = mm._parm["BB"]
-    assert BB_parm["type"] == "VEC"
-    assert BB_parm["dimensions"] == BB.size
-    assert BB_parm["workspace"] == 1
+    else:
+        assert AA.id == "AA"
+        BB = mm.vec(size=rand_.shape[1], name="BB")
+        assert BB.id == "BB"
+        CC = mm.matrix(mat, "CC")
+        assert CC.id == "CC"
 
-    # Sparse matrices are made of three matrices
-    assert "CC_DATA" in mm._parm
-    assert "CC_IND" in mm._parm
-    assert "CC_PTR" in mm._parm
+        assert isinstance(mm._parm, dict)
+        AA_parm = mm._parm["AA"]
+        assert AA_parm["type"] == "DMAT"
+        assert AA_parm["dimensions"] == AA.shape
+        assert AA_parm["workspace"] == 1
 
-    assert mm._parm["CC_DATA"]["dimensions"] == mat.indices.shape[0]
-    assert mm._parm["CC_DATA"]["type"] == "VEC"
-    assert mm._parm["CC_IND"]["dimensions"] == sz + 1
-    assert mm._parm["CC_IND"]["type"] == "VEC"
-    assert mm._parm["CC_PTR"]["dimensions"] == mat.indices.shape[0]
-    assert mm._parm["CC_PTR"]["type"] == "VEC"
+        BB_parm = mm._parm["BB"]
+        assert BB_parm["type"] == "VEC"
+        assert BB_parm["dimensions"] == BB.size
+        assert BB_parm["workspace"] == 1
+
+        # Sparse matrices are made of three matrices
+        assert "CC_DATA" in mm._parm
+        assert "CC_IND" in mm._parm
+        assert "CC_PTR" in mm._parm
+
+        assert mm._parm["CC_DATA"]["dimensions"] == mat.indices.shape[0]
+        assert mm._parm["CC_DATA"]["type"] == "VEC"
+        assert mm._parm["CC_IND"]["dimensions"] == sz + 1
+        assert mm._parm["CC_IND"]["type"] == "VEC"
+        assert mm._parm["CC_PTR"]["dimensions"] == mat.indices.shape[0]
+        assert mm._parm["CC_PTR"]["type"] == "VEC"
 
 
 def test_vec2(mm, mapdl):
