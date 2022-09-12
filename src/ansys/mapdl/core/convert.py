@@ -619,29 +619,29 @@ class FileTranslator:
         line = line[:-1] if line[-1] == "," else line
         LINE = line.upper()
 
-        CMD_ = line.split(",")[0].upper()
-        CMD4_ = CMD_[:4]
+        cmd_caps = line.split(",")[0].upper()
+        cmd_caps_short = cmd_caps[:4]
 
         items = line.split(",")
 
-        if CMD4_ in ["SOLV", "LSSO"] and self._comment_solve:
+        if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
                 "com", ["The following line has been commented due to `comment_solve`:"]
             )
             self.store_command("com", [line])
             return
 
-        if CMD4_ == "/COM":
+        if cmd_caps_short == "/COM":
             # It is a comment
             self.store_command("com", [line[5:]])
             return
 
-        if CMD_ == "*DO":
+        if cmd_caps == "*DO":
             self.start_non_interactive()
             self.store_run_command(line)
             return
 
-        if CMD_ in ["*ENDDO", "*ENDIF"]:
+        if cmd_caps in ["*ENDDO", "*ENDIF"]:
             self.store_run_command(line)
             self.end_non_interactive()
             return
@@ -657,13 +657,13 @@ class FileTranslator:
             self.end_non_interactive()
             return
 
-        if CMD_ == "/VERIFY":
+        if cmd_caps == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
             self.store_run_command("/PREP7")
             return
 
-        if CMD4_ == "*REP":
+        if cmd_caps_short == "*REP":
             if not self.non_interactive:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
@@ -677,15 +677,15 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
-        if CMD4_ in COMMANDS_TO_NOT_BE_CONVERTED:
+        if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
             self.store_run_command(line)
             return
 
-        if CMD4_ == "/TIT":  # /TITLE
+        if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
             return self.store_command("title", ["".join(parameters).strip()])
 
-        if CMD4_ == "*GET":
+        if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
                 self.store_run_command(line)
                 return
@@ -693,21 +693,21 @@ class FileTranslator:
                 parameters = line.split(",")[1:]
                 return self.store_command("get", parameters)
 
-        if CMD4_ == "/NOP":
+        if cmd_caps_short == "/NOP":
             self.comment = (
                 "It is not recommended to use '/NOPR' in a normal PyMAPDL session."
             )
             self.store_under_scored_run_command(line)
             return
 
-        if CMD4_ == "*CRE":  # creating a function
+        if cmd_caps_short == "*CRE":  # creating a function
             if self.macros_as_functions:
                 self.start_function(items[1].strip())
                 return
             else:
                 self.start_non_interactive()
 
-        if CMD_ == "/PREP7":
+        if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
 
         if "*END" in LINE:
@@ -726,7 +726,7 @@ class FileTranslator:
                 return
 
         # check for if statement
-        if CMD_[:3] == "*IF" or "*IF" in LINE:
+        if cmd_caps[:3] == "*IF" or "*IF" in LINE:
             self.start_non_interactive()
             self.store_run_command(line)
             return
@@ -772,18 +772,18 @@ class FileTranslator:
         # check valid command
         if (
             self._pymapdl_command(command) not in self._valid_commands
-            or CMD4_ in self._non_interactive_commands
+            or cmd_caps_short in self._non_interactive_commands
         ):
-            if CMD4_ in self._non_interactive_commands:
-                if CMD4_ in self._block_commands:
+            if cmd_caps_short in self._non_interactive_commands:
+                if cmd_caps_short in self._block_commands:
                     self._in_block = True
                     self._block_count = 0
                     self._block_count_target = 0
 
-                elif CMD4_ in self._enum_block_commands:
+                elif cmd_caps_short in self._enum_block_commands:
                     self._in_block = True
                     self._block_count = 0
-                    if CMD4_ == "CMBL":  # In cmblock
+                    if cmd_caps_short == "CMBL":  # In cmblock
                         # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
                         numitems = int(line.split(",")[3])
                         _block_count_target = (
@@ -791,12 +791,12 @@ class FileTranslator:
                         )
                         self._block_count_target = (
                             _block_count_target + 2
-                        )  # because the CMD4_ line and option line.
+                        )  # because the cmd_caps_short line and option line.
 
-                self._block_current_cmd = CMD4_
+                self._block_current_cmd = cmd_caps_short
                 self.start_non_interactive()
 
-            if self._in_block and CMD4_ not in self._non_interactive_commands:
+            if self._in_block and cmd_caps_short not in self._non_interactive_commands:
                 self.store_run_command(original_line)
             else:
                 self.store_run_command(line)
