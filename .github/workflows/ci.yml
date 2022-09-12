@@ -10,6 +10,7 @@ on:
       - main
 
 env:
+  PACKAGE_NAME: PyMAPDL
   PYMAPDL_PORT: 21000  # default won't work on GitHub runners
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
@@ -27,7 +28,6 @@ env:
   RESET_EXAMPLES_CACHE: 5
   RESET_DOC_BUILD_CACHE: 5
   RESET_AUTOSUMMARY_CACHE: 5
-  PACKAGE_NAME: PyMAPDL
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -350,7 +350,7 @@ jobs:
 
       - name: DPF Server Activation
         run: |
-          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core:231dev
 
       - name: Unit Testing
         run: |

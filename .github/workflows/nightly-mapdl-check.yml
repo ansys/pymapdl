@@ -10,6 +10,8 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
+  DPF_START_SERVER: False
+  DPF_PORT: 21002
 
 jobs:
 
@@ -58,10 +60,16 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
 
-      - name: Unit Testing
+      - name: Unit Testing Requirements Installation
         run: |
           pip install -r requirements/requirements_tests.txt
-          cd tests
+
+      - name: DPF Server Activation
+        run: |
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core:231dev
+
+      - name: Unit Testing
+        run: |
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display files structure
