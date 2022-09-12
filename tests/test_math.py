@@ -706,6 +706,7 @@ def test__parm(mm, mapdl):
             AA = mm.matrix(rand_, name="AA")
 
     else:
+        AA = mm.matrix(rand_, name="AA")
         assert AA.id == "AA"
         BB = mm.vec(size=rand_.shape[1], name="BB")
         assert BB.id == "BB"
