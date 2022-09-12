@@ -20,7 +20,7 @@ mm = mapdl.math
 # Allocate a Dense Matrix in the APDLMath workspace
 #
 mapdl.clear()
-dim = 10000
+dim = 1000
 a = mm.rand(dim, dim)
 b = mm.rand(dim)
 x = mm.zeros(dim)
