@@ -415,7 +415,7 @@ def test_print_com_in_converter():
 @pytest.fixture
 def run_cli():
     def do_run(*args):
-        args = ["convertscript"] + list(args)
+        args = ["pymapdl_convert_script"] + list(args)
         return os.system(" ".join(args))
 
     return do_run
