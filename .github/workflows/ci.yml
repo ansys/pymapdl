@@ -345,7 +345,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ secrets.BOT_APPLICATION_ID }}
-          password: ${{ steps.get_workflow_token.outputs.token }}
+          password: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
