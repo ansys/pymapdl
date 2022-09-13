@@ -1019,12 +1019,12 @@ class MapdlMath:
         mat : ansys.mapdl.math.AnsMat
             An APDLMath matrix
         algo : str, optional
-            Factorization algorithm.  Either ``"LAPACK"`` or
-            ``"DSP"``.
+            Factorization algorithm.  Either ``"LAPACK"`` (default for
+            dense matrices) or ``"DSP"`` (default for sparse matrices).
         inplace : bool, optional
             If ``False``, the factorization is performed on a copy
             of the input matrix (``mat`` argument), hence this input
-            matrix (``mat``) is not changed.
+            matrix (``mat``) is not changed. Default is ``True``.
 
         Returns
         -------
@@ -1733,12 +1733,12 @@ class AnsSolver(ApdlMathObj):
         mat : ansys.mapdl.math.AnsMat
             An ansys.mapdl.math matrix.
         algo : str, optional
-            Factorization algorithm.  Either ``"LAPACK"`` or
-            ``"DSP"``.
+            Factorization algorithm.  Either ``"LAPACK"`` (default for
+            dense matrices) or ``"DSP"`` (default for sparse matrices).
         inplace : bool, optional
             If ``False``, the factorization is performed on a copy
             of the input matrix (``mat`` argument), hence this input
-            matrix (``mat``) is not changed.
+            matrix (``mat``) is not changed. Default is ``True``.
 
         Examples
         --------
