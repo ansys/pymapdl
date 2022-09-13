@@ -2051,6 +2051,53 @@ class MapdlGrpc(_MapdlCore):
         return MapdlMath(self)
 
     @property
+    def krylov(self):
+        """APDL krylov interface
+
+        Returns
+        -------
+        :class:`MapdlMath <ansys.mapdl.core.krylov.Krylov_functions>`
+
+        Examples
+        --------
+        Solving using krylov method
+
+        >>> mk = mapdl.krylov
+
+        1.Generate Subspace
+        >>> Qz = mk.krygensub(maxDimQ,freqVal,chkOrthoKey,outKey)
+
+        maxDimQ     - maximum size/dimension of Krylov subspace
+        freqVal     - frequency value (Hz) at which to build the KRYLOV subspace
+        chkOrthoKey - [optional] key to check orthonormal properties of
+        each subspace vector with all other subspace vectors
+        outKey      - [optional] key to output KRYLOV subspace to Qz.txt file
+
+        2.Use KRYLOV subspace to solve a reduced harmonic analysis over a specified frequency range
+        >>> Yz = mk.krysolve(freqBeg,freqEnd,numFreq,outKey)
+
+        freqBeg - starting value of the frequency range (Hz)
+        freqEnd - ending value of the frequency range (Hz)
+        numFreq - user specified number of intervals in frequency range
+        loadKey - key specifying whether load should be ramped(0) or stepped(1)
+        outKey  - [optional] key to output reduced solution to Yz.txt file
+
+        3.Expand the reduced solution back to the original space
+        >>> mk.kryexpand(outKey,resKey)
+
+        outKey  - [optional] key to output expanded solution to Xz_*.txt file
+        resKey  - [optional] key to compute the residual of the expanded
+        solution
+            = 0 means do not compute the residual
+            = 1 means compute the L-inf norm of the residual
+            = 2 means compute the L-1 norm of the residual
+            = 3 means compute the L-2 norm of the residual
+        """
+        from ansys.mapdl.core.krylov import Krylov_functions
+
+        return Krylov_functions(self)
+
+    @property
     def db(self):
         """
         MAPDL database interface.
