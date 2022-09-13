@@ -655,3 +655,12 @@ def test_status(mm, capsys):
     # Checking also _status property
     assert "APDLMATH PARAMETER STATUS-" in mm._status
     assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])
+
+
+def test_dense_solver(mm):
+    dim = 1000
+    m2 = mm.rand(dim, dim)
+    m3 = m2.copy()
+    mm.factorize(m2, inplace=False)
+
+    assert np.allclose(m2.asarray(), m3.asarray())
