@@ -657,7 +657,7 @@ def test_status(mm, capsys):
     assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])
 
 
-def test_dense_solver(mm):
+def test_factorize_inplace_arg(mm):
     dim = 1000
     m2 = mm.rand(dim, dim)
     m3 = m2.copy()
