@@ -105,7 +105,7 @@ class LicenseChecker:
     @threaded_daemon
     def checkout_license(self, host=None):
         try:
-            self._check_mech_license_available(host, verbose=self._verbose)
+            self._check_mech_license_available(host)
         except Exception as error:
             self._license_checkout_success = False
             self._license_checkout_msg.append(str(error))
