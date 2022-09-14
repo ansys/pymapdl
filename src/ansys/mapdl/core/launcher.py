@@ -1012,6 +1012,8 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
         if os.name == "nt" and not force_intel:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
+            # This is due to the intel compiler, and only afects versions between
+            # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
@@ -1026,7 +1028,7 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
                 add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_path) >= 210:
+            if 222 > _version_from_path(exec_path) >= 210:
                 add_sw += " -mpi msmpi"
 
     return add_sw
