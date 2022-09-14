@@ -204,10 +204,8 @@ class LicenseChecker:
             Exceeded ``timeout`` while waiting for the license log file.
 
         """
-        licdebug_file = os.path.join(
-            self._get_licdebug_path(), self._get_licdebug_name()
-        )
-        file_iterator = self._get_licdebug_tail(licdebug_file)
+        licdebug_file = os.path.join(self._get_licdebug_path(), get_licdebug_name())
+        file_iterator = get_licdebug_tail(licdebug_file)
 
         if self._check_iterator(
             file_iterator, licdebug_file, timeout, notify_at_second
@@ -286,47 +284,9 @@ class LicenseChecker:
 
         return os.path.join(folder, ".ansys")
 
-    def _get_licdebug_name(self):
-        """Get license client log file name.
-
-        This file change the name according to the ANSYS version and the type of license requested (``$appname``).
-        * For ANSYS version 22.1 and above: ``licdebug.$hostname.$appname.$version.out``
-        * For ANSYS version 21.2 and below: ``licdebug.$appname.$version.out``
-
-        where:
-        * ``$hostname`` is the name of the machine.
-        * ``$appname`` is the name of the feature used by the license client. Eg. 'FEAT_ANSYS'
-        * ``$version`` is the version of ANSYS. Eg 211 for version 21.1.
-
-        Returns
-        -------
-        str
-            licdebug log file complete name.
-
-        """
-        # Licdebug name convention:
-        # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
-        # - For version 21.2 and below: `licdebug.$appname.$version.out`
-
-        from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
-
-        name = "licdebug"
-        hostname = socket.gethostname()
-        appname = APP_NAME
-        # This is the type of license my client requests (Windows 10, 2021R2)
-        version = _version_from_path(get_ansys_path(allow_input=False))
-        ending = "out"
-
-        if version < 221:
-            parts = (name, appname, version, ending)
-        else:
-            parts = (name, hostname, appname, version, ending)
-
-        return ".".join([str(each_part) for each_part in parts])
-
     def _get_ansysli_util_path(self):  # pragma: no cover
         """Return the ansys licencing utilities path."""
-        ansyslic_dir = self._get_ansyslic_dir()
+        ansyslic_dir = get_ansyslic_dir()
         if os.name == "nt":
             ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
         else:
@@ -444,72 +404,113 @@ class LicenseChecker:
 
         return True
 
-    def _get_licdebug_tail(self, licdebug_file, start_timeout=10, debug=False):
-        """Get each of the licdebug file messages.
 
-        This method keeps the ``licdebug`` file open checking for complete messages.
-        It yields one message at a time when called.
+def get_licdebug_tail(licdebug_file, start_timeout=10, debug=False):
+    """Get each of the licdebug file messages.
 
-        Parameters
-        ----------
-        licdebug_file : str
-            Path to the ``licdebug`` file.wh
-        start_timeout : float, optional
-            Maximum timeout to wait until the file exists.
+    This method keeps the ``licdebug`` file open checking for complete messages.
+    It yields one message at a time when called.
 
-        Yields
-        ------
-        msg : str
-            Message formatted as a single string.
+    Parameters
+    ----------
+    licdebug_file : str
+        Path to the ``licdebug`` file.wh
+    start_timeout : float, optional
+        Maximum timeout to wait until the file exists.
 
-        """
-        # wait until file exists
-        max_time = time.time() + start_timeout
-        while not os.path.isfile(licdebug_file):
-            time.sleep(0.01)
-            if time.time() > max_time:
-                raise TimeoutError(
-                    f"Exceeded {start_timeout} seconds while waiting for {licdebug_file}"
-                    " to exist."
-                )
+    Yields
+    ------
+    msg : str
+        Message formatted as a single string.
 
-        with open(licdebug_file) as fid:
-            # Going to the end of the file.
-            if not debug:  # pragma: no cover
-                fid.seek(0, 2)
-            while True:
-                lines = "".join(fid.readlines())
-                yield lines
+    """
+    # wait until file exists
+    max_time = time.time() + start_timeout
+    while not os.path.isfile(licdebug_file):
+        time.sleep(0.01)
+        if time.time() > max_time:
+            raise TimeoutError(
+                f"Exceeded {start_timeout} seconds while waiting for {licdebug_file}"
+                " to exist."
+            )
 
-    def _get_ansyslic_dir(self):
-        """Get the path to the Ansys license directory"""
+    with open(licdebug_file) as fid:
+        # Going to the end of the file.
+        if not debug:  # pragma: no cover
+            fid.seek(0, 2)
+        while True:
+            lines = "".join(fid.readlines())
+            yield lines
 
-        # it's possible the user has specified the license as an env var
-        ansyslic_dir = None
-        if LIC_FILE_ENVAR in os.environ:
-            ansyslmd_var = os.environ[LIC_FILE_ENVAR]
-            if not os.path.isfile(ansyslmd_var):
-                # likely license info
-                ansyslic_dir = None
+
+def get_ansyslic_dir():
+    """Get the path to the Ansys license directory"""
+
+    # it's possible the user has specified the license as an env var
+    ansyslic_dir = None
+    if LIC_FILE_ENVAR in os.environ:
+        ansyslmd_var = os.environ[LIC_FILE_ENVAR]
+        if not os.path.isfile(ansyslmd_var):
+            # likely license info
+            ansyslic_dir = None
+    else:
+        ansyslic_dir = os.getenv(LIC_PATH_ENVAR)
+
+    # env var may not be specified, check in the usual location
+    if ansyslic_dir is None:
+        if os.name == "nt":
+            ansyslic_dir = os.path.join(
+                os.environ["ProgramFiles"],
+                "ANSYS Inc",
+                "Shared Files",
+                "Licensing",
+            )
         else:
-            ansyslic_dir = os.getenv(LIC_PATH_ENVAR)
+            ansyslic_dir = "/usr/ansys_inc/shared_files/licensing"
 
-        # env var may not be specified, check in the usual location
-        if ansyslic_dir is None:
-            if os.name == "nt":
-                ansyslic_dir = os.path.join(
-                    os.environ["ProgramFiles"],
-                    "ANSYS Inc",
-                    "Shared Files",
-                    "Licensing",
-                )
-            else:
-                ansyslic_dir = "/usr/ansys_inc/shared_files/licensing"
+        if not os.path.isdir(ansyslic_dir):
+            raise FileNotFoundError(
+                f"Unable to locate ANSYS licencing path at {ansyslic_dir}\n"
+                f"Specify the {LIC_PATH_ENVAR}"
+            )
 
-            if not os.path.isdir(ansyslic_dir):
-                raise FileNotFoundError(
-                    f"Unable to locate ANSYS licencing path at {ansyslic_dir}\n"
-                    f"Specify the {LIC_PATH_ENVAR}"
-                )
+    return ansyslic_dir
 
-        return ansyslic_dir
+
+def get_licdebug_name(self):
+    """Get license client log file name.
+
+    This file change the name according to the ANSYS version and the type of license requested (``$appname``).
+    * For ANSYS version 22.1 and above: ``licdebug.$hostname.$appname.$version.out``
+    * For ANSYS version 21.2 and below: ``licdebug.$appname.$version.out``
+
+    where:
+    * ``$hostname`` is the name of the machine.
+    * ``$appname`` is the name of the feature used by the license client. Eg. 'FEAT_ANSYS'
+    * ``$version`` is the version of ANSYS. Eg 211 for version 21.1.
+
+    Returns
+    -------
+    str
+        licdebug log file complete name.
+
+    """
+    # Licdebug name convention:
+    # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
+    # - For version 21.2 and below: `licdebug.$appname.$version.out`
+
+    from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
+
+    name = "licdebug"
+    hostname = socket.gethostname()
+    appname = APP_NAME
+    # This is the type of license my client requests (Windows 10, 2021R2)
+    version = _version_from_path(get_ansys_path(allow_input=False))
+    ending = "out"
+
+    if version < 221:
+        parts = (name, appname, version, ending)
+    else:
+        parts = (name, hostname, appname, version, ending)
+
+    return ".".join([str(each_part) for each_part in parts])
