@@ -273,7 +273,7 @@ class InstanceFilter(logging.Filter):
     def filter(self, record):
         if not hasattr(record, "instance_name") and hasattr(record, "name"):
             record.instance_name = record.name
-        elif not hasattr(record, "instance_name"):
+        elif not hasattr(record, "instance_name"):  # pragma: no cover
             record.instance_name = ""
         return True
 
@@ -432,7 +432,7 @@ class Logger:
                     # global.
                     if isinstance(level, str):
                         new_loglevel = string_to_loglevel[level.upper()]
-                    elif isinstance(level, (int, float)):
+                    elif isinstance(level, (int, float)):  # pragma: no cover
                         new_loglevel = level
 
                     if each_handler.level > new_loglevel:
