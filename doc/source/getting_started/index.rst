@@ -8,6 +8,10 @@ available to you.
 Visit `Ansys <https://www.ansys.com/>`_ for more information on
 getting a licensed copy of Ansys.
 
+You can also try the Student Version of Ansys products in
+`Ansys Student Versions <https://www.ansys.com/academic/students>`_.
+These are versions valid during a year and with limited capabilities 
+regarding number of nodes, elements, etc.
 
 .. toctree::
    :hidden:

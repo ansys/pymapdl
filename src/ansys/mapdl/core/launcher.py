@@ -983,8 +983,11 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_add_sw(add_sw, exec_path, force_intel=False):
-    """Validate additional switches.
+def _validate_MPI(add_sw, exec_path, force_intel=False):
+    """Validate MPI configuration.
+
+    Enforce Microsoft MPI in version 21.0 or later, to fix a
+    VPN issue on Windows.
 
     Parameters
     ----------
@@ -1008,8 +1011,14 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     if "smp" not in add_sw:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
+            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
-        if os.name == "nt" and not force_intel:
+
+        if (
+            os.name == "nt"
+            and not force_intel
+            and (222 > _version_from_path(exec_path) >= 210)
+        ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
             #
@@ -1019,16 +1028,46 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-
             if "intelmpi" in add_sw:
+                LOG.debug(
+                    "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
+                )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
                 add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_path) >= 210:
-                add_sw += " -mpi msmpi"
+            LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
+            add_sw += " -mpi msmpi"
 
+    return add_sw
+
+
+def _force_smp_student_version(add_sw, exec_path):
+    """Force SMP in student version.
+
+    Parameters
+    ----------
+    add_sw : str
+        Additional swtiches.
+    exec_path : str
+        Path to the MAPDL executable.
+
+    Returns
+    -------
+    str
+        Validated additional switches.
+
+    """
+    # Converting additional_switches to lower case to avoid mismatches.
+    add_sw = add_sw.lower()
+
+    if (
+        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+    ):  # pragma: no cover
+        if "student" in exec_path.lower():
+            add_sw += " -smp"
+            LOG.debug("Student version detected, using '-smp' switch by default.")
     return add_sw
 
 
@@ -1208,6 +1247,9 @@ def launch_mapdl(
 
     Notes
     -----
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in SMP mode
+    unless another option is specified.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
@@ -1465,8 +1507,11 @@ def launch_mapdl(
     check_lock_file(run_location, jobname, override)
     mode = check_mode(mode, _version_from_path(exec_file))
 
-    # cache start parameters
-    additional_switches = _validate_add_sw(
+    # Setting SMP by default if student version is used.
+    additional_switches = _force_smp_student_version(additional_switches, exec_file)
+
+    #
+    additional_switches = _validate_MPI(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
@@ -1509,7 +1554,7 @@ def launch_mapdl(
 
     elif "-p " in additional_switches:
         # There is already a license request in additional switches.
-        license_type = re.findall(r"-p \b(\w*)", additional_switches)[
+        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
             0
         ]  # getting only the first product license.
 
@@ -1602,7 +1647,7 @@ def launch_mapdl(
         # to the license check
         if license_server_check:
             lic_check.check()
-            # pass
+
         raise exception
 
     return mapdl
