@@ -97,15 +97,9 @@ def test_get_ansys_license_directory():
 
 
 @skip_no_lic_bin
-def test__checkout_license(license_checker):
-    output = license_checker._checkout_license("meba")
-    assert "ANSYS LICENSE MANAGER ERROR" not in output
-
-
-@skip_no_lic_bin
 def test__checkout_wrong_license(license_checker):
     with pytest.raises(ValueError):
-        output = license_checker._checkout_license("meeeeba")
+        license_checker._checkout_license("meeeeba")
 
 
 @skip_no_lic_bin
