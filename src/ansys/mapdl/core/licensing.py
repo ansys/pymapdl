@@ -421,7 +421,7 @@ def get_ansys_license_directory():
 
     # env var may not be specified, check in the usual location
     if ansyslic_dir is None:
-        if os.name == "nt":
+        if os.name == "nt":  # pragma: no cover
             ansyslic_dir = os.path.join(
                 os.environ["ProgramFiles"],
                 "ANSYS Inc",
@@ -490,9 +490,9 @@ def get_ansys_license_debug_file_path():
     str
         path of the license client log file.
     """
-    if os.name == "nt":
+    if os.name == "nt":  # pragma: no cover
         folder = os.getenv("TEMP")
-    elif os.name == "posix":
+    elif os.name == "posix":  # pragma: no cover
         folder = os.getenv("HOME")
     else:
         raise OSError(f"Unsupported OS {os.name}")

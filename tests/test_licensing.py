@@ -103,6 +103,12 @@ def test__checkout_license(license_checker):
 
 
 @skip_no_lic_bin
+def test__checkout_wrong_license(license_checker):
+    with pytest.raises(ValueError):
+        output = license_checker._checkout_license("meeeeba")
+
+
+@skip_no_lic_bin
 def test__checkout_license_fail(license_checker):
     output = license_checker._checkout_license("meba", test_net_3, 1055)
     assert "CHECKOUT FAILED" in output
@@ -111,6 +117,11 @@ def test__checkout_license_fail(license_checker):
 @skip_no_lic_bin
 def test__check_mech_license_available(license_checker):
     license_checker._check_mech_license_available()
+
+
+@skip_no_lic_bin
+def test__check_mech_license_available_specified_license(license_checker):
+    license_checker._check_mech_license_available(licenses="meba")
 
 
 @skip_no_lic_bin
@@ -209,3 +220,80 @@ def test__check_license_file_iterator(tmpdir, license_checker):
     assert license_checker._check_license_file_iterator(
         file_iterator, file_, timeout, notify_at_second
     )
+
+
+def test_stop(license_checker):
+    license_checker.stop = True
+    assert license_checker._stop
+
+    license_checker.stop = 0
+    assert not license_checker._stop
+
+
+def test_is_connected(license_checker):
+    license_checker.is_connected = True
+    assert license_checker._is_connected
+
+    license_checker.is_connected = 0
+    assert not license_checker._is_connected
+
+
+def test_check_license_file_exception(license_checker):
+    with pytest.raises(TimeoutError):
+        license_checker._check_license_file(0.01)
+
+
+def test_license_wait():
+    license_checker = licensing.LicenseChecker()
+    assert not license_checker._lic_file_thread
+    assert not license_checker._checkout_thread
+
+    license_checker.start(checkout_license=True)
+    assert license_checker._lic_file_thread
+    assert license_checker._checkout_thread
+
+    license_checker.wait()
+    assert license_checker._lic_file_thread
+    assert license_checker._checkout_thread
+
+
+def test_license_check():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker._license_file_success = True
+    assert license_checker.check()
+
+    with pytest.raises(errors.LicenseServerConnectionError):
+        license_checker._license_file_success = False
+        license_checker.check()
+
+    license_checker._license_file_success = None
+    license_checker._license_checkout_success = True
+    assert license_checker.check()
+
+    with pytest.raises(errors.LicenseServerConnectionError):
+        license_checker._license_file_success = None
+        license_checker._license_checkout_success = False
+        license_checker.check()
+
+
+def test_stop_license_checker():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker.start()
+    time.sleep(1)
+
+    license_checker.stop = True
+    time.sleep(1)  # giving some time to reach end of the file.
+    assert not license_checker._lic_file_thread.is_alive()
+
+
+def test_is_connected_license_checker():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker.start()
+    time.sleep(1)
+
+    license_checker.is_connected = True
+    time.sleep(1)  # giving some time to reach end of the file.
+    assert not license_checker._lic_file_thread.is_alive()
