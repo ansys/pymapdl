@@ -244,10 +244,11 @@ def test_comment_solve():
 
 
 def test_macro_to_function():
-    assert "def SLV(" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "SLV()" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\ndef SLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\nSLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    output = convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "def SLV(" in output
+    assert "SLV()" in output
+    assert "\n\n\ndef SLV" in output
+    assert "\n\n\nSLV" in output
 
 
 def test_out():
@@ -361,3 +362,42 @@ def test_print_com_in_converter():
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,")  # Default
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,", print_com=True)
     assert "print_com=True" not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
+
+
+def test_only_commands():
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=True,
+        add_imports=True,
+        auto_exit=True,
+        header="asdf",
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" not in output
+    assert "import" not in output
+    assert "mapdl.exit" not in output
+
+
+@pytest.mark.parametrize(
+    "parameters",
+    [
+        ["/view,1,1,1", "mapdl.view(1, 1, 1)"],
+        ["/view,1,,1,1", 'mapdl.view(1, "", 1, 1)'],
+        ["/view,1,,1,  ,1", 'mapdl.view(1, "", 1, "", 1)'],
+        ["*get,1,1,1", "mapdl.get(1, 1, 1)"],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
+        ["vget,1,,'asdf',", 'mapdl.vget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',", 'mapdl.starvget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',,,,,", 'mapdl.starvget(1, "", "asdf")'],
+        [
+            "*vget,1,,,,,,,'asdf',,,,,",
+            'mapdl.starvget(1, "", "", "", "", "", "", "asdf")',
+        ],
+        ["solve", "mapdl.solve()"],
+        ["/solu", "mapdl.slashsolu()"],
+        ["solu", "mapdl.solu()"],
+    ],
+)
+def test_convert_star_slash(parameters):
+    assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]
