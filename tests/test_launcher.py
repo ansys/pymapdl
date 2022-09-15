@@ -9,7 +9,8 @@ import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
-    _validate_add_sw,
+    _force_smp_student_version,
+    _validate_MPI,
     _version_from_path,
     get_start_instance,
     is_common_executable_path,
@@ -70,8 +71,11 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_add_sw("", exec_path)
+    add_sw = _validate_MPI("", exec_path)
     assert "msmpi" in add_sw
+
+    add_sw = _validate_MPI("-mpi intelmpi", exec_path)
+    assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
 
 @pytest.mark.skipif(
@@ -385,3 +389,31 @@ def test_open_gui(mapdl):
 
     mapdl.open_gui(include_result=False, inplace=False)
     mapdl.open_gui(include_result=True, inplace=True)
+
+
+def test__force_smp_student_version():
+    add_sw = ""
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-mpi"
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-dmp"
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = ""
+    exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-smp"
+    exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
+    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
