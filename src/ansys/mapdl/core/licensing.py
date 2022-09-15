@@ -47,20 +47,21 @@ class LicenseChecker:
     ----------
     timeout : float, optional
         Timeout for the licensing log file check.
-    verbose : bool, optional
-        Enable or disable verbose output of the license check.  Useful
-        for debugging.
 
     """
 
-    def __init__(self, timeout=30, verbose=False):
+    def __init__(self, timeout=30, verbose=None):
         self._license_file_msg = []
         self._license_file_success = None
 
         self._license_checkout_msg = []
         self._license_checkout_success = None
         self._timeout = timeout
-        self._verbose = verbose
+
+        if verbose is not None:
+            DeprecationWarning(
+                "The argument 'verbose' has been deprecated, please use loggers from the logging module."
+            )
 
         self._lic_file_thread = None
         self._checkout_thread = None
@@ -88,14 +89,6 @@ class LicenseChecker:
     def is_connected(self, value):
         self._is_connected = bool(value)
 
-    @property
-    def verbose(self):
-        return self._verbose
-
-    @verbose.setter
-    def verbose(self, value):
-        self._verbose = bool(value)
-
     @threaded_daemon
     def check_license_file(self):
         try:
@@ -107,7 +100,7 @@ class LicenseChecker:
             self._license_file_success = True
 
     @threaded_daemon
-    def checkout_license(self, host=None):
+    def checkout_license(self, host=None):  # pragma: no cover
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -235,7 +228,9 @@ class LicenseChecker:
                 LOG.debug("The MAPDL session got connected. Stopping license check.")
                 return True
 
-            if time.time() > notification_time and notification_bool:
+            if (
+                time.time() > notification_time and notification_bool
+            ):  # pragma: no cover
                 msg = (
                     "PyMAPDL is taking longer than expected to connect to an MAPDL session.\n"
                     "Checking if there are any available licenses..."
@@ -247,8 +242,6 @@ class LicenseChecker:
             msg = next(file_iterator)
             if msg:
                 LOG.debug(f"Output from {licdebug_file}:\n{msg}")
-                if self.verbose:
-                    print(f"Output from {licdebug_file}:\n{msg}")
 
             if "DENIED" in msg:
                 # read to the end of the file
@@ -270,7 +263,7 @@ class LicenseChecker:
             f"Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}"
         )
 
-    def _checkout_license(self, lic, host=None, port=2325, verbose=None):
+    def _checkout_license(self, lic, host=None, port=2325):
         """Check if a license is available using the Ansys license utility.
 
         It uses it own process.
@@ -291,9 +284,6 @@ class LicenseChecker:
             Port on the host to connect to.  Only used when ``host`` is set.
 
         """
-        if verbose is None:
-            verbose = self.verbose
-
         if lic.lower() not in ALLOWABLE_LICENSES:
             raise ValueError(f"Invalid license '{lic}'")
 
@@ -321,12 +311,9 @@ class LicenseChecker:
         )
         output = process.stdout.read().decode()
 
-        if verbose:
-            t_elap = time.time() - tstart
-            print(f"License check complete in {t_elap:.2} seconds.\n")
-            print(output)
-            LOG.debug(f"License check complete in {t_elap:.2} seconds.\n")
-            LOG.debug(output)
+        t_elap = time.time() - tstart
+        LOG.debug(f"License check complete in {t_elap:.2} seconds.\n")
+        LOG.debug(output)
 
         return output
 
