@@ -204,9 +204,6 @@ def convert_script(
         print_com=print_com,
     )
 
-    if os.path.exists(filename_out):
-        raise FileExistsError(f"The output file '{filename_out}' already exists.")
-
     translator.save(filename_out)
     return translator.lines
 
