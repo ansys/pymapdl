@@ -297,3 +297,8 @@ def test_is_connected_license_checker():
     license_checker.is_connected = True
     time.sleep(1)  # giving some time to reach end of the file.
     assert not license_checker._lic_file_thread.is_alive()
+
+
+@skip_no_lic_bin
+def test__checkout_license(license_checker):
+    assert license_checker._checkout_license("mech_1")  # using default host and port

@@ -317,7 +317,9 @@ class LicenseChecker:
 
         return output
 
-    def _check_mech_license_available(self, host=None, licenses=None):
+    def _check_mech_license_available(
+        self, host=None, licenses=None
+    ):  # pragma: no cover
         """Check if there mechanical license available by running 'ansysli_util'.
 
         This uses the default configuration available to MAPDL.
@@ -389,7 +391,7 @@ def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=Fal
     """
     # wait until file exists
     max_time = time.time() + start_timeout
-    while not os.path.isfile(licdebug_file):
+    while not os.path.isfile(licdebug_file):  # pragma: no cover
         time.sleep(0.01)
         if time.time() > max_time:
             raise TimeoutError(
@@ -406,7 +408,7 @@ def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=Fal
             yield lines
 
 
-def get_ansys_license_directory():
+def get_ansys_license_directory():  # pragma: no cover
     """Get the path to the Ansys license directory"""
 
     # it's possible the user has specified the license as an env var
@@ -471,7 +473,7 @@ def get_ansys_license_debug_file_name():
     version = _version_from_path(get_ansys_path(allow_input=False))
     ending = "out"
 
-    if version < 221:
+    if version < 221:  # pragma: no cover
         parts = (name, appname, version, ending)
     else:
         parts = (name, hostname, appname, version, ending)
@@ -494,7 +496,7 @@ def get_ansys_license_debug_file_path():
         folder = os.getenv("TEMP")
     elif os.name == "posix":  # pragma: no cover
         folder = os.getenv("HOME")
-    else:
+    else:  # pragma: no cover
         raise OSError(f"Unsupported OS {os.name}")
 
     return os.path.join(folder, ".ansys")
