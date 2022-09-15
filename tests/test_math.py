@@ -675,6 +675,15 @@ def test_status(mm, capsys):
     assert all([each in mm._status for each in ["Name", "Type", "Dims", "Workspace"]])
 
 
+def test_factorize_inplace_arg(mm):
+    dim = 1000
+    m2 = mm.rand(dim, dim)
+    m3 = m2.copy()
+    mm.factorize(m2, inplace=False)
+
+    assert np.allclose(m2.asarray(), m3.asarray())
+
+
 def test_mult(mapdl, mm):
 
     rand_ = np.random.rand(100, 100)
