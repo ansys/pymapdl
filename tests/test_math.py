@@ -419,9 +419,19 @@ def test_copy2(mm):
     assert np.allclose(m2.asarray(), m3.asarray())
 
 
+def test_copy2(mm):
+    dim = 1000
+    m2 = mm.rand(dim, dim)
+    m3 = m2.copy()
+
+    assert np.allclose(m2.asarray(), m3.asarray())
+
+
 def test_dense_solver(mm):
     dim = 1000
     m2 = mm.rand(dim, dim)
+    # factorize do changes inplace in m2, so we
+    # need a copy to later compare.
     # factorize do changes inplace in m2, so we
     # need a copy to later compare.
     m3 = m2.copy()
@@ -429,9 +439,14 @@ def test_dense_solver(mm):
     solver = mm.factorize(m2)
 
     v = mm.ones(dim)
-    C = solver.solve(v)
+    C = C = solver.solve(v)
 
     # TODO: we need to verify this works
+    m3_ = m3.asarray()
+    v_ = v.asarray()
+    x = np.linalg.solve(m3_, v_)
+
+    assert np.allclose(C, x)
     m3_ = m3.asarray()
     v_ = v.asarray()
     x = np.linalg.solve(m3_, v_)

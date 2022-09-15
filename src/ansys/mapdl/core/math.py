@@ -17,6 +17,7 @@ from .check_version import VersionError, meets_version, version_requires
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
 from .errors import ANSYSDataTypeError, protect_grpc
 from .mapdl_grpc import MapdlGrpc
+from .parameters import interp_star_status
 
 MYCTYPE = {
     np.int32: "I",
@@ -166,6 +167,10 @@ class MapdlMath:
         """Print out the status of all APDLMath Objects"""
         return self._mapdl.run("*STATUS,MATH", mute=False)
 
+    @property
+    def _parm(self):
+        return interp_star_status(self._status)
+
     def vec(self, size=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create a vector.
 
@@ -199,19 +204,16 @@ class MapdlMath:
 
         if not name:
             name = id_generator()
+
+        if name not in self._parm:
             self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
 
-            ans_vec = AnsVec(name, self._mapdl, dtype, init)
-            if asarray:
-                return self._mapdl._vec_data(ans_vec.id)
-            else:
-                return ans_vec
+        ans_vec = AnsVec(name, self._mapdl, dtype, init)
+
+        if asarray:
+            return self._mapdl._vec_data(ans_vec.id)
         else:
-            ans_vec = AnsVec(name, self._mapdl)
-            if asarray:
-                return self._mapdl._vec_data(ans_vec.id)
-            else:
-                return ans_vec
+            return ans_vec
 
     def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None, asarray=False):
         """Create an APDLMath matrix.
@@ -1404,8 +1406,10 @@ class AnsVec(ApdlMathObj):
         AnsVec
             Hadamard product between this vector and the other vector.
         """
-        if not meets_version(self._mapdl._server_version, (0, 4, 0)):
-            raise VersionError(f"``{func.__name__}`` requires MAPDL version 2021R2")
+        if not meets_version(
+            self._mapdl._server_version, (0, 4, 0)
+        ):  # pragma: no cover
+            raise VersionError("``AnsVec`` requires MAPDL version 2021R2")
 
         if not isinstance(vec, AnsVec):
             raise TypeError("Must be an Ansys vector object")
