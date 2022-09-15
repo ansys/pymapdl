@@ -152,12 +152,47 @@ def test_convert_no_use_function_names(tmpdir):
     assert clines
 
 
-@pytest.mark.skipif(os.name == "nt", reason="Requires multiple instances")
 def test_convert(tmpdir):
     vm_file = examples.vmfiles["vm1"]
     pyscript = str(tmpdir.mkdir("tmpdir").join("vm1.py"))
     clines = pymapdl.convert_script(vm_file, pyscript, loglevel="ERROR")
     assert clines
+
+
+def test_convert_no_given_output_file(tmpdir):
+    mapdlscript = str(tmpdir.mkdir("tmpdir").join("mapdlscript.dat"))
+    with open(mapdlscript, "w") as fid:
+        fid.write("/com This is an mapdl script\n")
+        fid.write("/prep7\n")
+        fid.write("/eof\n")
+
+    clines = pymapdl.convert_script(mapdlscript)
+    pyscript = mapdlscript[:-4] + ".py"
+    assert os.path.exists(pyscript)
+    assert clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert "mapdl.prep7()" in clines
+    assert 'mapdl.run("/eof")' in clines
+
+    with open(pyscript, "r") as fid:
+        clines = fid.read()
+
+    assert clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert "mapdl.prep7()" in clines
+    assert 'mapdl.run("/eof")' in clines
+
+
+def test_convert_existing_output_file(tmpdir):
+    mapdlscript = str(tmpdir.mkdir("tmpdir").join("mapdlscript.dat"))
+    with open(mapdlscript, "w") as fid:
+        fid.write("/com This is an mapdl script\n")
+
+    pymapdl.convert_script(mapdlscript)
+    with pytest.raises(FileExistsError):
+        pymapdl.convert_script(mapdlscript)
 
 
 @pytest.mark.parametrize("cmd", block_commands)
@@ -181,7 +216,7 @@ def test_logger(capsys):
         translator.translate_line(line)
     std = capsys.readouterr()
     assert all(
-        ["Converted" in each for each in std.err.split("\n")[:-1]]
+        ["Converted" in each for each in std.err.split("\n") if each]
     )  # last one is an empty line.
 
 
