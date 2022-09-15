@@ -617,7 +617,7 @@ class FileTranslator:
 
         # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
-        LINE = line.upper()
+        line_upper = line.upper()
 
         cmd_caps = line.split(",")[0].upper()
         cmd_caps_short = cmd_caps[:4]
@@ -710,7 +710,7 @@ class FileTranslator:
         if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
 
-        if "*END" in LINE:
+        if "*END" in line_upper:
             if self.macros_as_functions:
                 self.store_empty_line()
                 self.store_empty_line()
@@ -726,7 +726,7 @@ class FileTranslator:
                 return
 
         # check for if statement
-        if cmd_caps[:3] == "*IF" or "*IF" in LINE:
+        if cmd_caps[:3] == "*IF" or "*IF" in line_upper:
             self.start_non_interactive()
             self.store_run_command(line)
             return
@@ -745,7 +745,7 @@ class FileTranslator:
             ):  # To escape cmds that require (XX) but they are not in block
                 self.end_non_interactive()
             return
-        elif LINE[:4] == "*USE" and self.macros_as_functions:
+        elif cmd_caps_short == "*USE" and self.macros_as_functions:
             func_name = items[1].strip()
             if func_name in self._functions:
                 args = ", ".join(items[2:])
@@ -763,7 +763,7 @@ class FileTranslator:
             self.store_empty_line()
             return
 
-        if line == "-1" or LINE == "END PREAD":  # End of block commands
+        if line == "-1" or line_upper == "END PREAD":  # End of block commands
             self.store_run_command(line)
             self._in_block = False
             self.end_non_interactive()
