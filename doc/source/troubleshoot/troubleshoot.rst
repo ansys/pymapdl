@@ -243,14 +243,16 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
     C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
 
 
+.. note:: Launching MAPDL Student Version
+   By default if a Student version is detected, PyMAPDL will launch the MAPDL instance in
+   ``SMP`` mode, unless another MPI option is specified.
 
 *****************
 Launching PyMAPDL
 *****************
 
 Even if you are able to correctly launch MAPDL, PyMAPDL might have some problems to launch
-MAPDL.
-
+MAPDL by itself.
 
 
 Manually Set the Executable Location
