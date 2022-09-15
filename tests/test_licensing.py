@@ -297,3 +297,8 @@ def test_is_connected_license_checker():
 @skip_no_lic_bin
 def test__checkout_license(license_checker):
     assert license_checker._checkout_license("mech_1")  # using default host and port
+
+
+def test_verbose_deprecating():
+    with pytest.raises(DeprecationWarning):
+        licensing.LicenseChecker(verbose=True)

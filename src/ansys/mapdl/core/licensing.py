@@ -59,7 +59,7 @@ class LicenseChecker:
         self._timeout = timeout
 
         if verbose is not None:
-            DeprecationWarning(
+            raise DeprecationWarning(
                 "The argument 'verbose' has been deprecated, please use loggers from the logging module."
             )
 
@@ -442,7 +442,7 @@ def get_ansys_license_directory():  # pragma: no cover
     return ansyslic_dir
 
 
-def get_ansys_license_debug_file_name():
+def get_ansys_license_debug_file_name():  # pragma: no cover
     """Get license client log file name.
 
     This file change the name according to the ANSYS version and the type of license requested (``$appname``).
@@ -473,7 +473,7 @@ def get_ansys_license_debug_file_name():
     version = _version_from_path(get_ansys_path(allow_input=False))
     ending = "out"
 
-    if version < 221:  # pragma: no cover
+    if version < 221:
         parts = (name, appname, version, ending)
     else:
         parts = (name, hostname, appname, version, ending)
@@ -481,7 +481,7 @@ def get_ansys_license_debug_file_name():
     return ".".join([str(each_part) for each_part in parts])
 
 
-def get_ansys_license_debug_file_path():
+def get_ansys_license_debug_file_path():  # pragma: no cover
     """Get license client log (``licdebug``) path.
 
     This path is obtained from the correspondent env variable (OS
@@ -492,11 +492,11 @@ def get_ansys_license_debug_file_path():
     str
         path of the license client log file.
     """
-    if os.name == "nt":  # pragma: no cover
+    if os.name == "nt":
         folder = os.getenv("TEMP")
-    elif os.name == "posix":  # pragma: no cover
+    elif os.name == "posix":
         folder = os.getenv("HOME")
-    else:  # pragma: no cover
+    else:
         raise OSError(f"Unsupported OS {os.name}")
 
     return os.path.join(folder, ".ansys")
