@@ -1011,13 +1011,26 @@ class MapdlMath:
         """
         return obj1 - obj2
 
-    def factorize(self, mat):
+    def factorize(self, mat, algo=None, inplace=True):
         """Factorize a matrix.
 
         Parameters
         ----------
         mat : ansys.mapdl.math.AnsMat
             An APDLMath matrix
+        algo : str, optional
+            Factorization algorithm.  Either ``"LAPACK"`` (default for
+            dense matrices) or ``"DSP"`` (default for sparse matrices).
+        inplace : bool, optional
+            If ``False``, the factorization is performed on a copy
+            of the input matrix (``mat`` argument), hence this input
+            matrix (``mat``) is not changed. Default is ``True``.
+
+        Returns
+        -------
+        ansys.mapdl.core.math.AnsSolver
+            An Ansys Solver object.
+
 
         Examples
         --------
@@ -1031,7 +1044,7 @@ class MapdlMath:
 
         """
         solver = AnsSolver(id_generator(), self._mapdl)
-        solver.factorize(mat)
+        solver.factorize(mat, algo=algo, inplace=inplace)
         return solver
 
     def norm(self, obj, order="nrm2"):
@@ -1056,7 +1069,7 @@ class MapdlMath:
         v = mm.ones(10)
         3.1622776601683795
         """
-        return obj.norm()
+        return obj.norm(nrmtype=order)
 
     @protect_grpc
     def _set_vec(self, vname, arr, dtype=None, chunk_size=DEFAULT_CHUNKSIZE):
@@ -1707,26 +1720,55 @@ class AnsSolver(ApdlMathObj):
     def __repr__(self):
         return "APDLMath Linear Solver"
 
-    def factorize(self, mat, algo=None):
+    def factorize(self, mat, algo=None, inplace=True):
         """Factorize a matrix
 
-        Perform the numerical factorization of a linear solver system.
+        Perform the numerical factorization of a linear solver system (:math:`A*x=b`).
+
+        .. warning:: By default, factorization modifies the input matrix ``mat``
+           in place. This behavior can be changed using the ``inplace`` argument.
 
         Parameters
         ----------
         mat : ansys.mapdl.math.AnsMat
             An ansys.mapdl.math matrix.
         algo : str, optional
-            Factorization algorithm.  Either ``"LAPACK"`` or
-            ``"DSP"``.
+            Factorization algorithm.  Either ``"LAPACK"`` (default for
+            dense matrices) or ``"DSP"`` (default for sparse matrices).
+        inplace : bool, optional
+            If ``False``, the factorization is performed on a copy
+            of the input matrix (``mat`` argument), hence this input
+            matrix (``mat``) is not changed. Default is ``True``.
+
+        Examples
+        --------
+        Factorize a random matrix and solve a linear system.
+
+        >>> mm = mapdl.math
+        >>> dim = 1000
+        >>> m2 = mm.rand(dim, dim)
+        >>> solver = mm.factorize(m2)
+        >>> b = mm.ones(dim)
+        >>> x = solver.solve(b)
 
         """
+        mat_id = mat.id
+        if not inplace:
+            self._mapdl._log.info("Performing factorization in a copy of the array.")
+            copy_mat = mat.copy()
+            mat_id = copy_mat.id
+        else:
+            self._mapdl._log.info(
+                "Performing factorization inplace. This changes the input array."
+            )
+
         if not algo:
             if mat.type == ObjType.DMAT:
                 algo = "LAPACK"
             elif mat.type == ObjType.SMAT:
                 algo = "DSP"
-        self._mapdl.run(f"*LSENGINE,{algo},{self.id},{mat.id}", mute=True)
+
+        self._mapdl.run(f"*LSENGINE,{algo},{self.id},{mat_id}", mute=True)
         self._mapdl._log.info(f"Factorizing using the {algo} package")
         self._mapdl.run(f"*LSFACTOR,{self.id}", mute=True)
 
