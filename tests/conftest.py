@@ -6,6 +6,9 @@ import time
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
+
+pytest_plugins = ["pytester"]
+
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
