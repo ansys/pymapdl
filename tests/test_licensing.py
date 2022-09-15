@@ -238,6 +238,7 @@ def test_is_connected(license_checker):
     assert not license_checker._is_connected
 
 
+@skip_no_lic_bin
 def test_check_license_file_exception(license_checker):
     with pytest.raises(TimeoutError):
         license_checker._check_license_file(0.01)
