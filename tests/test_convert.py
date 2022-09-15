@@ -448,6 +448,7 @@ def test_only_commands():
 def test_convert_star_slash(parameters):
     assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]
 
+
 ## CLI testing
 
 
