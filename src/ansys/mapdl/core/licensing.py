@@ -70,6 +70,7 @@ class LicenseChecker:
 
     @property
     def stop(self):
+        LOG.debug("Attempting to stop the license checker.")
         return self._stop
 
     @stop.setter
@@ -78,6 +79,9 @@ class LicenseChecker:
 
     @property
     def is_connected(self):
+        LOG.debug(
+            "PyMAPDL has connected to a MAPDL session. Attempting to stop the license checker."
+        )
         return self._is_connected
 
     @is_connected.setter
@@ -204,15 +208,17 @@ class LicenseChecker:
             Exceeded ``timeout`` while waiting for the license log file.
 
         """
-        licdebug_file = os.path.join(self._get_licdebug_path(), get_licdebug_name())
-        file_iterator = get_licdebug_tail(licdebug_file)
+        licdebug_file = os.path.join(
+            get_ansys_license_debug_file_path(), get_ansys_license_debug_file_name()
+        )
+        file_iterator = get_ansys_license_debug_file_tail(licdebug_file)
 
-        if self._check_iterator(
+        if self._check_license_file_iterator(
             file_iterator, licdebug_file, timeout, notify_at_second
         ):
             return True
 
-    def _check_iterator(
+    def _check_license_file_iterator(
         self, file_iterator, licdebug_file, timeout=30, notify_at_second=5
     ):
         """Loop over iterator"""
@@ -223,11 +229,11 @@ class LicenseChecker:
 
             if self.stop:
                 LOG.debug("The license checker has received a stop signal.")
-                return
+                raise Exception("The license checker has been stopped.")
 
             if self.is_connected:
                 LOG.debug("The MAPDL session got connected. Stopping license check.")
-                return
+                return True
 
             if time.time() > notification_time and notification_bool:
                 msg = (
@@ -264,36 +270,6 @@ class LicenseChecker:
             f"Exceeded timeout of {timeout} seconds while examining:\n{licdebug_file}"
         )
 
-    def _get_licdebug_path(self):
-        """Get license client log (``licdebug``) path.
-
-        This path is obtained from the correspondent env variable (OS
-        dependent) and appending ``.ansys``.
-
-        Returns
-        -------
-        str
-            path of the license client log file.
-        """
-        if os.name == "nt":
-            folder = os.getenv("TEMP")
-        elif os.name == "posix":
-            folder = os.getenv("HOME")
-        else:
-            raise OSError(f"Unsupported OS {os.name}")
-
-        return os.path.join(folder, ".ansys")
-
-    def _get_ansysli_util_path(self):  # pragma: no cover
-        """Return the ansys licencing utilities path."""
-        ansyslic_dir = get_ansyslic_dir()
-        if os.name == "nt":
-            ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
-        else:
-            ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
-
-        return ansysli_util_path
-
     def _checkout_license(self, lic, host=None, port=2325, verbose=None):
         """Check if a license is available using the Ansys license utility.
 
@@ -321,7 +297,7 @@ class LicenseChecker:
         if lic.lower() not in ALLOWABLE_LICENSES:
             raise ValueError(f"Invalid license '{lic}'")
 
-        ansysli_util_path = self._get_ansysli_util_path()
+        ansysli_util_path = get_ansys_license_utility_path()
 
         if not os.path.isfile(ansysli_util_path):
             raise FileNotFoundError(
@@ -405,7 +381,7 @@ class LicenseChecker:
         return True
 
 
-def get_licdebug_tail(licdebug_file, start_timeout=10, debug=False):
+def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=False):
     """Get each of the licdebug file messages.
 
     This method keeps the ``licdebug`` file open checking for complete messages.
@@ -443,7 +419,7 @@ def get_licdebug_tail(licdebug_file, start_timeout=10, debug=False):
             yield lines
 
 
-def get_ansyslic_dir():
+def get_ansys_license_directory():
     """Get the path to the Ansys license directory"""
 
     # it's possible the user has specified the license as an env var
@@ -477,7 +453,7 @@ def get_ansyslic_dir():
     return ansyslic_dir
 
 
-def get_licdebug_name(self):
+def get_ansys_license_debug_file_name():
     """Get license client log file name.
 
     This file change the name according to the ANSYS version and the type of license requested (``$appname``).
@@ -514,3 +490,35 @@ def get_licdebug_name(self):
         parts = (name, hostname, appname, version, ending)
 
     return ".".join([str(each_part) for each_part in parts])
+
+
+def get_ansys_license_debug_file_path():
+    """Get license client log (``licdebug``) path.
+
+    This path is obtained from the correspondent env variable (OS
+    dependent) and appending ``.ansys``.
+
+    Returns
+    -------
+    str
+        path of the license client log file.
+    """
+    if os.name == "nt":
+        folder = os.getenv("TEMP")
+    elif os.name == "posix":
+        folder = os.getenv("HOME")
+    else:
+        raise OSError(f"Unsupported OS {os.name}")
+
+    return os.path.join(folder, ".ansys")
+
+
+def get_ansys_license_utility_path():  # pragma: no cover
+    """Return the ansys licencing utilities path."""
+    ansyslic_dir = get_ansys_license_directory()
+    if os.name == "nt":
+        ansysli_util_path = os.path.join(ansyslic_dir, "winx64", "ansysli_util.exe")
+    else:
+        ansysli_util_path = os.path.join(ansyslic_dir, "linx64", "ansysli_util")
+
+    return ansysli_util_path

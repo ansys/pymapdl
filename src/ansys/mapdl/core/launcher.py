@@ -1606,7 +1606,8 @@ def launch_mapdl(
         raise exception
 
     # Stopping license checker
-    lic_check.is_connected = True
+    if license_server_check:
+        lic_check.is_connected = True
 
     return mapdl
 
