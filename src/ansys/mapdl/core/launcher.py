@@ -1243,6 +1243,9 @@ def launch_mapdl(
 
     Notes
     -----
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in SMP mode
+    unless another option is specified.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
