@@ -72,7 +72,7 @@ def write_log(path):
 
 
 try:
-    LIC_INSTALLED = os.path.isfile(licensing.get_ansysli_util_path())
+    LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
 except:
     LIC_INSTALLED = None
 
@@ -81,9 +81,14 @@ skip_no_lic_bin = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(scope="module")
+def license_checker():
+    return licensing.LicenseChecker()
+
+
 @skip_no_lic_bin
-def test_get_licdebug_path():
-    ansyslic_dir = licensing.get_ansyslic_dir()
+def test_get_ansys_license_directory():
+    ansyslic_dir = licensing.get_ansys_license_directory()
     if os.name == "nt":
         assert "Shared Files" in ansyslic_dir and "Licensing" in ansyslic_dir
     else:
@@ -92,39 +97,46 @@ def test_get_licdebug_path():
 
 
 @skip_no_lic_bin
-def test_checkout_license():
-    output = licensing.checkout_license("meba")
-    assert "ANSYS LICENSE MANAGER ERROR" not in output
+def test__checkout_wrong_license(license_checker):
+    with pytest.raises(ValueError):
+        license_checker._checkout_license("meeeeba")
 
 
 @skip_no_lic_bin
-def test_checkout_license_fail():
-    output = licensing.checkout_license("meba", test_net_3, 1055)
+def test__checkout_license_fail(license_checker):
+    output = license_checker._checkout_license("meba", test_net_3, 1055)
     assert "CHECKOUT FAILED" in output
 
 
 @skip_no_lic_bin
-def test_check_mech_license_available():
-    licensing.check_mech_license_available()
+def test__check_mech_license_available(license_checker):
+    license_checker._check_mech_license_available()
 
 
 @skip_no_lic_bin
-def test_check_mech_license_available_fail():
+def test__check_mech_license_available_specified_license(license_checker):
+    license_checker._check_mech_license_available(licenses="meba")
+
+
+@skip_no_lic_bin
+def test_check_mech_license_available_fail(license_checker):
     with pytest.raises(errors.LicenseServerConnectionError):
-        licensing.check_mech_license_available(test_net_3)
+        license_checker._check_mech_license_available(test_net_3)
 
 
-def test_get_licdebug_tail_timeout():
+def test_get_ansys_license_debug_file_tail_timeout(license_checker):
     with pytest.raises(TimeoutError):
-        msg = licensing.get_licdebug_tail("does_not_exist", start_timeout=0.05)
+        msg = licensing.get_ansys_license_debug_file_tail(
+            "does_not_exist", start_timeout=0.05
+        )
         next(msg)
 
 
-def test_get_licdebug_tail(tmpdir):
+def test_get_ansys_license_debug_file_tail(tmpdir, license_checker):
     tmp_file = tmpdir.join("tmplog.log")
     write_log(tmp_file)
 
-    msg_iter = licensing.get_licdebug_tail(tmp_file, start_timeout=1)
+    msg_iter = licensing.get_ansys_license_debug_file_tail(tmp_file, start_timeout=1)
     isinstance(msg_iter, types.GeneratorType)
     for line in msg_iter:
         if "CHECKOUT" in line:
@@ -135,20 +147,19 @@ def test_get_licdebug_tail(tmpdir):
 
 @skip_launch_mapdl
 @skip_no_lic_bin
-def test_check_license_file_fail():
+def test_check_license_file_fail(license_checker):
     with pytest.raises(TimeoutError):
-        licensing.check_license_file(timeout=0.1)
+        license_checker._check_license_file(timeout=0.1)
 
 
 @skip_no_lic_bin
-def test_license_checker(tmpdir):
+def test_license_checker(tmpdir, license_checker):
     # validate license checker (this will only checkout the license)
-    checker = licensing.LicenseChecker()
-    checker.start(license_file=False, checkout_license=True)
-    assert checker.check() is False
-    assert checker._license_checkout_success is None
-    checker.wait()
-    assert checker.check()
+    license_checker.start(license_file=False, checkout_license=True)
+    assert license_checker.check() is False
+    assert license_checker._license_checkout_success is None
+    license_checker.wait()
+    assert license_checker.check()
 
 
 @skip_launch_mapdl
@@ -169,12 +180,12 @@ def test_check_license_file(tmpdir):
         assert checker._license_file_success
 
 
-def test_check_iterator(tmpdir):
+def test__check_license_file_iterator(tmpdir, license_checker):
     file_name = "lic.log"
     file_ = tmpdir.join(file_name)
 
     def create_log_file(file_, msg):
-        file_iterator = licensing.get_licdebug_tail(file_, debug=True)
+        file_iterator = licensing.get_ansys_license_debug_file_tail(file_, debug=True)
         with open(file_, "w") as fid:
             fid.write(msg)
         return file_iterator
@@ -184,16 +195,110 @@ def test_check_iterator(tmpdir):
     timeout = -1
     file_iterator = create_log_file(file_, MSG_LIC_DENIED)
     with pytest.raises(TimeoutError):
-        licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
+        license_checker._check_license_file_iterator(
+            file_iterator, file_, timeout, notify_at_second
+        )
 
     # Running it with message.
     notify_at_second = 0
     timeout = 10
     file_iterator = create_log_file(file_, MSG_LIC_DENIED)
     with pytest.raises(errors.LicenseServerConnectionError):
-        licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
+        license_checker._check_license_file_iterator(
+            file_iterator, file_, timeout, notify_at_second
+        )
 
     notify_at_second = 0
     timeout = 10
     file_iterator = create_log_file(file_, MSG_LIC_CHECKOUT)
-    assert licensing.check_iterator(file_iterator, file_, timeout, notify_at_second)
+    assert license_checker._check_license_file_iterator(
+        file_iterator, file_, timeout, notify_at_second
+    )
+
+
+def test_stop(license_checker):
+    license_checker.stop = True
+    assert license_checker._stop
+
+    license_checker.stop = 0
+    assert not license_checker._stop
+
+
+def test_is_connected(license_checker):
+    license_checker.is_connected = True
+    assert license_checker._is_connected
+
+    license_checker.is_connected = 0
+    assert not license_checker._is_connected
+
+
+@skip_no_lic_bin
+def test_check_license_file_exception(license_checker):
+    with pytest.raises(TimeoutError):
+        license_checker._check_license_file(0.01)
+
+
+def test_license_wait():
+    license_checker = licensing.LicenseChecker()
+    assert not license_checker._lic_file_thread
+    assert not license_checker._checkout_thread
+
+    license_checker.start(checkout_license=True)
+    assert license_checker._lic_file_thread
+    assert license_checker._checkout_thread
+
+    license_checker.wait()
+    assert license_checker._lic_file_thread
+    assert license_checker._checkout_thread
+
+
+def test_license_check():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker._license_file_success = True
+    assert license_checker.check()
+
+    with pytest.raises(errors.LicenseServerConnectionError):
+        license_checker._license_file_success = False
+        license_checker.check()
+
+    license_checker._license_file_success = None
+    license_checker._license_checkout_success = True
+    assert license_checker.check()
+
+    with pytest.raises(errors.LicenseServerConnectionError):
+        license_checker._license_file_success = None
+        license_checker._license_checkout_success = False
+        license_checker.check()
+
+
+def test_stop_license_checker():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker.start()
+    time.sleep(1)
+
+    license_checker.stop = True
+    time.sleep(1)  # giving some time to reach end of the file.
+    assert not license_checker._lic_file_thread.is_alive()
+
+
+def test_is_connected_license_checker():
+    license_checker = licensing.LicenseChecker()
+
+    license_checker.start()
+    time.sleep(1)
+
+    license_checker.is_connected = True
+    time.sleep(1)  # giving some time to reach end of the file.
+    assert not license_checker._lic_file_thread.is_alive()
+
+
+@skip_no_lic_bin
+def test__checkout_license(license_checker):
+    assert license_checker._checkout_license("mech_1")  # using default host and port
+
+
+def test_verbose_deprecating():
+    with pytest.raises(DeprecationWarning):
+        licensing.LicenseChecker(verbose=True)
