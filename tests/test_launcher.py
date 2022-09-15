@@ -7,6 +7,7 @@ import weakref
 import pytest
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _force_smp_student_version,
     _validate_MPI,
@@ -238,14 +239,15 @@ def test_license_type_additional_switch():
 
     assert successful_check  # if at least one license is ok, this should be true.
 
-    dummy_license_name = "dummy"
-    # I had to scape the parenthesis because the match argument uses regex.
-    expected_warn = f"The additional switch product value \('-p {dummy_license_name}'\) is not a recognized license name or has been deprecated"
-    with pytest.warns(UserWarning, match=expected_warn):
-        mapdl = launch_mapdl(additional_switches=f" -p {dummy_license_name}")
-        # regardless the license specification, it should lunch.
-        assert mapdl.is_alive
-    mapdl.exit()
+
+@pytest.mark.skipif(
+    not get_start_instance(), reason="Skip when start instance is disabled"
+)
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+def test_license_type_dummy():
+    dummy_license_type = "dummy"
+    with pytest.raises(LicenseServerConnectionError):
+        launch_mapdl(additional_switches=f" -p {dummy_license_type}")
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")

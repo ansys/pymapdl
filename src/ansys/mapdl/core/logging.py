@@ -271,7 +271,9 @@ class InstanceFilter(logging.Filter):
     """Ensures that instance_name record always exists."""
 
     def filter(self, record):
-        if not hasattr(record, "instance_name"):
+        if not hasattr(record, "instance_name") and hasattr(record, "name"):
+            record.instance_name = record.name
+        elif not hasattr(record, "instance_name"):  # pragma: no cover
             record.instance_name = ""
         return True
 
@@ -428,7 +430,12 @@ class Logger:
                     # The logger handlers are copied and changed the loglevel is
                     # the specified log level is lower than the one of the
                     # global.
-                    if each_handler.level > string_to_loglevel[level.upper()]:
+                    if isinstance(level, str):
+                        new_loglevel = string_to_loglevel[level.upper()]
+                    elif isinstance(level, (int, float)):  # pragma: no cover
+                        new_loglevel = level
+
+                    if each_handler.level > new_loglevel:
                         new_handler.setLevel(level)
 
                 logger.addHandler(new_handler)

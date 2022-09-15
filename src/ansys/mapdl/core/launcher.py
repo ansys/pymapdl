@@ -1014,9 +1014,11 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
 
-        if os.name == "nt" and not force_intel and _version_from_path(exec_path) >= 210:
+        if os.name == "nt" and not force_intel and (222 > _version_from_path(exec_path) >= 210):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
+            # This is due to the intel compiler, and only afects versions between
+            # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
@@ -1084,7 +1086,8 @@ def launch_mapdl(
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
-    remove_temp_files=False,
+    remove_temp_files=None,
+    remove_temp_dir_on_exit=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1198,6 +1201,15 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
+        Deprecated option, please use ``remove_temp_dir_on_exit``.
+
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
+
+    remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
@@ -1378,6 +1390,16 @@ def launch_mapdl(
     ...                       mode='console')
 
     """
+    if remove_temp_files is not None:  # pragma: no cover
+        warnings.warn(
+            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "Please use ``remove_temp_dir_on_exit`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        remove_temp_dir_on_exit = remove_temp_files
+        remove_temp_files = None
+
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
 
@@ -1495,9 +1517,9 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
-        if remove_temp_files:
+        if remove_temp_dir_on_exit:
             LOG.info("`run_location` set. Disabling the removal of temporary files.")
-            remove_temp_files = False
+            remove_temp_dir_on_exit = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
@@ -1632,7 +1654,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=remove_temp_files,
+                remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 **start_parm,
             )
@@ -1645,6 +1667,10 @@ def launch_mapdl(
             lic_check.check()
 
         raise exception
+
+    # Stopping license checker
+    if license_server_check:
+        lic_check.is_connected = True
 
     return mapdl
 
