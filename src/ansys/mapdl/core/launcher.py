@@ -1014,7 +1014,11 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
 
-        if os.name == "nt" and not force_intel and (222 > _version_from_path(exec_path) >= 210):
+        if (
+            os.name == "nt"
+            and not force_intel
+            and (222 > _version_from_path(exec_path) >= 210)
+        ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
             # This is due to the intel compiler, and only afects versions between
