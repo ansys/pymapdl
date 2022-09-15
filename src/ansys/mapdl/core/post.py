@@ -168,7 +168,6 @@ class PostProcessing:
          75.03939292229019,
          75.20949687626468]
         """
-        self._mapdl.post1(mute=True)
         with self._mapdl.run_as_routine("POST1"):
             list_rsp = self._mapdl.set("LIST")
         return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
@@ -180,7 +179,7 @@ class PostProcessing:
         Returns
         -------
         numpy.ndarray
-            Frequency values for all result sets.
+            Numpy array of the frequency values for all result sets.
 
         Examples
         --------
@@ -191,7 +190,7 @@ class PostProcessing:
         array([ 220.,  240.,  260.,  280.,  300.,  320.,  340.,  360.,  380.,
         400.,  420.,  440.])
         """
-        # Because in MAPDL it is the same.
+        # Because in MAPDL is the same.
         return self.time_values
 
     def _reset_cache(self):
