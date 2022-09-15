@@ -97,7 +97,7 @@ class LicenseChecker:
             self._license_file_success = False
             self._license_file_msg.append(str(error))
         else:
-            self._license_file_success = True
+            self._license_file_success = True  # pragma: no cover
 
     @threaded_daemon
     def checkout_license(self, host=None):  # pragma: no cover
@@ -164,7 +164,7 @@ class LicenseChecker:
         elif self._license_checkout_success is False:
             raise LicenseServerConnectionError("\n".join(self._license_checkout_msg))
 
-        return False
+        return False  # pragma: no cover
 
     def _check_license_file(self, timeout=30, notify_at_second=5):  # pragma: no cover
         """Check the output of the license client log for connection error.
@@ -220,11 +220,11 @@ class LicenseChecker:
         notification_bool = True
         while time.time() < max_time:
 
-            if self.stop:
+            if self.stop:  # pragma: no cover
                 LOG.debug("The license checker has received a stop signal.")
                 raise Exception("The license checker has been stopped.")
 
-            if self.is_connected:
+            if self.is_connected:  # pragma: no cover
                 LOG.debug("The MAPDL session got connected. Stopping license check.")
                 return True
 
@@ -251,7 +251,7 @@ class LicenseChecker:
                     msg = next(file_iterator).strip()
                     if not msg:
                         break
-                    messages.append(msg)
+                    messages.append(msg)  # pragma: no cover
 
                 raise LicenseServerConnectionError("\n".join(messages))
 
@@ -284,12 +284,12 @@ class LicenseChecker:
             Port on the host to connect to.  Only used when ``host`` is set.
 
         """
-        if lic.lower() not in ALLOWABLE_LICENSES:
+        if lic.lower() not in ALLOWABLE_LICENSES:  # pragma: no cover
             raise ValueError(f"Invalid license '{lic}'")
 
         ansysli_util_path = get_ansys_license_utility_path()
 
-        if not os.path.isfile(ansysli_util_path):
+        if not os.path.isfile(ansysli_util_path):  # pragma: no cover
             raise FileNotFoundError(
                 "Ansys licensing path exists but ansysli_util not found at:\n"
                 f"{ansysli_util_path}"
@@ -297,7 +297,7 @@ class LicenseChecker:
 
         # allow the specification of ip and port
         env = os.environ.copy()
-        if host is not None and port is not None:
+        if host is not None and port is not None:  # pragma: no cover
             env["ANSYSLI_SERVERS"] = f"{host}:{port}"
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
