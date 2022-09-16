@@ -1537,65 +1537,7 @@ def launch_mapdl(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
-    if isinstance(license_type, str):
-        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
-        # For example:
-        # ```bash
-        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
-        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
-        # ```
-        #
-        # In older versions probably it might raise an error. But not sure.
-        license_type = license_type.lower().strip()
-
-        if "enterprise" in license_type and "solver" not in license_type:
-            license_type = "ansys"
-
-        elif "enterprise" in license_type and "solver" in license_type:
-            license_type = "meba"
-
-        elif "premium" in license_type:
-            license_type = "mech_2"
-
-        elif "pro" in license_type:
-            license_type = "mech_1"
-
-        elif license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-
-        additional_switches += " -p " + license_type
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
-        )
-
-    elif "-p " in additional_switches:
-        # There is already a license request in additional switches.
-        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
-            0
-        ]  # getting only the first product license.
-
-        if license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-            LOG.warning(warn_text)
-
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the additional switches parameter."
-        )
-
-    elif license_type is not None:
-        raise TypeError("The argument 'license_type' does only accept str or None.")
+    additional_switches = _check_license_argument(license_type, additional_switches)
 
     start_parm = {
         "exec_file": exec_file,
@@ -1617,7 +1559,7 @@ def launch_mapdl(
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
-        lic_check = LicenseChecker(timeout=start_timeout * 0.9, verbose=verbose_mapdl)
+        lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
     try:
@@ -1783,3 +1725,72 @@ def update_env_vars(add_env_vars, replace_env_vars):
             )
 
         return replace_env_vars
+
+
+def _check_license_argument(license_type, additional_switches):
+
+    if isinstance(license_type, str):
+        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
+        # For example:
+        # ```bash
+        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
+        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
+        # ```
+        #
+        # In older versions probably it might raise an error. But not sure.
+        license_type = license_type.lower().strip()
+
+        if "enterprise" in license_type and "solver" not in license_type:
+            license_type = "ansys"
+
+        elif "enterprise" in license_type and "solver" in license_type:
+            license_type = "meba"
+
+        elif "premium" in license_type:
+            license_type = "mech_2"
+
+        elif "pro" in license_type:
+            license_type = "mech_1"
+
+        elif license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+
+        additional_switches += " -p " + license_type
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
+        )
+
+    elif "-p " in additional_switches:
+        # There is already a license request in additional switches.
+        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
+            0
+        ]  # getting only the first product license.
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The additional switch product value ('-p {license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+            LOG.warning(warn_text)
+
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the additional switches parameter."
+        )
+
+    elif license_type is not None:
+        raise TypeError("The argument 'license_type' does only accept str or None.")
+
+    return additional_switches
