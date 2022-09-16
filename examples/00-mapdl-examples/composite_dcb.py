@@ -211,9 +211,9 @@ mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
-# mapdl.eplot(
-#     plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
-# )
+mapdl.eplot(
+    plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
+)
 
 ###############################################################################
 # Solve the non-linear static analysis
