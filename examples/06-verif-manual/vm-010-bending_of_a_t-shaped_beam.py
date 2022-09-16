@@ -172,7 +172,7 @@ cpos = [
     (-0.4135015240403764, -0.4134577015789461, 0.8112146563156641),
 ]
 
-_ = mapdl.eplot(show_node_numbering=True, line_width=5, cpos=cpos, font_size=40)
+mapdl.eplot(show_node_numbering=True, line_width=5, cpos=cpos, font_size=40)
 
 
 ###############################################################################

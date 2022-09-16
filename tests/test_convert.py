@@ -152,12 +152,47 @@ def test_convert_no_use_function_names(tmpdir):
     assert clines
 
 
-@pytest.mark.skipif(os.name == "nt", reason="Requires multiple instances")
 def test_convert(tmpdir):
     vm_file = examples.vmfiles["vm1"]
     pyscript = str(tmpdir.mkdir("tmpdir").join("vm1.py"))
     clines = pymapdl.convert_script(vm_file, pyscript, loglevel="ERROR")
     assert clines
+
+
+def test_convert_no_given_output_file(tmpdir):
+    mapdlscript = str(tmpdir.mkdir("tmpdir").join("mapdlscript.dat"))
+    with open(mapdlscript, "w") as fid:
+        fid.write("/com This is an mapdl script\n")
+        fid.write("/prep7\n")
+        fid.write("/eof\n")
+
+    clines = pymapdl.convert_script(mapdlscript)
+    pyscript = mapdlscript[:-4] + ".py"
+    assert os.path.exists(pyscript)
+    assert clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert "mapdl.prep7()" in clines
+    assert 'mapdl.run("/eof")' in clines
+
+    with open(pyscript, "r") as fid:
+        clines = fid.read()
+
+    assert clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert 'mapdl.com("This is an mapdl script")' in clines
+    assert "mapdl.prep7()" in clines
+    assert 'mapdl.run("/eof")' in clines
+
+
+def test_convert_existing_output_file(tmpdir):
+    mapdlscript = str(tmpdir.mkdir("tmpdir").join("mapdlscript.dat"))
+    with open(mapdlscript, "w") as fid:
+        fid.write("/com This is an mapdl script\n")
+
+    pymapdl.convert_script(mapdlscript)
+    with pytest.raises(FileExistsError):
+        pymapdl.convert_script(mapdlscript)
 
 
 @pytest.mark.parametrize("cmd", block_commands)
@@ -181,11 +216,11 @@ def test_logger(capsys):
         translator.translate_line(line)
     std = capsys.readouterr()
     assert all(
-        ["Converted" in each for each in std.err.split("\n")[:-1]]
+        ["Converted" in each for each in std.err.split("\n") if each]
     )  # last one is an empty line.
 
 
-def test_add_import():
+def test_add_imports():
     assert "launch_mapdl" in convert_apdl_block(APDL_CMDS, add_imports=True)
     assert "ansys.mapdl.core" in convert_apdl_block(APDL_CMDS, add_imports=True)
 
@@ -210,6 +245,17 @@ def test_auto_exit():
     )
     assert "mapdl.exit" not in convert_apdl_block(
         APDL_CMDS, auto_exit=False, add_imports=False
+    )
+
+
+def test_exec_file():
+    my_own_exec = "my/own/path/to/ansys/exec"
+
+    assert f'exec_file="{my_own_exec}"' in convert_apdl_block(
+        APDL_CMDS, exec_file=my_own_exec
+    )
+    assert f'exec_file="{my_own_exec}"' not in convert_apdl_block(
+        APDL_CMDS, exec_file=my_own_exec, add_imports=False
     )
 
 
@@ -244,10 +290,11 @@ def test_comment_solve():
 
 
 def test_macro_to_function():
-    assert "def SLV(" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "SLV()" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\ndef SLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
-    assert "\n\n\nSLV" in convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    output = convert_apdl_block(APDL_MACRO, macros_as_functions=True)
+    assert "def SLV(" in output
+    assert "SLV()" in output
+    assert "\n\n\ndef SLV" in output
+    assert "\n\n\nSLV" in output
 
 
 def test_out():
@@ -341,12 +388,12 @@ def test_no_macro_as_functions():
     assert '    mapdl.run("*END")' in output
 
 
-def test_format_ouput():
+def test_format_output():
     """Just testing it runs."""
-    non_formated = "def(a,b):return a + b"
-    converted = FileTranslator().format_using_autopep8(non_formated)
+    non_formatted = "def(a,b):return a + b"
+    converted = FileTranslator().format_using_autopep8(non_formatted)
     if converted:
-        assert converted == "def(a, b): return a + b\n"
+        assert converted == "def (a, b): return a + b\n"
         assert isinstance(converted, str)
     else:
         assert converted is None
@@ -361,3 +408,102 @@ def test_print_com_in_converter():
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,")  # Default
     assert "print_com=True" in convert_apdl_block("/prep7\nN,,,,", print_com=True)
     assert "print_com=True" not in convert_apdl_block("/prep7\nN,,,,", print_com=False)
+
+
+def test_only_commands():
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=True,
+        add_imports=True,
+        auto_exit=True,
+        header="asdf",
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" not in output
+    assert "import" not in output
+    assert "mapdl.exit" not in output
+
+
+@pytest.mark.parametrize(
+    "parameters",
+    [
+        ["/view,1,1,1", "mapdl.view(1, 1, 1)"],
+        ["/view,1,,1,1", 'mapdl.view(1, "", 1, 1)'],
+        ["/view,1,,1,  ,1", 'mapdl.view(1, "", 1, "", 1)'],
+        ["*get,1,1,1", "mapdl.get(1, 1, 1)"],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
+        ["*get,1,asdf,,1,qwert", 'mapdl.get(1, "asdf", "", 1, "qwert")'],
+        ["vget,1,,'asdf',", 'mapdl.vget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',", 'mapdl.starvget(1, "", "asdf")'],
+        ["*vget,1,,'asdf',,,,,", 'mapdl.starvget(1, "", "asdf")'],
+        [
+            "*vget,1,,,,,,,'asdf',,,,,",
+            'mapdl.starvget(1, "", "", "", "", "", "", "asdf")',
+        ],
+        ["solve", "mapdl.solve()"],
+        ["/solu", "mapdl.slashsolu()"],
+        ["solu", "mapdl.solu()"],
+    ],
+)
+def test_convert_star_slash(parameters):
+    assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]
+
+
+## CLI testing
+
+
+@pytest.fixture
+def run_cli():
+    def do_run(*args):
+        args = ["pymapdl_convert_script"] + list(args)
+        return os.system(" ".join(args))
+
+    return do_run
+
+
+def test_converter_cli(tmpdir, run_cli):
+    input_file = tmpdir.join("mapdl.dat")
+    output_file = tmpdir.join("mapdl.py")
+
+    content = """
+    /prep7
+    K,1,1,1,1
+    SOLVE
+    /post1
+    /eof
+    """
+
+    with input_file.open("w") as f:
+        f.write(content)
+
+    assert run_cli(str(input_file)) == 0
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert "mapdl.prep7()" in newcontent
+    assert "mapdl.exit()" in newcontent
+    assert "launch_mapdl" in newcontent
+
+    # This one overwrite the previous file
+    assert (
+        run_cli(
+            str(input_file),
+            "-o",
+            str(output_file),
+            "--auto_exit",
+            "False",
+            "--add_imports",
+            "False",
+        )
+        == 0
+    )
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert "mapdl.prep7()" in newcontent
+    assert "mapdl.exit()" not in newcontent
+    assert "launch_mapdl" not in newcontent

@@ -100,7 +100,7 @@ mapdl = launch_mapdl()
 
 mapdl.clear()
 mapdl.verify()
-_ = mapdl.prep7()
+mapdl.prep7(mute=True)
 
 
 ###############################################################################
@@ -353,7 +353,7 @@ cpos = [
     (2.03485925, 0.21270071036846988, 5.0),
     (0.0, 0.0, 1.0),
 ]
-_ = mapdl.eplot(cpos=cpos)
+mapdl.eplot(cpos=cpos)
 
 
 ###############################################################################
@@ -408,7 +408,7 @@ mapdl.d("ALL", "UZ", 0)
 
 # Select all nodes.
 mapdl.nsel("ALL")
-_ = mapdl.finish()
+mapdl.finish(mute=True)
 
 
 ###############################################################################
@@ -436,7 +436,7 @@ solution(deflect=defl_ls2)
 
 # Load Step 3
 solution(deflect=defl_ls3)
-_ = mapdl.finish()
+mapdl.finish(mute=True)
 
 
 ###############################################################################
@@ -445,7 +445,7 @@ _ = mapdl.finish()
 # Enter post-processing.
 
 # Enter the post-processing routine.
-_ = mapdl.post1()
+mapdl.post1(mute=True)
 
 
 ###############################################################################

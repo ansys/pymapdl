@@ -12,6 +12,8 @@ set BUILDDIR=build
 
 if "%1" == "" goto help
 if "%1" == "clean" goto clean
+if "%1" == "clean-all" goto clean-all
+if "%1" == "clean-examples" goto clean-examples
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
@@ -32,6 +34,16 @@ goto end
 :clean
 rmdir /s /q %BUILDDIR% > /NUL 2>&1 
 for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
+goto end
+
+:clean-all
+rmdir /s /q %BUILDDIR% > /NUL 2>&1 
+rmdir /s /q source\examples\gallery_examples > /NUL 2>&1 
+for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
+goto end
+
+:clean-examples
+rmdir /s /q source\examples\gallery_examples > /NUL 2>&1
 goto end
 
 :help

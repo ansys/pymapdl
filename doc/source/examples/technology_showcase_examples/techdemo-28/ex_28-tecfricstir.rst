@@ -1,5 +1,10 @@
 .. _tech_demo_28:
 
+.. role:: red
+
+.. role:: blue
+
+.. role:: green
 
 Friction Stir Welding (FSW) Simulation
 ***************************************
@@ -451,7 +456,7 @@ model the contact surface on the top surface of the workpiece, and the
     p.show()
 
 **Figure 28.4: Contact Pair Between Tool and Workpiece.**
-``CONTA174`` in blue, and ``TARGE170`` in red.
+``CONTA174`` in :blue:`blue`, and ``TARGE170`` in :red:`red`.
 
 
 Two real constants are specified to model friction-induced heat generation.
@@ -564,13 +569,14 @@ The following contact settings are used for the ``CONTA174`` elements:
         mapdl.esel('s', 'mat', '', 2)
         mapdl.esel("r", "ename", "", elem)
         esurf = mapdl.mesh._grid.linear_copy().extract_surface().clean()
-        pl.add_mesh(esurf, show_edges=True, show_scalar_bar=False,
-                   style='surface', color=color)
+        if mapdl.mesh.n_elem != 1:
+            pl.add_mesh(esurf, show_edges=True, show_scalar_bar=False,
+                    style='surface', color=color)
     pl.show()
 
 **Figure 28.5: Rigid Surface Constrained.**
 Pilot node or master with applied boundary conditions and the constrained 
-top surface of the tool (blue).**
+top surface of the tool (:blue:`blue`).**
 
 
 .. code:: python
@@ -858,7 +864,7 @@ perpendicular direction (z direction).
     pl.show()
 
 **Figure 28.7: Mechanical Boundary Conditions:**
-X-direction (``UX``) in red, Y-direction (``UY``) in green, and Z-direction (``UZ``) in blue.
+X-direction (``UX``) in :red:`red`, Y-direction (``UY``) in :green:`green`, and Z-direction (``UZ``) in :blue:`blue`.
 
    
 .. code:: python 
@@ -1392,7 +1398,7 @@ load step is shown in the following figure:
 
 
 **Figure 28.21: Contact Status at Interface with Bonding Temperature 1000 °C**
-Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
+Elements can be in near-contact (:blue:`blue`), sliding (:green:`green`) or sticking (:red:`red`) states.
 
 
 The sticking portion of the interface shows the bonding or welding region of
@@ -1410,7 +1416,7 @@ welding region would increase, as shown in this figure:
    pl.show() 
 
 **Figure 28.22: Contact Status at Interface with Bonding Temperature 900 °C**
-Elements can be in near-contact (blue), sliding (green) or sticking (red) states.
+Elements can be in near-contact (:blue:`blue`), sliding (:green:`green`) or sticking (:red:`red`) states.
 
 
 28.7.4. Heat Generation

@@ -74,14 +74,14 @@ result.plot_nodal_displacement(
 ###############################################################################
 # Animate a high frequency mode
 #
-# Get a smoother plot by disabling movie_filename and increasing ``nangles``.
+# Get a smoother plot by disabling movie_filename and increasing ``n_frames``.
 # Enable a continuous plot looping with ```loop=True```.
 
 result.animate_nodal_displacement(
     18,
     loop=False,
     add_text=False,
-    nangles=30,
+    n_frames=30,
     displacement_factor=0.4,
     show_axes=False,
     background="w",

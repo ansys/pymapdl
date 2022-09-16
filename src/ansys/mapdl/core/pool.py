@@ -70,7 +70,11 @@ class LocalMapdlPool:
         Restarts any failed instances in the pool.
 
     remove_temp_files : bool, optional
-        Removes all temporary files on exit.  Default ``True``.
+        This launcher creates a new MAPDL working directory for each instance
+        of MAPDL within the temporary user directory, obtainable with
+        ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     **kwargs : dict, optional
         See :func:`ansys.mapdl.core.launch_mapdl` for a complete

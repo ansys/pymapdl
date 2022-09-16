@@ -168,9 +168,30 @@ class PostProcessing:
          75.03939292229019,
          75.20949687626468]
         """
-        self._mapdl.post1(mute=True)
-        list_rsp = self._mapdl.set("LIST")
+        with self._mapdl.run_as_routine("POST1"):
+            list_rsp = self._mapdl.set("LIST")
         return np.genfromtxt(list_rsp.splitlines(), skip_header=3)[:, 1]
+
+    @property
+    def frequency_values(self) -> np.ndarray:
+        """Return an array of the frequency values for all result sets.
+
+        Returns
+        -------
+        numpy.ndarray
+            Numpy array of the frequency values for all result sets.
+
+        Examples
+        --------
+        Get all the time values after loading POST1.
+
+        >>> mapdl.post1()
+        >>> mapdl.post_processing.frequency_values
+        array([ 220.,  240.,  260.,  280.,  300.,  320.,  340.,  360.,  380.,
+        400.,  420.,  440.])
+        """
+        # Because in MAPDL is the same.
+        return self.time_values
 
     def _reset_cache(self):
         """Reset local cache"""
@@ -418,7 +439,7 @@ class PostProcessing:
         """
         tmp_table = "__ETABLE__"
         self._mapdl.etable(tmp_table, item, comp, option, mute=True)
-        return self._mapdl._get_array("ELEM", 1, "ETAB", tmp_table)[
+        return self._mapdl.get_array("ELEM", 1, "ETAB", tmp_table)[
             self.selected_elements
         ]
 
@@ -615,10 +636,10 @@ class PostProcessing:
     def _all_enum(self):
         self._mapdl.cm("__TMP_ELEM__", "ELEM")
         self._mapdl.allsel()
-        nnum = self._mapdl.get_array("ELEM", item1="ELIST")
+        enum = self._mapdl.get_array("ELEM", item1="ELIST")
 
         # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        if enum[0] == -1:
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
         self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
         return enum.astype(np.int32, copy=False)

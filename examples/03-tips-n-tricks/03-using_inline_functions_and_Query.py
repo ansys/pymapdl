@@ -71,9 +71,9 @@ mapdl.finish()
 
 mapdl.run("/SOLU")
 mapdl.antype("STATIC")
-mapdl.nsel("ALL")
+mapdl.allsel()
 mapdl.solve()
-mapdl.finish()
+mapdl.finish(mute=True)
 
 ###############################################################################
 # Post-Processing

@@ -22,6 +22,7 @@ import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -618,18 +619,25 @@ def get_start_instance(start_instance_default=True):
 
 
 def _get_available_base_ansys():
-    """Return a dictionary of available ANSYS versions with their base paths.
+    """Return a dictionary of available Ansys versions with their base paths.
+
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
 
     Returns
     -------
-    Return all installed ANSYS paths in Windows
+    Return all installed Ansys paths in Windows.
 
     >>> _get_available_base_ansys()
-    {194: 'C:\\Program Files\\ANSYS INC\\v194',
-     202: 'C:\\Program Files\\ANSYS INC\\v202',
-     211: 'C:\\Program Files\\ANSYS INC\\v211'}
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
-    Within Linux
+    Return all installed Ansys paths in Linux.
 
     >>> _get_available_base_ansys()
     {194: '/usr/ansys_inc/v194',
@@ -637,29 +645,57 @@ def _get_available_base_ansys():
      211: '/usr/ansys_inc/v211'}
     """
     base_path = None
-    if os.name == "nt":
-        supported_versions = [194, 202, 211, 212, 221]
-        awp_roots = {
-            ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
-        }
+    if os.name == "nt":  # pragma: no cover
+        supported_versions = SUPPORTED_ANSYS_VERSIONS
+        # The student version overwrites the AWP_ROOT env var (if it is installed later)
+        # However the priority should be given to the non-student version.
+        awp_roots = []
+        awp_roots_student = []
+
+        for ver in supported_versions:
+            path_ = os.environ.get(f"AWP_ROOT{ver}", "")
+            path_non_student = path_.replace("\\ANSYS Student", "")
+
+            if "student" in path_.lower() and os.path.exists(path_non_student):
+                # Check if also exist a non-student version
+                awp_roots.append([ver, path_non_student])
+                awp_roots_student.insert(0, [-1 * ver, path_])
+
+            else:
+                awp_roots.append([ver, path_])
+
+        awp_roots.extend(awp_roots_student)
         installed_versions = {
-            ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)
+            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
         }
+
         if installed_versions:
             return installed_versions
-        else:
+        else:  # pragma: no cover
+            LOG.debug(
+                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
+            )
             base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
+            if not os.path.exists(base_path):
+                LOG.debug(
+                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
+                )
+                return {}
     elif os.name == "posix":
         for path in ["/usr/ansys_inc", "/ansys_inc"]:
             if os.path.isdir(path):
                 base_path = path
-    else:
+    else:  # pragma: no cover
         raise OSError(f"Unsupported OS {os.name}")
 
     if base_path is None:
         return {}
 
     paths = glob(os.path.join(base_path, "v*"))
+
+    # Testing for ANSYS STUDENT version
+    if not paths:  # pragma: no cover
+        paths = glob(os.path.join(base_path, "ANSYS*"))
 
     if not paths:
         return {}
@@ -671,6 +707,35 @@ def _get_available_base_ansys():
             ansys_paths[int(ver_str)] = path
 
     return ansys_paths
+
+
+def get_available_ansys_installations():
+    """Return a dictionary of available Ansys versions with their base paths.
+
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
+
+    Returns
+    -------
+    Return all installed Ansys paths in Windows.
+
+    >>> get_available_ansys_installations()
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
+
+    Return all installed Ansys paths in Linux.
+
+    >>> get_available_ansys_installations()
+    {194: '/usr/ansys_inc/v194',
+     202: '/usr/ansys_inc/v202',
+     211: '/usr/ansys_inc/v211'}
+    """
+    return _get_available_base_ansys()
 
 
 def find_ansys():
@@ -703,6 +768,7 @@ def find_ansys():
         return "", ""
     version = max(versions.keys())
     ans_path = versions[version]
+    version = abs(version)
     if os.name == "nt":
         ansys_bin = os.path.join(
             ans_path, "ansys", "bin", "winx64", f"ansys{version}.exe"
@@ -917,8 +983,11 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_add_sw(add_sw, exec_path, force_intel=False):
-    """Validate additional switches.
+def _validate_MPI(add_sw, exec_path, force_intel=False):
+    """Validate MPI configuration.
+
+    Enforce Microsoft MPI in version 21.0 or later, to fix a
+    VPN issue on Windows.
 
     Parameters
     ----------
@@ -942,10 +1011,18 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     if "smp" not in add_sw:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
+            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
-        if os.name == "nt" and not force_intel:
+
+        if (
+            os.name == "nt"
+            and not force_intel
+            and (222 > _version_from_path(exec_path) >= 210)
+        ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
+            # This is due to the intel compiler, and only afects versions between
+            # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
@@ -953,16 +1030,46 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-
             if "intelmpi" in add_sw:
+                LOG.debug(
+                    "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
+                )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
                 add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_path) >= 210:
-                add_sw += " -mpi msmpi"
+            LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
+            add_sw += " -mpi msmpi"
 
+    return add_sw
+
+
+def _force_smp_student_version(add_sw, exec_path):
+    """Force SMP in student version.
+
+    Parameters
+    ----------
+    add_sw : str
+        Additional swtiches.
+    exec_path : str
+        Path to the MAPDL executable.
+
+    Returns
+    -------
+    str
+        Validated additional switches.
+
+    """
+    # Converting additional_switches to lower case to avoid mismatches.
+    add_sw = add_sw.lower()
+
+    if (
+        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+    ):  # pragma: no cover
+        if "student" in exec_path.lower():
+            add_sw += " -smp"
+            LOG.debug("Student version detected, using '-smp' switch by default.")
     return add_sw
 
 
@@ -976,13 +1083,15 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=120,
+    start_timeout=15,
     port=None,
     cleanup_on_exit=True,
     start_instance=None,
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=None,
+    remove_temp_dir_on_exit=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1096,7 +1205,20 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit.  Default ``False``.
+        Deprecated option, please use ``remove_temp_dir_on_exit``.
+
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
+
+    remove_temp_dir_on_exit : bool, optional
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -1137,6 +1259,9 @@ def launch_mapdl(
 
     Notes
     -----
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in SMP mode
+    unless another option is specified.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
@@ -1269,6 +1394,16 @@ def launch_mapdl(
     ...                       mode='console')
 
     """
+    if remove_temp_files is not None:  # pragma: no cover
+        warnings.warn(
+            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "Please use ``remove_temp_dir_on_exit`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        remove_temp_dir_on_exit = remove_temp_files
+        remove_temp_files = None
+
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
 
@@ -1386,13 +1521,19 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
+        if remove_temp_dir_on_exit:
+            LOG.info("`run_location` set. Disabling the removal of temporary files.")
+            remove_temp_dir_on_exit = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
     mode = check_mode(mode, _version_from_path(exec_file))
 
-    # cache start parameters
-    additional_switches = _validate_add_sw(
+    # Setting SMP by default if student version is used.
+    additional_switches = _force_smp_student_version(additional_switches, exec_file)
+
+    #
+    additional_switches = _validate_MPI(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
@@ -1435,7 +1576,7 @@ def launch_mapdl(
 
     elif "-p " in additional_switches:
         # There is already a license request in additional switches.
-        license_type = re.findall(r"-p \b(\w*)", additional_switches)[
+        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
             0
         ]  # getting only the first product license.
 
@@ -1486,10 +1627,10 @@ def launch_mapdl(
             mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
         elif mode == "corba":
             try:
-                # pending deprication to ansys-mapdl-corba
+                # pending deprecation to ansys-mapdl-corba
                 from ansys.mapdl.core.mapdl_corba import MapdlCorba
-            except ImportError:
-                raise ImportError(
+            except ModuleNotFoundError:  # pragma: no cover
+                raise ModuleNotFoundError(
                     "To use this feature, install the MAPDL CORBA package"
                     " with:\n\npip install ansys_corba"
                 ) from None
@@ -1517,7 +1658,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 **start_parm,
             )
@@ -1528,8 +1669,12 @@ def launch_mapdl(
         # to the license check
         if license_server_check:
             lic_check.check()
-            # pass
+
         raise exception
+
+    # Stopping license checker
+    if license_server_check:
+        lic_check.is_connected = True
 
     return mapdl
 

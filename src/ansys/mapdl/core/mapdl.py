@@ -28,11 +28,16 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
     inject_docs,
 )
-from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlInvalidRoutineError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.misc import (
     Information,
     allow_pickable_points,
+    check_valid_routine,
     last_created,
     load_file,
     random_string,
@@ -77,6 +82,7 @@ INVAL_COMMANDS = {
     "*IF": "Use a python ``if`` or run as non_interactive",
     "CMAT": "Run `CMAT` as ``non_interactive``.",
     "*REP": "Run '*REPEAT' in ``non_interactive``.",
+    "LSRE": "Run 'LSREAD' in ``non_interactive``.",
 }
 
 ## Soft-invalid commands
@@ -534,13 +540,69 @@ class _MapdlCore(Commands):
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
+    class _RetainRoutine:
+        """Store MAPDL's routine when entering and reverts it when exiting."""
+
+        def __init__(self, parent, routine):
+            self._parent = weakref.ref(parent)
+
+            # check the routine is valid since we're muting the output
+            check_valid_routine(routine)
+            self._requested_routine = routine
+
+        def __enter__(self):
+            """Store the current routine and enter the requested routine."""
+            self._cached_routine = self._parent().parameters.routine
+            self._parent()._log.debug("Caching routine %s", self._cached_routine)
+            if self._requested_routine.lower() != self._cached_routine.lower():
+                self._enter_routine(self._requested_routine)
+
+        def __exit__(self, *args):
+            """Restore the original routine."""
+            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
+            self._enter_routine(self._cached_routine)
+
+        def _enter_routine(self, routine):
+            """Enter a routine."""
+            if routine.lower() == "begin level":
+                self._parent().finish(mute=True)
+            else:
+                self._parent().run(f"/{routine}", mute=True)
+
+    def run_as_routine(self, routine):
+        """
+        Runs a command or commands at a routine and then revert to the prior routine.
+
+        This can be useful to avoid constantly changing between routines.
+
+        Parameters
+        ----------
+        routine : str
+            A MAPDL routine. For example, ``"PREP7"`` or ``"POST1"``.
+
+        Examples
+        --------
+        Enter ``PREP7`` and run ``numvar``, which requires ``POST26``, and
+        revert to the prior routine.
+
+        >>> mapdl.prep7()
+        >>> mapdl.parameters.routine
+        'PREP7'
+        >>> with mapdl.run_as_routine('POST26'):
+        ...     mapdl.numvar(200)
+        >>> mapdl.parameters.routine
+        'PREP7'
+
+        """
+        return self._RetainRoutine(self, routine)
+
     @property
     def last_response(self):
         """Returns the last response from MAPDL.
 
         Examples
         --------
-        >>> mapdl.last_response()
+        >>> mapdl.last_response
         'KEYPOINT      1   X,Y,Z=   1.00000       1.00000       1.00000'
         """
         return self._response
@@ -625,7 +687,7 @@ class _MapdlCore(Commands):
         >>> mapdl.geometry.line_select([3, 4, 5], sel_type='R')
 
         """
-        if self._geometry == None:
+        if self._geometry is None:
             self._geometry = self._create_geometry()
         return self._geometry
 
@@ -811,27 +873,26 @@ class _MapdlCore(Commands):
         return filename
 
     def open_gui(self, include_result=None, inplace=None):  # pragma: no cover
-        """Saves existing database and opens up the APDL GUI.
+        """Save the existing database and open it up in the MAPDL GUI.
 
         Parameters
         ----------
         include_result : bool, optional
-            Allow the result file to be post processed in the GUI.
-            It is ignored if 'inplace' is ``True``.
-            By default, it is ``True``.
+            Allow the result file to be post processed in the GUI.  It is
+            ignored if ``inplace`` is ``True``.  By default, ``True``.
 
         inplace : bool, optional
-            Open the GUI on the current working directory, instead of create
-            a new temporary directory and copy the results files over there.
-            If ``True``, it ignores 'include_result' kwarg.
-            By default, it is ``False``.
+            Open the GUI on the current MAPDL working directory, instead of
+            creating a new temporary directory and coping the results files
+            over there.  If ``True``, ignores ``include_result`` parameter.  By
+            default, this ``False``.
 
         Examples
         --------
         >>> from ansys.mapdl.core import launch_mapdl
         >>> mapdl = launch_mapdl()
 
-        Create a square area using keypoints
+        Create a square area using keypoints.
 
         >>> mapdl.prep7()
         >>> mapdl.k(1, 0, 0, 0)
@@ -844,11 +905,11 @@ class _MapdlCore(Commands):
         >>> mapdl.l(4, 1)
         >>> mapdl.al(1, 2, 3, 4)
 
-        Open up the gui
+        Open up the gui.
 
         >>> mapdl.open_gui()
 
-        Resume where you left off
+        Resume where you left off.
 
         >>> mapdl.et(1, 'MESH200', 6)
         >>> mapdl.amesh('all')
@@ -859,7 +920,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             raise RuntimeError(
-                "``open_gui`` can only be called from a local " "MAPDL instance"
+                "``open_gui`` can only be called from a local MAPDL instance."
             )
 
         if inplace and include_result:
@@ -891,7 +952,7 @@ class _MapdlCore(Commands):
                 rmtree(run_dir)
             os.mkdir(run_dir)
 
-        database_file = os.path.join(run_dir, "%s.db" % name)
+        database_file = os.path.join(run_dir, f"{name}.db")
         if os.path.isfile(database_file) and not inplace:
             os.remove(database_file)
 
@@ -903,6 +964,13 @@ class _MapdlCore(Commands):
         # finish, save and exit the server
         self.finish(mute=True)
         self.save(database_file, mute=True)
+
+        # Exit and do not remove the temporary directory. This is backwards
+        # compatible with CONSOLE and CORBA modes.
+        remove_tmp = False
+        if hasattr(self, "_remove_tmp"):
+            remove_tmp = self._remove_tmp
+        self._remove_tmp = False
         self.exit()
 
         # copy result file to temp directory
@@ -913,7 +981,7 @@ class _MapdlCore(Commands):
                     copyfile(resultfile, tmp_resultfile)
 
         # write temporary input file
-        start_file = os.path.join(run_dir, "start%s.ans" % version)
+        start_file = os.path.join(run_dir, f"start{version}.ans")
         with open(start_file, "w") as f:
             f.write("RESUME\n")
 
@@ -931,8 +999,8 @@ class _MapdlCore(Commands):
 
         if inplace:
             warn(
-                "MAPDL GUI is opened using 'inplace' kwarg."
-                f"Hence the changes you do will overwrite the files in {run_dir}."
+                "MAPDL GUI has been opened using 'inplace' kwarg. "
+                f"The changes you make will overwrite the files in {run_dir}."
             )
 
         call(
@@ -951,7 +1019,9 @@ class _MapdlCore(Commands):
         # reattach to a new session and reload database
         self._launch(self._start_parm)
         self.resume(database_file, mute=True)
-        self.save()
+
+        # restore remove tmp state
+        self._remove_tmp = remove_tmp
 
     def _cache_routine(self):
         """Cache the current routine."""
@@ -1836,34 +1906,48 @@ class _MapdlCore(Commands):
         return Result(result_path)
 
     @property
+    def result_file(self):
+        """Return the RST file path."""
+        return self._result_file
+
+    @property
     def _result_file(self):
         """Path of the non-distributed result file"""
         try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except Exception:
+            with self.run_as_routine("POST1"):
+                filename = self.inquire("", "RSTFILE")
+        except Exception:  # pragma: no cover
             filename = self.jobname
 
         try:
-            ext = self.inquire("", "RSTEXT")
-        except Exception:  # check if rth file exists
-            ext = ""
+            with self.run_as_routine("POST1"):
+                ext = self.inquire("", "RSTEXT")
+        except Exception:  # pragma: no cover
+            ext = "rst"
 
-        if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
+        if self._local:  # pragma: no cover
+            if ext == "":
+                # Case where there is RST extension because it is thermal for example
+                filename = self.jobname
 
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
+                rth_file = os.path.join(self.directory, f"{filename}.rth")
+                rst_file = os.path.join(self.directory, f"{filename}.rst")
+
+                if self._prioritize_thermal and os.path.isfile(rth_file):
+                    return rth_file
+
+                if os.path.isfile(rth_file) and os.path.isfile(rst_file):
+                    return last_created([rth_file, rst_file])
+                elif os.path.isfile(rth_file):
+                    return rth_file
+                elif os.path.isfile(rst_file):
+                    return rst_file
+            else:
+                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                if os.path.isfile(filename):
+                    return filename
         else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
-                return filename
+            return f"{filename}.{ext}"
 
     @property
     def _distributed_result_file(self):
@@ -1939,21 +2023,25 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):
-        """Writes stored commands to an input file and runs the input
-        file.  Used with non_interactive.
+    def _flush_stored(self):  # pragma: no cover
+        """Writes stored commands to an input file and runs the input file.
+
+        Used with ``non_interactive``.
+
+        Overridden by gRPC.
+
         """
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
-        tmp_out = os.path.join(tempfile.gettempdir(), "tmp_%s.out" % rnd_str)
-        self._stored_commands.insert(0, "/OUTPUT, '%s'" % tmp_out)
+        tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
+        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), "tmp_%s.inp" % rnd_str)
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
         self._log.debug(
             "Writing the following commands to a temporary " "apdl input file:\n%s",
             commands,
@@ -2641,6 +2729,11 @@ class _MapdlCore(Commands):
                 text += "\n\nIgnore these messages by setting allow_ignore=True"
                 raise MapdlInvalidRoutineError(text)
 
+        if "command is ignored" in text:
+            if not self.allow_ignore:
+                text += "\n\nIgnore these messages by setting allow_ignore=True"
+                raise MapdlCommandIgnoredError(text)
+
         # flag errors
         if "*** ERROR ***" in self._response and not self._ignore_errors:
             self._raise_output_errors(self._response)
@@ -2751,11 +2844,9 @@ class _MapdlCore(Commands):
             os.remove(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
-        """Load a table from Python to MAPDL.
+        """Load a table from Python to into MAPDL.
 
-        Uses ``TREAD`` to transfer the table.
-        It should be noticed that PyMAPDL when query a table, it will return
-        the table but not its axis (meaning it will return ``table[1:,1:]``).
+        Uses :func:`tread <Mapdl.tread>` to transfer the table.
 
         Parameters
         ----------
@@ -2765,21 +2856,20 @@ class _MapdlCore(Commands):
             containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
-        array : np.ndarray or List
-            List as a table or ``numpy`` array.
+        array : numpy.ndarray or List
+            List as a table or :class:`numpy.ndarray` array.
 
         var1 : str, optional
             Variable name corresponding to the first dimension (row).
-            Default Row
+            Default ``"Row"``.
 
             A primary variable (listed below) or can be an independent
-            parameter. If specifying an independent parameter, then
-            you must define an additional table for the independent
-            parameter. The additional table must have the same name as
-            the independent parameter and may be a function of one or
-            more primary variables or another independent
-            parameter. All independent parameters must relate to a
-            primary variable.
+            parameter. If specifying an independent parameter, then you must
+            define an additional table for the independent parameter. The
+            additional table must have the same name as the independent
+            parameter and may be a function of one or more primary variables or
+            another independent parameter. All independent parameters must
+            relate to a primary variable.
 
             - ``"TIME"``: Time
             - ``"FREQ"``: Frequency
@@ -2812,6 +2902,9 @@ class _MapdlCore(Commands):
 
         Examples
         --------
+        Transfer a table to MAPDL. The first column is time values and must be
+        ascending in order.
+
         >>> my_conv = np.array([[0, 0.001],
                                 [120, 0.001],
                                 [130, 0.005],
@@ -2820,7 +2913,12 @@ class _MapdlCore(Commands):
                                 [1000, 0.002]])
         >>> mapdl.load_table('MY_TABLE', my_conv, 'TIME')
         >>> mapdl.parameters['MY_TABLE']
-        array([0.0001, 0.0001, 0.0005, 0.0005, 0.0002, 0.0002])
+        array([[0.001],
+               [0.001],
+               [0.005],
+               [0.005],
+               [0.002],
+               [0.002]])
         """
         if not isinstance(array, np.ndarray):
             raise ValueError("The table should be a Numpy array")
@@ -2833,7 +2931,7 @@ class _MapdlCore(Commands):
             self.dim(
                 name,
                 "TABLE",
-                imax=array.shape[0] - 1,
+                imax=array.shape[0],
                 jmax=array.shape[1] - 1,
                 kmax="",
                 var1=var1,
@@ -2846,33 +2944,25 @@ class _MapdlCore(Commands):
                 f"Expecting only a 2D table, but input contains\n{array.ndim} dimensions"
             )
 
-        if not np.all(array[0, :-1] <= array[0, 1:]):
-            raise ValueError(
-                "The underlying ``TREAD`` command requires that the axis 0 is in ascending order."
-            )
         if not np.all(array[:-1, 0] <= array[1:, 0]):
             raise ValueError(
-                "The underlying ``TREAD`` command requires that the axis 1 is in ascending order."
+                "The underlying ``TREAD`` command requires that the first column is in "
+                "ascending order."
             )
+
+        # weird bug where MAPDL ignores the first row when there are greater than 2 columns
+        if array.shape[1] > 2:
+            array = np.vstack((array[0], array))
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
-
-        if array.shape[1] == 2:
-            # two-columns bug.
-            # If there is two columns, the header is also read as part of the table values,
-            # for this case, we are not going to write it to the file.
-            array = array[1:, :]
-
         np.savetxt(filename, array, header="File generated by PyMAPDL:load_table")
 
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
+        # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
-
-        if self._local:  # pragma: no cover
-            os.remove(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
@@ -2936,9 +3026,7 @@ class _MapdlCore(Commands):
     @supress_logging
     def directory(self, path):
         """Change the directory using ``Mapdl.cwd``"""
-        self.cwd(
-            path
-        )  # this has been wrapped in Mapdl to show a warning if the file does not exist.
+        self.cwd(path)
 
     @property
     def _lockfile(self):
@@ -3155,14 +3243,14 @@ class _MapdlCore(Commands):
 
     @wraps(Commands.cwd)
     def cwd(self, *args, **kwargs):
-        """Wraps cwd"""
-        returns_ = super().cwd(*args, **kwargs)
+        """Wraps cwd."""
+        output = super().cwd(*args, mute=False, **kwargs)
 
-        if returns_:  # if successful, it should be none.
-            if "*** WARNING ***" in self._response:
-                warn("\n" + self._response)
+        if output is not None:
+            if "*** WARNING ***" in output:
+                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
 
-        return returns_
+        return output
 
     def get_nodal_loads(self, label=None):
         """
@@ -3596,3 +3684,63 @@ class _MapdlCore(Commands):
                     raise MapdlRuntimeError(
                         f"\n\nError in instance {self.name}\n\n" + error_message
                     )
+
+    @wraps(Commands.lsread)
+    def lsread(self, *args, **kwargs):
+        """Wraps the ``LSREAD`` which does not work in interactive mode."""
+        self._log.debug("Forcing 'LSREAD' to run in non-interactive mode.")
+        with self.non_interactive:
+            super().lsread(*args, **kwargs)
+        return self._response.strip()
+
+    def file(self, fname="", ext="", **kwargs):
+        """Specifies the data file where results are to be found.
+
+        APDL Command: FILE
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the
+            characters needed for the directory path).  An unspecified
+            directory path defaults to the working directory; in this case, you
+            can use all 248 characters for the file name.
+
+        ext : str, default: "rst"
+            Filename extension (eight-character maximum). If ``fname`` has an
+            extension this is ignored.
+
+        Notes
+        -----
+        Specifies the Ansys data file where the results are to be found for
+        postprocessing.
+
+        Examples
+        --------
+        Load a result file that is outside of the current working directory.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> mapdl.post1()
+        >>> mapdl.file('/tmp/file.rst')
+
+        """
+        # MAPDL always adds the "rst" extension onto the name, even if already
+        # has one, so here we simply reconstruct it.
+        filename = pathlib.Path(fname + ext)
+
+        if not filename.exists():
+            # potential that the user is relying on the default "rst"
+            filename_rst = filename.parent / (filename.name + ".rst")
+            if not filename_rst.exists():
+                raise FileNotFoundError(f"Unable to locate {filename}")
+
+        return self._file(filename, **kwargs)
+
+    def _file(self, filename, **kwargs):
+        """Run the MAPDL ``file`` command with a proper filename."""
+        filename = pathlib.Path(filename)
+        ext = filename.suffix
+        fname = str(filename).replace(ext, "")
+        ext = ext.replace(".", "")
+        return self.run(f"FILE,{fname},{ext}", **kwargs)

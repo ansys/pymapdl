@@ -9,12 +9,15 @@ class LoadStepOptions:
         key
             Automatic time stepping key:
 
-            OFF - Do not use automatic time stepping.
+            OFF
+                Do not use automatic time stepping.
 
-            ON - Use automatic time stepping (default).
+            ON
+                Use automatic time stepping (default).
 
-            AUTO - The program determines whether to use automatic time stepping (used by
-                   Workbench).
+            AUTO
+                The program determines whether to use automatic time stepping (used by
+                Workbench).
 
         Notes
         -----
@@ -22,10 +25,10 @@ class LoadStepOptions:
         over this load step. If Key = ON, both time step prediction and time
         step bisection will be used.
 
-        You cannot use automatic time stepping [AUTOTS], line search [LNSRCH],
+        You cannot use automatic time stepping ``AUTOTS``, line search ``LNSRCH``,
         or the DOF solution predictor [PRED] with the arc-length method
-        [ARCLEN, ARCTRM]. If you activate the arc-length method after you set
-        AUTOTS, LNSRCH, or PRED, a warning message appears. If you choose to
+        ``ARCLEN, ARCTRM``. If you activate the arc-length method after you set
+        ``AUTOTS, LNSRCH``, or ``PRED``, a warning message appears. If you choose to
         proceed with the arc-length method, the program disables your automatic
         time stepping, line search, and DOF predictor settings, and the time
         step size is controlled by the arc-length method internally.
@@ -53,9 +56,9 @@ class LoadStepOptions:
 
         Notes
         -----
-        For an analysis involving a prestressed structure, the CAMPBELL command
+        For an analysis involving a prestressed structure, the ``CAMPBELL`` command
         specifies whether or not to prepare the result file to support  a
-        Campbell diagram analysis (PRCAMP or PLCAMP).
+        Campbell diagram analysis (``PRCAMP`` or ``PLCAMP``).
 
         To prestress a structure, the program performs a static solution before
         the linear perturbation modal solution.
@@ -465,7 +468,7 @@ class LoadStepOptions:
         nsbstp
             Number of substeps to be used for this load step (i.e., the time
             step size or frequency increment). If automatic time stepping is
-            used (AUTOTS), NSBSTP defines the size of the first substep.
+            used (``AUTOTS``), ``NSBSTP`` defines the size of the first substep.
 
         nsbmx
             Maximum number of substeps to be taken (i.e., the minimum time step
@@ -481,18 +484,20 @@ class LoadStepOptions:
             Time step carryover key (program-determined default depending on
             the problem physics):
 
-            OFF - Use NSBSTP to define time step at start of each load step.
+            OFF
+                Use NSBSTP to define time step at start of each load step.
 
-            ON - Use final time step from previous load step as the starting time step (if
-                 automatic time stepping is used).
+            ON
+                Use final time step from previous load step as the starting time step (if
+                automatic time stepping is used).
 
         Notes
         -----
-        See DELTIM for an alternative input.  It is recommended that all fields
+        See ``DELTIM`` for an alternative input.  It is recommended that all fields
         of this command be specified for solution efficiency and robustness.
 
-        When the arc-length method is active (ARCLEN command), the NSBMX and
-        NSBMN arguments are ignored.
+        When the arc-length method is active (``ARCLEN`` command), the ``NSBMX`` and
+        ``NSBMN`` arguments are ignored.
 
         This command is also valid in PREP7.
         """
@@ -510,11 +515,13 @@ class LoadStepOptions:
         num
             The number of solutions to expand. This value is required.
 
-            Num - Number of solutions to expand.
+            Num
+                Number of solutions to expand.
 
-            ALL - Expand all substeps between BEGRNG and ENDRNG (provided that ENDRNG > 0). If
-                  BEGRNG and ENDRNG have no specified values, this option
-                  expands all substeps of all load steps.
+            ALL
+                Expand all substeps between ``BEGRNG`` and ``ENDRNG`` (provided that ENDRNG > 0). If
+                ``BEGRNG`` and ``ENDRNG`` have no specified values, this option
+                expands all substeps of all load steps.
 
         begrng, endrng
             Beginning and ending time (or frequency) range for expanded
@@ -523,25 +530,27 @@ class LoadStepOptions:
         elcalc
             The element-calculation key:
 
-            YES - Calculate element results, nodal loads, and reaction loads. This value is the
-                  default.
+            YES
+                Calculate element results, nodal loads, and reaction loads. This value is the
+                default.
 
-            NO - Do not calculate these items.
+            NO
+                Do not calculate these items.
 
         Notes
         -----
         Specifies a range of solutions to be expanded from analyses that use
-        mode-superposition methods (ANTYPE,HARMIC or TRANS) or substructuring
-        (ANTYPE,SUBSTR).
+        mode-superposition methods (``ANTYPE,HARMIC`` or ``TRANS``) or substructuring
+        (``ANTYPE,SUBSTR``).
 
         For ANTYPE,TRANS, NUM, evenly spaced solutions are expanded between
-        time BEGRNG and time ENDRNG.
+        time BEGRNG and time ``ENDRNG``.
 
         For ANTYPE,HARMIC, NUM, evenly spaced solutions are expanded between
-        frequency BEGRNG and frequency ENDRNG.
+        frequency BEGRNG and frequency ``ENDRNG``.
 
         The first expansion in all cases is done at the first point beyond
-        BEGRNG (that is, at BEGRNG + (ENDRNG - BEGRNG) / NUM)).
+        BEGRNG (that is, at ``BEGRNG + (ENDRNG - BEGRNG) / NUM``)).
 
         The resulting results file will maintain the same load step, substep,
         and time (or frequency) values as the use pass.
@@ -549,17 +558,17 @@ class LoadStepOptions:
         For a single expansion of a solution, or for multiple expansions when
         the solutions are not evenly spaced (such as in a mode-superposition
         harmonic analysis with the cluster option), ANSYS, Inc. recommends
-        issuing one or more EXPSOL commands.
+        issuing one or more ``EXPSOL`` commands.
 
         The NUMEXP command is invalid in these cases:
 
-        In a substructing analysis (ANTYPE,SUBST) when a factorized matrix file
-        (the .LN22 file generated by the sparse solver) does not exist, causing
+        In a substructing analysis (``ANTYPE,SUBST``) when a factorized matrix file
+        (the ``.LN22`` file generated by the sparse solver) does not exist, causing
         ANSYS to employ the full-resolve method.
 
-        If the full-resolve option is selected using the SEOPT command.
+        If the full-resolve option is selected using the ``SEOPT`` command.
 
-        In both situations, use the EXPSOL command to perform a single
+        In both situations, use the ``EXPSOL`` command to perform a single
         expansion for each solution desired.
 
         This command is also valid in PREP7.

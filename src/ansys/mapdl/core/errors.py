@@ -61,6 +61,13 @@ class MapdlInvalidRoutineError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class MapdlCommandIgnoredError(RuntimeError):
+    """Raised when MAPDL ignores a command."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 class MapdlExitedError(RuntimeError):
     """Raised when MAPDL has exited"""
 

@@ -202,7 +202,7 @@ Start this example by launching MAPDL and loading the model.
     start(mapdl, 'linear_non_prestressed')
     mapdl.title("linear_non_prestressed, Solving brake squeal problem using linear non pre-stressed modal solve")
 
-    _ = mapdl.eplot(
+    mapdl.eplot(
         vtk=True, cpos="xy", show_edges=True, show_axes=False, line_width=2, background="w"
     )
 

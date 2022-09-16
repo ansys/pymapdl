@@ -8,6 +8,10 @@ available to you.
 Visit `Ansys <https://www.ansys.com/>`_ for more information on
 getting a licensed copy of Ansys.
 
+You can also try the Student Version of Ansys products in
+`Ansys Student Versions <https://www.ansys.com/academic/students>`_.
+These are versions valid during a year and with limited capabilities 
+regarding number of nodes, elements, etc.
 
 .. toctree::
    :hidden:
@@ -17,7 +21,6 @@ getting a licensed copy of Ansys.
    versioning
    docker
    using_julia
-   faq
    wsl
 
 ************
@@ -26,8 +29,8 @@ Installation
 
 Python Module
 ~~~~~~~~~~~~~
-The ``ansys.mapdl.core`` package currently supports Python 3.6 through
-Python 3.9 on Windows, Mac OS, and Linux.
+The ``ansys.mapdl.core`` package currently supports Python 3.7 through
+Python 3.10 on Windows, Mac OS, and Linux.
 
 Install the latest release from `PyPi
 <https://pypi.org/project/ansys-mapdl-core/>`_ with:

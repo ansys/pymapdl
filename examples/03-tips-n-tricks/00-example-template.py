@@ -38,12 +38,15 @@ Where ``XY`` is the number of the example. If there are already three examples n
 After this preamble is complete, the first code block begins.
 """
 
-# Your code goes here...
 from ansys.mapdl.core import launch_mapdl
 
-# start MAPDL and enter the pre-processing routine
+# start MAPDL
 mapdl = launch_mapdl()
-mapdl
+print(mapdl)
+
+# Your code goes here...
+# mapdl.prep7()
+# mapdl...
 
 ###############################################################################
 # Section Title
@@ -63,7 +66,6 @@ mapdl
 mapdl.clear()
 mapdl.prep7()
 print(mapdl)
-mapdl
 
 ###############################################################################
 # Plots and images
@@ -88,6 +90,7 @@ y = [i**2 + 3 * i - 1 for i in x]
 ax.plot(x, y)
 ax.set_xlabel("x")
 ax.set_ylabel("y")
+plt.show()
 
 ###############################################################################
 # Animations
@@ -106,5 +109,5 @@ ax.set_ylabel("y")
 # notebook, the example html and the demo script will all be auto-generated via ``sphinx-gallery``.
 
 ###############################################################################
-# stop mapdl
+# Stopping mapdl
 mapdl.exit()

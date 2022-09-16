@@ -13,7 +13,6 @@ and map it onto a geometry.
    :toctree: _autosummary/
 
    Mapdl.ftype
-   Mapdl.map_
    Mapdl.plgeom
    Mapdl.plmap
    Mapdl.read

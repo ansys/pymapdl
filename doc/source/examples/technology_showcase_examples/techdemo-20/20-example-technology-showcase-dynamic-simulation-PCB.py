@@ -1,7 +1,7 @@
 """.. _ref_dynamic_simulation_printed_circuit_board:
 
 Dynamic simulation of a printed circuit board assembly
-------------------------------------------------------
+======================================================
 
 This examples shows how to use PyMAPDL to import an existing FE model and to
 run a modal and PSD analysis. PyDPF modules are also used for post-processing.
@@ -10,21 +10,26 @@ This example is inspired from the model and analysis defined in Chapter 20 of
 the Mechanical APDL Technology Showcase Manual.
 
 Additional Packages Used
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
+
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
 
 """
 
 ###############################################################################
-# Starting MAPDL as a service and importing an external model
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Setting up model
+# ----------------
+#
 # The original FE model is given in the Ansys Mechanical APDL Technology
 # Showcase Manual.  The .cdb contains a FE model of a single circuit board. The
 # model is meshed with SOLID186, SHELL181 and BEAM188 elements. All components
 # of the PCB model is assigned with linear elastic isotropic materials. Bonded
 # and flexible surface-to-surface contact pairs are used to define the contact
 # between the IC packages and the circuit board.
-
+#
+# Starting MAPDL as a service and importing an external model
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
 import matplotlib.pyplot as plt
 
@@ -106,12 +111,16 @@ mapdl.number(1)
 mapdl.hbc(1, "on")
 mapdl.pbc("all", "", 1)
 mapdl.view(1, 1, 1, 1)
-mapdl.eplot(vtk=False)
+# mapdl.eplot(vtk=False)
 mapdl.eplot(vtk=True)
 
 ###############################################################################
+# Modal Analysis
+# --------------
+#
 # Run modal analysis
-# ~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~
+#
 # A modal analysis is run using Block Lanzos.
 # Only 10 modes are extracted for the sake of run times, but using a higher
 # number of nodes is recommended (suggestion: 300 modes).
@@ -137,43 +146,57 @@ print(output)
 # modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
 # and PyDPF-Core. All methods lead to the same result and are just given as an
 # example of how each module can be used.
-# The methods using DPF modules are commented in the code due to CI/CD issues
-# but will run locally if uncommented.
 
 # using MAPDL methods
 mapdl.post1()
 mapdl.set(1, 1)
 mapdl.plnsol("u", "sum")
 
-# using PyMAPDL result reader
+
+###############################################################################
+# Using PyMAPDL result reader
+# ***************************
+#
+# *Not recommended* - PyMAPDL reader library is in process to being deprecated.
+# It is recommended to use `DPF Post <https://postdocs.pyansys.com/>`_.
+#
+
 mapdl_result = mapdl.result
 mapdl_result.plot_nodal_displacement(0)
 
+###############################################################################
 # Using DPF-Post
+# **************
+#
 
-# from ansys.dpf import post
-# solution_path = 'file.rst'
-# solution = post.load_solution(solution_path)
-# print(solution)
-# displacement = solution.displacement(time_scoping=1)
-# total_deformation = displacement.norm
-# total_deformation.plot_contour(show_edges=True)
+from ansys.dpf import post
 
+solution_path = mapdl.result_file
+solution = post.load_solution(solution_path)
+print(solution)
+displacement = solution.displacement(time_scoping=1)
+total_deformation = displacement.norm
+total_deformation.plot_contour(show_edges=True, background="w")
+
+###############################################################################
 # Using DPF-Core
+# **************
+#
 
-# from ansys.dpf import core
-# model = core.Model(solution_path)
-# results = model.results
-# print(results)
-# displacements = results.displacement()
-# total_def = core.operators.math.norm_fc(displacements)
-# total_def_container = total_def.outputs.fields_container()
-# mesh = model.metadata.meshed_region
-# mesh.plot(total_def_container.get_field_by_time_id(1))
+from ansys.dpf import core
+
+model = core.Model(solution_path)
+results = model.results
+print(results)
+displacements = results.displacement()
+total_def = core.operators.math.norm_fc(displacements)
+total_def_container = total_def.outputs.fields_container()
+mesh = model.metadata.meshed_region
+mesh.plot(total_def_container.get_field_by_time_id(1))
 
 ###############################################################################
 # Run PSD analysis
-# ~~~~~~~~~~~~~~~~
+# ----------------
 # The response spectrum analysis is defined, solved and post-processed.
 
 # define PSD analysis with input spectrum

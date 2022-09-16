@@ -15,13 +15,13 @@
 
 .. rst-class:: sphx-glr-example-title
 
-.. _sphx_glr_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
+.. _sphx_glr_download_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
 
 .. _ref_dynamic_simulation_printed_circuit_board:
 .. _tech_demo_20:
 
 Dynamic simulation of a printed circuit board assembly
-------------------------------------------------------
+======================================================
 
 This examples shows how to use PyMAPDL to import an existing FE model and to
 run a modal and PSD analysis. PyDPF modules are also used for post-processing.
@@ -30,13 +30,15 @@ This example is inspired from the model and analysis defined in Chapter 20 of
 the Mechanical APDL Technology Showcase Manual.
 
 Additional Packages Used
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
+
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
 
-.. GENERATED FROM PYTHON SOURCE LINES 19-27
+.. GENERATED FROM PYTHON SOURCE LINES 20-33
 
-Starting MAPDL as a service and importing an external model
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting up model
+----------------
+
 The original FE model is given in the Ansys Mechanical APDL Technology
 Showcase Manual.  The .cdb contains a FE model of a single circuit board. The
 model is meshed with SOLID186, SHELL181 and BEAM188 elements. All components
@@ -44,10 +46,13 @@ of the PCB model is assigned with linear elastic isotropic materials. Bonded
 and flexible surface-to-surface contact pairs are used to define the contact
 between the IC packages and the circuit board.
 
-.. GENERATED FROM PYTHON SOURCE LINES 27-49
+Starting MAPDL as a service and importing an external model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 33-54
 
 .. code-block:: default
-
 
 
     import matplotlib.pyplot as plt
@@ -87,21 +92,21 @@ between the IC packages and the circuit board.
 
     Product:             Ansys Mechanical Enterprise
     MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    ansys.mapdl Version: 0.63.0
 
 
-    'ALSO SELECT ALL COMPONENTS'
+    ALSO SELECT ALL COMPONENTS
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 50-54
+.. GENERATED FROM PYTHON SOURCE LINES 55-59
 
 Creating the complete layered model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The original model will be duplicated to create a layered PCB of three layers
 that are binded together.
 
-.. GENERATED FROM PYTHON SOURCE LINES 54-112
+.. GENERATED FROM PYTHON SOURCE LINES 59-117
 
 .. code-block:: default
 
@@ -160,7 +165,7 @@ that are binded together.
     mapdl.hbc(1, "on")
     mapdl.pbc("all", "", 1)
     mapdl.view(1, 1, 1, 1)
-    mapdl.eplot(vtk=False)
+    # mapdl.eplot(vtk=False)
     mapdl.eplot(vtk=True)
 
 
@@ -171,25 +176,24 @@ that are binded together.
    :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_002.png
    :class: sphx-glr-single-img
 
-.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
-   :alt: 20 example technology showcase dynamic simulation PCB
-   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
-   :class: sphx-glr-single-img
 
 
 
 
+.. GENERATED FROM PYTHON SOURCE LINES 118-128
 
-.. GENERATED FROM PYTHON SOURCE LINES 113-119
+Modal Analysis
+--------------
 
 Run modal analysis
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
+
 A modal analysis is run using Block Lanzos.
 Only 10 modes are extracted for the sake of run times, but using a higher
 number of nodes is recommended (suggestion: 300 modes).
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 119-133
+.. GENERATED FROM PYTHON SOURCE LINES 128-142
 
 .. code-block:: default
 
@@ -217,29 +221,29 @@ number of nodes is recommended (suggestion: 300 modes).
 
  .. code-block:: none
 
-    *** NOTE ***                            CP =       1.641   TIME= 19:31:10
+    *** NOTE ***                            CP =       0.781   TIME= 06:52:51
      The automatic domain decomposition logic has selected the MESH domain   
      decomposition method with 2 processes per solution.                     
 
      *****  ANSYS SOLVE    COMMAND  *****
 
-     *** NOTE ***                            CP =       1.672   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.812   TIME= 06:52:51
      There is no title defined for this analysis.                            
 
-     *** NOTE ***                            CP =       1.672   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.828   TIME= 06:52:51
      To view 3-D mode shapes of beam or pipe elements, expand the modes with 
      element results calculation active via the MXPAND command's             
      Elcalc=YES.                                                             
 
-     *** WARNING ***                         CP =       1.672   TIME= 19:31:10
+     *** WARNING ***                         CP =       0.844   TIME= 06:52:51
      Previous testing revealed that 3 of the 26046 selected elements violate 
      shape warning limits.  To review warning messages, please see the       
      output or error file, or issue the CHECK command.                       
 
-     *** NOTE ***                            CP =       1.672   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.844   TIME= 06:52:51
      The model data was checked and warning messages were found.             
       Please review output or errors file (                                  
-     C:\Users\gayuso\AppData\Local\Temp\ansys_huwgqkdmck\file0.err ) for     
+     C:\Users\gayuso\AppData\Local\Temp\ansys_pasiuwhdkb\file0.err ) for     
      these warning messages.                                                 
 
      *** SELECTION OF ELEMENT TECHNOLOGIES FOR APPLICABLE ELEMENTS ***
@@ -307,7 +311,7 @@ number of nodes is recommended (suggestion: 300 modes).
      *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2     ***
      DISTRIBUTED Ansys Mechanical Enterprise                       
 
-     00000000  VERSION=WINDOWS x64   19:31:10  APR 11, 2022 CP=      1.672
+     00000000  VERSION=WINDOWS x64   06:52:51  JUL 25, 2022 CP=      0.844
 
                                                                                
 
@@ -324,20 +328,20 @@ number of nodes is recommended (suggestion: 300 modes).
        NUMBER OF MODES TO EXPAND . . . . . . . . . . .    10
        ELEMENT RESULTS CALCULATION . . . . . . . . . .OFF
 
-     *** NOTE ***                            CP =       1.672   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.844   TIME= 06:52:51
      SHELL181 and SHELL281 will not support real constant input at a future  
      release.  Please move to section input.                                 
 
-     *** NOTE ***                            CP =       1.672   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.891   TIME= 06:52:51
      The conditions for direct assembly have been met.  No .emat or .erot    
      files will be produced.                                                 
 
-     *** NOTE ***                            CP =       1.703   TIME= 19:31:10
+     *** NOTE ***                            CP =       0.922   TIME= 06:52:51
      Internal nodes from 43998 to 44297 are created.                         
      300 internal nodes are used for quadratic and/or cubic options of       
      BEAM188, PIPE288, and/or SHELL208.                                      
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 22 and contact element type 22 has been set up.  The       
      companion pair has real constant set ID 23.  Both pairs should have     
@@ -347,7 +351,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -360,13 +364,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23362 and target element 23450.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 23 and contact element type 22 has been set up.  The       
      companion pair has real constant set ID 22.  Both pairs should have     
@@ -376,7 +380,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -388,13 +392,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23389 and target element 23348.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 24 and contact element type 24 has been set up.  The       
      companion pair has real constant set ID 25.  Both pairs should have     
@@ -404,7 +408,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -417,13 +421,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 23534 and target element 23703.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 25 and contact element type 24 has been set up.  The       
      companion pair has real constant set ID 24.  Both pairs should have     
@@ -433,7 +437,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -445,13 +449,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23619 and target element 23500.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 26 and contact element type 26 has been set up.  The       
      companion pair has real constant set ID 27.  Both pairs should have     
@@ -461,7 +465,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -474,13 +478,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23799 and target element 23840.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 27 and contact element type 26 has been set up.  The       
      companion pair has real constant set ID 26.  Both pairs should have     
@@ -490,7 +494,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -502,13 +506,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 8.437694987E-15 was detected between contact  
      element 23816 and target element 23774.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 28 and contact element type 28 has been set up.  The       
      companion pair has real constant set ID 29.  Both pairs should have     
@@ -518,7 +522,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -531,13 +535,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 23925 and target element 24048.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 29 and contact element type 28 has been set up.  The       
      companion pair has real constant set ID 28.  Both pairs should have     
@@ -547,7 +551,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -559,13 +563,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.993605777E-15 was detected between contact  
      element 24004 and target element 23917.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 30 and contact element type 30 has been set up.  The       
      companion pair has real constant set ID 31.  Both pairs should have     
@@ -575,7 +579,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -588,13 +592,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.33226763E-14 was detected between contact   
      element 24136 and target element 24168.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 31 and contact element type 30 has been set up.  The       
      companion pair has real constant set ID 30.  Both pairs should have     
@@ -604,7 +608,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -616,13 +620,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 24143 and target element 24111.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 32 and contact element type 32 has been set up.  The       
      companion pair has real constant set ID 33.  Both pairs should have     
@@ -632,7 +636,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -645,13 +649,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 2.131628207E-14 was detected between contact  
      element 24242 and target element 24365.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 33 and contact element type 32 has been set up.  The       
      companion pair has real constant set ID 32.  Both pairs should have     
@@ -661,7 +665,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -673,13 +677,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 24279 and target element 24217.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 34 and contact element type 34 has been set up.  The       
      companion pair has real constant set ID 35.  Both pairs should have     
@@ -689,7 +693,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -702,13 +706,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 24457 and target element 24613.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 35 and contact element type 34 has been set up.  The       
      companion pair has real constant set ID 34.  Both pairs should have     
@@ -718,7 +722,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -730,13 +734,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 24514 and target element 24456.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 36 and contact element type 36 has been set up.  The       
      companion pair has real constant set ID 37.  Both pairs should have     
@@ -746,7 +750,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -759,13 +763,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 24670 and target element 24765.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 37 and contact element type 36 has been set up.  The       
      companion pair has real constant set ID 36.  Both pairs should have     
@@ -775,7 +779,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -787,13 +791,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 24705 and target element 24663.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 38 and contact element type 38 has been set up.  The       
      companion pair has real constant set ID 39.  Both pairs should have     
@@ -803,7 +807,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -816,13 +820,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 9.769962617E-15 was detected between contact  
      element 24836 and target element 24926.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 39 and contact element type 38 has been set up.  The       
      companion pair has real constant set ID 38.  Both pairs should have     
@@ -832,7 +836,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -844,13 +848,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 8.881784197E-15 was detected between contact  
      element 24879 and target element 24787.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 40 and contact element type 40 has been set up.  The       
      companion pair has real constant set ID 41.  Both pairs should have     
@@ -860,7 +864,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -871,20 +875,20 @@ number of nodes is recommended (suggestion: 300 modes).
      Pinball region factor PINB                    1.0000    
      The resulting pinball region                  4.0000    
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      One of the contact searching regions contains at least 63 target        
      elements.  You may reduce the pinball radius.                           
      Default target edge extension factor TOLS     10.000    
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 24979 and target element 25077.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 41 and contact element type 40 has been set up.  The       
      companion pair has real constant set ID 40.  Both pairs should have     
@@ -894,7 +898,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -907,13 +911,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 25011 and target element 24931.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 42 and contact element type 42 has been set up.  The       
      companion pair has real constant set ID 43.  Both pairs should have     
@@ -923,7 +927,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -937,13 +941,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 8.881784197E-15 was detected between contact  
      element 25172 and target element 25232.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 43 and contact element type 42 has been set up.  The       
      companion pair has real constant set ID 42.  Both pairs should have     
@@ -953,7 +957,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -966,13 +970,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 25184 and target element 25127.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 44 and contact element type 44 has been set up.  The       
      companion pair has real constant set ID 45.  Both pairs should have     
@@ -982,7 +986,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -995,13 +999,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25356 and target element 25570.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 45 and contact element type 44 has been set up.  The       
      companion pair has real constant set ID 44.  Both pairs should have     
@@ -1011,7 +1015,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1023,13 +1027,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 25446 and target element 25239.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 46 and contact element type 46 has been set up.  The       
      companion pair has real constant set ID 47.  Both pairs should have     
@@ -1039,7 +1043,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1052,13 +1056,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25628 and target element 25709.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 47 and contact element type 46 has been set up.  The       
      companion pair has real constant set ID 46.  Both pairs should have     
@@ -1068,7 +1072,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1080,13 +1084,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 25639 and target element 25608.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 48 and contact element type 48 has been set up.  The       
      companion pair has real constant set ID 49.  Both pairs should have     
@@ -1096,7 +1100,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1109,13 +1113,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25779 and target element 25820.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 49 and contact element type 48 has been set up.  The       
      companion pair has real constant set ID 48.  Both pairs should have     
@@ -1125,7 +1129,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1137,13 +1141,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25787 and target element 25736.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 50 and contact element type 50 has been set up.  The       
      companion pair has real constant set ID 51.  Both pairs should have     
@@ -1153,7 +1157,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1166,13 +1170,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 1.33226763E-14 was detected between contact   
      element 25924 and target element 26035.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 51 and contact element type 50 has been set up.  The       
      companion pair has real constant set ID 50.  Both pairs should have     
@@ -1182,7 +1186,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1194,7 +1198,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       2.719   TIME= 19:31:11
+     *** NOTE ***                            CP =       1.953   TIME= 06:52:52
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 25939 and target element 25890.                                 
      ****************************************
@@ -1202,7 +1206,7 @@ number of nodes is recommended (suggestion: 300 modes).
   
   
 
-     *** NOTE ***                            CP =       2.750   TIME= 19:31:11
+     *** NOTE ***                            CP =       2.016   TIME= 06:52:52
      Internal nodes from 43998 to 44297 are created.                         
      300 internal nodes are used for quadratic and/or cubic options of       
      BEAM188, PIPE288, and/or SHELL208.                                      
@@ -1225,7 +1229,7 @@ number of nodes is recommended (suggestion: 300 modes).
        DATABASE OUTPUT CONTROLS. . . . . . . . . . . .ALL DATA WRITTEN
 
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 22 and contact element type 22 has been set up.  The       
      companion pair has real constant set ID 23.  Both pairs should have     
@@ -1235,7 +1239,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1248,13 +1252,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23362 and target element 23450.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 23 and contact element type 22 has been set up.  The       
      companion pair has real constant set ID 22.  Both pairs should have     
@@ -1264,7 +1268,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1276,13 +1280,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23389 and target element 23348.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 24 and contact element type 24 has been set up.  The       
      companion pair has real constant set ID 25.  Both pairs should have     
@@ -1292,7 +1296,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1305,13 +1309,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 23534 and target element 23703.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 25 and contact element type 24 has been set up.  The       
      companion pair has real constant set ID 24.  Both pairs should have     
@@ -1321,7 +1325,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1333,13 +1337,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 23619 and target element 23500.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 32 and contact element type 32 has been set up.  The       
      companion pair has real constant set ID 33.  Both pairs should have     
@@ -1349,7 +1353,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1362,13 +1366,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 2.131628207E-14 was detected between contact  
      element 24242 and target element 24365.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 33 and contact element type 32 has been set up.  The       
      companion pair has real constant set ID 32.  Both pairs should have     
@@ -1378,7 +1382,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1390,13 +1394,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 24279 and target element 24217.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 38 and contact element type 38 has been set up.  The       
      companion pair has real constant set ID 39.  Both pairs should have     
@@ -1406,7 +1410,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1419,13 +1423,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 9.769962617E-15 was detected between contact  
      element 24836 and target element 24926.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 39 and contact element type 38 has been set up.  The       
      companion pair has real constant set ID 38.  Both pairs should have     
@@ -1435,7 +1439,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1447,13 +1451,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 8.881784197E-15 was detected between contact  
      element 24879 and target element 24787.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 40 and contact element type 40 has been set up.  The       
      companion pair has real constant set ID 41.  Both pairs should have     
@@ -1463,7 +1467,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1474,20 +1478,20 @@ number of nodes is recommended (suggestion: 300 modes).
      Pinball region factor PINB                    1.0000    
      The resulting pinball region                  4.0000    
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      One of the contact searching regions contains at least 63 target        
      elements.  You may reduce the pinball radius.                           
      Default target edge extension factor TOLS     10.000    
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 24979 and target element 25077.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 41 and contact element type 40 has been set up.  The       
      companion pair has real constant set ID 40.  Both pairs should have     
@@ -1497,7 +1501,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1510,13 +1514,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.065814104E-14 was detected between contact  
      element 25011 and target element 24931.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 48 and contact element type 48 has been set up.  The       
      companion pair has real constant set ID 49.  Both pairs should have     
@@ -1526,7 +1530,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1539,13 +1543,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25779 and target element 25820.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 49 and contact element type 48 has been set up.  The       
      companion pair has real constant set ID 48.  Both pairs should have     
@@ -1555,7 +1559,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1567,13 +1571,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.421085472E-14 was detected between contact  
      element 25787 and target element 25736.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 50 and contact element type 50 has been set up.  The       
      companion pair has real constant set ID 51.  Both pairs should have     
@@ -1583,7 +1587,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Shell edge - solid surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1596,13 +1600,13 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 1.33226763E-14 was detected between contact   
      element 25924 and target element 26035.                                 
      ****************************************
   
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Symmetric Deformable- deformable contact pair identified by real        
      constant set 51 and contact element type 50 has been set up.  The       
      companion pair has real constant set ID 50.  Both pairs should have     
@@ -1612,7 +1616,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Auto surface constraint is built
      Contact algorithm: MPC based approach
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Contact related postprocess items (ETABLE, pressure ...) are not        
      available.                                                              
      Contact detection at: nodal point (normal to target surface)
@@ -1624,7 +1628,7 @@ number of nodes is recommended (suggestion: 300 modes).
      Initial penetration/gap is excluded.
      Bonded contact (always) is defined.
 
-     *** NOTE ***                            CP =       3.625   TIME= 19:31:12
+     *** NOTE ***                            CP =       2.891   TIME= 06:52:53
      Max.  Initial penetration 7.105427358E-15 was detected between contact  
      element 25939 and target element 25890.                                 
      ****************************************
@@ -1696,29 +1700,29 @@ number of nodes is recommended (suggestion: 300 modes).
             3        60  BEAM188       0.000   0.000000
             4        60  BEAM188       0.000   0.000000
             5        60  BEAM188       0.000   0.000000
-            6     13038  SHELL181      0.625   0.000048
-            7       252  SOLID186      0.016   0.000062
-            8       432  SOLID186      0.031   0.000072
-            9       168  SOLID186      0.047   0.000279
-           10       396  SOLID186      0.062   0.000158
-           11       108  SOLID186      0.016   0.000145
+            6     13038  SHELL181      1.125   0.000086
+            7       252  SOLID186      0.062   0.000248
+            8       432  SOLID186      0.078   0.000181
+            9       168  SOLID186      0.031   0.000186
+           10       396  SOLID186      0.000   0.000000
+           11       108  SOLID186      0.000   0.000000
            12       384  SOLID186      0.062   0.000163
-           13       384  SOLID186      0.062   0.000163
-           14       210  SOLID186      0.047   0.000223
-           15       270  SOLID186      0.016   0.000058
-           16       408  SOLID186      0.031   0.000077
+           13       384  SOLID186      0.016   0.000041
+           14       210  SOLID186      0.016   0.000074
+           15       270  SOLID186      0.078   0.000289
+           16       408  SOLID186      0.047   0.000115
            17       150  SOLID186      0.000   0.000000
-           18       588  SOLID186      0.047   0.000080
-           19       240  SOLID186      0.016   0.000065
+           18       588  SOLID186      0.094   0.000159
+           19       240  SOLID186      0.078   0.000326
            20       216  SOLID186      0.062   0.000289
-           21       324  SOLID186      0.031   0.000096
+           21       324  SOLID186      0.016   0.000048
            22       228  CONTA174      0.016   0.000069
            23       228  TARGE170      0.000   0.000000
            24       435  CONTA174      0.031   0.000072
            25       435  TARGE170      0.000   0.000000
-           26       156  CONTA174      0.016   0.000100
+           26       156  CONTA174      0.000   0.000000
            27       156  TARGE170      0.000   0.000000
-           28       354  CONTA174      0.016   0.000044
+           28       354  CONTA174      0.000   0.000000
            29       354  TARGE170      0.000   0.000000
            30       108  CONTA174      0.000   0.000000
            31       108  TARGE170      0.000   0.000000
@@ -1726,23 +1730,23 @@ number of nodes is recommended (suggestion: 300 modes).
            33       348  TARGE170      0.000   0.000000
            34       342  CONTA174      0.000   0.000000
            35       342  TARGE170      0.000   0.000000
-           36       204  CONTA174      0.000   0.000000
+           36       204  CONTA174      0.016   0.000077
            37       204  TARGE170      0.000   0.000000
            38       234  CONTA174      0.000   0.000000
            39       234  TARGE170      0.000   0.000000
-           40       300  CONTA174      0.016   0.000052
+           40       300  CONTA174      0.047   0.000156
            41       300  TARGE170      0.000   0.000000
-           42       159  CONTA174      0.000   0.000000
+           42       159  CONTA174      0.047   0.000295
            43       159  TARGE170      0.000   0.000000
-           44       519  CONTA174      0.047   0.000090
-           45       519  TARGE170      0.016   0.000030
-           46       210  CONTA174      0.016   0.000074
+           44       519  CONTA174      0.016   0.000030
+           45       519  TARGE170      0.000   0.000000
+           46       210  CONTA174      0.000   0.000000
            47       210  TARGE170      0.000   0.000000
            48       204  CONTA174      0.000   0.000000
            49       204  TARGE170      0.000   0.000000
            50       288  CONTA174      0.000   0.000000
            51       288  TARGE170      0.000   0.000000
-     Time at end of element matrix formulation CP = 4.671875.                
+     Time at end of element matrix formulation CP = 4.40625.                 
 
       BLOCK LANCZOS CALCULATION OF UP TO    10 EIGENVECTORS.
       NUMBER OF EQUATIONS              =       159678
@@ -1752,7 +1756,7 @@ number of nodes is recommended (suggestion: 300 modes).
       MAXIMUM EIGENVALUE               =  0.10000E+31
 
 
-     *** NOTE ***                            CP =       8.656   TIME= 19:31:18
+     *** NOTE ***                            CP =       7.078   TIME= 06:52:58
      The initial memory allocation (-m) has been exceeded.                   
       Supplemental memory allocations are being used.                        
 
@@ -1764,7 +1768,7 @@ number of nodes is recommended (suggestion: 300 modes).
       Total memory required for in-core solution     =    811.685 MB
       Total memory required for out-of-core solution =    378.173 MB
 
-     *** NOTE ***                            CP =       8.656   TIME= 19:31:18
+     *** NOTE ***                            CP =       8.641   TIME= 06:53:00
      The Distributed Sparse Matrix Solver used by the Block Lanczos          
      eigensolver is currently running in the in-core memory mode.  This      
      memory mode uses the most amount of memory in order to avoid using the  
@@ -1775,7 +1779,7 @@ number of nodes is recommended (suggestion: 300 modes).
      *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2     ***
      DISTRIBUTED Ansys Mechanical Enterprise                       
 
-     00000000  VERSION=WINDOWS x64   19:31:20  APR 11, 2022 CP=     10.781
+     00000000  VERSION=WINDOWS x64   06:53:02  JUL 25, 2022 CP=     10.781
 
                                                                                
 
@@ -1800,7 +1804,7 @@ number of nodes is recommended (suggestion: 300 modes).
      *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2     ***
      DISTRIBUTED Ansys Mechanical Enterprise                       
 
-     00000000  VERSION=WINDOWS x64   19:31:20  APR 11, 2022 CP=     10.938
+     00000000  VERSION=WINDOWS x64   06:53:03  JUL 25, 2022 CP=     10.875
 
                                                                                
 
@@ -1924,7 +1928,7 @@ number of nodes is recommended (suggestion: 300 modes).
 
 
 
-     *** NOTE ***                            CP =      10.938   TIME= 19:31:20
+     *** NOTE ***                            CP =      10.875   TIME= 06:53:03
      The modes requested are mass normalized (Nrmkey on MODOPT).  However,   
      the modal masses and kinetic energies below are calculated with unit    
      normalized modes.                                                       
@@ -1958,7 +1962,7 @@ number of nodes is recommended (suggestion: 300 modes).
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 134-142
+.. GENERATED FROM PYTHON SOURCE LINES 143-149
 
 Post-processing the modal results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1966,10 +1970,8 @@ This sections illustrates different methods to post-process the results of the
 modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
 and PyDPF-Core. All methods lead to the same result and are just given as an
 example of how each module can be used.
-The methods using DPF modules are commented in the code due to CI/CD issues
-but will run locally if uncommented.
 
-.. GENERATED FROM PYTHON SOURCE LINES 142-174
+.. GENERATED FROM PYTHON SOURCE LINES 149-156
 
 .. code-block:: default
 
@@ -1979,31 +1981,62 @@ but will run locally if uncommented.
     mapdl.set(1, 1)
     mapdl.plnsol("u", "sum")
 
-    # using PyMAPDL result reader
+
+
+
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 157-163
+
+Using PyMAPDL result reader
+***************************
+
+*Not recommended* - PyMAPDL reader library is in process to being deprecated.
+It is recommended to use `DPF Post <https://postdocs.pyansys.com/>`_.
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 163-167
+
+.. code-block:: default
+
+
     mapdl_result = mapdl.result
     mapdl_result.plot_nodal_displacement(0)
 
-    # Using DPF-Post
 
-    # from ansys.dpf import post
-    # solution_path = 'file.rst'
-    # solution = post.load_solution(solution_path)
-    # print(solution)
-    # displacement = solution.displacement(time_scoping=1)
-    # total_deformation = displacement.norm
-    # total_deformation.plot_contour(show_edges=True)
 
-    # Using DPF-Core
 
-    # from ansys.dpf import core
-    # model = core.Model(solution_path)
-    # results = model.results
-    # print(results)
-    # displacements = results.displacement()
-    # total_def = core.operators.math.norm_fc(displacements)
-    # total_def_container = total_def.outputs.fields_container()
-    # mesh = model.metadata.meshed_region
-    # mesh.plot(total_def_container.get_field_by_time_id(1))
+.. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
+   :alt: 20 example technology showcase dynamic simulation PCB
+   :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_003.png
+   :class: sphx-glr-single-img
+
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 168-171
+
+Using DPF-Post
+**************
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 171-181
+
+.. code-block:: default
+
+
+    from ansys.dpf import post
+
+    solution_path = mapdl.result_file
+    solution = post.load_solution(solution_path)
+    print(solution)
+    displacement = solution.displacement(time_scoping=1)
+    total_deformation = displacement.norm
+    total_deformation.plot_contour(show_edges=True, background="w")
 
 
 
@@ -2013,22 +2046,111 @@ but will run locally if uncommented.
    :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_004.png
    :class: sphx-glr-single-img
 
+
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Modal Analysis Solution object.
+
+
+    Data Sources
+    ------------------------------
+    DPF  DataSources: 
+      Result files:
+         result key: rst and path: C:/Users/gayuso/AppData/Local/Temp/ansys_pasiuwhdkb\file.rst 
+      Secondary files:
+
+
+    DPF Model
+    ------------------------------
+    Modal analysis
+    Unit system: NMM: mm, ton, N, s, mA, degC
+    Physics Type: Mecanic
+    Available results:
+         -  displacement: Nodal Displacement
+    ------------------------------
+    DPF  Meshed Region: 
+      44097 nodes 
+      26046 elements 
+      Unit: mm 
+      With solid (3D) elements, shell (2D) elements, shell (3D) elements, beam (1D) elements
+    ------------------------------
+    DPF  Time/Freq Support: 
+      Number of sets: 10 
+    Cumulative     Frequency (Hz) LoadStep       Substep         
+    1              21.684283      1              1               
+    2              21.690242      1              2               
+    3              21.691317      1              3               
+    4              33.829735      1              4               
+    5              33.837985      1              5               
+    6              33.839387      1              6               
+    7              37.060643      1              7               
+    8              37.070912      1              8               
+    9              37.071871      1              9               
+    10             43.837536      1              10              
+
+    This may contain complex results.
+
+
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 182-185
+
+Using DPF-Core
+**************
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 185-197
+
+.. code-block:: default
+
+
+    from ansys.dpf import core
+
+    model = core.Model(solution_path)
+    results = model.results
+    print(results)
+    displacements = results.displacement()
+    total_def = core.operators.math.norm_fc(displacements)
+    total_def_container = total_def.outputs.fields_container()
+    mesh = model.metadata.meshed_region
+    mesh.plot(total_def_container.get_field_by_time_id(1))
+
+
+
+
 .. image-sg:: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
    :alt: 20 example technology showcase dynamic simulation PCB
    :srcset: /examples/technology_showcase_examples/techdemo-20/images/sphx_glr_20-example-technology-showcase-dynamic-simulation-PCB_005.png
    :class: sphx-glr-single-img
 
 
+.. rst-class:: sphx-glr-script-out
+
+ Out:
+
+ .. code-block:: none
+
+    Modal analysis
+    Unit system: NMM: mm, ton, N, s, mA, degC
+    Physics Type: Mecanic
+    Available results:
+         -  displacement: Nodal Displacement
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 175-178
+
+
+.. GENERATED FROM PYTHON SOURCE LINES 198-201
 
 Run PSD analysis
-~~~~~~~~~~~~~~~~
+----------------
 The response spectrum analysis is defined, solved and post-processed.
 
-.. GENERATED FROM PYTHON SOURCE LINES 178-218
+.. GENERATED FROM PYTHON SOURCE LINES 201-241
 
 .. code-block:: default
 
@@ -2082,13 +2204,13 @@ The response spectrum analysis is defined, solved and post-processed.
 
  .. code-block:: none
 
-    *** NOTE ***                            CP =      16.641   TIME= 19:31:26
+    *** NOTE ***                            CP =      16.328   TIME= 06:53:12
      The automatic domain decomposition logic has selected the MESH domain   
      decomposition method with 2 processes per solution.                     
 
      *****  ANSYS SOLVE    COMMAND  *****
                                                                          
-     Time at start of random vibration closed-form solution CP= 16.640625.   
+     Time at start of random vibration closed-form solution CP= 16.328125.   
 
 
      FREQUENCIES USED FOR RANDOM VIBRATION SOLUTION
@@ -2112,15 +2234,15 @@ The response spectrum analysis is defined, solved and post-processed.
 
      PERFORM INTEGRATION FOR ACCELERATION-TYPE QUANTITIES
                                                                          
-     Modal covariance matrix computed CP= 16.640625.                         
+     Modal covariance matrix computed CP= 16.328125.                         
                                                                          
-     Quasi-static modal covariance matrix computed CP= 16.640625.            
+     Quasi-static modal covariance matrix computed CP= 16.328125.            
                                                                          
-     Covariant-modal covariance matrix computed CP= 16.640625.               
+     Covariant-modal covariance matrix computed CP= 16.328125.               
                                                                          
-     Psd file file0.psd created.  CP= 16.640625.                             
+     Psd file file0.psd created.  CP= 16.328125.                             
                                                                          
-     Time at start of random vibration mode combinations CP= 16.640625.      
+     Time at start of random vibration mode combinations CP= 16.328125.      
 
       BASE EXCITATION PROBLEM
 
@@ -2350,7 +2472,7 @@ The response spectrum analysis is defined, solved and post-processed.
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 219-231
+.. GENERATED FROM PYTHON SOURCE LINES 242-254
 
 Post-process PSD analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2365,12 +2487,12 @@ density.
    to be plotted in the Python environment with the use of Matplotlib
    library.
 
-.. GENERATED FROM PYTHON SOURCE LINES 234-236
+.. GENERATED FROM PYTHON SOURCE LINES 257-259
 
 Post-process PSD analysis in POST1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 236-243
+.. GENERATED FROM PYTHON SOURCE LINES 259-266
 
 .. code-block:: default
 
@@ -2393,12 +2515,12 @@ Post-process PSD analysis in POST1
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 244-246
+.. GENERATED FROM PYTHON SOURCE LINES 267-269
 
 Post-process PSD analysis in POST26 (time-history post-processing)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 246-278
+.. GENERATED FROM PYTHON SOURCE LINES 269-301
 
 .. code-block:: default
 
@@ -2441,12 +2563,12 @@ Post-process PSD analysis in POST26 (time-history post-processing)
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 279-281
+.. GENERATED FROM PYTHON SOURCE LINES 302-304
 
 Post-process PSD analysis using Matplotlib
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. GENERATED FROM PYTHON SOURCE LINES 281-299
+.. GENERATED FROM PYTHON SOURCE LINES 304-322
 
 .. code-block:: default
 
@@ -2477,11 +2599,11 @@ Post-process PSD analysis using Matplotlib
    :class: sphx-glr-single-img
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 300-301
+.. GENERATED FROM PYTHON SOURCE LINES 323-324
 
 Exit MAPDL
 
-.. GENERATED FROM PYTHON SOURCE LINES 301-302
+.. GENERATED FROM PYTHON SOURCE LINES 324-325
 
 .. code-block:: default
 
@@ -2496,10 +2618,10 @@ Exit MAPDL
 
 .. rst-class:: sphx-glr-timing
 
-   **Total running time of the script:** ( 0 minutes  31.963 seconds)
+   **Total running time of the script:** ( 0 minutes  44.344 seconds)
 
 
-.. _sphx_glr_download_examples_examples_technology_showcase_examples-techdemo_20-example-technology-showcase-dynamic-simulation-PCB.py:
+.. _sphx_glr_download_examples_gallery_examples_06-verif-manual_20-example-technology-showcase-dynamic-simulation-PCB.py:
 
 
 .. only :: html

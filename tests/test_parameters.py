@@ -224,3 +224,8 @@ def test_double_parameter_get(mapdl, number):
         number, precision_double
     )
     mapdl._name = mapdl_name
+
+
+def test_parameter_delete_raise(mapdl):
+    with pytest.raises(KeyError, match="does not exist"):
+        del mapdl.parameters["not-a-parm"]
