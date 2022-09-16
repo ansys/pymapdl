@@ -9,6 +9,7 @@ import pytest
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
+    _check_license_argument,
     _force_smp_student_version,
     _validate_MPI,
     _version_from_path,
@@ -408,3 +409,38 @@ def test__force_smp_student_version():
     add_sw = "-smp"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
     assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+
+
+@pytest.mark.parametrize(
+    "license_short,license_name",
+    [[each_key, each_value] for each_key, each_value in LICENSES.items()],
+)
+def test_license_product_argument(license_short, license_name):
+    additional_switches = _check_license_argument(license_name, "qwer")
+    assert f"qwer -p {license_short}" in additional_switches
+
+
+@pytest.mark.parametrize("unvalid_type", [1, {}, ()])
+def test_license_product_argument_type_error(unvalid_type):
+    with pytest.raises(TypeError):
+        _check_license_argument(unvalid_type, "")
+
+
+def test_license_product_argument_warning():
+    with pytest.warns(UserWarning):
+        assert "-p asdf" in _check_license_argument("asdf", "qwer")
+
+
+@pytest.mark.parametrize(
+    "license_short,license_name",
+    [[each_key, each_value] for each_key, each_value in LICENSES.items()],
+)
+def test_license_product_argument_p_arg(license_short, license_name):
+    assert f"qw1234 -p {license_short}" == _check_license_argument(
+        None, f"qw1234 -p {license_short}"
+    )
+
+
+def test_license_product_argument_p_arg_warning():
+    with pytest.warns(UserWarning):
+        assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
