@@ -42,6 +42,7 @@ Additional Packages Used
 # This example begins by lunching Ansys Mechanical APDL
 
 import os
+import numpy as np
 
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model, locations
@@ -210,9 +211,9 @@ mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
-mapdl.eplot(
-    plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
-)
+# mapdl.eplot(
+#     plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
+# )
 
 ###############################################################################
 # Solve the non-linear static analysis
@@ -293,10 +294,20 @@ damage_df.head(20)
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
 
+# Identifyng the cohesive mesh
+mesh_op = dpf.operators.mesh.from_scoping()
+mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping("CM_1", model=model)
+my_scoping = mesh_op.inputs.scoping.connect(mesh_scoping_cohesive)
+my_inclusive = int(0)
+mesh_op.inputs.inclusive.connect(my_inclusive)
+my_mesh = dpf.MeshedRegion()
+mesh_op.inputs.mesh.connect(model.metadata.meshed_region)
+result_mesh = mesh_op.outputs.mesh()
+
 # Getting mesh of the model
 meshed_region = model.metadata.meshed_region
-Mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
-
+mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
+mesh_field_cohesive = result_mesh.field_of_properties(dpf.common.nodal_properties.coordinates)
 # Index of NMISC results
 nmisc_index = 70
 
@@ -313,7 +324,13 @@ op = dpf.operators.math.add()
 
 my_fieldA = dpf.Field()
 my_fieldA.location = locations.nodal
-op.inputs.fieldA.connect(Mesh_field)
+op.inputs.fieldA.connect(mesh_field)
+
+op_cohesive = dpf.operators.math.add()
+
+my_fieldA_cohesive = dpf.Field()
+my_fieldA_cohesive.location = locations.nodal
+op_cohesive.inputs.fieldA.connect(mesh_field_cohesive)
 
 # Generating the plotter object
 plotter = pv.Plotter()
@@ -331,14 +348,14 @@ plotter.add_mesh(
 )
 
 # Generating mesh of the contact part only
-# mesh_contact = ? # We need a way to get the mesh of the contact results only
-# plotter.add_mesh(
-#         mesh_contact,
-#         opacity=0.3,
-#         scalar_bar_args={"title": "Damage"},
-#         clim=[0, 1]
-#     )
-
+mesh_contact = result_mesh.grid
+plotter.add_mesh(
+        mesh_contact,
+        opacity=0.9,
+        scalar_bar_args={"title": "Damage"},
+        clim=[0, 1],
+        scalars=np.zeros((21))
+    )
 
 for i in range(1, 100):
 
@@ -350,28 +367,32 @@ for i in range(1, 100):
     op.inputs.fieldB.connect(disp[0])
 
     # Getting sum
-    result_field = op.outputs.field()
+    disp_result = op.outputs.field()
 
-    plotter.update_coordinates(result_field.data, mesh=mesh_beam, render=False)
-    # plotter.update_scalars(disp_values, mesh=mesh_beam, render=False)
+    # Getting displacements for the cohesive layer
+    disp = model.results.displacement(time_scoping=i, mesh_scoping=mesh_scoping_cohesive).eval()
 
-    # pLotting contact
-    # Setting time step
+    my_fieldB = dpf.Field()
+    my_fieldB.location = locations.nodal
+    op_cohesive.inputs.fieldB.connect(disp[0])
+
+    # Getting sum
+    disp_cohesive = op_cohesive.outputs.field()
+
+    # Getting damage variable
     dam_op.inputs.time_scoping([i])
-    dam_op.inputs.item_index.connect(nmisc_index)
+    my_item_index = int(70)
+    dam_op.inputs.item_index.connect(my_item_index)
+    cohesive_damage = dam_op.outputs.fields_container()
 
-    # Getting the values
-    # dam_op ...
-    # ...
-    # result_contact =
-
-    # Updating
-    # plotter.update_scalars(result_contact, mesh=mesh_contact, render=False)
+    # Update coordinates and scalars
+    plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=False)
+    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=False)
+    plotter.update_scalars(cohesive_damage[0].data, mesh=mesh_contact, render=False)
 
     plotter.write_frame()
 
 plotter.show()
-
 
 ###############################################################################
 #
