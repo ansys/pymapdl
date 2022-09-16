@@ -195,21 +195,6 @@ def test_license_type_keyword():
     not get_start_instance(), reason="Skip when start instance is disabled"
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-def test_dummy_license_name():
-    dummy_license_name = "dummy"
-    # I had to scape the parenthesis because the match argument uses regex.
-    expected_warn = f"The keyword argument 'license_type' value \('{dummy_license_name}'\) is not a recognized license name or has been deprecated"
-    with pytest.warns(UserWarning, match=expected_warn):
-        mapdl = launch_mapdl(license_type=dummy_license_name)
-        # regardless the license specification, it should lunch.
-        assert mapdl.is_alive
-    mapdl.exit()
-
-
-@pytest.mark.skipif(
-    not get_start_instance(), reason="Skip when start instance is disabled"
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
