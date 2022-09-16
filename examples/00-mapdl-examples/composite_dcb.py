@@ -354,7 +354,7 @@ plotter.add_mesh(
         opacity=0.9,
         scalar_bar_args={"title": "Damage"},
         clim=[0, 1],
-        scalars=np.zeros((mesh_contact.n_cells)))
+        scalars=np.zeros((mesh_contact.n_cells))
     )
 
 for i in range(1, 100):
