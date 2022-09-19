@@ -727,7 +727,7 @@ class PostProcessing:
     def nodal_temperature(self) -> np.ndarray:
         """The nodal temperature of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
         ``PRNSOL, TEMP``
 
         Notes
@@ -793,7 +793,7 @@ class PostProcessing:
     def nodal_displacement(self, component="NORM") -> np.ndarray:
         """Nodal X, Y, or Z structural displacement.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, U, X``
 
@@ -907,7 +907,7 @@ class PostProcessing:
     def nodal_rotation(self, component="ALL") -> np.ndarray:
         """Nodal X, Y, or Z structural rotation
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``PRNSOL, ROT, X``
         * ``PRNSOL, ROT, Y``
@@ -1013,7 +1013,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,U,X``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1139,7 +1139,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,S,X``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1264,7 +1264,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,TEMP``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1339,7 +1339,7 @@ class PostProcessing:
     def nodal_pressure(self) -> np.ndarray:
         """The nodal pressure of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
         ``PRNSOL, PRES``
 
         Notes
@@ -1405,7 +1405,7 @@ class PostProcessing:
     def nodal_voltage(self) -> np.ndarray:
         """The nodal voltage of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, PRES``
 
@@ -1478,7 +1478,7 @@ class PostProcessing:
     def nodal_component_stress(self, component) -> np.ndarray:
         """Nodal component stress.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``VGET, PARM, NODE, , S, X``
         * ``PRNSOL, S, COMP``
@@ -1562,7 +1562,7 @@ class PostProcessing:
     def nodal_principal_stress(self, component) -> np.ndarray:
         """Nodal principal stress.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``*VGET, PARM, NODE, , S, 1``
         * ``PRNSOL, S, PRIN``
@@ -1647,7 +1647,7 @@ class PostProcessing:
     def nodal_stress_intensity(self) -> np.ndarray:
         """The nodal stress intensity of the current result.
 
-        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+        Equivalent MAPDL command: ``PRNSOL, S, PRIN``
 
         Notes
         -----
@@ -1719,7 +1719,7 @@ class PostProcessing:
     def nodal_eqv_stress(self) -> np.ndarray:
         """The nodal equivalent stress of the current result.
 
-        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+        Equivalent MAPDL command: ``PRNSOL, S, PRIN``
 
         Returns
         -------
@@ -1803,7 +1803,7 @@ class PostProcessing:
 
         Includes elastic, plastic, and creep strain.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``*VGET, PARM, NODE, , EPTO, X``
 
@@ -1893,7 +1893,7 @@ class PostProcessing:
 
         Includes elastic, plastic, and creep strain.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``*VGET,PARM,NODE,,EPTO,1``
 
@@ -1980,7 +1980,7 @@ class PostProcessing:
     def nodal_total_strain_intensity(self) -> np.ndarray:
         """The total nodal strain intensity of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, EPTO, PRIN``
 
@@ -2052,7 +2052,7 @@ class PostProcessing:
     def nodal_total_eqv_strain(self) -> np.ndarray:
         """The total nodal equivalent strain of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, EPTO, PRIN``
 
