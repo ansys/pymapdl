@@ -13,7 +13,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 wing_model = os.path.join(dir_path, "wing.dat")
 static_thermal_example = vmfiles["vm5"]
 static_coupled_thermal = vmfiles["vm33"]
+modal_piezoelectric = vmfiles["vm175"]
+harmonic_piezoelectric = vmfiles["vm176"]
 shell_static_example = vmfiles["vm6"]
+static_electro_thermal_compliant_microactuator = vmfiles["vm223"]
+static_piezoelectric = vmfiles["vm231"]
 
 
 # be sure to add the input file directly in this directory
