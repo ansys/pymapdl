@@ -983,8 +983,11 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_add_sw(add_sw, exec_path, force_intel=False):
-    """Validate additional switches.
+def _validate_MPI(add_sw, exec_path, force_intel=False):
+    """Validate MPI configuration.
+
+    Enforce Microsoft MPI in version 21.0 or later, to fix a
+    VPN issue on Windows.
 
     Parameters
     ----------
@@ -1008,10 +1011,18 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     if "smp" not in add_sw:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
+            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
-        if os.name == "nt" and not force_intel:
+
+        if (
+            os.name == "nt"
+            and not force_intel
+            and (222 > _version_from_path(exec_path) >= 210)
+        ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
+            # This is due to the intel compiler, and only afects versions between
+            # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
@@ -1019,16 +1030,46 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-
             if "intelmpi" in add_sw:
+                LOG.debug(
+                    "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
+                )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
                 add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_path) >= 210:
-                add_sw += " -mpi msmpi"
+            LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
+            add_sw += " -mpi msmpi"
 
+    return add_sw
+
+
+def _force_smp_student_version(add_sw, exec_path):
+    """Force SMP in student version.
+
+    Parameters
+    ----------
+    add_sw : str
+        Additional swtiches.
+    exec_path : str
+        Path to the MAPDL executable.
+
+    Returns
+    -------
+    str
+        Validated additional switches.
+
+    """
+    # Converting additional_switches to lower case to avoid mismatches.
+    add_sw = add_sw.lower()
+
+    if (
+        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+    ):  # pragma: no cover
+        if "student" in exec_path.lower():
+            add_sw += " -smp"
+            LOG.debug("Student version detected, using '-smp' switch by default.")
     return add_sw
 
 
@@ -1042,14 +1083,15 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=120,
+    start_timeout=15,
     port=None,
     cleanup_on_exit=True,
     start_instance=None,
     ip=None,
     clear_on_connect=True,
     log_apdl=None,
-    remove_temp_files=False,
+    remove_temp_files=None,
+    remove_temp_dir_on_exit=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
@@ -1163,6 +1205,15 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
+        Deprecated option, please use ``remove_temp_dir_on_exit``.
+
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
+
+    remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
@@ -1208,6 +1259,9 @@ def launch_mapdl(
 
     Notes
     -----
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in SMP mode
+    unless another option is specified.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
@@ -1340,6 +1394,16 @@ def launch_mapdl(
     ...                       mode='console')
 
     """
+    if remove_temp_files is not None:  # pragma: no cover
+        warnings.warn(
+            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "Please use ``remove_temp_dir_on_exit`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        remove_temp_dir_on_exit = remove_temp_files
+        remove_temp_files = None
+
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
 
@@ -1457,78 +1521,23 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
-        if remove_temp_files:
+        if remove_temp_dir_on_exit:
             LOG.info("`run_location` set. Disabling the removal of temporary files.")
-            remove_temp_files = False
+            remove_temp_dir_on_exit = False
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
     mode = check_mode(mode, _version_from_path(exec_file))
 
-    # cache start parameters
-    additional_switches = _validate_add_sw(
+    # Setting SMP by default if student version is used.
+    additional_switches = _force_smp_student_version(additional_switches, exec_file)
+
+    #
+    additional_switches = _validate_MPI(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
-    if isinstance(license_type, str):
-        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
-        # For example:
-        # ```bash
-        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
-        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
-        # ```
-        #
-        # In older versions probably it might raise an error. But not sure.
-        license_type = license_type.lower().strip()
-
-        if "enterprise" in license_type and "solver" not in license_type:
-            license_type = "ansys"
-
-        elif "enterprise" in license_type and "solver" in license_type:
-            license_type = "meba"
-
-        elif "premium" in license_type:
-            license_type = "mech_2"
-
-        elif "pro" in license_type:
-            license_type = "mech_1"
-
-        elif license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-
-        additional_switches += " -p " + license_type
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
-        )
-
-    elif "-p " in additional_switches:
-        # There is already a license request in additional switches.
-        license_type = re.findall(r"-p \b(\w*)", additional_switches)[
-            0
-        ]  # getting only the first product license.
-
-        if license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-            LOG.warning(warn_text)
-
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the additional switches parameter."
-        )
-
-    elif license_type is not None:
-        raise TypeError("The argument 'license_type' does only accept str or None.")
+    additional_switches = _check_license_argument(license_type, additional_switches)
 
     start_parm = {
         "exec_file": exec_file,
@@ -1550,7 +1559,7 @@ def launch_mapdl(
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
-        lic_check = LicenseChecker(timeout=start_timeout * 0.9, verbose=verbose_mapdl)
+        lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
     try:
@@ -1591,7 +1600,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=remove_temp_files,
+                remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 **start_parm,
             )
@@ -1602,8 +1611,12 @@ def launch_mapdl(
         # to the license check
         if license_server_check:
             lic_check.check()
-            # pass
+
         raise exception
+
+    # Stopping license checker
+    if license_server_check:
+        lic_check.is_connected = True
 
     return mapdl
 
@@ -1712,3 +1725,72 @@ def update_env_vars(add_env_vars, replace_env_vars):
             )
 
         return replace_env_vars
+
+
+def _check_license_argument(license_type, additional_switches):
+
+    if isinstance(license_type, str):
+        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
+        # For example:
+        # ```bash
+        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
+        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
+        # ```
+        #
+        # In older versions probably it might raise an error. But not sure.
+        license_type = license_type.lower().strip()
+
+        if "enterprise" in license_type and "solver" not in license_type:
+            license_type = "ansys"
+
+        elif "enterprise" in license_type and "solver" in license_type:
+            license_type = "meba"
+
+        elif "premium" in license_type:
+            license_type = "mech_2"
+
+        elif "pro" in license_type:
+            license_type = "mech_1"
+
+        elif license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+
+        additional_switches += " -p " + license_type
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
+        )
+
+    elif "-p " in additional_switches:
+        # There is already a license request in additional switches.
+        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
+            0
+        ]  # getting only the first product license.
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The additional switch product value ('-p {license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+            LOG.warning(warn_text)
+
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the additional switches parameter."
+        )
+
+    elif license_type is not None:
+        raise TypeError("The argument 'license_type' does only accept str or None.")
+
+    return additional_switches

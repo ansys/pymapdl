@@ -10,10 +10,13 @@ on:
       - main
 
 env:
+  PACKAGE_NAME: PyMAPDL
   PYMAPDL_PORT: 21000  # default won't work on GitHub runners
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
+  DPF_START_SERVER: False
+  DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   # Following env vars when changed will "reset" the mentioned cache,
@@ -21,11 +24,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 5
-  RESET_EXAMPLES_CACHE: 5
-  RESET_DOC_BUILD_CACHE: 5
-  RESET_AUTOSUMMARY_CACHE: 5
-  PACKAGE_NAME: PyMAPDL
+  RESET_PIP_CACHE: 1
+  RESET_EXAMPLES_CACHE: 1
+  RESET_DOC_BUILD_CACHE: 1
+  RESET_AUTOSUMMARY_CACHE: 1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -121,7 +123,7 @@ jobs:
       - name: Get Bot Application Token
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v1
+        uses: peter-murray/workflow-application-token-action@v2
         with:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
@@ -342,10 +344,17 @@ jobs:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
-      - name: Unit Testing
+      - name: Unit Testing Requirements Installation
         run: |
           pip install -r requirements/requirements_tests.txt
-          xvfb-run pytest -v --durations=0 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+
+      - name: DPF Server Activation
+        run: |
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+
+      - name: Unit Testing
+        run: |
+          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         if: matrix.mapdl-version == 'v21.2.1'
