@@ -1,4 +1,5 @@
-""".. _ref_dcb_test_composite_delamination
+"""
+.. _ref_dcb_test_composite_delamination
 
 ======================================================================
 Static simulation of double cantilever beam test via cohesive elements
@@ -42,10 +43,10 @@ Additional Packages Used
 # This example begins by lunching Ansys Mechanical APDL
 
 import os
-import numpy as np
 
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model, locations
+import numpy as np
 import pyvista as pv
 
 from ansys.mapdl import core as pymapdl
@@ -296,7 +297,9 @@ model = Model(data_src)
 
 # Identifyng the cohesive mesh
 mesh_op = dpf.operators.mesh.from_scoping()
-mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping("CM_1", model=model)
+mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
+    "CM_1", model=model
+)
 my_scoping = mesh_op.inputs.scoping.connect(mesh_scoping_cohesive)
 my_inclusive = int(0)
 mesh_op.inputs.inclusive.connect(my_inclusive)
@@ -307,7 +310,9 @@ result_mesh = mesh_op.outputs.mesh()
 # Getting mesh of the model
 meshed_region = model.metadata.meshed_region
 mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
-mesh_field_cohesive = result_mesh.field_of_properties(dpf.common.nodal_properties.coordinates)
+mesh_field_cohesive = result_mesh.field_of_properties(
+    dpf.common.nodal_properties.coordinates
+)
 # Index of NMISC results
 nmisc_index = 70
 
@@ -350,12 +355,12 @@ plotter.add_mesh(
 # Generating mesh of the contact part only
 mesh_contact = result_mesh.grid
 plotter.add_mesh(
-        mesh_contact,
-        opacity=0.9,
-        scalar_bar_args={"title": "Damage"},
-        clim=[0, 1],
-        scalars=np.zeros((mesh_contact.n_cells))
-    )
+    mesh_contact,
+    opacity=0.9,
+    scalar_bar_args={"title": "Damage"},
+    clim=[0, 1],
+    scalars=np.zeros((mesh_contact.n_cells)),
+)
 
 for i in range(1, 100):
 
@@ -370,7 +375,9 @@ for i in range(1, 100):
     disp_result = op.outputs.field()
 
     # Getting displacements for the cohesive layer
-    disp = model.results.displacement(time_scoping=i, mesh_scoping=mesh_scoping_cohesive).eval()
+    disp = model.results.displacement(
+        time_scoping=i, mesh_scoping=mesh_scoping_cohesive
+    ).eval()
 
     my_fieldB = dpf.Field()
     my_fieldB.location = locations.nodal
