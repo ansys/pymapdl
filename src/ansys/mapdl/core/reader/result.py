@@ -19,9 +19,9 @@ import tempfile
 from typing import Iterable
 import weakref
 
-from ansys.dpf import post
-
-# from ansys.dpf.core import Model
+# from ansys.dpf import post
+from ansys.dpf import core as dpf
+from ansys.dpf.core import Model
 from ansys.mapdl.reader.rst import Result
 import numpy as np
 
@@ -214,8 +214,8 @@ class DPFResult(Result):
     def _build_dpf_object(self):
         if self._log:
             self._log.debug("Building DPF Model object.")
-        # self._cached_dpf_model = Model(self._rst)
-        self._cached_dpf_model = post.load_solution(self._rst)  # loading file
+        self._cached_dpf_model = Model(self._rst)
+        # self._cached_dpf_model = post.load_solution(self._rst)  # loading file
 
     @property
     def model(self):
@@ -260,43 +260,56 @@ class DPFResult(Result):
 
         return nodes
 
+    def _get_nodes_result(self, rnum, result_type, nodes=None):
+        return self._get_result(rnum, result_type, scope_type="Nodal", scope_ids=nodes)
+
+    def _get_elem_result(self, rnum, result_type, elements=None):
+        return self._get_result(
+            rnum, result_type, scope_type="Elemental", scope_ids=elements
+        )
+
     @update_result
-    def _get_nodes_result(self, rnum, result_type, data_type_=None, nodes=None):
-        if isinstance(rnum, list):
-            set_ = rnum[0]  # todo: implement subresults
-        elif isinstance(rnum, (int, float)):
-            set_ = rnum
+    def _get_result(self, rnum, result_type, scope_type="Nodal", scope_ids=None):
+        # todo: accepts components in nodes.
+        mesh = self.model.metadata.meshed_region
+
+        field_op = getattr(self.model.results, result_type)()
+
+        # Setting time steps
+        if not rnum:
+            rnum = 1
+
+        field_op.inputs.time_scoping.connect(rnum)
+
+        # Setting mesh scope
+        my_scoping = dpf.Scoping()
+        my_scoping.location = scope_type
+        if scope_ids:
+            my_scoping.ids = scope_ids
         else:
-            raise ValueError(
-                f"Please use 'int', 'float' or  'list' for the parameter 'rnum'."
-            )
+            if scope_type.lower() == "elemental":
+                entities = mesh.elements
+            else:
+                entities = mesh.nodes
 
-        result_types = result_type.split(".")
-        model = self.model
+            my_scoping.ids = entities.scoping.ids
 
-        if len(result_types) > 1:
-            model = getattr(model, result_types[0])
-            result_type = result_types[1]
+        field_op.inputs.mesh_scoping.connect(my_scoping)
 
-        # node argument
-        if nodes:
-            nodes = self._get_nodes_for_argument(nodes)  # accepts components
+        # Retrieving output
+        container = field_op.outputs.fields_container()[0]
+        container_data = container.data
 
-        # added +1 because DPF follows MAPDL (one starting) indexing
-        field = getattr(model, result_type)(set=set_ + 1, node_scoping=nodes)
-
-        if data_type_ is not None:  # Sometimes there is no X, Y, Z, scalar or tensor
-            field_dir = getattr(
-                field, data_type_
-            )  # this can give an error if the results are not in the RST.
-            # Use a try and except and give more clear info?
+        # Getting ids
+        if scope_type.lower() in "elemental":
+            ids_, mask_ = mesh.elements.map_scoping(container.scoping)
         else:
-            field_dir = field
+            ids_, mask_ = mesh.nodes.map_scoping(container.scoping)
 
-        if nodes is None:
-            nodes = self.model.mesh.nodes.scoping.ids
+        # Sorting results
+        id_order = np.argsort(ids_[mask_]).astype(int)
 
-        return nodes, field_dir.get_data_at_field(0)
+        return ids_[id_order], container_data[id_order]
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Returns the DOF solution for each node in the global
@@ -363,11 +376,82 @@ class DPFResult(Result):
                 "The parameter 'in_nodal_coord_sys' is being deprecated."
             )
 
-        return self._get_nodes_result(rnum, "displacement", "vector", nodes)
+        return self._get_nodes_result(rnum, "displacement", nodes)
 
     @wraps(nodal_displacement)
     def nodal_solution(self, *args, **kwargs):
         return self.nodal_displacement(*args, **kwargs)
+
+    def element_stress(
+        self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
+    ):
+        """Retrieves the element component stresses.
+
+        Equivalent ANSYS command: PRESOL, S
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        principal : bool, optional
+            Returns principal stresses instead of component stresses.
+            Default False.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system.
+            Default False and will return the results in the global
+            coordinate system.
+
+        elements : str, sequence of int or str, optional
+            Select a limited subset of elements.  Can be a element
+            component or array of element numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        **kwargs : optional keyword arguments
+            Hidden options for distributed result files.
+
+        Returns
+        -------
+        enum : np.ndarray
+            ANSYS element numbers corresponding to each element.
+
+        element_stress : list
+            Stresses at each element for each node for Sx Sy Sz Sxy
+            Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
+            principal is True.
+
+        enode : list
+            Node numbers corresponding to each element's stress
+            results.  One list entry for each element.
+
+        Examples
+        --------
+        Element component stress for the first result set.
+
+        >>> rst.element_stress(0)
+
+        Element principal stress for the first result set.
+
+        >>> enum, element_stress, enode = result.element_stress(0, principal=True)
+
+        Notes
+        -----
+        Shell stresses for element 181 are returned for top and bottom
+        layers.  Results are ordered such that the top layer and then
+        the bottom layer is reported.
+        """
+        # return super().element_stress(rnum, principal, in_element_coord_sys, **kwargs)
+        if principal is not None:
+            raise NotImplementedError()
+        if in_element_coord_sys is not None:
+            raise NotImplementedError
+
+        return self._get_elem_result(rnum, "stress", elements=elements)
 
     def nodal_elastic_strain(self, rnum, nodes=None):
         """Nodal component elastic strains.  This record contains
@@ -423,7 +507,7 @@ class DPFResult(Result):
         -----
         Nodes without a strain will be NAN.
         """
-        return self._get_nodes_result(rnum, "elastic_strain", "tensor", nodes)
+        return self._get_nodes_result(rnum, "elastic_strain", nodes)
 
     def nodal_plastic_strain(self, rnum, nodes=None):
         """Nodal component plastic strains.
@@ -476,7 +560,7 @@ class DPFResult(Result):
         >>> nnum, plastic_strain = rst.nodal_plastic_strain(0, nodes=range(20, 51))
 
         """
-        return self._get_nodes_result(rnum, "plastic_strain", "tensor", nodes)
+        return self._get_nodes_result(rnum, "plastic_strain", nodes)
 
     def nodal_acceleration(self, rnum, nodes=None, in_nodal_coord_sys=None):
         """Nodal velocities for a given result set.
@@ -518,7 +602,7 @@ class DPFResult(Result):
                 "The 'in_nodal_coord_sys' kwarg has been deprecated."
             )
 
-        return self._get_nodes_result(rnum, "misc.nodal_acceleration", "vector", nodes)
+        return self._get_nodes_result(rnum, "misc.nodal_acceleration", nodes)
 
     def nodal_reaction_forces(self, rnum, nodes=None):
         """Nodal reaction forces.
@@ -561,9 +645,7 @@ class DPFResult(Result):
          ['UX', 'UY', 'UZ'])
 
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_reaction_force", "vector", nodes
-        )
+        return self._get_nodes_result(rnum, "misc.nodal_reaction_force", nodes)
 
     def nodal_stress(self, rnum, nodes=None):
         """Retrieves the component stresses for each node in the
@@ -620,7 +702,7 @@ class DPFResult(Result):
         Nodes without a stress value will be NAN.
         Equivalent ANSYS command: PRNSOL, S
         """
-        return self._get_nodes_result(rnum, "stress", "vector", nodes)
+        return self._get_nodes_result(rnum, "stress", nodes)
 
     def nodal_temperature(self, rnum, nodes=None):
         """Retrieves the temperature for each node in the
@@ -669,7 +751,7 @@ class DPFResult(Result):
         >>> nnum, temp = rst.nodal_solution(0, nodes=range(20, 51))
 
         """
-        return self._get_nodes_result(rnum, "temperature", "scalar", nodes)
+        return self._get_nodes_result(rnum, "temperature", nodes)
 
     def nodal_thermal_strain(self, rnum, nodes=None):
         """Nodal component thermal strain.
@@ -721,9 +803,7 @@ class DPFResult(Result):
 
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0, nodes=range(20, 51))
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_thermal_strains", "vector", nodes
-        )
+        return self._get_nodes_result(rnum, "misc.nodal_thermal_strains", nodes)
 
     def nodal_velocity(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Nodal velocities for a given result set.
@@ -764,7 +844,7 @@ class DPFResult(Result):
             raise DeprecationWarning(
                 "The parameter 'in_nodal_coord_sys' is being deprecated."
             )
-        return self._get_nodes_result(rnum, "misc.nodal_velocity", "vector", nodes)
+        return self._get_nodes_result(rnum, "misc.nodal_velocity", nodes)
 
     def nodal_static_forces(self, rnum, nodes=None):
         """Return the nodal forces averaged at the nodes.
@@ -821,7 +901,7 @@ class DPFResult(Result):
         Nodes without a a nodal will be NAN.  These are generally
         midside (quadratic) nodes.
         """
-        return self._get_nodes_result(rnum, "misc.nodal_force", "vector", nodes)
+        return self._get_nodes_result(rnum, "misc.nodal_force", nodes)
 
     def principal_nodal_stress(self, rnum, nodes=None):
         """Computes the principal component stresses for each node in
@@ -869,7 +949,7 @@ class DPFResult(Result):
         """
         res = []
         for each in ["principal_1", "principal_2", "principal_3"]:
-            res.append(self._get_nodes_result(rnum, f"stress.{each}", None, nodes)[1])
+            res.append(self._get_nodes_result(rnum, f"stress.{each}", nodes)[1])
         return nodes, np.hstack(res)
 
     @property
@@ -1231,75 +1311,6 @@ class DPFResult(Result):
         """Index of the element within the result mesh"""
         # We need to get the mapping between the mesh.grid and the results.elements.
         # Probably DPF already has that mapping.
-        raise NotImplementedError("This should be implemented by DPF")
-
-    def element_stress(
-        self, rnum, principal=False, in_element_coord_sys=False, **kwargs
-    ):
-        """Retrieves the element component stresses.
-
-        Equivalent ANSYS command: PRESOL, S
-
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
-
-        principal : bool, optional
-            Returns principal stresses instead of component stresses.
-            Default False.
-
-        in_element_coord_sys : bool, optional
-            Returns the results in the element coordinate system.
-            Default False and will return the results in the global
-            coordinate system.
-
-        **kwargs : optional keyword arguments
-            Hidden options for distributed result files.
-
-        Returns
-        -------
-        enum : np.ndarray
-            ANSYS element numbers corresponding to each element.
-
-        element_stress : list
-            Stresses at each element for each node for Sx Sy Sz Sxy
-            Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
-            principal is True.
-
-        enode : list
-            Node numbers corresponding to each element's stress
-            results.  One list entry for each element.
-
-        Examples
-        --------
-        Element component stress for the first result set.
-
-        >>> rst.element_stress(0)
-
-        Element principal stress for the first result set.
-
-        >>> enum, element_stress, enode = result.element_stress(0, principal=True)
-
-        Notes
-        -----
-        Shell stresses for element 181 are returned for top and bottom
-        layers.  Results are ordered such that the top layer and then
-        the bottom layer is reported.
-        """
-
-        if isinstance(rnum, list):
-            set_ = rnum[0]  # todo: implement subresults
-        elif isinstance(rnum, (int, float)):
-            set_ = rnum
-        else:
-            raise ValueError(
-                f"Please use 'int', 'float' or  'list' for the parameter 'rnum'."
-            )
-
-        model = self.model
-
         raise NotImplementedError("This should be implemented by DPF")
 
     # def element_solution_data(self):
