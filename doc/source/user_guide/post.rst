@@ -16,8 +16,8 @@ streamed back to the client for review or visualization.
 .. note::
 
    You are encouraged to use the new Data Processing Framework (DPF)
-   modules at `DPF-Core <https://github.com/pyansys/DPF-Core>`_ and
-   `DPF-Post <https://github.com/pyansys/DPF-Post>`_ as they provide a
+   modules at `DPF-Core <dpf_core_gh>`_ and
+   `DPF-Post <dpf_post_gh>`_ as they provide a
    modern interface to ANSYS result files using a client/server
    interface using the same software used within Ansys Workbench, but
    via a Python client.

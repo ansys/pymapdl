@@ -5,11 +5,11 @@ To use PyMAPDL, you need to have a local installation of Ansys.  The
 version of Ansys installed will dictate the interface and features
 available to you.
 
-Visit `Ansys <https://www.ansys.com/>`_ for more information on
+Visit `Ansys <ansys>`_ for more information on
 getting a licensed copy of Ansys.
 
 You can also try the Student Version of Ansys products in
-`Ansys Student Versions <https://www.ansys.com/academic/students>`_.
+`Ansys Student Versions <ansys_student_version>`_.
 These are versions valid during a year and with limited capabilities 
 regarding number of nodes, elements, etc.
 
@@ -33,7 +33,7 @@ The ``ansys.mapdl.core`` package currently supports Python 3.7 through
 Python 3.10 on Windows, Mac OS, and Linux.
 
 Install the latest release from `PyPi
-<https://pypi.org/project/ansys-mapdl-core/>`_ with:
+<pymapdl_pypi>`_ with:
 
 .. code::
 
@@ -64,7 +64,7 @@ Offline Installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your install machine, the recommended way
 of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
-Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+Page <pymapdl_releases>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
@@ -82,7 +82,7 @@ If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
 install using the same command as above.
 
 Consider installing using a `virtual environment
-<https://docs.python.org/3/library/venv.html>`_.
+<using_venv>`_.
 
 
 Ansys Software Requirements

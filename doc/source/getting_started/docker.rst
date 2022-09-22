@@ -17,14 +17,14 @@ in a containerized environment (e.g. Docker or singularity):
 
 Installing the MAPDL Image
 --------------------------
-There is a docker image hosted on the `PyMAPDL GitHub
-<https://https://github.com/pyansys/pymapdl>`_ repository that you
+There is a docker image hosted on the `PyMAPDL GitHub 
+<pymapdl_repo>`_ repository that you
 can download using your GitHub credentials.
 
 Assuming you have docker installed, you can get started by
 authorizing docker to access this repository using a personal access
 token.  Create a GH personal access token with ``packages read`` permissions
-according to `Creating a personal access token <https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token>`_
+according to `Creating a personal access token <gh_creating_pat>`_
 
 Save that token to a file with:
 
@@ -127,7 +127,7 @@ with the `-np` switch.  For example:
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
 For additional command-line arguments, see the Ansys
-documentation at `ANSYS help <https://ansyshelp.ansys.com>`_.  Also,
+documentation at `ANSYS help <ansys_help>`_.  Also,
 be sure to have the appropriate license for additional HPC features.
 
 Using ``--restart`` policy with MAPDL products

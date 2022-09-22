@@ -7,15 +7,12 @@ PyAnsys Libraries on a Windows Subsystem for Linux and Docker
 This section shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL).  WSL is a compatibility layer for
 running Linux binary executables natively on Windows 10, Windows 11, and
-Windows Server 2019. For more information, see `Wikipedia-WSL`_.
+Windows Server 2019. For more information, see `WikipediaWSL`_.
 
 This section walks you through the installation of WSL on Windows and then
 shows how to use it together with MAPDL, PyMAPDL, and Docker.
 
-For more information about WSL, see `What is the Windows Subsystem for Linux?`_.
-
-.. _Wikipedia-WSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
-.. _What is the Windows Subsystem for Linux?: https://docs.microsoft.com/en-us/windows/wsl/about
+For more information about WSL, see `What is the Windows Subsystem for Linux`_.
 
 .. warning::
    This guide hasn't been fully tested with a VPN connection. If you
@@ -29,9 +26,7 @@ Running PyMAPDL on WSL
 Install WSL
 ============
 
-Install WSL by following Microsoft's directions at `Install WSL`_.
-
-.. _Install WSL: https://docs.microsoft.com/en-us/windows/wsl/install/
+Install WSL by following Microsoft's directions at `install_wsl_microsoft`_.
 
 Currently there are two versions of WSL. The oldest is WSL1, whereas WSL2 is
 the latest and include many improvements over WSL1.  It is highly recommended
@@ -45,8 +40,8 @@ We recommend that you use the CentOS7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
-`<https://github.com/wsldl-pg/CentWSL/>`_ or
-`<https://github.com/mishamosher/CentOS-WSL/>`_ .
+`gh_centos_wsl_1`_ or
+`gh_centos_wsl_2`_ .
 
 Optionally, you can also try Ubuntu, but it has not been tested yet in the context of WSL.
 
@@ -64,7 +59,7 @@ required libraries:
    sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
-If using Ubuntu, follow the instructions in `Running MAPDL: Ubuntu <https://mapdldocs.pyansys.com/getting_started/running_mapdl.html#ubuntu/>`_ .
+If using Ubuntu, follow the instructions in `Running MAPDL: Ubuntu <pymapdl_run_ubuntu>`_ .
 
 
 Install Ansys Products
@@ -73,7 +68,7 @@ Install Ansys Products
 To install ANSYS products in WSL Linux:
 
 1. Download the Ansys Structures image from the customer portal (`Current
-   Release <https://download.ansys.com/Current%20Release>`_).  If you are
+   Release <ansys_download_current_release>`_).  If you are
    downloading the image on a Windows machine, you can later copy from it to
    WSL (recommended).
 
@@ -102,8 +97,7 @@ To install ANSYS products in WSL Linux:
 
    - ``-<product_flag>`` : Specifies one or more specific products to install.
      If you omit the -product_flag argument, all products will be installed.
-     See the list of valid product_flags in Chapter 6 of the *ANSYS
-     Inc. Installation Guides* PDF.  In this case, only MAPDL (`-mechapdl`) is
+     See the list of valid ``product_flags`` in Chapter 6 of the `ansys_installation_and_licensing`_.  In this case, only MAPDL (`-mechapdl`) is
      needed.
 
 After installing MAPDL directly in ``/ansys_inc`` or in ``/usr/ansys_inc``,
@@ -129,8 +123,7 @@ Opening Ports
 You should open the ports ``1055`` and ``2325`` for the license server
 communication in *Windows Firewall Advanced*.  You can see the steps in `How to
 open port in Windows 10 Firewall
-<https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/>`_
-.
+<open_port_windows_10>`_.
 
 **Reality:**
 This works if you want to run a Docker image using WSL Linux image to host that
@@ -391,7 +384,7 @@ This method will not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `<https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules/>`_
+Link: `<disabling_firewall_on_wsl>`_
 
 Windows 10 Port Forwarding
 ==========================

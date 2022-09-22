@@ -32,7 +32,7 @@ the Mechanical APDL Technology Showcase Manual.
 Additional Packages Used
 ------------------------
 
-* `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
+* `Matplotlib <matplotlib>`_ is used for plotting purposes.
 
 .. GENERATED FROM PYTHON SOURCE LINES 20-33
 
@@ -1995,7 +1995,7 @@ Using PyMAPDL result reader
 ***************************
 
 *Not recommended* - PyMAPDL reader library is in process to being deprecated.
-It is recommended to use `DPF Post <https://postdocs.pyansys.com/>`_.
+It is recommended to use `DPF Post <dpf_post_docs>`_.
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 163-167

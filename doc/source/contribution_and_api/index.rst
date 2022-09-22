@@ -5,10 +5,10 @@ Contributing and API
 ====================
 
 Overall guidance on contributing to a PyAnsys library appears in the
-`Contributing <https://dev.docs.pyansys.com/how-to/contributing.html>`_ topic
+`Contributing <dev_guide_contributing>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
 with it and all `Coding style
-<https://dev.docs.pyansys.com/coding-style/index.html>`_ before attempting to
+<dev_guid_coding_style>`_ before attempting to
 contribute to PyMAPDL.
  
 The following contribution information is specific to PyMAPDL.

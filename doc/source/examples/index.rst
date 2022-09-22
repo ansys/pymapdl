@@ -56,11 +56,11 @@ However in some cases, external files are needed. A link to those files is
 available at each example page.
 These links refers to the following GitHub repository where you can find all of them:
 
-`GitHub Example Data Repository <https://github.com/pyansys/example-data>`_
+`GitHub Example Data Repository <example_data_repo>`_
 
 If you find out a missing or broken link, please open an issue in
-Github (`PyMAPDL Issues <https://github.com/pyansys/pymapdl/issues>`_) 
-or email us at `PyAnsys Support <pyansys.support@ansys.com>`_. 
+Github (`PyMAPDL Issues <pymapdl_issues>`_) 
+or email us at `PyAnsys Support <pyansys_support>`_. 
 
 
 

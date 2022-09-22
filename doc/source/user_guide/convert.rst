@@ -1,8 +1,7 @@
 Translating Scripts
 ===================
-The `ansys-mapdl-core <https://pypi.org/project/ansys-mapdl-core/>`_
-library contains a few basic functions to translate existing MAPDL
-scripts into PyMAPDL scripts.  Ideally, all math and variable setting
+PyMAPDL library contains a few basic functions to translate existing MAPDL
+scripts into python scripts.  Ideally, all math and variable setting
 would take place within Python as much as possible as APDL commands
 are less transparent and more difficult to debug.
 
