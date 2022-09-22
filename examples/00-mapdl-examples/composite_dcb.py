@@ -119,7 +119,7 @@ mapdl.eplot()
 # and defined as a components (in this case cm_1 and cm_2 respectively).
 # Successively, the CONTA174 and TARGE170 elements real constants, as well as
 # their keyoptions are set to capture the right behaviour. The meaning of each
-# of  these parameters can be found in the Ansys element documentation.
+# of these parameters can be found in the Ansys element documentation.
 # Finally, elements are generated on top of the respective surfaces cm_1 and
 # cm_2.
 
