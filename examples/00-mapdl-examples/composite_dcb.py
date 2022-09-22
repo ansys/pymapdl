@@ -129,12 +129,12 @@ mapdl.eplot()
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The generation of cohesive elements is the most delicate part of the
 # modelling approach. In first instance the two contact surfaces are identified
-# and defined as a components (in this case cm_1 and cm_2 respectively).
-# Successively, the CONTA174 and TARGE170 elements real constants, as well as
-# their keyoptions are set to capture the right behaviour. The meaning of each
+# and defined as a components (in this case `cm_1` and `cm_2 respectively).
+# Successively, the ``CONTA174`` and ``TARGE170`` elements real constants, as well as
+# their key options are set to capture the right behavior. The meaning of each
 # of these parameters can be found in the Ansys element documentation.
-# Finally, elements are generated on top of the respective surfaces cm_1 and
-# cm_2.
+# Finally, elements are generated on top of the respective surfaces `cm_1` and
+# `cm_2`.
 
 # identifying the two touching areas and assigning them to components
 mapdl.allsel()
@@ -389,7 +389,7 @@ for i in range(1, 100):
 plotter.show()
 
 # Plotting the reaction force at the bottom nodes
-mesh_scoping = model.metadata.named_selection('TOP_NOD')
+mesh_scoping = model.metadata.named_selection('BOT_NOD')
 f_tot = []
 d_tot = []
 for i in range (0,100):
@@ -404,7 +404,7 @@ f_tot[0] = 0
 
 fig, ax = plt.subplots()  
 
-plt.plot(d_tot,f_tot,'k')
+plt.plot(d_tot, f_tot,'k')
 plt.ylabel("Force [N]")
 plt.xlabel("Displacement [mm]")
 plt.show()
