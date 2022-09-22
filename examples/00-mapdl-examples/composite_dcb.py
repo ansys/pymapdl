@@ -66,7 +66,7 @@ print(mapdl)
 #
 #
 # Adding material parameters
-# ==========================
+# ~~~~~~~~~~~~~~~~~~
 # In this section, the material properties are defined. Composite plates are
 # modelled using homogeneous linear elastic orthotropic properties whereas a
 # bilinear cohesive law is used for cohesive elements.
