@@ -40,7 +40,7 @@ Additional Packages Used
 ###############################################################################
 # Starting MAPDL as a service
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# This example begins by lunching Ansys Mechanical APDL
+# This example begins by launching Ansys Mechanical APDL.
 
 import os
 
