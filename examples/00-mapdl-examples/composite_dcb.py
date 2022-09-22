@@ -288,7 +288,7 @@ damage_df.head(20)
 # Post-processing of the results using PyDPF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PyDPF can be used in this context to visualise the crack opening throughout
-# the simulation as an animation. The steps for producing that are provided in
+# the simulation as an animation. The steps for producing this are provided
 # below.
 
 # Using Operators to retrieve results
