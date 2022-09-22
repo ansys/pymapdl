@@ -71,7 +71,7 @@ print(mapdl)
 # modelled using homogeneous linear elastic orthotropic properties whereas a
 # bilinear cohesive law is used for cohesive elements.
 
-# entering the preprocessor and assign the unit system
+# entering the preprocessor and assigning the unit system
 mapdl.prep7()
 mapdl.units("mpa")
 
