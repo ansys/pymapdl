@@ -2065,37 +2065,42 @@ class MapdlGrpc(_MapdlCore):
         >>> mk = mapdl.krylov
 
         1.Generate Subspace
-        >>> Qz = mk.krygensub(maxDimQ,freqVal,chkOrthoKey,outKey)
+        >>> Qz = mk.krygensub(max_dim_q, freq_val, chk_ortho_key, out_key, full_file)
 
-        maxDimQ     - maximum size/dimension of Krylov subspace
-        freqVal     - frequency value (Hz) at which to build the KRYLOV subspace
-        chkOrthoKey - [optional] key to check orthonormal properties of
-        each subspace vector with all other subspace vectors
-        outKey      - [optional] key to output KRYLOV subspace to Qz.txt file
+        max_dim_q     - maximum size/dimension of Krylov subspace
+        freq_val      - frequency value (Hz) at which to build the KRYLOV subspace
+        chk_ortho_key - [optional] key to check orthonormal properties of
+                        each subspace vector with all other subspace vectors [Default:False]
+        out_key       - [optional] key to output KRYLOV subspace to Qz.txt file [Default:False]
+        full_file     - Specify full file name to read specific full file.
+                        By default jobname.full is read.
 
         2.Use KRYLOV subspace to solve a reduced harmonic analysis over a specified frequency range
-        >>> Yz = mk.krysolve(freqBeg,freqEnd,numFreq,outKey)
+        >>> Yz = mk.krysolve(freq_start,freq_end,num_freq,load_key,out_key)
 
-        freqBeg - starting value of the frequency range (Hz)
-        freqEnd - ending value of the frequency range (Hz)
-        numFreq - user specified number of intervals in frequency range
-        loadKey - key specifying whether load should be ramped(0) or stepped(1)
-        outKey  - [optional] key to output reduced solution to Yz.txt file
+        freq_start - starting value of the frequency range (Hz)
+        freq_end - ending value of the frequency range (Hz)
+        num_freq - user specified number of intervals in frequency range
+        load_key - key specifying whether load should be ramped(0) or stepped(1)
+        out_key  - [optional] key to output reduced solution to Yz.txt file [Default:False]
 
         3.Expand the reduced solution back to the original space
         >>> mk.kryexpand(outKey,resKey)
 
-        outKey  - [optional] key to output expanded solution to Xz_*.txt file
-        resKey  - [optional] key to compute the residual of the expanded
-        solution
-            = 0 means do not compute the residual
-            = 1 means compute the L-inf norm of the residual
-            = 2 means compute the L-1 norm of the residual
-            = 3 means compute the L-2 norm of the residual
+            out_key  - [optional] key to output expanded solution to Xz_*.txt file [Default:False]
+            res_key  - [optional] key to compute the residual of the expanded
+            solution
+                = 0 means do not compute the residual
+                = 1 means compute the L-inf norm of the residual
+                = 2 means compute the L-1 norm of the residual
+                = 3 means compute the L-2 norm of the residual
         """
-        from ansys.mapdl.core.krylov import Krylov_functions
+        if self._kylov is None:
+            from ansys.mapdl.core.krylov import KrylovSolver
 
-        return Krylov_functions(self)
+            self._kylov = KrylovSolver(self)
+
+        return self._kylov
 
     @property
     def db(self):

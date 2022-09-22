@@ -191,6 +191,7 @@ class _MapdlCore(Commands):
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
+        self._kylov = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(

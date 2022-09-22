@@ -262,7 +262,11 @@ def mapdl(request, tmpdir_factory):
         port = MAPDL_DEFAULT_PORT
 
     mapdl = launch_mapdl(
-        EXEC_FILE, override=True, run_location=run_path, cleanup_on_exit=cleanup
+        EXEC_FILE,
+        override=True,
+        run_location=run_path,
+        cleanup_on_exit=cleanup,
+        additional_switches="-smp",
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
