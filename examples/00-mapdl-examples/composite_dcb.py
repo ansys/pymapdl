@@ -60,8 +60,8 @@ print(mapdl)
 # ====================
 # In this step the model setup is performed choosing the units system and the
 # element types to be used in the simulations. In this case a fully 3D approach
-# is chosen therefore SOLID186 elements are used for meshing volumes and
-# TARGE170/CONTA174 are used for modelling cohesive elements in between contact
+# is chosen therefore ``SOLID186`` elements are used for meshing volumes and
+# ``TARGE170``/``CONTA174`` are used for modelling cohesive elements in between contact
 # surfaces.
 #
 #
