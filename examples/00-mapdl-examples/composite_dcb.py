@@ -313,6 +313,7 @@ mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coord
 mesh_field_cohesive = result_mesh.field_of_properties(
     dpf.common.nodal_properties.coordinates
 )
+
 # Index of NMISC results
 nmisc_index = 70
 
