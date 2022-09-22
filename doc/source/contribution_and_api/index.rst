@@ -5,10 +5,10 @@ Contributing and API
 ====================
 
 Overall guidance on contributing to a PyAnsys library appears in the
-`Contributing <https://dev.docs.pyansys.com/overview/contributing.html>`_ topic
+`Contributing <https://dev.docs.pyansys.com/how-to/contributing.html>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
-with it and all `Guidelines and Best Practices
-<https://dev.docs.pyansys.com/guidelines/index.html>`_ before attempting to
+with it and all `Coding style
+<https://dev.docs.pyansys.com/coding-style/index.html>`_ before attempting to
 contribute to PyMAPDL.
  
 The following contribution information is specific to PyMAPDL.
@@ -45,10 +45,10 @@ Viewing PyMAPDL Documentation
 =============================
 
 Documentation for the latest stable release of PyMAPDL is hosted at
-`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.
+`PyMAPDL Documentation <https://mapdl.docs.pyansys.com/>`_.
 
 Documentation for the latest development version, which tracks the
-``main`` branch, is hosted at  `Development PyMAPDL Documentation <https://dev.mapdldocs.pyansys.com/>`_.
+``main`` branch, is hosted at  `Development PyMAPDL Documentation <https://dev.mapdl.docs.pyansys.com//>`_.
 This version is automatically kept up to date via GitHub actions.
 
 Testing MAPDL
