@@ -297,7 +297,7 @@ damage_df.head(20)
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
 
-# Identifyng the cohesive mesh
+# Identifying the cohesive mesh
 mesh_op = dpf.operators.mesh.from_scoping()
 mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
     "CM_1", model=model
