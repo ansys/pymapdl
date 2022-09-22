@@ -291,6 +291,8 @@ damage_df.head(20)
 # the simulation as an animation. The steps for producing that are provided in
 # below.
 
+# Using Operators to retrieve results
+# --------------------------------------
 # Generating DPF model
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
