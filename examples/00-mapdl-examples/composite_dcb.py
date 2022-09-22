@@ -303,7 +303,6 @@ mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
 my_scoping = mesh_op.inputs.scoping.connect(mesh_scoping_cohesive)
 my_inclusive = int(0)
 mesh_op.inputs.inclusive.connect(my_inclusive)
-my_mesh = dpf.MeshedRegion()
 mesh_op.inputs.mesh.connect(model.metadata.meshed_region)
 result_mesh = mesh_op.outputs.mesh()
 
