@@ -246,7 +246,7 @@ print(output)
 ###############################################################################
 # Post-processing
 # ===============
-# The post-processing is perfored using PyMAPDL and PyDPF.
+# The post-processing is performed using PyMAPDL and PyDPF.
 #
 #
 # Post-processing of the results using PyMAPDL
