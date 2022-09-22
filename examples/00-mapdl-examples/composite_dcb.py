@@ -188,7 +188,7 @@ mapdl.esurf()
 # opposite side of the plate the displacement conditions are applied to
 # simulate the interfacial crack opening. These conditions are applied to the
 # top and bottom nodes corresponding to the geometrical edges located at
-# x = 0.0, z = 0.0 and x = 0.0, z = 3.4 respectively. Two different components
+# (0.0, `y`, 0.0) and (0.0, `y`, 3.4) respectively (coordinates (x, y, z)). Two different components
 # are assigned to these sets of nodes for a faster identification of the nodes
 # bearing reaction forces.
 
