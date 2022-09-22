@@ -30,11 +30,12 @@ Procedure
 * Solve the model
 * Plot results of interest using PyMAPDL
 * Plot results using PyDPF
+* Plot reaction force
 
 Additional Packages Used
 ~~~~~~~~~~~~~~~~~~~~~~~~
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
-
+* `Pandas <https://pandas.pydata.org/>`.
 """
 
 ###############################################################################
@@ -45,15 +46,27 @@ Additional Packages Used
 import os
 
 from ansys.dpf import core as dpf
-from ansys.dpf.core import Model, locations
+from ansys.dpf.core import Model
 import numpy as np
 import pyvista as pv
+import matplotlib.pyplot as plt
 
 from ansys.mapdl import core as pymapdl
 
 # start MAPDL as a service
 mapdl = pymapdl.launch_mapdl()
 print(mapdl)
+
+###############################################################################
+# Setting the model geometrical inputs
+# ========================
+length = 75.0
+pre_crack = 10.0
+width = 25.0
+height = 1.7
+d = 10.0
+# a small quantity defined for avoiding rounding-off error when picking geometrical entities
+eps = 1e-1 
 
 ###############################################################################
 # Setting up the model
@@ -99,8 +112,8 @@ mapdl.tbdata(1, 50.0, 0.5, 50, 0.5, 0.01, 2)
 # the composite material properties and the correct three-dimensional elements.
 
 # generating the two composite plates
-vnum0 = mapdl.block(0.0, 85.0, 0.0, 25.0, 0.0, 1.7)
-vnum1 = mapdl.block(0.0, 85.0, 0.0, 25.0, 1.7, 3.4)
+vnum0 = mapdl.block(0.0, length + pre_crack, 0.0, width, 0.0, height)
+vnum1 = mapdl.block(0.0, length + pre_crack, 0.0, width, height, 2*height)
 
 # assigning material properties and element type
 mapdl.mat(1)
@@ -129,7 +142,7 @@ mapdl.asel("s", "loc", "z", 1.7)
 areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[0], "r")
 mapdl.nsla("r", 1)
-mapdl.nsel("r", "loc", "x", 10, 86)
+mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.cm("cm_1", "node")
 
 mapdl.allsel()
@@ -137,7 +150,7 @@ mapdl.asel("s", "loc", "z", 1.7)
 areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[1], "r")
 mapdl.nsla("r", 1)
-mapdl.nsel("r", "loc", "x", 10, 86)
+mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.cm("cm_2", "node")
 
 # identifying all the elements before the creation of TARGE170 elements
@@ -195,8 +208,8 @@ mapdl.esurf()
 # applying the two displacement conditions
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
-mapdl.nsel(type_="r", item="loc", comp="z", vmin=3.4, vmax=3.4)
-mapdl.d(node="all", lab="uz", value=10)
+mapdl.nsel(type_="r", item="loc", comp="z", vmin=2*height, vmax=2*height)
+mapdl.d(node="all", lab="uz", value=d)
 mapdl.cm("top_nod", "node")
 
 mapdl.allsel()
@@ -207,13 +220,13 @@ mapdl.cm("bot_nod", "node")
 
 # applying the fix condition
 mapdl.allsel()
-mapdl.nsel(type_="s", item="loc", comp="x", vmin=85.0, vmax=85.0)
+mapdl.nsel(type_="s", item="loc", comp="x", vmin=length + pre_crack, vmax=length + pre_crack)
 mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
 mapdl.eplot(
-    plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
+    # plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
 )
 
 ###############################################################################
@@ -241,7 +254,6 @@ mapdl.outres("all", "all")
 
 # solving
 output = mapdl.solve()
-print(output)
 
 ###############################################################################
 # Post-processing
@@ -273,7 +285,7 @@ mapdl.esel("s", "ename", "", 174)
 
 # plotting the element values
 mapdl.post_processing.plot_element_values(
-    "nmisc", 70, scalar_bar_args={"title": "nmisc, dparam"}
+    "nmisc", 70, scalar_bar_args={"title": "Cohesive Damage"}
 )
 
 # extracting the nodal values of the damage parameter
@@ -282,34 +294,32 @@ mapdl.esel("s", "ename", "", 174)
 mapdl.etable("damage", "nmisc", 70)
 
 damage_df = mapdl.pretab("damage").to_dataframe()
-damage_df.head(20)
 
 ###############################################################################
 # Post-processing of the results using PyDPF
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # PyDPF can be used in this context to visualise the crack opening throughout
-# the simulation as an animation. The steps for producing this are provided
+# the simulation as an animation. The steps for producing that are provided in
 # below.
 
-# Using Operators to retrieve results
-# --------------------------------------
 # Generating DPF model
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
 
-# Identifying the cohesive mesh
-mesh_op = dpf.operators.mesh.from_scoping()
+# Getting the mesh of whole the model
+meshed_region = model.metadata.meshed_region
+
+# Getting the mesh of the cohesive elements
 mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
     "CM_1", model=model
 )
-my_scoping = mesh_op.inputs.scoping.connect(mesh_scoping_cohesive)
-my_inclusive = int(0)
-mesh_op.inputs.inclusive.connect(my_inclusive)
-mesh_op.inputs.mesh.connect(model.metadata.meshed_region)
-result_mesh = mesh_op.outputs.mesh()
 
-# Getting mesh of the model
-meshed_region = model.metadata.meshed_region
+result_mesh = dpf.operators.mesh.from_scoping(scoping=mesh_scoping_cohesive,
+                                              inclusive=0,
+                                              mesh=meshed_region
+                                              ).eval()
+
+# Getting the coordinates field for each mesh
 mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
 mesh_field_cohesive = result_mesh.field_of_properties(
     dpf.common.nodal_properties.coordinates
@@ -318,92 +328,86 @@ mesh_field_cohesive = result_mesh.field_of_properties(
 # Index of NMISC results
 nmisc_index = 70
 
-# Generating damage object
-dam_op = dpf.operators.result.nmisc()
-dam_op.inputs.data_sources(data_src)
+# Generating the damage result operator
+dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
-# Generating displacement object
-disp_op = dpf.Operator("U")
-disp_op.inputs.data_sources.connect(model.metadata.data_sources)
+# Generating the displacement operator
+disp_op = model.results.displacement()
 
-# Summing displacements to obtain total at step n
-op = dpf.operators.math.add()
+# Creating sum operators to compute the updated coordinates at step n
+add_op = dpf.operators.math.add(fieldA=mesh_field)
+add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
-my_fieldA = dpf.Field()
-my_fieldA.location = locations.nodal
-op.inputs.fieldA.connect(mesh_field)
-
-op_cohesive = dpf.operators.math.add()
-
-my_fieldA_cohesive = dpf.Field()
-my_fieldA_cohesive.location = locations.nodal
-op_cohesive.inputs.fieldA.connect(mesh_field_cohesive)
-
-# Plotting animation
-# --------------------
-# Generating the plotter object
+# Instantiating a PyVista plotter and starting the creation of a GIF
 plotter = pv.Plotter()
 plotter.open_gif("dcb.gif")
 
-# Generating grid of the whole beam
+# Adding the beam mesh to the scene
 mesh_beam = meshed_region.grid
 plotter.add_mesh(
     mesh_beam,
     lighting=False,
     show_edges=True,
-    scalar_bar_args={"title": "Damage"},
+    scalar_bar_args={"title": "Cohesive Damage"},
     clim=[0, 1],
     opacity=0.3,
 )
 
-# Generating mesh of the contact part only
+# Adding the contact mesh to the scene
 mesh_contact = result_mesh.grid
 plotter.add_mesh(
     mesh_contact,
     opacity=0.9,
-    scalar_bar_args={"title": "Damage"},
+    scalar_bar_args={"title": "Cohesive Damage"},
     clim=[0, 1],
     scalars=np.zeros((mesh_contact.n_cells)),
 )
 
 for i in range(1, 100):
-
     # Getting displacements
     disp = model.results.displacement(time_scoping=i).eval()
-
-    my_fieldB = dpf.Field()
-    my_fieldB.location = locations.nodal
-    op.inputs.fieldB.connect(disp[0])
-
-    # Getting sum
-    disp_result = op.outputs.field()
-
+    # Getting the updated coordinates
+    add_op.inputs.fieldB.connect(disp[0])
+    disp_result = add_op.outputs.field()
     # Getting displacements for the cohesive layer
     disp = model.results.displacement(
         time_scoping=i, mesh_scoping=mesh_scoping_cohesive
     ).eval()
-
-    my_fieldB = dpf.Field()
-    my_fieldB.location = locations.nodal
-    op_cohesive.inputs.fieldB.connect(disp[0])
-
-    # Getting sum
-    disp_cohesive = op_cohesive.outputs.field()
-
-    # Getting damage variable
+    # Getting the updated coordinates for the cohesive layer
+    add_op_cohesive.inputs.fieldB.connect(disp[0])
+    disp_cohesive = add_op_cohesive.outputs.field()
+    # Getting the damage field
     dam_op.inputs.time_scoping([i])
-    my_item_index = int(70)
-    dam_op.inputs.item_index.connect(my_item_index)
-    cohesive_damage = dam_op.outputs.fields_container()
-
+    cohesive_damage = dam_op.outputs.fields_container()[0]
     # Update coordinates and scalars
     plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=False)
     plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=False)
-    plotter.update_scalars(cohesive_damage[0].data, mesh=mesh_contact, render=False)
+    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=False)
 
     plotter.write_frame()
 
 plotter.show()
+
+# Plotting the reaction force at the bottom nodes
+mesh_scoping = model.metadata.named_selection('TOP_NOD')
+f_tot = []
+d_tot = []
+for i in range (0,100):
+    force_eval = model.results.element_nodal_forces(time_scoping=i, mesh_scoping=mesh_scoping).eval()
+    force = force_eval[0].data
+    f_tot += [np.sum(force[:,2])]
+    d = abs(model.results.displacement(time_scoping=i, mesh_scoping=mesh_scoping).eval()[0].data[0])
+    d_tot += [d[2]]
+
+d_tot[0] = 0
+f_tot[0] = 0
+
+fig, ax = plt.subplots()  
+
+plt.plot(d_tot,f_tot,'k')
+plt.ylabel("Force [N]")
+plt.xlabel("Displacement [mm]")
+plt.show()
 
 ###############################################################################
 #
