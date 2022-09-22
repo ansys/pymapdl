@@ -268,8 +268,8 @@ output = mapdl.solve()
 # measuring the delamination length, the cohesive damage parameter is plotted.
 # Although, the damage parameter is an element parameter, the result is
 # provided in terms of nodal result. Therefore, in this case we present the
-# result for just one of the four-noded cohesive element i.e. NMISC = 70.
-# The result for the other nodes are present at NMISC = 71,72,73.
+# result for just one of the four-noded cohesive element i.e. ``NMISC = 70``.
+# The result for the other nodes are present at ``NMISC = 71,72,73``.
 # The actual damage parameter nodal values can also be retrieved from the
 # solved model in form of table (or array).
 
