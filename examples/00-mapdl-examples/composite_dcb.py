@@ -339,6 +339,8 @@ my_fieldA_cohesive = dpf.Field()
 my_fieldA_cohesive.location = locations.nodal
 op_cohesive.inputs.fieldA.connect(mesh_field_cohesive)
 
+# Plotting animation
+# --------------------
 # Generating the plotter object
 plotter = pv.Plotter()
 plotter.open_gif("dcb.gif")
