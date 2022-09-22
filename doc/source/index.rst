@@ -14,8 +14,6 @@ PyMAPDL Documentation |version|
    contribution_and_api/index
 
 
-.. include:: links.rst
-
 Introduction and Purpose
 ------------------------
 PyMAPDL is part of the larger `PyAnsys <pyansys>`_
