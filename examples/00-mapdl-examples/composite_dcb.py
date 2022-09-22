@@ -267,7 +267,7 @@ mapdl.post1()
 # selecting the substep
 mapdl.set(1, 100)
 
-# selecting CONTA174 elements
+# selecting ``CONTA174`` elements
 mapdl.allsel()
 mapdl.esel("s", "ename", "", 174)
 
