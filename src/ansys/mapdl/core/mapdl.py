@@ -3742,3 +3742,27 @@ class _MapdlCore(Commands):
         fname = str(filename).replace(ext, "")
         ext = ext.replace(".", "")
         return self.run(f"FILE,{fname},{ext}", **kwargs)
+
+    @wraps(Commands.lsread)
+    def use(self, *args, **kwargs):
+        # Because of `name` can be a macro file or a macro block on a macro library
+        # file, we are going to test if the file exists locally first, then remote,
+        # and if not, silently assume that it is a macro in a macro library.
+        # I do not think there is a way to check if the macro exists before use it.
+        name = kwargs.get("name", args[0])
+
+        # Check if it is a file local
+        if os.path.exists(name):
+            self.upload(name)
+        elif name in self.list_files():
+            # the file exists in the MAPDL working directory
+            pass
+        else:
+            # Preferring logger.warning over warn (from warnings), since it is less intrusive.
+            self._log.warning(
+                "The name supplied to 'mapdl.use' is not a file in the Python "
+                "working directory, nor in the MAPDL working directory. "
+                "PyMAPDL will assume it is a macro block inside a macro library "
+                "file previously defined using 'mapdl.ulib'."
+            )
+        super().use(*args, **kwargs)
