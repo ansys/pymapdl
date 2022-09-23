@@ -252,7 +252,7 @@ mapdl.nsubst(nsbstp=100, nsbmx=100, nsbmn=100)
 mapdl.kbc(key=0)
 mapdl.outres("all", "all")
 
-# solving
+# Solve
 output = mapdl.solve()
 
 ###############################################################################
