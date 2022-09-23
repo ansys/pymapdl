@@ -237,7 +237,7 @@ mapdl.eplot(
 # substeps are requested in this case to have a smooth crack opening
 # progression as well as to facilitate convergency for the static solver.
 
-# entering the solution processor and defining the analysis settings
+# Enter the solution processor and define the analysis settings
 mapdl.allsel()
 mapdl.finish()
 mapdl.run("/SOLU")
