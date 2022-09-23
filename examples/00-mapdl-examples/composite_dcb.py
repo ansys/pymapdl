@@ -261,8 +261,8 @@ output = mapdl.solve()
 # The post-processing is performed using PyMAPDL and PyDPF.
 #
 #
-# Post-processing of the results using PyMAPDL
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Postprocess results using PyMAPDL
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This section illustrates how to perform a quick prost-processing of the
 # the results using PyMAPDL. In this particular case as one of the key part is
 # measuring the delamination length, the cohesive damage parameter is plotted.
