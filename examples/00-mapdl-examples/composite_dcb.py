@@ -351,7 +351,7 @@ plotter.add_mesh(
     opacity=0.3,
 )
 
-# Adding the contact mesh to the scene
+# Add the contact mesh to the scene
 mesh_contact = result_mesh.grid
 plotter.add_mesh(
     mesh_contact,
