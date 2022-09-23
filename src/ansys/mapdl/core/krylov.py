@@ -65,8 +65,18 @@ class KrylovSolver:
         # Check if full file exists
         if not full_file:
             self.full_file = self._mapdl.jobname + ".full"
-        if not os.path.exists(os.path.join(current_dir, self.full_file)):
-            raise FileNotFoundError(f"The file {self.full_file} could not be found")
+
+        # Checking if the full file exists.
+        if self._mapdl._local:
+            if not os.path.exists(os.path.join(current_dir, self.full_file)):
+                raise FileNotFoundError(
+                    f"The file {self.full_file} could not be found in local directory '{current_dir}'."
+                )
+        else:
+            if self.full_file not in self._mapdl.list_files():
+                raise FileNotFoundError(
+                    f"The file {self.full_file} could not be found in remote MAPDL instance."
+                )
 
         # Check for illegal input values by the user
         if not isinstance(max_dim_q, int) or max_dim_q <= 0:
