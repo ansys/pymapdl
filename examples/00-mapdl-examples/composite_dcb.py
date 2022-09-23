@@ -367,7 +367,7 @@ for i in range(1, 100):
     # Getting the updated coordinates
     add_op.inputs.fieldB.connect(disp[0])
     disp_result = add_op.outputs.field()
-    # Getting displacements for the cohesive layer
+    # Get displacements for the cohesive layer
     disp = model.results.displacement(
         time_scoping=i, mesh_scoping=mesh_scoping_cohesive
     ).eval()
