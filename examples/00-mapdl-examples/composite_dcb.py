@@ -246,7 +246,7 @@ mapdl.antype("static")
 # activating non-linear geometry
 mapdl.nlgeom("on")
 
-# requesting substeps
+# Request substeps
 mapdl.autots(key="on")
 mapdl.nsubst(nsbstp=100, nsbmx=100, nsbmn=100)
 mapdl.kbc(key=0)
