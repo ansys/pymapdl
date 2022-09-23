@@ -263,15 +263,14 @@ output = mapdl.solve()
 #
 # Postprocess results using PyMAPDL
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# This section illustrates how to perform a quick prost-processing of the
-# the results using PyMAPDL. In this particular case as one of the key part is
-# measuring the delamination length, the cohesive damage parameter is plotted.
-# Although, the damage parameter is an element parameter, the result is
-# provided in terms of nodal result. Therefore, in this case we present the
-# result for just one of the four-noded cohesive element i.e. ``NMISC = 70``.
+# This section shows how to use PyMAPDL to postprocess results. Because
+# measuring the delamination length is important, plot the cohesive damage parameter.
+# Although the damage parameter is an element parameter, the result is
+# provided in terms of a nodal result. Thus, the result for just one of
+# the four-noded cohesive element ``NMISC = 70`` is presented.
 # The result for the other nodes are present at ``NMISC = 71,72,73``.
-# The actual damage parameter nodal values can also be retrieved from the
-# solved model in form of table (or array).
+# You can retrieve the actual damage parameter nodal values from the
+# solved model in form of a table (or an array).
 
 # entering the postprocessing processor
 mapdl.post1()
