@@ -374,7 +374,7 @@ for i in range(1, 100):
     # Getting the updated coordinates for the cohesive layer
     add_op_cohesive.inputs.fieldB.connect(disp[0])
     disp_cohesive = add_op_cohesive.outputs.field()
-    # Getting the damage field
+    # Get the damage field
     dam_op.inputs.time_scoping([i])
     cohesive_damage = dam_op.outputs.fields_container()[0]
     # Update coordinates and scalars
