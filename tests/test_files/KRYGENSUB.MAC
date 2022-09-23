@@ -77,7 +77,7 @@ ccf=-omega0*omega0
 *SMAT,MatK,D,IMPORT,FULL,fullfile,STIFF        !stiffness matrix [MatK]
 *INQ,MatK,DIM2,nDOF                            !the 2nd matrix dimension,nDOF
 *SMAT,MatM,D,IMPORT,FULL,fullfile,MASS         !mass matrix [MatM]
-*SMAT,MatC,D,IMPORT,FULL,fullfile,DAMP         !damping matrix [MatC]
+*SMAT,Mat_C,D,IMPORT,FULL,fullfile,DAMP         !damping matrix [Mat_C]
 *SMAT,Nod2Solv,D,IMPORT,FULL,fullfile,NOD2SOLV !import the mapping vector
 *VEC,Fz,Z,IMPORT,FULL,fullfile,RHS             !right hand side {Fz}
 *VEC,Fz0,Z,COPY,Fz
@@ -85,8 +85,8 @@ ccf=-omega0*omega0
 !Form Az=(K-w0*w0*M,i*w0*C) and Cz=(C,i*2*w0*M)
 *SMAT,Az,Z,COPY,MatK                           ![Az]=[MatK]
 *AXPY,ccf,0.0,MatM,1.0,0.0,Az                  ![Az]=(1,0)*[Az]+(ccf,0)*[MatM]
-*AXPY,0.0,omega0,MatC,1.0,0.0,Az               ![Az]=(1,0)*[Az]+(0,omega0)*[MatC]
-*SMAT,Cz,Z,COPY,MatC                           ![Cz]=[MatC]
+*AXPY,0.0,omega0,Mat_C,1.0,0.0,Az               ![Az]=(1,0)*[Az]+(0,omega0)*[Mat_C]
+*SMAT,Cz,Z,COPY,Mat_C                           ![Cz]=[Mat_C]
 *AXPY,0.0,2.0*omega0,MatM,1.0,0.0,Cz           ![Cz]=(1,0)*[Cz]+(0,2*omega0)*[MatM]
 zeroC=0                                        !set zeroC flag
 *NRM,Cz,NRM2,normC,NO

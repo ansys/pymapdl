@@ -50,13 +50,13 @@ def solu_krylov(mapdl, frq):
     mapdl.harfrq(frq)  # Set beginning and ending frequency
     mapdl.nsubst(1)  # Set the number of frequency increments
     mapdl.wrfull(1)  # GENERATE .FULL FILE AND STOP
-    output = mapdl.solve()
+    mapdl.solve()
     mapdl.finish()
 
 
 def test_krylov_with_point_load(mapdl):
     # Case1 : Run Krylov Pymapdl
-    length, width = model_setup(mapdl, damp=1)
+    length, _ = model_setup(mapdl, damp=1)
     mm = mapdl.math
     mapdl.jobname = "point_load_py"
 
@@ -82,7 +82,7 @@ def test_krylov_with_point_load(mapdl):
     Xii_py = mm.vec(name="Xii").asarray()
 
     # Case2 :Run Krylov Macro
-    length, width = model_setup(mapdl, damp=1)
+    length, _ = model_setup(mapdl, damp=1)
     mapdl.jobname = "point_load_mac"
 
     # Define Load
@@ -120,7 +120,7 @@ def test_krylov_with_point_load(mapdl):
 def test_krylov_with_pressure_load(mapdl, res_key):
     # With ramped loading
     # Case1 : Run Krylov Pymapdl
-    length, width = model_setup(mapdl)
+    _, width = model_setup(mapdl)
     mm = mapdl.math
     mapdl.jobname = "pressure_py"
 
@@ -146,7 +146,7 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     Xii_py = mm.vec(name="Xii").asarray()
 
     # Case2 :Run Krylov Macro
-    length, width = model_setup(mapdl)
+    _, width = model_setup(mapdl)
     mapdl.jobname = "pressure_mac"
 
     mapdl.prep7()

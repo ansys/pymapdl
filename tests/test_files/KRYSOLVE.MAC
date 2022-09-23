@@ -70,7 +70,7 @@ outKey=arg5
 *SET,omega,freqBeg*twoPi                !circular frequency at starting point
 *SET,intV,(freqEnd-freqBeg)/numFreq
 *DO,iFreq,1,numFreq
-  !form RHS at the i-th freqency point
+  !form RHS at the i-th frequency point
   *INIT,iRHS,ZERO                       !{iRHS}=0
   *IF,loadKey,eq,0,then
     !apply ramped loading
@@ -91,7 +91,7 @@ outKey=arg5
   *SET,ccf,-omega*omega
   *SMAT,Az,Z,COPY,MatK                  !modified K:[Az]=[MatK]
   *AXPY,ccf,0.0,MatM,1.0,0.0,Az         ![Az]=(1,0)*[Az]+(ccf,0)*[MatM]
-  *AXPY,0.0,omega,MatC,1.0,0.0,Az       ![Az]=(1,0)*[Az]-(0,omega)*[MatC]
+  *AXPY,0.0,omega,Mat_C,1.0,0.0,Az       ![Az]=(1,0)*[Az]-(0,omega)*[Mat_C]
   *MULT,Az,,Qz,,AQ                      ![AQ]=[Az][Qz]
   *MULT,Qz,TRANS,AQ,,QtAQ               ![QtAQ]=[Q^t][AQ]
 

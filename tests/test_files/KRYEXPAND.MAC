@@ -6,7 +6,7 @@
 !COM   is available.  Note, when this macro is finished all APDL Math      *
 !COM   parameters will be deleted via the *FREE,ALL command.               *
 !COM                                                                       *
-!COM   COMMNAD USAGE: KRYEXPAND,outKey,resKey                              *
+!COM   COMMAND USAGE: KRYEXPAND,outKey,resKey                              *
 !COM     outKey  - [optional] key to output expanded solution to Xz_*.txt  *
 !COM               file                                                    *
 !COM     resKey  - [optional] key to compute the residual of the expanded  *
@@ -117,7 +117,7 @@ resKey=arg2
     *SET,ccf,-omega*omega
     *SMAT,Az,Z,COPY,MatK                   !modified K: [MatK] -> [Az]
     *AXPY,ccf,0.0,MatM,1.0,0.0,Az          !       -w*w*[MatM] +> [Az]
-    *AXPY,0.0,omega,MatC,1.0,0.0,Az        !       +i*w*[MatC] +> [Az]
+    *AXPY,0.0,omega,Mat_C,1.0,0.0,Az        !       +i*w*[Mat_C] +> [Az]
 
     !Compute {Rz}={iRHS}-[Az]*{Xi}
     *VEC,Rzi,Z,LINK,RzV,1
