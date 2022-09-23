@@ -317,7 +317,7 @@ result_mesh = dpf.operators.mesh.from_scoping(scoping=mesh_scoping_cohesive,
                                               mesh=meshed_region
                                               ).eval()
 
-# Getting the coordinates field for each mesh
+# Get the coordinates field for each mesh
 mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
 mesh_field_cohesive = result_mesh.field_of_properties(
     dpf.common.nodal_properties.coordinates
