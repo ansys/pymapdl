@@ -71,7 +71,7 @@ COMMANDS_TO_NOT_BE_CONVERTED.extend(COMMANDS_WITH_EMPTY_ARGS)
 
 def convert_script(
     filename_in,
-    filename_out,
+    filename_out=None,
     loglevel="WARNING",
     auto_exit=True,
     line_ending=None,
@@ -84,6 +84,7 @@ def convert_script(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -92,8 +93,9 @@ def convert_script(
     filename_in : str
         Filename of the ansys input file to read in.
 
-    filename_out : str
+    filename_out : str, optional
         Filename of the python script to write a translation to.
+        Defaults to the ``filename_in`` name ending in ``py``.
 
     loglevel : str, optional
         Logging level of the ansys object within the script.
@@ -103,7 +105,11 @@ def convert_script(
         ``True``.
 
     line_ending : str, optional
-        When None, automatically determined by OS being used.
+        When None, automatically is ``\n.``
+
+    exec_file : str, optional
+        Specify the location of the ANSYS executable and include
+        it in the converter output ``launch_mapdl`` call.
 
     macros_as_functions : bool, optional
         Attempt to convert MAPDL macros to python functions.
@@ -144,6 +150,12 @@ def convert_script(
         Print command ``/COM`` arguments to python console.
         Defaults to ``True``.
 
+    only_commands : bool, optional
+        If ``True``, it converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.
+
     Returns
     -------
     list
@@ -176,6 +188,13 @@ def convert_script(
     with open(filename_in, "r") as fid:
         apdl_strings = fid.readlines()
 
+    if filename_out is None:
+        filename_out = os.path.splitext(filename_in)[0] + ".py"
+        if os.path.exists(filename_out):
+            raise FileExistsError(
+                f"The predefined output file '{filename_out}' already exists."
+            )
+
     translator = _convert(
         apdl_strings=apdl_strings,
         loglevel=loglevel,
@@ -190,6 +209,7 @@ def convert_script(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        only_commands=only_commands,
     )
 
     translator.save(filename_out)
@@ -210,6 +230,7 @@ def convert_apdl_block(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -217,9 +238,6 @@ def convert_apdl_block(
     ----------
     apdl_string : str
         APDL strings or list of strings to convert.
-
-    filename_out : str
-        Filename of the python script to write a translation to.
 
     loglevel : str, optional
         Logging level of the ansys object within the script.
@@ -273,6 +291,12 @@ def convert_apdl_block(
         Print command ``/COM`` arguments to python console.
         Defaults to ``True``.
 
+    only_commands : bool, optional
+        If ``True``, it converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.
+
     Returns
     -------
     list
@@ -308,6 +332,7 @@ def convert_apdl_block(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        only_commands=only_commands,
     )
 
     if isinstance(apdl_strings, str):
@@ -329,7 +354,13 @@ def _convert(
     cleanup_output=True,
     header=True,
     print_com=True,
+    only_commands=False,
 ):
+
+    if only_commands:
+        auto_exit = False
+        add_imports = False
+        header = False
 
     translator = FileTranslator(
         loglevel,
@@ -374,8 +405,9 @@ class Lines(list):
 
     def append(self, item, mute=True):
         # append the item to itself (the list)
-        if not self._mute:
-            self._log.info(msg=f"Converted: '{item}'")
+        if not self._mute and item:
+            stripped_msg = item.replace("\n", "\\n")
+            self._log.info(msg=f"Converted: '{stripped_msg}'")
         super(Lines, self).append(item)
 
     def _setup_logger(self):
@@ -411,7 +443,7 @@ class FileTranslator:
         if line_ending:
             self.line_ending = line_ending
         else:
-            self.line_ending = os.linesep
+            self.line_ending = "\n"
         self.macros_as_functions = macros_as_functions
         self._infunction = False
         self.use_function_names = use_function_names
@@ -460,12 +492,10 @@ class FileTranslator:
     def write_header(self):
         if isinstance(self._header, bool):
             if self._header:
-                header = (
-                    f'"""Script generated by ansys-mapdl-core version {__version__}"""'
-                )
+                header = f'"""Script generated by ansys-mapdl-core version {__version__}"""\n'
                 self.lines.append(header)
         elif isinstance(self._header, str):
-            self.lines.append(f'"""{self._header}"""')
+            self.lines.append(f'"""{self._header}"""\n')
 
         else:
             raise TypeError(
@@ -473,7 +503,7 @@ class FileTranslator:
             )
 
     def write_exit(self):
-        self.lines.append(f"{self.obj_name}.exit()")
+        self.lines.append(f"\n{self.obj_name}.exit()")
 
     def format_using_autopep8(self, text=None):
         """Format internal `self.lines` with autopep8.
@@ -524,14 +554,14 @@ class FileTranslator:
         self.lines.append(f"from {core_module} import launch_mapdl")
 
         if exec_file:
-            exec_file_parameter = f'"{exec_file}", '
+            exec_file_parameter = f'exec_file="{exec_file}", '
         else:
             exec_file_parameter = ""
 
         if self.print_com:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)'
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)\n'
         else:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")'
+            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")\n'
         self.lines.append(line)
 
     @property
@@ -586,36 +616,40 @@ class FileTranslator:
         # Cleaning ending empty arguments.
         # Because of an extra comma added to toffst command when generating ds.dat.
         line_ = line.split(",")[::-1]  # inverting order
+
         for ind, each in enumerate(line_):
-            if each:
+            if each.strip():  # strip to remove spaces in empty arguments
                 break
-            else:
-                line_.pop(ind)
-        line = ",".join(line_[::-1])
+
+        line = ",".join(line_[ind:][::-1])
 
         # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
+        line_upper = line.upper()
 
-        cmd_ = line.split(",")[0].upper()
+        cmd_caps = line.split(",")[0].upper()
+        cmd_caps_short = cmd_caps[:4]
 
-        if cmd_[:4] in ["SOLV", "LSSO"] and self._comment_solve:
+        items = line.split(",")
+
+        if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
                 "com", ["The following line has been commented due to `comment_solve`:"]
             )
             self.store_command("com", [line])
             return
 
-        if cmd_[:4] == "/COM":
+        if cmd_caps_short == "/COM":
             # It is a comment
             self.store_command("com", [line[5:]])
             return
 
-        if cmd_ == "*DO":
+        if cmd_caps == "*DO":
             self.start_non_interactive()
             self.store_run_command(line)
             return
 
-        if cmd_ in ["*ENDDO", "*ENDIF"]:
+        if cmd_caps in ["*ENDDO", "*ENDIF"]:
             self.store_run_command(line)
             self.end_non_interactive()
             return
@@ -631,13 +665,13 @@ class FileTranslator:
             self.end_non_interactive()
             return
 
-        if cmd_ == "/VERIFY":
+        if cmd_caps == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
             self.store_run_command("/PREP7")
             return
 
-        if line[:4].upper() == "*REP":
+        if cmd_caps_short == "*REP":
             if not self.non_interactive:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
@@ -651,15 +685,15 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
-        if line[:4].upper() in COMMANDS_TO_NOT_BE_CONVERTED:
+        if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
             self.store_run_command(line)
             return
 
-        if line[:4].upper() == "/TIT":  # /TITLE
+        if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
             return self.store_command("title", ["".join(parameters).strip()])
 
-        if line[:4].upper() == "*GET":
+        if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
                 self.store_run_command(line)
                 return
@@ -667,17 +701,24 @@ class FileTranslator:
                 parameters = line.split(",")[1:]
                 return self.store_command("get", parameters)
 
-        if line[:4].upper() == "/NOP":
+        if cmd_caps_short == "/NOP":
             self.comment = (
                 "It is not recommended to use '/NOPR' in a normal PyMAPDL session."
             )
             self.store_under_scored_run_command(line)
             return
 
-        if line[:6].upper() == "/PREP7":
+        if cmd_caps_short == "*CRE":  # creating a function
+            if self.macros_as_functions:
+                self.start_function(items[1].strip())
+                return
+            else:
+                self.start_non_interactive()
+
+        if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
 
-        if "*END" in line:
+        if "*END" in line_upper:
             if self.macros_as_functions:
                 self.store_empty_line()
                 self.store_empty_line()
@@ -693,7 +734,7 @@ class FileTranslator:
                 return
 
         # check for if statement
-        if line[:3].upper() == "*IF" or "*IF" in line.upper():
+        if cmd_caps[:3] == "*IF" or "*IF" in line_upper:
             self.start_non_interactive()
             self.store_run_command(line)
             return
@@ -712,8 +753,7 @@ class FileTranslator:
             ):  # To escape cmds that require (XX) but they are not in block
                 self.end_non_interactive()
             return
-        elif line[:4] == "*USE" and self.macros_as_functions:
-            items = line.split(",")
+        elif cmd_caps_short == "*USE" and self.macros_as_functions:
             func_name = items[1].strip()
             if func_name in self._functions:
                 args = ", ".join(items[2:])
@@ -721,7 +761,6 @@ class FileTranslator:
                 return
 
         # check if a line is setting a variable
-        items = line.split(",")
         if "=" in items[0]:  # line sets a variable:
             self.store_run_command(line)
             return
@@ -732,32 +771,27 @@ class FileTranslator:
             self.store_empty_line()
             return
 
-        if line == "-1" or line == "END PREAD":  # End of block commands
+        if line == "-1" or line_upper == "END PREAD":  # End of block commands
             self.store_run_command(line)
             self._in_block = False
             self.end_non_interactive()
             return
 
         # check valid command
-        if command not in self._valid_commands:
-            cmd = line[:4].upper()
-            if cmd == "*CRE":  # creating a function
-                if self.macros_as_functions:
-                    self.start_function(items[1].strip())
-                    return
-                else:
-                    self.start_non_interactive()
-
-            elif cmd in self._non_interactive_commands:
-                if cmd in self._block_commands:
+        if (
+            self._pymapdl_command(command) not in self._valid_commands
+            or cmd_caps_short in self._non_interactive_commands
+        ):
+            if cmd_caps_short in self._non_interactive_commands:
+                if cmd_caps_short in self._block_commands:
                     self._in_block = True
                     self._block_count = 0
                     self._block_count_target = 0
 
-                elif cmd in self._enum_block_commands:
+                elif cmd_caps_short in self._enum_block_commands:
                     self._in_block = True
                     self._block_count = 0
-                    if cmd == "CMBL":  # In cmblock
+                    if cmd_caps_short == "CMBL":  # In cmblock
                         # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
                         numitems = int(line.split(",")[3])
                         _block_count_target = (
@@ -765,20 +799,38 @@ class FileTranslator:
                         )
                         self._block_count_target = (
                             _block_count_target + 2
-                        )  # because the cmd line and option line.
+                        )  # because the cmd_caps_short line and option line.
 
-                self._block_current_cmd = cmd
+                self._block_current_cmd = cmd_caps_short
                 self.start_non_interactive()
 
-            if self._in_block and cmd not in self._non_interactive_commands:
+            if self._in_block and cmd_caps_short not in self._non_interactive_commands:
                 self.store_run_command(original_line)
             else:
                 self.store_run_command(line)
 
         elif self.use_function_names:
+            if command[0] == "/":
+                slash_command = f"slash{command[1:]}"
+                if slash_command in dir(Commands):
+                    command = slash_command
+                else:
+                    command = command[1:]
+            elif command[0] == "*":
+                star_command = f"star{command[1:]}"
+                if star_command in dir(Commands):
+                    command = star_command
+                else:
+                    command = command[1:]
+
             self.store_command(command, parameters)
         else:
             self.store_run_command(line)
+
+    def _pymapdl_command(self, command):
+        if command[0] in ["/", "*"]:
+            command = command[1:]
+        return command
 
     def start_function(self, func_name):
         self._functions.append(func_name)
@@ -936,3 +988,139 @@ class FileTranslator:
             return True
 
         return False
+
+
+import click
+
+
+@click.command()
+@click.argument("filename_in")
+@click.option("-o", default=None, help="Name of the output Python script.")
+@click.option("--filename_out", default=None, help="Name of the output Python script.")
+@click.option(
+    "--loglevel",
+    default="WARNING",
+    help="Logging level of the ansys object within the script.",
+)
+@click.option(
+    "--auto_exit",
+    default=True,
+    help="Adds a line to the end of the script to exit MAPDL. Default ``True``",
+)
+@click.option("--line_ending", default=None, help="When None, automatically is ``\n.``")
+@click.option(
+    "--exec_file",
+    default=None,
+    help="Specify the location of the ANSYS executable and include it in the converter output ``launch_mapdl`` call.",
+)
+@click.option(
+    "--macros_as_functions",
+    default=True,
+    help="Attempt to convert MAPDL macros to python functions.",
+)
+@click.option(
+    "--use_function_names",
+    default=True,
+    help="Convert MAPDL functions to ansys.mapdl.core.Mapdl class methods.  When ``True``, the MAPDL command ``K`` will be converted to ``mapdl.k``.  When ``False``, it will be converted to ``mapdl.run('k')``.",
+)
+@click.option(
+    "--show_log",
+    default=False,
+    help="Print the converted commands using a logger (from ``logging`` Python module).",
+)
+@click.option(
+    "--add_imports",
+    default=True,
+    help='If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl`` and ``mapdl = launch_mapdl(loglevel="WARNING")`` to the beginning of the output file. This option is useful if you are planning to use the output script from another mapdl session. See examples section. This option overrides ``auto_exit``.',
+)
+@click.option(
+    "--comment_solve",
+    default=False,
+    help='If ``True``, it will pythonically comment the lines that contain ``"SOLVE"`` or ``"/EOF"``.',
+)
+@click.option(
+    "--cleanup_output",
+    default=True,
+    help="If ``True`` the output is formatted using ``autopep8`` before writing the file or returning the string. This requires ``autopep8`` to be installed.",
+)
+@click.option(
+    "--header",
+    default=True,
+    help="If ``True``, the default header is written in the first line of the output. If a string is provided, this string will be used as header.",
+)
+@click.option(
+    "--print_com",
+    default=True,
+    help="Print command ``/COM`` arguments to python console. Defaults to ``True``.",
+)
+def cli(
+    filename_in,
+    o,
+    filename_out,
+    loglevel,
+    auto_exit,
+    line_ending,
+    exec_file,
+    macros_as_functions,
+    use_function_names,
+    show_log,
+    add_imports,
+    comment_solve,
+    cleanup_output,
+    header,
+    print_com,
+):
+    """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
+
+    USAGE:
+
+    The main usage is:
+
+        $ convertscript mapdl.dat -o python.py
+
+        File mapdl.dat successfully converted to python.py.
+
+    The output argument is completely optional, in that case, it will just change the extension to "py".
+
+        $ convertscript mapdl.dat
+
+        File mapdl.dat successfully converted to mapdl.py.
+
+    You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
+
+        $ convertscript mapdl.dat --auto-exit False
+
+        File mapdl.dat successfully converted to mapdl.py.
+
+        $ convertscript.exe mapdl.dat --filename_out mapdl.out --add_imports False
+
+        File mapdl.dat successfully converted to mapdl.out.
+
+
+    """
+    if o:
+        filename_out = o
+
+    convert_script(
+        filename_in,
+        filename_out,
+        loglevel,
+        auto_exit,
+        line_ending,
+        exec_file,
+        macros_as_functions,
+        use_function_names,
+        show_log,
+        add_imports,
+        comment_solve,
+        cleanup_output,
+        header,
+        print_com,
+    )
+
+    if filename_out:
+        print(f"File {filename_in} successfully converted to {filename_out}.")
+    else:
+        print(
+            f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
+        )

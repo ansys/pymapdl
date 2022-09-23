@@ -6,6 +6,9 @@ import time
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
+
+pytest_plugins = ["pytester"]
+
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
@@ -491,7 +494,14 @@ def make_block(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def coupled_example(mapdl, cleared):
-    mapdl.input(vmfiles["vm33"])
+    vm33 = vmfiles["vm33"]
+    with open(vm33, "r") as fid:
+        mapdl_code = fid.read()
+
+    mapdl_code = mapdl_code.replace(
+        "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
+    )
+    mapdl.input_strings(mapdl_code)
 
 
 @pytest.fixture(scope="function")

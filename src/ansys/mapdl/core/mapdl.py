@@ -3750,19 +3750,32 @@ class _MapdlCore(Commands):
         # and if not, silently assume that it is a macro in a macro library.
         # I do not think there is a way to check if the macro exists before use it.
         name = kwargs.get("name", args[0])
+        base_name = os.path.basename(name)
 
         # Check if it is a file local
         if os.path.exists(name):
             self.upload(name)
-        elif name in self.list_files():
-            # the file exists in the MAPDL working directory
+
+        elif base_name in self.list_files():
+            # the file exists in the MAPDL working directory, so do nothing.
             pass
+
         else:
+            if os.path.dirname(name):
+                # It seems you provided a path (or something like that)
+                raise FileNotFoundError(
+                    f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
+                    "working directory, nor in the MAPDL working directory. "
+                )
             # Preferring logger.warning over warn (from warnings), since it is less intrusive.
             self._log.warning(
-                "The name supplied to 'mapdl.use' is not a file in the Python "
+                f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
                 "working directory, nor in the MAPDL working directory. "
                 "PyMAPDL will assume it is a macro block inside a macro library "
                 "file previously defined using 'mapdl.ulib'."
             )
-        super().use(*args, **kwargs)
+            # If MAPDL cannot find named macro file, it will throw a runtime error.
+
+        # Updating arg since the path is not needed anymore.
+        args = (base_name, args[1:])
+        return super().use(*args, **kwargs)
