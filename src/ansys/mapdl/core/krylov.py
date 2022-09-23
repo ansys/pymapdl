@@ -213,7 +213,7 @@ class KrylovSolver:
 
         # Optional check on Orthonormality of vectors
         if chk_ortho_key:
-            orth_file = os.path.join(self._mapdl.directory, f"{self.jobname}_ortho.txt")
+            orth_file = os.path.join(f"{self.jobname}_ortho.txt")
             f = open(orth_file, "w")
             for i in range(1, numQ + 1):
                 self._mapdl.vec("Vz", "Z", "LINK", self.Qz.id, i)
@@ -442,7 +442,6 @@ class KrylovSolver:
 
                 file = open(
                     os.path.join(
-                        self._mapdl.directory,
                         f"{self.jobname}_Xzu_{iFreq}.txt",
                     ),
                     "w",
@@ -511,7 +510,6 @@ class KrylovSolver:
                 # Output norms of residual vector
                 file1 = open(
                     os.path.join(
-                        self._mapdl.directory,
                         f"{self.jobname}_Rzi_{iFreq}.txt",
                     ),
                     "w",
