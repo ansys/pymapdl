@@ -326,7 +326,7 @@ mesh_field_cohesive = result_mesh.field_of_properties(
 # Get the index of the NMISC results
 nmisc_index = 70
 
-# Generating the damage result operator
+# Generate the damage result operator
 dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
 # Generate the displacement operator
