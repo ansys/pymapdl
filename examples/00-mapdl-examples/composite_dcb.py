@@ -340,7 +340,7 @@ add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 plotter = pv.Plotter()
 plotter.open_gif("dcb.gif")
 
-# Adding the beam mesh to the scene
+# Add the beam mesh to the scene
 mesh_beam = meshed_region.grid
 plotter.add_mesh(
     mesh_beam,
