@@ -5,7 +5,7 @@
 Static simulation of double cantilever beam test via cohesive elements
 ======================================================================
 
-This example is inspired to a classic double cantilever beam test commonly used
+This example is a classic double cantilever beam test commonly used
 to study mode I interfacial delamination of composite plates.
 
 Description
