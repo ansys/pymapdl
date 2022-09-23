@@ -329,7 +329,7 @@ nmisc_index = 70
 # Generating the damage result operator
 dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
-# Generating the displacement operator
+# Generate the displacement operator
 disp_op = model.results.displacement()
 
 # Creating sum operators to compute the updated coordinates at step n
