@@ -332,7 +332,7 @@ dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 # Generate the displacement operator
 disp_op = model.results.displacement()
 
-# Creating sum operators to compute the updated coordinates at step n
+# Create sum operators to compute the updated coordinates at step n
 add_op = dpf.operators.math.add(fieldA=mesh_field)
 add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
