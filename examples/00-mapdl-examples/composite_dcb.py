@@ -53,7 +53,7 @@ import matplotlib.pyplot as plt
 
 from ansys.mapdl import core as pymapdl
 
-# start MAPDL as a service
+# Start MAPDL as a service
 mapdl = pymapdl.launch_mapdl()
 print(mapdl)
 
