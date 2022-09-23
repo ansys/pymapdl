@@ -307,7 +307,7 @@ model = Model(data_src)
 # Getting the mesh of whole the model
 meshed_region = model.metadata.meshed_region
 
-# Getting the mesh of the cohesive elements
+# Get the mesh of the cohesive elements
 mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
     "CM_1", model=model
 )
