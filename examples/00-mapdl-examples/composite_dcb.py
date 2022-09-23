@@ -272,7 +272,7 @@ output = mapdl.solve()
 # You can retrieve the actual damage parameter nodal values from the
 # solved model in form of a table (or an array).
 
-# entering the postprocessing processor
+# Enter the postprocessor
 mapdl.post1()
 
 # selecting the substep
