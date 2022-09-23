@@ -362,7 +362,7 @@ plotter.add_mesh(
 )
 
 for i in range(1, 100):
-    # Getting displacements
+    # Get displacements
     disp = model.results.displacement(time_scoping=i).eval()
     # Getting the updated coordinates
     add_op.inputs.fieldB.connect(disp[0])
