@@ -282,7 +282,7 @@ mapdl.set(1, 100)
 mapdl.allsel()
 mapdl.esel("s", "ename", "", 174)
 
-# plotting the element values
+# Plot the element values
 mapdl.post_processing.plot_element_values(
     "nmisc", 70, scalar_bar_args={"title": "Cohesive Damage"}
 )
