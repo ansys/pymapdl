@@ -256,8 +256,8 @@ mapdl.outres("all", "all")
 output = mapdl.solve()
 
 ###############################################################################
-# Post-processing
-# ===============
+# Postprocessing
+# ==============
 # The post-processing is performed using PyMAPDL and PyDPF.
 #
 #
