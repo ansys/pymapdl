@@ -68,8 +68,8 @@ unable call multiple products at either a granular or high level or
 use packages such as ``numpy``, ``scipy``, ``pytorch``,
 ``tensorflow``, etc.  PyMAPDL ties this in with MAPDL, that allows you
 to have a fully parametric workflow that leverages these machine
-learning tools or allows for advanced plotting with ``pyvista`` or
-``matplotlib``.
+learning tools or allows for advanced plotting with `Pyvista <pyvista_docs>`_ or
+`matplotlib <matplotlibmain>`_.
 
 
 

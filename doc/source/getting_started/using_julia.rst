@@ -20,7 +20,7 @@ To install Julia go to their website `julia_main`_ and follow the instructions g
 Setting Julia Environment
 ==========================
 
-To have access to Python libraries within Julia, you must install the `PyCall <pycall>`_ Julia package.
+To have access to Python libraries within Julia, you must install the `PyCall <pycallmain>`_ Julia package.
 To install it, run Julia and switch to the package manager by pressing the ``"]"`` key.
 
 If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
@@ -73,7 +73,7 @@ For example:
 Installing PyMAPDL in Julia
 ===========================
 
-*PyCall* includes a lightweight Python environment that uses `Conda <conda>`_ to manage and access Python packages.
+*PyCall* includes a lightweight Python environment that uses `Conda <condamain>`_ to manage and access Python packages.
 This environment, currently based on Python 3.9.7, includes the standard basic Python libraries.
 However, because it is a fully working Python environment, you can still use it from outside the Julia command line and install Python packages using ``pip``.
 

@@ -87,7 +87,7 @@ mesh.
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs>`__
+    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs>`_
 
 
 Plotting Non-Interactively using MAPDL
@@ -97,7 +97,7 @@ native tools, pass ``vtk=False`` when running plotting commands such
 as :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>`,
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>`, etc..  Plots will
 be generated within MAPDL and then shown using `matploblib
-<https://matplotlib.org/stable/contents.html>`__.
+<matplotlibmain>`_.
 
 
 Start PyMAPDL
@@ -142,7 +142,7 @@ Each of these will create a matplotlib figure and pause execution
 .. figure:: ../images/aplot.png
     :width: 400pt
 
-    Area Plot from MAPDL displayed using `matplotlib <matplotlib>`__
+    Area Plot from MAPDL displayed using `matplotlib <matplotlibmain>`_
 
 
 For more details on the plotting functions, see :ref:`ref_plotting_api`.

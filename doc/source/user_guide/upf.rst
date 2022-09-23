@@ -86,7 +86,7 @@ Python UPF Methodology
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Coding a Python UPF is different from using a compiled language like C/C++ or Fortran,
-mainly in terms of the API. Because the `gRPC technology <grpc>`_ 
+mainly in terms of the API. Because the `gRPC technology <grpcmain>`_ 
 is used to handle the
 communication and the exchange of data between the Python process and the Mechanical APDL
 process, you need to understand the way this feature handles the

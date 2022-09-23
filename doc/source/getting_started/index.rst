@@ -5,7 +5,7 @@ To use PyMAPDL, you need to have a local installation of Ansys.  The
 version of Ansys installed will dictate the interface and features
 available to you.
 
-Visit `Ansys <ansys>`_ for more information on
+Visit `Ansys <ansysmain>`_ for more information on
 getting a licensed copy of Ansys.
 
 You can also try the Student Version of Ansys products in
@@ -40,7 +40,7 @@ Install the latest release from `PyPi
    pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
-<https://github.com/pyansys/pymapdl/issues>`_ via:
+<pymapdl_issues>`_ via:
 
 .. code::
 

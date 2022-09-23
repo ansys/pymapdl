@@ -384,7 +384,7 @@ This method will not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `<disabling_firewall_on_wsl>`_
+Link: `disabling_firewall_on_wsl`_
 
 Windows 10 Port Forwarding
 ==========================

@@ -1,5 +1,5 @@
 .. #Pyansys
-.. _pyansys: https://docs.pyansys.com
+.. _pyansysmain: https://docs.pyansys.com
 .. _pyansys_support: pyansys.support@ansys.com
 
 .. #Other projects
@@ -7,6 +7,7 @@
 .. _dpf_post_gh: https://github.com/pyansys/DPF-Post
 .. _dpf_core_docs: https://dpf.docs.pyansys.com/
 .. _dpf_post_docs: https://post.docs.pyansys.com/
+.. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 
 .. #PyAnsys Developer Guide
@@ -16,13 +17,13 @@
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org
 .. _jupyter: https://jupyter.org/
-.. _grpc: https://grpc.io/
+.. _grpcmain: https://grpc.io/
 .. _numpy_docs: https://numpy.org/doc/stable/
-.. _matplotlib_docs: https://matplotlib.org/stable/contents.html
-.. _matplotlib: https://matplotlib.org
+.. _matplotlib docs: https://matplotlib.org/stable/contents.html
+.. _matplotlibmain: https://matplotlib.org
 
 .. #Ansys
-.. _ansys: https://www.ansys.com/
+.. _ansysmain: https://www.ansys.com/
 .. _ansys_student_version: https://www.ansys.com/academic/students
 .. _ansys_innovation_space: https://courses.ansys.com/
 .. _ansys_download_current_release: https://download.ansys.com/Current%20Release
@@ -61,11 +62,11 @@
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
-.. _conda: https://conda.io
+.. _condamain: https://conda.io
 
 .. #Julia
 .. _julia_main: https://julialang.org/
 .. _julia_windows: https://julialang.org/downloads/platform/.. #indows
 .. _julia_linux_and_freebsd: https://julialang.org/downloads/platform/.. #inux_and_freebsd
 .. _julia_macos: https://julialang.org/downloads/platform/.. #acos
-.. _pycall: https://github.com/JuliaPy/PyCall.jl
+.. _pycallmain: https://github.com/JuliaPy/PyCall.jl
