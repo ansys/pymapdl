@@ -295,13 +295,12 @@ mapdl.etable("damage", "nmisc", 70)
 damage_df = mapdl.pretab("damage").to_dataframe()
 
 ###############################################################################
-# Post-processing of the results using PyDPF
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# PyDPF can be used in this context to visualise the crack opening throughout
-# the simulation as an animation. The steps for producing that are provided in
-# below.
+# Postprocessing results using PyDPF
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Use PyDPF to visualize the crack opening throughout the simulation as
+# an animation.
 
-# Generating DPF model
+# Generate the DPF model
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
 
