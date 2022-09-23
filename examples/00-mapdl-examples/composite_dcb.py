@@ -386,7 +386,7 @@ for i in range(1, 100):
 
 plotter.show()
 
-# Plotting the reaction force at the bottom nodes
+# Plot the reaction force at the bottom nodes
 mesh_scoping = model.metadata.named_selection('BOT_NOD')
 f_tot = []
 d_tot = []
