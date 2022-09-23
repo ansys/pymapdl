@@ -323,7 +323,7 @@ mesh_field_cohesive = result_mesh.field_of_properties(
     dpf.common.nodal_properties.coordinates
 )
 
-# Index of NMISC results
+# Get the index of the NMISC results
 nmisc_index = 70
 
 # Generating the damage result operator
