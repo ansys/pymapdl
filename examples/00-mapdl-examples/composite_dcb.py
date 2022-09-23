@@ -336,7 +336,7 @@ disp_op = model.results.displacement()
 add_op = dpf.operators.math.add(fieldA=mesh_field)
 add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
-# Instantiating a PyVista plotter and starting the creation of a GIF
+# Instantiate a PyVista plotter and start the creation of a GIF
 plotter = pv.Plotter()
 plotter.open_gif("dcb.gif")
 
