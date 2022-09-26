@@ -71,6 +71,9 @@ pext=0.24                         # Differential external pressure (MPa)
 mapdl = launch_mapdl()
 print(mapdl)
 
+mapdl.filname('buckling') # change filename
+# mapdl.nerr(nmerr=200, nmabt=10000, abort=-1, ifkey=0, num=0)
+
 # enter preprocessor
 mapdl.prep7()
 
@@ -108,12 +111,9 @@ mapdl.secdata(25,1)
 
 # read model of stiffened cylinder
 # download the cdb file
-# ring_mesh_file = download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
-
-ring_mesh_file = r"D:\PyAnsys\Examples\Buckling_PostBuckling_TD21\ring_stiffened_cylinder_mesh_file.cdb"
+ring_mesh_file = download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
 
 # read in cdb
-
 mapdl.cdread("db", ring_mesh_file)
 mapdl.allsel()
 mapdl.eplot(background="w")
@@ -251,10 +251,9 @@ mapdl.post_processing.plot_nodal_displacement('NORM',
 # updating the geometry with mode shapes. The factor assumes the manufacturing
 # tolerance of the radius to be on the order of 0.1. 
 mapdl.finish()
-mapdl.filname('buckling') # change filename
 mapdl.prep7()
 for i in range(1,11):
-    mapdl.upgeom(0.1,1,i,'file','rst') # Add imperfections as a tenth of each
+    mapdl.upgeom(0.1,1,i,'buckling','rst') # Add imperfections as a tenth of each
                                         # mode shape
 mapdl.finish()
 #%%
@@ -301,7 +300,7 @@ mapdl.slashsolu()                    # Restart analysis with stabilization
 mapdl.antype('static','restart',1,10)
 mapdl.nsubst(100,50000,10)
 mapdl.rescontrol('define','last')
-mapdl.stabilize('constant','energy',0.000144)  # Use energy option 
+mapdl.stabilize('constant','energy',0.000143)  # Use energy option 
 output = mapdl.solve()
 print(output)
 mapdl.finish()
