@@ -35,8 +35,8 @@ Procedure
 Additional packages
 ~~~~~~~~~~~~~~~~~~~
 These additional packages are imported for use:
-* `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
-* `Pandas <https://pandas.pydata.org/>`.
+* - `Matplotlib <https://matplotlib.org>`_ for plotting
+* - `Pandas <https://pandas.pydata.org/>`_ for data analysis and manipulation
 """
 
 ###############################################################################
