@@ -17,7 +17,7 @@ Objective
 This example shows how to use PyMAPDL to simulate delamination in
 composite materials. PyDPF modules are also used for the post-processing of the results.
 
-Problem Figure
+Problem figure
 ~~~~~~~~~~~~~~
 .. image:: ../../../images/dcb_test.png
    :width: 400
