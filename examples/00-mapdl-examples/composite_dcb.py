@@ -178,7 +178,7 @@ mapdl.keyopt(3, 18, 0)
 mapdl.keyopt(3, 2, 0)
 mapdl.keyopt(2, 5, 0)
 
-# generating TARGE170 elements on top of cm_1
+# Generate TARGE170 elements on top of cm_1
 mapdl.nsel("s", "", "", "cm_1")
 mapdl.cm("_target", "node")
 mapdl.type(2)
