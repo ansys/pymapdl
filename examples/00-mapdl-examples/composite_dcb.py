@@ -137,7 +137,7 @@ mapdl.eplot()
 # Finally, elements are generated on top of the respective surfaces ``cm_1`` and
 # ``cm_2``.
 
-# identifying the two touching areas and assigning them to components
+# Identify the two touching areas and assign them to components
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
 areas = mapdl.geometry.anum
