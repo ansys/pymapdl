@@ -85,7 +85,7 @@ eps = 1e-1
 # Composite plates are modelled using homogeneous linear elastic orthotropic
 # properties, whereas a bilinear cohesive law is used for cohesive elements.
 
-# entering the preprocessor and assigning the unit system
+# Enter the preprocessor and define the unit system
 mapdl.prep7()
 mapdl.units("mpa")
 
