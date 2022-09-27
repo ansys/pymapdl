@@ -194,17 +194,16 @@ mapdl.esln("s", 0)
 mapdl.esurf()
 
 ###############################################################################
-# Generating boundary conditions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# In this final step the boundary conditions are assigned to replicate the real
-# test conditions. In particular, one end of the two composite plates
-# is fixed against translation along x, y and z. On the other hand, on the
-# opposite side of the plate the displacement conditions are applied to
+# Generate boundary conditions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Assign boundary conditions to replicate the real test conditions. One end of the two
+# composite plates is fixed against translation along the x, y, and z axis. On the
+# opposite side of the plate, displacement conditions are applied to
 # simulate the interfacial crack opening. These conditions are applied to the
-# top and bottom nodes corresponding to the geometrical edges located at
-# (0.0, `y`, 0.0) and (0.0, `y`, 3.4) respectively (coordinates (x, y, z)). Two different components
-# are assigned to these sets of nodes for a faster identification of the nodes
-# bearing reaction forces.
+# top and bottom nodes corresponding to the geometrical edges located
+# respectively at these (x, y, z) coordinates:, ``(0.0, `y`, 0.0)`` and ``(0.0, `y`, 3.4)``.
+# Two different components are assigned to these sets of nodes for a faster
+# identification of the nodes bearing reaction forces.
 
 # applying the two displacement conditions
 mapdl.allsel()
