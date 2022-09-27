@@ -107,10 +107,10 @@ mapdl.tbtemp(25.0)
 mapdl.tbdata(1, 50.0, 0.5, 50, 0.5, 0.01, 2)
 
 ###############################################################################
-# Creating the geometry in the model and meshing
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# The two plates are generated as two parallelepipeds to which are assigned
-# the composite material properties and the correct three-dimensional elements.
+# Create the geometry in the model and meshing
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The two plates are generated as two parallelepipeds. Composite material properties
+# and the three-dimensional elements are then assigned.
 
 # generating the two composite plates
 vnum0 = mapdl.block(0.0, length + pre_crack, 0.0, width, 0.0, height)
