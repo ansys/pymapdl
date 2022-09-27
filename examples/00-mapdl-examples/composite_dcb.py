@@ -112,7 +112,7 @@ mapdl.tbdata(1, 50.0, 0.5, 50, 0.5, 0.01, 2)
 # The two plates are generated as two parallelepipeds. Composite material properties
 # and the three-dimensional elements are then assigned.
 
-# generating the two composite plates
+# Generate the two composite plates
 vnum0 = mapdl.block(0.0, length + pre_crack, 0.0, width, 0.0, height)
 vnum1 = mapdl.block(0.0, length + pre_crack, 0.0, width, height, 2*height)
 
