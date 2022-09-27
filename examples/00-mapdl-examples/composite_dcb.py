@@ -80,11 +80,10 @@ eps = 1e-1
 # surfaces.
 #
 #
-# Adding material parameters
-# ~~~~~~~~~~~~~~~~~~
-# In this section, the material properties are defined. Composite plates are
-# modelled using homogeneous linear elastic orthotropic properties whereas a
-# bilinear cohesive law is used for cohesive elements.
+# Define material parameters
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Composite plates are modelled using homogeneous linear elastic orthotropic
+# properties, whereas a bilinear cohesive law is used for cohesive elements.
 
 # entering the preprocessor and assigning the unit system
 mapdl.prep7()
