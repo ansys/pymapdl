@@ -205,7 +205,7 @@ mapdl.esurf()
 # Two different components are assigned to these sets of nodes for a faster
 # identification of the nodes bearing reaction forces.
 
-# applying the two displacement conditions
+# Apply the two displacement conditions
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
 mapdl.nsel(type_="r", item="loc", comp="z", vmin=2*height, vmax=2*height)
