@@ -116,7 +116,7 @@ mapdl.tbdata(1, 50.0, 0.5, 50, 0.5, 0.01, 2)
 vnum0 = mapdl.block(0.0, length + pre_crack, 0.0, width, 0.0, height)
 vnum1 = mapdl.block(0.0, length + pre_crack, 0.0, width, height, 2*height)
 
-# assigning material properties and element type
+# Assign material properties and element type
 mapdl.mat(1)
 mapdl.type(1)
 
