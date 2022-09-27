@@ -233,9 +233,9 @@ mapdl.eplot(
 # Solve the non-linear static analysis
 # ====================================
 #
-# A non-linear static analysis is run to in this very last step. One hundreds
-# substeps are requested in this case to have a smooth crack opening
-# progression as well as to facilitate convergency for the static solver.
+# Run a non-linear static analysis. To have smooth crack opening
+# progression and facilitate convergency for the static solver, request
+# 100 substeps.
 
 # Enter the solution processor and define the analysis settings
 mapdl.allsel()
