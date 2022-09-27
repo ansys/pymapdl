@@ -89,7 +89,7 @@ eps = 1e-1
 mapdl.prep7()
 mapdl.units("mpa")
 
-# defining SOLID185, TARGE170 and CONTA174 elements along with the element size
+# Define SOLID185, TARGE170, and CONTA174 elements, along with the element size
 mapdl.et(1, 185)
 mapdl.et(2, 170)
 mapdl.et(3, 174)
