@@ -59,8 +59,9 @@ mapdl = pymapdl.launch_mapdl()
 print(mapdl)
 
 ###############################################################################
-# Setting the model geometrical inputs
-# ========================
+# Set geometrical inputs
+# ======================
+# Set geometrical inputs for the model.
 length = 75.0
 pre_crack = 10.0
 width = 25.0
