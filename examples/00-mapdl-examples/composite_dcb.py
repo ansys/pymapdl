@@ -275,7 +275,7 @@ output = mapdl.solve()
 # Enter the postprocessor
 mapdl.post1()
 
-# selecting the substep
+# Select the substep
 mapdl.set(1, 100)
 
 # Select ``CONTA174`` elements
