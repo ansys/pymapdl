@@ -243,7 +243,7 @@ mapdl.finish()
 mapdl.run("/SOLU")
 mapdl.antype("static")
 
-# activating non-linear geometry
+# Activate non-linear geometry
 mapdl.nlgeom("on")
 
 # Request substeps
