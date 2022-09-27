@@ -305,7 +305,7 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
 model = Model(data_src)
 
-# Getting the mesh of whole the model
+# Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
 
 # Get the mesh of the cohesive elements
