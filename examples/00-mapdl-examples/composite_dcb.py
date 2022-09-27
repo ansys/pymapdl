@@ -25,12 +25,12 @@ Problem figure
 
 Procedure
 ~~~~~~~~~
-* Launch MAPDL instance
-* Setup the model
-* Solve the model
-* Plot results of interest using PyMAPDL
-* Plot results using PyDPF
-* Plot reaction force
+* Launch the MAPDL instance.
+* Set up the model.
+* Solve the model.
+* Plot results using PyMAPDL.
+* Plot results using PyDPF.
+* Plot reaction force.
 
 Additional Packages Used
 ~~~~~~~~~~~~~~~~~~~~~~~~
