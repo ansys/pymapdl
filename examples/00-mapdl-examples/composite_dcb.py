@@ -159,7 +159,7 @@ mapdl.allsel()
 mapdl.cm("_elemcm", "elem")
 mapdl.mat(2)
 
-# assigning real constants and keyoptions
+# Assign real constants and key options
 mapdl.r(3, "", "", 1.0, 0.1, 0, "")
 mapdl.rmore("", "", 1.0e20, 0.0, 1.0, "")
 mapdl.rmore(0.0, 0.0, 1.0, "", 1.0, 0.5)
