@@ -127,16 +127,16 @@ mapdl.vmesh(vnum1)
 mapdl.eplot()
 
 ###############################################################################
-# Generating cohesive elements in between the contact surfaces
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Generate cohesive elements in between the contact surfaces
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The generation of cohesive elements is the most delicate part of the
-# modelling approach. In first instance the two contact surfaces are identified
-# and defined as a components (in this case `cm_1` and `cm_2 respectively).
-# Successively, the ``CONTA174`` and ``TARGE170`` elements real constants, as well as
-# their key options are set to capture the right behavior. The meaning of each
+# modelling approach. First, the two contact surfaces are identified
+# and defined as a components (in this case ``cm_1`` and ``cm_2`` respectively).
+# Then, the real constants for the ``CONTA174`` and ``TARGE170`` elements and
+# their key options are set to capture the correct behavior. Descriptions for each
 # of these parameters can be found in the Ansys element documentation.
-# Finally, elements are generated on top of the respective surfaces `cm_1` and
-# `cm_2`.
+# Finally, elements are generated on top of the respective surfaces ``cm_1`` and
+# ``cm_2``.
 
 # identifying the two touching areas and assigning them to components
 mapdl.allsel()
