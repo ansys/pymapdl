@@ -71,12 +71,12 @@ d = 10.0
 eps = 1e-1 
 
 ###############################################################################
-# Setting up the model
-# ====================
-# In this step the model setup is performed choosing the units system and the
-# element types to be used in the simulations. In this case a fully 3D approach
-# is chosen therefore ``SOLID186`` elements are used for meshing volumes and
-# ``TARGE170``/``CONTA174`` are used for modelling cohesive elements in between contact
+# Set up the model
+# ================
+# Set up the model by choosing the units system and the
+# element types for the simulations. Because a fully 3D approach
+# is chosen for this example, ``SOLID186`` elements are used for meshing volumes, and
+# ``TARGE170`` and ``CONTA174`` are used for modelling cohesive elements in between contact
 # surfaces.
 #
 #
