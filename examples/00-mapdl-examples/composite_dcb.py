@@ -154,7 +154,7 @@ mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.cm("cm_2", "node")
 
-# identifying all the elements before the creation of TARGE170 elements
+# Identify all the elements before generation of TARGE170 elements
 mapdl.allsel()
 mapdl.cm("_elemcm", "elem")
 mapdl.mat(2)
