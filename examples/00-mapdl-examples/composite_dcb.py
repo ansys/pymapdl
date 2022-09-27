@@ -95,7 +95,7 @@ mapdl.et(2, 170)
 mapdl.et(3, 174)
 mapdl.esize(10.0)
 
-# defining a material properties for the composite plates
+# Define material properties for the composite plates
 mapdl.mp("ex", 1, 61340)
 mapdl.mp("dens", 1, 1.42e-09)
 mapdl.mp("nuxy", 1, 0.1)
