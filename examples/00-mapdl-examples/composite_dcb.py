@@ -32,8 +32,9 @@ Procedure
 * Plot results using PyDPF.
 * Plot reaction force.
 
-Additional Packages Used
-~~~~~~~~~~~~~~~~~~~~~~~~
+Additional packages
+~~~~~~~~~~~~~~~~~~~
+These additional packages are imported for use:
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
 * `Pandas <https://pandas.pydata.org/>`.
 """
