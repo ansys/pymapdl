@@ -258,7 +258,7 @@ output = mapdl.solve()
 ###############################################################################
 # Postprocessing
 # ==============
-# The post-processing is performed using PyMAPDL and PyDPF.
+# Use PyMAPDL and PyDPF for postprocessing.
 #
 #
 # Postprocess results using PyMAPDL
