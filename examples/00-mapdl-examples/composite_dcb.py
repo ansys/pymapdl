@@ -287,7 +287,7 @@ mapdl.post_processing.plot_element_values(
     "nmisc", 70, scalar_bar_args={"title": "Cohesive Damage"}
 )
 
-# extracting the nodal values of the damage parameter
+# Extract the nodal values of the damage parameter
 mapdl.allsel()
 mapdl.esel("s", "ename", "", 174)
 mapdl.etable("damage", "nmisc", 70)
