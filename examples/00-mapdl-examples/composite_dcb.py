@@ -185,7 +185,7 @@ mapdl.type(2)
 mapdl.esln("s", 0)
 mapdl.esurf()
 
-# generating the CONTA174 elements on top of cm_2
+# Generate CONTA174 elements on top of cm_2
 mapdl.cmsel("s", "_elemcm")
 mapdl.nsel("s", "", "", "cm_2")
 mapdl.cm("_contact", "node")
