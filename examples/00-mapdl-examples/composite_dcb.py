@@ -100,7 +100,7 @@ mapdl.mp("ex", 1, 61340)
 mapdl.mp("dens", 1, 1.42e-09)
 mapdl.mp("nuxy", 1, 0.1)
 
-# defining the bilinear cohesive law
+# Define the bilinear cohesive law
 mapdl.mp("mu", 2, 0)
 mapdl.tb("czm", 2, 1, "", "bili")
 mapdl.tbtemp(25.0)
