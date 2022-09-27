@@ -218,7 +218,7 @@ mapdl.nsel(type_="r", item="loc", comp="z", vmin=0.0, vmax=0.0)
 mapdl.d(node="all", lab="uz", value=-10)
 mapdl.cm("bot_nod", "node")
 
-# applying the fix condition
+# Apply the fix condition
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=length + pre_crack, vmax=length + pre_crack)
 mapdl.d(node="all", lab="ux", value=0.0)
