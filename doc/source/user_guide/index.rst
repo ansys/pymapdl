@@ -28,6 +28,7 @@ PyMAPDL library.
    pool
    xpl
    upf
+   krylov
 
 
 PyMAPDL Basic Overview

@@ -19,6 +19,7 @@ this project.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`python_upf_examples` | Demonstrates the interoperability between ``MAPDL`` user programmable functions and Python.             |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-
+| :ref:`krylov_example`      | Demonstrates the usage of Krylov method for solving Customised Harmonic Analysis.                       |
++----------------------------+---------------------------------------------------------------------------------------------------------+
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html

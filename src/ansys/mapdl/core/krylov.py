@@ -42,7 +42,8 @@ class KrylovSolver:
                         with all other subspace vectors [Default:False]
         out_key       : Bool, optional
                         Key to output KRYLOV subspace to Qz.txt file [Default:False]
-        full_file     : Specify .full file name to read specific full file.
+        full_file     : str, optional
+                        Specify .full file name to read specific full file,
                         By default jobname.full is read.
 
         Returns
@@ -52,9 +53,6 @@ class KrylovSolver:
 
         Notes
         -----
-        The frequency at which the subspace is build is ideally at the middle of
-        frequency range of study.
-
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
@@ -356,29 +354,29 @@ class KrylovSolver:
         return self.Yz
 
     def kryexpand(self, out_key=False, res_key=0):
-        """Expand reduced solution back to FE space
+        """ "Expand reduced solution back to FE space
 
         This method expands the reduced solution for a harmonic analysis
-            back to the original space.  Optional calculation of the residual
-            is available.
+        back to the original space.  Optional calculation of the residual
+        is available.
 
         Parameters
         ----------
-            out_key  : Bool
-                      Key to output expanded solution to Xz_*.txt file [Default:False]
-            res_key  : int, optional
-                      Key to compute the residual of the expanded solution
-
+        out_key  : Bool
+                   Key to output expanded solution to Xz_*.txt file [Default:False]
+        res_key  : int, optional
+                Key to compute the residual of the expanded solution
                 = 0 means do not compute the residual [Default]
                 = 1 means compute the L-inf norm of the residual
                 = 2 means compute the L-1 norm of the residual
                 = 3 means compute the L-2 norm of the residual
+
         Returns
         -------
-        None (if out_key = False)
-
-        Ndarray (if out_key = True)
-            Solution vectors mapped to User order.
+        Ndarray
+            Solution vectors mapped to User order. (if out_key = True)
+        None
+            (if out_key = False)
 
         Notes
         -----
