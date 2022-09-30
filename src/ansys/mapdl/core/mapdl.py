@@ -3639,7 +3639,7 @@ class _MapdlCore(Commands):
 
                 # Extracting only the first 'lines_number' lines.
                 # This is important. Regex has problems parsing long messages.
-                lines_number = 10
+                lines_number = 20
                 partial_output = "\n".join(
                     response.splitlines()[index : (index + lines_number)]
                 )
