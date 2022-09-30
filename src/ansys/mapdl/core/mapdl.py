@@ -3647,7 +3647,7 @@ class _MapdlCore(Commands):
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*\n)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*)",  # we might consider to use only one \n.
                     partial_output,
                     re.DOTALL,
                 )
