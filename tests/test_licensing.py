@@ -167,7 +167,7 @@ def test_license_checker(tmpdir, license_checker):
 @skip_no_lic_bin
 def test_check_license_file(tmpdir):
     timeout = 15
-    checker = licensing.LicenseChecker(verbose=True, timeout=timeout)
+    checker = licensing.LicenseChecker(timeout=timeout)
     # start the license check in the background
     checker.start(checkout_license=False)
 
