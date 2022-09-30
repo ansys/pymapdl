@@ -17,7 +17,8 @@ except:
     LIC_INSTALLED = None
 
 skip_no_lic_bin = pytest.mark.skipif(
-    not (LIC_INSTALLED and IS_LOCAL), reason="Requires local license utilities binaries"
+    not (LIC_INSTALLED and IS_LOCAL),
+    reason="Requires being in 'local' mode and have license utilities binaries.",
 )
 
 skip_launch_mapdl = pytest.mark.skipif(
