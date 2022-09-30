@@ -276,10 +276,9 @@ def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
     license_checker.start()
-    time.sleep(1)
+    license_checker.wait()
 
     license_checker.stop = True
-    time.sleep(1)  # giving some time to reach end of the file.
     assert not license_checker._lic_file_thread.is_alive()
 
 
@@ -287,10 +286,9 @@ def test_is_connected_license_checker():
     license_checker = licensing.LicenseChecker()
 
     license_checker.start()
-    time.sleep(1)
+    license_checker.wait()
 
     license_checker.is_connected = True
-    time.sleep(1)  # giving some time to reach end of the file.
     assert not license_checker._lic_file_thread.is_alive()
 
 
