@@ -4,11 +4,21 @@ import os
 import time
 import types
 
+from conftest import LOCAL as IS_LOCAL
 import pytest
 
 from ansys.mapdl.core import errors, launch_mapdl, licensing
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import threaded
+
+try:
+    LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
+except:
+    LIC_INSTALLED = None
+
+skip_no_lic_bin = pytest.mark.skipif(
+    not (LIC_INSTALLED and IS_LOCAL), reason="Requires local license utilities binaries"
+)
 
 skip_launch_mapdl = pytest.mark.skipif(
     not get_start_instance() and check_valid_ansys(),
@@ -29,33 +39,33 @@ FAKE_CHECKOUT_SUCCESS = """
 """
 
 MSG_LIC_DENIED = """
-        2021/09/06 22:39:38    DENIED              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
+        2021/09/06 22:39:38    DENIED              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   1026:FEAT_ANSYS:user@machine.win.ansys.com:winx64   0000:1.1.1.1
                     Request name ansys does not exist in the licensing pool.
                     Cannot connect to license server system.
                     The license server manager (lmgrd) has not been started yet,
                     the wrong port@host or license file is being used, or the
                     port or hostname in the license file has been changed.
                     Feature:       ansys
-                    Server name:   192.168.18.10
-                    License path:  1055@AAPDDqVK5WqNLrt;
+                    Server nam0000 1.1.1.1
+                    License path:  1055@machine;
                     FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
 """
 MSG_LIC_CHECKOUT = """
-        2021/09/06 22:39:38    CHECKOUT              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   10268:FEAT_ANSYS:gayuso@AAPDDqVK5WqNLrt.win.ansys.com:winx64   7368:192.168.18.10
+        2021/09/06 22:39:38    CHECKOUT              ansys                           21.2 (2021.0512)             1/0/0/0                 1/1/1/1   1026:FEAT_ANSYS:user@machine.win.ansys.com:winx64   0000:1.1.1.1
                     Request name ansys does not exist in the licensing pool.
                     Cannot connect to license server system.
                     The license server manager (lmgrd) has not been started yet,
                     the wrong port@host or license file is being used, or the
                     port or hostname in the license file has been changed.
                     Feature:       ansys
-                    Server name:   192.168.18.10
-                    License path:  1055@AAPDDqVK5WqNLrt;
+                    Server nam0000 1.1.1.1
+                    License path:  1055@machine;
                     FlexNet Licensing error:-15,578.  System Error: 10049 "WinSock: Invalid address"
 """
 
 
 # TEST-NET-3 (not quite a black hole, but set aside by RFC 5737)
-test_net_3 = "203.0.113.0"
+TEST_NET_3 = "203.0.113.0"
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_LOG_PATH = os.path.join(PATH, "test_files", "sample_lic_log.log")
@@ -69,16 +79,6 @@ def write_log(path):
         for line in FAKE_CHECKOUT_SUCCESS.splitlines():
             fid.write(line + "\n")
             time.sleep(0.01)
-
-
-try:
-    LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
-except:
-    LIC_INSTALLED = None
-
-skip_no_lic_bin = pytest.mark.skipif(
-    not LIC_INSTALLED, reason="Requires local license utilities binaries"
-)
 
 
 @pytest.fixture(scope="module")
@@ -104,7 +104,7 @@ def test__checkout_wrong_license(license_checker):
 
 @skip_no_lic_bin
 def test__checkout_license_fail(license_checker):
-    output = license_checker._checkout_license("meba", test_net_3, 1055)
+    output = license_checker._checkout_license("meba", TEST_NET_3, 1055)
     assert "CHECKOUT FAILED" in output
 
 
@@ -121,7 +121,7 @@ def test__check_mech_license_available_specified_license(license_checker):
 @skip_no_lic_bin
 def test_check_mech_license_available_fail(license_checker):
     with pytest.raises(errors.LicenseServerConnectionError):
-        license_checker._check_mech_license_available(test_net_3)
+        license_checker._check_mech_license_available(TEST_NET_3)
 
 
 def test_get_ansys_license_debug_file_tail_timeout(license_checker):
@@ -276,9 +276,11 @@ def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
     license_checker.start()
-    license_checker.wait()
+    time.sleep(1)
 
-    license_checker.stop = True
+    license_checker.stop = True  # Overwriting the connect attribute
+    # so the thread is killed right after.
+    time.sleep(2)
     assert not license_checker._lic_file_thread.is_alive()
 
 
@@ -286,9 +288,11 @@ def test_is_connected_license_checker():
     license_checker = licensing.LicenseChecker()
 
     license_checker.start()
-    license_checker.wait()
+    time.sleep(1)
 
-    license_checker.is_connected = True
+    license_checker.is_connected = True  # Overwriting the connect attribute
+    # so the thread is killed right after.
+    time.sleep(2)
     assert not license_checker._lic_file_thread.is_alive()
 
 
