@@ -55,6 +55,7 @@ from ansys.mapdl.core.post import PostProcessing
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
+    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
 # test for png file
