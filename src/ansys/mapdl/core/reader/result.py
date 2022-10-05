@@ -26,7 +26,15 @@ from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
+
+
+class ResultNotFound(MapdlRuntimeError):
+    """Results not found"""
+
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
 
 
 def update_result(function):
@@ -260,56 +268,196 @@ class DPFResult(Result):
 
         return nodes
 
-    def _get_nodes_result(self, rnum, result_type, nodes=None):
-        return self._get_result(rnum, result_type, scope_type="Nodal", scope_ids=nodes)
+    def _set_requested_location(self, op, mesh, requested_location):
+        scop = dpf.Scoping()
 
-    def _get_elem_result(self, rnum, result_type, elements=None):
-        return self._get_result(
-            rnum, result_type, scope_type="Elemental", scope_ids=elements
-        )
+        if requested_location.lower() == "nodal":
+            scop.location = dpf.locations.nodal
+            scop.ids = mesh.nodes.scoping.ids
 
-    @update_result
-    def _get_result(self, rnum, result_type, scope_type="Nodal", scope_ids=None):
-        # todo: accepts components in nodes.
-        mesh = self.model.metadata.meshed_region
+        elif requested_location.lower() == "elemental_nodal":
+            scop.ids = mesh.elements.scoping.ids
 
-        field_op = getattr(self.model.results, result_type)()
-
-        # Setting time steps
-        if not rnum:
-            rnum = 1
-
-        field_op.inputs.time_scoping.connect(rnum)
-
-        # Setting mesh scope
-        my_scoping = dpf.Scoping()
-        my_scoping.location = scope_type
-        if scope_ids:
-            my_scoping.ids = scope_ids
+        elif requested_location.lower() == "elemental":
+            scop.location = dpf.locations.elemental
+            scop.ids = mesh.elements.scoping.ids
         else:
-            if scope_type.lower() == "elemental":
+            raise ValueError(
+                f"The 'requested_location' value ({requested_location}) is not allowed."
+            )
+        op.inputs.mesh_scoping.connect(scop)
+
+    def _set_input_timestep_scope(self, op, rnum):
+
+        if not rnum:
+            rnum = [int(1)]
+        else:
+            if isinstance(rnum, (int, float)):
+                rnum = [rnum]
+            else:
+                raise TypeError(
+                    "Only 'int' and 'float' are supported to define the steps."
+                )
+
+        my_time_scoping = dpf.Scoping()
+        my_time_scoping.location = "timefreq_steps"  # "time_freq" #timefreq_steps
+        my_time_scoping.ids = rnum
+
+        op.inputs.time_scoping.connect(my_time_scoping)
+
+    def _set_input_mesh_scope(
+        self, op, mesh, requested_location, scope_type, scope_ids
+    ):
+        my_scoping = dpf.Scoping()
+
+        if requested_location.lower() == "nodal":
+            location = dpf.locations.nodal
+        elif requested_location.lower() == "elemental_nodal":
+            location = None  # Default
+        elif requested_location.lower() == "elemental":
+            location = dpf.locations.elemental
+        else:
+            raise ValueError(
+                f"The 'requested_location' value ({requested_location}) is not allowed."
+            )
+
+        if location:
+            my_scoping.location = location
+
+        if scope_ids:
+            if isinstance(scope_ids, str):
+                raise NotImplementedError("Components are not implemented yet")
+            else:
+                my_scoping.ids = scope_ids
+        else:  # selecting all elements nodes
+            if scope_type.lower() in "elemental":
                 entities = mesh.elements
             else:
                 entities = mesh.nodes
 
             my_scoping.ids = entities.scoping.ids
 
-        field_op.inputs.mesh_scoping.connect(my_scoping)
+        op.inputs.mesh_scoping.connect(my_scoping)
 
-        # Retrieving output
-        container = field_op.outputs.fields_container()[0]
-        container_data = container.data
+        ids_ = my_scoping.ids
+        id_order = np.argsort(ids_).astype(int)
+        return ids_, id_order
 
-        # Getting ids
-        if scope_type.lower() in "elemental":
-            ids_, mask_ = mesh.elements.map_scoping(container.scoping)
+    def _get_nodes_result(
+        self, rnum, result_type, in_nodal_coord_sys=False, nodes=None
+    ):
+        return self._get_result(
+            rnum,
+            result_type,
+            requested_location="Nodal",
+            scope_type="Nodal",
+            scope_ids=nodes,
+            result_in_entity_cs=in_nodal_coord_sys,
+        )
+
+    def _get_elem_result(
+        self, rnum, result_type, in_element_coord_sys=False, elements=None
+    ):
+        return self._get_result(
+            rnum,
+            result_type,
+            requested_location="Elemental",
+            scope_type="Elemental",
+            scope_ids=elements,
+            result_in_entity_cs=in_element_coord_sys,
+        )
+
+    def _get_elemnodal_result(
+        self, rnum, result_type, in_element_coord_sys=False, elements=None
+    ):
+        return self._get_result(
+            rnum,
+            result_type,
+            requested_location="Elemental_Nodal",
+            scope_type="NodalElemental",
+            scope_ids=elements,
+            result_in_entity_cs=in_element_coord_sys,
+        )
+
+    @update_result
+    def _get_result(
+        self,
+        rnum,
+        result_type,
+        requested_location="Nodal",
+        scope_type="Nodal",
+        scope_ids=None,
+        result_in_entity_cs=False,
+    ):
+        """
+        Get elemental/nodal/elementalnodal results.
+
+        Parameters
+        ----------
+        rnum : int
+            Result step/set
+        result_type : str
+            Result type, for example "stress", "strain", "displacement", etc.
+        requested_location : str, optional
+            Results given at which type of entity, by default "Nodal"
+        scope_type : str, optional
+            The results are obtained in the following entities/scope, by default "Nodal"
+        scope_ids : Union([int, floats, List[int]]), optional
+            List of entities (nodal/elements) to get the results from, by default None
+        result_in_entity_cs : bool, optional
+            Obtain the results in the entity coordenate system, by default False
+
+        Returns
+        -------
+        np.array
+            Values
+
+        Raises
+        ------
+        ResultNotFound
+            The given result (stress, strain, ...) could not be found in the RST file.
+        TypeError
+            Only floats and ints are allowed to scope steps/time.
+        NotImplementedError
+            Component input selection is still not supported.
+        """
+
+        # todo: accepts components in nodes.
+        mesh = self.model.metadata.meshed_region
+
+        if not hasattr(self.model.results, result_type):
+            list_results = "\n    ".join(
+                [each for each in dir(self.model.results) if not each.startswith("_")]
+            )
+            raise ResultNotFound(
+                f"The result '{result_type}' cannot be found on the RST file. "
+                f"The current results are:\n    {list_results}"
+            )
+
+        # Getting field
+        op = getattr(self.model.results, result_type)()
+
+        # CS output
+        if not result_in_entity_cs:
+            op.inputs.bool_rotate_to_global.connect(True)
         else:
-            ids_, mask_ = mesh.nodes.map_scoping(container.scoping)
+            op.inputs.bool_rotate_to_global.connect(False)
 
-        # Sorting results
-        id_order = np.argsort(ids_[mask_]).astype(int)
+        # Setting time steps
+        self._set_input_timestep_scope(op, rnum)
 
-        return ids_[id_order], container_data[id_order]
+        # Set type of return
+        self._set_requested_location(op, mesh, requested_location)
+
+        # Setting mesh scope
+        ids_, id_order = self._set_input_mesh_scope(
+            op, mesh, requested_location, scope_type, scope_ids
+        )
+
+        fields = op.outputs.fields_container()  # This index 0 is the step indexing.
+        fields_data = fields[0].data
+
+        return ids_[id_order], fields_data
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Returns the DOF solution for each node in the global
@@ -376,7 +524,7 @@ class DPFResult(Result):
                 "The parameter 'in_nodal_coord_sys' is being deprecated."
             )
 
-        return self._get_nodes_result(rnum, "displacement", nodes)
+        return self._get_nodes_result(rnum, "displacement", nodes, in_nodal_coord_sys)
 
     @wraps(nodal_displacement)
     def nodal_solution(self, *args, **kwargs):
@@ -445,13 +593,23 @@ class DPFResult(Result):
         layers.  Results are ordered such that the top layer and then
         the bottom layer is reported.
         """
-        # return super().element_stress(rnum, principal, in_element_coord_sys, **kwargs)
-        if principal is not None:
+        if principal:
             raise NotImplementedError()
-        if in_element_coord_sys is not None:
-            raise NotImplementedError
+        else:
+            return self._get_elem_result(
+                rnum, "stress", in_element_coord_sys, elements, **kwargs
+            )
 
-        return self._get_elem_result(rnum, "stress", elements=elements)
+    def element_nodal_stress(
+        self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
+    ):
+
+        if principal:
+            raise NotImplementedError()
+        else:
+            return self._get_elemnodal_result(
+                rnum, "stress", in_element_coord_sys, elements, **kwargs
+            )
 
     def nodal_elastic_strain(self, rnum, nodes=None):
         """Nodal component elastic strains.  This record contains
