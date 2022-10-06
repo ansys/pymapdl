@@ -11,6 +11,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # add any files you'd like to import here.  For example:
 wing_model = os.path.join(dir_path, "wing.dat")
+
+# Canonical Examples
 static_thermal_example = vmfiles["vm5"]
 static_coupled_thermal = vmfiles["vm33"]
 modal_piezoelectric = vmfiles["vm175"]
