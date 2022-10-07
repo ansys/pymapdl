@@ -3778,5 +3778,5 @@ class _MapdlCore(Commands):
             # If MAPDL cannot find named macro file, it will throw a runtime error.
 
         # Updating arg since the path is not needed anymore.
-        args = (base_name, args[1:])
+        args = (base_name, *args[1:])
         return super().use(*args, **kwargs)
