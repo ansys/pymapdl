@@ -29,6 +29,7 @@ and output impedance on other end.
 
     import os
     import numpy as np
+    import math
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
 
@@ -189,7 +190,7 @@ Perform Modal Analysis to study the natural modes of the system
     ev = mm.eigs(nev, k, M, phi=A, fmin=1.0)
     for i in range(nev):
         f = ev[i]  # Eigenfrequency (Hz)
-        print(f"[{i}] : Freq = {f:8.2f} Hz")
+         print(f"[{i}] : Freq = {f:8.2f} Hz")
 
 
 .. parsed-literal::
@@ -305,9 +306,13 @@ Results : Pressure Distribution as a function of length
     substep_index = 99
     for each_node, loc in zip(ind, coords):
         index_num = np.where(res[substep_index]['node'] == each_node)
-        pressure = res[substep_index][index_num]['x']
+        pressure = res[substep_index][index_num]['x'][0]
+        #Calculate amplitude at 60 deg
+        magnitude = abs(pressure)
+        phase = math.atan2(pressure.imag,pressure.real)
+        pressure_a = magnitude * np.cos(np.deg2rad(60)+phase)
         x_data.append(loc[0])
-        y_data.append(pressure)
+        y_data.append(pressure_a)
 
 .. code:: ipython3
 
@@ -316,13 +321,19 @@ Results : Pressure Distribution as a function of length
 
 .. code:: ipython3
 
-    # Plot X-Y Graph
-    plt.plot(sorted_x_data, sorted_y_data, linewidth= 3.0)
+    # Plotting the curve
+    plt.plot(sorted_x_data, sorted_y_data, linewidth= 3.0, color='b', label='Krylov method')
+    
+    # Naming the x-axis, y-axis and the whole graph
     plt.title("Pressure Distribution as a function of length")
     plt.xlabel("Length Coord")
     plt.ylabel("Pressure")
+    
+    # Adding legend
+    plt.legend()
+    
+    # To load the display window
     plt.show()
-
 
 
 .. image:: /examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_36_1.png
@@ -356,10 +367,19 @@ Results : Plot Frequency response Function
     frf_x, frf_y = zip(*frf_List) 
         
         
-    plt.plot(frf_x, frf_y, linewidth= 3.0)
+    # Plotting the curve    
+    plt.plot(frf_x, frf_y, linewidth= 3.0, color='b')
+
+    #Plot the natural frequency as vertical lines on the FRF graph
+    for itr in range(0,6):
+        plt.axvline(x=ev[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
+        
+    # Naming the x-axis, y-axis and the whole graph
     plt.title("Frequency Response Function")
     plt.xlabel("Frequency (HZ)")
     plt.ylabel("Pressure")
+
+    # To load the display window
     plt.show()
 
 
