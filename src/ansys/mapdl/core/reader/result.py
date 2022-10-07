@@ -9,6 +9,7 @@ DPF-Post needs quite a few things:
 - components support
 
 
+
 Check #todos
 """
 
@@ -83,6 +84,7 @@ class DPFResult(Result):
 
         self.__rst_directory = None
         self.__rst_name = None
+        self._mapdl_weakref = None
 
         if rst_file_path is not None:
             if os.path.exists(rst_file_path):
@@ -93,7 +95,6 @@ class DPFResult(Result):
                     f"The RST file '{rst_file_path}' could not be found."
                 )
 
-            self._mapdl_weakref = None
             self._mode_rst = True
 
         elif mapdl is not None:
@@ -173,14 +174,20 @@ class DPFResult(Result):
     @property
     def _rst_directory(self):
         if self.__rst_directory is None:
-            if self.local:
-                _rst_directory = self._mapdl.directory
-            else:
-                _rst_directory = os.path.join(tempfile.gettempdir(), random_string())
-                if not os.path.exists(_rst_directory):
-                    os.mkdir(_rst_directory)
+            if self.mode_mapdl:
+                if self.local:
+                    _rst_directory = self._mapdl.directory
+                else:
+                    _rst_directory = os.path.join(
+                        tempfile.gettempdir(), random_string()
+                    )
+                    if not os.path.exists(_rst_directory):
+                        os.mkdir(_rst_directory)
+                self.__rst_directory = _rst_directory
 
-            self.__rst_directory = _rst_directory
+            else:  # rst mode
+                # It should have been initialized with this value already.
+                pass
 
         return self.__rst_directory
 
@@ -268,24 +275,60 @@ class DPFResult(Result):
 
         return nodes
 
-    def _set_requested_location(self, op, mesh, requested_location):
+    def _set_rescope(self, op, scope_ids):
+        fc = op.outputs.fields_container()
+
+        rescope = dpf.operators.scoping.rescope()
+        rescope.inputs.mesh_scoping(scope_ids)
+        rescope.inputs.fields(fc)
+        rescope_field = rescope.outputs.fields_as_fields_container()[
+            0
+        ]  # This index 0 is the step indexing.
+
+        # When we destroy the operator, we might lose access to the array, that is why we copy.
+        ids = rescope_field.scoping.ids.copy()
+        data = rescope_field.data.copy()
+
+        return ids, data
+
+    def _set_mesh_scoping(self, op, mesh, requested_location, scope_ids):
         scop = dpf.Scoping()
 
         if requested_location.lower() == "nodal":
             scop.location = dpf.locations.nodal
-            scop.ids = mesh.nodes.scoping.ids
+            if scope_ids:
+                scop.ids = scope_ids
+            else:
+                scop.ids = mesh.nodes.scoping.ids
 
         elif requested_location.lower() == "elemental_nodal":
-            scop.ids = mesh.elements.scoping.ids
+            if scope_ids:
+                scop.ids = scope_ids
+            else:
+                scop.ids = mesh.elements.scoping.ids
 
         elif requested_location.lower() == "elemental":
             scop.location = dpf.locations.elemental
-            scop.ids = mesh.elements.scoping.ids
+            if scope_ids:
+                scop.ids = scope_ids
+            else:
+                scop.ids = mesh.elements.scoping.ids
         else:
             raise ValueError(
                 f"The 'requested_location' value ({requested_location}) is not allowed."
             )
         op.inputs.mesh_scoping.connect(scop)
+        return scop.ids
+
+    def _set_element_results(self, op, mesh):
+
+        fc = op.outputs.fields_container()
+
+        op2 = dpf.operators.averaging.to_elemental_fc()
+        op2.inputs.fields_container.connect(fc)
+        op2.inputs.mesh.connect(mesh)
+
+        return op2
 
     def _set_input_timestep_scope(self, op, rnum):
 
@@ -305,43 +348,18 @@ class DPFResult(Result):
 
         op.inputs.time_scoping.connect(my_time_scoping)
 
-    def _set_input_mesh_scope(
-        self, op, mesh, requested_location, scope_type, scope_ids
-    ):
-        my_scoping = dpf.Scoping()
-
-        if requested_location.lower() == "nodal":
-            location = dpf.locations.nodal
-        elif requested_location.lower() == "elemental_nodal":
-            location = None  # Default
-        elif requested_location.lower() == "elemental":
-            location = dpf.locations.elemental
-        else:
-            raise ValueError(
-                f"The 'requested_location' value ({requested_location}) is not allowed."
+    def _get_operator(self, result_field):
+        if not hasattr(self.model.results, result_field):
+            list_results = "\n    ".join(
+                [each for each in dir(self.model.results) if not each.startswith("_")]
+            )
+            raise ResultNotFound(
+                f"The result '{result_field}' cannot be found on the RST file. "
+                f"The current results are:\n    {list_results}"
             )
 
-        if location:
-            my_scoping.location = location
-
-        if scope_ids:
-            if isinstance(scope_ids, str):
-                raise NotImplementedError("Components are not implemented yet")
-            else:
-                my_scoping.ids = scope_ids
-        else:  # selecting all elements nodes
-            if scope_type.lower() in "elemental":
-                entities = mesh.elements
-            else:
-                entities = mesh.nodes
-
-            my_scoping.ids = entities.scoping.ids
-
-        op.inputs.mesh_scoping.connect(my_scoping)
-
-        ids_ = my_scoping.ids
-        id_order = np.argsort(ids_).astype(int)
-        return ids_, id_order
+        # Getting field
+        return getattr(self.model.results, result_field)()
 
     def _get_nodes_result(
         self, rnum, result_type, in_nodal_coord_sys=False, nodes=None
@@ -350,7 +368,6 @@ class DPFResult(Result):
             rnum,
             result_type,
             requested_location="Nodal",
-            scope_type="Nodal",
             scope_ids=nodes,
             result_in_entity_cs=in_nodal_coord_sys,
         )
@@ -362,7 +379,6 @@ class DPFResult(Result):
             rnum,
             result_type,
             requested_location="Elemental",
-            scope_type="Elemental",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
         )
@@ -374,7 +390,6 @@ class DPFResult(Result):
             rnum,
             result_type,
             requested_location="Elemental_Nodal",
-            scope_type="NodalElemental",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
         )
@@ -383,9 +398,8 @@ class DPFResult(Result):
     def _get_result(
         self,
         rnum,
-        result_type,
+        result_field,
         requested_location="Nodal",
-        scope_type="Nodal",
         scope_ids=None,
         result_in_entity_cs=False,
     ):
@@ -396,12 +410,10 @@ class DPFResult(Result):
         ----------
         rnum : int
             Result step/set
-        result_type : str
+        result_field : str
             Result type, for example "stress", "strain", "displacement", etc.
         requested_location : str, optional
             Results given at which type of entity, by default "Nodal"
-        scope_type : str, optional
-            The results are obtained in the following entities/scope, by default "Nodal"
         scope_ids : Union([int, floats, List[int]]), optional
             List of entities (nodal/elements) to get the results from, by default None
         result_in_entity_cs : bool, optional
@@ -425,17 +437,10 @@ class DPFResult(Result):
         # todo: accepts components in nodes.
         mesh = self.model.metadata.meshed_region
 
-        if not hasattr(self.model.results, result_type):
-            list_results = "\n    ".join(
-                [each for each in dir(self.model.results) if not each.startswith("_")]
-            )
-            raise ResultNotFound(
-                f"The result '{result_type}' cannot be found on the RST file. "
-                f"The current results are:\n    {list_results}"
-            )
+        if isinstance(scope_ids, np.ndarray):
+            scope_ids = scope_ids.tolist()
 
-        # Getting field
-        op = getattr(self.model.results, result_type)()
+        op = self._get_operator(result_field)
 
         # CS output
         if not result_in_entity_cs:
@@ -447,17 +452,17 @@ class DPFResult(Result):
         self._set_input_timestep_scope(op, rnum)
 
         # Set type of return
-        self._set_requested_location(op, mesh, requested_location)
+        ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids)
 
-        # Setting mesh scope
-        ids_, id_order = self._set_input_mesh_scope(
-            op, mesh, requested_location, scope_type, scope_ids
-        )
+        if requested_location.lower() == "elemental":
+            op = self._set_element_results(
+                op, mesh
+            )  # overwrite op to be the elemental results OP
 
-        fields = op.outputs.fields_container()  # This index 0 is the step indexing.
-        fields_data = fields[0].data
+        # Applying rescope to make sure the order is right
+        ids, data = self._set_rescope(op, ids.astype(int).tolist())
 
-        return ids_[id_order], fields_data
+        return ids, data
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Returns the DOF solution for each node in the global
@@ -524,7 +529,12 @@ class DPFResult(Result):
                 "The parameter 'in_nodal_coord_sys' is being deprecated."
             )
 
-        return self._get_nodes_result(rnum, "displacement", nodes, in_nodal_coord_sys)
+        return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
+
+    def nodal_voltage(self, rnum, in_nodal_coord_sys=None, nodes=None):
+        return self._get_nodes_result(
+            rnum, "electric_potential", in_nodal_coord_sys, nodes
+        )
 
     @wraps(nodal_displacement)
     def nodal_solution(self, *args, **kwargs):
@@ -611,7 +621,7 @@ class DPFResult(Result):
                 rnum, "stress", in_element_coord_sys, elements, **kwargs
             )
 
-    def nodal_elastic_strain(self, rnum, nodes=None):
+    def nodal_elastic_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal component elastic strains.  This record contains
         strains in the order ``X, Y, Z, XY, YZ, XZ, EQV``.
 
@@ -665,9 +675,11 @@ class DPFResult(Result):
         -----
         Nodes without a strain will be NAN.
         """
-        return self._get_nodes_result(rnum, "elastic_strain", nodes)
+        return self._get_nodes_result(
+            rnum, "elastic_strain", in_nodal_coord_sys=in_nodal_coord_sys, nodes=nodes
+        )
 
-    def nodal_plastic_strain(self, rnum, nodes=None):
+    def nodal_plastic_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal component plastic strains.
 
         This record contains strains in the order:
@@ -718,9 +730,9 @@ class DPFResult(Result):
         >>> nnum, plastic_strain = rst.nodal_plastic_strain(0, nodes=range(20, 51))
 
         """
-        return self._get_nodes_result(rnum, "plastic_strain", nodes)
+        return self._get_nodes_result(rnum, "plastic_strain", in_nodal_coord_sys, nodes)
 
-    def nodal_acceleration(self, rnum, nodes=None, in_nodal_coord_sys=None):
+    def nodal_acceleration(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Nodal velocities for a given result set.
 
         Parameters
@@ -755,14 +767,11 @@ class DPFResult(Result):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        if in_nodal_coord_sys is not None:
-            raise DeprecationWarning(
-                "The 'in_nodal_coord_sys' kwarg has been deprecated."
-            )
+        return self._get_nodes_result(
+            rnum, "misc.nodal_acceleration", in_nodal_coord_sys, nodes
+        )
 
-        return self._get_nodes_result(rnum, "misc.nodal_acceleration", nodes)
-
-    def nodal_reaction_forces(self, rnum, nodes=None):
+    def nodal_reaction_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal reaction forces.
 
         Parameters
@@ -803,9 +812,11 @@ class DPFResult(Result):
          ['UX', 'UY', 'UZ'])
 
         """
-        return self._get_nodes_result(rnum, "misc.nodal_reaction_force", nodes)
+        return self._get_nodes_result(
+            rnum, "misc.nodal_reaction_force", in_nodal_coord_sys, nodes
+        )
 
-    def nodal_stress(self, rnum, nodes=None):
+    def nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Retrieves the component stresses for each node in the
         solution.
 
@@ -860,7 +871,7 @@ class DPFResult(Result):
         Nodes without a stress value will be NAN.
         Equivalent ANSYS command: PRNSOL, S
         """
-        return self._get_nodes_result(rnum, "stress", nodes)
+        return self._get_nodes_result(rnum, "stress", in_nodal_coord_sys, nodes)
 
     def nodal_temperature(self, rnum, nodes=None):
         """Retrieves the temperature for each node in the
@@ -911,7 +922,7 @@ class DPFResult(Result):
         """
         return self._get_nodes_result(rnum, "temperature", nodes)
 
-    def nodal_thermal_strain(self, rnum, nodes=None):
+    def nodal_thermal_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal component thermal strain.
 
         This record contains strains in the order X, Y, Z, XY, YZ, XZ,
@@ -961,9 +972,9 @@ class DPFResult(Result):
 
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0, nodes=range(20, 51))
         """
-        return self._get_nodes_result(rnum, "misc.nodal_thermal_strains", nodes)
+        return self._get_nodes_result(rnum, "thermal_strain", in_nodal_coord_sys, nodes)
 
-    def nodal_velocity(self, rnum, in_nodal_coord_sys=None, nodes=None):
+    def nodal_velocity(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal velocities for a given result set.
 
         Parameters
@@ -998,13 +1009,11 @@ class DPFResult(Result):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        if in_nodal_coord_sys is not None:
-            raise DeprecationWarning(
-                "The parameter 'in_nodal_coord_sys' is being deprecated."
-            )
-        return self._get_nodes_result(rnum, "misc.nodal_velocity", nodes)
+        return self._get_nodes_result(
+            rnum, "misc.nodal_velocity", in_nodal_coord_sys, nodes
+        )
 
-    def nodal_static_forces(self, rnum, nodes=None):
+    def nodal_static_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Return the nodal forces averaged at the nodes.
 
         Nodal forces are computed on an element by element basis, and
@@ -1059,9 +1068,11 @@ class DPFResult(Result):
         Nodes without a a nodal will be NAN.  These are generally
         midside (quadratic) nodes.
         """
-        return self._get_nodes_result(rnum, "misc.nodal_force", nodes)
+        return self._get_nodes_result(
+            rnum, "misc.nodal_force", in_nodal_coord_sys, nodes
+        )
 
-    def principal_nodal_stress(self, rnum, nodes=None):
+    def principal_nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Computes the principal component stresses for each node in
         the solution.
 
@@ -1107,7 +1118,11 @@ class DPFResult(Result):
         """
         res = []
         for each in ["principal_1", "principal_2", "principal_3"]:
-            res.append(self._get_nodes_result(rnum, f"stress.{each}", nodes)[1])
+            res.append(
+                self._get_nodes_result(
+                    rnum, f"stress.{each}", in_nodal_coord_sys, nodes
+                )[1]
+            )
         return nodes, np.hstack(res)
 
     @property
@@ -1180,6 +1195,7 @@ class DPFResult(Result):
     @property
     def n_sector(self):
         """Number of sectors"""
+        # TODO: Need to check when this is triggered.
         return self.model.get_result_info().has_cyclic
 
     @property
@@ -1472,9 +1488,6 @@ class DPFResult(Result):
         raise NotImplementedError("This should be implemented by DPF")
 
     # def element_solution_data(self):
-    #     pass
-
-    # def element_stress(self):
     #     pass
 
     # def materials(self):
