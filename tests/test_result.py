@@ -11,6 +11,8 @@ Notes
 - There are some issues with ordering the ``Elemental`` and ``ElementalNodal`` results according to Element ID.
   Because of that, the third level of assertion is made on the sorted arrays.
 
+- ``Post`` does not filter based on mapdl selected nodes (neither reader)
+
 """
 import os
 import tempfile
@@ -23,6 +25,7 @@ from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
     piezoelectric_rectangular_strip_under_pure_bending_load,
+    pinched_cylinder,
     transient_thermal_stress_in_a_cylinder,
 )
 
@@ -33,12 +36,12 @@ def validate(result_values, reader_values, post_values=None):
     try:
         assert all_close(result_values, reader_values, post_values)
     except AssertionError:
-        try:
-            assert np.allclose(result_values, post_values) or np.allclose(
-                result_values, reader_values
-            )
-        except AssertionError:  # Sometimes sorting fails.
-            assert np.allclose(sorted(result_values), sorted(post_values))
+        # try:
+        assert np.allclose(result_values, post_values) or np.allclose(
+            result_values, reader_values
+        )
+        # except AssertionError:  # Sometimes sorting fails.
+        #     assert np.allclose(sorted(result_values), sorted(post_values))
 
 
 def all_close(*args):
@@ -181,13 +184,23 @@ class TestStaticThermocoupledExample(TestExample):
 
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
+    @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     @pytest.mark.parametrize("set_", list(range(1, 10)), scope="class")
-    def test_compatibility_element_stress(self, mapdl, reader, post, result, set_):
+    def test_compatibility_element_stress(
+        self, mapdl, reader, post, result, set_, comp
+    ):
         mapdl.set(1, set_)
-        post_values = post.element_stress("x")
-        result_values = result.element_stress(set_)[1][:, 0]
-        reader_values = reader.element_stress(set_ - 1)[1]
-        reader_values = np.array([each[0][0] for each in reader_values])
+        post_values = post.element_stress(COMPONENTS[comp])
+
+        ids, result_values = result.element_stress(set_)
+        result_values = result_values[np.argsort(ids)][:, comp]
+
+        # Reader returns a list of arrays. Each element of the list is the array (nodes x stress) for each element
+        reader_values = reader.element_stress(set_ - 1)[1]  # getting data
+        # We are going to do the average across the element, and then retrieve the first column (X)
+        reader_values = np.array(
+            [each_element.mean(axis=0)[comp] for each_element in reader_values]
+        )
 
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
@@ -264,13 +277,21 @@ class TestElectroThermalCompliantMicroactuator(TestExample):
         # validate(result_values, reader_values, post_values)  # Reader results are broken
         assert np.allclose(post_values, result_values)
 
-    def test_compatibility_element_stress(self, mapdl, reader, post, result):
+    @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
+    def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         set_ = 1
         mapdl.set(1, set_)
-        post_values = post.element_stress("x")
-        result_values = result.element_stress(set_)[1][:, 0]
-        reader_values = reader.element_stress(set_ - 1)[1]
-        reader_values = np.array([each[0][0] for each in reader_values])
+        post_values = post.element_stress(COMPONENTS[comp])
+
+        ids, result_values = result.element_stress(set_)
+        result_values = result_values[np.argsort(ids)][:, comp]
+
+        # Reader returns a list of arrays. Each element of the list is the array (nodes x stress) for each element
+        reader_values = reader.element_stress(set_ - 1)[1]  # getting data
+        # We are going to do the average across the element, and then retrieve the first column (X)
+        reader_values = np.array(
+            [each_element.mean(axis=0)[comp] for each_element in reader_values]
+        )
 
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
@@ -290,19 +311,65 @@ class TestSolidStaticPlastic(TestExample):
 
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
-    def test_compatibility_element_stress(self, mapdl, reader, post, result):
+    @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
+    def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         set_ = 1
         mapdl.set(1, set_)
-        post_values = post.element_stress("x")
-        result_values = result.element_stress(set_)[1][:, 0]
-        reader_values = reader.element_stress(set_ - 1)[1]
-        reader_values = np.array([each[0][0] for each in reader_values])
 
-        validate(result_values, reader_values, post_values)  # Reader results are broken
+        # Post returns the elements always ordered, because of the ETAB.
+        # It does not filter by selection neither.
+        post_values = post.element_stress(COMPONENTS[comp])
+
+        ids, result_values = result.element_stress(set_)
+        result_values = result_values[np.argsort(ids)][:, comp]
+
+        # Reader returns a list of arrays. Each element of the list is the array (nodes x stress) for each element
+        reader_values = reader.element_stress(set_ - 1)[1]  # getting data
+        # We are going to do the average across the element, and then retrieve the first column (X)
+        reader_values = np.array(
+            [each_element.mean(axis=0)[comp] for each_element in reader_values]
+        )
+
+        validate(result_values, reader_values, post_values)
+
+    def test_selection_nodes(self, mapdl, result, post):
+        set_ = 1
+        mapdl.set(1, set_)
+        nodes = mapdl.mesh.nnum
+        ids = list(range(5, 10))
+        nodes_selection = nodes[ids]
+
+        post_values = post.nodal_displacement("X")
+        result_values = result.nodal_displacement(1, nodes=nodes_selection)[1][:, 0]
+
+        assert len(result_values) == len(nodes_selection)
+
+        assert np.allclose(result_values, post_values[ids])
+        mapdl.allsel()  # resetting selection
+
+    def test_selection_elements(self, mapdl, result, post):
+        set_ = 1
+        mapdl.set(1, set_)
+        mapdl.esel("s", "elem", "", 0, 200)
+        ids = list(range(3, 6))
+        elem_selection = mapdl.mesh.enum[ids]
+
+        post_values = post.element_stress("x")
+        result_values = result.element_stress(set_, elements=elem_selection)[1][:, 0]
+
+        assert len(result_values) == len(ids)
+
+        assert np.allclose(result_values, post_values[ids])
+        mapdl.allsel()  # resetting selection
 
 
 class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
-    """Class to test the piezoelectric rectangular strip under pure bending load VM231 example."""
+    """Class to test the piezoelectric rectangular strip under pure bending load VM231 example.
+
+    A piezoceramic (PZT-4) rectangular strip occupies the region |x| l, |y| h. The material is oriented
+    such that its polarization direction is aligned with the Y axis. The strip is subjected to the pure bending
+    load σx = σ1 y at x = ± l. Determine the electro-elastic field distribution in the strip
+    """
 
     example = piezoelectric_rectangular_strip_under_pure_bending_load
     example_name = "piezoelectric rectangular strip under pure bending load"
@@ -331,7 +398,10 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
         set_ = 1
         mapdl.set(1, set_)
         post_values = post.element_stress(COMPONENTS[comp])
-        result_values = result.element_stress(set_)[1][:, comp]
+
+        ids, result_values = result.element_stress(set_)
+        result_values = result_values[np.argsort(ids)][:, comp]
+
         reader_values = reader.element_stress(set_ - 1)[1]
         reader_values = np.array([each[comp][0] for each in reader_values])
 
@@ -382,3 +452,62 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
 
         assert np.allclose(result_values, post_values)
         mapdl.allsel()
+
+
+class TestPinchedCylinderVM6(TestExample):
+    """Class to test a pinched cylinder (VM6 example).
+
+    A thin-walled cylinder is pinched by a force F at the middle of the cylinder length.
+    Determine the radial displacement δ at the point where F is applied. The ends of the cylinder are free edges.
+    """
+
+    example = pinched_cylinder
+    example_name = "piezoelectric rectangular strip under pure bending load"
+    apdl_code = prepare_example(example, 0)
+    example_name = title(apdl_code)
+
+    def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
+        mapdl.set(1, 1)
+        post_values = post.nodal_displacement("all")[:, :3]
+        result_values = result.nodal_displacement(1)[1]
+        reader_values = reader.nodal_displacement(0)[1][:, :3]
+
+        validate(result_values, reader_values, post_values)  # Reader results are broken
+
+    @pytest.mark.xfail(
+        reason="The shell elements return TOP/BOTTOM in PRESOL, but we don't know about DPF."
+    )
+    @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
+    def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
+        set_ = 1
+        mapdl.set(1, set_)
+
+        # Post returns the elements always ordered, because of the ETAB.
+        # It does not filter by selection neither.
+        post_values = post.element_stress(COMPONENTS[comp])
+
+        ids, result_values = result.element_stress(set_)
+        result_values = result_values[np.argsort(ids)][:, comp]
+
+        # Reader returns a list of arrays. Each element of the list is the array (nodes x stress) for each element
+        reader_values = reader.element_stress(set_ - 1)[1]  # getting data
+        # We are going to do the average across the element, and then retrieve the first column (X)
+        reader_values = np.array(
+            [each_element.mean(axis=0)[comp] for each_element in reader_values]
+        )
+
+        validate(result_values, reader_values, post_values)
+
+    @pytest.mark.xfail(
+        reason="The shell elements return TOP/BOTTOM in PRESOL, but we don't know about DPF."
+    )
+    def test_nodal_coordinate_system(self, mapdl, result, post):
+        set_ = 1
+        mapdl.set(1, set_)
+        mapdl.rsys("solu")
+
+        post_values = post.element_stress("x")
+        result_values = result.element_stress(set_, in_element_coord_sys=True)[1][:, 0]
+
+        assert np.allclose(result_values, post_values)
+        mapdl.allsel()  # resetting selection
