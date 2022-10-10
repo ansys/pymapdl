@@ -4,6 +4,8 @@ import os
 import numpy as np
 import pytest
 
+from ansys.mapdl.core.check_version import meets_version
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Krylov Apdl Macro Files
@@ -27,14 +29,13 @@ def solu_krylov(mapdl, frq):
 
 
 def test_krylov_with_point_load(mapdl):
-    if mapdl.info.mapdl_version_build not in ["22.2", "23.1"]:
+    if not meets_version(mapdl._server_version, (0, 5, 1)):
         pytest.skip("Requires MAPDL v222 and above")
 
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
     mm = mapdl.math
     mapdl.jobname = "point_load_py"
-    print(mapdl.directory)
 
     # Parameters set for Krylov
     max_q = 10
@@ -80,7 +81,7 @@ def test_krylov_with_point_load(mapdl):
 
 @pytest.mark.parametrize("res_key", [0, 1, 2, 3])
 def test_krylov_with_pressure_load(mapdl, res_key):
-    if mapdl.info.mapdl_version_build not in ["22.2", "23.1"]:
+    if not meets_version(mapdl._server_version, (0, 5, 1)):
         pytest.skip("Requires MAPDL v222 and above")
 
     # With ramped loading
@@ -181,7 +182,7 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     ],
 )
 def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
-    if mapdl.info.mapdl_version_build not in ["22.2", "23.1"]:
+    if not meets_version(mapdl._server_version, (0, 5, 1)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
@@ -235,7 +236,7 @@ def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
     ],
 )
 def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
-    if mapdl.info.mapdl_version_build not in ["22.2", "23.1"]:
+    if not meets_version(mapdl._server_version, (0, 5, 1)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
@@ -276,7 +277,7 @@ def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
     ],
 )
 def test_non_valid_inputs_kryexpand(mapdl, input_kryexpand):
-    if mapdl.info.mapdl_version_build not in ["22.2", "23.1"]:
+    if not meets_version(mapdl._server_version, (0, 5, 1)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
