@@ -45,7 +45,7 @@ with:
 
 You can now launch MAPDL directly from docker with a short script or
 directly from the command line.  Since this image contains no license
-server, you must enter your license server IP address in the
+server, you will need to enter in your license server IP address the
 ``LICENSE_SERVER`` environment variable.  With that, you can launch
 MAPDL with:
 
@@ -77,8 +77,7 @@ Once you've launched MAPDL you should see:
     Server listening on : 0.0.0.0:50052
 
 Connecting to the MAPDL Container from Python
----------------------------------------------
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can now connect to the instance with:
 
 .. code:: python
@@ -105,10 +104,6 @@ Verify your connection with:
 
 Additional Considerations
 -------------------------
-
-Appending MAPDL Options to the Container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 In the command:
 
 .. code::
@@ -126,119 +121,6 @@ with the `-np` switch.  For example:
     IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
-For additional command-line arguments, see the Ansys
+For additional command line arguments please see the ansys
 documentation at `ANSYS help <https://ansyshelp.ansys.com>`_.  Also,
 be sure to have the appropriate license for additional HPC features.
-
-Using ``--restart`` policy with MAPDL products
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-By default, MAPDL creates a ``LOCK`` file in the working directory when it starts
-and deletes this file if it exits normally. The file is used to avoid overwriting files
-such as database (DB) files or result (RST) files when starting MAPDL after an
-abnormal termination.
-
-Because of this behavior, when using the Docker ``--restart`` flag in the ``docker run``
-command, you might enter into an infinite loop if you specify the Docker image to
-reboot after an abnormal termination. For example, ``--restart always``. 
-Because of the presence of the ``LOCK`` file, MAPDL exits, attempting to not overwrite
-the files from the previous crash, while the Docker process keeps attempting to
-restart the MAPDL container (and the MAPDL process with it).
-
-In such cases, you should not use the ``--restart`` option. If you really need to use
-this option, you can avoid MAPDL checks and create the ``LOCK`` file by starting
-the process with the environment variable ``ANSYS_LOCK`` set to ``"OFF"``. 
-
-You can do this in your ``docker run`` command:
-
-.. code:: bash
-
-  docker run \
-      --restart always \
-      -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
-      -e ANSYS_LOCK="OFF" \
-      -p 50052:50052 \
-      $IMAGE
-
-
-Getting Useful Files After Abnormal Termination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In some cases, the MAPDL container might crash after the MAPDL process experiences an
-abnormal termination. In these cases, you can retrieve log files and output files using 
-tools that Docker provides.
-
-First, get the Docker container name:
-
-.. code:: pwsh
-
-  PS docker ps
-  CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
-  c14560bff70f   ghcr.io/pyansys/pymapdl/mapdl:v22.2.0   "/ansys_inc/ansys/bi…"   9 seconds ago    Up 8 seconds    0.0.0.0:50053->50052/tcp   mapdl
-
-To appear in ``docker ps``, the container should be running.
-
-You can then use the ``name`` in the following command:
-
-.. code:: pwsh
-
-  PS docker exec -it mapdl /bin/bash
-
-This command executes the command shell (``/bin/bash``) of the container and attaches your current terminal to it (interactive ``-it``).
-
-.. code:: pwsh
-
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]#
-
-Now you can enter commands inside the Docker container and navigate inside it.
-
-.. code:: pwsh
-
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]# ls
-  anaconda-post.log  cleanup-ansys-c14560bff70f-709.sh  file0.err   file1.err  file1.page  file2.out   file3.log   home   media  proc  sbin  tmp
-  ansys_inc          dev                                file0.log   file1.log  file2.err   file2.page  file3.out   lib    mnt    root  srv   usr
-  bin                etc                                file0.page  file1.out  file2.log   file3.err   file3.page  lib64  opt    run   sys   var
-
-You can then take note of the files you want to retrieve. For example, the error and output files (``file*.err`` and ``file*.out``).
-
-Exit the container terminal using ``exit``:
-
-.. code:: pwsh
-
-  [root@c14560bff70f /]# exit
-  exit
-  (base) PS C:\Users\user>
-
-You can copy the noted files using this script:
-
-.. code:: pwsh
-
-  docker cp mapdl:/file0.err .
-  docker cp mapdl:/file1.err .
-  docker cp mapdl:/file1.out .
-
-If you want to retrieve multiple files, the most efficient approach is to get back inside the Docker container:
-
-.. code:: pwsh
-
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]#
-
-Create a folder where you are going to copy all the desired files:
-
-.. code:: pwsh
-
-  [root@c14560bff70f /]# mkdir -p /mapdl_logs
-  [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
-  [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
-  [root@c14560bff70f /]# ls mapdl_logs/
-  file0.err  file1.err  file1.out  file2.err  file2.out  file3.err  file3.out
-
-Then copy the entire folder content at once:
-
-.. code:: pwsh
-
-  docker cp mapdl:/mapdl_logs/. .
-
