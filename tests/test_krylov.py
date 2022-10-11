@@ -29,7 +29,7 @@ def solu_krylov(mapdl, frq):
 
 
 def test_krylov_with_point_load(mapdl):
-    if not meets_version(mapdl._server_version, (0, 5, 1)):
+    if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
     # Case1 : Run Krylov Pymapdl
@@ -81,7 +81,7 @@ def test_krylov_with_point_load(mapdl):
 
 @pytest.mark.parametrize("res_key", [0, 1, 2, 3])
 def test_krylov_with_pressure_load(mapdl, res_key):
-    if not meets_version(mapdl._server_version, (0, 5, 1)):
+    if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
     # With ramped loading
@@ -182,7 +182,7 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     ],
 )
 def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
-    if not meets_version(mapdl._server_version, (0, 5, 1)):
+    if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
@@ -236,7 +236,7 @@ def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
     ],
 )
 def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
-    if not meets_version(mapdl._server_version, (0, 5, 1)):
+    if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
@@ -277,7 +277,7 @@ def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
     ],
 )
 def test_non_valid_inputs_kryexpand(mapdl, input_kryexpand):
-    if not meets_version(mapdl._server_version, (0, 5, 1)):
+    if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
