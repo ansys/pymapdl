@@ -93,7 +93,6 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     # Parameters set for Krylov
     max_q = 10
     frq = 100
-    freq_val = frq
 
     mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
     # Run Harmonic Analysis
