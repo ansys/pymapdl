@@ -497,10 +497,7 @@ class KrylovSolver:
                 numdof = int(num_eqn / num_node)
 
                 file = open(
-                    os.path.join(
-                        self._mapdl.directory,
-                        f"{self.jobname}_Xzu_{iFreq}.txt",
-                    ),
+                    f"{self.jobname}_Xzu_{iFreq}.txt",
                     "w",
                 )
                 for extnode in range(1, max_node + 1):
@@ -566,10 +563,7 @@ class KrylovSolver:
 
                 # Output norms of residual vector
                 file1 = open(
-                    os.path.join(
-                        self._mapdl.directory,
-                        f"{self.jobname}_Rzi_{iFreq}.txt",
-                    ),
+                    f"{self.jobname}_Rzi_{iFreq}.txt",
                     "w",
                 )
                 norm_rz = 0.0
