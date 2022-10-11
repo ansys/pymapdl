@@ -305,7 +305,7 @@ class KrylovSolver:
 
         # Optional check on Orthonormality of vectors
         if chk_ortho_key:
-            orth_file = os.path.join(self._mapdl.directory, f"{self.jobname}_ortho.txt")
+            orth_file = os.path.join(f"{self.jobname}_ortho.txt")
             self._chk_ortho_vec(orth_file, uz, num_q)
 
         # Output generated subspace vectors to file
