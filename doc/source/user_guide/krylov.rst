@@ -148,13 +148,9 @@ Reference
 For additional details, for the krylov method refer the `APDL Docummentation Manual 
 <https://ansysproducthelpqa.win.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/ans_str/str_Krysweep.html>`_
 
-.. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency, 
+.. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency,
 Fully Coupled, Structural Acoustic Analysis and Optimization. PhD Thesis. Oxford Brookes University,
 Mechanical Engineering Department. Oxford, UK.
 
 .. [2] Eser, M. C. (2019) Efficient Evaluation of Sound Radiation of an Electric Motor using Model Order
 Reduction.MSc Thesis. Technical University of Munich, Mechanical Engineering Department. Munich, DE.
-
-
-
-
