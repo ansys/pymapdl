@@ -205,7 +205,7 @@ class MapdlMath:
         if not name:
             name = id_generator()
 
-        if name not in self._parm:
+        if name.upper() not in self._parm:
             self._mapdl.run(f"*VEC,{name},{MYCTYPE[dtype]},ALLOC,{size}", mute=True)
 
         ans_vec = AnsVec(name, self._mapdl, dtype, init)
