@@ -419,14 +419,6 @@ def test_copy2(mm):
     assert np.allclose(m2.asarray(), m3.asarray())
 
 
-def test_copy2(mm):
-    dim = 1000
-    m2 = mm.rand(dim, dim)
-    m3 = m2.copy()
-
-    assert np.allclose(m2.asarray(), m3.asarray())
-
-
 def test_dense_solver(mm):
     dim = 1000
     m2 = mm.rand(dim, dim)
