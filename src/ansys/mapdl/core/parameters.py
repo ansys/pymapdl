@@ -602,19 +602,12 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     parameters = {}
-    if "APDLMATH" in status:
-        header = "  Name                   Type"
-        incr = 84
-    else:  # normal parameters
-        header = "NAME                              VALUE"
-        incr = 80
-
-    st = status.find(header)
+    st = status.find("NAME                              VALUE")
 
     if st == -1:
         return {}
 
-    for line in status[st + incr :].splitlines():
+    for line in status[st + 80 :].splitlines():
         items = line.split()
         if not items:
             continue
@@ -633,27 +626,6 @@ def interp_star_status(status):
                 value = items[1]
             parameters[name] = {"type": items[2], "value": value}
         elif len(items) == 5:
-            if items[1] in ["DMAT", "VEC", "SMAT"]:
-                parameters[name] = {
-                    "type": items[1],
-                    "MemoryMB": float(items[2]),
-                    "dimensions": get_apdl_math_dimensions(items[3]),
-                    "workspace": int(items[4]),
-                }
-            elif items[1] in ["LSENGINE"]:
-                parameters[name] = {
-                    "type": items[1],
-                    "workspace": int(items[4]),
-                }
-            else:
-                shape = (int(items[2]), int(items[3]), int(items[4]))
-                parameters[name] = {"type": items[1], "shape": shape}
+            shape = (int(items[2]), int(items[3]), int(items[4]))
+            parameters[name] = {"type": items[1], "shape": shape}
     return parameters
-
-
-def get_apdl_math_dimensions(dimensions_str):
-    """Convert the dimensions string to a tuple (arrays) or int (vectors)"""
-    if ":" in dimensions_str:
-        return tuple([int(each) for each in dimensions_str[1:-1].split(":")])
-    else:
-        return int(dimensions_str)
