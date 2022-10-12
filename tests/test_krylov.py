@@ -101,8 +101,8 @@ def test_krylov_with_point_load(mapdl):
     solu_krylov(mapdl, frq)
 
     dd = mapdl.krylov
-    Qz_py = dd.krygensub(max_q, frq, True, True).asarray()
-    Yz_py = dd.krysolve(frq, frq, 1, 1, True).asarray()
+    dd.krygensub(max_q, frq, True, True).asarray()
+    dd.krysolve(frq, frq, 1, 1, True).asarray()
     dd.kryexpand(True, 3)
     Xii_py = mm.vec(name="Xii").asarray()
 
@@ -134,8 +134,8 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     solu_krylov(mapdl, frq)
 
     dd = mapdl.krylov
-    Qz_py = dd.krygensub(max_q, frq, True, True).asarray()
-    Yz_py = dd.krysolve(frq, frq, 1, 0, True).asarray()
+    dd.krygensub(max_q, frq, True, True).asarray()
+    dd.krysolve(frq, frq, 1, 0, True).asarray()
     dd.kryexpand(True, res_key)
     Xii_py = mm.vec(name="Xii").asarray()
 
