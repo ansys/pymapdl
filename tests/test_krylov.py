@@ -105,10 +105,11 @@ def test_krylov_with_point_load(mapdl):
     Yz_py = dd.krysolve(frq, frq, 1, 1, True).asarray()
     dd.kryexpand(True, 3)
     Xii_py = mm.vec(name="Xii").asarray()
+    print(Xii_py)
 
     # setting the absolute and relative tolerance
-    rtol = 1e-4
-    atol = 1e-4
+    rtol = 1e-16
+    atol = 1e-16
 
     # Verify DOF solution
     assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
@@ -135,16 +136,14 @@ def test_krylov_with_pressure_load(mapdl, res_key):
 
     dd = mapdl.krylov
     Qz_py = dd.krygensub(max_q, frq, True, True).asarray()
-    print(Qz_py)
     Yz_py = dd.krysolve(frq, frq, 1, 0, True).asarray()
-    print(Yz_py)
     dd.kryexpand(True, res_key)
     Xii_py = mm.vec(name="Xii").asarray()
     print(Xii_py)
 
     # setting the absolute and relative tolerance
-    rtol = 1e-4
-    atol = 1e-4
+    rtol = 1e-16
+    atol = 1e-16
 
     # Verify DOF solution
     assert np.allclose(Xii_macro_pres_load, Xii_py, rtol, atol)
