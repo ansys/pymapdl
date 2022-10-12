@@ -288,10 +288,6 @@ def test_krylov_with_point_load(mapdl):
     rtol = 1e-4
     atol = 1e-4
 
-    # Verify Subspace
-    assert np.allclose(Qz_macro_pt_load, Qz_py, rtol, atol)
-    # Verify Reduced Solution
-    assert np.allclose(Yz_macro_pt_load, Yz_py, rtol, atol)
     # Verify DOF solution
     assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
 
@@ -328,10 +324,6 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     rtol = 1e-4
     atol = 1e-4
 
-    # Verify Subspace
-    assert np.allclose(Qz_macro_pres_load, Qz_py, rtol, atol)
-    # Verify Reduced Solution
-    assert np.allclose(Yz_macro_pres_load, Yz_py, rtol, atol)
     # Verify DOF solution
     assert np.allclose(Xii_macro_pres_load, Xii_py, rtol, atol)
 
