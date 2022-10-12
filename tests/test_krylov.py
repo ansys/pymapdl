@@ -285,8 +285,8 @@ def test_krylov_with_point_load(mapdl):
     Xii_py = mm.vec(name="Xii").asarray()
 
     # setting the absolute and relative tolerance
-    rtol = 1e-6
-    atol = 1e-6
+    rtol = 1e-4
+    atol = 1e-4
 
     # Verify Subspace
     assert np.allclose(Qz_macro_pt_load, Qz_py, rtol, atol)
@@ -325,8 +325,8 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     print(Xii_py)
 
     # setting the absolute and relative tolerance
-    rtol = 1e-6
-    atol = 1e-6
+    rtol = 1e-4
+    atol = 1e-4
 
     # Verify Subspace
     assert np.allclose(Qz_macro_pres_load, Qz_py, rtol, atol)
