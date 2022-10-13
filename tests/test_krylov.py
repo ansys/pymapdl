@@ -9,10 +9,66 @@ from ansys.mapdl.core.check_version import meets_version
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Krylov Apdl Macro Files
-ulib_path = os.path.join(PATH, "test_files")
-kry_gensub = os.path.join(ulib_path, "KRYGENSUB.mac")
-kry_solve = os.path.join(ulib_path, "KRYSOLVE.mac")
-kry_expand = os.path.join(ulib_path, "KRYEXPAND.mac")
+lib_path = os.path.join(PATH, "test_files")
+
+# Results from APDL Macro to compare with Pymapdl results
+# Case 1 : Model with point load
+
+# Expanded sol
+Xii_macro_pt_load = [
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    1.25777677e-08 - 4.65192672e-19j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    1.25777677e-08 - 4.65192662e-19j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    1.25777677e-08 - 4.65192681e-19j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+    1.25777677e-08 - 4.65192661e-19j,
+    0.00000000e00 + 0.00000000e00j,
+    0.00000000e00 + 0.00000000e00j,
+]
+
+# Case 2 : Model with Pressure load
+Xii_macro_pres_load = [
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    0.00000000e00 + 0.0j,
+    1.01806232e-10 + 0.0j,
+    -3.84610666e-10 + 0.0j,
+    0.00000000e00 + 0.0j,
+    -4.86686586e-11 + 0.0j,
+    8.03322966e-11 + 0.0j,
+    0.00000000e00 + 0.0j,
+    -4.86686586e-11 + 0.0j,
+    8.03322966e-11 + 0.0j,
+    0.00000000e00 + 0.0j,
+    1.01806232e-10 + 0.0j,
+    -3.84610666e-10 + 0.0j,
+    0.00000000e00 + 0.0j,
+]
 
 
 def solu_krylov(mapdl, frq):
@@ -41,42 +97,21 @@ def test_krylov_with_point_load(mapdl):
     max_q = 10
     frq = 100
 
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_point_load"), "cdb")
+    mapdl.cdread("db", os.path.join(lib_path, "krylov_point_load"), "cdb")
     solu_krylov(mapdl, frq)
 
     dd = mapdl.krylov
-    Qz_py = dd.krygensub(max_q, frq, True, True).asarray()
-    Yz_py = dd.krysolve(frq, frq, 1, 1, True).asarray()
+    dd.krygensub(max_q, frq, True, True).asarray()
+    dd.krysolve(frq, frq, 1, 1, True).asarray()
     dd.kryexpand(True, 3)
     Xii_py = mm.vec(name="Xii").asarray()
 
-    mapdl.clear()
-    # Case2 :Run Krylov Macro
-    mapdl.jobname = "point_load_mac"
-
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_point_load"), "cdb")
-    # Run Harmonic Analysis
-    solu_krylov(mapdl, frq)
-
-    mapdl.use(kry_gensub, max_q, frq, 1, 1)
-    Qz_macro = mm.mat(name="Qz").asarray()
-
-    mapdl.use(kry_solve, frq, frq, 1, 1, 1)
-    Yz_macro = mm.mat(name="Yz").asarray()
-    mapdl.use(kry_expand, 1, 3)
-    Xii_macro = mm.vec(name="Xii").asarray()
-
-    # Compare Case 1 and 2 Results
     # setting the absolute and relative tolerance
-    rtol = 1e-6
-    atol = 1e-6
+    rtol = 1e-16
+    atol = 1e-16
 
-    # Verify Subspace
-    assert np.allclose(Qz_macro, Qz_py, rtol, atol)
-    # Verify Reduced Solution
-    assert np.allclose(Yz_macro, Yz_py, rtol, atol)
     # Verify DOF solution
-    assert np.allclose(Xii_macro, Xii_py, rtol, atol)
+    assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
 
 
 @pytest.mark.parametrize("res_key", [0, 1, 2, 3])
@@ -94,42 +129,22 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     max_q = 10
     frq = 100
 
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
+    mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
     # Run Harmonic Analysis
     solu_krylov(mapdl, frq)
 
     dd = mapdl.krylov
-    Qz_py = dd.krygensub(max_q, frq, True, True).asarray()
-    Yz_py = dd.krysolve(frq, frq, 1, 0, True).asarray()
+    dd.krygensub(max_q, frq, True, True).asarray()
+    dd.krysolve(frq, frq, 1, 0, True).asarray()
     dd.kryexpand(True, res_key)
     Xii_py = mm.vec(name="Xii").asarray()
 
-    mapdl.clear()
-    # Case2 :Run Krylov Macro
-    mapdl.jobname = "pressure_mac"
-
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
-    # Run Harmonic Analysis
-    solu_krylov(mapdl, frq)
-
-    mapdl.use(kry_gensub, 10, 100, 1, 1)
-    Qz_macro = mm.mat(name="Qz").asarray()
-    mapdl.use(kry_solve, 100, 100, 1, 0, 1)
-    Yz_macro = mm.mat(name="Yz").asarray()
-    mapdl.use(kry_expand, 1, res_key)
-    Xii_macro = mm.vec(name="Xii").asarray()
-
-    # Compare Case 1 and 2 Results
     # setting the absolute and relative tolerance
-    rtol = 1e-6
-    atol = 1e-6
+    rtol = 1e-16
+    atol = 1e-16
 
-    # Verify Subspace
-    assert np.allclose(Qz_macro, Qz_py, rtol, atol)
-    # Verify Reduced Solution
-    assert np.allclose(Yz_macro, Yz_py, rtol, atol)
     # Verify DOF solution
-    assert np.allclose(Xii_macro, Xii_py, rtol, atol)
+    assert np.allclose(Xii_macro_pres_load, Xii_py, rtol, atol)
 
 
 # Test Exceptions
@@ -189,7 +204,7 @@ def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
     maxQ = input_kry_gensub[0]
     freq_val = input_kry_gensub[1]
 
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
+    mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
     solu_krylov(mapdl, 100)
     dd = mapdl.krylov
     with pytest.raises(ValueError) as e:
@@ -239,7 +254,7 @@ def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
+    mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
 
     # Parameters set for Krylov
     solu_krylov(mapdl, 100)
@@ -280,7 +295,7 @@ def test_non_valid_inputs_kryexpand(mapdl, input_kryexpand):
         pytest.skip("Requires MAPDL v222 and above")
 
     mapdl.clear()
-    mapdl.cdread("db", os.path.join(ulib_path, "krylov_pressure_load"), "cdb")
+    mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
 
     solu_krylov(mapdl, 100)
     dd = mapdl.krylov
