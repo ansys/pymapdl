@@ -78,7 +78,6 @@ CMD_LISTING = [
     "PRST",  # Not documented.
     "PRVE",
     "PRXF",  # Not documented.
-    "STAT",
     "SWLI",
 ]
 
