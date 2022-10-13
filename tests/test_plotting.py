@@ -479,3 +479,34 @@ def test_plotter_input(mapdl, make_block):
         pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl == pl2
     assert pl is pl2
+
+    # invalid plotter type
+    with pytest.raises(TypeError):
+        pl2 = mapdl.eplot(return_plotter=True, plotter=[])
+
+
+def test_cpos_input(mapdl, make_block):
+    cpos = [
+        (0.3914, 0.4542, 0.7670),
+        (0.0243, 0.0336, -0.0222),
+        (-0.2148, 0.8998, -0.3796),
+    ]
+
+    cpos1 = mapdl.eplot(cpos=cpos, return_cpos=True)
+    assert np.allclose(np.array(cpos), np.array([each for each in cpos1]), rtol=1e-4)
+
+
+def test_show_bounds(mapdl, make_block):
+    default_bounds = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
+    pl = mapdl.eplot(show_bounds=True, return_plotter=True)
+
+    assert pl.bounds
+    assert len(pl.bounds) == 6
+    assert pl.bounds != default_bounds
+
+
+def test_background(mapdl, make_block):
+    default_color = "#4c4c4cff"
+    pl = mapdl.eplot(background="red", return_plotter=True)
+    assert pl.background_color != default_color
+    assert pl.background_color == "red"
