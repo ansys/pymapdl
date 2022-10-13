@@ -469,3 +469,13 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
         "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
     )
     assert selected == []
+
+
+def test_plotter_input(mapdl, make_block):
+    pl = Plotter(off_screen=True)
+    # because in CICD we use 'screen_off', this will trigger a warning,
+    # since using 'plotter' will overwrite this kwarg.
+    with pytest.warns(UserWarning):
+        pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
+    assert pl == pl2
+    assert pl is pl2

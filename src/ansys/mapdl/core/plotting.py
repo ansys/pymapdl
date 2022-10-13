@@ -1,4 +1,6 @@
 """Plotting helper for MAPDL using pyvista"""
+from warnings import warn
+
 import numpy as np
 
 from ansys.mapdl.core import _HAS_PYVISTA
@@ -158,6 +160,7 @@ def _general_plotter(
     font_family=None,
     text_color=None,
     theme=None,
+    plotter=None,
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -285,6 +288,13 @@ def _general_plotter(
         PyVista theme. Defaults to `PyMAPDL theme <https://github
         .com/pyansys/pyansys-sphinx-theme>`_.
 
+    plotter : pyvista.Plotter, optional
+        If a pyvista.Plotter not is provided, then creates its
+        own plotter. If a pyvista.Plotter is provided, the arguments
+        ``notebook``, ``off_screen`` and ``theme`` are ignored, since
+        they should be set when instantiated the provided plotter.
+        Defaults to None (create the Plotter object)
+
     Returns
     -------
     pyvista.Plotter
@@ -321,13 +331,23 @@ def _general_plotter(
     if theme is None:
         theme = MapdlTheme()
 
-    pl = pv.Plotter(off_screen=off_screen, notebook=notebook, theme=theme)
+    if not (plotter is None or isinstance(plotter, pv.Plotter)):
+        raise TypeError("The kwarg 'plotter' can only accept pv.Plotter objects.")
+
+    if not plotter:
+        plotter = pv.Plotter(off_screen=off_screen, notebook=notebook, theme=theme)
+    else:
+        if off_screen or notebook or theme:
+            warn(
+                "The kwargs 'off_screen', 'notebook' and 'theme' are ignored when using 'plotter' kwarg.",
+                UserWarning,
+            )
 
     if background:
-        pl.set_background(background)
+        plotter.set_background(background)
 
     for point in points:
-        pl.add_points(
+        plotter.add_points(
             point["points"],
             scalars=point.get("scalars", None),
             color=color,
@@ -346,7 +366,7 @@ def _general_plotter(
         )
 
     for mesh in meshes:
-        pl.add_mesh(
+        plotter.add_mesh(
             mesh["mesh"],
             scalars=mesh.get("scalars"),
             scalar_bar_args=scalar_bar_args,
@@ -375,7 +395,7 @@ def _general_plotter(
         points, idx, _ = unique_rows(np.array(label["points"]))
         labels = np.array(label["labels"])[idx].tolist()
 
-        pl.add_point_labels(
+        plotter.add_point_labels(
             points,
             labels,
             show_points=False,
@@ -386,15 +406,15 @@ def _general_plotter(
         )
 
     if cpos:
-        pl.camera_position = cpos
+        plotter.camera_position = cpos
 
     if show_bounds:
-        pl.show_bounds()
+        plotter.show_bounds()
 
     if show_axes:
-        pl.show_axes()
+        plotter.show_axes()
 
-    return pl
+    return plotter
 
 
 # Using * to force all the following arguments to be keyword only.
@@ -446,6 +466,7 @@ def general_plotter(
     bc_target=None,
     bc_glyph_size=None,
     bc_labels_font_size=16,
+    plotter=None,
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -625,6 +646,13 @@ def general_plotter(
         Size of the text on the boundary conditions labels.
         By default it is 16.
 
+    plotter : pyvista.Plotter, optional
+        If a pyvista.Plotter not is provided, then creates its
+        own plotter. If a pyvista.Plotter is provided, the arguments
+        ``notebook``, ``off_screen`` and ``theme`` are ignored, since
+        they should be set when instantiated the provided plotter.
+        Defaults to None (create the Plotter object)
+
     Returns
     -------
     cpos or pyvista.Plotter or None
@@ -719,6 +747,7 @@ def general_plotter(
         font_family=font_family,
         text_color=text_color,
         theme=theme,
+        plotter=plotter,
     )
 
     if plot_bc:
