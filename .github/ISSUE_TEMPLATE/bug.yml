@@ -28,7 +28,6 @@ body:
     attributes:
       label: Description of the bug
       placeholder: Describe what bug you encountered and what should have happened.
-      value: "A bug happened!"
     validations:
       required: true
 
