@@ -289,11 +289,11 @@ def _general_plotter(
         .com/pyansys/pyansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
-        If a pyvista.Plotter not is provided, then creates its
-        own plotter. If a pyvista.Plotter is provided, the arguments
+        If a :class:`pyvista.Plotter` not is provided, then creates its
+        own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
         ``notebook``, ``off_screen`` and ``theme`` are ignored, since
         they should be set when instantiated the provided plotter.
-        Defaults to None (create the Plotter object)
+        Defaults to ``None`` (create the Plotter object).
 
     Returns
     -------
@@ -647,11 +647,11 @@ def general_plotter(
         By default it is 16.
 
     plotter : pyvista.Plotter, optional
-        If a pyvista.Plotter not is provided, then creates its
-        own plotter. If a pyvista.Plotter is provided, the arguments
+        If a :class:`pyvista.Plotter` not is provided, then creates its
+        own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
         ``notebook``, ``off_screen`` and ``theme`` are ignored, since
         they should be set when instantiated the provided plotter.
-        Defaults to None (create the Plotter object)
+        Defaults to ``None`` (create the Plotter object).
 
     Returns
     -------
