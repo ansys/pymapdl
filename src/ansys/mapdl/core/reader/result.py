@@ -3,14 +3,20 @@ Replacing Result in PyMAPDL.
 """
 
 
-""" Comments
-
-DPF-Post needs quite a few things:
-- components support
-
+"""
+COMMENTS
+========
 
 
-Check #todos
+TODO's
+======
+* Check #todos
+* Allow (step, substep) in rnum
+* Component support
+* Check what happens when a node does not have results in all the steps. In DPF is it zero?
+* Adding 'principal' support ("SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when principal is True.")
+* Check DPF issues
+
 """
 
 from functools import wraps
@@ -238,6 +244,20 @@ class DPFResult(Result):
             self._build_dpf_object()
         return self._cached_dpf_model
 
+    @property
+    def metadata(self):
+        return self.model.metadata
+
+    @property
+    def mesh(self):
+        """Mesh from result file."""
+        # TODO: this should be a class equivalent to reader.mesh class.
+        return self.model.mesh
+
+    @property
+    def grid(self):
+        return self.model.mesh.grid
+
     def _get_nodes_for_argument(self, nodes):
         """Get nodes from 'nodes' which can be int, floats, or list/tuple of int/floats, or
         components( strs, or iterable[strings]"""
@@ -275,21 +295,54 @@ class DPFResult(Result):
 
         return nodes
 
-    def _set_rescope(self, op, scope_ids):
-        fc = op.outputs.fields_container()
+    def _get_principal(self, op):
+        fc = op.outputs.fields_as_fields_container()[
+            0
+        ]  # This index 0 is the step indexing.
 
-        rescope = dpf.operators.scoping.rescope()
-        rescope.inputs.mesh_scoping(scope_ids)
-        rescope.inputs.fields(fc)
-        rescope_field = rescope.outputs.fields_as_fields_container()[
+        op1 = dpf.operators.invariant.principal_invariants()
+        op1.inputs.field.connect(fc)
+        # Get output data
+        result_field_eig_1 = op.outputs.field_eig_1()
+        result_field_eig_2 = op.outputs.field_eig_2()
+        result_field_eig_3 = op.outputs.field_eig_3()
+
+        op2 = dpf.operators.invariant.invariants()
+        op2.inputs.field.connect(fc)
+
+        # Get output data
+        result_field_int = op.outputs.field_int()
+        result_field_eqv = op.outputs.field_eqv()
+        # result_field_max_shear = op.outputs.field_max_shear()
+
+        return np.hstack(
+            (
+                result_field_eig_1,
+                result_field_eig_2,
+                result_field_eig_3,
+                result_field_int,
+                result_field_eqv,
+            )
+        )
+
+    def _extract_data(self, op):
+        fc = op.outputs.fields_as_fields_container()[
             0
         ]  # This index 0 is the step indexing.
 
         # When we destroy the operator, we might lose access to the array, that is why we copy.
-        ids = rescope_field.scoping.ids.copy()
-        data = rescope_field.data.copy()
+        ids = fc.scoping.ids.copy()
+        data = fc.data.copy()
 
         return ids, data
+
+    def _set_rescope(self, op, scope_ids):
+        fc = op.outputs.fields_container()
+
+        rescope = dpf.operators.scoping.rescope()
+        rescope.inputs.mesh_scoping(sorted(scope_ids))
+        rescope.inputs.fields(fc)
+        return rescope
 
     def _set_mesh_scoping(self, op, mesh, requested_location, scope_ids):
         scop = dpf.Scoping()
@@ -324,7 +377,7 @@ class DPFResult(Result):
 
         fc = op.outputs.fields_container()
 
-        op2 = dpf.operators.averaging.to_elemental_fc()
+        op2 = dpf.operators.averaging.to_elemental_fc(collapse_shell_layers=True)
         op2.inputs.fields_container.connect(fc)
         op2.inputs.mesh.connect(mesh)
 
@@ -337,13 +390,15 @@ class DPFResult(Result):
         else:
             if isinstance(rnum, (int, float)):
                 rnum = [rnum]
+            elif isinstance(rnum, (list, tuple)):
+                rnum = [self.parse_step_substep(rnum)]
             else:
                 raise TypeError(
                     "Only 'int' and 'float' are supported to define the steps."
                 )
 
         my_time_scoping = dpf.Scoping()
-        my_time_scoping.location = "timefreq_steps"  # "time_freq" #timefreq_steps
+        my_time_scoping.location = "time_freq_steps"  # "time_freq"
         my_time_scoping.ids = rnum
 
         op.inputs.time_scoping.connect(my_time_scoping)
@@ -362,7 +417,12 @@ class DPFResult(Result):
         return getattr(self.model.results, result_field)()
 
     def _get_nodes_result(
-        self, rnum, result_type, in_nodal_coord_sys=False, nodes=None
+        self,
+        rnum,
+        result_type,
+        in_nodal_coord_sys=False,
+        nodes=None,
+        return_operator=False,
     ):
         return self._get_result(
             rnum,
@@ -370,10 +430,16 @@ class DPFResult(Result):
             requested_location="Nodal",
             scope_ids=nodes,
             result_in_entity_cs=in_nodal_coord_sys,
+            return_operator=return_operator,
         )
 
     def _get_elem_result(
-        self, rnum, result_type, in_element_coord_sys=False, elements=None
+        self,
+        rnum,
+        result_type,
+        in_element_coord_sys=False,
+        elements=None,
+        return_operator=False,
     ):
         return self._get_result(
             rnum,
@@ -381,10 +447,16 @@ class DPFResult(Result):
             requested_location="Elemental",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
+            return_operator=return_operator,
         )
 
     def _get_elemnodal_result(
-        self, rnum, result_type, in_element_coord_sys=False, elements=None
+        self,
+        rnum,
+        result_type,
+        in_element_coord_sys=False,
+        elements=None,
+        return_operator=False,
     ):
         return self._get_result(
             rnum,
@@ -392,6 +464,7 @@ class DPFResult(Result):
             requested_location="Elemental_Nodal",
             scope_ids=elements,
             result_in_entity_cs=in_element_coord_sys,
+            return_operator=return_operator,
         )
 
     @update_result
@@ -402,6 +475,7 @@ class DPFResult(Result):
         requested_location="Nodal",
         scope_ids=None,
         result_in_entity_cs=False,
+        return_operator=False,
     ):
         """
         Get elemental/nodal/elementalnodal results.
@@ -418,11 +492,24 @@ class DPFResult(Result):
             List of entities (nodal/elements) to get the results from, by default None
         result_in_entity_cs : bool, optional
             Obtain the results in the entity coordenate system, by default False
+        return_operator : bool, optional
+            Return the last used operator (most of the times it will be a Rescope operator).
+            Defaults to ``False``.
 
         Returns
         -------
         np.array
-            Values
+            Ids of the entities (nodes or elements)
+        np.array
+            Values of the entities for the requested solution
+        dpf.Operator
+            If ``return_operator`` is ``True``, then it will return the last instantiated
+            operator (most of the times a
+
+            `Rescope operator<https://dpf.docs.pyansys.com/api/ansys.dpf.core.operators.scoping.rescope.html>`_
+
+            :class:`rescope <ansys.dpf.core.operators.scoping.rescope.rescope>`
+            .)
 
         Raises
         ------
@@ -435,7 +522,7 @@ class DPFResult(Result):
         """
 
         # todo: accepts components in nodes.
-        mesh = self.model.metadata.meshed_region
+        mesh = self.metadata.meshed_region
 
         if isinstance(scope_ids, np.ndarray):
             scope_ids = scope_ids.tolist()
@@ -460,11 +547,78 @@ class DPFResult(Result):
             )  # overwrite op to be the elemental results OP
 
         # Applying rescope to make sure the order is right
-        ids, data = self._set_rescope(op, ids.astype(int).tolist())
+        op = self._set_rescope(op, ids.astype(int).tolist())
 
-        return ids, data
+        fc = op.outputs.fields_as_fields_container()[0]
+        if fc.shell_layers is not dpf.shell_layers.nonelayer:
+            # check
+            pass
+
+        if return_operator:
+            return op
+        else:
+            return self._extract_data(op)
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
+        """Returns the DOF solution for each node in the global
+        cartesian coordinate system or nodal coordinate system.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        in_nodal_coord_sys : bool, optional
+            When ``True``, returns results in the nodal coordinate
+            system.  Default ``False``.
+
+        nodes : str, sequence of int or str, optional
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        Returns
+        -------
+        nnum : int np.ndarray
+            Node numbers associated with the results.
+
+        result : float np.ndarray
+            Array of nodal displacements.  Array
+            is (``nnod`` x ``sumdof``), the number of nodes by the
+            number of degrees of freedom which includes ``numdof`` and
+            ``nfldof``
+
+        Examples
+        --------
+        Return the nodal soltuion (in this case, displacement) for the
+        first result of ``"file.rst"``
+
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
+        >>> nnum, data = rst.nodal_solution(0)
+
+        Return the nodal solution just for the nodal component
+        ``'MY_COMPONENT'``.
+
+        >>> nnum, data = rst.nodal_solution(0, nodes='MY_COMPONENT')
+
+        Return the nodal solution just for the nodes from 20 through 50.
+
+        >>> nnum, data = rst.nodal_solution(0, nodes=range(20, 51))
+
+        Notes
+        -----
+        Some solution results may not include results for each node.
+        These results are removed by and the node numbers of the
+        solution results are reflected in ``nnum``.
+        """
+        return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
+
+    def nodal_solution(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
@@ -505,8 +659,8 @@ class DPFResult(Result):
         Return the nodal soltuion (in this case, displacement) for the
         first result of ``"file.rst"``
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, data = rst.nodal_solution(0)
 
         Return the nodal solution just for the nodal component
@@ -524,21 +678,111 @@ class DPFResult(Result):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        if in_nodal_coord_sys is not None:
-            raise DeprecationWarning(
-                "The parameter 'in_nodal_coord_sys' is being deprecated."
+
+        if hasattr(self.model.results, "displacement"):
+            return self.nodal_displacement(rnum, in_nodal_coord_sys, nodes)
+        elif hasattr(self.model.results, "displacement"):
+            return self.nodal_temperature(rnum, nodes)
+        else:
+            raise ResultNotFound(
+                "The current analysis does not have 'displacement' or 'temperature' results."
             )
 
-        return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
+    def nodal_temperature(self, rnum, nodes=None):
+        """Retrieves the temperature for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        Equivalent MAPDL command: PRNSOL, TEMP
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        nodes : str, sequence of int or str, optional
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        Returns
+        -------
+        nnum : numpy.ndarray
+            Node numbers of the result.
+
+        temperature : numpy.ndarray
+            Temperature at each node.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
+        >>> nnum, temp = rst.nodal_temperature(0)
+
+        Return the temperature just for the nodal component
+        ``'MY_COMPONENT'``.
+
+        >>> nnum, temp = rst.nodal_stress(0, nodes='MY_COMPONENT')
+
+        Return the temperature just for the nodes from 20 through 50.
+
+        >>> nnum, temp = rst.nodal_solution(0, nodes=range(20, 51))
+
+        """
+        return self._get_nodes_result(rnum, "temperature", nodes)
 
     def nodal_voltage(self, rnum, in_nodal_coord_sys=None, nodes=None):
+        """Retrieves the voltage for each node in the
+        solution.
+
+        The order of the results corresponds to the sorted node
+        numbering.
+
+        Equivalent MAPDL command: PRNSOL, VOLT
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        nodes : str, sequence of int or str, optional
+            Select a limited subset of nodes.  Can be a nodal
+            component or array of node numbers.  For example
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        Returns
+        -------
+        nnum : numpy.ndarray
+            Node numbers of the result.
+
+        voltage : numpy.ndarray
+            voltage at each node.
+
+        Examples
+        --------
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
+        >>> nnum, temp = rst.nodal_voltage(0)
+
+        Return the voltage just for the nodal component
+        ``'MY_COMPONENT'``.
+
+        >>> nnum, temp = rst.nodal_stress(0, nodes='MY_COMPONENT')
+
+        """
         return self._get_nodes_result(
             rnum, "electric_potential", in_nodal_coord_sys, nodes
         )
-
-    @wraps(nodal_displacement)
-    def nodal_solution(self, *args, **kwargs):
-        return self.nodal_displacement(*args, **kwargs)
 
     def element_stress(
         self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
@@ -604,7 +848,15 @@ class DPFResult(Result):
         the bottom layer is reported.
         """
         if principal:
-            raise NotImplementedError()
+            op = self._get_elem_result(
+                rnum,
+                "stress",
+                in_element_coord_sys=in_element_coord_sys,
+                elements=elements,
+                return_operator=True,
+                **kwargs,
+            )
+            return self._get_principal(op)
         else:
             return self._get_elem_result(
                 rnum, "stress", in_element_coord_sys, elements, **kwargs
@@ -613,9 +865,74 @@ class DPFResult(Result):
     def element_nodal_stress(
         self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
     ):
+        """Retrieves the nodal stresses for each element.
 
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a list containing
+            (step, substep) of the requested result.
+
+        principal : bool, optional
+            Returns principal stresses instead of component stresses.
+            Default False.
+
+        in_element_coord_sys : bool, optional
+            Returns the results in the element coordinate system if ``True``.
+            Else, it returns the results in the global coordinate system.
+            Default False
+
+        elements : str, sequence of int or str, optional
+            Select a limited subset of elements.  Can be a element
+            component or array of element numbers.  For example:
+
+            * ``"MY_COMPONENT"``
+            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+            * ``np.arange(1000, 2001)``
+
+        **kwargs : optional keyword arguments
+            Hidden options for distributed result files.
+
+        Returns
+        -------
+        enum : np.ndarray
+            ANSYS element numbers corresponding to each element.
+
+        element_stress : list
+            Stresses at each element for each node for Sx Sy Sz Sxy
+            Syz Sxz or SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when
+            principal is True.
+
+        enode : list
+            Node numbers corresponding to each element's stress
+            results.  One list entry for each element.
+
+        Examples
+        --------
+        Element component stress for the first result set.
+
+        >>> rst.element_stress(0)
+
+        Element principal stress for the first result set.
+
+        >>> enum, element_stress, enode = result.element_stress(0, principal=True)
+
+        Notes
+        -----
+        Shell stresses for element 181 are returned for top and bottom
+        layers.  Results are ordered such that the top layer and then
+        the bottom layer is reported.
+        """
         if principal:
-            raise NotImplementedError()
+            op = self._get_elemnodal_result(
+                rnum,
+                "stress",
+                in_element_coord_sys=in_element_coord_sys,
+                elements=elements,
+                return_operator=True,
+                **kwargs,
+            )
+            return self._get_principal(op)
         else:
             return self._get_elemnodal_result(
                 rnum, "stress", in_element_coord_sys, elements, **kwargs
@@ -654,12 +971,17 @@ class DPFResult(Result):
             Nodal component elastic strains.  Array is in the order
             ``X, Y, Z, XY, YZ, XZ, EQV``.
 
+            .. versionchanged:: 0.64
+                The nodes with no values are now equals to zero.
+                The results of the midnodes are also calculated and
+                presented.
+
         Examples
         --------
         Load the nodal elastic strain for the first result.
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, elastic_strain = rst.nodal_elastic_strain(0)
 
         Return the nodal elastic strain just for the nodal component
@@ -674,6 +996,8 @@ class DPFResult(Result):
         Notes
         -----
         Nodes without a strain will be NAN.
+
+        ..
         """
         return self._get_nodes_result(
             rnum, "elastic_strain", in_nodal_coord_sys=in_nodal_coord_sys, nodes=nodes
@@ -715,8 +1039,8 @@ class DPFResult(Result):
         --------
         Load the nodal plastic strain for the first solution.
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, plastic_strain = rst.nodal_plastic_strain(0)
 
         Return the nodal plastic strain just for the nodal component
@@ -757,8 +1081,8 @@ class DPFResult(Result):
 
         Examples
         --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, data = rst.nodal_acceleration(0)
 
         Notes
@@ -801,8 +1125,8 @@ class DPFResult(Result):
         Get the nodal reaction forces for the first result and print
         the reaction forces of a single node.
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> rforces, nnum, dof = rst.nodal_reaction_forces(0)
         >>> dof_ref = rst.result_dof(0)
         >>> rforces[:3], nnum[:3], dof[:3], dof_ref
@@ -853,8 +1177,8 @@ class DPFResult(Result):
 
         Examples
         --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, stress = rst.nodal_stress(0)
 
         Return the nodal stress just for the nodal component
@@ -872,55 +1196,6 @@ class DPFResult(Result):
         Equivalent ANSYS command: PRNSOL, S
         """
         return self._get_nodes_result(rnum, "stress", in_nodal_coord_sys, nodes)
-
-    def nodal_temperature(self, rnum, nodes=None):
-        """Retrieves the temperature for each node in the
-        solution.
-
-        The order of the results corresponds to the sorted node
-        numbering.
-
-        Equivalent MAPDL command: PRNSOL, TEMP
-
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
-
-        nodes : str, sequence of int or str, optional
-            Select a limited subset of nodes.  Can be a nodal
-            component or array of node numbers.  For example
-
-            * ``"MY_COMPONENT"``
-            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
-            * ``np.arange(1000, 2001)``
-
-        Returns
-        -------
-        nnum : numpy.ndarray
-            Node numbers of the result.
-
-        temperature : numpy.ndarray
-            Temperature at each node.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
-        >>> nnum, temp = rst.nodal_temperature(0)
-
-        Return the temperature just for the nodal component
-        ``'MY_COMPONENT'``.
-
-        >>> nnum, temp = rst.nodal_stress(0, nodes='MY_COMPONENT')
-
-        Return the temperature just for the nodes from 20 through 50.
-
-        >>> nnum, temp = rst.nodal_solution(0, nodes=range(20, 51))
-
-        """
-        return self._get_nodes_result(rnum, "temperature", nodes)
 
     def nodal_thermal_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal component thermal strain.
@@ -959,8 +1234,8 @@ class DPFResult(Result):
         --------
         Load the nodal thermal strain for the first solution.
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, thermal_strain = rst.nodal_thermal_strain(0)
 
         Return the nodal thermal strain just for the nodal component
@@ -999,8 +1274,8 @@ class DPFResult(Result):
 
         Examples
         --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, data = rst.nodal_velocity(0)
 
         Notes
@@ -1095,8 +1370,8 @@ class DPFResult(Result):
         --------
         Load the principal nodal stress for the first solution.
 
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> from ansys.mapdl.core.reader import DPFResult as Result
+        >>> rst = Result('file.rst')
         >>> nnum, stress = rst.principal_nodal_stress(0)
 
         Notes
@@ -1116,14 +1391,14 @@ class DPFResult(Result):
         ``ansys-mapdl-reader`` uses the default ``AVPRIN, 0`` option.
 
         """
-        res = []
-        for each in ["principal_1", "principal_2", "principal_3"]:
-            res.append(
-                self._get_nodes_result(
-                    rnum, f"stress.{each}", in_nodal_coord_sys, nodes
-                )[1]
-            )
-        return nodes, np.hstack(res)
+        op = self._get_nodes_result(
+            rnum,
+            "stress",
+            in_nodal_coord_sys=in_nodal_coord_sys,
+            nodes=nodes,
+            return_operator=True,
+        )
+        return self._get_principal(op)
 
     @property
     def n_results(self):
@@ -1140,30 +1415,18 @@ class DPFResult(Result):
         """Return the ``pathlib.Path`` version of the filename. This property can not be set."""
         return pathlib.Path(self._rst)
 
-    @property
-    def mesh(self):
-        """Mesh from result file."""
-        return (
-            self.model.mesh
-        )  # todo: this should be a class equivalent to reader.mesh class.
-
-    @property
-    def grid(self):
-        return self.model.mesh.grid
-
     def nsets(self):
-        return self.model.time_freq_support.n_sets
+        return self.metadata.time_freq_support.n_sets
 
     def parse_step_substep(self, user_input):
         """Converts (step, substep) to a cumulative index"""
-
         if isinstance(user_input, int):
-            return self.model.time_freq_support.get_cumulative_index(
+            return self.metadata.time_freq_support.get_cumulative_index(
                 user_input
-            )  # todo: should it be 1 or 0 based indexing?
+            )  # 0 based indexing
 
         elif isinstance(user_input, (list, tuple)):
-            return self.model.time_freq_support.get_cumulative_index(
+            return self.metadata.time_freq_support.get_cumulative_index(
                 user_input[0], user_input[1]
             )
 
@@ -1309,183 +1572,183 @@ class DPFResult(Result):
     @property
     def time_values(self):
         "Values for the time/frequency"
-        return self.model.time_freq_support.time_frequencies.data_as_list
+        return self.metadata.time_freq_support.time_frequencies.data_as_list
 
-    def save_as_vtk(
-        self, filename, rsets=None, result_types=["ENS"], progress_bar=True
-    ):
-        """Writes results to a vtk readable file.
+    # def save_as_vtk(
+    #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
+    # ):
+    #     """Writes results to a vtk readable file.
 
-        Nodal results will always be written.
+    #     Nodal results will always be written.
 
-        The file extension will select the type of writer to use.
-        ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
-        select the VTK XML writer.
+    #     The file extension will select the type of writer to use.
+    #     ``'.vtk'`` will use the legacy writer, while ``'.vtu'`` will
+    #     select the VTK XML writer.
 
-        Parameters
-        ----------
-        filename : str, pathlib.Path
-            Filename of grid to be written.  The file extension will
-            select the type of writer to use.  ``'.vtk'`` will use the
-            legacy writer, while ``'.vtu'`` will select the VTK XML
-            writer.
+    #     Parameters
+    #     ----------
+    #     filename : str, pathlib.Path
+    #         Filename of grid to be written.  The file extension will
+    #         select the type of writer to use.  ``'.vtk'`` will use the
+    #         legacy writer, while ``'.vtu'`` will select the VTK XML
+    #         writer.
 
-        rsets : collections.Iterable
-            List of result sets to write.  For example ``range(3)`` or
-            [0].
+    #     rsets : collections.Iterable
+    #         List of result sets to write.  For example ``range(3)`` or
+    #         [0].
 
-        result_types : list
-            Result type to write.  For example ``['ENF', 'ENS']``
-            List of some or all of the following:
+    #     result_types : list
+    #         Result type to write.  For example ``['ENF', 'ENS']``
+    #         List of some or all of the following:
 
-            - EMS: misc. data
-            - ENF: nodal forces
-            - ENS: nodal stresses
-            - ENG: volume and energies
-            - EGR: nodal gradients
-            - EEL: elastic strains
-            - EPL: plastic strains
-            - ECR: creep strains
-            - ETH: thermal strains
-            - EUL: euler angles
-            - EFX: nodal fluxes
-            - ELF: local forces
-            - EMN: misc. non-sum values
-            - ECD: element current densities
-            - ENL: nodal nonlinear data
-            - EHC: calculated heat generations
-            - EPT: element temperatures
-            - ESF: element surface stresses
-            - EDI: diffusion strains
-            - ETB: ETABLE items
-            - ECT: contact data
-            - EXY: integration point locations
-            - EBA: back stresses
-            - ESV: state variables
-            - MNL: material nonlinear record
+    #         - EMS: misc. data
+    #         - ENF: nodal forces
+    #         - ENS: nodal stresses
+    #         - ENG: volume and energies
+    #         - EGR: nodal gradients
+    #         - EEL: elastic strains
+    #         - EPL: plastic strains
+    #         - ECR: creep strains
+    #         - ETH: thermal strains
+    #         - EUL: euler angles
+    #         - EFX: nodal fluxes
+    #         - ELF: local forces
+    #         - EMN: misc. non-sum values
+    #         - ECD: element current densities
+    #         - ENL: nodal nonlinear data
+    #         - EHC: calculated heat generations
+    #         - EPT: element temperatures
+    #         - ESF: element surface stresses
+    #         - EDI: diffusion strains
+    #         - ETB: ETABLE items
+    #         - ECT: contact data
+    #         - EXY: integration point locations
+    #         - EBA: back stresses
+    #         - ESV: state variables
+    #         - MNL: material nonlinear record
 
-        progress_bar : bool, optional
-            Display a progress bar using ``tqdm``.
+    #     progress_bar : bool, optional
+    #         Display a progress bar using ``tqdm``.
 
-        Notes
-        -----
-        Binary files write much faster than ASCII, but binary files
-        written on one system may not be readable on other systems.
-        Binary can only be selected for the legacy writer.
+    #     Notes
+    #     -----
+    #     Binary files write much faster than ASCII, but binary files
+    #     written on one system may not be readable on other systems.
+    #     Binary can only be selected for the legacy writer.
 
-        Examples
-        --------
-        Write nodal results as a binary vtk file.
+    #     Examples
+    #     --------
+    #     Write nodal results as a binary vtk file.
 
-        >>> rst.save_as_vtk('results.vtk')
+    #     >>> rst.save_as_vtk('results.vtk')
 
-        Write using the xml writer
+    #     Write using the xml writer
 
-        >>> rst.save_as_vtk('results.vtu')
+    #     >>> rst.save_as_vtk('results.vtu')
 
-        Write only nodal and elastic strain for the first result
+    #     Write only nodal and elastic strain for the first result
 
-        >>> rst.save_as_vtk('results.vtk', [0], ['EEL', 'EPL'])
+    #     >>> rst.save_as_vtk('results.vtk', [0], ['EEL', 'EPL'])
 
-        Write only nodal results (i.e. displacements) for the first result.
+    #     Write only nodal results (i.e. displacements) for the first result.
 
-        >>> rst.save_as_vtk('results.vtk', [0], [])
+    #     >>> rst.save_as_vtk('results.vtk', [0], [])
 
-        """
-        # This should probably be included a part of the ansys.dpf.post.result_data.ResultData class
-        raise NotImplementedError("To be implemented by DPF")
+    #     """
+    #     # This should probably be included a part of the ansys.dpf.post.result_data.ResultData class
+    #     raise NotImplementedError("To be implemented by DPF")
 
-    @property
-    def subtitle(self):
-        raise NotImplementedError("To be implemented by DPF")
+    # @property
+    # def subtitle(self):
+    #     raise NotImplementedError("To be implemented by DPF")
 
-    @property
-    def _is_distributed(self):
-        raise NotImplementedError("To be implemented by DPF")
+    # @property
+    # def _is_distributed(self):
+    #     raise NotImplementedError("To be implemented by DPF")
 
-    @property
-    def is_distributed(self):
-        """True when this result file is part of a distributed result
+    # @property
+    # def is_distributed(self):
+    #     """True when this result file is part of a distributed result
 
-        Only True when Global number of nodes does not equal the
-        number of nodes in this file.
+    #     Only True when Global number of nodes does not equal the
+    #     number of nodes in this file.
 
-        Notes
-        -----
-        Not a reliabile indicator if a cyclic result.
-        """
-        return self._is_distributed
+    #     Notes
+    #     -----
+    #     Not a reliabile indicator if a cyclic result.
+    #     """
+    #     return self._is_distributed
 
-    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
-        """return a 4x4 transformation array for a given coordinate system"""
-        raise NotImplementedError("To be implemented by DPF.")
+    # def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+    #     """return a 4x4 transformation array for a given coordinate system"""
+    #     raise NotImplementedError("To be implemented by DPF.")
 
-    def cylindrical_nodal_stress(self):
-        """Retrieves the stresses for each node in the solution in the
-        cylindrical coordinate system as the following values:
+    # def cylindrical_nodal_stress(self):
+    #     """Retrieves the stresses for each node in the solution in the
+    #     cylindrical coordinate system as the following values:
 
-        ``R``, ``THETA``, ``Z``, ``RTHETA``, ``THETAZ``, and ``RZ``
+    #     ``R``, ``THETA``, ``Z``, ``RTHETA``, ``THETAZ``, and ``RZ``
 
-        The order of the results corresponds to the sorted node
-        numbering.
+    #     The order of the results corresponds to the sorted node
+    #     numbering.
 
-        Computes the nodal stress by averaging the stress for each
-        element at each node.  Due to the discontinuities across
-        elements, stresses will vary based on the element they are
-        evaluated from.
+    #     Computes the nodal stress by averaging the stress for each
+    #     element at each node.  Due to the discontinuities across
+    #     elements, stresses will vary based on the element they are
+    #     evaluated from.
 
-        Parameters
-        ----------
-        rnum : int or list
-            Cumulative result number with zero based indexing, or a
-            list containing (step, substep) of the requested result.
+    #     Parameters
+    #     ----------
+    #     rnum : int or list
+    #         Cumulative result number with zero based indexing, or a
+    #         list containing (step, substep) of the requested result.
 
-        nodes : str, sequence of int or str, optional
-            Select a limited subset of nodes.  Can be a nodal
-            component or array of node numbers.  For example
+    #     nodes : str, sequence of int or str, optional
+    #         Select a limited subset of nodes.  Can be a nodal
+    #         component or array of node numbers.  For example
 
-            * ``"MY_COMPONENT"``
-            * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
-            * ``np.arange(1000, 2001)``
+    #         * ``"MY_COMPONENT"``
+    #         * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+    #         * ``np.arange(1000, 2001)``
 
-        Returns
-        -------
-        nnum : numpy.ndarray
-            Node numbers of the result.
+    #     Returns
+    #     -------
+    #     nnum : numpy.ndarray
+    #         Node numbers of the result.
 
-        stress : numpy.ndarray
-            Stresses at ``R, THETA, Z, RTHETA, THETAZ, RZ`` averaged
-            at each corner node where ``R`` is radial.
+    #     stress : numpy.ndarray
+    #         Stresses at ``R, THETA, Z, RTHETA, THETAZ, RZ`` averaged
+    #         at each corner node where ``R`` is radial.
 
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> rst = pymapdl_reader.read_binary('file.rst')
-        >>> nnum, stress = rst.cylindrical_nodal_stress(0)
+    #     Examples
+    #     --------
+    #     >>> from ansys.mapdl.core.reader import DPFResult as Result
+    #     >>> rst = Result('file.rst')
+    #     >>> nnum, stress = rst.cylindrical_nodal_stress(0)
 
-        Return the cylindrical nodal stress just for the nodal component
-        ``'MY_COMPONENT'``.
+    #     Return the cylindrical nodal stress just for the nodal component
+    #     ``'MY_COMPONENT'``.
 
-        >>> nnum, stress = rst.cylindrical_nodal_stress(0, nodes='MY_COMPONENT')
+    #     >>> nnum, stress = rst.cylindrical_nodal_stress(0, nodes='MY_COMPONENT')
 
-        Return the nodal stress just for the nodes from 20 through 50.
+    #     Return the nodal stress just for the nodes from 20 through 50.
 
-        >>> nnum, stress = rst.cylindrical_nodal_stress(0, nodes=range(20, 51))
+    #     >>> nnum, stress = rst.cylindrical_nodal_stress(0, nodes=range(20, 51))
 
-        Notes
-        -----
-        Nodes without a stress value will be NAN.
-        Equivalent ANSYS commands:
-        RSYS, 1
-        PRNSOL, S
-        """
-        raise NotImplementedError("This should be implemented by DPF")
+    #     Notes
+    #     -----
+    #     Nodes without a stress value will be NAN.
+    #     Equivalent ANSYS commands:
+    #     RSYS, 1
+    #     PRNSOL, S
+    #     """
+    #     raise NotImplementedError("This should be implemented by DPF")
 
-    def element_lookup(self, element_id):
-        """Index of the element within the result mesh"""
-        # We need to get the mapping between the mesh.grid and the results.elements.
-        # Probably DPF already has that mapping.
-        raise NotImplementedError("This should be implemented by DPF")
+    # def element_lookup(self, element_id):
+    #     """Index of the element within the result mesh"""
+    #     # We need to get the mapping between the mesh.grid and the results.elements.
+    #     # Probably DPF already has that mapping.
+    #     raise NotImplementedError("This should be implemented by DPF")
 
     # def element_solution_data(self):
     #     pass
