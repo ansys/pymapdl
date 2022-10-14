@@ -249,6 +249,22 @@ class PostProcessing:
         return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num="SBST"))
 
     @property
+    def set(self) -> int:
+        """Current step number
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 2)
+        >>> mapdl.post_processing.set
+        2
+        """
+        sets = self._mapdl.set("LIST").to_array()
+        ldstep = self.load_step
+        substep = self.sub_step
+        return sets[(sets[:, 3] == ldstep) & (sets[:, 4] == substep)][0, 0]
+
+    @property
     def time(self) -> float:
         """Time associated with current result in the database.
 
