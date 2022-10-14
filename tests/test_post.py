@@ -805,6 +805,12 @@ def test_time_values(mapdl, contact_solve):
     )
 
 
+@pytest.mark.parametrize("set_", [1, 2, 3, 4])
+def test_set(mapdl, contact_solve, set_):
+    mapdl.set(nset=set_)
+    assert mapdl.post_processing.set == set_
+
+
 ###############################################################################
 # @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
 # def test_nodal_thermal_component_strain(mapdl, thermal_solve, comp):

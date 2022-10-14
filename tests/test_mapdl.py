@@ -10,6 +10,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
@@ -1571,3 +1572,40 @@ def test_get_fallback(mapdl, cleared):
 
     with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
         mapdl.get_value("elem", 0, "num", "maxd")
+
+
+def test_use_uploading(mapdl, cleared, tmpdir):
+    mymacrofile_name = "mymacrofile.mac"
+    mymacrofile = tmpdir.join(mymacrofile_name)
+    with open(mymacrofile, "w") as fid:
+        fid.write("/prep7\n/eof")
+
+    assert mymacrofile_name not in mapdl.list_files()
+    out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert mymacrofile_name in mapdl.list_files()
+
+    os.remove(mymacrofile)
+    out = mapdl.use(mymacrofile)
+
+    # Raises an error.
+    with pytest.raises(RuntimeError):
+        mapdl.use("myinexistentmacro.mac")
+
+    # Raise an error
+    with pytest.raises(FileNotFoundError):
+        mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_set_list(mapdl, cube_solve):
+    mapdl.post1()
+    obj = mapdl.set("list")
+
+    assert isinstance(obj, CommandListingOutput)
+
+    assert obj.to_array() is not None
+    assert obj.to_array().size != 0
+
+    obj = mapdl.set("list", 1)
+
+    assert not isinstance(obj, CommandListingOutput)
