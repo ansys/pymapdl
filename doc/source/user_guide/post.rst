@@ -62,6 +62,7 @@ These commands are listed in Table-1_.
 |                |                                                                                                   | * :func:`Mapdl.swlist() <ansys.mapdl.core.Mapdl.swlist>`                 |
 |                |                                                                                                   |                                                                          |
 |                |                                                                                                   |  **Other Listing**                                                       |
+|                |                                                                                                   |                                                                          |
 |                |                                                                                                   | * :func:`Mapdl.set("LIST") <ansys.mapdl.core.Mapdl.set>`                 |
 |                |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+  
