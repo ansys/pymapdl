@@ -28,7 +28,7 @@ from ._commands import (
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
 REG_FLOAT_INT = re.compile(
-    r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+"
+    r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
 )  # match number groups
 BC_REGREP = re.compile(
     r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
@@ -620,7 +620,7 @@ class CommandListingOutput(CommandOutput):
         parsed_lines = []
         for line in self.splitlines():
             # exclude any line containing characters [A-Z] except for E
-            if line and not REG_LETTERS.search(line):
+            if line.strip() and not REG_LETTERS.search(line):
                 items = REG_FLOAT_INT.findall(line)
                 if items:
                     parsed_lines.append(items)
