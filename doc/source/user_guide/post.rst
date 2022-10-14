@@ -41,8 +41,9 @@ These commands are listed in Table-1_.
 | Category       | Extra Methods Available                                                                           | Mapdl Commands                                                    |
 +================+===================================================================================================+===================================================================+
 | **Listing**    | * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`                      | **Results Listing**                                               |
-|                | * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`                    | * :func:`prcint() <ansys.mapdl.core.mapdl._MapdlCore.prcint>`     |
-|                | * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`            | * :func:`prenergy() <ansys.mapdl.core.mapdl._MapdlCore.prenergy>` |
+|                | * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`                    |                                                                   |
+|                | * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`            | * :func:`prcint() <ansys.mapdl.core.mapdl._MapdlCore.prcint>`     |
+|                |                                                                                                   | * :func:`prenergy() <ansys.mapdl.core.mapdl._MapdlCore.prenergy>` |
 |                |                                                                                                   | * :func:`prerr() <ansys.mapdl.core.mapdl._MapdlCore.prerr>`       |
 |                |                                                                                                   | * :func:`presol() <ansys.mapdl.core.mapdl._MapdlCore.presol>`     |
 |                |                                                                                                   | * :func:`pretab() <ansys.mapdl.core.mapdl._MapdlCore.pretab>`     |
