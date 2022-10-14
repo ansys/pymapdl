@@ -262,7 +262,7 @@ class PostProcessing:
         sets = self._mapdl.set("LIST").to_array()
         ldstep = self.load_step
         substep = self.sub_step
-        return sets[(sets[:, 3] == ldstep) & (sets[:, 4] == substep)][0, 0]
+        return sets[(sets[:, 2] == ldstep) & (sets[:, 3] == substep)][0, 0]
 
     @property
     def time(self) -> float:
