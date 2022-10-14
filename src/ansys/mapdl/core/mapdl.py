@@ -3797,7 +3797,12 @@ class _MapdlCore(Commands):
             lstep, sbstep, fact, kimg, time, angle, nset, order, **kwargs
         )
 
-        if lstep.upper() == "LIST" and not sbstep and not fact:
+        if (
+            isinstance(lstep, str)
+            and lstep.upper() == "LIST"
+            and not sbstep
+            and not fact
+        ):
             return CommandListingOutput(output, magicwords=["SET", "TIME/FREQ"])
         else:
             return output
