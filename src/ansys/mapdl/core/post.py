@@ -249,7 +249,7 @@ class PostProcessing:
         return int(self._mapdl.get_value("ACTIVE", item1="SET", it1num="SBST"))
 
     @property
-    def set(self) -> int:
+    def step(self) -> int:
         """Current step number
 
         Examples

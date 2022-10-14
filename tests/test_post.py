@@ -805,10 +805,10 @@ def test_time_values(mapdl, contact_solve):
     )
 
 
-@pytest.mark.parametrize("set_", [1, 2, 3, 4])
-def test_set(mapdl, contact_solve, set_):
-    mapdl.set(nset=set_)
-    assert mapdl.post_processing.set == set_
+@pytest.mark.parametrize("step_", [1, 2, 3, 4])
+def test_set(mapdl, contact_solve, step_):
+    mapdl.set(nset=step_)
+    assert mapdl.post_processing.step == step_
 
 
 ###############################################################################
