@@ -27,7 +27,9 @@ from ._commands import (
 
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
-REG_FLOAT_INT = re.compile(r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+\s")
+REG_FLOAT_INT = re.compile(
+    r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+"
+)  # match number groups
 BC_REGREP = re.compile(
     r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
 )
@@ -478,20 +480,29 @@ class CommandListingOutput(CommandOutput):
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
 
+    def __new__(cls, content, cmd=None, magicwords=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        obj._magicwords = magicwords
+        return obj
+
     def __init__(self, *args, **kwargs):
         self._cache = None
 
-    def _is_data_start(self, line, magicword=None):
+    def _is_data_start(self, line, magicwords=None):
         """Check if line is the start of a data group."""
-        if not magicword:
-            magicword = GROUP_DATA_START
+        if not magicwords:
+            if self._magicwords:
+                magicwords = self._magicwords
+            else:
+                magicwords = GROUP_DATA_START
 
         # Checking if we are supplying a custom start function.
         if self.custom_data_start(line) is not None:
             return self.custom_data_start(line)
 
         if line.split():
-            if line.split()[0] in magicword or self.custom_data_start(line):
+            if line.split()[0] in magicwords or self.custom_data_start(line):
                 return True
         return False
 
@@ -557,7 +568,7 @@ class CommandListingOutput(CommandOutput):
                 body = body[:i]
         return body
 
-    def _get_data_group_indexes(self, body, magicword=None):
+    def _get_data_group_indexes(self, body, magicwords=None):
         """Return the indexes of the start and end of the data groups."""
         if "*****ANSYS VERIFICATION RUN ONLY*****" in str(self[:1000]):
             shift = 2
@@ -568,7 +579,7 @@ class CommandListingOutput(CommandOutput):
         start_idxs = [
             ind
             for ind, each in enumerate(body)
-            if self._is_data_start(each, magicword=magicword)
+            if self._is_data_start(each, magicwords=magicwords)
         ]
         end_idxs = [
             ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)
