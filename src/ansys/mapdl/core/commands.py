@@ -480,10 +480,11 @@ class CommandListingOutput(CommandOutput):
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
 
-    def __new__(cls, content, cmd=None, magicwords=None):
+    def __new__(cls, content, cmd=None, magicwords=None, columns_names=None):
         obj = super().__new__(cls, content)
         obj._cmd = cmd
         obj._magicwords = magicwords
+        obj._columns_names = columns_names
         return obj
 
     def __init__(self, *args, **kwargs):
@@ -601,6 +602,9 @@ class CommandListingOutput(CommandOutput):
         List of strings
 
         """
+        if self._columns_names:
+            return self._columns_names
+
         body = self._get_body()
         pairs = list(self._get_data_group_indexes(body))
         try:

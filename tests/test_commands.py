@@ -680,12 +680,17 @@ def test_string_with_literal():
 
 
 @pytest.mark.parametrize("output,last_element", [(set_list_0, 9), (set_list_1, 15)])
-def test_set_list_magicwords(output, last_element):
+def test_magicwords(output, last_element):
     magicwords = ["SET"]
-    obj = CommandListingOutput(output, magicwords=magicwords)
+    obj = CommandListingOutput(
+        output,
+        magicwords=magicwords,
+        columns_names=["SET", "TIME/FREQ", "LOAD STEP", "SUBSTEP", "CUMULATIVE"],
+    )
 
     assert obj.to_list() is not None
     assert obj.to_array() is not None
+    assert obj.to_dataframe() is not None
 
     arr = obj.to_array()
     assert arr[-1, -1] == last_element

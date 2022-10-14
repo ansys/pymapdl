@@ -3803,6 +3803,16 @@ class _MapdlCore(Commands):
             and not sbstep
             and not fact
         ):
-            return CommandListingOutput(output, magicwords=["SET", "TIME/FREQ"])
+            return CommandListingOutput(
+                output,
+                magicwords=["SET", "TIME/FREQ"],
+                columns_names=[
+                    "SET",
+                    "TIME/FREQ",
+                    "LOAD STEP",
+                    "SUBSTEP",
+                    "CUMULATIVE",
+                ],
+            )
         else:
             return output
