@@ -1,5 +1,5 @@
 Sphinx==5.2.3
-ansys-mapdl-reader==0.52.1
+ansys-mapdl-reader==0.52.2
 ansys-sphinx-theme==0.6.1
 grpcio==1.43.0
 imageio-ffmpeg==0.4.7
