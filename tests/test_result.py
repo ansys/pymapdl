@@ -17,10 +17,13 @@ Notes
 import os
 import tempfile
 
+from ansys.dpf import core as dpf_core
 from ansys.dpf.gate.errors import DPFServerException
 from ansys.mapdl.reader import read_binary
 import numpy as np
 import pytest
+
+DPF_PORT = os.environ.get("DPF_PORT", 21002)  # Set in ci.yaml
 
 from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
@@ -52,12 +55,6 @@ def all_close(*args):
     )
 
 
-def test_DPF_result_class(mapdl, cube_solve):
-    from ansys.mapdl.core.reader.result import DPFResult
-
-    assert isinstance(mapdl.result, DPFResult)
-
-
 def extract_sections(vm_code, index):
     if not isinstance(index, (int, tuple, list)):
         raise TypeError("'index' should be an integer")
@@ -81,7 +78,7 @@ def extract_sections(vm_code, index):
             selection = vm_code_lines[indexes[each_] : indexes[each_ + 1]]
         except IndexError:
             raise IndexError(
-                f"The amount of examples (APDL code blocks separated by '/CLEAR' commands) in this example ('{vm}') is {len(indexes)-1}. "
+                f"The amount of examples (APDL code blocks separated by '/CLEAR' commands) in this example is {len(indexes)-1}. "
                 "Please use an index value inside that range."
             )
         code_.extend(selection)
@@ -160,6 +157,22 @@ class TestExample:
     @pytest.fixture(scope="class")
     def result(self, setup):
         return setup.result
+
+
+def test_DPF_result_class(mapdl, cube_solve):
+    from ansys.mapdl.core.reader.result import DPFResult
+
+    assert isinstance(mapdl.result, DPFResult)
+
+
+def test_dpf_connection():
+    # uses 127.0.0.1 and port 50054 by default
+    try:
+        grpc_con = dpf_core.connect_to_server(port=DPF_PORT)
+        assert grpc_con.live
+        assert True
+    except OSError:
+        assert False
 
 
 class TestStaticThermocoupledExample(TestExample):
@@ -506,14 +519,6 @@ class TestPinchedCylinderVM6(TestExample):
 
         validate(result_values, reader_values, post_values)
         mapdl.shell()  # Back to default
-
-    def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
-        mapdl.set(1, 1)
-        post_values = post.nodal_displacement("all")[:, :3]
-        result_values = result.nodal_displacement(1)[1]
-        reader_values = reader.nodal_displacement(0)[1][:, :3]
-
-        validate(result_values, reader_values, post_values)  # Reader results are broken
 
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     def test_result_in_element_coordinate_system(
