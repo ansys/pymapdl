@@ -1,4 +1,4 @@
-Sphinx==5.2.3
+Sphinx==5.3.0
 ansys-mapdl-reader==0.52.2
 ansys-sphinx-theme==0.6.1
 grpcio==1.43.0
