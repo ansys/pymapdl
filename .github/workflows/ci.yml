@@ -34,7 +34,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  packages: write
+  packages: read
 
 jobs:
 
