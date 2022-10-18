@@ -277,7 +277,7 @@ using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
 attribute or implemented Pythonically.
 
 
-Warnings and erors
+Warnings and errors
 ~~~~~~~~~~~~~~~~~~~
 Errors are handled Pythonically. For example:
 
@@ -855,7 +855,7 @@ Environment variables
 ~~~~~~~~~~~~~~~~~~~~~
 There are several PyMAPDL-specific environment variables that can be
 used to control the behavior or launching of PyMAPDL and MAPDL, including those
-described in the follwoing table.
+described in the following table.
 
 +---------------------------------+-------------------------------------------------+
 | ``ANSYSLMD_LICENSE_FILE``       | License file or IP address (192.168.0.16).      |

@@ -10,7 +10,7 @@ For more information on getting a licensed copy of Ansys, visit
 
 You can also try the Student Version of Ansys products in
 `Ansys Student Versions <https://www.ansys.com/academic/students>`_.
-The Student Verion is valid during a calendar year with limited capabilities,
+The Student Version is valid during a calendar year with limited capabilities,
 such as on the number of nodes and elements.
 
 .. toctree::
