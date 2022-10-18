@@ -36,6 +36,8 @@ from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
+COMPONENTS = ["X", "Y", "Z", "XY", "YZ", "XZ"]
+
 
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""
@@ -151,7 +153,7 @@ class DPFResult(Result):
     def mode(self):
         if self._mode_rst:
             return "RST"
-        elif self._mode_rst:
+        else:
             return "MAPDL"
 
     @property
@@ -167,6 +169,29 @@ class DPFResult(Result):
             return True
         else:
             return False
+
+    @property
+    def _is_thermal(self):
+        """Return True if there are TEMP DOF in the solution."""
+        return hasattr(self.model.results, "temperature")
+
+    @property
+    def _is_distributed(self):
+        # raise NotImplementedError("To be implemented by DPF")
+        return False  # Hardcoded until DPF exposure
+
+    @property
+    def is_distributed(self):
+        """True when this result file is part of a distributed result
+
+        Only True when Global number of nodes does not equal the
+        number of nodes in this file.
+
+        Notes
+        -----
+        Not a reliabile indicator if a cyclic result.
+        """
+        return self._is_distributed
 
     @property
     def _rst(self):
@@ -252,24 +277,58 @@ class DPFResult(Result):
     def mesh(self):
         """Mesh from result file."""
         # TODO: this should be a class equivalent to reader.mesh class.
-        return self.model.mesh
+        return self.model.metadata.meshed_region
 
     @property
     def grid(self):
-        return self.model.mesh.grid
+        return self.mesh.grid
 
-    def _get_nodes_for_argument(self, nodes):
-        """Get nodes from 'nodes' which can be int, floats, or list/tuple of int/floats, or
-        components( strs, or iterable[strings]"""
-        if isinstance(nodes, (int, float)):
-            return nodes
-        elif isinstance(nodes, str):
+    def _get_entities_ids(self, entities, entity_type="Nodal"):
+        """Get entities ids given their ids, or component names.
+
+        If a list is given it checks can be int, floats, or list/tuple of int/floats, or
+        components (strs, or iterable[strings])
+
+        Parameters
+        ----------
+        entities : str, int, floats, Iter[int], Iter[float], Iter[str]
+            Entities ids or components
+
+        entity_type : str, optional
+            Type of entity, by default "Nodal"
+
+        Returns
+        -------
+        list
+            List of entities ids.
+
+        Raises
+        ------
+        ValueError
+            The argument 'entity_type' can only be 'Nodal' or 'Elemental'
+        TypeError
+            Only ints, floats, strings or iterable of the previous ones are allowed.
+        ValueError
+            The named selection '{each_named_selection}' does not exist.
+        ValueError
+            The named selection '{each_named_selection}' does not contain {entity_type} information.
+        """
+        if entity_type.lower() not in ["nodal", "elemental"]:
+            raise ValueError(
+                "The argument 'entity_type' can only be 'Nodal' or 'Elemental'. "
+            )
+        else:
+            entity_type = entity_type.title()  # Sanity check
+
+        if isinstance(entities, (int, float)):
+            return [entities]
+        elif isinstance(entities, str):
             # it is component name
-            nodes = [nodes]
-        elif isinstance(nodes, Iterable):
-            if all([isinstance(each, (int, float)) for each in nodes]):
-                return nodes
-            elif all([isinstance(each, str) for each in nodes]):
+            entities = [entities]
+        elif isinstance(entities, Iterable):
+            if all([isinstance(each, (int, float)) for each in entities]):
+                return [entities]
+            elif all([isinstance(each, str) for each in entities]):
                 pass
         else:
             raise TypeError(
@@ -277,23 +336,24 @@ class DPFResult(Result):
             )
 
         # For components selections:
-        nodes_ = []
-        available_ns = self.model.mesh.available_named_selections
-        for each_named_selection in nodes:
+        entities_ = []
+        available_ns = self.mesh.available_named_selections
+
+        for each_named_selection in entities:
             if each_named_selection not in available_ns:
                 raise ValueError(
                     f"The named selection '{each_named_selection}' does not exist."
                 )
 
-            scoping = self.model.mesh.named_selection(each_named_selection)
-            if scoping.location != "Nodal":
+            scoping = self.mesh.named_selection(each_named_selection)
+            if scoping.location != entity_type:
                 raise ValueError(
-                    f"The named selection '{each_named_selection}' does not contain nodes."
+                    f"The named selection '{each_named_selection}' does not contain {entity_type} information."
                 )
 
-            nodes_.append(scoping.ids)
+            entities_.append(scoping.ids)
 
-        return nodes
+        return entities_
 
     def _get_principal(self, op):
         fc = op.outputs.fields_as_fields_container()[
@@ -538,6 +598,10 @@ class DPFResult(Result):
         # Setting time steps
         self._set_input_timestep_scope(op, rnum)
 
+        # getting the ids of the entities scope
+        entity_type = "elemental" if "elemental" in requested_location else "nodal"
+        scope_ids = self._get_entities_ids(scope_ids, requested_location)
+
         # Set type of return
         ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids)
 
@@ -681,7 +745,7 @@ class DPFResult(Result):
 
         if hasattr(self.model.results, "displacement"):
             return self.nodal_displacement(rnum, in_nodal_coord_sys, nodes)
-        elif hasattr(self.model.results, "displacement"):
+        elif hasattr(self.model.results, "temperature"):
             return self.nodal_temperature(rnum, nodes)
         else:
             raise ResultNotFound(
@@ -1091,9 +1155,7 @@ class DPFResult(Result):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_acceleration", in_nodal_coord_sys, nodes
-        )
+        return self._get_nodes_result(rnum, "acceleration", in_nodal_coord_sys, nodes)
 
     def nodal_reaction_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal reaction forces.
@@ -1136,9 +1198,7 @@ class DPFResult(Result):
          ['UX', 'UY', 'UZ'])
 
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_reaction_force", in_nodal_coord_sys, nodes
-        )
+        return self._get_nodes_result(rnum, "reaction_force", in_nodal_coord_sys, nodes)
 
     def nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Retrieves the component stresses for each node in the
@@ -1284,9 +1344,7 @@ class DPFResult(Result):
         These results are removed by and the node numbers of the
         solution results are reflected in ``nnum``.
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_velocity", in_nodal_coord_sys, nodes
-        )
+        return self._get_nodes_result(rnum, "velocity", in_nodal_coord_sys, nodes)
 
     def nodal_static_forces(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Return the nodal forces averaged at the nodes.
@@ -1343,9 +1401,7 @@ class DPFResult(Result):
         Nodes without a a nodal will be NAN.  These are generally
         midside (quadratic) nodes.
         """
-        return self._get_nodes_result(
-            rnum, "misc.nodal_force", in_nodal_coord_sys, nodes
-        )
+        return self._get_nodes_result(rnum, "nodal_force", in_nodal_coord_sys, nodes)
 
     def principal_nodal_stress(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Computes the principal component stresses for each node in
@@ -1403,7 +1459,7 @@ class DPFResult(Result):
     @property
     def n_results(self):
         """Number of results"""
-        return self.model.get_result_info().n_results
+        return self.model.metadata.result_info.n_results
 
     @property
     def filename(self) -> str:
@@ -1442,55 +1498,94 @@ class DPFResult(Result):
         >>> mapdl.result.version
         20.1
         """
-        return float(self.model.get_result_info().solver_version)
+        return float(self.model.metadata.result_info.solver_version)
 
     @property
     def available_results(self):
+        """Available result types.
+
+        .. versionchanged:: 0.64
+           From 0.64, the MAPDL data labels (i.e. NSL for nodal displacements,
+           ENS for nodal stresses, etc) are not included in the output of this command.
+
+        Examples
+        --------
+        >>> mapdl.result.available_results
+        Available Results:
+        Nodal Displacement
+        Nodal Velocity
+        Nodal Acceleration
+        Nodal Force
+        ElementalNodal Element nodal Forces
+        ElementalNodal Stress
+        Elemental Volume
+        Elemental Energy-stiffness matrix
+        Elemental Hourglass Energy
+        Elemental thermal dissipation energy
+        Elemental Kinetic Energy
+        Elemental co-energy
+        Elemental incremental energy
+        ElementalNodal Strain
+        ElementalNodal Thermal Strains
+        ElementalNodal Thermal Strains eqv
+        ElementalNodal Swelling Strains
+        ElementalNodal Temperature
+        Nodal Temperature
+        ElementalNodal Heat flux
+        ElementalNodal Heat flux
+        """
         text = "Available Results:\n"
-        for each_available_result in self.model.get_result_info().available_results:
-            text += (
+        for each_available_result in self.model.metadata.result_info.available_results:
+            text += (  # TODO: Missing label data NSL, VSL, etc
                 each_available_result.native_location
                 + " "
-                + each_available_result.name
+                + each_available_result.physical_name
                 + "\n"
             )
+        return text
 
     @property
     def n_sector(self):
         """Number of sectors"""
-        # TODO: Need to check when this is triggered.
-        return self.model.get_result_info().has_cyclic
+        if self.model.metadata.result_info.has_cyclic:
+            return self.model.metadata.result_info.cyclic_support.num_sectors()
+
+    @property
+    def num_stages(self):
+        """Number of cyclic stages in the model"""
+        if self.model.metadata.result_info.has_cyclic:
+            return self.model.metadata.result_info.cyclic_support.num_stages
 
     @property
     def title(self):
         """Title of model in database"""
-        return self.model.get_result_info().main_title
+        return self.model.metadata.result_info.main_title
 
     @property
-    def is_cyclic(self):  # Todo: DPF should implement this.
-        return self.n_sector > 1
+    def is_cyclic(self):
+        return self.model.metadata.result_info.has_cyclic
 
     @property
     def units(self):
-        return self.model.get_result_info().unit_system_name
+        return self.model.metadata.result_info.unit_system_name
 
     def __repr__(self):
-        if False or self.is_distributed:
+        if self.is_distributed:
             rst_info = ["PyMAPDL Reader Distributed Result"]
         else:
             rst_info = ["PyMAPDL Result"]
 
         rst_info.append("{:<12s}: {:s}".format("title".capitalize(), self.title))
-        rst_info.append("{:<12s}: {:s}".format("subtitle".capitalize(), self.subtitle))
+        # rst_info.append("{:<12s}: {:s}".format("subtitle".capitalize(), self.subtitle)) #TODO: subtitle is not implemented in DPF.
         rst_info.append("{:<12s}: {:s}".format("units".capitalize(), self.units))
 
         rst_info.append("{:<12s}: {:s}".format("Version", self.version))
         rst_info.append("{:<12s}: {:s}".format("Cyclic", self.is_cyclic))
         rst_info.append("{:<12s}: {:d}".format("Result Sets", self.nsets))
 
-        rst_info.append("{:<12s}: {:d}".format("Nodes", self.model.mesh.nodes.n_nodes))
+        rst_info.append("{:<12s}: {:d}".format("Nodes", self.mesh.nodes.n_nodes))
         rst_info.append(
-            "{:<12s}: {:d}".format("Elements", self.model.mesh.elements.n_elements)
+            "{:<12s}: {:d}".format("Elements", self.mesh.elements.n_elements)
         )
 
         rst_info.append("\n")
@@ -1541,8 +1636,9 @@ class DPFResult(Result):
         # size based on the first result
         nnum, sol = func(0, in_nodal_coord_sys)
         data = np.empty((self.nsets, sol.shape[0], sol.shape[1]), np.float64)
-        for i in range(self.nsets):
-            data[i] = func(i)[1]
+        data[0] = sol
+        for i in range(1, self.nsets):
+            data[i] = func(i, in_nodal_coord_sys)[1]
 
         return nnum, data
 
@@ -1563,9 +1659,11 @@ class DPFResult(Result):
                 16, 17, 18, 19, 20], dtype=int32)}
         """
         element_components_ = {}
-        for each_named_selection in self.model.mesh.available_named_selections:
-            scoping = self.model.mesh.named_selection(each_named_selection)
-            element_components_[each_named_selection] = scoping.ids
+        for each_named_selection in self.mesh.available_named_selections:
+            scoping = self.mesh.named_selection(each_named_selection)
+            element_components_[each_named_selection] = np.array(
+                scoping.ids, dtype=np.int32
+            )
 
         return element_components_
 
@@ -1573,6 +1671,83 @@ class DPFResult(Result):
     def time_values(self):
         "Values for the time/frequency"
         return self.metadata.time_freq_support.time_frequencies.data_as_list
+
+    def plot_nodal_stress(
+        self,
+        rnum,
+        comp=None,
+        show_displacement=False,
+        displacement_factor=1,
+        node_components=None,
+        element_components=None,
+        sel_type_all=True,
+        treat_nan_as_zero=True,
+        **kwargs,
+    ):
+        """Plots the stresses at each node in the solution.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        comp : str, optional
+            Stress component to display.  Available options:
+            - ``"X"``
+            - ``"Y"``
+            - ``"Z"``
+            - ``"XY"``
+            - ``"YZ"``
+            - ``"XZ"``
+
+        node_components : list, optional
+            Accepts either a string or a list strings of node
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        element_components : list, optional
+            Accepts either a string or a list strings of element
+            components to plot.  For example:
+            ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
+
+        sel_type_all : bool, optional
+            If node_components is specified, plots those elements
+            containing all nodes of the component.  Default ``True``.
+
+        treat_nan_as_zero : bool, optional
+            Treat NAN values (i.e. stresses at midside nodes) as zero
+            when plotting.
+
+        kwargs : keyword arguments
+            Additional keyword arguments.  See ``help(pyvista.plot)``
+
+        Returns
+        -------
+        cpos : list
+            3 x 3 vtk camera position.
+
+        Examples
+        --------
+        Plot the X component nodal stress while showing displacement.
+
+        >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
+        """
+        if not comp:
+            comp = "X"
+
+        ind = COMPONENTS.index(comp)
+
+        op = self._get_nodes_result(
+            rnum,
+            "stress",
+            nodes=node_components,
+            in_nodal_coord_sys=False,
+            return_operator=True,
+        )
+        fc = op.outputs.fields_as_fields_container()[0]
+
+        raise Exception()
 
     # def save_as_vtk(
     #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
@@ -1661,23 +1836,6 @@ class DPFResult(Result):
     # @property
     # def subtitle(self):
     #     raise NotImplementedError("To be implemented by DPF")
-
-    # @property
-    # def _is_distributed(self):
-    #     raise NotImplementedError("To be implemented by DPF")
-
-    # @property
-    # def is_distributed(self):
-    #     """True when this result file is part of a distributed result
-
-    #     Only True when Global number of nodes does not equal the
-    #     number of nodes in this file.
-
-    #     Notes
-    #     -----
-    #     Not a reliabile indicator if a cyclic result.
-    #     """
-    #     return self._is_distributed
 
     # def cs_4x4(self, cs_cord, as_vtk_matrix=False):
     #     """return a 4x4 transformation array for a given coordinate system"""
