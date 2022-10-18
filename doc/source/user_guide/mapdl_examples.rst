@@ -1,11 +1,11 @@
-ANSYS APDL Interactive Control Examples
+ANSYS APDL interactive control examples
 =======================================
-These examples are used to demonstrate how to convert an existing
-ANSYS APDL script to a python PyMAPDL script.  You could also simply
+These examples demonstrate how to convert an existing
+ANSYS APDL script to a Python PyMAPDL script. You could also simply
 use the built-in :func:`convert_script()
-<ansys.mapdl.core.convert_script>` within `ansys-mapdl-core
+<ansys.mapdl.core.convert_script>` function within `ansys-mapdl-core
 <https://pypi.org/project/ansys-mapdl-core/>`_ to convert an existing
-input file:
+input file.
 
 .. code:: python
 
@@ -15,15 +15,15 @@ input file:
     >>> pymapdl.convert_script(inputfile, pyscript)
 
 
-Torsional Load on a Bar using SURF154 Elements
+Torsional load on a bar using SURF154 elements
 ----------------------------------------------
-This ANSYS APDL script builds a bar and applies torque to it using
-SURF154 elements.  This is a static analysis example.
+This Ansys APDL script builds a bar and applies torque to it using
+SURF154 elements. This is a static analysis example.
 
 
-Script Initialization
+Script initialization
 ~~~~~~~~~~~~~~~~~~~~~
-Beginning of MAPDL script:
+Here is the beginning of the MAPDL script:
 
 .. code::
 
@@ -40,8 +40,8 @@ Beginning of MAPDL script:
     FORCE = 100/RADIUS
     PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
 
-Corresponding PyMAPDL script including the initialization of an
-instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`:
+Here is the corresponding PyMAPDL script, including the initialization of an
+instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class:
 
 .. code:: python
 
@@ -49,7 +49,7 @@ instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`:
     import numpy as np
     from ansys.mapdl.core import launch_mapdl
     
-    # start ANSYS in the current working directory with default jobname "file"
+    # start Ansys in the current working directory with default jobname "file"
     mapdl = launch_mapdl(run_location=os.getcwd())
         
     # define cylinder and mesh parameters
@@ -63,9 +63,9 @@ instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`:
     pressure = force/(h_tip*2*np.pi*radius)
 
 
-Model Creation
+Model creation
 ~~~~~~~~~~~~~~    
-APDL Script:
+Here is an APDL script for creating the model:
 
 .. code::
 
@@ -116,7 +116,7 @@ APDL Script:
     amesh,all
     finish
 
-Corresponding PyMAPDL script:
+Here is the corresponding PyMAPDL script:
 
 .. code:: python
 
@@ -169,7 +169,7 @@ Corresponding PyMAPDL script:
 
 Solution
 ~~~~~~~~
-APDL script:
+Here is the APDL script for the solution:
 
 .. code::
 
@@ -202,7 +202,7 @@ APDL script:
     SAVE
 
 
-Corresponding PyMAPDL script:
+Here is the corresponding PyMAPDL script:
 
 .. code:: python
 
@@ -226,7 +226,7 @@ Corresponding PyMAPDL script:
     mapdl.pbc('u', 1)
     mapdl.solve()
 
-Access and plot the results within python using PyMAPDL:
+Access and plot the results within Python using PyMAPDL:
 
 .. code:: python
 
@@ -280,11 +280,12 @@ Access and plot the results within python using PyMAPDL:
 .. figure:: ../images/cylinder_vonmises.png
     :width: 300pt
 
-    Non-interactive Screenshot of von Mises Stress from PyMAPDL
+    Non-interactive screenshot of von Mises stress from PyMAPDL
 
 
 Alternatively, you can access the same results directly from MAPDL
-using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`:
+using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
+attribute:
 
 .. code:: python
 
@@ -294,10 +295,10 @@ using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
     result.plot_nodal_eqv_stress()
 
 
-Running an Input File - Spotweld SHELL181 Example
+Running an input file - spotweld SHELL181 example
 -------------------------------------------------
 This MAPDL example demonstrates how to model spot welding on three
-thin sheets of metal.  Here, we simply run the full input file using
+thin sheets of metal. Here, the full input file is simply run using
 the PyMAPDL interface.
 
 .. code::
@@ -444,7 +445,7 @@ the PyMAPDL interface.
 
 
 Here is the Python script using `ansys-mapdl-reader
-<https://pypi.org/project/ansys-mapdl-reader/>`_ to access the results
+<https://pypi.org/project/ansys-mapdl-reader/>`_ package to access the results
 after running the MAPDL analysis.
 
 .. code:: python
@@ -462,7 +463,7 @@ after running the MAPDL analysis.
 
     Spot Weld: Displacement
 
-Get the nodal and element component stress at time step 0.  Plot the
+Get the nodal and element component stress at time step 0. Plot the
 stress in the Z direction.
 
 .. code:: python
@@ -478,11 +479,11 @@ stress in the Z direction.
 .. figure:: ../images/spot_sz.png
     :width: 300pt
 
-    Spot Weld: Z Stress
+    Spot weld: Z stress
 
 .. code:: python
 
-    Get the principal nodal stress and plot the von Mises Stress
+    Get the principal nodal stress and plot the von Mises stress
 
     >>> nnum, pstress = result.principal_nodal_stress(0)
     >>> result.plot_principal_nodal_stress(0, 'SEQV')
@@ -490,4 +491,4 @@ stress in the Z direction.
 .. figure:: ../images/spot_seqv.png
     :width: 300pt
 
-    Spot Weld: von Mises Stress
+    Spot weld: von Mises stress
