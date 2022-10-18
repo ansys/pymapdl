@@ -165,6 +165,7 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
+        self._use_dpf = start_parm.get("use_dpf", False)
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -1865,10 +1866,14 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        # from ansys.mapdl.reader import read_binary
 
-        # from ansys.mapdl.reader.rst import Result
-        from ansys.mapdl.core.reader import DPFResult as Result
+        if self._use_dpf:
+            from ansys.mapdl.core.reader import DPFResult
+
+            return DPFResult(None, self)
+        else:
+            from ansys.mapdl.reader import read_binary
+            from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
@@ -1902,8 +1907,7 @@ class _MapdlCore(Commands):
         if not os.path.isfile(result_path):
             raise FileNotFoundError("No results found at %s" % result_path)
 
-        # return read_binary(result_path)
-        return Result(result_path)
+        return read_binary(result_path)
 
     @property
     def result_file(self):
