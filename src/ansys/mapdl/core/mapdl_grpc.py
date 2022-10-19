@@ -1111,7 +1111,7 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_result(os.getcwd())
 
         """
-        if not path:
+        if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
 
         def _download(targets):
