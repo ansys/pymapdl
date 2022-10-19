@@ -119,6 +119,7 @@ class DPFResult(Result):
             )
 
         # dpf
+        self._update()
         self._loaded = False
         self._update_required = False  # if true, it triggers a update on the RST file
         self._cached_dpf_model = None
@@ -135,6 +136,11 @@ class DPFResult(Result):
         """Return the weakly referenced instance of MAPDL"""
         if self._mapdl_weakref:
             return self._mapdl_weakref()
+
+    @property
+    def mapdl(self):
+        """Return the MAPDL instance"""
+        return self._mapdl
 
     @property
     def _log(self):
@@ -231,6 +237,25 @@ class DPFResult(Result):
                 self.__rst_name = f"model_{random_string()}.rst"
         return self.__rst_name
 
+    def update(self, progress_bar=None, chunk_size=None):
+        """Update the DPF Model.
+
+        It does trigger an update on the underlying RST file.
+
+        Parameters
+        ----------
+        progress_bar : _type_, optional
+            Show progress br, by default None
+        chunk_size : _type_, optional
+            _description_, by default None
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        return self._update(progress_bar=progress_bar, chunk_size=chunk_size)
+
     def _update(self, progress_bar=None, chunk_size=None):
         if self._mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
@@ -242,11 +267,14 @@ class DPFResult(Result):
         self._loaded = True
         self._update_required = False
 
-    def _update_rst(self, progress_bar=None, chunk_size=None):
+    def _update_rst(self, progress_bar=None, chunk_size=None, save=True):
         # Saving model
-        self._mapdl.save(self._rst_name[:-4], "rst", "model")
+        if save:
+            self._mapdl.save()
 
-        if self.local and not self.local:
+        self._mapdl.reswrite(self._rst_name)
+
+        if self.local is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
             self._mapdl.download(
@@ -255,18 +283,24 @@ class DPFResult(Result):
                 progress_bar=progress_bar,
                 chunk_size=chunk_size,
             )
-        # self._update_required = not self._update_required # demonstration
 
     def _build_dpf_object(self):
         if self._log:
-            self._log.debug("Building DPF Model object.")
-        self._cached_dpf_model = Model(self._rst)
-        # self._cached_dpf_model = post.load_solution(self._rst)  # loading file
+            self._log.debug("Building/Updating DPF Model object.")
+
+        if not self._cached_dpf_model:
+            self._cached_dpf_model = Model(self._rst)
+        else:
+            # self._cached_dpf_model.update_stream()
+            # DPF will update itself
+            pass
 
     @property
     def model(self):
+        """Returns the DPF model object."""
         if self._cached_dpf_model is None or self._update_required:
-            self._build_dpf_object()
+            self._update()
+
         return self._cached_dpf_model
 
     @property
@@ -320,16 +354,22 @@ class DPFResult(Result):
         else:
             entity_type = entity_type.title()  # Sanity check
 
-        if isinstance(entities, (int, float)):
+        if entities is None:
+            return entities
+
+        elif isinstance(entities, (int, float)):
             return [entities]
+
         elif isinstance(entities, str):
             # it is component name
             entities = [entities]
+
         elif isinstance(entities, Iterable):
             if all([isinstance(each, (int, float)) for each in entities]):
-                return [entities]
+                return entities
             elif all([isinstance(each, str) for each in entities]):
                 pass
+
         else:
             raise TypeError(
                 "Only ints, floats, strings or iterable of the previous ones are allowed."
@@ -1579,8 +1619,8 @@ class DPFResult(Result):
         # rst_info.append("{:<12s}: {:s}".format("subtitle".capitalize(), self.subtitle)) #TODO: subtitle is not implemented in DPF.
         rst_info.append("{:<12s}: {:s}".format("units".capitalize(), self.units))
 
-        rst_info.append("{:<12s}: {:s}".format("Version", self.version))
-        rst_info.append("{:<12s}: {:s}".format("Cyclic", self.is_cyclic))
+        rst_info.append("{:<12s}: {}".format("Version", self.version))
+        rst_info.append("{:<12s}: {}".format("Cyclic", self.is_cyclic))
         rst_info.append("{:<12s}: {:d}".format("Result Sets", self.nsets))
 
         rst_info.append("{:<12s}: {:d}".format("Nodes", self.mesh.nodes.n_nodes))
