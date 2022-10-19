@@ -199,8 +199,8 @@ This is useful when using PyMAPDL with older MAPDL scripts. For example:
 
 Alternatively, you can simply write the commands to a file and then
 run the file using the :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
-method. For example, if you have a ``"ds.dat"``file generated from Ansys Mechanical,
-you can run that with:
+method. For example, if you have a ``"ds.dat"`` file generated from Ansys
+Mechanical, you can run that with:
 
 .. code:: python
 
@@ -615,7 +615,7 @@ MAPDL through Python with the :func:`Mapdl.run()
     mapdl.parameters['MYARR'] = arr
 
 Verify that the data has been properly loaded to MAPDL by indexing the
-:attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>`attribute as if it
+:attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>` attribute as if it
 was a Python dictionary:
 
 .. code:: python

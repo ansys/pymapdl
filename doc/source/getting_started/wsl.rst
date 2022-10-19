@@ -63,7 +63,7 @@ required libraries:
    sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
-If you are using Ubuntu, follow the instructions in `Running MAPDL: Ubuntu <https://mapdldocs.pyansys.com/getting_started/running_mapdl.html#ubuntu/>`_ .
+If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <https://mapdldocs.pyansys.com/getting_started/running_mapdl.html#ubuntu/>`_ .
 
 
 Install Ansys products
@@ -133,8 +133,8 @@ open port in Windows 10 Firewall
 This works if you want to run a Docker image using WSL Linux image to host that
 Docker image. The Docker image successfully communicates with the Windows
 License Server using these ports if you use the ``'-p'`` flag when running the
-Docker image and these ports are open.  See `Running MAPDL on a Local Docker
-Image`_.
+Docker image and these ports are open.  See `Run MAPDL on a local Docker
+image`_.
 
 
 If you want to run MAPDL in the CentOS7 image and use the Windows license
@@ -144,7 +144,7 @@ still try to open ports ``1055`` and ``2325`` in the firewall and check if your
 MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to disable the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
-side effects and security risk so use it with caution. See `Disabling Firewall on WSL Ethernet`_.
+side effects and security risk so use it with caution. See `Disable Firewall on WSL Ethernet`_.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -280,7 +280,7 @@ You can then run the Docker image with:
 Notes
 =====
 
-The specified IP address ``127.0.0.1`` in `Run MAPDL on a Local Docker Image`_ is
+The specified IP address ``127.0.0.1`` in `Run MAPDL on a local Docker image`_ is
 the IP address of WSL CentOS from the WSL perspective, whereas the Windows host IP address is
 normally ``127.0.1.1``. Docker builds the PyMAPDL images using the WSL
 distribution as the base. Hence, PyMAPDL is running on a Linux WSL
@@ -356,8 +356,8 @@ install. To do so, you must provide a full path to the file containing the
 products to install.
 
 
-Regarding IP addresses in WSL and the Windows host
-================================================
+IP addresses in WSL and the Windows host
+========================================
 
 Theory
 ------
@@ -377,7 +377,7 @@ as mentioned earlier, this issue is solved.
 
 
 
-Disabling firewall on WSL ethernet
+Disable firewall on WSL ethernet
 ==================================
 This method shows a notification:
 

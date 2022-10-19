@@ -77,7 +77,7 @@ Once you've launched MAPDL you should see:
     Server listening on : 0.0.0.0:50052
 
 Connect to the MAPDL container from Python
----------------------------------------------
+-------------------------------------------
 
 You can now connect to the instance with:
 
