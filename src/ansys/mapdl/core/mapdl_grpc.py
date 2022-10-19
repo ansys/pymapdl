@@ -75,6 +75,17 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
 
+try:
+    from ansys.mapdl.core.reader import DPFResult
+
+    HAS_DPF = True
+
+except ModuleNotFoundError:
+    from ansys.mapdl.reader import read_binary
+    from ansys.mapdl.reader.rst import Result
+
+    HAS_DPF = False
+
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -2294,11 +2305,9 @@ class MapdlGrpc(_MapdlCore):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        # from ansys.mapdl.reader import read_binary
-        # from ansys.mapdl.reader.rst import Result
 
-        HAS_DPF = True
-        from ansys.mapdl.core.reader import DPFResult as Result
+        if HAS_DPF:
+            return DPFResult(None, self)
 
         if not self._local:
             # download to temporary directory
@@ -2309,9 +2318,6 @@ class MapdlGrpc(_MapdlCore):
                 os.mkdir(save_path)
             result_path = self.download_result(save_path)
         else:
-            if HAS_DPF:
-                return Result(os.path.join(self.directory, self.jobname + ".rst"))
-
             if self._distributed_result_file and self._result_file:
                 result_path = self._distributed_result_file
                 result = Result(result_path, read_mesh=False)
@@ -2339,7 +2345,7 @@ class MapdlGrpc(_MapdlCore):
         if not os.path.isfile(result_path):
             raise FileNotFoundError("No results found at %s" % result_path)
 
-        return Result(result_path)
+        return read_binary(result_path)
 
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
