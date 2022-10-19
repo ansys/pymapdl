@@ -23,6 +23,7 @@ electrothermal_microactuator_analysis = vmfiles["vm223"]
 piezoelectric_rectangular_strip_under_pure_bending_load = vmfiles["vm231"]
 transient_response_of_a_ball_impacting_a_flexible_surface = vmfiles["vm65"]
 threed_nonaxisymmetric_vibration_of_a_stretched_membrane = vmfiles["vm155"]
+modal_analysis_of_a_cyclic_symmetric_annular_plate = vmfiles["vm244"]
 
 
 # be sure to add the input file directly in this directory
