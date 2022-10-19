@@ -192,7 +192,7 @@ environment variable with that IP address:
 
 
 Run MAPDL on a local Docker image
-********************************
+*********************************
 
 To run a Docker image, you must follow all steps in `Run PyMAPDL on WSL`_ .
 
