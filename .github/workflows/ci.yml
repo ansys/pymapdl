@@ -354,7 +354,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
 
       - name: Unit Testing
         run: |
