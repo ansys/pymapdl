@@ -14,6 +14,7 @@ Notes
 - ``Post`` does not filter based on mapdl selected nodes (neither reader)
 
 """
+from logging import Logger
 import os
 import tempfile
 
@@ -23,18 +24,20 @@ from ansys.mapdl.reader import read_binary
 import numpy as np
 import pytest
 
+from ansys.mapdl.core.logging import Logger as MAPDLLogger
+
 DPF_PORT = os.environ.get("DPF_PORT", 21002)  # Set in ci.yaml
 
-from ansys.mapdl.core.examples import (
+from ansys.mapdl.core.examples import (  # threed_nonaxisymmetric_vibration_of_a_stretched_membrane,
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
+    modal_analysis_of_a_cyclic_symmetric_annular_plate,
     piezoelectric_rectangular_strip_under_pure_bending_load,
     pinched_cylinder,
     transient_response_of_a_ball_impacting_a_flexible_surface,
     transient_thermal_stress_in_a_cylinder,
 )
-
-COMPONENTS = ["X", "Y", "Z", "XY", "YZ", "XZ"]
+from ansys.mapdl.core.reader.result import COMPONENTS
 
 
 def validate(result_values, reader_values, post_values=None):
@@ -555,9 +558,10 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
     Purposes of tests
     =================
     * Test multiple steps simulations
+    * Test mesh and nodes
 
     Features of test
-    ================1.
+    ================
     * Analysis Type(s): Nonlinear Transient Dynamic Analysis (ANTYPE = 4)
     * Element Type(s):
       * Structural Mass Elements (MASS21)
@@ -624,3 +628,78 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
         assert result.parse_step_substep((1, 4)) == 5
         assert result.parse_step_substep((1, 5)) == 6
         assert result.parse_step_substep((1, 10)) == 11
+
+    def test_mesh(self, mapdl, reader, post, result):
+        assert np.allclose(mapdl.mesh.nnum, result.mesh.nodes.scoping.ids)
+        assert np.allclose(mapdl.mesh.enum, result.mesh.elements.scoping.ids)
+
+    def test_configuration(self, mapdl, result):
+        if result.mode_rst:
+            assert isinstance(mapdl.result.logger, Logger)
+        elif result.mode_mapdl:
+            assert isinstance(mapdl.result.logger, MAPDLLogger)
+
+    def test_no_cyclic(self, mapdl, reader, post, result):
+        assert not result.is_cyclic
+        assert result.n_sector is None
+        assert result.num_stages is None
+
+
+# class TestChabocheRateDependentPlasticMaterialunderCyclicLoadingVM155(TestExample):
+#     """Class to test Chaboche Rate-Dependent Plastic Material under Cyclic Loading (VM155 example).
+
+#     A thin plate is modeled with chaboche rate-dependent plastic material model. Uniaxial cyclic displacement
+#     loading is applied in vertical direction (Figure .155.1: Uniaxial Loading Problem Sketch (p. 379)). The
+#     loading history is composed of 23 cycles (Figure .155.2: Loading history (p. 380)), in which the first 22
+#     cycles have an identical displacement path. In the last load cycle the displacement is made constant at
+#     time gaps 910 to 940 seconds and at time gaps 960 to 990 seconds. The stress history is computed and
+#     compared against the reference solution.
+
+#     Purposes of tests
+#     =================
+#     * None yet
+
+#     Features of test
+#     ================
+#     * Analysis Type(s): Static Analysis (ANTYPE = 0)
+#     * Element Type(s):
+#       * 2-D Structural Solid Elements (PLANE182)
+
+#     """
+
+#     example = threed_nonaxisymmetric_vibration_of_a_stretched_membrane
+#     example_name = "Transient Response of a Ball Impacting a Flexible Surface"
+
+
+class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(TestExample):
+    """Class to test Modal Analysis of a Cyclic Symmetric Annular Plate (VM244 example).
+
+    The fundamental natural frequency of an annular plate is determined using a mode-frequency analysis.
+    The lower bound is calculated from the natural frequency of the annular plates, which are free on the
+    inner radius and fixed on the outer. The bounds for the plate frequency are compared to the theoretical
+    results.
+
+    Purposes of tests
+    =================
+    * Test cyclic (axisymmetric) simulations
+
+    Features of test
+    ================
+    * Analysis Type(s): Mode-frequency analysis (ANTYPE = 2)
+    * Element Type(s):
+      * 3-D 8-Node Structural Solid (SOLID185)
+      * 3-D 20-Node Structural Solid (SOLID186)
+      * 3-D 10-Node Tetrahedral Structural Solid (SOLID187)
+      * 4-Node Finite Strain Shell (SHELL181)
+      * 3-D 8-Node Layered Solid Shell (SOLSH190)
+      * 8-Node Finite Strain Shell (SHELL281)
+
+    """
+
+    example = modal_analysis_of_a_cyclic_symmetric_annular_plate
+    example_name = "Modal Analysis of a Cyclic Symmetric Annular Plate"
+
+    def test_cyclic(self, mapdl, reader, post, result):
+        assert result.is_cyclic
+        assert result.n_sector == 12
+        assert result.num_stages == 1
