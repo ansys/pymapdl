@@ -93,6 +93,7 @@ class DPFResult(Result):
         self.__rst_directory = None
         self.__rst_name = None
         self._mapdl_weakref = None
+        self._server_file_path = None  # In case DPF is remote.
 
         if rst_file_path is not None:
             if os.path.exists(rst_file_path):
@@ -232,7 +233,7 @@ class DPFResult(Result):
     @property
     def _rst_name(self):
         if self.__rst_name is None:
-            self.__rst_name = self._mapdl.jobname + ".rst"
+            self.__rst_name = self._mapdl.result_file
         return self.__rst_name
 
     def update(self, progress_bar=None, chunk_size=None):
@@ -258,6 +259,10 @@ class DPFResult(Result):
         if self._mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
+        # Upload it to DPF if we are not in local
+        if self._dpf_is_remote():
+            self._upload_to_dpf()
+
         # Updating model
         self._build_dpf_object()
 
@@ -265,19 +270,20 @@ class DPFResult(Result):
         self._loaded = True
         self._update_required = False
 
+    def _dpf_is_remote(self):
+        return True
+
+    def _upload_to_dpf(self):
+        self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
+
     def _update_rst(self, progress_bar=None, chunk_size=None, save=True):
         # Saving model
         if save:
             self._mapdl.save()
 
-        # with self._mapdl.run_as_routine("POST1"):
-        #     self._mapdl.reswrite(self._rst_name)
-
         if self.local is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
-            # rst_file = self._mapdl.jobname + ".rst"
-
             self._mapdl.download(
                 self._rst_name,
                 self._rst_directory,
