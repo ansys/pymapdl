@@ -119,7 +119,7 @@ class DPFResult(Result):
             )
 
         # dpf
-        self._update()
+        # self._update()
         self._loaded = False
         self._update_required = False  # if true, it triggers a update on the RST file
         self._cached_dpf_model = None
@@ -128,7 +128,8 @@ class DPFResult(Result):
         ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
         ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
-        # this will be removed once the reader class has been fully substituted.
+        # these will be removed once the reader class has been fully substituted.
+        self._update()
         super().__init__(self._rst, read_mesh=False)
 
     @property
@@ -272,7 +273,8 @@ class DPFResult(Result):
         if save:
             self._mapdl.save()
 
-        self._mapdl.reswrite(self._rst_name)
+        # with self._mapdl.run_as_routine("POST1"):
+        #     self._mapdl.reswrite(self._rst_name)
 
         if self.local is False:
             self._log.debug("Updating the local copy of remote RST file.")
