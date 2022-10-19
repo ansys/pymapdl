@@ -191,7 +191,7 @@ environment variable with that IP address:
     export ANSYSLMD_LICENSE_FILE=1055@$winhostIP
 
 
-Ru MAPDL on a local Docker image
+Run MAPDL on a local Docker image
 ********************************
 
 To run a Docker image, you must follow all steps in `Run PyMAPDL on WSL`_ .
