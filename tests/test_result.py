@@ -24,7 +24,7 @@ from ansys.mapdl.reader import read_binary
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.logging import Logger as MAPDLLogger
+from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
 
 DPF_PORT = os.environ.get("DPF_PORT", 21002)  # Set in ci.yaml
 

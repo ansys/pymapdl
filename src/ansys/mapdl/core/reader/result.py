@@ -232,10 +232,7 @@ class DPFResult(Result):
     @property
     def _rst_name(self):
         if self.__rst_name is None:
-            if self.local:
-                self.__rst_name = self._mapdl.jobname
-            else:
-                self.__rst_name = f"model_{random_string()}.rst"
+            self.__rst_name = self._mapdl.jobname + ".rst"
         return self.__rst_name
 
     def update(self, progress_bar=None, chunk_size=None):
@@ -279,6 +276,8 @@ class DPFResult(Result):
         if self.local is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
+            # rst_file = self._mapdl.jobname + ".rst"
+
             self._mapdl.download(
                 self._rst_name,
                 self._rst_directory,
