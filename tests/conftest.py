@@ -269,7 +269,6 @@ def mapdl(request, tmpdir_factory):
         override=True,
         run_location=run_path,
         cleanup_on_exit=cleanup,
-        additional_switches="-smp",
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 

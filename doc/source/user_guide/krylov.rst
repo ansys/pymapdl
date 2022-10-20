@@ -1,5 +1,5 @@
 =======================================
-Harmonic Analysis via the Krylov Method
+Harmonic analysis via the krylov method
 =======================================
 
 Introduction

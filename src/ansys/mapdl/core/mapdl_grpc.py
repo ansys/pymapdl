@@ -2064,7 +2064,7 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def krylov(self):
-        """APDL krylov interface
+        """MAPDL krylov interface
 
         Returns
         -------
