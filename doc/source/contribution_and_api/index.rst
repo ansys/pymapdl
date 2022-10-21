@@ -125,6 +125,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    geometry
    helper
    inline
+   krylov
    logging
    mapdl
    math
@@ -135,5 +136,3 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
-   krylov
-   

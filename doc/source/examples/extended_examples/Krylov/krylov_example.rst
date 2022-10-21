@@ -17,8 +17,8 @@ These are the main steps required:
 -  Reduce the system of equations and solve at each frequency using the
    :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method.
 
--  Expand the reduced solution back to the FE space using the :func:`KrylovSolver.kryexpand() 
-  <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method.
+-  Expand the reduced solution back to the FE space using the :func:`KrylovSolver.kryexpand()
+   <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method.
 
 Problem description
 -------------------
@@ -45,8 +45,10 @@ and output impedance on the other end.
 
 
 .. warning:: Launching MAPDL in ``'-smp'`` mode to avoid distributing processing
-   because it is not supported by the MAPDL Math module.
+   because it is not supported by the MAPDL Krylov module.
     
+This section defines the geometry parameters and analysis settings.
+As mentioned earlier, the geometry is a cylinder defined by its radius (``cyl_r``) and its length (``cyl_L``).
 
 Parameters definition
 ~~~~~~~~~~~~~~~~~~~~~
@@ -77,7 +79,7 @@ Parameters definition
     
     tol_elem = nelem_wl * no_wl  # total number of elements across length
 
-Element and Material definition
+Element and material definition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
@@ -139,7 +141,7 @@ Plot FE model:
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
 
 
-Boundary Condition Definition
+Define boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -168,8 +170,8 @@ Boundary Condition Definition
 
 
 
-Perform Modal Analysis to study the natural modes of the system
----------------------------------------------------------------
+Perform modal analysis
+----------------------
 
 .. code:: ipython3
 
@@ -236,9 +238,10 @@ Initialize Krylov class object
 
     Qz = dd.krygensub(10, 500, True, True)
 
+The shape of the subspace generated is:
+
 .. code:: ipython3
 
-    # The shape of the Subspace generated
     print(Qz.shape)
 
 
