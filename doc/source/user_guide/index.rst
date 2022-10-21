@@ -31,7 +31,7 @@ PyMAPDL library.
    krylov
 
 
-PyMAPDL Basic Overview
+PyMAPDL overview
 ======================
 The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of of

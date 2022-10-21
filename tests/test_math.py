@@ -431,7 +431,7 @@ def test_dense_solver(mm):
     solver = mm.factorize(m2)
 
     v = mm.ones(dim)
-    C = C = solver.solve(v)
+    C = solver.solve(v)
 
     # TODO: we need to verify this works
     m3_ = m3.asarray()

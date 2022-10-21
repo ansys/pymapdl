@@ -229,7 +229,7 @@ def test_non_valid_inputs_solve(
     mapdl, cleared, freq_start, freq_end, freq_steps, ramped_load, error_msg
 ):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.clear()
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
