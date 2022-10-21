@@ -32,7 +32,7 @@ The following assumptions are made in the Krylov solution obtained using this me
 * The external load vector is linearly ramped over frequency. Ramping assumes that the frequency at 
   which the Krylov subspace is built is in the middle of the frequency range. If you wish to apply 
   stepped loading, there is an option to specify that in the inputs for the 
-  :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method.
+  :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` method.
 
 
 Krylov : PyMAPDL implementation
@@ -48,9 +48,9 @@ Details on the theory and equations describing the Krylov method can be found in
 
 The exposure in PyMAPDL follows the same the same theory as the apdl macro and has the following methods:
 
-* :func:`KrylovSolver.krygensub() <ansys.mapdl.core.krylov.KrylovSolver.krygensub>` Creates the Krylov subspace. 
-* :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` Solves the reduced system of equations.
-* :func:`KrylovSolver.kryexpand() <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` Expands the Krylov subspace.
+* :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>` Creates the Krylov subspace. 
+* :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` Solves the reduced system of equations.
+* :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` Expands the Krylov subspace.
 
 .. warning:: These methods must be run consecutively.
 
@@ -86,37 +86,37 @@ Create Instance of the Krylov Class
     
     >>> mk = mapdl.krylov
 
-Call the :func:`krygensub <ansys.mapdl.core.krylov.KrylovSolver.krygensub>` method which creates the Krylov subspace:
+Call the :func:`gensubspace <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>` method which creates the Krylov subspace:
 Build a subspace of Size / Dimension 10 and at a frequency of 500 Hz.
 
 .. code:: py
 
-    >>> Qz = mk.krygensub(10, 500, True, True)
+    >>> Qz = mk.gensubspace(10, 500, True, True)
 
 Return the Krylov subspace
 --------------------------
 
-Call the :func:`krysolve <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method which reduces system of equations and solve at each frequency:
+Call the :func:`solve <ansys.mapdl.core.krylov.KrylovSolver.solve>` method which reduces system of equations and solve at each frequency:
 Solve from 0 Hz to 1000 Hz with 100 intervals in between, with stepped loading   
 
 .. code:: py
 
-    >>> Yz = mk.krysolve(0, 1000, 100, 1, True)
+    >>> Yz = mk.solve(0, 1000, 100, 1, True)
 
 
 Return the Reduced solution over Frequency range
 ------------------------------------------------
             
-Call the :func:`kryexpand <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method which expand the reduced solution back to FE space:
+Call the :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method which expand the reduced solution back to FE space:
 Output the expanded solution and calculate residual.   
 
 .. code:: py
 
-    >>> res = mk.kryexpand(True, 3)
+    >>> res = mk.expand(True, 3)
 
 Return Ndarray (if out_key = True) solution vectors mapped to User order.
 
-.. note:: The Ndarray returned by the method ``kryexpand`` contains the node number along with dof solution,
+.. note:: The Ndarray returned by the method ``expand`` contains the node number along with dof solution,
           for each of the calculated frequency.
 
 Get the dof solution at a specific frequency

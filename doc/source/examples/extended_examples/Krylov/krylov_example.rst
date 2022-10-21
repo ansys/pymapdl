@@ -11,13 +11,13 @@ analysis.
 These are the main steps required:
 
 -  Generate a Krylov subspace for model reduction in harmonic analysis.
-   Using :func:`KrylovSolver.krygensub() <ansys.mapdl.core.krylov.KrylovSolver.krygensub>` method.
+   Using :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>` method.
 
 -  Reduce the system of equations and solve at each frequency.
-   Using :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method.
+   Using :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` method.
 
 -  expand reduced solution back to FE space
-   Using :func:`KrylovSolver.kryexpand() <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method.
+   Using :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` method.
 
 Problem Description
 -------------------
@@ -235,7 +235,7 @@ Initialize Krylov class object
 
 .. code:: ipython3
 
-    Qz = dd.krygensub(10, 500, True, True)
+    Qz = dd.gensubspace(10, 500, True)
 
 .. code:: ipython3
 
@@ -253,7 +253,7 @@ from 0 Hz to 1000 Hz with ramped loading
 
 .. code:: ipython3
 
-    Yz = dd.krysolve(0, 1000, 100, 0, True)
+    Yz = dd.solve(0, 1000, 100)
 
 .. code:: ipython3
 
@@ -270,7 +270,7 @@ from 0 Hz to 1000 Hz with ramped loading
 
 .. code:: ipython3
 
-    res = dd.kryexpand(True, 3)
+    res = dd.expand(residual_computation=True, residual_algorithm="l2")
 
 Results : Pressure Distribution as a function of length
 -------------------------------------------------------

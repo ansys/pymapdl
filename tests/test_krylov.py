@@ -94,16 +94,16 @@ def test_krylov_with_point_load(mapdl):
     mapdl.jobname = "point_load_py"
 
     # Parameters set for Krylov
-    max_q = 10
-    frq = 100
+    max_dim_q = 10
+    frequency = 100
 
     mapdl.cdread("db", os.path.join(lib_path, "krylov_point_load"), "cdb")
-    solu_krylov(mapdl, frq)
+    solu_krylov(mapdl, frequency)
 
     dd = mapdl.krylov
-    dd.krygensub(max_q, frq, True, True).asarray()
-    dd.krysolve(frq, frq, 1, 1, True).asarray()
-    dd.kryexpand(True, 3)
+    dd.gensubspace(max_dim_q, frequency, check_orthogonality=True)
+    dd.solve(frequency, frequency, freq_steps=1, ramped_load=True)
+    dd.expand(residual_computation=True, residual_algorithm="l2")
     Xii_py = mm.vec(name="Xii").asarray()
 
     # setting the absolute and relative tolerance
@@ -114,8 +114,10 @@ def test_krylov_with_point_load(mapdl):
     assert np.allclose(Xii_macro_pt_load, Xii_py, rtol, atol)
 
 
-@pytest.mark.parametrize("res_key", [0, 1, 2, 3])
-def test_krylov_with_pressure_load(mapdl, res_key):
+@pytest.mark.parametrize(
+    "residual_algorithm", ["L-inf", "Linf", "L-1", "L1", "L-2", "L2"]
+)
+def test_krylov_with_pressure_load(mapdl, residual_algorithm):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
@@ -134,9 +136,9 @@ def test_krylov_with_pressure_load(mapdl, res_key):
     solu_krylov(mapdl, frq)
 
     dd = mapdl.krylov
-    dd.krygensub(max_q, frq, True, True).asarray()
-    dd.krysolve(frq, frq, 1, 0, True).asarray()
-    dd.kryexpand(True, res_key)
+    dd.gensubspace(max_q, frq, check_orthogonality=True)
+    dd.solve(frq, frq, freq_steps=1, ramped_load=True)
+    dd.expand(residual_computation=True, residual_algorithm=residual_algorithm)
     Xii_py = mm.vec(name="Xii").asarray()
 
     # setting the absolute and relative tolerance
@@ -149,19 +151,17 @@ def test_krylov_with_pressure_load(mapdl, res_key):
 
 # Test Exceptions
 @pytest.mark.parametrize(
-    "input_kry_gensub",
+    "maxQ,freq,check_ortho,error_msg",
     [
         (
             10.2,
             100,
-            True,
             True,
             "The maximum size of Krylov subspace is required to be greater than 0",
         ),
         (
             -2,
             100,
-            True,
             True,
             "The maximum size of Krylov subspace is required to be greater than 0",
         ),
@@ -169,87 +169,65 @@ def test_krylov_with_pressure_load(mapdl, res_key):
             10,
             100.3,
             True,
-            True,
-            "The frequency value for building the Krylov subspace is required to be greater or equal to 0 Hz",
+            "The frequency value ('freq_val') for building the Krylov subspace is required",
         ),
         (
             10,
             -100,
             True,
-            True,
-            "The frequency value for building the Krylov subspace is required to be greater or equal to 0 Hz",
+            "The frequency value ('freq_val') for building the Krylov subspace is required",
         ),
         (
             10,
             100,
             3,
-            False,
-            "The chk_ortho_key value for building the Krylov subspace is required to be Boolean True or False",
-        ),
-        (
-            10,
-            100,
-            True,
-            2,
-            "The out_key value for building the Krylov subspace is required to be to be Boolean True or False",
+            "The 'check_orthogonality' value for building the Krylov subspace is required",
         ),
     ],
 )
-def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
+def test_non_valid_inputs_gensubspace(
+    mapdl, cleared, maxQ, freq, check_ortho, error_msg
+):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
-
-    mapdl.clear()
-    # Parameters set for Krylov
-    maxQ = input_kry_gensub[0]
-    freq_val = input_kry_gensub[1]
 
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
     solu_krylov(mapdl, 100)
     dd = mapdl.krylov
     with pytest.raises(ValueError) as e:
-        dd.krygensub(maxQ, freq_val, input_kry_gensub[2], input_kry_gensub[3])
-    assert str(e.value) == input_kry_gensub[4]
+        dd.gensubspace(maxQ, freq, check_ortho)
+    assert error_msg in str(e.value)
 
 
 @pytest.mark.parametrize(
-    "input_krysolve",
+    "freq_start,freq_end,freq_steps,ramped_load,error_msg",
     [
         (
             -2,
             100,
             10,
-            0,
             True,
-            "The beginning frequency value for solving the reduced solution is required to be greater than or equal to 0",
+            "The beginning frequency value for solving the reduced solution is required",
         ),
         (
             2,
             100,
             -10,
-            1,
             False,
-            "The number of frequencies for which to compute the reduced solution is required to be greater than 0",
+            "The number of frequencies ('freq_steps') for which to compute the reduced",
         ),
         (
             2,
             100,
             10,
-            -1,
-            True,
-            "The Load key value for computing the reduced solution is required to be 0 or 1",
-        ),
-        (
-            2,
-            100,
-            10,
-            0,
-            2,
-            "The out_key value for computing the reduced solution is required to be Boolean True or False",
+            1,
+            "The 'ramped_load' argument for computing the reduced solution can only",
         ),
     ],
 )
-def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
+def test_non_valid_inputs_solve(
+    mapdl, cleared, freq_start, freq_end, freq_steps, ramped_load, error_msg
+):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
@@ -260,37 +238,42 @@ def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
     solu_krylov(mapdl, 100)
     dd = mapdl.krylov
     with pytest.raises(ValueError) as e:
-        dd.krysolve(
-            input_krysolve[0],
-            input_krysolve[1],
-            input_krysolve[2],
-            input_krysolve[3],
-            input_krysolve[4],
-        )
-    assert str(e.value) == input_krysolve[5]
+        dd._check_input_solve(freq_start, freq_end, freq_steps, ramped_load)
+    assert error_msg in str(e.value)
 
 
 @pytest.mark.parametrize(
-    "input_kryexpand",
+    "return_solution,residual_computation,residual_algorithm,error_msg",
     [
         (
             2,
             100,
-            "The out_key value for expanding the reduced solution is required to be Boolean True or False",
+            "l-inf",
+            "The 'return_solution' value for expanding the reduced solution is required to be",
         ),
         (
             True,
             5,
-            "The res_key value for expanding the reduced solution is required to be 0 -> 3",
+            "l-inf",
+            "The 'residual_computation' can only be a boolean or a string 'off' or 'no'.",
         ),
         (
             True,
             -1,
-            "The res_key value for expanding the reduced solution is required to be 0 -> 3",
+            "l-inf",
+            "The 'residual_computation' can only be a boolean or a string 'off' or 'no'.",
+        ),
+        (
+            True,
+            True,
+            "l-3",
+            "The provided 'residual_algorithm' is not allowed. Only allowed are",
         ),
     ],
 )
-def test_non_valid_inputs_kryexpand(mapdl, input_kryexpand):
+def test_non_valid_inputs_expand(
+    mapdl, return_solution, residual_computation, residual_algorithm, error_msg
+):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL v222 and above")
 
@@ -300,5 +283,24 @@ def test_non_valid_inputs_kryexpand(mapdl, input_kryexpand):
     solu_krylov(mapdl, 100)
     dd = mapdl.krylov
     with pytest.raises(ValueError) as e:
-        dd.kryexpand(input_kryexpand[0], input_kryexpand[1])
-    assert str(e.value) == input_kryexpand[2]
+        dd._check_input_expand(
+            return_solution, residual_computation, residual_algorithm
+        )
+    assert error_msg in str(e.value)
+
+
+def test_check_full_file_exist(mapdl, cleared):
+    # deleting previous full file.
+    if mapdl._local:
+        full_file = os.path.join(mapdl.directory, mapdl.jobname + ".full")
+        if os.path.exists(full_file):
+            os.remove()
+    else:
+        mapdl.slashdelete(mapdl.jobname + ".full")
+
+    kk = mapdl.krylov
+    with pytest.raises(FileNotFoundError):
+        kk._check_full_file_exists("mydummy.full")
+
+    with pytest.raises(FileNotFoundError):
+        kk._check_full_file_exists()
