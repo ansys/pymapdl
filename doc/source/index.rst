@@ -1,4 +1,4 @@
-PyMAPDL Documentation |version|
+PyMAPDL documentation |version|
 ===============================
 
 .. toctree::
@@ -15,7 +15,7 @@ PyMAPDL Documentation |version|
 
 
 
-Introduction and Purpose
+Introduction and purpose
 ------------------------
 PyMAPDL is part of the larger `PyAnsys <https://docs.pyansys.com>`_
 effort to facilitate the use of Ansys technologies directly from
@@ -26,12 +26,12 @@ Python. Its primary package, ``ansys-mapdl-core``, provides:
 - Plotting of MAPDL geometry and meshes using `PyVista
   <https://docs.pyvista.org>`_ from within a Python script or an
   interactive `Jupyter notebook <https://jupyter.org/>`_.
-- Access to MAPDL arrays as Python objects (e.g. nodes, elements,
+- Access to MAPDL arrays as Python objects (for example, nodes, elements,
   solution matrices, and results).
 
-With PyMAPDL it is easier than ever to integrate the simulation capabilities 
-of the Ansys MAPDL multi-physics solver directly into novel applications 
-thanks to an API that will look familiar to APDL and Python users alike.
+Thanks to an API that looks familiar to APDL and Python users alike, PyMAPDL
+makes it is easier than ever to integrate the simulation capabilities 
+of the Ansys MAPDL multi-physics solver directly into novel applications.
 The package presents a Python-friendly interface to drive the software
 that manages the submission of low-level APDL commands, while exchanging
 data through high-performance gRPC interfaces.
@@ -39,7 +39,7 @@ data through high-performance gRPC interfaces.
 Accelerate the preparation of your simulations using PyMAPDL. Combine the
 expressiveness of general-purpose Python code to control the flow in your
 input decks with methods that drive the solver. Explore proof of concept 
-studies or capture knowledge using interactive Jupyter notebooks.  Tap
+studies or capture knowledge using interactive Jupyter notebooks. Tap
 the solver as the physics engine in your next Artificial Intelligence
 application. It is now open source: Enjoy it! Contributions are welcome.
 
@@ -61,7 +61,7 @@ commands that can then be transmitted to an MAPDL instance running anywhere,
 while producing network footprints that are compact and efficient.
 
 
-Quick Code
+Quick code
 ----------
 Here's a brief example of how PyMAPDL works:
 
@@ -75,9 +75,9 @@ Here's a brief example of how PyMAPDL works:
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
     PyMAPDL Version:     Version: 0.57.0
 
-MAPDL is now active and you can send commands to it as a genuine a
-Python class.  For example, if we wanted to create a surface using
-keypoints we could run:
+MAPDL is now active and you can send commands to it as a genuine
+Python class. For example, if you wanted to create a surface using
+keypoints, you could run:
 
 .. code:: python
 
@@ -92,23 +92,24 @@ keypoints we could run:
     mapdl.run('L, 4, 1')
     mapdl.run('AL, 1, 2, 3, 4')
 
-MAPDL interactively returns the result of each command and it is
-stored to the logging module or can be immediately printed out with
-``print(mapdl.run)``.  Errors are caught immediately and pythonically.
+MAPDL interactively returns the result of each command, which is
+stored to the logging module. The ``print(mapdl.run)`` method can
+also be used to immediately print out the result. Errors are caught
+immediately and Pythonically.
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-MAPDL functions can be called directly from an :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` instance in a pythonic manner.  This is to
+MAPDL functions can be called directly from a :class:`Mapdl
+<ansys.mapdl.core.mapdl._MapdlCore>` instance in a Pythonic manner. This is to
 simplify calling MAPDL, especially when inputs are variables within
-Python.  For example, the following two commands are equivalent:
+Python. For example, the following two commands are equivalent:
 
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
     mapdl.run('K, 1, 0, 0, 0')
 
-This approach takes care of the string formatting for you.  For
+This approach takes care of the string formatting for you. For
 example, inputting points from a numpy array:
 
 .. code:: python
@@ -119,13 +120,13 @@ example, inputting points from a numpy array:
        mapdl.k(i + 1, x, y, z)
 
 
-Advanced Features
+Advanced features
 ~~~~~~~~~~~~~~~~~
 All features available to command line MAPDL can be used within
 PyMAPDL, and there are a variety of new features available through
 gRPC.
 
-For example view the current mesh status with:
+For example, view the current mesh status with:
 
 .. code::
 
@@ -137,7 +138,7 @@ For example view the current mesh status with:
       Number of Node Components:    0
       Number of Element Components: 0
 
-Or save it as vtk with:
+Or save it as a VTK file with:
 
 .. code::
 
@@ -155,13 +156,13 @@ You can even plot directly from the Python environment with:
 .. figure:: ./images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using ``PyMAPDL`` and ``vtk``
+    Element pot from MAPDL using ``PyMAPDL`` and ``vtk``
 
-For a full listing of the additional PyMAPDL features, please see the
+For a full listing of PyMAPDL features, see the
 :ref:`ref_user_guide`.
 
 
-Project Index
+Project index
 *************
 
 * :ref:`genindex`

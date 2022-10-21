@@ -587,3 +587,10 @@ def test_load_table(mapdl_console):
     )
     mapdl_console.load_table("my_conv", my_conv, "TIME")
     assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
+
+
+def test_mode_corba(mapdl_console):
+    assert mapdl_console.mode == "console"
+    assert not mapdl_console.is_grpc
+    assert not mapdl_console.is_corba
+    assert mapdl_console.is_console
