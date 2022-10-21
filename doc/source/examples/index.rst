@@ -34,7 +34,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. toctree::
     :hidden:
-    :maxdepth: 4
+    :maxdepth: 3
 
     Cart-Pole Simulation <https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html>
     extended_examples/ex_01-gmsh_example/ex_01-gmsh_example

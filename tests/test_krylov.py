@@ -251,7 +251,7 @@ def test_non_valid_inputs_krygensub(mapdl, input_kry_gensub):
 )
 def test_non_valid_inputs_krysolve(mapdl, input_krysolve):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.clear()
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")

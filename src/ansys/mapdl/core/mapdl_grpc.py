@@ -2072,7 +2072,7 @@ class MapdlGrpc(_MapdlCore):
 
         Examples
         --------
-        Solving using krylov method
+        Solve using Krylov method
 
         >>> mk = mapdl.krylov
 
@@ -2087,7 +2087,8 @@ class MapdlGrpc(_MapdlCore):
         full_file     - Specify full file name to read specific full file.
                         By default jobname.full is read.
 
-        2.Use KRYLOV subspace to solve a reduced harmonic analysis over a specified frequency range
+        2. Use Krylov subspace to solve a reduced harmonic analysis over a specified frequency
+        range.
         >>> Yz = mk.krysolve(freq_start,freq_end,num_freq,load_key,out_key)
 
         freq_start - starting value of the frequency range (Hz)
@@ -2096,7 +2097,7 @@ class MapdlGrpc(_MapdlCore):
         load_key - key specifying whether load should be ramped(0) or stepped(1)
         out_key  - [optional] key to output reduced solution to Yz.txt file [Default:False]
 
-        3.Expand the reduced solution back to the original space
+        3. Expand the reduced solution back to the original space.
         >>> mk.kryexpand(outKey,resKey)
 
             out_key  - [optional] key to output expanded solution to Xz_*.txt file [Default:False]

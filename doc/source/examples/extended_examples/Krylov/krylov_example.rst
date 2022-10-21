@@ -2,28 +2,30 @@
 
 
 
-Harmonic analysis using the Frequency sweep Krylov method
+Harmonic analysis using the frequency sweep Krylov method
 =========================================================
 
-This example shows how to use the krylov method in `PyMAPDL <https://mapdl.docs.pyansys.com/>`_ for harmonic
+This example shows how to use the Krylov method in `PyMAPDL <https://mapdl.docs.pyansys.com/>`_ for harmonic
 analysis.
 
 These are the main steps required:
 
--  Generate a Krylov subspace for model reduction in harmonic analysis.
-   Using :func:`KrylovSolver.krygensub() <ansys.mapdl.core.krylov.KrylovSolver.krygensub>` method.
+-  Generate a Krylov subspace for model reduction in the harmonic analysis using
+   the :func:`KrylovSolver.krygensub() <ansys.mapdl.core.krylov.KrylovSolver.krygensub>`
+   method.
 
--  Reduce the system of equations and solve at each frequency.
-   Using :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method.
+-  Reduce the system of equations and solve at each frequency using the
+   :func:`KrylovSolver.krysolve() <ansys.mapdl.core.krylov.KrylovSolver.krysolve>` method.
 
--  expand reduced solution back to FE space
-   Using :func:`KrylovSolver.kryexpand() <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method.
+-  Expand the reduced solution back to the FE space using the :func:`KrylovSolver.kryexpand() 
+  <ansys.mapdl.core.krylov.KrylovSolver.kryexpand>` method.
 
-Problem Description
+Problem description
 -------------------
 
-To perform Harmonic analysis on a cylindrical acoustic duct using the
-`Krylov method <https://en.wikipedia.org/wiki/Krylov_subspace>`_ and study the response of the system over a range of
+To perform an harmonic analysis on a cylindrical acoustic duct using the
+`Krylov method <https://en.wikipedia.org/wiki/Krylov_subspace>`_ 
+and study the response of the system over a range of
 frequencies.
 
 The model is a cylindrical acoustic duct with pressure load on one end
@@ -37,13 +39,13 @@ and output impedance on the other end.
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
 
-Launch mapdl in ``'-smp'`` mode to avoid distributing processing which is not supported by the MAPDL Math module.
-
-.. code:: ipython3
-
     mapdl = launch_mapdl(additional_switches='-smp', nproc=4)
     mapdl.clear()
     mm = mapdl.math
+
+
+.. warning:: Launching MAPDL in ``'-smp'`` mode to avoid distributing processing
+   because it is not supported by the MAPDL Math module.
     
 
 Parameters definition
@@ -51,21 +53,29 @@ Parameters definition
 
 .. code:: ipython3
 
+    # Constants
     pi = np.arccos(-1)
+    c0 = 340                         # Speed of Sound (m/s)
+
+    # Materials
     rho = 1.2                        # density
-    c0 = 340                         # Speed of Sound
-    frq = 1000                       # excitation freq   Hz
     visco = 0.9                      # viscosity
-    
+
+    # Excitation
+    frq = 1000                       # excitation freq   Hz
+
+    # FE analysis settings
+    nelem_wl = 10                    # no of elements per wavelength
+
+    # Derived parameters
     TP = 1/frq
     WL = c0 * TP
     no_wl = 3                        # no of wavelengths in space
-    
+
     cyl_L = no_wl * WL               # length of duct
     cyl_r = 0.025 * cyl_L            # cross section of duct
     
-    nelem_wl = 10                    # no of elements per wavelength
-    tol_elem = nelem_wl * no_wl
+    tol_elem = nelem_wl * no_wl  # total number of elements across length
 
 Element and Material definition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -79,9 +89,6 @@ Element and Material definition
     mapdl.mp("SONC", 1, c0)
     mapdl.mp("VISC", 1, visco)
 
-.. parsed-literal::
-
-    MATERIAL          1     VISC =  0.9000000
 
 Geometry definition
 ~~~~~~~~~~~~~~~~~~~
@@ -104,11 +111,8 @@ Geometry definition
     mapdl.cm('cm1', 'volu')
 
 
-.. parsed-literal::
 
-    DEFINITION OF COMPONENT = CM1       ENTITY=VOLU
-
-Mesh Creation
+Create mesh:
 
 .. code:: ipython3
 
@@ -125,11 +129,8 @@ Mesh Creation
     mapdl.allsel()
 
 
-.. parsed-literal::
 
-    SELECT ALL ENTITIES OF TYPE= ALL  AND BELOW
-
-Plot FE model :
+Plot FE model:
 
 .. code:: ipython3
 
@@ -144,23 +145,27 @@ Boundary Condition Definition
 
 .. code:: ipython3
 
+    # Select areas to apply pressure to
     mapdl.cmsel("S", "cm1")
     mapdl.aslv()
-    mapdl.asel('R',"EXT")
+    mapdl.asel('R',"EXT")  # Select external areas
     mapdl.asel('R',"LOC","x",0)
-    mapdl.nsla('S',1)   
+    mapdl.nsla('S',1)
+    
+    # Apply pressure
     mapdl.d('ALL','PRES', 1)
+    
+    # Select nodes on the areas where impedance is to be applied
     mapdl.cmsel("S", "cm1")
     mapdl.aslv()
     mapdl.asel('R',"EXT")
     mapdl.asel('R',"LOC","x",cyl_L)
-    mapdl.nsla("S",1)      
+    mapdl.nsla("S",1)
+
+    # Apply impedance
     mapdl.sf("ALL","IMPD",1000)
     mapdl.allsel()
 
-.. parsed-literal::
-
-    SELECT ALL ENTITIES OF TYPE= ALL  AND BELOW
 
 
 Perform Modal Analysis to study the natural modes of the system
@@ -169,7 +174,7 @@ Perform Modal Analysis to study the natural modes of the system
 .. code:: ipython3
 
     # Modal Analysis
-    mapdl.run("/SOLU")
+    mapdl.slashsolu()
     nev = 10 # Get the first 10 modes
     output = mapdl.modal_analysis("DAMP", nmode=nev)
     mapdl.finish()
@@ -199,10 +204,10 @@ Perform Modal Analysis to study the natural modes of the system
     Freq =  1584.36 Hz
     
 
-Run Harmonic Analysis using Krylov method
+Run harmonic analysis using Krylov method
 -----------------------------------------
 
-**Step 1** : Generate Full File
+**Step 1**: Generate full file
 
 .. code:: ipython3
 
@@ -213,15 +218,9 @@ Run Harmonic Analysis using Krylov method
     mapdl.harfrq(0,1000)   # Set beginning and ending frequency
     mapdl.nsubst(100)      # Set the number of frequency increments
     mapdl.wrfull(1)        # GENERATE .FULL FILE AND STOP
-    output = mapdl.solve()
+    mapdl.solve()
     mapdl.finish()
 
-.. parsed-literal::
-
-    FINISH SOLUTION PROCESSING
-    
-    
-     ***** ROUTINE COMPLETED *****  CP =         3.781
 
 
 Initialize Krylov class object
@@ -230,7 +229,7 @@ Initialize Krylov class object
 
     dd = mapdl.krylov
 
-**Step 2** : Generate a Krylov subspace of size / Dimension 10 at frequency
+**Step 2**: Generate a Krylov subspace of size/dimension 10 at frequency
 500 Hz for model reduction
 
 .. code:: ipython3
@@ -248,8 +247,8 @@ Initialize Krylov class object
     (3240, 10)
     
 
-**Step 3** : Reduces system of equations and solve at each frequency Solve
-from 0 Hz to 1000 Hz with ramped loading
+**Step 3**: Reduce the system of equations and solve at each frequency
+from 0 Hz to 1000 Hz with ramped loading.
 
 .. code:: ipython3
 
@@ -266,14 +265,14 @@ from 0 Hz to 1000 Hz with ramped loading
     (10, 100)
     
 
-**Step 4** : Expand reduced solution back to FE space
+**Step 4**: Expand reduced solution back to the FE space.
 
 .. code:: ipython3
 
-    res = dd.kryexpand(True, 3)
+    results = dd.kryexpand(True, 3)
 
-Results : Pressure Distribution as a function of length
--------------------------------------------------------
+Results: Pressure distribution as a function of length
+------------------------------------------------------
 
 .. code:: ipython3
 
@@ -285,10 +284,10 @@ Results : Pressure Distribution as a function of length
     nodes = mapdl.db.nodes
     ind, coords, angles = nodes.all_asarray()
 
+Load the last result substep to get the pressure for each of the selected nodes.
+
 .. code:: ipython3
 
-    # Load last substep results
-    # Get Pressure for each of the selected nodes
     x_data = []
     y_data = []
     substep_index = 99
@@ -305,32 +304,34 @@ Results : Pressure Distribution as a function of length
         x_data.append(loc[0])
         y_data.append(pressure_a)
 
+Sort the results according to the X-coordinate:
+
 .. code:: ipython3
 
-    # Sort the results according to X-coord min to X-coord max
     sorted_x_data, sorted_y_data = zip(*sorted(zip(x_data, y_data)))
 
+Plot the calculated data:
+
 .. code:: ipython3
 
-    # Plotting the curve
     plt.plot(sorted_x_data, sorted_y_data, linewidth= 3.0, color='b', label='Krylov method')
     
-    # Naming the x-axis, y-axis and the whole graph
-    plt.title("Pressure Distribution as a function of length")
-    plt.xlabel("Length Coord")
+    # Name the graph and the x-axis and y-axis
+    plt.title("Pressure distribution as a function of length")
+    plt.xlabel("Length coordinate")
     plt.ylabel("Pressure")
     
-    # Adding legend
+    # Add legend
     plt.legend()
     
-    # To load the display window
+    # Load the display window
     plt.show()
 
 
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_36_1.png
 
 
-Results : Plot Frequency response Function
+Results: Plot frequency response function
 ------------------------------------------
 
 .. code:: ipython3
@@ -353,25 +354,33 @@ Results : Plot Frequency response Function
 
         dic[start_freq] = abs_pressure
         start_freq += step_val
-        
+
+Sort the results:
+
+.. code:: python3
+
     frf_List = dic.items()
     frf_List = sorted(frf_List)
     frf_x, frf_y = zip(*frf_List) 
         
         
-    # Plotting the curve    
+
+Plot the frequency response function for the selected node: 
+
+.. code:: python3
+    
     plt.plot(frf_x, frf_y, linewidth= 3.0, color='b')
 
-    #Plot the natural frequency as vertical lines on the FRF graph
+    # Plot the natural frequency as vertical lines on the FRF graph
     for itr in range(0,6):
         plt.axvline(x=ev[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
         
-    # Naming the x-axis, y-axis and the whole graph
+    # Name the graph and the x-axis and y-axis
     plt.title("Frequency Response Function")
     plt.xlabel("Frequency (HZ)")
     plt.ylabel("Pressure")
 
-    # To load the display window
+    # Load the display window
     plt.show()
 
 
