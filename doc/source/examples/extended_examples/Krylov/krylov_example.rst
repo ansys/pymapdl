@@ -226,7 +226,7 @@ Initialize Krylov class object
 
 .. code:: ipython3
 
-    Qz = dd.krygensub(10, 500, True, True)
+    Qz = dd.gensub(10, 500, check_orthogonality=True)
 
 .. code:: ipython3
 
@@ -243,7 +243,7 @@ from 0 Hz to 1000 Hz with ramped loading.
 
 .. code:: ipython3
 
-    Yz = dd.krysolve(0, 1000, 100, 0, True)
+    Yz = dd.solve(0, 1000, 100, ramped_load=True)
 
 .. code:: ipython3
 

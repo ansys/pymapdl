@@ -10,6 +10,7 @@ from .mapdl_grpc import MapdlGrpc
 
 class KrylovSolver:
     """Abstract mapdl krylov class.  Created from a ``Mapdl`` instance.
+
     Notes
     -----
     The procedure to use the Krylov solver is composed of three steps:
@@ -181,7 +182,7 @@ class KrylovSolver:
         self._mapdl.vec("fz0", "Z", "COPY", "fz")
         self.fz0 = self.mm.vec(name="fz0")
 
-    def _calculate_orthogonality(self, orth_file, uz, num_q):
+    def _calculate_orthogonality(self, uz, num_q):
         """Check Orthonormality of vectors"""
 
         if self.orthogonality is not None:
@@ -226,7 +227,9 @@ class KrylovSolver:
 
         check_orthogonality : bool, optional
           Whether to check the orthonormal properties of each subspace vector
-          with all other subspace vectors. The default is ``False``.
+          with all other subspace vectors. The result matrix is stored in
+          :attr:`KrylovSolver.orthogonality <ansys.mapdl.core.krylov.KrylovSolver.orthogonality`.
+          The default is ``False``.
 
         full_file : str, optional
           Name of the FULL file to read. The default is ``<jobname>.full``.
@@ -359,8 +362,7 @@ class KrylovSolver:
 
         # Optional check on Orthonormality of vectors
         if check_orthogonality:
-            orth_file = os.path.join(f"{self.jobname}_ortho.txt")
-            self._calculate_orthogonality(orth_file, uz, num_q)
+            self._calculate_orthogonality(uz, num_q)
 
         self._run_gensubspace = True
         return self.Qz
@@ -408,6 +410,7 @@ class KrylovSolver:
         self.freq_start = freq_start
         self.freq_steps = freq_steps
         self.ramped_load = ramped_load
+        self.freq_end = freq_end
 
         az = self.mm.mat(name="az")
         ndof = self._ndof
@@ -426,7 +429,7 @@ class KrylovSolver:
 
         # Loop over frequency range
         omega = self.freq_start * 2 * np.pi
-        self.intV = (freq_end - self.freq_start) / self.freq_steps
+        self.intV = (self.freq_end - self.freq_start) / self.freq_steps
 
         for iFreq in range(1, self.freq_steps + 1):
             # form RHS at the i-th frequency point
@@ -493,12 +496,15 @@ class KrylovSolver:
         residual_algorithm : str, optional
           Specifies the type of residual normal calculation. It can take
           the following values:
-          * "L-inf": Compute the L-inf norm of the residual.
+          * "L-inf": Compute the L-inf norm of the residual. Default value.
           * "L-1": Compute the L-1 norm of the residual.
           * "L-2": Compute the L-2 norm of the residual.
 
         compute_solution_vectors : bool, optional
-          If ``True`` it compute the solution vectors. Defaults to ``True``.
+          If ``True`` it compute the solution vectors. The solution vectors
+          are stored in :attr:`Krylov.solution_vectors
+          <ansys.mapdl.core.krylov.KrylovSolver.solution_vectors>` method.
+          Defaults to ``True``.
 
         return_solution : bool, optional
           If ``True`` it will return the solution vectors. By default is ``False``.
@@ -521,7 +527,7 @@ class KrylovSolver:
         if residual_algorithm is not None:
             # To avoid having to set residual computation.
             residual_computation = True
-        else:
+        elif residual_algorithm is None:
             residual_algorithm = "L-Inf"
 
         # Check inputs before executing the method
