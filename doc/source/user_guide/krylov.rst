@@ -141,7 +141,7 @@ solution and calculate the residual.
 It returns a :class:`numpy array<numpy.ndarray>` (if the kwarg ``out_key``
 is set to ``True``) solution vectors mapped to User order.
 
-.. note:: The ``ndarray`` returned by the method ``kryexpand`` contains
+.. note:: The ``ndarray`` returned by the method ``expand`` contains
    the node number along with the dof solution for each of the calculated
    frequencies.
 
