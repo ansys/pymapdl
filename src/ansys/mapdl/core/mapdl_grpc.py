@@ -2068,7 +2068,7 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        :class:`MapdlMath <ansys.mapdl.core.krylov.Krylov_functions>`
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
 
         Examples
         --------

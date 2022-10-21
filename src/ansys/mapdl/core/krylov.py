@@ -7,7 +7,9 @@ from .mapdl_grpc import MapdlGrpc
 
 
 class KrylovSolver:
-    """Abstract mapdl krylov class.  Created from a ``Mapdl`` instance.
+    """Provides an abstract class for the MAPDL Krylov method.
+    
+     This class is created from a ``Mapdl`` instance.
 
     Examples
     --------
@@ -17,20 +19,20 @@ class KrylovSolver:
     >>> mapdl = launch_mapdl()
     >>> ....
     >>> ....
-    >>> Generate the FEA model (mesh, constraints, loads, etc.)
+    >>> Generate the FEA model (mesh, constraints, loads)
     >>> Generate the .full file
 
     >>> mk = mapdl.krylov
 
-    Generate Krylov subspace
+    Generate the Krylov subspace.
 
     >>> Qz = mk.krygensub(10, 500, True, True)
 
-    Reduces system of equations and solve at each frequency
+    Reduce the system of equations and solve at each frequency.
 
     >>> Yz = mk.krysolve(0, 1000, 100, 0, True)
 
-    Expand reduced solution back to FE space
+    Expand the reduced solution back to the FE space.
 
     >>> res = mk.kryexpand(True, 3)
 
@@ -68,61 +70,61 @@ class KrylovSolver:
         else:
             if self.full_file not in self._mapdl.list_files():
                 raise FileNotFoundError(
-                    f"The file {self.full_file} could not be found in remote MAPDL instance."
+                    f"The file {self.full_file} could not be found in the remote MAPDL instance."
                 )
 
         # Check for illegal input values by the user
         if not isinstance(max_dim_q, int) or max_dim_q <= 0:
             raise ValueError(
-                "The maximum size of Krylov subspace is required to be greater than 0"
+                "The maximum size of the Krylov subspace must be greater than 0."
             )
         if not isinstance(freq_val, int) or freq_val < 0:
             raise ValueError(
-                "The frequency value for building the Krylov subspace is required to be greater or equal to 0 Hz"
+                "The frequency value for building the Krylov subspace must be equal to or greater than 0 Hz."
             )
         if not isinstance(chk_ortho_key, bool):
             raise ValueError(
-                "The chk_ortho_key value for building the Krylov subspace is required to be Boolean True or False"
+                "The chk_ortho_key value for building the Krylov subspace must be True or False."
             )
         if not isinstance(out_key, bool):
             raise ValueError(
-                "The out_key value for building the Krylov subspace is required to be to be Boolean True or False"
+                "The out_key value for building the Krylov subspace must be True or False"
             )
 
     def _check_input_krysolve(self, freq_start, freq_end, num_freq, load_key, out_key):
-        """Validates the inputs to krysolve method."""
+        """Validate the inputs to the ``krysolve`` method."""
 
         if not isinstance(freq_start, int) or freq_start < 0:
             raise ValueError(
-                "The beginning frequency value for solving the reduced solution is required to be greater than or equal to 0"
+                "The beginning frequency value for solving the reduced solution must be equal to or greater than 0."
             )
         if not isinstance(num_freq, int) or num_freq <= 0:
             raise ValueError(
-                "The number of frequencies for which to compute the reduced solution is required to be greater than 0"
+                "The number of frequencies for which to compute the reduced solution must be greater than 0."
             )
         if not isinstance(load_key, int) or load_key < 0 or load_key > 1:
             raise ValueError(
-                "The Load key value for computing the reduced solution is required to be 0 or 1"
+                "The load_key value for computing the reduced solution must be 0 or 1."
             )
         if not isinstance(out_key, bool):
             raise ValueError(
-                "The out_key value for computing the reduced solution is required to be Boolean True or False"
+                "The out_key value for computing the reduced solution must be True or False."
             )
 
     def _check_input_kryexpand(self, out_key, res_key):
-        """Validates the inputs to kryexpand method."""
+        """Validate the inputs to the ``kryexpand`` method."""
 
         if not isinstance(out_key, bool):
             raise ValueError(
-                "The out_key value for expanding the reduced solution is required to be Boolean True or False"
+                "The out_key value for expanding the reduced solution must be True or False."
             )
         if not isinstance(res_key, int) or res_key < 0 or res_key > 3:
             raise ValueError(
-                "The res_key value for expanding the reduced solution is required to be 0 -> 3"
+                "The res_key value for expanding the reduced solution must be 0 through 3."
             )
 
     def _get_data_from_full_file(self):
-        """Extracts Stiffness, Mass, Damping and force matrices from full file"""
+        """Extract stiffness, mass, damping, and force matrices from the FULL file."""
 
         self._mat_k = self.mm.stiff(fname=self.full_file)
         self._ndof = self._mat_k.shape[1]
@@ -157,12 +159,12 @@ class KrylovSolver:
     def krygensub(
         self, max_dim_q, freq_val, chk_ortho_key=False, out_key=False, full_file=None
     ):
-        """Generates a Krylov subspace for model reduction in harmonic analysis
+        """Generate a Krylov subspace for model reduction in a harmonic analysis.
 
         This method generates a Krylov subspace used for a model reduction
         solution in a harmonic analysis. The subspace is built using the
-        assembled matrices and load vector on the jobname.full file that
-        is located in the current working directory.  This .full file
+        assembled matrices and load vector on the ``<jobname>.full`` file that
+        is located in the current working directory. This FULL file
         should be built at the specified frequency value.
 
         Parameters
@@ -187,8 +189,8 @@ class KrylovSolver:
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys.
         """
 
         current_dir = self._mapdl.directory
@@ -200,7 +202,7 @@ class KrylovSolver:
         init_val = 2  # Initialized as no damping
         zero_c = 0
 
-        # Check the Inputs
+        # Check the inputs
         self._check_input_krygensub(
             max_dim_q, freq_val, chk_ortho_key, out_key, full_file
         )
@@ -209,7 +211,7 @@ class KrylovSolver:
         # Get the force vector from the defined Ansvec
         fz = self.mm.vec(name="fz")
 
-        # Create Subspace
+        # Create subspace
         self.Qz = self.mm.zeros(self._ndof, max_dim_q, dtype=np.cdouble)
 
         # Form az = (K-w0*w0*M,i*w0*C)
@@ -315,9 +317,9 @@ class KrylovSolver:
         return self.Qz
 
     def krysolve(self, freq_start, freq_end, num_freq, load_key, out_key=False):
-        """Reduces system of equations and solve at each frequency
+        """Reduce the system of equations and solve at each frequency.
 
-        This method uses a KRYLOV subspace to solve a reduced harmonic
+        This method uses a Krylov subspace to solve a reduced harmonic
         analysis over a specified frequency range for a given number of
         frequency points (intervals).
 
@@ -337,22 +339,22 @@ class KrylovSolver:
         Returns
         -------
         AnsMat
-            Reduced solution over Frequency range.
+            Reduced solution over the frequency range.
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS."""
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys."""
 
         # Check inputs before executing the method
         self._check_input_krysolve(freq_start, freq_end, num_freq, load_key, out_key)
 
-        # Store input arguments from user
+        # Store provided input arguments
         self.freq_start = freq_start
         self.num_freq = num_freq
         self.load_key = load_key
 
-        # Execute macro if no errors above
+        # Execute macro if no errors raised
         az = self.mm.mat(name="az")
         ndof = self._ndof
         dim_q = self.dim_q
@@ -419,10 +421,10 @@ class KrylovSolver:
         return self.Yz
 
     def kryexpand(self, out_key=False, res_key=0):
-        """Expand reduced solution back to FE space
+        """Expand the reduced solution back to the FE space.
 
         This method expands the reduced solution for a harmonic analysis
-        back to the original space.  Optional calculation of the residual
+        back to the original space. Optional calculation of the residual
         is available.
 
         Parameters
@@ -445,8 +447,8 @@ class KrylovSolver:
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS."""
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys."""
 
         # Check inputs before executing the method
         self._check_input_kryexpand(out_key, res_key)
@@ -492,7 +494,7 @@ class KrylovSolver:
                 Xii = self.mm.vec(name="Xii")
                 dof_each_freq = []
 
-                # Map {Xii} to user ordering
+                # Map {Xii} to provided order
                 num_eqn = Xii.size  # dim 1
                 numdof = int(num_eqn / num_node)
 
