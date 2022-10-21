@@ -56,7 +56,7 @@ Contents
    Demonstrate extended methods and writing a list to a file.
 
 7. **Advanced plotting**
-   Use of `mesh.grid <https://mapdldocs.pyansys.com/mapdl_commands/graphics/_autosummary/ansys.mapdl.core.Mapdl.grid.html>`_
+   Use of :class:`pyvista.UnstructuredGrid`
    for additional postprocessing.
 
 
@@ -85,9 +85,9 @@ NU = 0.27
 # has become ``run_location``.
 # You could use ``run_location`` to specify the MAPDL run location. For example:
 #
-# ..code:: python3
+# .. code:: python3
 #
-#   mapdl = launch_mapdl(run_location=path)
+#    mapdl = launch_mapdl(run_location=path)
 #
 # Otherwise, the MAPDL working directory is stored in ``mapdl.directory``. In this
 # directory, MAPDL will create some of the images we will show later.
@@ -339,8 +339,7 @@ mapdl.post_processing.nodal_principal_stress("1")
 ###############################################################################
 # Results as lists, arrays, and DataFrames
 # -----------------------------------------
-# Using `mapdl.prnsol <https://mapdldocs.pyansys.com/mapdl_commands/post1/_autosummary/ansys.mapdl.core.Mapdl.prnsol.html>`_
-# to check
+# Using :meth:`mapdl.prnsol` to check
 print(mapdl.prnsol("S", "PRIN"))
 
 ###############################################################################
