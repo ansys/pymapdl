@@ -1,0 +1,20 @@
+name: Dependabot
+on:
+  workflow_dispatch:
+  schedule:
+    # Every Sunday at 1PM UTC (9AM EST)
+    - cron: "0 0 * * 0"
+
+jobs:
+  check-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: marcoroth/dependabot-bump-together-action@v0.3.1
+        with:
+          dependencies: sphinx, pandas, imageio, matplotlib, scipy, numpy, pyvista
+          package_managers: pip
+          directory: ${{ github.workspace }}
+          branch: main
+          username: pyansys-ci-bot
+          token: ${{ secrets.GITHUB_TOKEN }}
+
