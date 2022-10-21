@@ -176,11 +176,10 @@ Perform modal analysis
     k = mm.stiff(fname=f"{mapdl.jobname}.full")
     M = mm.mass(fname=f"{mapdl.jobname}.full")
     A = mm.mat(k.nrow, nev)
-    ev = mm.eigs(nev, k, M, phi=A, fmin=1.0)
+    eigenvalues = mm.eigs(nev, k, M, phi=A, fmin=1.0)
 
-    for i in range(nev):
-        f = ev[i]  # Eigenfrequency (Hz)
-         print(f"[{i}] : Freq = {f:8.2f} Hz")
+    for each_freq in range(eigenvalues):
+         print(f"Freq = {each_freq:8.2f} Hz") # Eigenfrequency (Hz)
 
 
 .. parsed-literal::

@@ -36,11 +36,11 @@ class KrylovSolver:
     >>> Generate the .full file
 
     >>> mk = mapdl.krylov
-    >>> # Generate Krylov subspace
+    >>> # Generate the Krylov subspace
     >>> Qz = mk.gensubspace(10, 100, check_orthogonality=True)
-    >>> # Reduces system of equations and solve at each frequency
+    >>> # Reduce the system of equations and solve at each frequency.
     >>> Yz = mk.solve(10, 100,  freq_steps=1, ramped_load=True)
-    >>> # Expand reduced solution back to FE space
+    >>> # Expand the reduced solution back to the FE space.
     >>> res = mk.expand(residual_computation=True, residual_algorithm="l2")
 
     """
@@ -84,7 +84,7 @@ class KrylovSolver:
         else:
             if self.full_file not in self._mapdl.list_files():
                 raise FileNotFoundError(
-                    f"The file '{self.full_file}' could not be found in remote MAPDL instance."
+                    f"The file '{self.full_file}' could not be found in the remote MAPDL instance."
                 )
 
     @property
@@ -94,24 +94,24 @@ class KrylovSolver:
             return np.allclose(self.orthogonality, eye_)
 
     def _check_input_gensubspace(self, max_dim_q, freq_val, check_orthogonality):
-        """Validates the inputs to gensubspace method."""
+        """Validate the inputs to the ``gensubspace`` method."""
 
         # Check for illegal input values by the user
         if not isinstance(max_dim_q, int) or max_dim_q <= 0:
             raise ValueError(
-                "The maximum size of Krylov subspace is required to be greater than 0"
+                "The maximum size of the Krylov subspace must be greater than 0."
             )
 
         if not isinstance(freq_val, int) or freq_val < 0:
             raise ValueError(
-                "The frequency value ('freq_val') for building the Krylov subspace is required "
-                "to be greater or equal to 0 Hz."
+                "The frequency value ('freq_val') for building the Krylov subspace must be "
+                "equal to or greater than 0 Hz."
             )
 
         if not isinstance(check_orthogonality, bool):
             raise ValueError(
-                "The 'check_orthogonality' value for building the Krylov subspace is required "
-                "to be boolean True or False"
+                "The 'check_orthogonality' value for building the Krylov subspace must be "
+                "True or False"
             )
 
     def _check_input_solve(self, freq_start, freq_end, freq_steps, ramped_load):
@@ -119,26 +119,26 @@ class KrylovSolver:
 
         if not isinstance(freq_start, int) or freq_start < 0:
             raise ValueError(
-                "The beginning frequency value for solving the reduced solution is required "
-                "to be greater than or equal to 0."
+                "The beginning frequency value for solving the reduced solution must be "
+                "equal to or greater than 0 Hz."
             )
 
         if not isinstance(freq_end, int) or freq_end < 0 or freq_end < freq_start:
             raise ValueError(
-                "The beginning frequency value for solving the reduced solution is required "
-                "to be greater than or equal to 0, and greater than starting frequency.'"
+                "The beginning frequency value for solving the reduced solution must be "
+                "equal to or greater than 0 Hz, and greater than starting frequency.'"
             )
 
         if not isinstance(freq_steps, int) or freq_steps < 1:
             raise ValueError(
                 "The number of frequencies ('freq_steps') for which to compute the reduced "
-                "solution is required to be an integer greater than or equal to 1."
+                "solution must be to be an integer greater than or equal to 1."
             )
 
         if not isinstance(ramped_load, bool):
             raise ValueError(
-                "The 'ramped_load' argument for computing the reduced solution can only "
-                "be a boolean value."
+                "The 'ramped_load' argument for computing the reduced solution must be "
+                "True or False"
             )
 
     def _check_input_expand(
@@ -148,15 +148,10 @@ class KrylovSolver:
 
         if not isinstance(return_solution, bool):
             raise ValueError(
-                "The 'return_solution' value for expanding the reduced solution is required to be Boolean True or False"
+                "The 'return_solution' value for expanding the solution must be to be Boolean True or False"
             )
-        if not isinstance(residual_computation, bool) and not (
-            isinstance(residual_computation, str)
-            and residual_computation.lower() not in ["no", "off"]
-        ):
-            raise ValueError(
-                "The 'residual_computation' can only be a boolean or a string 'off' or 'no'."
-            )
+        if not isinstance(residual_computation, bool):
+            raise ValueError("The 'residual_computation' must be True or False.")
         if not isinstance(
             residual_algorithm, str
         ) or residual_algorithm.lower() not in [
@@ -223,18 +218,17 @@ class KrylovSolver:
         Parameters
         ----------
         max_dim_q : int
-          Maximum size/dimension of Krylov subspace
+          Maximum size/dimension of the Krylov subspace.
 
         frequency : int
-          Frequency value (Hz) at which to build the KRYLOV subspace
+          Frequency value in Hz to build the Krylov subspace at.
 
         check_orthogonality : bool, optional
-          Check orthonormal properties of each subspace vector
-          with all other subspace vectors [Default:False]
+          Whether to check the orthonormal properties of each subspace vector
+          with all other subspace vectors. The default is ``False``.
 
         full_file : str, optional
-          Specify .full file name to read specific full file,
-          By default jobname.full is read.
+          Name of the FULL file to read. The default is ``<jobname>.full``.
 
         Returns
         -------
@@ -373,20 +367,21 @@ class KrylovSolver:
     def solve(self, freq_start, freq_end, freq_steps, ramped_load=True):
         """Reduces system of equations and solve at each frequency.
 
-        This method uses a KRYLOV subspace to solve a reduced harmonic
+        This method uses a Krylov subspace to solve a reduced harmonic
         analysis over a specified frequency range for a given number of
         frequency points (intervals).
 
         Parameters
         ----------
         freq_start : int
-          Starting value of the frequency range (Hz)
+          Starting value of the frequency range in Hz.
         freq_end : int
-          Ending value of the frequency range (Hz)
+          Ending value of the frequency range in Hz.
         freq_steps : int
-          User specified number of intervals in frequency range
+          Number of intervals in the frequency range.
         ramped_load : bool
-          If ``True``, use ramped load. If not, it is stepped (``False``). Defaults to ``True``.
+          Whether to use ramped load. If not, the load used is stepped (``False``).
+          Defaults to ``True``.
 
         Returns
         -------
@@ -495,10 +490,11 @@ class KrylovSolver:
           Default to ``False``.
 
         residual_algorithm : str, optional
-          It can take the following values:
-          * "L-inf": Compute the L-inf norm of the residual
-          * "L-1": Compute the L-1 norm of the residual
-          * "L-2": Compute the L-2 norm of the residual
+          Specifies the type of residual normal calculation. It can take
+          the following values:
+          * "L-inf": Compute the L-inf norm of the residual.
+          * "L-1": Compute the L-1 norm of the residual.
+          * "L-2": Compute the L-2 norm of the residual.
 
         compute_solution_vectors : bool, optional
           If ``True`` it compute the solution vectors. Defaults to ``True``.

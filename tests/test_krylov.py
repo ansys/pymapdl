@@ -86,7 +86,7 @@ def solu_krylov(mapdl, frq):
 
 def test_krylov_with_point_load(mapdl):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
@@ -119,7 +119,7 @@ def test_krylov_with_point_load(mapdl):
 )
 def test_krylov_with_pressure_load(mapdl, residual_algorithm):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # With ramped loading
     # Case1 : Run Krylov Pymapdl
@@ -157,31 +157,31 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
             10.2,
             100,
             True,
-            "The maximum size of Krylov subspace is required to be greater than 0",
+            "The maximum size of the Krylov subspace must be greater than 0.",
         ),
         (
             -2,
             100,
             True,
-            "The maximum size of Krylov subspace is required to be greater than 0",
+            "The maximum size of the Krylov subspace must be greater than 0.",
         ),
         (
             10,
             100.3,
             True,
-            "The frequency value ('freq_val') for building the Krylov subspace is required",
+            "The frequency value ('freq_val') for building the Krylov subspace must be",
         ),
         (
             10,
             -100,
             True,
-            "The frequency value ('freq_val') for building the Krylov subspace is required",
+            "The frequency value ('freq_val') for building the Krylov subspace must be",
         ),
         (
             10,
             100,
             3,
-            "The 'check_orthogonality' value for building the Krylov subspace is required",
+            "The 'check_orthogonality' value for building the Krylov subspace must be",
         ),
     ],
 )
@@ -189,7 +189,7 @@ def test_non_valid_inputs_gensubspace(
     mapdl, cleared, maxQ, freq, check_ortho, error_msg
 ):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
     solu_krylov(mapdl, 100)
@@ -207,7 +207,7 @@ def test_non_valid_inputs_gensubspace(
             100,
             10,
             True,
-            "The beginning frequency value for solving the reduced solution is required",
+            "The beginning frequency value for solving the reduced solution must be",
         ),
         (
             2,
@@ -221,7 +221,7 @@ def test_non_valid_inputs_gensubspace(
             100,
             10,
             1,
-            "The 'ramped_load' argument for computing the reduced solution can only",
+            "The 'ramped_load' argument for computing the reduced solution must be",
         ),
     ],
 )
@@ -249,19 +249,19 @@ def test_non_valid_inputs_solve(
             2,
             100,
             "l-inf",
-            "The 'return_solution' value for expanding the reduced solution is required to be",
+            "The 'return_solution' value for expanding the solution must be",
         ),
         (
             True,
             5,
             "l-inf",
-            "The 'residual_computation' can only be a boolean or a string 'off' or 'no'.",
+            "The 'residual_computation' must be True or False",
         ),
         (
             True,
             -1,
             "l-inf",
-            "The 'residual_computation' can only be a boolean or a string 'off' or 'no'.",
+            "The 'residual_computation' must be True or False",
         ),
         (
             True,
@@ -275,7 +275,7 @@ def test_non_valid_inputs_expand(
     mapdl, return_solution, residual_computation, residual_algorithm, error_msg
 ):
     if not meets_version(mapdl._server_version, (0, 5, 0)):
-        pytest.skip("Requires MAPDL v222 and above")
+        pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.clear()
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
