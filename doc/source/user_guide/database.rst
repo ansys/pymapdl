@@ -1,16 +1,16 @@
-Accessing MAPDL Database
-========================
+Access MAPDL database
+=====================
 
-.. warning:: This feature is still in beta. Please report any errors or suggestions to pyansys.support@ansys.com.
+.. warning:: This feature is still in beta. Report any errors or suggestions to pyansys.support@ansys.com.
 
 
-From PyMAPDL v0.61.2, you can access elements and nodes data from the MAPDL database using the DB module.
+In PyMAPDL v0.61.2 and later, you can access elements and nodes data from the MAPDL database using the DB module.
 
 
 Usage
 ~~~~~
 
-Getting the elems and nodes objects:
+Get the ``elems`` and ``nodes`` objects.
 
 .. code:: py
 
@@ -33,7 +33,7 @@ Getting the elems and nodes objects:
         Number of selected nodes: 3652
         Maximum node number:      3652
 
-To obtain the first element:
+Obtain the first element.
 
 .. code:: py
     
@@ -42,7 +42,7 @@ To obtain the first element:
     1
 
 
-Check if the element is selected or not:
+Check if the element is selected.
 
 .. code:: py
 
@@ -94,18 +94,18 @@ Return the selection status and the coordinates of node 22.
     >>> coord
     (-0.0014423144202849985, 0.010955465718673852, 0.0, 0.0, 0.0, 0.0)
 
-.. note:: The coordenates returned by the method ``coord`` contains the following: X, Y, Z, THXY, THYZ, and THZX.
+.. note:: The coordinates returned by the ``coord`` method contain the following: X, Y, Z, THXY, THYZ, and THZX.
 
 
 Requirements
 ~~~~~~~~~~~~
 
-To use ``DB`` feature, you need to meet the following requirements:
+To use the ``DB`` feature, you must meet these requirements:
 
-* ``ansys.api.mapdl`` package version should be 0.5.1 or higher.
-* ANSYS MAPDL version should be 2021R1 or newer.
+* ``ansys.api.mapdl`` package version should be 0.5.1 or later.
+* Ansys MAPDL version should be 2021 R1 or later.
 
-.. warning:: This feature does not work in the latest Ansys 2023R1.
+.. warning:: This feature does not work in the Ansys 2023 R1.
 
 
 

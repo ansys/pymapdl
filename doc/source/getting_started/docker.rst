@@ -1,29 +1,29 @@
 .. _docker:
 
-**************************
-Using MAPDL Through Docker
-**************************
+************************
+Use MAPDL through Docker
+************************
 You can run MAPDL within a container on any OS using `docker` and
 connect to it via PyMAPDL.
 
 There are several situations in which it is advantageous to run MAPDL
-in a containerized environment (e.g. Docker or singularity):
+in a containerized environment (for example, Docker or Singularity):
 
 - Run in a consistent environment regardless of the host OS.
 - Portability and ease of install.
-- Large scale cluster deployment using Kubernetes
+- Large-scale cluster deployment using Kubernetes
 - Genuine application isolation through containerization.
 
 
-Installing the MAPDL Image
---------------------------
-There is a docker image hosted on the `PyMAPDL GitHub
+Install the MAPDL image
+-----------------------
+There is a Docker image hosted on the `PyMAPDL GitHub
 <https://https://github.com/pyansys/pymapdl>`_ repository that you
 can download using your GitHub credentials.
 
-Assuming you have docker installed, you can get started by
-authorizing docker to access this repository using a personal access
-token.  Create a GH personal access token with ``packages read`` permissions
+Assuming that you have docker installed, you can get started by
+authorizing Docker to access this repository using a personal access
+token. Create a GitHub personal access token with ``packages read`` permissions
 according to `Creating a personal access token <https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token>`_
 
 Save that token to a file with:
@@ -33,8 +33,8 @@ Save that token to a file with:
    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > GH_TOKEN.txt
 
 
-This lets you send the token to docker without leaving the token value
-in your history.  Next, authorize docker to access this repository
+This lets you send the token to Docker without leaving the token value
+in your history. Next, authorize Docker to access this repository
 with:
 
 .. code::
@@ -44,9 +44,9 @@ with:
 
 
 You can now launch MAPDL directly from docker with a short script or
-directly from the command line.  Since this image contains no license
+directly from the command line. Because this image contains no license
 server, you must enter your license server IP address in the
-``LICENSE_SERVER`` environment variable.  With that, you can launch
+``LICENSE_SERVER`` environment variable. With that, you can launch
 MAPDL with:
 
 .. code::
@@ -59,7 +59,7 @@ MAPDL with:
 
 
 Note that port `50052` (local to the container) is being mapped to
-50052 on the host.  This makes it possible to launch several MAPDL
+50052 on the host. This makes it possible to launch several MAPDL
 instances with different port mappings to allow for multiple instances
 of MAPDL.
 
@@ -76,8 +76,8 @@ Once you've launched MAPDL you should see:
     Server Executable   : MapdlGrpc Server
     Server listening on : 0.0.0.0:50052
 
-Connecting to the MAPDL Container from Python
----------------------------------------------
+Connect to the MAPDL container from Python
+-------------------------------------------
 
 You can now connect to the instance with:
 
@@ -103,11 +103,11 @@ Verify your connection with:
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
     PyMAPDL Version:     Version: 0.57.0
 
-Additional Considerations
+Additional considerations
 -------------------------
 
-Appending MAPDL Options to the Container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Append MAPDL options to the container
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the command:
 
@@ -117,9 +117,9 @@ In the command:
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
 You can provide additional command line parameters to MAPDL by simply
-appending to the docker command.  For example, you can increase the
+appending to the docker command. For example, you can increase the
 number of processors (up to the number available on the host machine)
-with the `-np` switch.  For example:
+with the ```-np``` switch. For example:
 
 .. code::
 
@@ -127,11 +127,11 @@ with the `-np` switch.  For example:
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
 For additional command-line arguments, see the Ansys
-documentation at `ANSYS help <https://ansyshelp.ansys.com>`_.  Also,
+documentation at `ANSYS help <https://ansyshelp.ansys.com>`_. Also,
 be sure to have the appropriate license for additional HPC features.
 
-Using ``--restart`` policy with MAPDL products
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Use ``--restart`` policy with MAPDL products
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, MAPDL creates a ``LOCK`` file in the working directory when it starts
 and deletes this file if it exits normally. The file is used to avoid overwriting files
@@ -161,8 +161,8 @@ You can do this in your ``docker run`` command:
       $IMAGE
 
 
-Getting Useful Files After Abnormal Termination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Get useful files after abnormal termination
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In some cases, the MAPDL container might crash after the MAPDL process experiences an
 abnormal termination. In these cases, you can retrieve log files and output files using 

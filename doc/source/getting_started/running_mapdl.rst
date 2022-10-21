@@ -1,34 +1,33 @@
 .. _using_standard_install:
 
-***************************************
-Using PyMAPDL from the Standard Install
-***************************************
+******************************************
+Use PyMAPDL from the standard installation
+******************************************
 
-The pyansys ``ansys-mapdl-core`` package requires either a local or
-remote instance of MAPDL to communicate with it.  This section covers
+The PyAnsys ``ansys-mapdl-core`` package requires either a local or
+remote instance of MAPDL to communicate with it. This section covers
 launching and interfacing with MAPDL from a local instance by
 launching it from Python.
 
-Installing MAPDL
-----------------
+Install MAPDL
+-------------
 
-MAPDL is installed by default from the standard installer.  When
-installing ANSYS, verify that the "Mechanical Products" option is
-checked under the "Structural Mechanics" option.  The standard
-installer options may change, but for reference see the following
-figure.
+MAPDL is installed by default from the Ansys standard installer. When
+installing Ansys, verify that the **Mechanical Products** checkbox is
+selected under the **Structural Mechanics** option. While the standard
+installer options can change, see the following figure for reference.
 
 .. figure:: ../images/unified_install_2019R1.jpg
     :width: 400pt
 
 
-Launching MAPDL
----------------
+Launch MAPDL
+------------
 
-Launching MAPDL locally
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Launch MAPDL locally
+~~~~~~~~~~~~~~~~~~~~
 
-You can use the ``launch_mapdl`` function to have Python startup MAPDL and
+You can use the ``launch_mapdl`` method to have Python start MAPDL and
 automatically connect to it:
 
 .. code:: python
@@ -45,16 +44,17 @@ automatically connect to it:
 This is the easiest and fastest way to get PyMAPDL up and running. 
 But you need to have an ANSYS license server installed locally. 
 
-Launching a gRPC MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Launch a gRPC MAPDL session
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can start MAPDL from the command line and then connect to it.
-To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation) use:
+
+To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation), use:
 
 .. code::
 
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
-Or on Linux (assuming a ``/usr/ansys_inc`` installation):
+To launch MAPDL on Linux (assuming a ``/usr/ansys_inc`` installation), use:
 
 .. code::
 
@@ -73,21 +73,23 @@ This starts up MAPDL in gRPC mode, and MAPDL should output:
      Server Executable   : MapdlGrpc Server
      Server listening on : 0.0.0.0:50052
 
-You can configure the port MAPDL starts on with the ``-port`` argument.  For
-example, you can startup the server to listen for connections at 
+You can configure the port that MAPDL starts on with the ``-port`` argument.
+For example, you can start the server to listen for connections at 
 port 50005 with:
 
 .. code::
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
-You can also configure the IP. 
-However because of an ANSYS limitation to receive
-strings from command line, the IP needs to be read from an external file 
-called ``mylocal.ip``. This file is read automatically from the directory where 
+You can also configure the IP address. 
+However, because of an Ansys limitation to receive
+strings from a command line, the IP address must be read from an external file 
+named ``mylocal.ip``. This file is read automatically from the directory where 
 MAPDL is running.
 
-You can then setup the IP in Windows (Powershell and CMD) with:
+You can then set up the IP address.
+
+In Windows (Powershell and CMD), use:
 
 .. code::
     
@@ -95,7 +97,7 @@ You can then setup the IP in Windows (Powershell and CMD) with:
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
 
-or in Linux with:
+In Linux, use:
 
 .. code::
     
@@ -103,11 +105,11 @@ or in Linux with:
     /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
 
 
-Connecting to a gRPC MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Connect to a gRPC MAPDL session
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A MAPDL gRPC server can be connected to either from the same host, or from an
-external host.  For example, you can connect to a MAPDL service
+A MAPDL gRPC server can be connected to from either the same host or an
+external host. For example, you can connect to a MAPDL service
 running **locally** with:
 
 .. code::
@@ -116,13 +118,13 @@ running **locally** with:
     >>> mapdl = Mapdl()
 
 
-This assumes that your MAPDL service is running locally on the default ip 
-(127.0.0.1) and on the default port (50052).  
+This assumes that your MAPDL service is running locally on the default IP address 
+(127.0.0.1) and on the default port (50052).
 
 If you want to connect to a **remote** instance of MAPDL and you know the IP 
 address of that instance, you can connect to it.
-For example, if on your local network at IP ``192.168.0.1`` there is a
-computer running MAPDL on the port 50052, you can connect to it with
+For example, if on your local network at IP address ``192.168.0.1`` there is a
+computer running MAPDL on the port 50052, you can connect to it with:
 
 .. code::
 
@@ -134,9 +136,9 @@ Alternatively you can use a hostname:
 
     >>> mapdl = Mapdl('myremotemachine', port=50052)
 
-Please note that you must have started MAPDL in gRPC mode in the PC with
-the mentioned IP/hostname for this to work.
+Note that you must have started MAPDL in gRPC mode on the computer with
+the mentioned IP address/hostname for this to work.
 If you have MAPDL installed on your local host, you
-can use ``launch_mapdl`` to both start and connect to MAPDL.
+can use the ``launch_mapdl`` method to both start and connect to MAPDL.
 
-If you find any problem launching PyMAPDL, please check :ref:`debugging_launch_mapdl`
+If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`
