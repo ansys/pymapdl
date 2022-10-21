@@ -32,7 +32,7 @@ class KrylovSolver:
     >>> mapdl = launch_mapdl()
     >>> ....
     >>> ....
-    >>> Generate the FEA model (mesh, constraints, loads, etc.)
+    >>> Generate the FEA model (mesh, constraints, loads)
     >>> Generate the .full file
 
     >>> mk = mapdl.krylov
@@ -115,7 +115,7 @@ class KrylovSolver:
             )
 
     def _check_input_solve(self, freq_start, freq_end, freq_steps, ramped_load):
-        """Validates the inputs to solve method."""
+        """Validate the inputs to the ``solve`` method."""
 
         if not isinstance(freq_start, int) or freq_start < 0:
             raise ValueError(
@@ -148,7 +148,7 @@ class KrylovSolver:
 
         if not isinstance(return_solution, bool):
             raise ValueError(
-                "The 'return_solution' value for expanding the solution must be to be Boolean True or False"
+                "The 'return_solution' value for expanding the solution must be True or False"
             )
         if not isinstance(residual_computation, bool):
             raise ValueError("The 'residual_computation' must be True or False.")
@@ -167,7 +167,7 @@ class KrylovSolver:
             )
 
     def _get_data_from_full_file(self):
-        """Extracts Stiffness, Mass, Damping and force matrices from full file"""
+        """Extract stiffness, mass, damping, and force matrices from the FULL file."""
 
         self._mat_k = self.mm.stiff(fname=self.full_file)
         self._ndof = self._mat_k.shape[1]
@@ -185,6 +185,7 @@ class KrylovSolver:
         """Check Orthonormality of vectors"""
 
         if self.orthogonality is not None:
+            # Using previously calculated (if any)
             return self.orthogonality
 
         orthogonality = np.zeros(shape=(num_q + 1, num_q + 1))
@@ -207,12 +208,12 @@ class KrylovSolver:
     def gensubspace(
         self, max_dim_q, frequency, check_orthogonality=False, full_file=None
     ):
-        """Generates a Krylov subspace for model reduction in harmonic analysis
+        """Generate a Krylov subspace for model reduction in a harmonic analysis.
 
         This method generates a Krylov subspace used for a model reduction
         solution in a harmonic analysis. The subspace is built using the
-        assembled matrices and load vector on the jobname.full file that
-        is located in the current working directory.  This full file
+        assembled matrices and load vector on the ``<jobname>.full`` file that
+        is located in the current working directory. This FULL file
         should be built at the specified frequency value.
 
         Parameters
@@ -237,8 +238,8 @@ class KrylovSolver:
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS.
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys.
         """
 
         current_dir = self._mapdl.directory
@@ -262,7 +263,7 @@ class KrylovSolver:
         # Get the force vector from the defined Ansvec
         fz = self.mm.vec(name="fz")
 
-        # Create Subspace
+        # Create subspace
         self.Qz = self.mm.zeros(self._ndof, max_dim_q, dtype=np.cdouble)
 
         # Form az = (K-w0*w0*M,i*w0*C)
@@ -386,7 +387,7 @@ class KrylovSolver:
         Returns
         -------
         AnsMat
-            Reduced solution over Frequency range.
+            Reduced solution over the frequency range.
 
         Notes
         -----
@@ -480,7 +481,7 @@ class KrylovSolver:
         """Expand reduced solution back to FE space.
 
         This method expands the reduced solution for a harmonic analysis
-        back to the original space.  Optional calculation of the residual
+        back to the original space. Optional calculation of the residual
         is available.
 
         Parameters
@@ -505,7 +506,7 @@ class KrylovSolver:
         Returns
         -------
         np.ndarray
-            Solution vectors mapped to user order. (if ``return_solution = True``)
+            Solution vectors mapped to a given order. (if ``return_solution = True``)
         None
             If ``return_solution = False``
 

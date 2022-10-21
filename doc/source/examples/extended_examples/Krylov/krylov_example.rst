@@ -203,7 +203,7 @@ Run harmonic analysis using Krylov method
 
 .. code:: ipython3
 
-    # mapdl.run('/SOLU')
+    mapdl.run('/SOLU')
     mapdl.antype('HARMIC')  # HARMONIC ANALYSIS
     mapdl.hropt('KRYLOV')
     mapdl.eqslv('SPARSE')
@@ -243,11 +243,10 @@ from 0 Hz to 1000 Hz with ramped loading.
 
 .. code:: ipython3
 
-    Yz = dd.solve(0, 1000, 100)
+    Yz = dd.krysolve(0, 1000, 100, 0, True)
 
 .. code:: ipython3
 
-    # Reduced solution over Frequency range
     print(Yz.shape)
 
 
@@ -283,17 +282,23 @@ Load the last result substep to get the pressure for each of the selected nodes.
     y_data = []
     substep_index = 99
 
+    def get_pressure_at(node, step=1):
+        """Get the pressure at a given node at a given step (by default first step)"""
+        index_num = np.where(result[step]['node'] == node)
+        return result[step][index_num]
+
     for each_node, loc in zip(ind, coords):
-        index_num = np.where(res[substep_index]['node'] == each_node)
-        pressure = result[substep_index][index_num]['x'][0]
+        # Get pressure at the node
+        pressure = get_pressure(each_node, substep_index)['x'][0]
 
         #Calculate amplitude at 60 deg
         magnitude = abs(pressure)
-        phase = math.atan2(pressure.imag,pressure.real)
+        phase = math.atan2(pressure.imag, pressure.real)
         pressure_a = magnitude * np.cos(np.deg2rad(60)+phase)
 
-        x_data.append(loc[0])
-        y_data.append(pressure_a)
+       # Store result for later plotting
+        x_data.append(loc[0])  # X-Coordenate
+        y_data.append(pressure_a)  # Nodal pressure at 60 degrees
 
 Sort the results according to the X-coordinate:
 
@@ -330,17 +335,20 @@ Results: Plot frequency response function
     # Pick node closest to 0.2 in X direction, Y&Z = 0
     node_number = mapdl.queries.node(0.2, 0, 0)
     
-    # Get the response of the system for the selected node
-    # over a range of frequency [0-1000 Hz]
+
+Get the response of the system for the selected node
+over a range of frequencies [0-1000 Hz]:
+
+.. code:: python3
+
     start_freq = 0
     end_freq = 1000
     num_steps = 100
     step_val = (end_freq - start_freq) / num_steps
     dic = {}
 
-    for freq in range (0,num_steps):
-        index_num = np.where(res[freq]['node'] == node_number)
-        pressure = result[freq][index_num]['x']
+    for freq in range (0,num_steps):        
+        pressure = get_pressure(node_number, freq)['x']
         abs_pressure = abs(pressure)
 
         dic[start_freq] = abs_pressure
