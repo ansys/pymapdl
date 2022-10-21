@@ -1594,3 +1594,22 @@ def test_use_uploading(mapdl, cleared, tmpdir):
     # Raise an error
     with pytest.raises(FileNotFoundError):
         mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_mode(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "corba"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "console"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert mapdl.is_console
+
+    mapdl._mode = "grpc"  # Going back to default
