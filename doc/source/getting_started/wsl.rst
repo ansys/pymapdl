@@ -7,12 +7,13 @@ PyAnsys Libraries on a Windows Subsystem for Linux and Docker
 This section shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL).  WSL is a compatibility layer for
 running Linux binary executables natively on Windows 10, Windows 11, and
-Windows Server 2019. For more information, see `WikipediaWSL`_.
+Windows Server 2019. For more information, see `Wikipedia WSL <WikipediaWSL>`_.
 
 This section walks you through the installation of WSL on Windows and then
 shows how to use it together with MAPDL, PyMAPDL, and Docker.
 
-For more information about WSL, see `What is the Windows Subsystem for Linux`_.
+For more information about WSL, see 
+`What is the Windows Subsystem for Linux <What_is_the_Windows_Subsystem_for_Linux>`_.
 
 .. warning::
    This guide hasn't been fully tested with a VPN connection. If you
@@ -26,7 +27,8 @@ Running PyMAPDL on WSL
 Install WSL
 ============
 
-Install WSL by following Microsoft's directions at `install_wsl_microsoft`_.
+Install WSL by following Microsoft's directions at 
+`Microsoft: Install WSL <install_wsl_microsoft>`_.
 
 Currently there are two versions of WSL. The oldest is WSL1, whereas WSL2 is
 the latest and include many improvements over WSL1.  It is highly recommended
@@ -40,8 +42,8 @@ We recommend that you use the CentOS7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
-`gh_centos_wsl_1`_ or
-`gh_centos_wsl_2`_ .
+`CentOS WSL <gh_centos_wsl_1>`_ or
+`CentOS WSL <gh_centos_wsl_2>`_ .
 
 Optionally, you can also try Ubuntu, but it has not been tested yet in the context of WSL.
 
@@ -67,8 +69,8 @@ Install Ansys Products
 
 To install ANSYS products in WSL Linux:
 
-1. Download the Ansys Structures image from the customer portal (`Current
-   Release <ansys_download_current_release>`_).  If you are
+1. Download the Ansys Structures image from the customer portal 
+   (`Current Release <ansys_download_current_release>`_). If you are
    downloading the image on a Windows machine, you can later copy from it to
    WSL (recommended).
 
@@ -97,7 +99,9 @@ To install ANSYS products in WSL Linux:
 
    - ``-<product_flag>`` : Specifies one or more specific products to install.
      If you omit the -product_flag argument, all products will be installed.
-     See the list of valid ``product_flags`` in Chapter 6 of the `ansys_installation_and_licensing`_.  In this case, only MAPDL (`-mechapdl`) is
+     See the list of valid ``product_flags`` in Chapter 6 of the 
+     `Ansys installation and licensing guide <ansys_installation_and_licensing>`_.
+     In this case, only MAPDL (`-mechapdl`) is
      needed.
 
 After installing MAPDL directly in ``/ansys_inc`` or in ``/usr/ansys_inc``,
@@ -121,9 +125,8 @@ Opening Ports
 
 **Theory:** 
 You should open the ports ``1055`` and ``2325`` for the license server
-communication in *Windows Firewall Advanced*.  You can see the steps in `How to
-open port in Windows 10 Firewall
-<open_port_windows_10>`_.
+communication in *Windows Firewall Advanced*.  You can see the steps in 
+`How to open port in Windows 10 Firewall <open_port_windows_10>`_.
 
 **Reality:**
 This works if you want to run a Docker image using WSL Linux image to host that
@@ -141,7 +144,7 @@ firewall and check if your MAPDL installation can communicate with the Windows
 Hosts.  If you are having problems after setting the firewall rules, you might
 have to disable Windows Firewall for the WSL ethernet virtual interface.  This
 might pose some unknown side effects and security risk so use it with caution.
-See `Disabling Firewall on WSL Ethernet`_
+See `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl>`_
 
 
 Setting Up an Environmental Variable in WSL that Points to Windows Host License Server
@@ -384,7 +387,7 @@ This method will not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `disabling_firewall_on_wsl`_
+Link: `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl>`_
 
 Windows 10 Port Forwarding
 ==========================

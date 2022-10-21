@@ -44,7 +44,7 @@
 .. _padt_licensing: https://www.padtinc.com/blog/15271-2/
 .. _install_wsl_microsoft: https://docs.microsoft.com/en-us/windows/wsl/install/
 .. _WikipediaWSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
-.. _What is the Windows Subsystem for Linux: https://docs.microsoft.com/en-us/windows/wsl/about
+.. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
 .. _open_port_windows_10: https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules/
 
