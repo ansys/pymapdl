@@ -17,7 +17,7 @@ These are the main steps required:
 - Reduce the system of equations and solve at each frequency using the
   :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` method.
 
-- Expand the reduced solution back to the FE space using the 
+- Expand the reduced solution back to the FE space using the
   :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` method.
 
 Problem Description
@@ -70,7 +70,7 @@ Parameters definition
     
     tol_elem = nelem_wl * no_wl  # total number of elements across length
 
-Element and Material definition
+Element and material definition
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: ipython3
@@ -132,7 +132,7 @@ Plot FE model:
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
 
 
-Boundary Condition Definition
+Define boundary conditions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -161,8 +161,8 @@ Boundary Condition Definition
 
 
 
-Perform Modal Analysis to study the natural modes of the system
----------------------------------------------------------------
+Perform modal analysis
+----------------------
 
 .. code:: ipython3
 
@@ -227,11 +227,10 @@ Initialize Krylov class object
 
 .. code:: ipython3
 
-    Qz = dd.gensubspace(10, 500, True)
+    Qz = dd.krygensub(10, 500, True, True)
 
 .. code:: ipython3
 
-    # The shape of the Subspace generated
     print(Qz.shape)
 
 
