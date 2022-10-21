@@ -39,17 +39,11 @@ and output impedance on the other end.
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
 
-Launch mapdl in ``'-smp'`` mode to avoid distributing processing which is not supported by the MAPDL Math module.
-
-.. code:: ipython3
-
-    mapdl = launch_mapdl(additional_switches='-smp', nproc=4)
+    mapdl = launch_mapdl(nproc=4)
     mapdl.clear()
     mm = mapdl.math
 
 
-.. warning:: Launching MAPDL in ``'-smp'`` mode to avoid distributing processing
-   because it is not supported by the MAPDL Math module.
     
 
 Parameters definition
