@@ -92,7 +92,8 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          # echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "{PYMAPDL_VERSION}={"$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')"} >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
 
@@ -100,7 +101,7 @@ jobs:
         run: pip wheel . -w wheelhouse
 
       - name: Zip wheelhouse
-        uses: vimtor/action-zip@v1
+        uses: vimtor/action-zip@master
         with:
           files: wheelhouse
           dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
@@ -173,7 +174,8 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          # echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "{PYMAPDL_VERSION}={"$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')"} >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
 
