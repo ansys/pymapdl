@@ -3799,3 +3799,41 @@ class _MapdlCore(Commands):
         # Updating arg since the path is not needed anymore.
         args = (base_name, args[1:])
         return super().use(*args, **kwargs)
+
+    @wraps(Commands.set)
+    def set(
+        self,
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        order="",
+        **kwargs,
+    ):
+        """Wraps SET to return a Command listing"""
+        output = super().set(
+            lstep, sbstep, fact, kimg, time, angle, nset, order, **kwargs
+        )
+
+        if (
+            isinstance(lstep, str)
+            and lstep.upper() == "LIST"
+            and not sbstep
+            and not fact
+        ):
+            return CommandListingOutput(
+                output,
+                magicwords=["SET", "TIME/FREQ"],
+                columns_names=[
+                    "SET",
+                    "TIME/FREQ",
+                    "LOAD STEP",
+                    "SUBSTEP",
+                    "CUMULATIVE",
+                ],
+            )
+        else:
+            return output
