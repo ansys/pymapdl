@@ -33,6 +33,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  packages: read
+
+
 jobs:
 
   stylecheck:
@@ -159,7 +163,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v2.1.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -204,6 +208,11 @@ jobs:
       - name: Install Docs Build Requirements
         run: |
           pip install -r requirements/requirements_docs.txt
+
+      - name: DPF Server Activation
+        run: |
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Build Documentation
         run: |
@@ -332,7 +341,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v2.1.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -350,7 +359,8 @@ jobs:
 
       - name: DPF Server Activation
         run: |
-          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |
