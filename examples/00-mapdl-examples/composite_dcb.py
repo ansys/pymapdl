@@ -1,5 +1,5 @@
 """
-.. _ref_dcb_test_composite_delamination
+.. _ref_dcb_test_composite_delamination:
 
 ======================================================================
 Static simulation of double cantilever beam test via cohesive elements
@@ -22,6 +22,8 @@ Problem figure
 .. image:: ../../../images/dcb_test.png
    :width: 400
    :alt: DCB experimental test setup
+
+   Source: https://www.wikiwand.com/en/Delamination
 
 Procedure
 ~~~~~~~~~
