@@ -17,15 +17,15 @@ PyMAPDL documentation |version|
 
 Introduction and purpose
 ------------------------
-PyMAPDL is part of the larger `PyAnsys <https://docs.pyansys.com>`_
+PyMAPDL is part of the larger `PyAnsys <pyansys_>`_
 effort to facilitate the use of Ansys technologies directly from
 Python. Its primary package, ``ansys-mapdl-core``, provides:
 
 - Scripting of MAPDL through both Python and Ansys Parametric Design
   Language (APDL) syntax.
 - Plotting of MAPDL geometry and meshes using `PyVista
-  <https://docs.pyvista.org>`_ from within a Python script or an
-  interactive `Jupyter notebook <https://jupyter.org/>`_.
+  <pyvista_docs_>`_ from within a Python script or an
+  interactive `Jupyter notebook <jupyter_>`_.
 - Access to MAPDL arrays as Python objects (for example, nodes, elements,
   solution matrices, and results).
 
@@ -46,7 +46,7 @@ application. It is now open source: Enjoy it! Contributions are welcome.
 
 Background
 ----------
-PyMAPDL, based on `gRPC <https://grpc.io/>`_, represents an
+PyMAPDL, based on `gRPC <grpc_>`_, represents an
 improvement over its predecessor based on CORBA. These technologies
 allow the MAPDL solver to function as a server, ready to respond to
 connecting clients.

@@ -114,7 +114,7 @@ str
 
     * ``str.to_dataframe()`` (Only if Pandas is installed)
 
-    For more information visit `PyMAPDL Post-Processing <https://mapdldocs.pyansys.com/user_guide/post.html>`_.
+    For more information visit `PyMAPDL Post-Processing <https://mapdl.docs.pyansys.com/user_guide/post.html>`_.
 
 """
 

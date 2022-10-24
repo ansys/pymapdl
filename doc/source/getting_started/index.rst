@@ -6,10 +6,10 @@ version of Ansys installed dictates the interface and features
 available to you.
 
 For more information on getting a licensed copy of Ansys, visit
-`Ansys <https://www.ansys.com/>`_ .
+`Ansys <ansys_>`_ .
 
 You can also try the Student Version of Ansys products in
-`Ansys Student Versions <https://www.ansys.com/academic/students>`_.
+`Ansys Student Versions <ansys_student_version_>`_.
 The Student Version is valid during a calendar year with limited capabilities,
 such as on the number of nodes and elements.
 
@@ -32,15 +32,15 @@ Python module
 The ``ansys.mapdl.core`` package currently supports Python 3.7 through
 Python 3.10 on Windows, Mac OS, and Linux.
 
-Install the latest release from `PyPi
-<https://pypi.org/project/ansys-mapdl-core/>`_ with:
+Install the latest release from 
+`PyPi <pymapdl_pypi_>`_ with:
 
 .. code::
 
    pip install ansys-mapdl-core
 
-Alternatively, install the latest from `PyMAPDL GitHub
-<https://github.com/pyansys/pymapdl/issues>`_ via:
+Alternatively, install the latest from 
+`PyMAPDL GitHub <pymapdl_issues_>`_ via:
 
 .. code::
 
@@ -63,8 +63,8 @@ after restarting the Python kernel.
 Offline installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your install machine, the recommended way
-of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
-Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+of installing PyMAPDL is downloading the wheelhouse archive from the 
+`Releases Page <pymapdl_releases_>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
@@ -81,8 +81,7 @@ For example, on Linux with Python 3.7, unzip it and install it with the followin
 If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
 install using the same command as above.
 
-Consider installing using a `virtual environment
-<https://docs.python.org/3/library/venv.html>`_.
+Consider installing using a `virtual environment <using_venv_>`_.
 
 
 Ansys software requirements
