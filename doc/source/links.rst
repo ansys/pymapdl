@@ -20,7 +20,7 @@
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
 .. _numpy_docs: https://numpy.org/doc/stable/
-.. _matplotlib docs: https://matplotlib.org/stable/contents.html
+.. _matplotlib_docs: https://matplotlib.org/stable/contents.html
 .. _matplotlib: https://matplotlib.org
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
