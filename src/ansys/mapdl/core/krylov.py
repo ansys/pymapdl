@@ -91,7 +91,7 @@ class KrylovSolver:
     @property
     def is_orthogonal(self):
         """
-        Check whether the values in generated subspace is orthogonal.
+        Check whether the solution is orthogonal.
 
         Returns
         -------
@@ -603,30 +603,7 @@ class KrylovSolver:
             return self.solution_vectors
 
     def compute_residuals(self, iFreq, RzV, Xi, omega):
-        """
-        Compute residuals of the matrices.
-
-        Parameters
-        ----------
-        iFreq : int
-            Frequency for what the residual is calculated.
-        RzV : _type_
-            _description_
-        Xi : _type_
-            _description_
-        omega : _type_
-            _description_
-
-        Returns
-        -------
-        tuple
-            Return the norm_rz, norm_fz
-
-        Raises
-        ------
-        ValueError
-            If an incorrect/non-supported algorithm is provided.
-        """
+        """Compute residuals of the matrices"""
         # form {iRHS}
         self.iRHS.zeros()
         if self.ramped_load:

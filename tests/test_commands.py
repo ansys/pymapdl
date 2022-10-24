@@ -71,19 +71,19 @@ ARGS_INQ_FUNC = {
 set_list_0 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
 
    SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
-     1 0.20000             1         1         3                  
-     2 0.40000             1         2         5                  
-     3 0.70000             1         3         7                  
+     1 0.20000             1         1         3
+     2 0.40000             1         2         5
+     3 0.70000             1         3         7
      4  1.0000             1         4         9"""
 
 set_list_1 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
 
    SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
-     1 0.10000E-02         1        10        10                  
-     2 0.20000E-02         2         1        11                  
-     3 0.30000E-02         2         2        12                  
-     4 0.40000E-02         2         3        13                  
-     5 0.50000E-02         2         4        14                  
+     1 0.10000E-02         1        10        10
+     2 0.20000E-02         2         1        11
+     3 0.30000E-02         2         2        12
+     4 0.40000E-02         2         3        13
+     5 0.50000E-02         2         4        14
      6 0.60000E-02         2         5        15
  """
 
