@@ -97,12 +97,12 @@ In those cases, you might see output **similar** to:
 
 
 PADT has a great blog regarding ANSYS issues, and licensing is always a common issue 
-(for example `Changes to Licensing at ANSYS 2020R1 <https://www.padtinc.com/blog/15271-2/>`_).  
+(for example `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_).  
 Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys,
 please check the online Ansys licensing documentation at 
-`Installation and Licensing <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en>`_.
+`Installation and Licensing <ansys_installation_and_licensing_>`_.
 
-For more comprehensive information, download the :download:`ANSYS Licensing Guide <ANSYS_Inc._Licensing_Guide.pdf>`.
+For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
 
 
 VPN Issues
@@ -121,7 +121,7 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
 While this approach has the disadvantage of using the potentially slower shared
 memory parallel mode, you'll at least be able to run MAPDL.
 For more details on shared vs distributed memory, see
-`High-Performance Computing for Mechanical Simulations using ANSYS <https://www.ansys.com/-/media/Ansys/corporate/resourcelibrary/presentation/hpc-for-mechanical-ansys.pdf>`_.
+`High-Performance Computing for Mechanical Simulations using ANSYS <ansys_parallel_computing_guide_>`_.
 
 
 In addition, if your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly

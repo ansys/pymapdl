@@ -9,14 +9,14 @@ Objective
 Demonstrate the interoperability of PyAnsys with ``gmsh``, a very well known
 open source Python meshing library.
 
-For more information about ``gmsh`` please visit its website: `Gmsh <https://gmsh.info/>`_.
+For more information about ``gmsh`` please visit its website: `Gmsh <gmsh_>`_.
 
 Description
 -----------
 In this example the interoperability of PyAnsys with the open source mesher ``gmsh`` is demonstrated.
 Using ``gmsh`` we import an external geometry file in STL format and then the 
 geometry is imported into PyMAPDL using the 
-`pymapdl-reader <https://github.com/pyansys/pymapdl-reader>`_ library.
+`pymapdl-reader <legacy_reader_docs_>`_ library.
 
 This example is composed of several files. 
 

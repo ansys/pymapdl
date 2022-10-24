@@ -24,14 +24,18 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 1
-  RESET_EXAMPLES_CACHE: 1
-  RESET_DOC_BUILD_CACHE: 1
-  RESET_AUTOSUMMARY_CACHE: 1
+  RESET_PIP_CACHE: 3
+  RESET_EXAMPLES_CACHE: 3
+  RESET_DOC_BUILD_CACHE: 3
+  RESET_AUTOSUMMARY_CACHE: 3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  packages: read
+
 
 jobs:
 
@@ -41,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
       - name: Install pre-commit
@@ -61,7 +65,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -129,7 +133,7 @@ jobs:
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.8
 
@@ -159,7 +163,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v2.1.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -205,6 +209,11 @@ jobs:
         run: |
           pip install -r requirements/requirements_docs.txt
 
+      - name: DPF Server Activation
+        run: |
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
       - name: Build Documentation
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
@@ -223,7 +232,7 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           repository-name: pyansys/pymapdl-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
@@ -302,7 +311,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.8
 
@@ -332,7 +341,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v2.1.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -350,14 +359,14 @@ jobs:
 
       - name: DPF Server Activation
         run: |
-          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |
           xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
-        if: matrix.mapdl-version == 'v21.2.1'
         name: 'Upload coverage to Codecov'
 
       - name: Check package
@@ -425,7 +434,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
 

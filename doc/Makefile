@@ -6,6 +6,7 @@ SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+LINKCHECKDIR  = build/linkcheck
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -39,6 +40,11 @@ pdf:
 	cd build/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
 	(test -f build/latex/*.pdf && echo pdf exists) || exit 1
 
+checklinks:
+	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) $(LINKCHECKDIR)
+	@echo
+	@echo "Check finished. Report is in $(LINKCHECKDIR)."
+
 # manually deploy to https://github.com/pyansys/pymapdl-docs
 # WARNING: Use with care as this overwrites history of gh-pages
 deploy: 
@@ -48,7 +54,7 @@ deploy:
 	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo "Deploying..."
 	touch build/html/.nojekyll
-	echo "mapdldocs.pyansys.com" >> build/html/CNAME
+	echo "mapdl.docs.pyansys.com" >> build/html/CNAME
 	cd build/html && git init
 	cd build/html && git add .
 	cd build/html && git checkout -b gh-pages

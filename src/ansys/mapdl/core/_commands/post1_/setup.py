@@ -537,6 +537,10 @@ class Setup:
             LIST - Scan the results file and list a summary of each load step.  (KIMG, TIME,
                    ANGLE, and NSET are ignored.)
 
+                   .. versionchanged:: 0.64
+                      From version 0.64 you can use the methods ``to_list`` and
+                      ``to_array`` on the object returning from ``mapdl.set("list")``.
+
         sbstep
             Substep number (within Lstep). Defaults to the last substep of the
             load step (except in a buckling or modal analysis). For a buckling

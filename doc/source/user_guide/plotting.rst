@@ -44,7 +44,7 @@ Plot lines within Python using :func:`Mapdl.lplot() <ansys.mapdl.core.Mapdl.lplo
 .. figure:: ../images/lplot_vtk.png
     :width: 400pt
 
-    Line Plot from MAPDL using PyMAPDL and `Pyvista <https://docs.pyvista.org/>`__
+    Line Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`__
 
 
 Area and Volume Plotting
@@ -67,7 +67,7 @@ area with the 8 circles and then extrude it.
 .. figure:: ../images/vplot_vtk.png
     :width: 400pt
 
-    Volume Plot from MAPDL using PyMAPDL and `Pyvista <https://docs.pyvista.org/>`__
+    Volume Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`__
 
 
 Node and Element Plotting
@@ -87,7 +87,7 @@ mesh.
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using PyMAPDL and `Pyvista <https://docs.pyvista.org/>`__
+    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`_
 
 
 Plotting Non-Interactively using MAPDL
@@ -96,8 +96,8 @@ You can also plot using MAPDL's native plotting tools.  To use the
 native tools, pass ``vtk=False`` when running plotting commands such
 as :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>`,
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>`, etc..  Plots will
-be generated within MAPDL and then shown using `matploblib
-<https://matplotlib.org/stable/contents.html>`__.
+be generated within MAPDL and then shown using 
+`matploblib <matplotlib_main_>`_.
 
 
 Start PyMAPDL
@@ -142,7 +142,8 @@ Each of these will create a matplotlib figure and pause execution
 .. figure:: ../images/aplot.png
     :width: 400pt
 
-    Area Plot from MAPDL displayed using `matploblib <https://matplotlib.org/stable/contents.html>`__
+    Area Plot from MAPDL displayed using 
+    `matplotlib <matplotlib_main_>`_
 
 
 For more details on the plotting functions, see :ref:`ref_plotting_api`.

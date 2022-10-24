@@ -1208,7 +1208,9 @@ def wrap_point_SEL(entity="node"):
 
             if isinstance(vmin, (set, tuple, list, np.ndarray)):
 
-                if len(vmin) == 0 and kwargs.get("Used_P", False):
+                if kwargs.get("Used_P", False) and (
+                    (isinstance(vmin, np.ndarray) and vmin.size != 0) or len(vmin) == 0
+                ):
                     # edge case where during the picking we have selected nothing.
                     # In that case, we just silently quit NSEL command. We do **not**
                     # want to unselect everything (case in scripting where

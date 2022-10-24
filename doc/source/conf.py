@@ -74,6 +74,7 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/", None),
 }
 
 suppress_warnings = ["label.*"]
@@ -140,7 +141,14 @@ exclude_patterns = [
     ".DS_Store",
     # because we include this in examples/index.rst
     "examples/gallery_examples/index.rst",
+    "links.rst",
 ]
+
+# make rst_epilog a variable, so you can add other epilog parts to it
+rst_epilog = ""
+# Read link all targets from file
+with open("links.rst") as f:
+    rst_epilog += f.read()
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

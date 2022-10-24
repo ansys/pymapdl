@@ -33,45 +33,43 @@ Overview
 --------
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
 communicate with the MAPDL process directly from Python. The latest
-ansys-mapdl-core package enables a more comprehensive interface with
+``ansys-mapdl-core`` package enables a more comprehensive interface with
 MAPDL and supports:
 
-- All the features of the original module (e.g. pythonic commands,
-  interactive sessions).
+- All the features of the original module (for example, Pythonic commands
+  and interactive sessions).
 - Remote connections to MAPDL from anywhere via gRPC.
 - Direct access to MAPDL arrays, meshes, and geometry as Python
   objects.
-- Low level access to the MAPDL solver through APDL math in a scipy
+- Low-level access to the MAPDL solver through APDL math in a SciPy-
   like interface.
 
-Here's a quick demo of PyMAPDL within VSCode:
+Here's a quick demo of PyMAPDL within Visual Studio Code:
 
 .. image:: https://github.com/pyansys/pymapdl/raw/main/doc/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
 
-Documentation and Issues
+Documentation and issues
 ------------------------
-See the `Documentation <https://mapdldocs.pyansys.com>`_ page for more
-details, and the `Examples gallery
-<https://mapdldocs.pyansys.com/examples/index.html>`_ for some
-examples.
+For more information, see the `Documentation <https://mapdl.docs.pyansys.com>`_ page.
+For some examples, see the `Examples gallery <https://mapdl.docs.pyansys.com/examples/index.html>`_.
 
-Please feel free to post issues and other questions at `PyMAPDL Issues
+Feel free to post issues and other questions at `PyMAPDL Issues
 <https://github.com/pyansys/pymapdl/issues>`_.  This is the best place
 to post questions and code.
 
 
 
-Project Transition - Legacy Support
+Project transition - legacy support
 -----------------------------------
 This project was formerly known as ``pyansys``, and we'd like to thank
 all the early adopters, contributors, and users who submitted issues,
 gave feedback, and contributed code through the years.  The
-``pyansys`` project has been taken up Ansys and will be leveraged in
-creating new Pythonic, cross-platform, and multi-language service
-based interfaces for Ansys's products.  Your contributions to
+``pyansys`` project has been taken up at Ansys and is being leveraged in
+creating new Pythonic, cross-platform, and multi-language service-based
+interfaces for Ansys's products.  Your contributions to
 ``pyansys`` has shaped it into a better solution.
 
 The ``pyansys`` project is expanding beyond just MAPDL, and while
@@ -84,7 +82,7 @@ split up into the following projects and modules:
 - `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
 - `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
 
-Please visit the GitHub pages for further details regarding each project.
+For more information on each project, visit their GitHub pages.
 
 
 Installation
@@ -116,7 +114,7 @@ For a local "development" version, install with (requires pip >= 22.0):
    pip install -e .
 
 
-Offline Installation
+Offline installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your install machine, the recommended way
 of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
@@ -143,15 +141,15 @@ Consider installing using a `virtual environment
 
 Dependencies
 ------------
-You will need a local licenced copy of Ansys to run MAPDL prior and
+You must have a local licenced copy of Ansys to run MAPDL prior and
 including 2021R1.  If you have the latest version of 2021R1 you do
 not need MAPDL installed locally and can connect to a remote instance.
 
 
-Getting Started
+Getting started
 ---------------
 
-Launch MAPDL Locally
+Launch MAPDL locally
 ~~~~~~~~~~~~~~~~~~~~
 You can launch MAPDL locally directly from Python using ``launch_mapdl``:
 
@@ -165,15 +163,15 @@ launches it as a background process, and immediately connects to it.
 You can then start sending python commands to MAPDL.
 
 
-Launching Manually or Connecting to a Remote Instance
+Launching manually or connecting to a remote instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you wish to connect to a session of MAPDL on a remote computer
+If you want to connect to a session of MAPDL on a remote computer
 (either locally the LAN or through the internet), first ensure you
-have MAPDL started in gRPC server mode.  This example assumes you will
-be launching an instance locally from Windows, but can be easily
+have MAPDL started in gRPC server mode.  This example assumes that you
+are launching an instance locally from Windows, but it can be easily
 adapted to run from Linux, or the LAN provided the necessary ports are
-open.  This example specifies the port with ``-port 50052``, but this
+open. This example specifies the port with ``-port 50052``, but this
 option can be left out if you plan on using the default port 50052.
 
 .. code::
@@ -199,14 +197,14 @@ A successful connection returns:
     ansys.mapdl.core Version: 0.57.0
 
 
-Should you wish to connect to this instance of MAPDL from a remote
+Should you want to connect to this instance of MAPDL from a remote
 computer, you substitute ``ip=`` with the LAN or WAN address of the
 computer you wish to connect to.  Depending on your network settings,
 you may have to open local ports or enable port redirection across the
 WAN.
 
 
-Basic Usage
+Basic usage
 ~~~~~~~~~~~
 You run MAPDL commands via:
 
@@ -236,20 +234,19 @@ properties, or view mesh statistics.  Additionally, there's the
 ``parameters`` property which shows the active MAPDL parameters, and
 you can use to send or receive arrays between MAPDL and Python.
 
-See the full documentation at `PyMAPDL Documentation
-<https://mapdldocs.pyansys.com>`_ for more details.
+For more information, see the full documentation at `PyMAPDL Documentation
+<https://mapdl.docs.pyansys.com>`_.
 
 
 Run on Docker
 ~~~~~~~~~~~~~
-Run MAPDL within a container on any OS with ``docker``!
+You can run MAPDL within a container on any OS with ``docker``.
 
-See `MAPDL on Docker README
-<https://github.com/pyansys/pymapdl/blob/master/docker/README.md>`_
-for details regarding using MAPDL within a container.
+For information on using MAPDL within a container, see `MAPDL on Docker README
+<https://github.com/pyansys/pymapdl/blob/master/docker/README.md>`_.
 
 
-Citing this Module
+Citing this module
 -------------------
 If you use ``PyMAPDL`` for research and would like to cite the module
 and source, you can visit `pyansys Zenodo
@@ -270,11 +267,11 @@ correct citation.  For example, the BibTex citation is:
       url          = {https://doi.org/10.5281/zenodo.4009467}
     }
 
-Please visit the link above for the most recent citation as the
-citation here may not be current.
+Because the citation here might not be current, visit the link above to obtain
+the most recent citation.
 
 
-License and Acknowledgments
+License and acknowledgments
 ---------------------------
 ``PyMAPDL`` is licensed under the MIT license.
 
@@ -285,4 +282,4 @@ core behavior or license of the original software.  The use of the
 interactive APDL control of ``PyMAPDL`` requires a legally licensed
 local copy of Ansys.
 
-To get a copy of Ansys, please visit `Ansys <https://www.ansys.com/>`_.
+To get a copy of Ansys, visit `Ansys <https://www.ansys.com/>`_.

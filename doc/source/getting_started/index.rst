@@ -1,17 +1,17 @@
 ===============
-Getting Started
+Getting started
 ===============
-To use PyMAPDL, you need to have a local installation of Ansys.  The
-version of Ansys installed will dictate the interface and features
+To use PyMAPDL, you must have a local installation of Ansys. The
+version of Ansys installed dictates the interface and features
 available to you.
 
-Visit `Ansys <https://www.ansys.com/>`_ for more information on
-getting a licensed copy of Ansys.
+For more information on getting a licensed copy of Ansys, visit
+`Ansys <ansys_>`_ .
 
 You can also try the Student Version of Ansys products in
-`Ansys Student Versions <https://www.ansys.com/academic/students>`_.
-These are versions valid during a year and with limited capabilities 
-regarding number of nodes, elements, etc.
+`Ansys Student Versions <ansys_student_version_>`_.
+The Student Version is valid during a calendar year with limited capabilities,
+such as on the number of nodes and elements.
 
 .. toctree::
    :hidden:
@@ -27,20 +27,20 @@ regarding number of nodes, elements, etc.
 Installation
 ************
 
-Python Module
+Python module
 ~~~~~~~~~~~~~
 The ``ansys.mapdl.core`` package currently supports Python 3.7 through
 Python 3.10 on Windows, Mac OS, and Linux.
 
-Install the latest release from `PyPi
-<https://pypi.org/project/ansys-mapdl-core/>`_ with:
+Install the latest release from 
+`PyPi <pymapdl_pypi_>`_ with:
 
 .. code::
 
    pip install ansys-mapdl-core
 
-Alternatively, install the latest from `PyMAPDL GitHub
-<https://github.com/pyansys/pymapdl/issues>`_ via:
+Alternatively, install the latest from 
+`PyMAPDL GitHub <pymapdl_issues_>`_ via:
 
 .. code::
 
@@ -55,16 +55,16 @@ For a local "development" version, install with:
    cd pymapdl
    pip install -e .
 
-This will allow you to install the pymapdl ``ansys-mapdl-core`` module
+This allows you to install the ``ansys-mapdl-core`` module
 and modify it locally and have the changes reflected in your setup
 after restarting the Python kernel.
 
 
-Offline Installation
+Offline installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your install machine, the recommended way
-of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
-Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+of installing PyMAPDL is downloading the wheelhouse archive from the 
+`Releases Page <pymapdl_releases_>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
@@ -81,24 +81,23 @@ For example, on Linux with Python 3.7, unzip it and install it with the followin
 If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
 install using the same command as above.
 
-Consider installing using a `virtual environment
-<https://docs.python.org/3/library/venv.html>`_.
+Consider installing using a `virtual environment <using_venv_>`_.
 
 
-Ansys Software Requirements
+Ansys software requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For the latest features, you will need a copy of Ansys 2021R1
-installed locally, but PyMAPDL is compatible with Ansys 17.0 and newer
+For the latest features, you must have a copy of Ansys 2021 R1
+installed locally, but PyMAPDL is compatible with Ansys 17.0 and later
 on Windows and 13.0 on Linux.
 
 .. note::
 
     The latest versions of Ansys provide signifiantly better support
-    and features.  Certain features will not be supported by earlier
-    versions of Ansys (e.g. APDL Math).
+    and features. Certain features are not supported on earlier Ansys versions
+    versions such as APDL Math.
 
 
-Verify Your Installation
+Verify your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Check that you can start MAPDL from Python by running:
 
@@ -112,6 +111,6 @@ Check that you can start MAPDL from Python by running:
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
     PyMAPDL Version:     Version: 0.58.0
 
-If you see a response from the server, congratulations!  You're ready
-to get started using MAPDL as a service.  For details regarding the
+If you see a response from the server, congratulations. You're ready
+to get started using MAPDL as a service. For information on the
 PyMAPDL interface, see :ref:`ref_mapdl_user_guide`.
