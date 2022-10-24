@@ -32,7 +32,7 @@ the Mechanical APDL Technology Showcase Manual.
 Additional Packages Used
 ------------------------
 
-* `Matplotlib <matplotlib>`_ is used for plotting purposes.
+* `Matplotlib <matplotlib_>`_ is used for plotting purposes.
 
 .. GENERATED FROM PYTHON SOURCE LINES 20-33
 
@@ -55,7 +55,7 @@ Starting MAPDL as a service and importing an external model
 .. code-block:: default
 
 
-    import matplotlib.pyplot as plt
+    import _.pyplot as plt
 
     from ansys.mapdl.core import launch_mapdl
     from ansys.mapdl.core.examples import download_tech_demo_data
@@ -1995,7 +1995,7 @@ Using PyMAPDL result reader
 ***************************
 
 *Not recommended* - PyMAPDL reader library is in process to being deprecated.
-It is recommended to use `DPF Post <dpf_post_docs>`_.
+It is recommended to use `DPF Post <dpf_post_docs_>`_.
 
 
 .. GENERATED FROM PYTHON SOURCE LINES 163-167

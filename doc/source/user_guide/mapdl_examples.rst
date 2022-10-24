@@ -2,9 +2,9 @@ ANSYS APDL interactive control examples
 =======================================
 These examples demonstrate how to convert an existing
 ANSYS APDL script to a Python PyMAPDL script. You could also simply
-use the built-in :func:`convert_script()
-<ansys.mapdl.core.convert_script>` function within `ansys-mapdl-core
-<https://pypi.org/project/ansys-mapdl-core/>`_ to convert an existing
+use the built-in :func:`convert_script() 
+<ansys.mapdl.core.convert_script>` function within 
+`ansys-mapdl-core <pymapdl_main_>`_ to convert an existing
 input file.
 
 .. code:: python
@@ -444,8 +444,8 @@ the PyMAPDL interface.
     >>> mapdl.input('spot_weld.inp')
 
 
-Here is the Python script using `ansys-mapdl-reader
-<https://pypi.org/project/ansys-mapdl-reader/>`_ package to access the results
+Here is the Python script using 
+`ansys-mapdl-reader <legacy_reader_docs_>`_ package to access the results
 after running the MAPDL analysis.
 
 .. code:: python

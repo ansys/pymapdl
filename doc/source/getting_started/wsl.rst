@@ -28,7 +28,7 @@ Install WSL
 ===========
 
 Install WSL by following Microsoft's directions at 
-`Microsoft: Install WSL <install_wsl_microsoft>`_.
+`Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
 Currently there are two versions of WSL: WSL1 abd WSL2. Because WSL2 is
 the latest and includes many improvements over WSL1, using WSL2 is highly recommended.
@@ -43,8 +43,8 @@ You should use the CentOS7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
-`CentOS-WSL <gh_centos_wsl_1>`_ or
-`CentOS WSL <gh_centos_wsl_2>`_ .
+`CentOS-WSL <gh_centos_wsl_1_>`_ or
+`CentOS WSL <gh_centos_wsl_2_>`_ .
 
 Optionally, you can try Ubuntu, but it has not been tested yet in the context of WSL.
 
@@ -62,7 +62,7 @@ required libraries:
    sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
-If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <pymapdl_run_ubuntu>`_ .
+If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <pymapdl_run_ubuntu_>`_ .
 
 
 Install Ansys products
@@ -71,7 +71,7 @@ Install Ansys products
 To install Ansys products in WSL Linux:
 
 1. Download the **Ansys Structures** image from the customer portal (`Current
-   Release <https://download.ansys.com/Current%20Release>`_).  If you are
+   Release <ansys_current_release_>`_).  If you are
    downloading the image on a Windows machine, you should later copy it from
    you downloads folder to  WSL.
 
@@ -124,16 +124,15 @@ Open ports
 
 **Theory:** 
 You should open the ports ``1055`` and ``2325`` for the license server
-communication in **Windows Firewall Advanced**. You can see the steps in `How to
-open port in Windows 10 Firewall
-<https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/>`_.
+communication in **Windows Firewall Advanced**. You can see the steps in 
+`How to open port in Windows 10 Firewall <open_port_windows_10_>`_.
 
 **Reality:**
 This works if you want to run a Docker image using WSL Linux image to host that
 Docker image. The Docker image successfully communicates with the Windows
 License Server using these ports if you use the ``'-p'`` flag when running the
-Docker image and these ports are open.  See `Run MAPDL on a local Docker
-image`_.
+Docker image and these ports are open. 
+See `Run MAPDL on a local Docker image`_.
 
 
 If you want to run MAPDL in the CentOS7 image and use the Windows license
@@ -144,7 +143,7 @@ MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to disable the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution.
-See `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl>`_.
+See `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl_>`_.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -387,7 +386,7 @@ This method does not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl>`_
+Link: `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl_>`_
 
 Windows 10 port forwarding
 ==========================

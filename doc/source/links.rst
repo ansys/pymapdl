@@ -11,6 +11,7 @@
 .. _example_data_repo: https://github.com/pyansys/example-data
 
 .. #PyAnsys Developer Guide
+.. _dev_guide_pyansys: https://dev.docs.pyansys.com/
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 
@@ -21,12 +22,21 @@
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib docs: https://matplotlib.org/stable/contents.html
 .. _matplotlibmain: https://matplotlib.org
+.. _precommit: https://pre-commit.com/
+.. _gmsh: https://gmsh.info/
+.. _scipy: https://docs.scipy.org/doc/scipy/reference/
+.. _docker: https://www.docker.com/
+
 
 .. #Ansys
 .. _ansysmain: https://www.ansys.com/
 .. _ansys_student_version: https://www.ansys.com/academic/students
 .. _ansys_innovation_space: https://courses.ansys.com/
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
+.. _ansys_current_release: https://download.ansys.com/Current%20Release
+
+.. # techdemos
+.. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
@@ -53,11 +63,17 @@
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
 
 .. #PyMAPDL related
+.. _pymapdl_main: pymapdl_docs_
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/pyansys/pymapdl/releases
-.. _pymapdl_run_ubuntu: https://mapdldocs.pyansys.com/getting_started/running_mapdl.html.. #buntu/
+.. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/troubleshoot/troubleshoot.html?#ubuntu
 .. _pymapdl_issues: https://github.com/pyansys/pymapdl/issues
 .. _pymapdl_repo: https://https://github.com/pyansys/pymapdl
+.. _pymapdl_docs: https://mapdl.docs.pyansys.com/
+.. _pymapdl_dev_docs: https://dev.mapdl.docs.pyansys.com/
+.. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
+.. _pymapdl_cheatsheet_: ../_static/Cheat_Sheet_PyMAPDL.pdf
+.. _licensing_guide_pdf: ANSYS_Inc._Licensing_Guide.pdf
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
