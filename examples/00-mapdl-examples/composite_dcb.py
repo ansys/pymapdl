@@ -44,7 +44,7 @@ These additional packages are imported for use:
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # This example begins by importing the required packages and then launching Ansys Mechanical APDL.
 
-import os
+import tempfile
 
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model
@@ -302,8 +302,13 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 # Use PyDPF to visualize the crack opening throughout the simulation as
 # an animation.
 
+# Upload file to DPF server
+temp_directory = tempfile.gettempdir()
+rst_path = mapdl.download_result(temp_directory)
+server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+
 # Generate the DPF model
-data_src = dpf.DataSources(os.path.join(mapdl.directory, "file.rst"))
+data_src = dpf.DataSources(server_file_path)
 model = Model(data_src)
 
 # Get the mesh of the whole model
