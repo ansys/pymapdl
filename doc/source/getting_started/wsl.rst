@@ -42,7 +42,7 @@ We recommend that you use the CentOS7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
-`CentOS WSL <gh_centos_wsl_1>`_ or
+`CentOS-WSL <gh_centos_wsl_1>`_ or
 `CentOS WSL <gh_centos_wsl_2>`_ .
 
 Optionally, you can also try Ubuntu, but it has not been tested yet in the context of WSL.
@@ -70,7 +70,7 @@ Install Ansys Products
 To install ANSYS products in WSL Linux:
 
 1. Download the Ansys Structures image from the customer portal 
-   (`Current Release <ansys_download_current_release>`_). If you are
+   (`Current Release <https://download.ansys.com/Current%20Release>`_). If you are
    downloading the image on a Windows machine, you can later copy from it to
    WSL (recommended).
 

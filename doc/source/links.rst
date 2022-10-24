@@ -26,7 +26,6 @@
 .. _ansysmain: https://www.ansys.com/
 .. _ansys_student_version: https://www.ansys.com/academic/students
 .. _ansys_innovation_space: https://courses.ansys.com/
-.. _ansys_download_current_release: https://download.ansys.com/Current%20Release
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 
 .. #Ansys internal documentation
