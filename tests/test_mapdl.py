@@ -526,6 +526,11 @@ def test_apdl_logging(mapdl, tmpdir):
         mapdl.slashsolu()
         mapdl.prep7()
 
+    file_input = str(tmp_dir.join("input.inp"))
+    str_not_in_apdl_logger = "/com, this input should not appear"
+    with open(file_input, "w") as fid:
+        fid.write(str_not_in_apdl_logger)
+
     mapdl._apdl_log.flush()
     with open(file_path, "r") as fid:
         log = fid.read()
@@ -537,6 +542,24 @@ def test_apdl_logging(mapdl, tmpdir):
     assert "This is a comment" in log
     assert "This is a non-interactive command" in log
     assert "/SOLU" in log
+
+    # The input of the ``non_interactive`` should not write to the apdl_logger.
+    assert "/INP," not in log
+    assert "'input.inp'" not in log
+    assert "/OUT,_input_tmp_" not in log
+    assert str_not_in_apdl_logger not in log
+
+    # Testing /input, i
+    mapdl.input(file_input)
+    mapdl._apdl_log.flush()
+    with open(file_path, "r") as fid:
+        log = fid.read()
+
+    # Testing /input PR #1455
+    assert "/INP," in log
+    assert "'input.inp'" in log
+    assert "/OUT,_input_tmp_" in log
+    assert str_not_in_apdl_logger not in log
 
     # Closing
     mapdl._close_apdl_log()
@@ -1548,3 +1571,45 @@ def test_get_fallback(mapdl, cleared):
 
     with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
         mapdl.get_value("elem", 0, "num", "maxd")
+
+
+def test_use_uploading(mapdl, cleared, tmpdir):
+    mymacrofile_name = "mymacrofile.mac"
+    mymacrofile = tmpdir.join(mymacrofile_name)
+    with open(mymacrofile, "w") as fid:
+        fid.write("/prep7\n/eof")
+
+    assert mymacrofile_name not in mapdl.list_files()
+    out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert mymacrofile_name in mapdl.list_files()
+
+    os.remove(mymacrofile)
+    out = mapdl.use(mymacrofile)
+
+    # Raises an error.
+    with pytest.raises(RuntimeError):
+        mapdl.use("myinexistentmacro.mac")
+
+    # Raise an error
+    with pytest.raises(FileNotFoundError):
+        mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_mode(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "corba"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "console"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert mapdl.is_console
+
+    mapdl._mode = "grpc"  # Going back to default

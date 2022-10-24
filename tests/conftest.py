@@ -6,6 +6,9 @@ import time
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
+
+pytest_plugins = ["pytester"]
+
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
@@ -80,7 +83,7 @@ HAS_GRPC = int(rver) >= 211 or ON_CI
 
 # determine if we can launch an instance of MAPDL locally
 # start with ``False`` and always assume the remote case
-local = [False]
+LOCAL = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -247,7 +250,7 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
-@pytest.fixture(scope="session", params=local)
+@pytest.fixture(scope="session", params=LOCAL)
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
@@ -487,7 +490,14 @@ def make_block(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def coupled_example(mapdl, cleared):
-    mapdl.input(vmfiles["vm33"])
+    vm33 = vmfiles["vm33"]
+    with open(vm33, "r") as fid:
+        mapdl_code = fid.read()
+
+    mapdl_code = mapdl_code.replace(
+        "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
+    )
+    mapdl.input_strings(mapdl_code)
 
 
 @pytest.fixture(scope="function")

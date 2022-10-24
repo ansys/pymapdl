@@ -10,6 +10,7 @@ on:
       - main
 
 env:
+  PACKAGE_NAME: PyMAPDL
   PYMAPDL_PORT: 21000  # default won't work on GitHub runners
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
@@ -23,11 +24,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 5
-  RESET_EXAMPLES_CACHE: 5
-  RESET_DOC_BUILD_CACHE: 5
-  RESET_AUTOSUMMARY_CACHE: 5
-  PACKAGE_NAME: PyMAPDL
+  RESET_PIP_CACHE: 1
+  RESET_EXAMPLES_CACHE: 1
+  RESET_DOC_BUILD_CACHE: 1
+  RESET_AUTOSUMMARY_CACHE: 1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
       - name: Install pre-commit
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -127,13 +127,13 @@ jobs:
       - name: Get Bot Application Token
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
         id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v1
+        uses: peter-murray/workflow-application-token-action@v2
         with:
           application_id: ${{ secrets.BOT_APPLICATION_ID }}
           application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.8
 
@@ -232,7 +232,7 @@ jobs:
 
       - name: Deploy
         if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           repository-name: pyansys/pymapdl-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
@@ -311,7 +311,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.8
 
@@ -364,10 +364,9 @@ jobs:
 
       - name: Unit Testing
         run: |
-          xvfb-run pytest -v --durations=10 --maxfail=10 --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
-        if: matrix.mapdl-version == 'v21.2.1'
         name: 'Upload coverage to Codecov'
 
       - name: Check package
@@ -435,7 +434,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.9
 

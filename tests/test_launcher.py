@@ -7,8 +7,11 @@ import weakref
 import pytest
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
-    _validate_add_sw,
+    _check_license_argument,
+    _force_smp_student_version,
+    _validate_MPI,
     _version_from_path,
     get_start_instance,
     is_common_executable_path,
@@ -69,8 +72,11 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_add_sw("", exec_path)
+    add_sw = _validate_MPI("", exec_path)
     assert "msmpi" in add_sw
+
+    add_sw = _validate_MPI("-mpi intelmpi", exec_path)
+    assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
 
 @pytest.mark.skipif(
@@ -185,15 +191,6 @@ def test_license_type_keyword():
 
     assert any(checks)
 
-    dummy_license_name = "dummy"
-    # I had to scape the parenthesis because the match argument uses regex.
-    expected_warn = f"The keyword argument 'license_type' value \('{dummy_license_name}'\) is not a recognized license name or has been deprecated"
-    with pytest.warns(UserWarning, match=expected_warn):
-        mapdl = launch_mapdl(license_type=dummy_license_name)
-        # regardless the license specification, it should lunch.
-        assert mapdl.is_alive
-    mapdl.exit()
-
 
 @pytest.mark.skipif(
     not get_start_instance(), reason="Skip when start instance is disabled"
@@ -234,14 +231,15 @@ def test_license_type_additional_switch():
 
     assert successful_check  # if at least one license is ok, this should be true.
 
-    dummy_license_name = "dummy"
-    # I had to scape the parenthesis because the match argument uses regex.
-    expected_warn = f"The additional switch product value \('-p {dummy_license_name}'\) is not a recognized license name or has been deprecated"
-    with pytest.warns(UserWarning, match=expected_warn):
-        mapdl = launch_mapdl(additional_switches=f" -p {dummy_license_name}")
-        # regardless the license specification, it should lunch.
-        assert mapdl.is_alive
-    mapdl.exit()
+
+@pytest.mark.skipif(
+    not get_start_instance(), reason="Skip when start instance is disabled"
+)
+@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+def test_license_type_dummy():
+    dummy_license_type = "dummy"
+    with pytest.raises(LicenseServerConnectionError):
+        launch_mapdl(additional_switches=f" -p {dummy_license_type}")
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -383,3 +381,66 @@ def test_open_gui(mapdl):
 
     mapdl.open_gui(include_result=False, inplace=False)
     mapdl.open_gui(include_result=True, inplace=True)
+
+
+def test__force_smp_student_version():
+    add_sw = ""
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-mpi"
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-dmp"
+    exec_path = (
+        r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
+    )
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = ""
+    exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
+    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+
+    add_sw = "-smp"
+    exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
+    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+
+
+@pytest.mark.parametrize(
+    "license_short,license_name",
+    [[each_key, each_value] for each_key, each_value in LICENSES.items()],
+)
+def test_license_product_argument(license_short, license_name):
+    additional_switches = _check_license_argument(license_name, "qwer")
+    assert f"qwer -p {license_short}" in additional_switches
+
+
+@pytest.mark.parametrize("unvalid_type", [1, {}, ()])
+def test_license_product_argument_type_error(unvalid_type):
+    with pytest.raises(TypeError):
+        _check_license_argument(unvalid_type, "")
+
+
+def test_license_product_argument_warning():
+    with pytest.warns(UserWarning):
+        assert "-p asdf" in _check_license_argument("asdf", "qwer")
+
+
+@pytest.mark.parametrize(
+    "license_short,license_name",
+    [[each_key, each_value] for each_key, each_value in LICENSES.items()],
+)
+def test_license_product_argument_p_arg(license_short, license_name):
+    assert f"qw1234 -p {license_short}" == _check_license_argument(
+        None, f"qw1234 -p {license_short}"
+    )
+
+
+def test_license_product_argument_p_arg_warning():
+    with pytest.warns(UserWarning):
+        assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")

@@ -10,6 +10,8 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
+  DPF_START_SERVER: False
+  DPF_PORT: 21002
 
 jobs:
 
@@ -20,7 +22,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
           python-version: 3.8
 
@@ -52,16 +54,22 @@ jobs:
 
       - name: Pull image
         run: |
-          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e ANS_DEBUG_CRASH=1 -e ANSYS_LOCK="OFF" --restart always --name mapdl -p $PYMAPDL_PORT:50052 -p $PYMAPDL_DB_PORT:50055 $MAPDL_IMAGE -smp > log.txt &
+          docker run -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER -e ANSYS_LOCK="OFF" --restart always --name mapdl -p $PYMAPDL_PORT:50052 -p $PYMAPDL_DB_PORT:50055 $MAPDL_IMAGE -smp > log.txt &
           grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
           python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
 
-      - name: Unit Testing
+      - name: Unit Testing Requirements Installation
         run: |
           pip install -r requirements/requirements_tests.txt
-          cd tests
+
+      - name: DPF Server Activation
+        run: |
+          docker run -d -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50054 ghcr.io/pyansys/dpf-core/dpf:v2021.1
+
+      - name: Unit Testing
+        run: |
           xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display files structure

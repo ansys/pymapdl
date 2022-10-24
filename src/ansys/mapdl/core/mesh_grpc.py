@@ -139,7 +139,7 @@ class MeshGrpc:
         self._mapdl.nsle("S", mute=True)
 
         # not thread safe
-        self._update_cache_elem().join()
+        self._update_cache_elem()
 
         threads = [
             self._update_cache_element_desc(),
@@ -540,7 +540,6 @@ class MeshGrpc:
         nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
         return nodes
 
-    @threaded
     def _update_cache_elem(self):
         """Update the element and element offset cache"""
         if self._cache_elem is None:
@@ -554,7 +553,7 @@ class MeshGrpc:
         in offset.  Each element contains 10 items plus the nodes
         belonging to the element.
         """
-        self._update_cache_elem().join()
+        self._update_cache_elem()
         return self._cache_elem
 
     @_elem.setter
@@ -564,7 +563,7 @@ class MeshGrpc:
     @property
     def _elem_off(self):
         """Element offset array"""
-        self._update_cache_elem().join()
+        self._update_cache_elem()
         return self._cache_elem_off
 
     @_elem_off.setter
