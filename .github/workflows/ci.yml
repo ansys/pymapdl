@@ -92,7 +92,6 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          # echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
           echo "{PYMAPDL_VERSION}={"$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')"} >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
@@ -174,7 +173,6 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          # echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
           echo "{PYMAPDL_VERSION}={"$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')"} >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
