@@ -21,7 +21,7 @@
 .. _grpc: https://grpc.io/
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib_docs: https://matplotlib.org/stable/contents.html
-.. _matplotlib: https://matplotlib.org
+.. _matplotlib_main: https://matplotlib.org
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
 .. _scipy: https://docs.scipy.org/doc/scipy/reference/
@@ -63,7 +63,7 @@
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
 
 .. #PyMAPDL related
-.. _pymapdl: pymapdl_docs_
+.. _pymapdl_main: pymapdl_docs_
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/pyansys/pymapdl/releases
 .. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/troubleshoot/troubleshoot.html?#ubuntu
