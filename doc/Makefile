@@ -6,6 +6,7 @@ SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
+LINKCHECKDIR  = build/linkcheck
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -38,6 +39,11 @@ pdf:
 	python validate_png.py  # clean-up GIFs mislabeled as PNG
 	cd build/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
 	(test -f build/latex/*.pdf && echo pdf exists) || exit 1
+
+checklinks:
+	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) $(LINKCHECKDIR)
+	@echo
+	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
 # manually deploy to https://github.com/pyansys/pymapdl-docs
 # WARNING: Use with care as this overwrites history of gh-pages
