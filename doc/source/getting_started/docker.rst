@@ -1,4 +1,4 @@
-.. _docker:
+.. _pymapdl_docker:
 
 ************************
 Use MAPDL through Docker

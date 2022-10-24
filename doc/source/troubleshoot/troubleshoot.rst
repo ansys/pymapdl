@@ -102,7 +102,7 @@ Should you be responsible for maintaining Ansys licensing or have a personal ins
 please check the online Ansys licensing documentation at 
 `Installation and Licensing <ansys_installation_and_licensing_>`_.
 
-For more comprehensive information, download the :download:`ANSYS Licensing Guide <licensing_guide_pdf_>`.
+For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
 
 
 VPN Issues
