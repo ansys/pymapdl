@@ -90,6 +90,14 @@ class KrylovSolver:
 
     @property
     def is_orthogonal(self):
+        """
+        Check whether the values in ...
+
+        Returns
+        -------
+        bool
+            If the matrix is orthogonal, returns ``True``, otherwise is ``False``.
+        """
         if self.orthogonality is not None:
             eye_ = np.eye(N=self.orthogonality.shape[0])
             return np.allclose(self.orthogonality, eye_)
@@ -592,6 +600,30 @@ class KrylovSolver:
             return self.solution_vectors
 
     def compute_residuals(self, iFreq, RzV, Xi, omega):
+        """
+        Compute residuals of the matrices.
+
+        Parameters
+        ----------
+        iFreq : int
+            Frequency for what the residual is calculated.
+        RzV : _type_
+            _description_
+        Xi : _type_
+            _description_
+        omega : _type_
+            _description_
+
+        Returns
+        -------
+        tuple
+            Return the norm_rz, norm_fz
+
+        Raises
+        ------
+        ValueError
+            If an incorrect/non-supported algorithm is provided.
+        """
         # form {iRHS}
         self.iRHS.zeros()
         if self.ramped_load:
