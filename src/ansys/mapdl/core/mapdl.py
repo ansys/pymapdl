@@ -165,6 +165,7 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
+        self._mode = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -235,6 +236,26 @@ class _MapdlCore(Commands):
             raise ValueError(
                 f"The property ``print_com`` only allows booleans, but type {type(value)} was supplied."
             )
+
+    @property
+    def mode(self):
+        """Return the type of instance, namely: grpc, corba or console."""
+        return self._mode
+
+    @property
+    def is_grpc(self):
+        """Return true if using grpc to connect to the MAPDL instance."""
+        return self._mode == "grpc"
+
+    @property
+    def is_corba(self):
+        """Return true if using corba to connect to the MAPDL instance."""
+        return self._mode == "corba"
+
+    @property
+    def is_console(self):
+        """Return true if using console to connect to the MAPDL instance."""
+        return self._mode == "console"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -3741,3 +3762,40 @@ class _MapdlCore(Commands):
         fname = str(filename).replace(ext, "")
         ext = ext.replace(".", "")
         return self.run(f"FILE,{fname},{ext}", **kwargs)
+
+    @wraps(Commands.lsread)
+    def use(self, *args, **kwargs):
+        # Because of `name` can be a macro file or a macro block on a macro library
+        # file, we are going to test if the file exists locally first, then remote,
+        # and if not, silently assume that it is a macro in a macro library.
+        # I do not think there is a way to check if the macro exists before use it.
+        name = kwargs.get("name", args[0])
+        base_name = os.path.basename(name)
+
+        # Check if it is a file local
+        if os.path.exists(name):
+            self.upload(name)
+
+        elif base_name in self.list_files():
+            # the file exists in the MAPDL working directory, so do nothing.
+            pass
+
+        else:
+            if os.path.dirname(name):
+                # It seems you provided a path (or something like that)
+                raise FileNotFoundError(
+                    f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
+                    "working directory, nor in the MAPDL working directory. "
+                )
+            # Preferring logger.warning over warn (from warnings), since it is less intrusive.
+            self._log.warning(
+                f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
+                "working directory, nor in the MAPDL working directory. "
+                "PyMAPDL will assume it is a macro block inside a macro library "
+                "file previously defined using 'mapdl.ulib'."
+            )
+            # If MAPDL cannot find named macro file, it will throw a runtime error.
+
+        # Updating arg since the path is not needed anymore.
+        args = (base_name, args[1:])
+        return super().use(*args, **kwargs)

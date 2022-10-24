@@ -364,3 +364,10 @@ def test__channel_str(mapdl):
     assert ":" in mapdl._channel_str
     assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
     assert re.search("\d{4,6}", mapdl._channel_str)
+
+
+def test_mode_corba(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console

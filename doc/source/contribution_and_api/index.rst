@@ -107,8 +107,9 @@ This way, it's not possible for you to push code that fails the style checks. Fo
 
 API Reference
 =============
-This section gives an overview of the API of several public PyMAPDL
-classes, functions, and attributes.
+This page gives an overview of the API of several public PyMAPDL
+classes, functions, and attributes. You can find them
+on the left sidebar.
 
 These methods may include some MAPDL commands but are generally
 specific to pymapdl specific methods and classes (i.e. methods that
