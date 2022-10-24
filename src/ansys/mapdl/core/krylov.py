@@ -47,7 +47,7 @@ class KrylovSolver:
     """
 
     def __init__(self, mapdl):
-        if not isinstance(mapdl, MapdlGrpc):
+        if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.mm = self._mapdl.math
@@ -91,7 +91,7 @@ class KrylovSolver:
     @property
     def is_orthogonal(self):
         """
-        Check whether the values in ...
+        Check whether the values in generated subspace is orthogonal.
 
         Returns
         -------
@@ -153,7 +153,7 @@ class KrylovSolver:
     def _check_input_expand(
         self, return_solution, residual_computation, residual_algorithm
     ):
-        """Validates the inputs to expand method."""
+        """Validate the inputs to the ``expand`` method."""
 
         if not isinstance(return_solution, bool):
             raise ValueError(
@@ -197,13 +197,13 @@ class KrylovSolver:
             # Using previously calculated (if any)
             return self.orthogonality
 
-        orthogonality = np.zeros(shape=(num_q + 1, num_q + 1))
-        for i in range(1, num_q + 1):
-            self._mapdl.vec("Vz", "Z", "LINK", self.Qz.id, i)
+        orthogonality = np.zeros(shape=(num_q, num_q))
+        for i in range(num_q):
+            self._mapdl.vec("Vz", "Z", "LINK", self.Qz.id, i + 1)
             Vz = self.mm.vec(name="Vz")
             Vz_m = Vz.asarray()
-            for j in range(1, num_q + 1):
-                self._mapdl.vec(uz.id, "Z", "LINK", self.Qz.id, j)
+            for j in range(num_q):
+                self._mapdl.vec(uz.id, "Z", "LINK", self.Qz.id, j + 1)
                 uz_m = uz.asarray()
                 rcon = np.vdot(Vz_m, uz_m)
                 rcon_real = rcon.real
@@ -265,7 +265,7 @@ class KrylovSolver:
         # Check full file exists
         self._check_full_file_exists(full_file)
 
-        # Check the Inputs
+        # Check the inputs
         self._check_input_gensubspace(max_dim_q, frequency, check_orthogonality)
 
         # Get matrices from full file
@@ -376,7 +376,7 @@ class KrylovSolver:
         return self.Qz
 
     def solve(self, freq_start, freq_end, freq_steps, ramped_load=True):
-        """Reduces system of equations and solve at each frequency.
+        """Reduce the system of equations and solve at each frequency.
 
         This method uses a Krylov subspace to solve a reduced harmonic
         analysis over a specified frequency range for a given number of
@@ -401,8 +401,9 @@ class KrylovSolver:
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS."""
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys.
+        """
 
         # Check we ran gensubspace method before
         if not self._run_gensubspace:
@@ -413,7 +414,7 @@ class KrylovSolver:
         # Check inputs before executing the method
         self._check_input_solve(freq_start, freq_end, freq_steps, ramped_load)
 
-        # Execute macro if no errors above
+        # Execute macro if no errors raised
         # Store input arguments from user
         self.freq_start = freq_start
         self.freq_steps = freq_steps
@@ -489,7 +490,7 @@ class KrylovSolver:
         compute_solution_vectors=True,
         return_solution=False,
     ):
-        """Expand reduced solution back to FE space.
+        """Expand the reduced solution back to FE space.
 
         This method expands the reduced solution for a harmonic analysis
         back to the original space. Optional calculation of the residual
@@ -526,8 +527,9 @@ class KrylovSolver:
 
         Notes
         -----
-        Distributed ANSYS Restriction: This command is not supported in
-        Distributed ANSYS."""
+        Distributed Ansys restriction: This command is not supported in
+        Distributed Ansys.
+        """
         # Check we ran solve method before
         if not self._run_solve:
             raise MapdlRuntimeError("The method 'solve' should be executed first.")
@@ -588,7 +590,8 @@ class KrylovSolver:
                 norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
                 if not self.residuals:
                     self.residuals = []
-                    self.residuals.append([iFreq, norm_rz, norm_fz])
+
+                self.residuals.append([iFreq, norm_rz, norm_fz])
 
         # Storing solution in class
         if compute_solution_vectors:

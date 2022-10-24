@@ -2067,11 +2067,11 @@ class MapdlGrpc(_MapdlCore):
     def krylov(self):
         """APDL krylov interface.
 
-        For more information check :class:`MapdlMath <ansys.mapdl.core.krylov.KrylovSolver>`
+        For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
 
         Returns
         -------
-        :class:`MapdlMath <ansys.mapdl.core.krylov.KrylovSolver>`
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
 
         """
         if self._kylov is None:

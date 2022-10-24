@@ -54,21 +54,21 @@ solutions using the Python programming language for user-defined routines.
 If you do not require customization, you can use the APDL commands to
 solve a harmonic analysis with the Krylov method.
 
-More information on the theory of Krylov method can be found on 
+More information on the theory of Krylov method can be found in the 
 `Structural Analysis Guide 
 <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/Hlp_G_STR4_4.html>`_. 
 The procedure described here implements an analysis identical to that 
 defined by the macros. Details on the theory and equations describing 
-the Krylov method can be found in the works of Puri [1]_ and Eser [2]_ .
+the Krylov method can be found in the works of Puri [1]_ and Eser [2]_.
 
 The exposure in PyMAPDL follows the same theory as the APDL macro and
 has the following methods:
 
-* :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`
+* :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`:
   Creates the Krylov subspace. 
-* :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` 
+* :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>`: 
   Solves the reduced system of equations.
-* :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>`
+* :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>`:
   Expands the Krylov subspace.
 
 .. warning:: These methods must be run consecutively.
@@ -107,39 +107,39 @@ Create an instance of the Krylov class
 
 Call the 
 :func:`gensubspace <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`
-method which creates the Krylov subspace:
-Build a subspace of Size / Dimension 10 and at a frequency of 500 Hz.
+method, to create the Krylov subspace:
+Build a subspace of size / dimension 10 and at a frequency of 500 Hz.
 
 .. code:: py
 
-    >>> Qz = mk.gensubspace(10, 500, True, True)
+    >>> Qz = mk.gensubspace(10, 500, True)
 
 Return the Krylov subspace
 --------------------------
 
-Call the :func:`solve <ansys.mapdl.core.krylov.KrylovSolver.solve>` method,
-which reduces the system of equations, and then solve at each frequency.
+Call the :func:`solve <ansys.mapdl.core.krylov.KrylovSolver.solve>` method to
+reduce the system of equations, and then solve at each frequency.
 The following code solves from 0 Hz
 to 1000 Hz with 100 intervals in between, with stepped loading.
 
 .. code:: py
 
-    >>> Yz = mk.solve(0, 1000, 100, 1, True)
+    >>> Yz = mk.solve(0, 1000, 100, ramped_load= True)
 
 
 Return the reduced solution over the frequency range
 ----------------------------------------------------
             
-Call the :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method,
-which expands the reduced solution back to FE space. Output the expanded
+Call the :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method
+to expand the reduced solution back to FE space. Output the expanded
 solution and calculate the residual.   
 
 .. code:: py
 
-    >>> result = mk.expand(True, 3)
+    >>> result = mk.expand(residual_computation= True, "L-inf", compute_solution_vectors= True, True)
 
 It returns a :class:`numpy array<numpy.ndarray>` (if the kwarg ``out_key``
-is set to ``True``) solution vectors mapped to User order.
+is set to ``True``) solution vectors mapped to user order.
 
 .. note:: The ``ndarray`` returned by the method ``expand`` contains
    the node number along with the dof solution for each of the calculated
@@ -153,10 +153,8 @@ or step:
 .. code:: py
 
    # Get the nodal solution at freq number 3``````
-   >>> freq = 3
-   >>> node_order = res[freq-1]['node'] # Get the nodal order   
-   >>> for node_num in node_order:
-   >>> 	   nodal_sol = res[freq-1][node_num]['x'] # Get the nodal solution for each node
+   >>> freq = 3  
+   >>> nodal_sol = result[freq-1] # Get the nodal solution for each node
 
 Example
 =======
@@ -166,9 +164,7 @@ Examples of using the Krylov method in PyMAPDL are available in :ref:`krylov_exa
 Requirements
 ============
 
-To use the Krylov method in PyMAPDL, these requirements must be met:
-
-* Ansys MAPDL version 2022 R2 or later.
+To use the Krylov method in PyMAPDL, Ansys MAPDL version 2022 R2 or later must be used.
 
 .. warning:: This feature does not support Distributed Ansys. 
     However, you can still run MAPDL Math commands without specifying the ``-smp``
