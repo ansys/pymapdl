@@ -1,5 +1,5 @@
 .. #Pyansys
-.. _pyansysmain: https://docs.pyansys.com
+.. _pyansys: https://docs.pyansys.com
 .. _pyansys_support: pyansys.support@ansys.com
 
 .. #Other projects
@@ -18,10 +18,10 @@
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org
 .. _jupyter: https://jupyter.org/
-.. _grpcmain: https://grpc.io/
+.. _grpc: https://grpc.io/
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib docs: https://matplotlib.org/stable/contents.html
-.. _matplotlibmain: https://matplotlib.org
+.. _matplotlib: https://matplotlib.org
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
 .. _scipy: https://docs.scipy.org/doc/scipy/reference/
@@ -29,7 +29,7 @@
 
 
 .. #Ansys
-.. _ansysmain: https://www.ansys.com/
+.. _ansys: https://www.ansys.com/
 .. _ansys_student_version: https://www.ansys.com/academic/students
 .. _ansys_innovation_space: https://courses.ansys.com/
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
@@ -63,7 +63,7 @@
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
 
 .. #PyMAPDL related
-.. _pymapdl_main: pymapdl_docs_
+.. _pymapdl: pymapdl_docs_
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/pyansys/pymapdl/releases
 .. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/troubleshoot/troubleshoot.html?#ubuntu
@@ -77,11 +77,11 @@
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
-.. _condamain: https://conda.io
+.. _conda: https://conda.io
 
 .. #Julia
-.. _julia_main: https://julialang.org/
+.. _julia: https://julialang.org/
 .. _julia_windows: https://julialang.org/downloads/platform/#windows
 .. _julia_linux_and_freebsd: https://julialang.org/downloads/platform/#linux_and_freebsd
 .. _julia_macos: https://julialang.org/downloads/platform/#macos
-.. _pycallmain: https://github.com/JuliaPy/PyCall.jl
+.. _pycall: https://github.com/JuliaPy/PyCall.jl

@@ -67,7 +67,7 @@ use packages such as ``numpy``, ``scipy``, ``pytorch``,
 ``tensorflow``, etc.  PyMAPDL ties this in with MAPDL, that allows you
 to have a fully parametric workflow that leverages these machine
 learning tools or allows for advanced plotting with `Pyvista <pyvista_docs_>`_ or
-`matplotlib <matplotlibmain_>`_.
+`matplotlib <matplotlib_>`_.
 
 
 

@@ -6,7 +6,7 @@ version of Ansys installed dictates the interface and features
 available to you.
 
 For more information on getting a licensed copy of Ansys, visit
-`Ansys <ansysmain_>`_ .
+`Ansys <ansys_>`_ .
 
 You can also try the Student Version of Ansys products in
 `Ansys Student Versions <ansys_student_version_>`_.

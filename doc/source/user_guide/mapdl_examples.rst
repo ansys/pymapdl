@@ -4,7 +4,7 @@ These examples demonstrate how to convert an existing
 ANSYS APDL script to a Python PyMAPDL script. You could also simply
 use the built-in :func:`convert_script() 
 <ansys.mapdl.core.convert_script>` function within 
-`ansys-mapdl-core <pymapdl_main_>`_ to convert an existing
+`ansys-mapdl-core <pymapdl_>`_ to convert an existing
 input file.
 
 .. code:: python

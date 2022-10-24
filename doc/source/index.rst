@@ -17,7 +17,7 @@ PyMAPDL documentation |version|
 
 Introduction and purpose
 ------------------------
-PyMAPDL is part of the larger `PyAnsys <pyansysmain_>`_
+PyMAPDL is part of the larger `PyAnsys <pyansys_>`_
 effort to facilitate the use of Ansys technologies directly from
 Python. Its primary package, ``ansys-mapdl-core``, provides:
 
@@ -46,7 +46,7 @@ application. It is now open source: Enjoy it! Contributions are welcome.
 
 Background
 ----------
-PyMAPDL, based on `gRPC <grpcmain_>`_, represents an
+PyMAPDL, based on `gRPC <grpc_>`_, represents an
 improvement over its predecessor based on CORBA. These technologies
 allow the MAPDL solver to function as a server, ready to respond to
 connecting clients.

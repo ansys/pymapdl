@@ -97,7 +97,7 @@ native tools, pass ``vtk=False`` when running plotting commands such
 as :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>`,
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>`, etc..  Plots will
 be generated within MAPDL and then shown using 
-`matploblib <matplotlibmain_>`_.
+`matploblib <matplotlib_>`_.
 
 
 Start PyMAPDL
@@ -143,7 +143,7 @@ Each of these will create a matplotlib figure and pause execution
     :width: 400pt
 
     Area Plot from MAPDL displayed using 
-    `matplotlib <matplotlibmain_>`_
+    `matplotlib <matplotlib_>`_
 
 
 For more details on the plotting functions, see :ref:`ref_plotting_api`.
