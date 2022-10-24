@@ -10,12 +10,10 @@ How should I report issues?
 ---------------------------
 
 Issues with pyansys such as bugs, feature requests, and documentation
-errors can be reported on the `GitHub page
-<https://github.com/pyansys/PyMAPDL/issues>`_ as new issues.
+errors can be reported on the `pymapdl_issues`_ as new issues.
 
 If you wish to ask more open-ended questions or wish to pick the
-brains of the community you can visit the `Discussions section
-<https://github.com/pyansys/PyMAPDL/discussions>`_ of our GitHub
+brains of the community you can visit the `pymapdl_discussions`_ of our GitHub
 repository.
 
 
@@ -68,8 +66,8 @@ unable call multiple products at either a granular or high level or
 use packages such as ``numpy``, ``scipy``, ``pytorch``,
 ``tensorflow``, etc.  PyMAPDL ties this in with MAPDL, that allows you
 to have a fully parametric workflow that leverages these machine
-learning tools or allows for advanced plotting with ``pyvista`` or
-``matplotlib``.
+learning tools or allows for advanced plotting with `Pyvista <pyvista_docs_>`_ or
+`matplotlib <matplotlib_main_>`_.
 
 
 

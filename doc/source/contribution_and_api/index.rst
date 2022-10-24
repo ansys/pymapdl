@@ -5,10 +5,9 @@ Contributing and API
 ====================
 
 Overall guidance on contributing to a PyAnsys library appears in the
-`Contributing <https://dev.docs.pyansys.com/overview/contributing.html>`_ topic
+`Contributing <dev_guide_contributing_>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
-with it and all `Guidelines and Best Practices
-<https://dev.docs.pyansys.com/guidelines/index.html>`_ before attempting to
+with it and all `Coding style <dev_guide_coding_style_>`_ before attempting to
 contribute to PyMAPDL.
  
 The following contribution information is specific to PyMAPDL.
@@ -30,7 +29,7 @@ Run this code to clone and install the latest version of PyMAPDL in development 
 Posting Issues
 ==============
 
-Use the `PyMAPDL Issues <https://github.com/pyansys/pymapdl/issues>`_
+Use the `PyMAPDL Issues <pymapdl_issues_>`_
 page to submit questions, report bugs, and request new features. When possible, we
 recommend that you use these issue templates:
 
@@ -39,16 +38,17 @@ recommend that you use these issue templates:
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email `pyansys.support@ansys.com <pyansys.support@ansys.com>`_.
+To reach the project support team, email `pyansys.support@ansys.com <pyansys_support_>`_.
 
 Viewing PyMAPDL Documentation
 =============================
 
 Documentation for the latest stable release of PyMAPDL is hosted at
-`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.
+`PyMAPDL Documentation <pymapdl_docs_>`_.
 
 Documentation for the latest development version, which tracks the
-``main`` branch, is hosted at  `Development PyMAPDL Documentation <https://dev.mapdldocs.pyansys.com/>`_.
+``main`` branch, is hosted at 
+`Development PyMAPDL Documentation <pymapdl_dev_docs_>`_.
 This version is automatically kept up to date via GitHub actions.
 
 Testing MAPDL
@@ -81,8 +81,8 @@ Code Style
 ==========
 
 PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
-<https://dev.docs.pyansys.com>`_ and implements style checking using
-`pre-commit <https://pre-commit.com/>`_.
+<dev_guide_pyansys_>`_ and implements style checking using
+`pre-commit <precommit_>`_.
 
 To ensure your code meets minimum code styling standards, run::
 
@@ -126,6 +126,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    geometry
    helper
    inline
+   krylov
    logging
    mapdl
    math
@@ -136,4 +137,3 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
-   

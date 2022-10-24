@@ -2079,6 +2079,24 @@ class MapdlGrpc(_MapdlCore):
         return MapdlMath(self)
 
     @property
+    def krylov(self):
+        """APDL krylov interface.
+
+        For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        Returns
+        -------
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        """
+        if self._kylov is None:
+            from ansys.mapdl.core.krylov import KrylovSolver
+
+            self._kylov = KrylovSolver(self)
+
+        return self._kylov
+
+    @property
     def db(self):
         """
         MAPDL database interface.

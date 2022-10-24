@@ -10,6 +10,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
@@ -1599,6 +1600,20 @@ def test_use_uploading(mapdl, cleared, tmpdir):
     # Raise an error
     with pytest.raises(FileNotFoundError):
         mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_set_list(mapdl, cube_solve):
+    mapdl.post1()
+    obj = mapdl.set("list")
+
+    assert isinstance(obj, CommandListingOutput)
+
+    assert obj.to_array() is not None
+    assert obj.to_array().size != 0
+
+    obj = mapdl.set("list", 1)
+
+    assert not isinstance(obj, CommandListingOutput)
 
 
 def test_mode(mapdl):

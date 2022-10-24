@@ -67,6 +67,26 @@ ARGS_INQ_FUNC = {
     "kcmplx": 1,
 }
 
+
+set_list_0 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
+
+   SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
+     1 0.20000             1         1         3
+     2 0.40000             1         2         5
+     3 0.70000             1         3         7
+     4  1.0000             1         4         9"""
+
+set_list_1 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
+
+   SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
+     1 0.10000E-02         1        10        10
+     2 0.20000E-02         2         1        11
+     3 0.30000E-02         2         2        12
+     4 0.40000E-02         2         3        13
+     5 0.50000E-02         2         4        14
+     6 0.60000E-02         2         5        15
+ """
+
 PRNSOL_OUT = """PRINT F    REACTION SOLUTIONS PER NODE
        1   0.1287512532E+008  0.4266737217E+007
        2  -0.1512012179E+007  0.2247558576E+007
@@ -657,6 +677,23 @@ def test_string_with_literal():
     assert output.__repr__() == output
     assert output.__repr__() == base_
     assert len(output.split()) == 2
+
+
+@pytest.mark.parametrize("output,last_element", [(set_list_0, 9), (set_list_1, 15)])
+def test_magicwords(output, last_element):
+    magicwords = ["SET"]
+    obj = CommandListingOutput(
+        output,
+        magicwords=magicwords,
+        columns_names=["SET", "TIME/FREQ", "LOAD STEP", "SUBSTEP", "CUMULATIVE"],
+    )
+
+    assert obj.to_list() is not None
+    assert obj.to_array() is not None
+    assert obj.to_dataframe() is not None
+
+    arr = obj.to_array()
+    assert arr[-1, -1] == last_element
 
 
 def test_nlist_to_array(mapdl, beam_solve):
