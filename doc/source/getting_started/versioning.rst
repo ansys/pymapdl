@@ -24,8 +24,8 @@ text to and from the MAPDL service, relying on file IO for all other
 operations. While not as performant as gRPC, this interface still
 allows you to control a local instance of MAPDL. These versions of
 MAPDL support specific versions of Windows and Linux. For more information
-on the supported platforms, see `Ansys Platform Support
-<https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support>`_.
+on the supported platforms, see 
+`Ansys Platform Support <ansys_platform_support_>`_.
 
 .. Note::
 

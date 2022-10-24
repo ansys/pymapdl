@@ -10,11 +10,11 @@ Resources
 =========
 
 - You can also try the Student Version of Ansys products in
-  `Ansys Student Versions <https://www.ansys.com/academic/students>`_.
+  `Ansys Student Versions <ansys_student_version_>`_.
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download `PyMAPDL cheatsheet <../_static/Cheat_Sheet_PyMAPDL.pdf>`_.
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`_.
 
 
 Courses
@@ -26,7 +26,7 @@ Ansys has prepared high quality courses which will guide you through your learni
 Intro to Python
 ---------------
 
-The `Intro to Python <https://courses.ansys.com/index.php/courses/intro-to-python/>`_ course teaches you
+The `Intro to Python <course_intro_python_>`_ course teaches you
 the basis of the Python programming language.
 
 
@@ -52,7 +52,7 @@ Course content
 Getting Started with PyMAPDL
 ----------------------------
 
-The `Getting Started with PyMAPDL <https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/>`_ course teaches
+The `Getting Started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
 you about PyMAPDL, the Pythonic way to access Ansys MAPDL. 
 
 Course content
@@ -70,7 +70,7 @@ Course content
 Intro to Ansys Mechanical APDL Scripting
 ---------------_------------------------
 
-The `Intro to Ansys Mechanical APDL Scripting <https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/>`_
+The `Intro to Ansys Mechanical APDL Scripting <course_intro_apdl_>`_
 course teaches you how APDL, the Mechanical solver syntax language, works.
 
 Course content
@@ -90,7 +90,7 @@ Course content
 Recommended links
 =================
 
-* PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/>`_
-* `Ansys Innovation Courses <https://courses.ansys.com/>`_
+* PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
+* `Ansys Innovation Courses <ansys_innovation_space_>`_
 
-Feel free to email any educational or learning resources to `PyAnsys Support <pyansys.support@ansys.com>`_.
+Feel free to email any educational or learning resources to `PyAnsys Support <pyansys_support_>`_.

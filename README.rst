@@ -53,8 +53,8 @@ or in batch mode on Windows, Linux, and even Mac OS.
 
 Documentation and issues
 ------------------------
-For more information, see the `Documentation <https://mapdldocs.pyansys.com>`_ page.
-For some examples, see the `Examples gallery <https://mapdldocs.pyansys.com/examples/index.html>`_.
+For more information, see the `Documentation <https://mapdl.docs.pyansys.com>`_ page.
+For some examples, see the `Examples gallery <https://mapdl.docs.pyansys.com/examples/index.html>`_.
 
 Feel free to post issues and other questions at `PyMAPDL Issues
 <https://github.com/pyansys/pymapdl/issues>`_.  This is the best place
@@ -235,7 +235,7 @@ properties, or view mesh statistics.  Additionally, there's the
 you can use to send or receive arrays between MAPDL and Python.
 
 For more information, see the full documentation at `PyMAPDL Documentation
-<https://mapdldocs.pyansys.com>`_.
+<https://mapdl.docs.pyansys.com>`_.
 
 
 Run on Docker

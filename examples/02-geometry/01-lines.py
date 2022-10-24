@@ -231,7 +231,7 @@ lnum
 # Line Geometry
 # ~~~~~~~~~~~~~
 # Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
-# saved or plotted.  For more details, visit https://docs.pyvista.com
+# saved or plotted.  For more details, visit https://docs.pyvista.org/
 lines = mapdl.geometry.lines
 lines
 
