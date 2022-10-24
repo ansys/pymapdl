@@ -54,7 +54,7 @@ deploy:
 	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo "Deploying..."
 	touch build/html/.nojekyll
-	echo "mapdldocs.pyansys.com" >> build/html/CNAME
+	echo "mapdl.docs.pyansys.com" >> build/html/CNAME
 	cd build/html && git init
 	cd build/html && git add .
 	cd build/html && git checkout -b gh-pages
