@@ -657,3 +657,16 @@ def test_string_with_literal():
     assert output.__repr__() == output
     assert output.__repr__() == base_
     assert len(output.split()) == 2
+
+
+def test_nlist_to_array(mapdl, beam_solve):
+    # This kinternal include the internal points, so it matches the
+    # number of nodes with midside nodes.
+    nlist = mapdl.nlist(kinternal="internal")
+    assert isinstance(nlist.to_list(), list)
+    assert isinstance(nlist.to_array(), np.ndarray)
+
+    # above asserts should be removed once fixed the midside issue.
+    assert len(nlist.to_list()) == len(mapdl.mesh.nodes)
+    assert len(nlist.to_array()) == len(mapdl.mesh.nodes)
+    assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)

@@ -1571,3 +1571,45 @@ def test_get_fallback(mapdl, cleared):
 
     with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
         mapdl.get_value("elem", 0, "num", "maxd")
+
+
+def test_use_uploading(mapdl, cleared, tmpdir):
+    mymacrofile_name = "mymacrofile.mac"
+    mymacrofile = tmpdir.join(mymacrofile_name)
+    with open(mymacrofile, "w") as fid:
+        fid.write("/prep7\n/eof")
+
+    assert mymacrofile_name not in mapdl.list_files()
+    out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert mymacrofile_name in mapdl.list_files()
+
+    os.remove(mymacrofile)
+    out = mapdl.use(mymacrofile)
+
+    # Raises an error.
+    with pytest.raises(RuntimeError):
+        mapdl.use("myinexistentmacro.mac")
+
+    # Raise an error
+    with pytest.raises(FileNotFoundError):
+        mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_mode(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "corba"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "console"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert mapdl.is_console
+
+    mapdl._mode = "grpc"  # Going back to default

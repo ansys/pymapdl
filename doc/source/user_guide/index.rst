@@ -1,10 +1,9 @@
 .. _ref_user_guide:
 
 ==========
-User Guide
+User guide
 ==========
-This guide provides a general overview of the basics and usage of the
-PyMAPDL library.
+This section provides a general overview of PyMAPDL and how you use it.
 
 
 ..
@@ -30,19 +29,19 @@ PyMAPDL library.
    upf
 
 
-PyMAPDL Basic Overview
-======================
+PyMAPDL overview
+================
 The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
-within the ``ansys-mapdl-core`` library creates an instance of of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in the background and sends
-commands to that service.  Errors and warnings are processed
-Pythonically letting the user develop a script real-time without
-worrying about if it will function correctly when deployed in batch
+within the ``ansys-mapdl-core`` library creates an instance of the
+:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
+commands to that service. Errors and warnings are processed
+Pythonically, letting you develop a script in real time, without
+worrying about it functioning correctly when deployed in batch
 mode.
 
-MAPDL can be started from python in gRPC mode using
-:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  This starts
-MAPDL in a temporary directory by default.  You can change this to
+MAPDL can be started from Python in gRPC mode using the
+:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This starts
+MAPDL in a temporary directory by default. You can change this to
 your current directory with:
 
 .. code:: python
@@ -53,9 +52,9 @@ your current directory with:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active and you can send commands to it as a genuine a
-Python class.  For example, if we wanted to create a surface using
-keypoints we could run:
+MAPDL is now active, and you can send commands to it as a genuine a
+Python class.  For example, if you wanted to create a surface using
+keypoints, you could run:
 
 .. code:: python
 
@@ -70,8 +69,8 @@ keypoints we could run:
     mapdl.run('L, 4, 1')
     mapdl.run('AL, 1, 2, 3, 4')
 
-MAPDL interactively returns the result of each command and it is
-stored to the logging module.  Errors are caught immediately.  For
+MAPDL interactively returns the result of each command, which is
+stored to the logging module. Errors are caught immediately. For
 example, if you input an invalid command:
 
 .. code:: python
@@ -89,37 +88,37 @@ example, if you input an invalid command:
    Keypoint 1 is referenced by only one line.  Improperly connected line   
    set for AL command.                                                     
 
-This ``MapdlRuntimeError`` was caught immediately, and this means that
-you can write your MAPDL scripts in python, run them interactively and
-then as a batch without worrying if the script will run correctly if
+This ``MapdlRuntimeError`` was caught immediately. This means that
+you can write your MAPDL scripts in Python, run them interactively, and
+then run them as a batch without worrying if the script would run correctly if
 you had instead outputted it to a script file.
 
 The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
-than just sending text to MAPDL and includes higher level wrapping
-allowing for better scripting and interaction with MAPDL.  See the
-:ref:`ref_examples` for an overview of the various advanced
-methods to visualize, script, and interact with MAPDL.
+than just sending text to MAPDL. It includes higher-level wrapping,
+allowing for better scripting and interaction with MAPDL. For an overview of the
+various advanced methods to visualize, script, and interact with MAPDL, see
+:ref:`ref_examples`.
 
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from an instance of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a pythonic manner.  This is
-to simplify calling ANSYS, especially when inputs are variables within
-Python.  For example, the following two commands are equivalent:
+:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
+to simplify calling Anys, especially when inputs are variables within
+Python. For example, the following two commands are equivalent:
 
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
     mapdl.run('K, 1, 0, 0, 0')
 
-This approach has some obvious advantages, chiefly that it's a easier
-to script as ``ansys-mapdl-core`` takes care of the string formatting for you.
-For example, inputting points from a numpy array:
+This approach has some obvious advantages. Chiefly, it's easier
+to script because ``ansys-mapdl-core`` takes care of the string formatting for you.
+For example, you can input points from a numpy array with:
 
 .. code:: python
 
-   # make 10 random keypoints in ANSYS
+   # make 10 random keypoints in Ansys
    points = np.random.random((10, 3))
    for i, (x, y, z) in enumerate(points):
        mapdl.k(i + 1, x, y, z)
@@ -143,7 +142,7 @@ Additionally, exceptions are caught and handled within Python.
 
 
 For longer scripts, instead of sending commands to MAPDL as in the
-area creation example, we can instead run:
+area creation example, you can instead run:
 
 .. code:: python
 
@@ -165,7 +164,7 @@ area creation example, we can instead run:
 
 This approach has some obvious advantages, chiefly that it's a bit
 easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
-takes care of the string formatting for you.  For example, inputting
+takes care of the string formatting for you. For example, inputting
 points from a numpy array:
 
 .. code:: python
@@ -178,7 +177,7 @@ points from a numpy array:
        mapdl.k(i + 1, x, y, z)
 
 Additionally, each function with the MAPDL class has help associated
-within it.  For example:
+with it. For example:
 
 .. code:: python
 
@@ -196,12 +195,12 @@ within it.  For example:
         Parameters
         ----------
         npt
-            Reference number for keypoint.  If zero, the lowest
+            Reference number for keypoint. If zero, the lowest
             available number is assigned [NUMSTR].
 
         x, y, z
             Keypoint location in the active coordinate system (may be
-            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
+            R, θ, Z or R, θ, Φ). If X = P, graphical picking is
             enabled and all other fields (including NPT) are ignored
             (valid only in the GUI).
 
@@ -214,11 +213,11 @@ within it.  For example:
         Notes
         -----
         Defines a keypoint in the active coordinate system [CSYS] for
-        line, area, and volume descriptions.  A previously defined
-        keypoint of the same number will be redefined.  Keypoints may
+        line, area, and volume descriptions. A previously defined
+        keypoint of the same number is then redefined. A keypoint may
         be redefined only if it is not yet attached to a line or is
-        not yet meshed.  Solid modeling in a toroidal system is not
+        not yet meshed. Solid modeling in a toroidal system is not
         recommended.
 
 
-Visit :ref:`ref_pymapdl_stability` for stability considerations.
+For stability considerations, see :ref:`ref_pymapdl_stability`.
