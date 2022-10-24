@@ -68,12 +68,12 @@
 .. _pymapdl_releases: https://github.com/pyansys/pymapdl/releases
 .. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/troubleshoot/troubleshoot.html?#ubuntu
 .. _pymapdl_issues: https://github.com/pyansys/pymapdl/issues
-.. _pymapdl_repo: https://https://github.com/pyansys/pymapdl
+.. _pymapdl_repo: https://github.com/pyansys/pymapdl
 .. _pymapdl_docs: https://mapdl.docs.pyansys.com/
 .. _pymapdl_dev_docs: https://dev.mapdl.docs.pyansys.com/
 .. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
-.. _pymapdl_cheatsheet_: ../_static/Cheat_Sheet_PyMAPDL.pdf
-.. _licensing_guide_pdf: ANSYS_Inc._Licensing_Guide.pdf
+.. _pymapdl_cheatsheet: ./_assets/Cheat_Sheet_PyMAPDL.pdf
+.. _licensing_guide_pdf: ./_assets/lic_guide.pdf
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
@@ -81,7 +81,7 @@
 
 .. #Julia
 .. _julia_main: https://julialang.org/
-.. _julia_windows: https://julialang.org/downloads/platform/.. #indows
-.. _julia_linux_and_freebsd: https://julialang.org/downloads/platform/.. #inux_and_freebsd
-.. _julia_macos: https://julialang.org/downloads/platform/.. #acos
+.. _julia_windows: https://julialang.org/downloads/platform/#windows
+.. _julia_linux_and_freebsd: https://julialang.org/downloads/platform/#linux_and_freebsd
+.. _julia_macos: https://julialang.org/downloads/platform/#macos
 .. _pycallmain: https://github.com/JuliaPy/PyCall.jl

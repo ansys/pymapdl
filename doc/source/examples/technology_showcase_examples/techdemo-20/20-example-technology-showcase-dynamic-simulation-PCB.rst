@@ -32,7 +32,7 @@ the Mechanical APDL Technology Showcase Manual.
 Additional Packages Used
 ------------------------
 
-* `Matplotlib <matplotlib_>`_ is used for plotting purposes.
+* `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
 
 .. GENERATED FROM PYTHON SOURCE LINES 20-33
 
