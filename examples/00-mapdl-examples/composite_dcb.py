@@ -48,9 +48,9 @@ import os
 
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-import matplotlib.pyplot as plt
 
 from ansys.mapdl import core as pymapdl
 
@@ -68,7 +68,7 @@ width = 25.0
 height = 1.7
 d = 10.0
 # a small quantity defined for avoiding rounding-off error when picking geometrical entities
-eps = 1e-1 
+eps = 1e-1
 
 ###############################################################################
 # Set up the model
@@ -114,7 +114,7 @@ mapdl.tbdata(1, 50.0, 0.5, 50, 0.5, 0.01, 2)
 
 # Generate the two composite plates
 vnum0 = mapdl.block(0.0, length + pre_crack, 0.0, width, 0.0, height)
-vnum1 = mapdl.block(0.0, length + pre_crack, 0.0, width, height, 2*height)
+vnum1 = mapdl.block(0.0, length + pre_crack, 0.0, width, height, 2 * height)
 
 # Assign material properties and element type
 mapdl.mat(1)
@@ -208,7 +208,7 @@ mapdl.esurf()
 # Apply the two displacement conditions
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
-mapdl.nsel(type_="r", item="loc", comp="z", vmin=2*height, vmax=2*height)
+mapdl.nsel(type_="r", item="loc", comp="z", vmin=2 * height, vmax=2 * height)
 mapdl.d(node="all", lab="uz", value=d)
 mapdl.cm("top_nod", "node")
 
@@ -220,7 +220,9 @@ mapdl.cm("bot_nod", "node")
 
 # Apply the fix condition
 mapdl.allsel()
-mapdl.nsel(type_="s", item="loc", comp="x", vmin=length + pre_crack, vmax=length + pre_crack)
+mapdl.nsel(
+    type_="s", item="loc", comp="x", vmin=length + pre_crack, vmax=length + pre_crack
+)
 mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
@@ -312,10 +314,9 @@ mesh_scoping_cohesive = dpf.mesh_scoping_factory.named_selection_scoping(
     "CM_1", model=model
 )
 
-result_mesh = dpf.operators.mesh.from_scoping(scoping=mesh_scoping_cohesive,
-                                              inclusive=0,
-                                              mesh=meshed_region
-                                              ).eval()
+result_mesh = dpf.operators.mesh.from_scoping(
+    scoping=mesh_scoping_cohesive, inclusive=0, mesh=meshed_region
+).eval()
 
 # Get the coordinates field for each mesh
 mesh_field = meshed_region.field_of_properties(dpf.common.nodal_properties.coordinates)
@@ -387,22 +388,28 @@ for i in range(1, 100):
 plotter.show()
 
 # Plot the reaction force at the bottom nodes
-mesh_scoping = model.metadata.named_selection('BOT_NOD')
+mesh_scoping = model.metadata.named_selection("BOT_NOD")
 f_tot = []
 d_tot = []
-for i in range (0,100):
-    force_eval = model.results.element_nodal_forces(time_scoping=i, mesh_scoping=mesh_scoping).eval()
+for i in range(0, 100):
+    force_eval = model.results.element_nodal_forces(
+        time_scoping=i, mesh_scoping=mesh_scoping
+    ).eval()
     force = force_eval[0].data
-    f_tot += [np.sum(force[:,2])]
-    d = abs(model.results.displacement(time_scoping=i, mesh_scoping=mesh_scoping).eval()[0].data[0])
+    f_tot += [np.sum(force[:, 2])]
+    d = abs(
+        model.results.displacement(time_scoping=i, mesh_scoping=mesh_scoping)
+        .eval()[0]
+        .data[0]
+    )
     d_tot += [d[2]]
 
 d_tot[0] = 0
 f_tot[0] = 0
 
-fig, ax = plt.subplots()  
+fig, ax = plt.subplots()
 
-plt.plot(d_tot, f_tot,'k')
+plt.plot(d_tot, f_tot, "k")
 plt.ylabel("Force [N]")
 plt.xlabel("Displacement [mm]")
 plt.show()
