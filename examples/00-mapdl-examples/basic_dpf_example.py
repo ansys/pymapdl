@@ -73,7 +73,7 @@ server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
 
 
 ###############################################################################
-# Then you can create the DPF model.
+# Then you can create the :class:`DPF Model <ansys.dpf.core.model.Model>`.
 #
 
 model = dpf.Model(server_file_path)
@@ -83,26 +83,28 @@ print(model)
 # Model Metadata
 # ~~~~~~~~~~~~~~
 # Specific metadata can be extracted from the model by referencing the
-# model's ``metadata`` property.  For example, to print only the
-# ``result_info``:
+# model's :attr:`metadata <ansys.dpf.core.model.Model.metadata>`
+# property.  For example, to print only the
+# :attr:`result_info <ansys.dpf.core.model.Metadata.result_info>`:
 
 metadata = model.metadata
 print(metadata.result_info)
 
 ###############################################################################
-# To print the mesh region:
+# To print the :class:`mesh region<ansys.dpf.core.meshed_region.MeshedRegion>`:
 
 print(metadata.meshed_region)
 
 ###############################################################################
-# To print the time or frequency of the results:
+# To print the time or frequency of the results use
+# :class:`time_freq_support <ansys.dpf.core.time_freq_support.TimeFreqSupport>`:
 
 print(metadata.time_freq_support)
 
 ###############################################################################
 # Extracting Displacement Results
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# All results of the model can be accessed through the :class:`ansys.dpf.core.results.Results`
+# All results of the model can be accessed through the :class:`Results <ansys.dpf.core.results.Results>`
 # property, which returns the :class:`ansys.dpf.core.results.Results`
 # class. This class contains the DPF result operators available to a
 # specific result file, which are listed when printing the object with
@@ -110,7 +112,7 @@ print(metadata.time_freq_support)
 #
 # Here, the :class:`displacement <ansys.dpf.core.operators.result.displacement.displacement>`
 # operator is connected with
-# :class:`ansys.dpf.core.data_sources.DataSources`, which
+# :class:`DataSources <ansys.dpf.core.data_sources.DataSources>`, which
 # takes place automatically when running
 # :class:`results.displacement() <ansys.dpf.core.operators.result.displacement.displacement>`.
 # By default, the :class:`displacement <ansys.dpf.core.operators.result.displacement.displacement>`
