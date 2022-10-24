@@ -27,6 +27,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    pool
    xpl
    upf
+   krylov
 
 
 PyMAPDL overview

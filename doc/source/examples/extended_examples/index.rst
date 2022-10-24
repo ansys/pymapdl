@@ -17,8 +17,9 @@ this project.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`extended_example01`  | Demonstrates the interoperability between PyMAPDL and the `gmsh <gmsh_>`_ meshing library.              |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-| :ref:`python_upf_examples` | Demonstrates the interoperability between ``MAPDL`` user programmable functions and Python.             |
+| :ref:`python_upf_examples` | Demonstrates the interoperability between user-programmable functions in MAPDL and Python.              |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-
+| :ref:`krylov_example`      | Demonstrates the usage of the Krylov method for solving a customized harmonic analysis.                 |
++----------------------------+---------------------------------------------------------------------------------------------------------+
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html

@@ -55,6 +55,7 @@ from ansys.mapdl.core.post import PostProcessing
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
+    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
 # test for png file
@@ -192,6 +193,7 @@ class _MapdlCore(Commands):
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
+        self._kylov = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -3796,8 +3798,8 @@ class _MapdlCore(Commands):
             )
             # If MAPDL cannot find named macro file, it will throw a runtime error.
 
-        # Updating arg since the path is not needed anymore.
-        args = (base_name, args[1:])
+        # Update arg because the path is no longer needed
+        args = (base_name, *args[1:])
         return super().use(*args, **kwargs)
 
     @wraps(Commands.set)
