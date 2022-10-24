@@ -322,6 +322,7 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
+        self._mode = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False

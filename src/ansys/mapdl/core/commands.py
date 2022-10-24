@@ -53,7 +53,7 @@ GROUP_DATA_START = ["NODE", "ELEM"]
 # Some of them are not documented (already deprecated?)
 # So they are not in the Mapdl class,
 # so they won't be wrapped.
-CMD_LISTING = [
+CMD_RESULT_LISTING = [
     "NLIN",  # not documented
     "PRCI",
     "PRDI",  # Not documented.
@@ -78,11 +78,23 @@ CMD_LISTING = [
     "PRST",  # Not documented.
     "PRVE",
     "PRXF",  # Not documented.
-    "STAT",
     "SWLI",
 ]
 
 CMD_BC_LISTING = ["FLIS", "DLIS"]
+
+CMD_ENTITY_LISTING = [
+    "NLIS",
+    # "ELIS", # To be implemented later
+    # "KLIS",
+    # "LLIS",
+    # "ALIS",
+    # "VLIS",
+]
+
+CMD_LISTING = []
+CMD_LISTING.extend(CMD_ENTITY_LISTING)
+CMD_LISTING.extend(CMD_RESULT_LISTING)
 
 # Adding empty lines to match current format.
 docstring_injection = """

@@ -36,6 +36,7 @@ concurrency:
 permissions:
   packages: read
 
+
 jobs:
 
   stylecheck:
@@ -208,6 +209,11 @@ jobs:
         run: |
           pip install -r requirements/requirements_docs.txt
 
+      - name: DPF Server Activation
+        run: |
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
       - name: Build Documentation
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
@@ -354,7 +360,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |

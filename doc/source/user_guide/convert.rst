@@ -1,19 +1,19 @@
-Translating Scripts
+Translate scripts
 ===================
 The `ansys-mapdl-core <https://pypi.org/project/ansys-mapdl-core/>`_
 library contains a few basic functions to translate existing MAPDL
-scripts into PyMAPDL scripts.  Ideally, all math and variable setting
-would take place within Python as much as possible as APDL commands
+scripts into PyMAPDL scripts. Ideally, all math and variable setting
+would take place within Python because APDL commands
 are less transparent and more difficult to debug.
 
 Caveats
 ~~~~~~~
 These examples only show an automatic translation of a verification
-file and not optimized code.  Should it be necessary to pull
-parameters or arrays from ansys, use :func:`Mapdl.get_value()
-<ansys.mapdl.core.Mapdl.get_value>`, which is quite similar to the
+file and not optimized code. Should it be necessary to pull
+parameters or arrays from ansys, use the :func:`Mapdl.get_value()
+<ansys.mapdl.core.Mapdl.get_value>` function, which is quite similar to the
 MAPDL :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` 
-command as in:
+command shown here:
 
 .. code:: python
 
@@ -21,7 +21,8 @@ command as in:
    4.532094298033
 
 Alternatively, if a parameter is already defined, you can access it
-using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` with:
+using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute
+with:
 
 .. code:: python
 
@@ -37,9 +38,10 @@ using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` with:
     4.532094298033
 
 
-Script Translation
+Script translation
 ~~~~~~~~~~~~~~~~~~
-Existing ANSYS scripts can be translated using :func:`convert_script() <ansys.mapdl.core.convert_script>`
+Existing Ansys scripts can be translated using the :func:`convert_script() <ansys.mapdl.core.convert_script>`
+function:
 
 .. code:: python
 
@@ -48,8 +50,8 @@ Existing ANSYS scripts can be translated using :func:`convert_script() <ansys.ma
     pyscript = 'pyscript.py'
     pymapdl.convert_script(inputfile, pyscript)
 
-Or additionally, you can convert code in form of strings for later processing
-using :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` :
+Or, you can convert code in form of strings for later processing using the
+:func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` function:
 
 .. code:: python
 
@@ -63,31 +65,31 @@ using :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` :
     pycode = convert_apdl_block(apdl_string) # apdl_string can be also a list of strings.
 
 
-The script conversion functions allows some interesting arguments which can be seen in
+The script conversion functions allow some interesting arguments that can be seen in
 their respective function documentation, :func:`convert_script() <ansys.mapdl.core.convert_script>`
 and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`.
-Especially interesting are they keyword arguments ``add_imports``, ``comment_solve`` or
+Especially interesting are the keyword arguments ``add_imports``, ``comment_solve``, and
 ``print_com``.
 
 Of particular note in the following examples is how most of the
-commands can be called as a method to the ansys object rather than
-sending a string as a command.  Additionally, take note that some
+commands can be called as a method to the Ansys object rather than
+sending a string as a command. Additionally, take note that some
 commands require the :attr:`Mapdl.non_interactive
 <ansys.mapdl.core.Mapdl.non_interactive>` context manager since some
 commands require and may break the server connection for some
-interfaces (e.g. CORBA) or are invalid (as in gRPC).
+interfaces (such as CORBA) or are invalid (as in gRPC).
 
 Also note that APDL macros that use ``*CREATE`` have been replaced
-with python functions.  This will make the code easier to debug
+with Python functions. This makes the code easier to debug
 should it be necessary to insert a ``breakpoint()`` in the script.
 
 
-Example: VM1 - Statically Indeterminate Reaction Force Analysis
+Example: VM1 - statically indeterminate reaction force analysis
 ---------------------------------------------------------------
-Ansys MAPDL contains over 200 verification files used for ANSYS
-validation and demonstration.  These validation files are used here to
+Ansys MAPDL contains over 200 verification files used for Ansys
+validation and demonstration. These validation files are used here to
 demo the use of the PyMAPDL file translator :func:`convert_script()
-<ansys.mapdl.core.convert_script>` and are available in:
+<ansys.mapdl.core.convert_script>` function and are available in:
 
 .. code:: python
 
@@ -96,6 +98,7 @@ demo the use of the PyMAPDL file translator :func:`convert_script()
     '.../ansys/mapdl/core/examples/verif/vm1.dat'
 
 This example translates the verification example ``"vm1.dat"``.
+
 First, the MAPDL code:
 
 .. code::
@@ -152,7 +155,7 @@ First, the MAPDL code:
     FINISH
     *LIST,vm1,vrt
 
-This verification file was translated using:
+Translate the verification file with:
 
 .. code:: python
 
@@ -160,7 +163,7 @@ This verification file was translated using:
     >>> from ansys.mapdl.core import examples
     >>> pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
 
-Translated code:
+Here is the translated code:
 
 .. code:: python
 
@@ -221,7 +224,7 @@ Translated code:
     mapdl.exit()
 
 
-Results from running the converted file:
+Here are the results from running the converted file:
 
 .. code::
 
@@ -246,13 +249,14 @@ You can verify the reaction forces with:
 
 Note that some of the commands with ``/`` are not directly translated
 to functions and are instead run as "classic" commands like
-``mapdl.run('/COM')``.  Also, please note that the ``*VWRITE`` command
-requires a command immediately following it.  This normally locks the
+``mapdl.run('/COM')``. Also, note that the ``*VWRITE`` command
+requires a command immediately following it. This normally locks the
 interface, so it's implemented in the background as an input file
-using :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
+using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+attribute.
 
 
-VM7 - Plastic Compression of a Pipe Assembly
+VM7 - plastic compression of a pipe assembly
 --------------------------------------------
 Here is the input file from VM7:
 

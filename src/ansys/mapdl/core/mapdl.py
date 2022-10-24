@@ -165,6 +165,7 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
+        self._mode = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -235,6 +236,26 @@ class _MapdlCore(Commands):
             raise ValueError(
                 f"The property ``print_com`` only allows booleans, but type {type(value)} was supplied."
             )
+
+    @property
+    def mode(self):
+        """Return the type of instance, namely: grpc, corba or console."""
+        return self._mode
+
+    @property
+    def is_grpc(self):
+        """Return true if using grpc to connect to the MAPDL instance."""
+        return self._mode == "grpc"
+
+    @property
+    def is_corba(self):
+        """Return true if using corba to connect to the MAPDL instance."""
+        return self._mode == "corba"
+
+    @property
+    def is_console(self):
+        """Return true if using console to connect to the MAPDL instance."""
+        return self._mode == "console"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
