@@ -4,8 +4,9 @@
 Basic DPF-Core Usage with PyMAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This example is adapted from `Basic DPF-Core Usage Example <https://dpf.docs.pyansys.com/examples/00-basic/00-basic_example.html>`_
-and it shows how to open a result file and do some
+This example is adapted from
+`Basic DPF-Core Usage Example <https://dpf.docs.pyansys.com/examples/00-basic/00-basic_example.html>`_
+and it shows how to open a result file in `DPF <https://dpf.docs.pyansys.com/>`_ and do some
 basic postprocessing.
 
 If you have Ansys 2021 R1 installed, starting DPF is quite easy
@@ -41,8 +42,10 @@ temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
 ###############################################################################
-# Next, open the generated RST file and print out the ``model`` object.  The
-# ``Model`` class helps to organize access methods for the result by
+# Next, open the generated RST file and print out the
+# :class:`Model <ansys.dpf.core.model.Model>` object.
+# The :class:`Model <ansys.dpf.core.model.Model>` class helps to
+# organize access methods for the result by
 # keeping track of the operators and data sources used by the result
 # file.
 #
@@ -56,11 +59,23 @@ rst_path = mapdl.download_result(temp_directory)
 # Also, note that the first time you create a DPF object, Python
 # automatically attempts to start the server in the background.  If you
 # want to connect to an existing server (either local or remote), use
-# :func:`dpf.connect_to_server`.
+# :func:`dpf.connect_to_server <ansys.dpf.core.server.connect_to_server>`.
+# In this case, DPF will attempt to connect to a local server at the port 50052
+# unless another port is specified.
 
 dpf.connect_to_server()
 
+
+###############################################################################
+# If you are working with a remote server, you might need to upload the ``RST``
+# file before working with it.
 server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+
+
+###############################################################################
+# Then you can create the DPF model.
+#
+
 model = dpf.Model(server_file_path)
 print(model)
 
@@ -87,16 +102,21 @@ print(metadata.time_freq_support)
 ###############################################################################
 # Extracting Displacement Results
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# All results of the model can be accessed through the ``results``
+# All results of the model can be accessed through the :class:`ansys.dpf.core.results.Results`
 # property, which returns the :class:`ansys.dpf.core.results.Results`
 # class. This class contains the DPF result operators available to a
 # specific result file, which are listed when printing the object with
 # ``print(results)``.
 #
-# Here, the ``'U'`` operator is connected with ``data_sources``, which
-# takes place automatically when running ``results.displacement()``.
-# By default, the ``'U'`` operator is connected to the first result set,
+# Here, the :class:`displacement <ansys.dpf.core.operators.result.displacement.displacement>`
+# operator is connected with
+# :class:`ansys.dpf.core.data_sources.DataSources`, which
+# takes place automatically when running
+# :class:`results.displacement() <ansys.dpf.core.operators.result.displacement.displacement>`.
+# By default, the :class:`displacement <ansys.dpf.core.operators.result.displacement.displacement>`
+# operator is connected to the first result set,
 # which for this static result is the only result.
+
 results = model.results
 displacements = results.displacement()
 fields = displacements.outputs.fields_container()
@@ -106,14 +126,28 @@ disp = fields[0].data
 disp
 
 ###############################################################################
-# ## Plot displacements
+# Plot displacements
+# ~~~~~~~~~~~~~~~~~~
 #
+# You can plot the previous displacement field using:
 
 model.metadata.meshed_region.plot(fields, cpos="xy")
 
+###############################################################################
+# Or using
+#
+
+fields[0].plot(cpos="xy")
 
 ###############################################################################
-# ## Clean up
+# This way is particularly useful if you have used :class:`ansys.dpf.core.scoping.Scoping`
+# on the mesh or results.
+
+
+###############################################################################
+# Clean up
+# ~~~~~~~~
 #
-# Stop mapdl
+# Stop MAPDL session.
+#
 mapdl.exit()
