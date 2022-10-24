@@ -7,13 +7,13 @@ PyAnsys libraries on a Windows Subsystem for Linux and Docker
 This page shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL). WSL is a compatibility layer for
 running Linux binary executables natively on Windows 10, Windows 11, and
-Windows Server 2019. For more information, see `Wikipedia WSL <WikipediaWSL>`_.
+Windows Server 2019. For more information, see `Wikipedia WSL <WikipediaWSL_>`_.
 
 Sections on this page walk you through the installation of WSL on Windows and then
 show how to use it together with MAPDL, PyMAPDL, and Docker.
 
 For more information about WSL, see 
-`What is the Windows Subsystem for Linux <What_is_the_Windows_Subsystem_for_Linux>`_.
+`What is the Windows Subsystem for Linux <What_is_the_Windows_Subsystem_for_Linux_>`_.
 
 .. warning::
    This approach hasn't been fully tested with a VPN connection. If you
