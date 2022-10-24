@@ -305,8 +305,8 @@ mapdl.show("close")
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)
 mapdl.dim("response", "array", 4000, 1)
-mapdl.vget("frequencies(1)", 1)
-mapdl.vget("response(1)", 3)
+mapdl.vget("frequencies", 1)
+mapdl.vget("response", 3)
 frequencies = mapdl.parameters["frequencies"]
 response = mapdl.parameters["response"]
 
