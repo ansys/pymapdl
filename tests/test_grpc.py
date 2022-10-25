@@ -8,6 +8,7 @@ from ansys.mapdl.core import examples, launch_mapdl
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
+from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -29,10 +30,10 @@ directory creation.
 )
 
 
-def write_tmp(mapdl, filename, ext="txt"):
+def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
     """Write a temporary file from MAPDL."""
     with mapdl.non_interactive:
-        mapdl.cfopen(filename, "txt")
+        mapdl.cfopen(filename, ext)
         mapdl.vwrite("dummy_file")  # Needs to write something, File cannot be empty.
         mapdl.run("(A10)")
         mapdl.cfclos()
@@ -253,7 +254,7 @@ def test_no_get_value_non_interactive(mapdl):
 
 def test__download(mapdl, tmpdir):
     # Creating temp file
-    write_tmp(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
 
     file_name = "myfile0.txt"
     assert file_name in mapdl.list_files()
@@ -284,8 +285,8 @@ def test__download(mapdl, tmpdir):
     ],
 )
 def test_download(mapdl, tmpdir, option, expected_files):
-    write_tmp(mapdl, "myfile0")
-    write_tmp(mapdl, "myfile1")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
     mapdl.download(option, target_dir=tmpdir)
     for file_to_check in expected_files:
@@ -293,8 +294,8 @@ def test_download(mapdl, tmpdir, option, expected_files):
 
 
 def test_download_without_target_dir(mapdl, tmpdir):
-    write_tmp(mapdl, "myfile0")
-    write_tmp(mapdl, "myfile1")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
     old_cwd = os.getcwd()
     try:
@@ -357,6 +358,20 @@ def test_download_project_extensions(mapdl, tmpdir):
 
     expected = {"log", "out", "err", "lock"}
     assert expected.intersection(files_extensions) == {"log", "out"}
+
+
+def test_download_result(mapdl, cleared, tmpdir):
+    if "file.rst" not in mapdl.list_files():
+        write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
+    target_dir = tmpdir.mkdir(f"tmp_{random_string()}")
+    mapdl.download_result(target_dir)
+    assert os.path.exists(os.path.join(target_dir, "file.rst"))
+
+    assert not os.path.exists("file.rst")
+    mapdl.download_result()  # with default argument
+    assert os.path.exists("file.rst")
+
+    os.remove("file.rst")
 
 
 def test__channel_str(mapdl):

@@ -212,7 +212,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Build Documentation
         run: |
@@ -360,7 +360,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |
