@@ -333,6 +333,7 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
+        self._mode = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
@@ -2072,6 +2073,24 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.math import MapdlMath
 
         return MapdlMath(self)
+
+    @property
+    def krylov(self):
+        """APDL krylov interface.
+
+        For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        Returns
+        -------
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        """
+        if self._kylov is None:
+            from ansys.mapdl.core.krylov import KrylovSolver
+
+            self._kylov = KrylovSolver(self)
+
+        return self._kylov
 
     @property
     def db(self):

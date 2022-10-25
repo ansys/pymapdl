@@ -11,6 +11,6 @@ questions or submissions to this repository.
 
 
 For contributing to this project, please refer to the [PyAnsys Developer's Guide].
-Further information about contributing to PyMAPDL can be found in [Contributing](https://mapdldocs.pyansys.com/contributing.html).
+Further information about contributing to PyMAPDL can be found in [Contributing](https://mapdl.docs.pyansys.com/contribution_and_api/index.html).
 
 [PyAnsys Developer's Guide]: https://dev.docs.pyansys.com/

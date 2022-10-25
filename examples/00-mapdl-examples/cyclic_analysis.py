@@ -166,8 +166,8 @@ print(output)
 #    in favor of DPF, but we can use this for now for some great animations.
 #
 # For more details regarding cyclic result post processing, see:
-# - `Understanding Nodal Diameters from a Cyclic Model Analysis <https://readerdocs.pyansys.com/examples/01-cyclic_results/academic_sector_nd.html>`_
-# - `Modal Cyclic Symmetry Example <https://dpfdocs.pyansys.com/examples/02-modal-harmonic/01-modal_cyclic.html>`_
+# - `Understanding Nodal Diameters from a Cyclic Model Analysis <https://reader.docs.pyansys.com/examples/01-cyclic_results/academic_sector_nd.html>`_
+# - `Modal Cyclic Symmetry Example <https://dpf.docs.pyansys.com/examples/02-modal-harmonic/01-modal_cyclic.html>`_
 
 # grab the result object from MAPDL
 result = mapdl.result

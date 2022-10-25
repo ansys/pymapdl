@@ -55,6 +55,7 @@ from ansys.mapdl.core.post import PostProcessing
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
+    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
 # test for png file
@@ -165,6 +166,7 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
+        self._mode = None
         self._use_dpf = start_parm.get("use_dpf", False)
 
         if _HAS_PYVISTA:
@@ -192,6 +194,7 @@ class _MapdlCore(Commands):
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
+        self._kylov = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -236,6 +239,26 @@ class _MapdlCore(Commands):
             raise ValueError(
                 f"The property ``print_com`` only allows booleans, but type {type(value)} was supplied."
             )
+
+    @property
+    def mode(self):
+        """Return the type of instance, namely: grpc, corba or console."""
+        return self._mode
+
+    @property
+    def is_grpc(self):
+        """Return true if using grpc to connect to the MAPDL instance."""
+        return self._mode == "grpc"
+
+    @property
+    def is_corba(self):
+        """Return true if using corba to connect to the MAPDL instance."""
+        return self._mode == "corba"
+
+    @property
+    def is_console(self):
+        """Return true if using console to connect to the MAPDL instance."""
+        return self._mode == "console"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -3782,8 +3805,8 @@ class _MapdlCore(Commands):
             )
             # If MAPDL cannot find named macro file, it will throw a runtime error.
 
-        # Updating arg since the path is not needed anymore.
-        args = (base_name, args[1:])
+        # Update arg because the path is no longer needed
+        args = (base_name, *args[1:])
         return super().use(*args, **kwargs)
 
     @wraps(Commands.set)

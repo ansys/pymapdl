@@ -71,19 +71,19 @@ ARGS_INQ_FUNC = {
 set_list_0 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
 
    SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
-     1 0.20000             1         1         3                  
-     2 0.40000             1         2         5                  
-     3 0.70000             1         3         7                  
+     1 0.20000             1         1         3
+     2 0.40000             1         2         5
+     3 0.70000             1         3         7
      4  1.0000             1         4         9"""
 
 set_list_1 = """*****  INDEX OF DATA SETS ON RESULTS FILE  *****
 
    SET   TIME/FREQ    LOAD STEP   SUBSTEP  CUMULATIVE
-     1 0.10000E-02         1        10        10                  
-     2 0.20000E-02         2         1        11                  
-     3 0.30000E-02         2         2        12                  
-     4 0.40000E-02         2         3        13                  
-     5 0.50000E-02         2         4        14                  
+     1 0.10000E-02         1        10        10
+     2 0.20000E-02         2         1        11
+     3 0.30000E-02         2         2        12
+     4 0.40000E-02         2         3        13
+     5 0.50000E-02         2         4        14
      6 0.60000E-02         2         5        15
  """
 
@@ -694,3 +694,16 @@ def test_magicwords(output, last_element):
 
     arr = obj.to_array()
     assert arr[-1, -1] == last_element
+
+
+def test_nlist_to_array(mapdl, beam_solve):
+    # This kinternal include the internal points, so it matches the
+    # number of nodes with midside nodes.
+    nlist = mapdl.nlist(kinternal="internal")
+    assert isinstance(nlist.to_list(), list)
+    assert isinstance(nlist.to_array(), np.ndarray)
+
+    # above asserts should be removed once fixed the midside issue.
+    assert len(nlist.to_list()) == len(mapdl.mesh.nodes)
+    assert len(nlist.to_array()) == len(mapdl.mesh.nodes)
+    assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)

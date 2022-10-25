@@ -424,6 +424,8 @@ def test_dense_solver(mm):
     m2 = mm.rand(dim, dim)
     # factorize do changes inplace in m2, so we
     # need a copy to later compare.
+    # factorize do changes inplace in m2, so we
+    # need a copy to later compare.
     m3 = m2.copy()
 
     solver = mm.factorize(m2)
@@ -432,6 +434,11 @@ def test_dense_solver(mm):
     C = solver.solve(v)
 
     # TODO: we need to verify this works
+    m3_ = m3.asarray()
+    v_ = v.asarray()
+    x = np.linalg.solve(m3_, v_)
+
+    assert np.allclose(C, x)
     m3_ = m3.asarray()
     v_ = v.asarray()
     x = np.linalg.solve(m3_, v_)
