@@ -1,11 +1,19 @@
 """Test post-processing module for ansys.mapdl.core"""
+import inspect
+import re
+
 import numpy as np
 import pytest
 from pyvista import Plotter
 from pyvista.plotting.renderer import CameraPosition
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.post import COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE, STRESS_TYPES
+from ansys.mapdl.core.post import (
+    COMPONENT_STRESS_TYPE,
+    PRINCIPAL_TYPE,
+    STRESS_TYPES,
+    PostProcessing,
+)
 
 # must be run first before loading a result
 # since MAPDL may be on a remote windows machine, cannot test
@@ -809,6 +817,46 @@ def test_time_values(mapdl, contact_solve):
 def test_set(mapdl, contact_solve, step_):
     mapdl.set(nset=step_)
     assert mapdl.post_processing.step == step_
+
+
+def test_meta_post_plot_docstrings():
+    for each in dir(PostProcessing):
+        if each.startswith("plot_"):
+            meth = getattr(PostProcessing, each)
+            docstring = meth.__doc__
+
+            for section in ["Parameters", "Returns", "Notes", "Examples"]:
+                assert re.search(
+                    f"{section}\n *-*", docstring
+                ), f"Section '{section}' not in '{meth.__name__}'"
+
+            signature = inspect.signature(meth)
+            for each_ in signature.parameters:
+                if each_ != "self":
+                    assert (
+                        each_ in docstring
+                    ), f"The argument '{each_}' in '{meth.__name__}' is not in its docstring."
+
+            assert (
+                "If ``vkt=True`` (default), this function uses" in docstring
+            ), f"'vtk=True' part not found in {meth.__name__}"
+            assert (
+                len(
+                    re.findall(
+                        ":func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`",
+                        docstring,
+                    )
+                )
+                >= 2
+            ), f"Less than two complete one-liner general plotter link in {meth.__name__}"
+            assert (
+                len(
+                    re.findall(
+                        "<ansys.mapdl.core.plotting.general_plotter>`", docstring
+                    )
+                )
+                >= 3
+            ), f"Less than three complete one-liner general plotter link in {meth.__name__}"
 
 
 ###############################################################################

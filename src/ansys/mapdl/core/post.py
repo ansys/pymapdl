@@ -337,9 +337,11 @@ class PostProcessing:
         item : str
             Label identifying the item.  See the table below in the
             notes section.
+
         comp : str, optional
             Component of the item if applicable.  See the table below
             in the notes section.
+
         option : str, optional
             Option for storing element table data.  One of the
             following:
@@ -459,7 +461,7 @@ class PostProcessing:
             self.selected_elements
         ]
 
-    def plot_nodal_values(self, item, comp, show_elem_numbering=False, **kwargs):
+    def plot_nodal_values(self, item, comp, show_node_numbering=False, **kwargs):
         """Plot nodal values
 
         Displays solution results as continuous element contours.
@@ -473,16 +475,33 @@ class PostProcessing:
         item : str
             Label identifying the item.  See the table below in the
             notes section.
+
         comp : str, optional
             Component of the item if applicable.  See the table below
             in the notes section.
+
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`
 
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``.
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -498,7 +517,7 @@ class PostProcessing:
             "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
         )
         return self._plot_point_scalars(
-            values, show_node_numbering=show_elem_numbering, **kwargs
+            values, show_node_numbering=show_node_numbering, **kwargs
         )
 
     def plot_element_values(
@@ -517,9 +536,11 @@ class PostProcessing:
         item : str
             Label identifying the item.  See the table below in the
             notes section.
+
         comp : str, optional
             Component of the item if applicable.  See the table below
             in the notes section.
+
         option : str, optional
             Option for storing element table data.  One of the
             following:
@@ -530,15 +551,29 @@ class PostProcessing:
               specified item component.
             * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
-        show_element_numbering : bool, optional
+
+        show_elem_numbering : bool, optional
             Plot the element numbers of the elements.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`
 
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``.
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -778,10 +813,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -887,10 +936,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -996,10 +1059,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1099,14 +1176,13 @@ class PostProcessing:
         option : str, optional
             Option for storing element table data.  One of the
             following:
-
             * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
             * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
             * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
-        show_element_numbering : bool, optional
+        show_elem_numbering : bool, optional
             Plot the element numbers of the elements.
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
@@ -1117,7 +1193,16 @@ class PostProcessing:
         pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``.
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1139,9 +1224,11 @@ class PostProcessing:
             )
 
         if component.upper() == "NORM":
-            disp = np.linalg.norm(self.element_displacement("ALL"), axis=1)
+            disp = np.linalg.norm(
+                self.element_displacement("ALL", option=option), axis=1
+            )
         else:
-            disp = self.element_displacement(component)
+            disp = self.element_displacement(component, option=option)
         kwargs.setdefault(
             "scalar_bar_args", {"title": f"{component} Element Displacement"}
         )
@@ -1217,35 +1304,48 @@ class PostProcessing:
         Parameters
         ----------
         component : str
-            Element stress to retrieve.  One of the following:
+          Element stress to retrieve.  One of the following:
 
-            +---------------------+--------------------+
-            | X, Y, Z, XY, YZ, XZ | Component stress.  |
-            +---------------------+--------------------+
-            | 1, 2, 3             | Principal stress.  |
-            +---------------------+--------------------+
-            | INT                 | Stress intensity.  |
-            +---------------------+--------------------+
-            | EQV                 | Equivalent stress  |
-            +---------------------+--------------------+
+          +---------------------+--------------------+
+          | X, Y, Z, XY, YZ, XZ | Component stress.  |
+          +---------------------+--------------------+
+          | 1, 2, 3             | Principal stress.  |
+          +---------------------+--------------------+
+          | INT                 | Stress intensity.  |
+          +---------------------+--------------------+
+          | EQV                 | Equivalent stress  |
+          +---------------------+--------------------+
 
         option : str, optional
-            Option for storing element table data.  One of the
-            following:
+          Option for storing element table data.  One of the
+          following:
 
-            * ``"MIN"`` : Store minimum element nodal value of the
-              specified item component.
-            * ``"MAX"`` : Store maximum element nodal value of the
-              specified item component.
-            * ``"AVG"`` : Store averaged element centroid value of the
-              specified item component (default).
-
+          * ``"MIN"`` : Store minimum element nodal value of the
+            specified item component.
+          * ``"MAX"`` : Store maximum element nodal value of the
+            specified item component.
+          * ``"AVG"`` : Store averaged element centroid value of the
+            specified item component (default).
+        show_elem_numbering : bool, optional
+            Plot the element numbers of the elements.
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``.
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1332,12 +1432,28 @@ class PostProcessing:
             * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
 
+        show_elem_numbering : bool, optional
+            Plot the element numbers of the elements.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`
+
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
-            plots.  Only returned when ``return_cpos`` is ``True``.
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1390,10 +1506,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1463,10 +1593,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1556,10 +1700,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1639,10 +1797,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1702,10 +1874,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1784,10 +1970,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1883,10 +2083,24 @@ class PostProcessing:
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -1963,18 +2177,34 @@ class PostProcessing:
         component : str
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2026,17 +2256,35 @@ class PostProcessing:
     def plot_nodal_total_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the total nodal strain intensity of the current result.
 
-        Returns
-        -------
-        list
-            Camera position from plotter.  Can be reused as an input
-            parameter to use the same camera position for future
-            plots.
+        Parameters
+        ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2108,16 +2356,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2193,21 +2456,37 @@ class PostProcessing:
 
         Parameters
         ----------
-        show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
-        **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
         component : str
             Nodal elastic component to plot.  Must be ``'X'``,
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
+        show_node_numbering : bool, optional
+            Plot the node numbers of surface nodes.
+
+        **kwargs : dict, optional
+            Keyword arguments passed to :func:`general_plotter
+            <ansys.mapdl.core.plotting.general_plotter>`.
+
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2282,18 +2561,34 @@ class PostProcessing:
         component : str
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2353,16 +2648,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2433,16 +2743,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2526,18 +2851,34 @@ class PostProcessing:
         component : str
             Nodal plastic component to plot.  Must be ``'X'``,
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2606,18 +2947,34 @@ class PostProcessing:
         component : str
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2678,16 +3035,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2765,16 +3137,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2859,18 +3246,34 @@ class PostProcessing:
         component : str
             Nodal thermal component to plot.  Must be ``'X'``,
             ``'Y'``, ``'Z'``, ``'XY'``, ``'YZ'``, or ``'XZ'``.
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -2944,18 +3347,34 @@ class PostProcessing:
         component : str
             Nodal principal strain component to plot.  Must be
             ``'1'``, ``'2'``, or ``'3'``
+
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -3012,17 +3431,35 @@ class PostProcessing:
     def plot_nodal_thermal_strain_intensity(self, show_node_numbering=False, **kwargs):
         """Plot the thermal nodal strain intensity of the current result.
 
-        Returns
-        -------
-        list
-            Camera position from plotter.  Can be reused as an input
-            parameter to use the same camera position for future
-            plots.
+        Parameters
+        ----------
         show_node_numbering : bool, optional
-            Plot the node numbers of surface nodes.
+            Plot the node numbers of surface nodes. Defaults to False
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
+
+        Returns
+        -------
+        pyvista.plotting.renderer.CameraPosition
+            Camera position from plotter.  Can be reused as an input
+            parameter to use the same camera position for future
+            plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -3100,16 +3537,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
@@ -3177,16 +3629,31 @@ class PostProcessing:
         ----------
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
 
         Returns
         -------
-        list
+        pyvista.plotting.renderer.CameraPosition
             Camera position from plotter.  Can be reused as an input
             parameter to use the same camera position for future
             plots.
+            Only returned when ``return_cpos`` is ``True``.
+
+        pyvista.Plotter
+            Pyvista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using Pyvista Plotter methods.
+            Only when ``return_plotter`` kwarg is ``True``.
+
+        Notes
+        -----
+        If ``vkt=True`` (default), this function uses
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        You can pass key arguments to
+        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
         --------
