@@ -360,10 +360,12 @@ def test_download_project_extensions(mapdl, tmpdir):
     assert expected.intersection(files_extensions) == {"log", "out"}
 
 
-def test_download_result(mapdl, tmpdir):
-    write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
+def test_download_result(mapdl, cleared, tmpdir):
+    if "file.rst" not in mapdl.list_files():
+        write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
     target_dir = tmpdir.mkdir(f"tmp_{random_string()}")
     mapdl.download_result(target_dir)
+    assert os.path.exists(os.path.join(target_dir, "file.rst"))
 
     assert not os.path.exists("file.rst")
     mapdl.download_result()  # with default argument
