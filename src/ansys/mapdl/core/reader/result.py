@@ -29,14 +29,19 @@ import weakref
 # from ansys.dpf import post
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model
-from ansys.mapdl.reader.rst import Result
+from ansys.dpf.core.errors import DPFServerException
+
+# from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.core.misc import check_valid_ip, random_string
 
 COMPONENTS = ["X", "Y", "Z", "XY", "YZ", "XZ"]
+
+DPF_PORT = None
+DPF_IP = None
 
 
 class ResultNotFound(MapdlRuntimeError):
@@ -61,14 +66,14 @@ def update_result(function):
     @wraps(function)
     def wrapper(self, *args, **kwargs):
         if self._update_required or not self._loaded or self._cached_dpf_model is None:
-            self._update()
-            self._log.debug("RST file updated.")
+            self.update()
+            self.logger.debug("RST file updated.")
         return function(self, *args, **kwargs)
 
     return wrapper
 
 
-class DPFResult(Result):
+class DPFResult:  # (Result):
     """
     Result object based on DPF library.
 
@@ -95,7 +100,12 @@ class DPFResult(Result):
         self._mapdl_weakref = None
         self._server_file_path = None  # In case DPF is remote.
 
-        if rst_file_path is not None:
+        if rst_file_path is not None and mapdl is not None:
+            raise ValueError(
+                "Only one the arguments must be supplied: 'rst_file_path' or 'mapdl'."
+            )
+
+        elif rst_file_path is not None:
             if os.path.exists(rst_file_path):
                 self.__rst_directory = os.path.dirname(rst_file_path)
                 self.__rst_name = os.path.basename(rst_file_path)
@@ -124,14 +134,81 @@ class DPFResult(Result):
         self._loaded = False
         self._update_required = False  # if true, it triggers a update on the RST file
         self._cached_dpf_model = None
+        self._is_remote = (
+            False  # Default false, unless using self.connect or the env var are set.
+        )
 
         # old attributes
         ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
         ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
         # these will be removed once the reader class has been fully substituted.
-        self._update()
-        super().__init__(self._rst, read_mesh=False)
+        # self._update()
+        # super().__init__(self._rst, read_mesh=False)
+
+    def connect_to_server(self, ip=None, port=None):
+        """
+        Connect to the DPF Server.
+
+        Parameters
+        ----------
+        ip : str, optional
+            IP address of the server, by default "127.0.0.1"
+        port : int, optional
+            Server Port, by default 50054
+
+        Returns
+        -------
+        dpf.server_types.GrpcServer
+            Return the server connection.
+
+        Raises
+        ------
+        MapdlRuntimeError
+            If it cannot connect to an instance at the specified IP and port.
+
+        Notes
+        -----
+        You can also set the ``ip`` and ``port`` values using the environment variables
+        ``DPF_PORT`` and ``DPF_IP``.
+        In case these variables are set, and the inputs of this function are not ``None``,
+        the priority order is:
+
+        1. Values supplied to this function.
+        2. The environment variables
+        3. The default values
+
+        """
+        if not ip:
+            DPF_IP = ip = os.environ.get("DPF_IP", "127.0.0.1")  # Set in ci.yaml
+
+        if not port:
+            DPF_PORT = port = int(os.environ.get("DPF_PORT", 50054))
+
+        self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
+        check_valid_ip(ip)
+
+        try:
+            grpc_con = dpf.connect_to_server(ip, port, as_global=True)
+        except DPFServerException as e:
+            if "failed to connect to all addresses" in str(e):
+                raise MapdlRuntimeError(
+                    f"We could not connect to the DPF session in {ip}:{port}. Check the connection settings."
+                )
+
+        self._is_remote = True
+        self._grpc_con = grpc_con
+
+        return grpc_con
+
+    def _dpf_remote_envvars(self):
+        """Return True if any of the env variables are set"""
+        return "DPF_IP" in os.environ or "DPF_PORT" in os.environ
+
+    @property
+    def is_remote(self):
+        """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
+        return self._is_remote
 
     @property
     def _mapdl(self):
@@ -260,7 +337,8 @@ class DPFResult(Result):
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
         # Upload it to DPF if we are not in local
-        if self._dpf_is_remote():
+        if self.is_remote():
+            self.connect_to_server()
             self._upload_to_dpf()
 
         # Updating model
@@ -269,9 +347,6 @@ class DPFResult(Result):
         # Resetting flag
         self._loaded = True
         self._update_required = False
-
-    def _dpf_is_remote(self):
-        return True
 
     def _upload_to_dpf(self):
         self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)

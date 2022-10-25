@@ -145,13 +145,17 @@ class TestExample:
         mapdl.save()
         mapdl.post1()
         mapdl.csys(0)
+
+        # downloading file
+        rst_name = mapdl.jobname + ".rst"
+        mapdl.download_result(self.tmp_dir)
+        self.rst_path = os.path.join(self.tmp_dir, rst_name)
+
         return mapdl
 
     @pytest.fixture(scope="class")
     def reader(self, setup):
-        rst_name = setup.jobname + ".rst"
-        setup.download_result(self.tmp_dir)
-        return read_binary(os.path.join(self.tmp_dir, rst_name))
+        return read_binary(os.path.join(self.tmp_dir, self.rst_path))
 
     @pytest.fixture(scope="class")
     def post(self, setup):
