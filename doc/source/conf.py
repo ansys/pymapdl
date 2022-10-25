@@ -193,9 +193,23 @@ html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
+    "collapse_navigation": True,
+    "use_edit_page_button": True,
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
+    "icon_links": [
+        {
+            "name": "Support",
+            "url": "https://github.com/pyansys/pymapdl/discussions",
+            "icon": "fa fa-comment fa-fw",
+        },
+    ],
+}
+
+html_theme_options = {
+    "show_prev_next": False,
+    "github_url": "https://github.com/pyvista/pyvista",
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
