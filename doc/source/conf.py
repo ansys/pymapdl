@@ -207,7 +207,11 @@ html_theme_options = {
     ],
 }
 
-
+html_context = {
+    "github_user": "pyansys",
+    "github_repo": "pymapdl",
+    "github_version": "main",
+}
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
