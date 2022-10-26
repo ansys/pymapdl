@@ -16,6 +16,8 @@ Notes
 """
 from logging import Logger
 import os
+
+# import uuid
 import tempfile
 
 from ansys.dpf import core as dpf_core
@@ -180,6 +182,15 @@ def test_dpf_connection():
         assert True
     except OSError:
         assert False
+
+
+# def test_session_id(mapdl):
+#     session_id = f"__{generate_session_id()}"
+
+#     assert session_id not in mapdl.parameters
+#     mapdl._run(f"{session_id} = 1")
+#     assert session_id not in mapdl.parameters # session id should not shown in mapdl.parameters
+#     assert
 
 
 class TestStaticThermocoupledExample(TestExample):

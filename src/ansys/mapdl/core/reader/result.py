@@ -24,14 +24,14 @@ import os
 import pathlib
 import tempfile
 from typing import Iterable
+import uuid
 import weakref
 
 # from ansys.dpf import post
 from ansys.dpf import core as dpf
 from ansys.dpf.core import Model
 from ansys.dpf.core.errors import DPFServerException
-
-# from ansys.mapdl.reader.rst import Result
+from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
@@ -65,15 +65,23 @@ def update_result(function):
 
     @wraps(function)
     def wrapper(self, *args, **kwargs):
-        if self._update_required or not self._loaded or self._cached_dpf_model is None:
-            self.update()
-            self.logger.debug("RST file updated.")
+        # if self._update_required or not self._loaded or self._cached_dpf_model is None:
+        #     self.update()
+        #     self.logger.debug("RST file updated.")
         return function(self, *args, **kwargs)
 
     return wrapper
 
 
-class DPFResult:  # (Result):
+def generate_session_id(length=10):
+    """Generate an unique ssesion id.
+
+    It can be shorten by the argument 'length'."""
+    uid = uuid.uuid4()
+    return "".join(str(uid).split("-")[:-1])[:length]
+
+
+class DPFResult(Result):
     """
     Result object based on DPF library.
 
@@ -99,6 +107,7 @@ class DPFResult:  # (Result):
         self.__rst_name = None
         self._mapdl_weakref = None
         self._server_file_path = None  # In case DPF is remote.
+        self._session_id = None
 
         if rst_file_path is not None and mapdl is not None:
             raise ValueError(
@@ -124,6 +133,9 @@ class DPFResult:  # (Result):
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
 
+            # self._session_id = f"__{uuid.uuid4()}__"
+            # self.mapdl.parameters[self._session_id] = 1
+
         else:
             raise ValueError(
                 "One of the following kwargs must be supplied: 'rst_file_path' or 'mapdl'"
@@ -138,13 +150,21 @@ class DPFResult:  # (Result):
             False  # Default false, unless using self.connect or the env var are set.
         )
 
+        self.connect_to_server()
+
         # old attributes
         ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
         ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
         # these will be removed once the reader class has been fully substituted.
-        # self._update()
-        # super().__init__(self._rst, read_mesh=False)
+        self._update()
+        super().__init__(self._rst, read_mesh=False)
+
+    def _generate_session_id(self, length=10):
+        """Generate an unique ssesion id.
+
+        It can be shorten by the argument 'length'."""
+        return "__" + generate_session_id(length)
 
     def connect_to_server(self, ip=None, port=None):
         """
@@ -337,8 +357,8 @@ class DPFResult:  # (Result):
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
         # Upload it to DPF if we are not in local
-        if self.is_remote():
-            self.connect_to_server()
+        if self.is_remote:
+            # self.connect_to_server()
             self._upload_to_dpf()
 
         # Updating model
@@ -370,12 +390,10 @@ class DPFResult:  # (Result):
         if self._log:
             self._log.debug("Building/Updating DPF Model object.")
 
-        if not self._cached_dpf_model:
-            self._cached_dpf_model = Model(self._rst)
+        if self.is_remote:
+            self._cached_dpf_model = Model(self._server_file_path)
         else:
-            # self._cached_dpf_model.update_stream()
-            # DPF will update itself
-            pass
+            self._cached_dpf_model = Model(self._rst)
 
     @property
     def model(self):
