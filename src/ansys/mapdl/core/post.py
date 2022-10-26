@@ -1173,17 +1173,21 @@ class PostProcessing:
         component : str, optional
             Structural displacement component to retrieve.  Must be
             ``"X"``, ``"Y"``, ``"Z"``, or ``"NORM"``.
+
         option : str, optional
             Option for storing element table data.  One of the
             following:
+
             * ``"MIN"`` : Store minimum element nodal value of the
               specified item component.
             * ``"MAX"`` : Store maximum element nodal value of the
               specified item component.
             * ``"AVG"`` : Store averaged element centroid value of the
               specified item component (default).
+
         show_elem_numbering : bool, optional
             Plot the element numbers of the elements.
+
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`.
