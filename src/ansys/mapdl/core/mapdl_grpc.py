@@ -1099,8 +1099,21 @@ class MapdlGrpc(_MapdlCore):
                 return fobj.read()
         return self._download_as_raw(tmp_file).decode()
 
-    def download_result(self, path, progress_bar=False, preference=None):
+    def download_result(self, path=None, progress_bar=False, preference=None):
         """Download remote result files to a local directory
+
+        Parameters
+        ----------
+        path : str, Path, optional
+          Path where the files are downloaded, by default the current
+          python path (``os.getcwd()``)
+
+        progress_bar : bool, optional
+          Show the progress bar or not, default to False.
+
+        preference : str
+          Specify the preferred result file, either ``rst`` or ``rth``.
+          Only required when both files are present. Defaults to 'rst'.
 
         Examples
         --------
@@ -1110,6 +1123,8 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_result(os.getcwd())
 
         """
+        if path is None:  # if not path seems to not work in same cases.
+            path = os.getcwd()
 
         def _download(targets):
             for target in targets:
