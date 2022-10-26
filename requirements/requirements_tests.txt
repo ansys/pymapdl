@@ -1,4 +1,4 @@
-ansys-dpf-core==0.6.1
+ansys-dpf-core==0.6.2
 autopep8==1.7.0
 matplotlib==3.6.1
 scipy==1.9.3
