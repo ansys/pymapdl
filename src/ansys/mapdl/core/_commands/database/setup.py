@@ -91,14 +91,17 @@ class Setup:
         slab
             Mode for saving the database:
 
-            ALL - Save the model data, solution data and post data
-                  (element tables, etc.). This value is the default.
+            ALL
+              Save the model data, solution data and post data
+              (element tables, etc.). This value is the default.
 
-            MODEL - Save the model data (solid model, finite element
-            model, loadings, etc.) only.
+            MODEL
+              Save the model data (solid model, finite element
+              model, loadings, etc.) only.
 
-            SOLU - Save the model data and the solution data (nodal
-            and element results).
+            SOLU
+              Save the model data and the solution data (nodal
+              and element results).
 
         Notes
         -----
@@ -144,12 +147,12 @@ class Setup:
         ----------
         mode
             CENT
+              Solid model boundary condition symbols and labels appear at the centroid of the
+              solid model entity (default).
 
-            CENT - Solid model boundary condition symbols and labels appear at the centroid of the
-                   solid model entity (default).
-
-            TESS - Solid model boundary condition symbols and labels appear inside each
-                   constituent element of the tessellation.
+            TESS
+              Solid model boundary condition symbols and labels appear inside each
+              constituent element of the tessellation.
 
         Notes
         -----
