@@ -781,7 +781,7 @@ to the backing plate.
     pl.show()
 
 **Figure 28.6: Thermal Boundary Conditions.**
-Convection loads (red) and conduction loads (yellow)
+Convection loads (:red:`red`) and conduction loads (:yellow:`yellow`)
 
 Available data suggest that the value of the convection coefficient lies
 between 10 and 30 W/m2 °C for the workpiece surfaces, except for the bottom
