@@ -24,11 +24,12 @@ Mechanical APDL provides the following ways to implement a harmonic analysis
 using the Krylov method:
 
 #. Mechanical APDL commands
-#. APDL macros as described in `Frequency-Sweep Harmonic Analysis via the Krylov Method
-  <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-  in the **Structural Analysis** guide for Mechanical APDL
+#. APDL macros as described in
+   `Frequency-Sweep Harmonic Analysis via the Krylov Method
+   <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
+   in the **Structural Analysis** guide for Mechanical APDL
 #. PyMAPDL, using the Python programming language to expose the Krylov
-  features as described on this page
+   features as described on this page
 
 Assumptions
 -----------
