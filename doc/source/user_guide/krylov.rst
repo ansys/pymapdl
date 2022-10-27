@@ -54,7 +54,7 @@ solutions using the Python programming language for user-defined routines.
 
 If you do not require customization, you can use the Mechanical APDL
 commands to solve a harmonic analysis with the Krylov method. For more
-information, including the theory behing this method, see
+information, including the theory behind this method, see
 `Frequency-Sweep Harmonic Analysis via the Krylov Method 
 <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
 in the **Structural Analysis** guide for Mechanical APDL_. 
