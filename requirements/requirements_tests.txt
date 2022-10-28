@@ -1,5 +1,5 @@
 ansys-dpf-core==0.6.2
-autopep8==1.7.0
+autopep8==2.0.0
 matplotlib==3.6.1
 scipy==1.9.3
 pandas==1.5.1
