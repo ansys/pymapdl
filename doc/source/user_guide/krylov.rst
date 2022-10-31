@@ -49,7 +49,7 @@ to obtain the solution:
 
 Krylov method implementation in PyMAPDL
 =======================================
-The PyMAPDL implementation of the Kylov method gives you customization
+The PyMAPDL implementation of the Krylov method gives you customization
 and flexibility because you can access subspace vectors and reduced
 solutions using the Python programming language for user-defined routines.
 
