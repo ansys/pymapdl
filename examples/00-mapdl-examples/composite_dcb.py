@@ -309,6 +309,7 @@ try:
     # Upload file to DPF server
     temp_directory = tempfile.gettempdir()
     rst_path = mapdl.download_result(temp_directory)
+    dpf.connect_to_server()
     server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
     data_src = dpf.DataSources(server_file_path)
 except:
