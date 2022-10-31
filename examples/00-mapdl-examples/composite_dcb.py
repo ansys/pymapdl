@@ -315,7 +315,7 @@ except:
     # Using DPF locally
     rst = mapdl.download_result()
     data_src = dpf.DataSources(rst)
-    
+
 # Generate the DPF model
 model = Model(data_src)
 
@@ -433,10 +433,9 @@ plt.show()
 # Use PyDPF method .animate() to visualize the crack opening throughout the simulation as
 # an animation.
 disp = model.results.displacement.on_all_time_freqs.eval()
-camera_pos = disp.animate(scale_factor=10.,
-                          save_as="dcb_animate.gif",
-                          return_cpos=True,
-                          show_axes=True)
+camera_pos = disp.animate(
+    scale_factor=10.0, save_as="dcb_animate.gif", return_cpos=True, show_axes=True
+)
 
 ###############################################################################
 #
