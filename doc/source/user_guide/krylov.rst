@@ -28,11 +28,13 @@ using the Krylov method:
    `Frequency-Sweep Harmonic Analysis via the Krylov Method
    <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
    in the **Structural Analysis** guide for Mechanical APDL
-#. PyMAPDL, using the Python programming language to expose the Krylov
-   features as described on this page
 
-Assumptions
------------
+PyMAPDL also provides a way to implement a harmonic analysis using the Kylov method.
+Subsequent sections describe how to use the Krylov method in PyMAPDL.
+
+
+**Assumptions**
+---------------
 The following assumptions are made when using the Kylov PyMAPDL method
 to obtain the solution:
 
