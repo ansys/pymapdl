@@ -20,17 +20,21 @@ the response across the frequency range:
 * Solves the reduced system
 * Expands the results back to compute the harmonic response 
 
-MAPDL provides the following ways to implement a harmonic analysis using
-the Krylov method:
+Mechanical APDL provides the following ways to implement a harmonic analysis
+using the Krylov method:
 
-#. Mechanical APDL commands.
-#. APDL macros as described in "Frequency-Sweep Harmonic Analysis via the
-   Krylov Method" in the *Structural Analysis Guide*.
-#. PyMAPDL. You can use the Python programming language to expose the Krylov
-   features as described in this section.
+#. Mechanical APDL commands
+#. APDL macros as described in
+   `Frequency-Sweep Harmonic Analysis via the Krylov Method
+   <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
+   in the **Structural Analysis** guide for Mechanical APDL
 
-Assumptions
------------
+PyMAPDL also provides a way to implement a harmonic analysis using the Kylov method.
+Subsequent sections describe how to use the Krylov method in PyMAPDL.
+
+
+**Assumptions**
+---------------
 The following assumptions are made when using the Kylov PyMAPDL method
 to obtain the solution:
 
@@ -45,23 +49,23 @@ to obtain the solution:
   method.
 
 
-Krylov method implementation in PyMADL
-======================================
-The PyMAPDL implementation of the Kylov method gives you customization
+Krylov method implementation in PyMAPDL
+=======================================
+The PyMAPDL implementation of the Krylov method gives you customization
 and flexibility because you can access subspace vectors and reduced
 solutions using the Python programming language for user-defined routines.
 
-If you do not require customization, you can use the APDL commands to
-solve a harmonic analysis with the Krylov method.
+If you do not require customization, you can use the Mechanical APDL
+commands to solve a harmonic analysis with the Krylov method. For more
+information, including the theory behind this method, see
+`Frequency-Sweep Harmonic Analysis via the Krylov Method 
+<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
+in the **Structural Analysis** guide for Mechanical APDL. 
 
-More information on the theory of Krylov method can be found in the 
-`Structural Analysis Guide 
-<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/Hlp_G_STR4_4.html>`_. 
-The procedure described here implements an analysis identical to that 
-defined by the macros. Details on the theory and equations describing 
-the Krylov method can be found in the works of Puri [1]_ and Eser [2]_.
+For additional theory information and equations for
+the Krylov method, see the works of Puri [1]_ and Eser [2]_.
 
-The exposure in PyMAPDL follows the same theory as the APDL macro and
+The exposure in PyMAPDL follows the same theory as the Mechanical APDL macros and
 has the following methods:
 
 * :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`:
@@ -75,8 +79,13 @@ has the following methods:
 
 Usage
 =====
+This section shows how to implement an analysis identical to that 
+defined by the Mechanical APDL macros.
 
-Generate the full file (``.full``) for the Krylov method using Mechanical APDL:
+Generate the FULL file and FEA model
+------------------------------------
+Generate the FULL file for the Krylov method and the FEA model
+using Mechanical APDL:
 
 .. code:: py
 
@@ -107,8 +116,8 @@ Create an instance of the Krylov class
 
 Call the 
 :func:`gensubspace <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`
-method, to create the Krylov subspace:
-Build a subspace of size / dimension 10 and at a frequency of 500 Hz.
+method to create the Krylov subspace and build a subspace of
+size/dimension 10 at a frequency of 500 Hz:
 
 .. code:: py
 
@@ -118,9 +127,8 @@ Return the Krylov subspace
 --------------------------
 
 Call the :func:`solve <ansys.mapdl.core.krylov.KrylovSolver.solve>` method to
-reduce the system of equations, and then solve at each frequency.
-The following code solves from 0 Hz
-to 1000 Hz with 100 intervals in between, with stepped loading.
+reduce the system of equations and solve at each frequency. This code
+solves from 0 Hz to 1000 Hz with 100 intervals in between, with stepped loading:
 
 .. code:: py
 
@@ -131,23 +139,24 @@ Return the reduced solution over the frequency range
 ----------------------------------------------------
             
 Call the :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method
-to expand the reduced solution back to FE space. Output the expanded
-solution and calculate the residual.   
+to expand the reduced solution back to the FE space, output the expanded
+solution, and calculate the residual:   
 
 .. code:: py
 
     >>> result = mk.expand(residual_computation= True, "L-inf", compute_solution_vectors= True, True)
 
-It returns a :class:`numpy array<numpy.ndarray>` (if the kwarg ``out_key``
-is set to ``True``) solution vectors mapped to user order.
+The preceding code returns a :class:`numpy array<numpy.ndarray>` if the kwarg ``out_key``
+is set to ``True``. Solution vectors are mapped to user order.
 
-.. note:: The ``ndarray`` returned by the method ``expand`` contains
+.. note:: The :class:`numpy array<numpy.ndarray>` returned by the
+   `:func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method contains
    the node number along with the dof solution for each of the calculated
    frequencies.
 
 Get the dof solution at a specific frequency
 --------------------------------------------
-This code shows how you can get the nodal solution at a specific frequency
+This code shows how to get the nodal solution at a specific frequency
 or step:
 
 .. code:: py
@@ -164,17 +173,18 @@ Examples of using the Krylov method in PyMAPDL are available in :ref:`krylov_exa
 Requirements
 ============
 
-To use the Krylov method in PyMAPDL, Ansys MAPDL version 2022 R2 or later must be used.
+To use the Krylov method in PyMAPDL, Mechanical APDL version 2022 R2 or later
+must be used.
 
 .. warning:: This feature does not support Distributed Ansys. 
-    However, you can still run MAPDL Math commands without specifying the ``-smp``
-    flag when launching MAPDL.
+    However, you can still run Mechanical APDL Math commands without
+    specifying the ``-smp`` flag when launching Mechanical APDL.
 
 Reference
 =========
 For more information on the Krylov method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
 <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-in the **Structural Analysis** guide for Mechanical APDL.
+in the **Structural Analysis** guide for Mechanical APDL and these resources:
 
 .. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency,
    Fully Coupled, Structural Acoustic Analysis and Optimization. PhD Thesis. Oxford Brookes University,
