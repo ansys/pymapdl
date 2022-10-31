@@ -6,6 +6,8 @@
 
 .. role:: green
 
+.. role:: yellow
+
 Friction Stir Welding (FSW) Simulation
 ***************************************
 
