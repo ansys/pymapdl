@@ -322,5 +322,5 @@ def test_lowercases():
 
         LOG.setLevel(each_loglevel.lower())
 
-        for each_logger in LOG._instances:
+        for each_logger in LOG._instances.values():
             each_logger.setLevel(each_loglevel.lower())
