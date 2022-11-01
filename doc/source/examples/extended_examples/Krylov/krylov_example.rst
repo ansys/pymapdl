@@ -98,7 +98,7 @@ with no FSI interface in the element.
 Define geometry
 ~~~~~~~~~~~~~~~
 
-Create a cylinder of required dimensions and split it into
+Create a cylinder of the required dimensions and split it into
 four segments for uniform generation of the mesh in each segment.
 
 .. code:: ipython3
