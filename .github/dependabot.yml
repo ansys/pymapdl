@@ -4,7 +4,7 @@ updates:
     directory: "/requirements" # Location of package manifests
     insecure-external-code-execution: allow
     schedule:
-      interval: "daily"
+      interval: "weekly"
     labels:
       - "Maintenance"
       - "Dependencies"
@@ -15,4 +15,4 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"

@@ -147,8 +147,6 @@ class Setup:
         ----------
         mode
             CENT
-
-            CENT
               Solid model boundary condition symbols and labels appear at the centroid of the
               solid model entity (default).
 

@@ -71,22 +71,22 @@ class LicenseChecker:
 
     @property
     def stop(self):
-        LOG.debug("Attempting to stop the license checker.")
         return self._stop
 
     @stop.setter
     def stop(self, value):
+        if bool(value):
+            LOG.debug("Attempting to stop the license checker.")
         self._stop = bool(value)
 
     @property
     def is_connected(self):
-        LOG.debug(
-            "PyMAPDL has connected to a MAPDL session. Attempting to stop the license checker."
-        )
         return self._is_connected
 
     @is_connected.setter
     def is_connected(self, value):
+        if bool(value):
+            LOG.debug("PyMAPDL has connected to a MAPDL session.")
         self._is_connected = bool(value)
 
     @threaded_daemon
