@@ -1,17 +1,17 @@
 @import url("default.css");
 
-.red {
+.red-text {
     color: red;
 }
 
-.green {
+.green-text {
     color: green;
 }
 
-.blue {
+.blue-text {
     color: blue;
 }
 
-.yellow {
-  color: yellow;
+.yellow-text {
+    color: yellow;
 }
