@@ -43,6 +43,9 @@
 .. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
 .. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_dan/dantoc.html
 
+.. # Ansys Structural Guide links:
+.. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html
+
 .. #Ansys learning
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
