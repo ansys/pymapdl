@@ -181,9 +181,9 @@ must be used.
 
 Reference
 =========
-For more information on the Krylov method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-in the **Structural Analysis** guide for Mechanical APDL and these resources:
+For more information on the Krylov method, see see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
+<ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide for Mechanical APDL
+and these resources:
 
 .. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency,
    Fully Coupled, Structural Acoustic Analysis and Optimization. PhD Thesis. Oxford Brookes University,
