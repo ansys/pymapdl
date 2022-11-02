@@ -6,7 +6,7 @@ Harmonic analysis using the frequency-sweep Krylov method
 =========================================================
 
 This example shows how to use the frequency-sweep Krylov method
-method implemented in PyAEDT. For more information, including the
+method implemented in PyMAPDL. For more information, including the
 theory behind this method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
 <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
 in the **Structural Analysis** guide for Mechanical APDL.
@@ -14,7 +14,7 @@ in the **Structural Analysis** guide for Mechanical APDL.
 Overview
 --------
 
-This example uses the frequency-sweep Kylov method to perform a harmonic analysis
+This example uses the frequency-sweep Krylov method to perform a harmonic analysis
 on a cylindrical acoustic duct and study the response of the system over
 a range of frequencies.
 
@@ -32,9 +32,9 @@ These are the main steps required:
 - Use the :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` method
   to expand the reduced solution back to the FE space.
 
-Perform required inmports
--------------------------
- Perform required imports. 
+Perform required imports
+------------------------
+ Perform required imports and launch mapdl.
 
 .. code:: ipython3
 
@@ -50,7 +50,7 @@ Perform required inmports
 
   
 Define parameters
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Define some geometry parameters and analysis settings. As mentioned earlier, the geometry
 is a cylinder defined by its radius (``cyl_r``) and its length (``cyl_L``). The length
@@ -79,10 +79,10 @@ and can have ten elements per wavelength.
     nelem_wl = 10                    # no of elements per wavelength
     tol_elem = nelem_wl * no_wl      # total number of elements across length
 
-Define elemment and materials
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Define element type and materials
+---------------------------------
 Assign fluid medium (air) properties to the duct. This example
-uses Fluid 220 (``Keyopt(2)=1``) with one degree of freedom per node pressure,
+uses Fluid 220 (``Keyopt(2)=1``) with one degree of freedom per node (pressure),
 with no FSI interface in the element.
 
 .. code:: ipython3
@@ -96,7 +96,7 @@ with no FSI interface in the element.
 
 
 Define geometry
-~~~~~~~~~~~~~~~
+---------------
 
 Create a cylinder of the required dimensions and split it into
 four segments for uniform generation of the mesh in each segment.
@@ -121,7 +121,7 @@ four segments for uniform generation of the mesh in each segment.
     # Split  the cylinder into four segments to create a more uniform mesh
     mapdl.vsbw("ALL", keep='DELETE')
     mapdl.wprota(thzx=90)
-    mapdl.vsbw("ALL", keep='DELETE') # Why this is needed?
+    mapdl.vsbw("ALL", keep='DELETE')
 
     mapdl.wpcsys(-1)
     
@@ -144,8 +144,6 @@ Create the mesh.
     # Select volume to mesh    
     mapdl.cmsel("S", "cm1")
 
-Assign length element size constraint
--------------------------------------
 
 To ensure that the volume is divided in ``tot_elem`` across its length, assign
 a length element size constraint to the longitudinal lines.
@@ -181,7 +179,7 @@ Plot the FE model.
 
 
 Define boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 Apply pressure load on one end and output impedance on other end of the acoustic duct.
 
@@ -249,7 +247,7 @@ Get the first 10 natural frequency modes of the acoustic duct.
 Run harmonic analysis using Krylov method
 -----------------------------------------
 Perform the following steps to run the harmonic analysis using the
-frequency-sweep Krylov methd.
+frequency-sweep Krylov method.
 
 **Step 1**: Generate FULL file and initialize the ``Krylov`` class object.
 
@@ -310,7 +308,7 @@ Obtain the shape of the reduced solution generated.
 
 .. code:: ipython3
 
-    result = dd.expand(residual_computation=True, residual_algorithm="l2")
+    result = dd.expand(residual_computation=True, residual_algorithm="l2",return_solution = True)
 
 Plot the pressure distribution as a function of length
 ------------------------------------------------------
@@ -342,7 +340,7 @@ Load the last result substep to get the pressure for each of the selected nodes.
 
     for each_node, loc in zip(ind, coords):
         # Get pressure at the node
-        pressure = get_pressure(each_node, substep_index)['x'][0]
+        pressure = get_pressure_at(each_node, substep_index)['x'][0]
 
         #Calculate amplitude at 60 deg
         magnitude = abs(pressure)
@@ -404,7 +402,7 @@ over a range of frequencies, such as 0 to 1000 Hz.
     dic = {}
 
     for freq in range (0,num_steps):        
-        pressure = get_pressure(node_number, freq)['x']
+        pressure = get_pressure_at(node_number, freq)['x']
         abs_pressure = abs(pressure)
 
         dic[start_freq] = abs_pressure
@@ -428,7 +426,7 @@ Plot the frequency response function for the selected node.
 
     # Plot the natural frequency as vertical lines on the FRF graph
     for itr in range(0,6):
-        plt.axvline(x=ev[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
+        plt.axvline(x=eigenvalues[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
         
     # Name the graph and the x-axis and y-axis
     plt.title("Frequency Response Function")
