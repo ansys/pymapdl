@@ -14,7 +14,7 @@ plotly==5.11.0
 pypandoc==1.10
 pytest-sphinx==0.5.0
 pythreejs==2.4.1
-pyvista==0.36.1
+pyvista==0.37.0
 sphinx-autobuild==2021.3.14
 sphinx-autodoc-typehints==1.19.4
 sphinx-copybutton==0.5.0
