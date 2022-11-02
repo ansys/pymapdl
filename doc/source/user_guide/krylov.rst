@@ -181,7 +181,7 @@ must be used.
 
 Reference
 =========
-For more information on the Krylov method, see see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
+For more information on the Krylov method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
 <ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide for Mechanical APDL
 and these resources:
 
