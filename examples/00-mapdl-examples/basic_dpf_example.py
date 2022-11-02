@@ -26,7 +26,9 @@ from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples import vmfiles
 
 ###############################################################################
-# ## Model creation
+# Model creation
+# ~~~~~~~~~~~~~~
+#
 # Running a verification manual example in MAPDL
 #
 mapdl = launch_mapdl()
