@@ -6,9 +6,9 @@ Harmonic analysis using the frequency-sweep Krylov method
 =========================================================
 
 This example shows how to use the frequency-sweep Krylov method
-method implemented in PyMAPDL. For more information, including the
+implemented in PyMAPDL. For more information, including the
 theory behind this method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
+<ansys_krylov_sweep_harmonic_analysis_>`_
 in the **Structural Analysis** guide for Mechanical APDL.
 
 Overview
@@ -118,7 +118,7 @@ four segments for uniform generation of the mesh in each segment.
     # Extrude the circular area to generate a cylinder of specified length 
     mapdl.vext("ALL", dx=cyl_L)
 
-    # Split  the cylinder into four segments to create a more uniform mesh
+    # Split the cylinder into four segments to create a more uniform mesh
     mapdl.vsbw("ALL", keep='DELETE')
     mapdl.wprota(thzx=90)
     mapdl.vsbw("ALL", keep='DELETE')
@@ -308,7 +308,7 @@ Obtain the shape of the reduced solution generated.
 
 .. code:: ipython3
 
-    result = dd.expand(residual_computation=True, residual_algorithm="l2",return_solution = True)
+    result = dd.expand(residual_computation=True, residual_algorithm="l2", return_solution = True)
 
 Plot the pressure distribution as a function of length
 ------------------------------------------------------
