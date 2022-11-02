@@ -133,7 +133,7 @@ four segments for uniform generation of the mesh in each segment.
 Create mesh
 -----------
 
-Create the mesh.
+Create the mesh and plot the FE model.
 
 .. code:: ipython3
 
@@ -158,22 +158,17 @@ a length element size constraint to the longitudinal lines.
     mapdl.lsel("U", 'loc', 'x', 0)
     mapdl.lsel("U", 'loc', 'x', cyl_L)
 
-    # Apply length constraint.
+    # Apply length constraint
     mapdl.lesize('ALL',ndiv = tol_elem)
     mapdl.lsla()
 
     # Mesh
     mapdl.vsweep('ALL')
     mapdl.allsel()
-
-Plot FE model
--------------
-
-Plot the FE model.
-
-.. code:: ipython3
-
+    
+    # Plot the FE model
     mapdl.eplot()
+
 
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
 
