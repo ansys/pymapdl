@@ -184,6 +184,27 @@ def test_dpf_connection():
         assert False
 
 
+def test_upload(mapdl, solved_box, tmpdir):
+    # Download RST file
+    rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
+
+    # Stabilishing connection
+    grpc_con = dpf_core.connect_to_server(port=DPF_PORT)
+    assert grpc_con.live
+
+    # Upload RST
+    server_file_path = dpf_core.upload_file_in_tmp_folder(rst_path)
+
+    # Creating model
+    model = dpf_core.Model(server_file_path)
+    assert model.results is not None
+
+    # Checks
+    mapdl.allsel()
+    assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
+    assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
+
+
 # def test_session_id(mapdl):
 #     session_id = f"__{generate_session_id()}"
 
