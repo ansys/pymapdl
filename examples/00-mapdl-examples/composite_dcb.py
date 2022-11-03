@@ -431,7 +431,7 @@ plt.show()
 ###############################################################################
 # Animate results using PyDPF with .anmiate() method
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Use PyDPF method .animate() to visualize the crack opening throughout the simulation as
+# Use PyDPF method :func:`FieldsContainer.animate() <ansys.dpf.core.fields_container.FieldsContainer.animate>` to visualize the crack opening throughout the simulation as
 # an animation.
 disp = model.results.displacement.on_all_time_freqs.eval()
 camera_pos = disp.animate(
