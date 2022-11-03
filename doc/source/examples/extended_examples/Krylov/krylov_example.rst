@@ -5,30 +5,36 @@
 Harmonic analysis using the frequency-sweep Krylov method
 =========================================================
 
-This example shows how to use the Krylov method in `PyMAPDL <https://mapdl.docs.pyansys.com/>`_ for harmonic
-analysis.
+This example shows how to use the frequency-sweep Krylov method
+implemented in PyMAPDL. For more information, including the
+theory behind this method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
+<ansys_krylov_sweep_harmonic_analysis_>`_
+in the **Structural Analysis** guide for Mechanical APDL.
 
-These are the main steps required:
+Overview
+--------
 
-- Generate a Krylov subspace for model reduction in the harmonic analysis using
-  the :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`
-  method.
-
-- Reduce the system of equations and solve at each frequency using the
-  :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>` method.
-
-- Expand the reduced solution back to the FE space using the
-  :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` method.
-
-Problem Description
--------------------
-
-To perform an harmonic analysis on a cylindrical acoustic duct using the Krylov method
-and study the response of the system over a range of frequencies.
-
+This example uses the frequency-sweep Krylov method to perform a harmonic analysis
+on a cylindrical acoustic duct and study the response of the system over
+a range of frequencies.
 
 The model is a cylindrical acoustic duct with pressure load on one end
 and output impedance on the other end.
+
+These are the main steps required:
+
+- Use the :func:`KrylovSolver.gensubspace() <ansys.mapdl.core.krylov.KrylovSolver.gensubspace>`
+  method to generate a Krylov subspace for model reduction in the harmonic analysis.
+
+- Use the :func:`KrylovSolver.solve() <ansys.mapdl.core.krylov.KrylovSolver.solve>`
+  method to reduce the system of equations and solve at each frequency.
+
+- Use the :func:`KrylovSolver.expand() <ansys.mapdl.core.krylov.KrylovSolver.expand>` method
+  to expand the reduced solution back to the FE space.
+
+Perform required imports
+------------------------
+ Perform required imports and launch mapdl.
 
 .. code:: ipython3
 
@@ -42,16 +48,14 @@ and output impedance on the other end.
     mapdl.clear()
     mm = mapdl.math
 
+  
+Define parameters
+-----------------
 
-    
-
-Parameters definition
-~~~~~~~~~~~~~~~~~~~~~
-
-This section defines some geometry parameters and analysis settings.
-As mentioned earlier, the geometry is a cylinder defined by its radius (``cyl_r``) and its length (``cyl_L``).
-The length of the duct is such that three complete wavelengths (``no_wl``) can fit in its length and can have
-ten elements per wavelength.
+Define some geometry parameters and analysis settings. As mentioned earlier, the geometry
+is a cylinder defined by its radius (``cyl_r``) and its length (``cyl_L``). The length
+of the duct is such that three complete wavelengths (``no_wl``) can fit in its length
+and can have ten elements per wavelength.
 
 .. code:: ipython3
 
@@ -75,11 +79,10 @@ ten elements per wavelength.
     nelem_wl = 10                    # no of elements per wavelength
     tol_elem = nelem_wl * no_wl      # total number of elements across length
 
-Element and material definition
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here we will assign fluid medium (Air) properties to the duct.
-We will use Fluid 220 (Keyopt(2)=1) with one degree of freedom per node : pressure,
+Define element type and materials
+---------------------------------
+Assign fluid medium (air) properties to the duct. This example
+uses Fluid 220 (``Keyopt(2)=1``) with one degree of freedom per node (pressure),
 with no FSI interface in the element.
 
 .. code:: ipython3
@@ -92,44 +95,45 @@ with no FSI interface in the element.
     mapdl.mp("VISC", 1, visco)
 
 
-Geometry definition
-~~~~~~~~~~~~~~~~~~~
+Define geometry
+---------------
 
-Here we discuss creating a cylinder of required dimensions and splitting it into
-4 segments for uniform generation of the mesh in each segment.
+Create a cylinder of the required dimensions and split it into
+four segments for uniform generation of the mesh in each segment.
 
 .. code:: ipython3
 
-    # Setting back to default
+    # Set back to default
     mapdl.csys(0)
     
-    # Rotating working plane for the cylinder generation
+    # Rotate working plane for the cylinder generation
     mapdl.wpcsys(-1)
     mapdl.wprota(thzx=90)
 
-    # Generating a circular area with specified radius 
+    # Generate a circular area with a specified radius 
     mapdl.cyl4(0, 0, cyl_r)
 
     mapdl.wpcsys(-1)
 
-    # Extrude the circular area to generate cylinder of specified length 
+    # Extrude the circular area to generate a cylinder of specified length 
     mapdl.vext("ALL", dx=cyl_L)
 
-    # Segment the cylinder into four quadrants to create a more uniform mesh
+    # Split the cylinder into four segments to create a more uniform mesh
     mapdl.vsbw("ALL", keep='DELETE')
     mapdl.wprota(thzx=90)
-    mapdl.vsbw("ALL", keep='DELETE') # Why this is needed?
+    mapdl.vsbw("ALL", keep='DELETE')
 
     mapdl.wpcsys(-1)
     
-    # Creating a component with the created volume
+    # Create a component with the created volume
     mapdl.cm('cm1', 'volu')
 
 
 
-Create mesh:
+Create mesh
+-----------
 
-Mesh the 
+Create the mesh and plot the FE model.
 
 .. code:: ipython3
 
@@ -154,28 +158,23 @@ a length element size constraint to the longitudinal lines.
     mapdl.lsel("U", 'loc', 'x', 0)
     mapdl.lsel("U", 'loc', 'x', cyl_L)
 
-    # Apply length constraint.
+    # Apply length constraint
     mapdl.lesize('ALL',ndiv = tol_elem)
     mapdl.lsla()
 
     # Mesh
     mapdl.vsweep('ALL')
-
     mapdl.allsel()
-
-
-
-Plot FE model:
-
-.. code:: ipython3
-
+    
+    # Plot the FE model
     mapdl.eplot()
+
 
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
 
 
 Define boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 Apply pressure load on one end and output impedance on other end of the acoustic duct.
 
@@ -203,11 +202,10 @@ Apply pressure load on one end and output impedance on other end of the acoustic
     mapdl.allsel()
 
 
-
 Perform modal analysis
 ----------------------
 
-Get the first 10 natural frequency modes of the acoustic duct
+Get the first 10 natural frequency modes of the acoustic duct.
 
 .. code:: ipython3
 
@@ -243,28 +241,24 @@ Get the first 10 natural frequency modes of the acoustic duct
 
 Run harmonic analysis using Krylov method
 -----------------------------------------
+Perform the following steps to run the harmonic analysis using the
+frequency-sweep Krylov method.
 
-**Step 1**: Generate full file.
+**Step 1**: Generate FULL file and initialize the ``Krylov`` class object.
 
 .. code:: ipython3
 
     mapdl.run('/SOLU')
-    mapdl.antype('HARMIC')  # HARMONIC ANALYSIS
+    mapdl.antype('HARMIC')  # Set options for harmonic analysis
     mapdl.hropt('KRYLOV')
     mapdl.eqslv('SPARSE')
-    mapdl.harfrq(0,1000)   # set beginning and ending frequency
-    mapdl.nsubst(100)      # set the number of frequency increments
-    mapdl.wrfull(1)        # GENERATE .FULL FILE AND STOP
+    mapdl.harfrq(0,1000)    # Set beginning and ending frequency
+    mapdl.nsubst(100)       # Set the number of frequency increments
+    mapdl.wrfull(1)         # Generate FULL file and stop
     mapdl.solve()
     mapdl.finish()
 
-
-
-Initialize Krylov class object.
-
-.. code:: ipython3
-
-    dd = mapdl.krylov
+    dd = mapdl.krylov       # Initialize Krylov class object
 
 **Step 2**: Generate a Krylov subspace of size/dimension 10 at frequency
 500 Hz for model reduction.
@@ -273,7 +267,8 @@ Initialize Krylov class object.
 
     Qz = dd.gensubspace(10, 500, check_orthogonality=True)
 
-The shape of the generated subspace.
+
+Obtain the shape of the generated subspace.
 
 .. code:: ipython3
 
@@ -292,7 +287,7 @@ from 0 Hz to 1000 Hz with ramped loading.
 
     Yz = dd.solve(0, 1000, 100, ramped_load=True)
 
-The shape of the reduced solution generated is.
+Obtain the shape of the reduced solution generated.
 
 .. code:: ipython3
 
@@ -308,9 +303,9 @@ The shape of the reduced solution generated is.
 
 .. code:: ipython3
 
-    result = dd.expand(residual_computation=True, residual_algorithm="l2")
+    result = dd.expand(residual_computation=True, residual_algorithm="l2", return_solution = True)
 
-Results: Pressure distribution as a function of length
+Plot the pressure distribution as a function of length
 ------------------------------------------------------
 
 Plot the pressure distribution over the length of the duct on nodes where Y, Z coordinates are zero.
@@ -334,13 +329,13 @@ Load the last result substep to get the pressure for each of the selected nodes.
     substep_index = 99
 
     def get_pressure_at(node, step=1):
-        """Get the pressure at a given node at a given step (by default first step)"""
+        """Get pressure at a given node at a given step (by default first step)"""
         index_num = np.where(result[step]['node'] == node)
         return result[step][index_num]
 
     for each_node, loc in zip(ind, coords):
         # Get pressure at the node
-        pressure = get_pressure(each_node, substep_index)['x'][0]
+        pressure = get_pressure_at(each_node, substep_index)['x'][0]
 
         #Calculate amplitude at 60 deg
         magnitude = abs(pressure)
@@ -351,13 +346,13 @@ Load the last result substep to get the pressure for each of the selected nodes.
         x_data.append(loc[0])  # X-Coordenate
         y_data.append(pressure_a)  # Nodal pressure at 60 degrees
 
-Sort the results according to the X-coordinate:
+Sort the results according to the X coordinate.
 
 .. code:: ipython3
 
     sorted_x_data, sorted_y_data = zip(*sorted(zip(x_data, y_data)))
 
-Plot the calculated data:
+Plot the calculated data.
 
 .. code:: ipython3
 
@@ -378,11 +373,11 @@ Plot the calculated data:
 .. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_36_1.png
 
 
-Results: Plot frequency response function
-------------------------------------------
+Plot the frequency response function
+------------------------------------
 
 Plot the frequency response function of any node along the length of the cylindrical duct.
-For example, let us plot the frequency response function for a node along 0.2 in X-direction of the duct.
+This code plots the frequency response function for a node along 0.2 in the X direction of the duct.
 
 .. code:: ipython3
 
@@ -391,7 +386,7 @@ For example, let us plot the frequency response function for a node along 0.2 in
     
 
 Get the response of the system for the selected node
-over a range of frequencies [0-1000 Hz]:
+over a range of frequencies, such as 0 to 1000 Hz.
 
 .. code:: python3
 
@@ -402,13 +397,13 @@ over a range of frequencies [0-1000 Hz]:
     dic = {}
 
     for freq in range (0,num_steps):        
-        pressure = get_pressure(node_number, freq)['x']
+        pressure = get_pressure_at(node_number, freq)['x']
         abs_pressure = abs(pressure)
 
         dic[start_freq] = abs_pressure
         start_freq += step_val
 
-Sort the results:
+Sort the results.
 
 .. code:: python3
 
@@ -418,7 +413,7 @@ Sort the results:
         
         
 
-Plot the frequency response function for the selected node: 
+Plot the frequency response function for the selected node. 
 
 .. code:: python3
     
@@ -426,7 +421,7 @@ Plot the frequency response function for the selected node:
 
     # Plot the natural frequency as vertical lines on the FRF graph
     for itr in range(0,6):
-        plt.axvline(x=ev[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
+        plt.axvline(x=eigenvalues[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
         
     # Name the graph and the x-axis and y-axis
     plt.title("Frequency Response Function")
