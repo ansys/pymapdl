@@ -26,7 +26,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
     technology_showcase_examples/techdemo-20/20-example-technology-showcase-dynamic-simulation-PCB
     technology_showcase_examples/techdemo-28/ex_28-tecfricstir
 
-.. include:: technology_showcase_examples/README.txt
+.. include:: technology_showcase_examples/index.rst
    :start-line: 2
 
 

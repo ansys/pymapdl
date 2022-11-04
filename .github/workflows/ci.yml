@@ -24,10 +24,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 3
-  RESET_EXAMPLES_CACHE: 3
-  RESET_DOC_BUILD_CACHE: 3
-  RESET_AUTOSUMMARY_CACHE: 3
+  RESET_PIP_CACHE: 9
+  RESET_EXAMPLES_CACHE: 9
+  RESET_DOC_BUILD_CACHE: 9
+  RESET_AUTOSUMMARY_CACHE: 9
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "{PYMAPDL_VERSION}={$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')}" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
 
@@ -104,7 +104,7 @@ jobs:
         run: pip wheel . -w wheelhouse
 
       - name: Zip wheelhouse
-        uses: vimtor/action-zip@v1
+        uses: vimtor/action-zip@master
         with:
           files: wheelhouse
           dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
@@ -177,7 +177,7 @@ jobs:
 
       - name: Retrieve PyMAPDL version
         run: |
-          echo "::set-output name=PYMAPDL_VERSION::$(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+          echo "{PYMAPDL_VERSION}={$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')}" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
         id: version
 
@@ -212,7 +212,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Build Documentation
         run: |
@@ -360,7 +360,7 @@ jobs:
       - name: DPF Server Activation
         run: |
           docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -v `pwd`:/dpf -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
         run: |

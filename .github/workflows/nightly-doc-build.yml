@@ -5,6 +5,9 @@ on:
     - cron:  '0 4 * * *'
   workflow_dispatch:
 
+permissions:
+  packages: read
+
 jobs:
   nightly_docs_build:
     runs-on: ubuntu-20.04
@@ -12,9 +15,12 @@ jobs:
     env:
       DISPLAY: ':99.0'
       MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v21.2.1'
-      PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_START_INSTANCE: FALSE
+      PYMAPDL_PORT: 21000  # default won't work on azure
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYANSYS_OFF_SCREEN: True
+      DPF_START_SERVER: False
+      DPF_PORT: 21002
 
     steps:
       - uses: actions/checkout@v3
@@ -60,6 +66,10 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
   
+      - name: DPF Server Activation
+        run: |
+          docker run -d -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
+
       - name: Build Documentation
         run: |
           pip install -r requirements/requirements_docs.txt

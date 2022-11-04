@@ -1416,7 +1416,7 @@ def test_result_file(mapdl, solved_box):
 
 @skip_in_cloud
 def test_file_command_local(mapdl, cube_solve, tmpdir):
-    rst_file = mapdl._result_file
+    rst_file = mapdl.result_file
 
     # check for raise of non-exising file
     with pytest.raises(FileNotFoundError):
@@ -1425,11 +1425,16 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     # change directory
     try:
         old_path = mapdl.directory
-        mapdl.directory = str(tmpdir)
-        assert Path(mapdl.directory) == tmpdir
+        tmp_dir = tmpdir.mkdir("asdf")
+        mapdl.directory = str(tmp_dir)
+        assert Path(mapdl.directory) == tmp_dir
+
+        mapdl.slashsolu()
+        mapdl.solve()
 
         mapdl.post1()
         mapdl.file(rst_file)
+
     finally:
         # always revert to preserve state
         mapdl.directory = old_path

@@ -217,6 +217,8 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
+        if isinstance(level, str):
+            level = string_to_loglevel[level.upper()]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
@@ -343,6 +345,9 @@ class Logger:
         # create default main logger
         self.logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
+        if isinstance(level, str):
+            level = level.upper()
+
         self.logger.setLevel(level)
         self.logger.propagate = True
         self.level = self.logger.level  # TODO: TO REMOVE
@@ -402,6 +407,8 @@ class Logger:
 
     def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
+        if isinstance(level, str):
+            level = string_to_loglevel[level.upper()]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
