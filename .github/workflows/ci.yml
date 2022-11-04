@@ -428,9 +428,134 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
+  build_test_ubuntu:
+    name: Build and Unit Testing
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/pyansys/pymapdl/mapdl:ubuntu  # Be updated later
+      options: "--entrypoint /bin/bash"
+      env:
+        ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
+        PYANSYS_OFF_SCREEN: True
+        ON_CI: True
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: 3.8
+
+      - name: Install OS packages
+        run: |
+          sudo apt update
+          sudo apt install libgl1-mesa-glx xvfb
+
+      - name: Test virtual framebuffer
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: Install ansys-mapdl-core
+        run: |
+          pip install build
+          python -m build
+          pip install dist/*.whl
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Login in Github Container registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull, launch, and validate MAPDL service
+        run: .ci/start_mapdl.sh
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+
+      - name: Unit Testing Requirements Installation
+        run: |
+          pip install -r requirements/requirements_tests.txt
+
+      # - name: DPF Server Activation
+      #   run: |
+      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
+      - name: Unit Testing
+        run: |
+          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+
+      - uses: codecov/codecov-action@v3
+        name: 'Upload coverage to Codecov'
+
+      - name: Check package
+        run: |
+          pip install twine
+          twine check dist/*
+
+      - name: Upload wheel and binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: PyMAPDL-packages
+          path: dist/
+          retention-days: 7
+
+      - name: Display files structure
+        if: always()
+        run: |
+          mkdir logs-${{ matrix.mapdl-version }} && echo "Successfully generated directory ${{ matrix.mapdl-version }}"
+          echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
+          ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
+
+      - name: Display docker files structures
+        if: always()
+        run: |
+          echo "::group:: Display files structure" && docker exec mapdl /bin/bash -c "ls -R" && echo "::endgroup::"
+          docker exec mapdl /bin/bash -c "ls -R" > ./logs-${{ matrix.mapdl-version }}/docker_files_structure.txt
+
+      - name: Collect MAPDL logs on failure
+        if: always()
+        run: |
+          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'"
+          docker exec mapdl /bin/bash -c "if compgen -G 'file*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi"
+          docker exec mapdl /bin/bash -c "if compgen -G 'file*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi"
+          docker exec mapdl /bin/bash -c "if compgen -G 'file*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi"
+          docker exec mapdl /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi"
+          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
+
+      - name: Tar logs
+        if: always()
+        run: |
+          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
+          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
+
+      - name: Upload logs to GitHub
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-${{ matrix.mapdl-version }}.tgz
+
+      - name: Display MAPDL Logs
+        if: always()
+        run: cat log.txt
+
+      - name: List main files
+        if: always()
+        run: |
+          if compgen -G './logs-${{ matrix.mapdl-version }}/*.err' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi
+          if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi
+          if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
+
+
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test]
+    needs: [docs_build, build_test, build_test_ubuntu]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
