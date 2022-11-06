@@ -434,6 +434,10 @@ jobs:
     container:
       image: ghcr.io/pyansys/pymapdl/mapdl:ubuntu  # Be updated later
       options: "--entrypoint /bin/bash"
+      credentials:
+        username: ${{ secrets.GH_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
       env:
         ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
         PYANSYS_OFF_SCREEN: True
@@ -445,7 +449,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4.3.0
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install OS packages
         run: |
