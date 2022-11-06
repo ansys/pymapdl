@@ -32,23 +32,7 @@ except:
     HAS_CORBA = False
 
 # CORBA and console available versions
-versions = [
-    "170",  # 17.0
-    "182",  # 18.2
-    "182",  # 18.2
-    "190",  # 19.0
-    "191",  # 19.1
-    "192",  # 19.2
-    "193",  # 2019R1
-    "194",  # 2019R2
-    "195",  # 2019R3
-    "201",  # 2020R1
-    "202",  # 2020R2
-    "211",  # 2021R1
-    "212",  # 2021R2
-    "221",  # 2022R1
-    "222",  # 2022R2
-]
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
 valid_versions = []
 for version in versions:
@@ -274,6 +258,7 @@ def test_remove_temp_files():
         assert os.path.isdir(path)
 
 
+@pytest.mark.flaky(reruns=3, reruns_delay=2)
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
