@@ -428,6 +428,47 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
+  test_windows:
+    name: Unit Testing on Windows
+    runs-on: [self-hosted, Windows, pymapdl]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: 3.9
+
+      - name: Checking python
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Install ansys-mapdl-core
+        run: |
+          python -m pip install build
+          python -m build
+          python -m pip install dist/*.whl
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Unit Testing Requirements Installation
+        run: |
+          python -m pip install -r requirements/requirements_tests.txt
+
+      # - name: DPF Server Activation
+      #   run: |
+      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
+      - name: Unit Testing
+        run: |
+          set PYMAPDL_PORT=
+          set PYMAPDL_START_INSTANCE=
+          pytest -v -k "not test_database and not test_dpf" --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+
+      - uses: codecov/codecov-action@v3
+        name: 'Upload coverage to Codecov'
+
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [docs_build, build_test]
