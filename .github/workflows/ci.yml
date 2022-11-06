@@ -429,7 +429,7 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
   build_test_ubuntu:
-    name: Build and Unit Testing
+    name: Build and Unit Testing on Ubuntu
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/pyansys/mapdl:ubuntu  # Be updated later
@@ -453,8 +453,8 @@ jobs:
 
       - name: Install OS packages
         run: |
-          sudo apt update
-          sudo apt install libgl1-mesa-glx xvfb
+          apt update
+          apt install libgl1-mesa-glx xvfb
 
       - name: Test virtual framebuffer
         run: |
@@ -468,18 +468,6 @@ jobs:
           pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-      - name: Login in Github Container registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull, launch, and validate MAPDL service
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: Unit Testing Requirements Installation
         run: |
