@@ -447,6 +447,11 @@ jobs:
       - name: Check for dockerenv file
         run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
 
+      - name: Unset env var to run locally
+        run: |
+          unset PYMAPDL_PORT
+          unset PYMAPDL_START_INSTANCE
+
       - uses: actions/checkout@v3
 
       - name: Setup Python
