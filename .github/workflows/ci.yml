@@ -483,6 +483,8 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
+          unset PYMAPDL_PORT
+          unset PYMAPDL_START_INSTANCE
           python -m pip install -r requirements/requirements_tests.txt
 
       # - name: DPF Server Activation
