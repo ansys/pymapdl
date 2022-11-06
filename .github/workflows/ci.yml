@@ -432,7 +432,7 @@ jobs:
     name: Build and Unit Testing
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/pyansys/pymapdl/mapdl:ubuntu  # Be updated later
+      image: ghcr.io/pyansys/mapdl:ubuntu  # Be updated later
       options: "--entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
