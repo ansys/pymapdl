@@ -461,15 +461,15 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          python pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
+          python -m pip install -r .ci/requirements_test_xvfb.txt
+          python -m xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
         run: |
           python -m pip install build
           python -m build
           python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -m xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
 
       - name: Unit Testing Requirements Installation
