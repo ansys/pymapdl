@@ -458,20 +458,20 @@ jobs:
 
       - name: Test virtual framebuffer
         run: |
-          pip install -r .ci/requirements_test_xvfb.txt
+          python pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
         run: |
-          pip install build
+          python pip install build
           python -m build
-          pip install dist/*.whl
+          python pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
 
       - name: Unit Testing Requirements Installation
         run: |
-          pip install -r requirements/requirements_tests.txt
+          python pip install -r requirements/requirements_tests.txt
 
       # - name: DPF Server Activation
       #   run: |
@@ -480,7 +480,7 @@ jobs:
 
       - name: Unit Testing
         run: |
-          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          python xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         name: 'Upload coverage to Codecov'
