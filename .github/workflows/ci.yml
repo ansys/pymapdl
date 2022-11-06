@@ -483,8 +483,6 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
-          unset PYMAPDL_PORT
-          unset PYMAPDL_START_INSTANCE
           python -m pip install -r requirements/requirements_tests.txt
 
       # - name: DPF Server Activation
@@ -494,6 +492,8 @@ jobs:
 
       - name: Unit Testing
         run: |
+          unset PYMAPDL_PORT
+          unset PYMAPDL_START_INSTANCE
           xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
