@@ -7,7 +7,6 @@
 *.so
 *.o
 *.cache
-coverage.xml
 
 # OS generated files #
 ######################
@@ -55,6 +54,7 @@ tests/cyclic/htmlcov
 *,cover
 .benchmarks/
 test-output.xml
+coverage.xml
 
 \#*
 .\#*
