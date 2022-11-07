@@ -19,6 +19,7 @@ env:
   DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
+  ON_CI: True
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
@@ -429,28 +430,16 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
   build_test_ubuntu:
-    name: Build and Unit Testing on Ubuntu
+    name: Local Unit Testing on Ubuntu
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/pyansys/mapdl:ubuntu  # Be updated later
+      image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       options: "--entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
-      env:
-        ANSYSLMD_LICENSE_FILE: 1055@${{ secrets.LICENSE_SERVER }}
-        PYANSYS_OFF_SCREEN: True
-        ON_CI: True
 
     steps:
-      - name: Check for dockerenv file
-        run: (ls /.dockerenv && echo Found dockerenv) || (echo No dockerenv)
-
-      - name: Unset env var to run locally
-        run: |
-          unset PYMAPDL_PORT
-          unset PYMAPDL_START_INSTANCE
-
       - uses: actions/checkout@v3
 
       - name: Setup Python
@@ -499,7 +488,6 @@ jobs:
 
       - uses: codecov/codecov-action@v3
         name: 'Upload coverage to Codecov'
-
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
