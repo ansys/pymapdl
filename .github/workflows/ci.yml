@@ -436,15 +436,17 @@ jobs:
       - uses: actions/checkout@v3
 
       # - name: Setup Python
-      #   uses: actions/setup-python@v4.3.0
+      #   uses: actions/setup-python@v4.3.2
       #   with:
       #     python-version: 3.9
 
       - name: Checking python
+        shell: powershell
         run: |
           python -m pip install --upgrade pip
 
       - name: Install ansys-mapdl-core
+        shell: powershell
         run: |
           python -m pip install build
           python -m build
@@ -452,6 +454,7 @@ jobs:
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Unit Testing Requirements Installation
+        shell: powershell
         run: |
           python -m pip install -r requirements/requirements_tests.txt
 
