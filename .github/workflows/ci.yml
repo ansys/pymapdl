@@ -11,9 +11,6 @@ on:
 
 env:
   PACKAGE_NAME: PyMAPDL
-  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
-  PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
@@ -119,6 +116,10 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    env:
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
 
     steps:
       - uses: actions/checkout@v3
@@ -306,6 +307,10 @@ jobs:
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0']
+    env:
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
 
     steps:
       - uses: actions/checkout@v3
