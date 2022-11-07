@@ -456,7 +456,7 @@ jobs:
           python -m pip install build
           python -m build
           $FILE_=Resolve-Path '.\dist\*.whl'
-          python -m pip install $FILE_.Path
+          python -m pip install $FILE_.Path --upgrade
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Unit Testing Requirements Installation
