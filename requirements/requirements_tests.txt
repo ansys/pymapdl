@@ -7,5 +7,5 @@ pytest==7.2.0
 pytest-cov==4.0.0
 pyvista==0.37.0
 pyansys-tools-report==0.3.2
-vtk==9.0.3
+vtk==9.2.2
 pytest-rerunfailures==10.2
