@@ -3685,7 +3685,7 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.groups()[0]
+                    error_message = error_message.group(0)  # Catching only the first error.
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
