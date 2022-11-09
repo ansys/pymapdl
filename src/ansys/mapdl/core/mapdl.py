@@ -3663,14 +3663,17 @@ class _MapdlCore(Commands):
                 # Extracting only the first 'lines_number' lines.
                 # This is important. Regex has problems parsing long messages.
                 lines_number = 20
-                partial_output = "\n".join(
+                if len(response.splitlines()) <= lines_number:
+                    partial_output = response
+                else:
+                    partial_output = "\n".join(
                     response.splitlines()[index : (index + lines_number)]
                 )
 
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",  # we might consider to use only one \n.
                     partial_output,
                     re.DOTALL,
                 )
