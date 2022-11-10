@@ -75,6 +75,6 @@ It is visible at the following link: `Friction Stir Welding (FSW) Simulation <ht
 Recommendations
 ---------------
 
-As the dynamic examples are examples that have to be run at each Documentation building, make sure to
+As the dynamic examples are examples that have to be run at each Documentation build, make sure to
 make them very short. To get around the problem of execution time, feel free to use the static or the
 semi-static examples.
