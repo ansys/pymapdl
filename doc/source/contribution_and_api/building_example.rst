@@ -7,7 +7,7 @@ Building an example
 
 .. currentmodule:: ansys.mapdl.core.building_example
 
-To run the documentation, you need to have the correct versions of each tools. To do so, execute the
+To run the documentation, you need to have the correct versions of each tool. To do so, execute the
 following instruction.
 
 .. code:: bash
