@@ -123,6 +123,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
 
    commands
    database
+   building_example
    geometry
    helper
    inline
