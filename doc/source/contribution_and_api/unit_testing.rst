@@ -13,9 +13,9 @@ changes on the code are consistent with other parts of the code
 and verify that the changes are the expected in the implementation.
 
 Unit tests are in the ``tests`` directory inside this repository.
-All the tests that you'll find in this  directory are not
-Unit tests. Some of them are Integration tests. The difference between
-an Unit test and an Integration one  is that the Integration tests will
+All the tests that you will find in this  directory are not
+unit tests. Some of them are integration tests. The difference between
+a unit test and an integration one is that integration tests will
 test several units of the code and ensure that they work together.
 
 To verify that all the code is properly tested, `Codecov <https://github.com/codecov>`_
@@ -26,7 +26,7 @@ the checks that must be approved to merge the code.
 Test Validation GitHub workflow
 -------------------------------
 
-Unit tests and Integration tests are part of the Continuous Integration (CD) approach. 
+Unit tests and integration tests are part of the Continuous Integration (CD) approach. 
 Combined with the Continuous Development (CD) one, they form the CI/CD approach. 
 The latter provides continuous automation and monitoring
 throughout the application lifecycle: from the coding and testing
@@ -38,7 +38,7 @@ phases to the deployment phase.
 Create a unit test 
 ------------------
 
-In the pymapdl repository, the tests run using the **pytest package**. 
+In the PyMAPDL repository, tests run using ``pytest``. 
 
 To create a pytest file, its name must be in the form ``test_filename.py``.
 
@@ -49,13 +49,13 @@ Here are some checks to create a good unit test:
 3. The tests cover all the scenarios of the code. You can check it with **Codecov**.
 4. The test should return the same result each time. 
 5. The tests are independent.
-6. Each test tests only one part of the code at a time.
+6. Each test verifies only one part of the code at a time.
 7. The test should run fast.
 
 `What makes a good unit test <https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test>`_ 
 is an exhaustive list of tips for creating good unit tests.
 
-As a lot of pymapdl tests imply server connection, most of the test are integration tests.
+Since the majority of PyMAPDL tests imply server connection, most of the test are integration tests.
 
 `The unit tests and the integration tests <https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py>`_ of the 
 **ansys.mapdl.core.math** library are one of the numerous tests that you can find in
