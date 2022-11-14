@@ -59,7 +59,26 @@ As a lot of pymapdl tests imply server connection, most of the test are integrat
 
 `The unit tests and the integration tests <https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py>`_ of the 
 **ansys.mapdl.core.math** library are one of the numerous tests that you can find in
-the `test directory <https://github.com/pyansys/pymapdl/tree/main/tests>`_ . 
-You'll find examples to understand how you can use the pytest package.
+the `test directory <https://github.com/pyansys/pymapdl/tree/main/tests>`_ .
+You'll find examples to understand how you can use the pytest package. Here is two of them: 
 
-Please take note of the `pytest documentation <https://docs.pytest.org/en/7.2.x/>`_ .
+.. code:: python
+
+    >>> import numpy as np
+    >>> import ansys.mapdl.core.math as apdl_math
+
+    >>> @pytest.fixture(scope="module")
+    >>> def mm(mapdl):
+    >>>     return mapdl.math
+
+    >>> def test_rand(mm):
+    >>>     w = mm.rand(10)
+    >>>     assert w.size == 10
+
+    >>> def test_matrix_addition(mm):
+    >>>     m1 = mm.rand(10, 10)
+    >>>     m2 = mm.rand(10, 10)
+    >>>     m3 = m1 + m2
+    >>>     assert np.allclose(m1.asarray() + m2.asarray(), m3.asarray())
+
+You can find the `pytest documentation <https://docs.pytest.org/en/7.2.x/>`_ for further explanations.
