@@ -60,7 +60,7 @@ As a lot of pymapdl tests imply server connection, most of the test are integrat
 `The unit tests and the integration tests <https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py>`_ of the 
 **ansys.mapdl.core.math** library are one of the numerous tests that you can find in
 the `test directory <https://github.com/pyansys/pymapdl/tree/main/tests>`_ .
-You'll find examples to understand how you can use the pytest package. Here is two of them: 
+You will find examples to understand how you can use the ``pytest`` package. Here is two of them: 
 
 .. code:: python
 
