@@ -514,7 +514,7 @@ def contact_solve(mapdl):
     # ***** Problem parameters ********
     l = 76.2e-03 / 3  # Length of each plate,m
     w = 31.75e-03 / 2  # Width of each plate,m
-    t = 3.18e-03  # Tickness of each plate,m
+    t = 3.18e-03  # Thickness of each plate,m
     r1 = 7.62e-03  # Shoulder radius of tool,m
     h = 15.24e-03  # Height of tool, m
     l1 = r1  # Starting location of tool on weldline

@@ -59,7 +59,7 @@ print(mapdl.elist())
 
 ###############################################################################
 # Access them as a list of arrays
-# See the documentation on ``mapdl.mesh.elem`` for interperting the
+# See the documentation on ``mapdl.mesh.elem`` for interpreting the
 # individual elements
 for elem in mapdl.mesh.elem:
     print(elem)
