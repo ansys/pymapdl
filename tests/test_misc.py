@@ -179,8 +179,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     Hence we cannot really test the files are being uploaded.
     So the assert in the '/' directory are commented.
     """
-    old_state = mapdl._local
-    mapdl._local = True
+    old_local = mapdl._local
 
     if file_ == "dumdum.dummy":
         file_path = str(tmpdir.mkdir("tmpdir").join(file_))
@@ -191,9 +190,12 @@ def test_load_file_local(mapdl, tmpdir, file_):
     if os.path.isfile(file_path):
         os.remove(file_path)
 
+    mapdl._local = True
     # When the file does not exist
     with pytest.raises(FileNotFoundError):
         load_file(mapdl, file_path)
+
+    mapdl._local = False  # Otherwise the list_files() fails
 
     # File is in the python working directory
     with open(file_path, "w") as fid:
@@ -201,15 +203,24 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     assert os.path.exists(file_path)
     if mapdl.directory != "/":
-        assert not os.path.exists(os.path.join(mapdl.directory, file_))
+        if old_local:
+            pth = os.path.join(mapdl.directory, file_)
+            assert not os.path.exists(pth)
+        else:
+            assert not file_ in mapdl.list_files()
 
+    mapdl._local = True  # to keep checking locally
     load_file(mapdl, file_path)
 
     # File is in both, the python working directory and MAPDL directory
     assert os.path.exists(file_path)
 
     if mapdl.directory != "/":
-        assert os.path.exists(os.path.join(mapdl.directory, file_))
+        if old_local:
+            pth = os.path.join(mapdl.directory, file_)
+            assert os.path.exists(pth)
+        else:
+            assert file_ in mapdl.list_files()
 
         with pytest.warns(UserWarning, match=f"The file '{file_}' is present in both,"):
             load_file(mapdl, file_path)
@@ -217,13 +228,17 @@ def test_load_file_local(mapdl, tmpdir, file_):
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "empty" in fid.read()
 
+    mapdl._local = False  # Otherwise list_files() fails
+
     # checking the overwriting with local
     # Changing local file first
     with open(file_path, "w") as fid:
         fid.write("not that empty")
 
+    mapdl._local = True
     load_file(mapdl, file_path, priority_mapdl_file=False)
-
+    mapdl._local = False
+    
     if mapdl.directory != "/":
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
@@ -233,12 +248,13 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     assert not os.path.exists(file_path)
 
+    mapdl._local = True
     if mapdl.directory != "/":
         assert os.path.exists(os.path.join(mapdl.directory, file_))
 
         load_file(mapdl, file_path)
 
-    mapdl._local = old_state
+    mapdl._local = old_local
     if mapdl.directory != "/":
         os.remove(os.path.join(mapdl.directory, file_))
 
