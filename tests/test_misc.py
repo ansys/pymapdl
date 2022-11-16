@@ -179,6 +179,10 @@ def test_load_file_local(mapdl, tmpdir, file_):
     Hence we cannot really test the files are being uploaded.
     So the assert in the '/' directory are commented.
     """
+    # first cleaning
+    mapdl.slashdelete(file_)
+
+    # Storing local
     old_local = mapdl._local
 
     if file_ == "dumdum.dummy":
@@ -255,8 +259,10 @@ def test_load_file_local(mapdl, tmpdir, file_):
         load_file(mapdl, file_path)
 
     mapdl._local = old_local
-    if mapdl.directory != "/":
+    if not old_local and mapdl.directory != "/":
         os.remove(os.path.join(mapdl.directory, file_))
+    
+    mapdl.slashdelete(file_)
 
 
 def test_plain_report():
