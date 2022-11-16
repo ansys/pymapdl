@@ -146,6 +146,7 @@ class DPFResult(Result):
         self._loaded = False
         self._update_required = False  # if true, it triggers a update on the RST file
         self._cached_dpf_model = None
+        self._connected = False
         self._is_remote = (
             False  # Default false, unless using self.connect or the env var are set.
         )
@@ -166,9 +167,106 @@ class DPFResult(Result):
         It can be shorten by the argument 'length'."""
         return "__" + generate_session_id(length)
 
+    def _connect_to_dpf_using_mode(
+        self, mode="InProcess", external_ip=None, external_port=None
+    ):
+        if mode == "InProcess":
+            dpf.server.set_server_configuration(
+                dpf.server_factory.AvailableServerConfigs.InProcessServer
+            )
+            srvr = dpf.server.start_local_server()
+        elif mode == "LocalGrpc":
+            dpf.server.set_server_configuration(
+                dpf.server_factory.AvailableServerConfigs.GrpcServer
+            )
+            srvr = dpf.server.start_local_server()
+        elif mode == "RemoteGrpc":
+            dpf.server.set_server_configuration(
+                dpf.server_factory.AvailableServerConfigs.GrpcServer
+            )
+            if external_ip is not None and external_port is not None:
+                srvr = dpf.server.connect_to_server(ip=external_ip, port=external_port)
+            else:
+                raise Exception(
+                    "external_ip and external_port should be provided for RemoteGrpc communication"
+                )
+        self._connection = srvr
+
+    def _try_connect_inprocess(self):
+        try:
+            self._connect_to_dpf_using_mode(mode="InProcess")
+            self._connected = True
+        except DPFServerException:  # probably should filter a bit here
+            self._connected = False
+
+    def _try_connect_localgrpc(self):
+        try:
+            self._connect_to_dpf_using_mode(mode="LocalGrpc")
+            self._connected = True
+        except DPFServerException:  # probably should filter a bit here
+            self._connected = False
+
+    def _try_connect_remotegrpc(self, DPF_IP, DPF_PORT):
+        try:
+            self._connect_to_dpf_using_mode(
+                mode="RemoteGrpc", external_ip=DPF_IP, external_port=DPF_PORT
+            )
+            self._connected = True
+            self._is_remote = True
+        except DPFServerException:
+            self._connected = False
+
+    def _iterate_connections(self, DPF_IP, DPF_PORT):
+
+        if not self._connected:
+            self._try_connect_inprocess()
+
+        if not self._connected:
+            self._try_connect_localgrpc()
+
+        if not self._connected:
+            self._try_connect_remotegrpc(DPF_IP, DPF_PORT)
+
+        if self._connected:
+            return
+
+        raise DPFServerException(
+            "Could not connect to DPF server after trying all the available options."
+        )
+
+    def _set_dpf_env_vars(self, ip=None, port=None):
+        if ip is not None:
+            DPF_IP = ip
+        elif "DPF_IP" in os.environ:
+            DPF_IP = os.environ["DPF_IP"]
+        elif self.mapdl:
+            DPF_IP = self.mapdl._ip
+        else:
+            DPF_IP = "127.0.0.1"
+
+        if port is not None:
+            DPF_PORT = port
+        elif "DPF_PORT" in os.environ:
+            DPF_PORT = os.environ["DPF_PORT"]
+        elif self.mapdl:
+            DPF_PORT = self.mapdl._port + 3
+        else:
+            DPF_PORT = 50055
+        return DPF_IP, DPF_PORT
+
+    def _connect_to_dpf(self, ip=None, port=None):
+
+        if not self._mode_rst and not self._mapdl._local:
+            self._try_connect_remotegrpc(ip, port)
+
+        else:
+            # any connection method is supported because the file local.
+            self._iterate_connections(DPF_IP, DPF_PORT)
+
     def connect_to_server(self, ip=None, port=None):
         """
         Connect to the DPF Server.
+
 
         Parameters
         ----------
@@ -196,30 +294,17 @@ class DPFResult(Result):
 
         1. Values supplied to this function.
         2. The environment variables
+        3. The MAPDL stored values (if working on MAPDL mode)
         3. The default values
 
         """
-        if not ip:
-            DPF_IP = ip = os.environ.get("DPF_IP", "127.0.0.1")  # Set in ci.yaml
 
-        if not port:
-            DPF_PORT = port = int(os.environ.get("DPF_PORT", 50054))
-
-        self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
+        ip, port = self._set_dpf_env_vars(ip, port)
         check_valid_ip(ip)
 
-        try:
-            grpc_con = dpf.connect_to_server(ip, port, as_global=True)
-        except DPFServerException as e:
-            if "failed to connect to all addresses" in str(e):
-                raise MapdlRuntimeError(
-                    f"We could not connect to the DPF session in {ip}:{port}. Check the connection settings."
-                )
+        self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
 
-        self._is_remote = True
-        self._grpc_con = grpc_con
-
-        return grpc_con
+        self._connect_to_dpf(ip, port)
 
     def _dpf_remote_envvars(self):
         """Return True if any of the env variables are set"""
@@ -2167,3 +2252,17 @@ class DPFResult(Result):
 
 # def plot_principal_nodal_stress(self):
 #     pass
+
+
+class DPFResultRST(DPFResult):
+    """Interface to the DPF result class based on the RST file format."""
+
+    def connect(self):
+        pass
+
+
+class DPFResultMAPDL(DPFResult):
+    """Interface to the DPF result class based on the MAPDL instance"""
+
+    def connect(self):
+        pass
