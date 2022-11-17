@@ -488,6 +488,8 @@ jobs:
 
       - uses: codecov/codecov-action@v3
         name: 'Upload coverage to Codecov'
+        with:
+          root_dir: ${{ github.workspace }}
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
