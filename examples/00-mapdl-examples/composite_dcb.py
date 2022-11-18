@@ -304,13 +304,20 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 # Use PyDPF to visualize the crack opening throughout the simulation as
 # an animation.
 
-# Upload file to DPF server
-temp_directory = tempfile.gettempdir()
-rst_path = mapdl.download_result(temp_directory)
-server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+try:
+    # ONLY IF DPF SERVER DEPLOYED WITH gRPC COMMUNICATION
+    # Upload file to DPF server
+    temp_directory = tempfile.gettempdir()
+    rst_path = mapdl.download_result(temp_directory)
+    dpf.connect_to_server()
+    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+    data_src = dpf.DataSources(server_file_path)
+except:
+    # Using DPF locally
+    rst = mapdl.download_result()
+    data_src = dpf.DataSources(rst)
 
 # Generate the DPF model
-data_src = dpf.DataSources(server_file_path)
 model = Model(data_src)
 
 # Get the mesh of the whole model
@@ -420,6 +427,16 @@ plt.plot(d_tot, f_tot, "k")
 plt.ylabel("Force [N]")
 plt.xlabel("Displacement [mm]")
 plt.show()
+
+###############################################################################
+# Animate results using PyDPF with .anmiate() method
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Use PyDPF method :func:`FieldsContainer.animate() <ansys.dpf.core.fields_container.FieldsContainer.animate>` to visualize the crack opening throughout the simulation as
+# an animation.
+disp = model.results.displacement.on_all_time_freqs.eval()
+camera_pos = disp.animate(
+    scale_factor=10.0, save_as="dcb_animate.gif", return_cpos=True, show_axes=True
+)
 
 ###############################################################################
 #

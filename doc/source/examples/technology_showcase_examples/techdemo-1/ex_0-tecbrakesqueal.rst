@@ -220,7 +220,6 @@ Start this example by launching MAPDL and loading the model.
    pyvista.global_theme.background = 'white'
    pyvista.global_theme.window_size = [600, 400]
    pyvista.global_theme.axes.show = True
-   pyvista.global_theme.antialiasing = True
    pyvista.global_theme.show_scalar_bar = True
 
    from ansys.mapdl.core import examples
