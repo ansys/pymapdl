@@ -84,7 +84,6 @@
 .. _licensing_guide_pdf: ./_assets/lic_guide.pdf
 .. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 
-
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
 .. _conda: https://conda.io
