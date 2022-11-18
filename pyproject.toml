@@ -62,7 +62,7 @@ tests = [
     "vtk==9.0.3",
     "pytest-rerunfailures==10.2",
 ]
-docs = [
+doc = [
     "Sphinx==5.3.0",
     "ansys-dpf-core==0.6.2",
     "ansys-mapdl-reader==0.52.3",
