@@ -50,7 +50,7 @@ paths = [
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -67,7 +67,7 @@ def test_validate_sw():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -78,7 +78,7 @@ def test_version_from_path(path_data):
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -88,7 +88,7 @@ def test_catch_version_from_path():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -102,7 +102,7 @@ def test_find_ansys_linux():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -113,7 +113,7 @@ def test_invalid_mode():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -125,7 +125,7 @@ def test_old_version():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -138,7 +138,7 @@ def test_failed_console():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -152,7 +152,7 @@ def test_launch_console(version):
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -170,7 +170,7 @@ def test_launch_corba(version):
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -189,7 +189,7 @@ def test_license_type_keyword():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -211,7 +211,7 @@ def test_license_type_keyword_names():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -231,7 +231,7 @@ def test_license_type_additional_switch():
 
 
 @pytest.mark.skipif(
-    not get_start_instance() and get_start_instance() is not None,
+    get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
