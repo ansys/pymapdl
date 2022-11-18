@@ -26,8 +26,10 @@ from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples import vmfiles
 
 ###############################################################################
-# ## Model creation
-# Running a verification manual example in MAPDL
+# Create model
+# ~~~~~~~~~~~~~~
+#
+# Running an example from the MAPDL verification manual
 #
 mapdl = launch_mapdl()
 
@@ -147,8 +149,8 @@ fields[0].plot(cpos="xy")
 
 
 ###############################################################################
-# Clean up
-# ~~~~~~~~
+# Close session
+# ~~~~~~~~~~~~~~
 #
 # Stop MAPDL session.
 #

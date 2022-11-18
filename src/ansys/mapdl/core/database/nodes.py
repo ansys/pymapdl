@@ -416,7 +416,7 @@ class DbNodes:
         # where each node is
         # INT32, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE, DOUBLE
 
-        # first, just interpert as int32 and extract node numbering
+        # first, just interpret as int32 and extract node numbering
         # ignore the first int as this is n_nodes
         # data = parse_chunks(chunks, np.int32)
         c = 0
