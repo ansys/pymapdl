@@ -89,10 +89,6 @@ doc = [
     "sphinxemoji==0.2.0",
     "vtk==9.0.3",
 ]
-build = [
-    "setuptools>=41.0.0",
-    "wheel>=0.33.0",
-]
 
 [tool.flit.module]
 name = "ansys.mapdl.core"
