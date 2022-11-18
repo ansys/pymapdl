@@ -130,9 +130,7 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
             mapdl.download(each_file, pth)
 
     list_files = os.listdir(pth)
-    error_files = [
-                each for each in list_files if each.endswith(".err")
-            ]
+    error_files = [each for each in list_files if each.endswith(".err")]
 
     # "S 1", "1 H" and "5 H Ansys" are character at the end of lines in the CDB_FILE variable.
     # They are allowed in the CDREAD command, but it gives warnings in the /INPUT command.

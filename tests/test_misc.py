@@ -242,7 +242,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     mapdl._local = True
     load_file(mapdl, file_path, priority_mapdl_file=False)
     mapdl._local = False
-    
+
     if mapdl.directory != "/":
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
@@ -261,7 +261,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     mapdl._local = old_local
     if not old_local and mapdl.directory != "/":
         os.remove(os.path.join(mapdl.directory, file_))
-    
+
     mapdl.slashdelete(file_)
 
 
