@@ -3,7 +3,7 @@
 Unit Testing
 ============
 
-Unit tests are testing functions which validate that the software
+Unit tests are functions that validate the software by testing that the
 logic implemented inside a certain method, class or module is
 working as expected. They should try to be as atomic and 
 independent as possible.
@@ -12,13 +12,13 @@ Unit testing is highly important. It enables to check that the
 changes on the code are consistent with other parts of the code
 and verify that the changes are the expected in the implementation.
 
-Unit tests are in the ``tests`` directory inside this repository.
-All the tests that you will find in this  directory are not
+Unit tests are in the `tests <pymapdl_tests_>`_ directory inside this repository.
+All the tests that you will find in this directory are not
 unit tests. Some of them are integration tests. The difference between
-a unit test and an integration one is that integration tests will
+an unit test and an integration one is that integration tests will
 test several units of the code and ensure that they work together.
 
-To verify that all the code is properly tested, `Codecov <https://github.com/codecov>`_
+To verify that all the code is properly tested, `Codecov <codecov_>`_
 generates a coverage report of the committed code. It details how
 merging the Pull Request will impact the coverage. It is one of
 the checks that must be approved to merge the code.
