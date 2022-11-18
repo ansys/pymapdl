@@ -177,7 +177,6 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     In CICD it seems we cannot write to the root folder '/'.
     Hence we cannot really test the files are being uploaded.
-    So the assert in the '/' directory are commented.
     """
     # first cleaning
     mapdl.slashdelete(file_)
@@ -186,6 +185,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     old_local = mapdl._local
 
     if file_ == "dumdum.dummy":
+        # Upload from a different folder
         file_path = str(tmpdir.mkdir("tmpdir").join(file_))
     else:
         file_path = file_
@@ -194,75 +194,73 @@ def test_load_file_local(mapdl, tmpdir, file_):
     if os.path.isfile(file_path):
         os.remove(file_path)
 
-    mapdl._local = True
+    # mapdl._local = True
     # When the file does not exist
     with pytest.raises(FileNotFoundError):
         load_file(mapdl, file_path)
 
-    mapdl._local = False  # Otherwise the list_files() fails
+    # mapdl._local = False  # Otherwise the list_files() fails
 
     # File is in the python working directory
     with open(file_path, "w") as fid:
         fid.write("empty")
 
     assert os.path.exists(file_path)
-    if mapdl.directory != "/":
-        if old_local:
-            pth = os.path.join(mapdl.directory, file_)
-            assert not os.path.exists(pth)
-        else:
-            assert not file_ in mapdl.list_files()
 
-    mapdl._local = True  # to keep checking locally
+    if mapdl._local:
+        pth = os.path.join(mapdl.directory, file_)
+        assert not os.path.exists(pth)
+    else:
+        assert not file_ in mapdl.list_files()
+
+    # mapdl._local = True  # to keep checking locally
     load_file(mapdl, file_path)
+    # mapdl._local = old_local
 
     # File is in both, the python working directory and MAPDL directory
     assert os.path.exists(file_path)
 
-    if mapdl.directory != "/":
-        if old_local:
-            pth = os.path.join(mapdl.directory, file_)
-            assert os.path.exists(pth)
-        else:
-            assert file_ in mapdl.list_files()
-
-        with pytest.warns(UserWarning, match=f"The file '{file_}' is present in both,"):
-            load_file(mapdl, file_path)
+    if mapdl._local:
+        pth = os.path.join(mapdl.directory, file_)
+        assert os.path.exists(pth)
 
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "empty" in fid.read()
 
-    mapdl._local = False  # Otherwise list_files() fails
+    else:
+        assert file_ in mapdl.list_files()
+        mapdl.download(file_)
+        assert os.path.exists(file_)
+
+        with open(os.path.join(file_), "r") as fid:
+            assert "empty" in fid.read()
+
+    with pytest.warns(UserWarning, match=f"The file '{file_}' is present in both,"):
+        load_file(mapdl, file_path)
 
     # checking the overwriting with local
     # Changing local file first
     with open(file_path, "w") as fid:
         fid.write("not that empty")
 
-    mapdl._local = True
+    # mapdl._local = True
     load_file(mapdl, file_path, priority_mapdl_file=False)
-    mapdl._local = False
+    # mapdl._local = False
 
-    if mapdl.directory != "/":
+    if mapdl._local:
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
+    else:
+        mapdl.download(file_)
+        with open(os.path.join(file_), "r") as fid:
+            assert "empty" in fid.read()
 
     # File is in the MAPDL working directory
     os.remove(file_path)  # removing local file
-
     assert not os.path.exists(file_path)
 
-    mapdl._local = True
-    if mapdl.directory != "/":
-        assert os.path.exists(os.path.join(mapdl.directory, file_))
-
-        load_file(mapdl, file_path)
-
-    mapdl._local = old_local
-    if not old_local and mapdl.directory != "/":
-        os.remove(os.path.join(mapdl.directory, file_))
-
     mapdl.slashdelete(file_)
+    assert file_ not in mapdl.list_files()
 
 
 def test_plain_report():
