@@ -355,7 +355,7 @@ jobs:
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: Pull, launch, and validate MAPDL service from private
-        run: .ci/start_mapdl_ubuntu.sh
+        run: bash .ci/start_mapdl_ubuntu.sh
         if: ${{ matrix.mapdl-version == 'v22.2-ubuntu' }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
