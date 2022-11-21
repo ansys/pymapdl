@@ -383,6 +383,33 @@ class Files:
         command = f"/COPY,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
         return self.run(command, **kwargs)
 
+    def fclean(self, **kwargs):
+        """Deletes all local files in all processors in a distributed parallel processing run.
+
+        APDL Command: /FCLEAN
+
+        Deletes all local files (``.rst``, ``.esav``, ``.emat``, ``.mode``, ``.mlv``,
+        ``.seld``, ``.dsub``, ``.ist``, ``.full``, ``.rdsp``, ``.rfrq``, ``.rnnn``,
+        ``.resf``, ``.stat``, ``.modesym``, ``.osave``, ``.erot``, ``.log``)
+        in all processors in a distributed parallel processing run.
+
+        .. warning:: Because ``/FCLEAN`` deletes all local files, it should only be issued if you are sure that
+           none of those files are needed in downstream analyses. Deleting files that are necessary for
+           the next substep, load step, or analysis will prevent continuation of the run.
+
+        Notes
+        -----
+
+        Issue ``/FCLEAN`` to delete all local files having the current Jobname (``/FILNAME``) and save
+        disk space in a distributed parallel processing run. Like other file deletion commands, deletion happens
+        immediately upon issuing this command. Different than other file deletion commands, it enables the
+        convenience of deleting all ``Jobname.*`` local files without having to issue separate commands specifying
+        each file type
+
+        This command is valid only at the Begin Level.
+        """
+        return self.run("/FCLEAN", **kwargs)
+
     def fcomp(self, ident="", level="", **kwargs):
         """Specifies file compression level.
 
