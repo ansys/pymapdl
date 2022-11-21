@@ -15,7 +15,7 @@ and verify that the changes are the expected in the implementation.
 Unit tests are in the `tests <pymapdl_tests_>`_ directory inside this repository.
 All the tests that you will find in this directory are not
 unit tests. Some of them are integration tests. The difference between
-an unit test and an integration one is that integration tests will
+a unit test and an integration test is that the latter will
 test several units of the code and ensure that they work together.
 
 To verify that all the code is properly tested, we need to make sure that every piece
@@ -92,7 +92,8 @@ Test Validation GitHub workflow
 Unit tests and integration tests are part of the Continuous Integration (CI) approach. 
 Combined with the Continuous Development (CD) approach, they form the CI/CD approach. 
 This approach provides continuous integration (CI) of the newly added code by
-automating its testing, monitoring and deployment which allow us a continuous deployment (CD) throughout the application lifecycle.
+automating its testing, monitoring and deployment which allow us a continuous
+deployment (CD) throughout the application lifecycle.
 
 .. figure:: ../images/cicd.jpg
     :width: 300pt
@@ -102,11 +103,12 @@ Create a unit test
 
 In the PyMAPDL repository, tests run using `pytest <pytest_>`_. 
 
-To create a pytest file, its name must be in the form ``test_XXX.py``  where ``XXX`` can be the function/method/class you are 
-testing or some other explicative name. Please keep in mind that ``pytest`` can filter the tests to run in the command
+To create a pytest file, its name must be in the form ``test_XXX.py``  where ``XXX``
+can be the function/method/class you are testing or some other explicative
+name. Please keep in mind that ``pytest`` can filter the tests to run in the command
 line using the argument ``-k``. For more information visit `pytest usage <pytest_usage_>`_.
 
-Here is some advice to follow when create good unit tests: 
+Here is some advice to follow when creating good unit tests: 
 
 1. The test method names are long and descriptive.
 2. The tests cover all the code implementation. You can check it with **Codecov**.
@@ -118,9 +120,11 @@ Here is some advice to follow when create good unit tests:
 `What makes a good unit test <article_good_unit_test_>`_ 
 is an exhaustive list of tips for creating good unit tests.
 
-Since the majority of PyMAPDL tests imply server connection, most of the test are integration tests and they require a running
-instance of MAPDL. If your test requires a running MAPDL instance, PyMAPDL library provides the `mapdl <mapdl_fixture_>`_
-fixture which you can use as the following in your function signature. It will be executed upstream each test and not within all tests .
+Since the majority of PyMAPDL tests imply server connection, most of the
+test are integration tests and they require a running instance of MAPDL. If
+your test requires a running MAPDL instance, PyMAPDL library provides the
+`mapdl <mapdl_fixture_>`_ fixture which you can use as the following in your
+function signature. It will be executed upstream each test and not within all tests.
 
 .. code:: python
 
