@@ -305,7 +305,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'ubuntu']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu']
 
     steps:
       - uses: actions/checkout@v3
@@ -349,14 +349,14 @@ jobs:
 
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
-        if: ${{ matrix.python-version }} != 'ubuntu'
+        if: ${{ matrix.mapdl-version }} != 'v22.2-ubuntu'
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
-      - name: Pull, launch, and validate MAPDL service
+      - name: Pull, launch, and validate MAPDL service from private
         run: .ci/start_mapdl.sh
-        if: ${{ matrix.python-version }} != 'ubuntu'
+        if: ${{ matrix.mapdl-version }} == 'v22.2-ubuntu'
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
