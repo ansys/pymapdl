@@ -148,7 +148,7 @@ def parse_chunks(chunks, dtype=None):
         generator from grpc.  Each chunk contains a bytes payload
 
     dtype : np.dtype
-        Numpy data type to interpert chunks as.
+        Numpy data type to interpret chunks as.
 
     Returns
     -------

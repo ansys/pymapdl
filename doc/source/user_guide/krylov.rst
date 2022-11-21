@@ -24,10 +24,9 @@ Mechanical APDL provides the following ways to implement a harmonic analysis
 using the Krylov method:
 
 #. Mechanical APDL commands
-#. APDL macros as described in
-   `Frequency-Sweep Harmonic Analysis via the Krylov Method
-   <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-   in the **Structural Analysis** guide for Mechanical APDL
+#. APDL macros as described in `Frequency-Sweep Harmonic Analysis via the Krylov Method
+   <ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide
+   for Mechanical APDL
 
 PyMAPDL also provides a way to implement a harmonic analysis using the Kylov method.
 Subsequent sections describe how to use the Krylov method in PyMAPDL.
@@ -59,8 +58,8 @@ If you do not require customization, you can use the Mechanical APDL
 commands to solve a harmonic analysis with the Krylov method. For more
 information, including the theory behind this method, see
 `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-in the **Structural Analysis** guide for Mechanical APDL. 
+<ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide
+for Mechanical APDL. 
 
 For additional theory information and equations for
 the Krylov method, see the works of Puri [1]_ and Eser [2]_.
@@ -183,8 +182,8 @@ must be used.
 Reference
 =========
 For more information on the Krylov method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html>`_
-in the **Structural Analysis** guide for Mechanical APDL and these resources:
+<ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide for Mechanical APDL
+and these resources:
 
 .. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency,
    Fully Coupled, Structural Acoustic Analysis and Optimization. PhD Thesis. Oxford Brookes University,

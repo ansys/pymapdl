@@ -3364,7 +3364,7 @@ class _MapdlCore(Commands):
         match_reserved_leading_underscored_parameter_name = (
             r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
-        # If it also ends in undescore, this won't be triggered.
+        # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
             raise ValueError(
                 f"It is discouraged the use of parameters starting with underscore ('_'). "
