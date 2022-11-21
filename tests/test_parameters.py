@@ -12,11 +12,17 @@ import pytest
         1e31,
         1e41,
         1e51,
-        pytest.param(1e61, marks=pytest.mark.xfail),
+        # pytest.param(1e61, marks=pytest.mark.xfail),
     ],
 )
 def test__get_parameter_array(mapdl, number):
     name = "param_array"
+
+    # High number
+    shape = (100, 100)
+    array = np.ones(shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
     # Testing 1D arrays
     shape = (100,)
@@ -29,13 +35,6 @@ def test__get_parameter_array(mapdl, number):
     array = np.ones(shape) * number
     mapdl.load_array(name=name, array=array)
     assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
-
-    # High number
-    with pytest.raises(RuntimeError):
-        shape = (100, 100)
-        array = np.ones(shape) * number
-        mapdl.load_array(name=name, array=array)
-        mapdl.parameters._get_parameter_array(name, shape)
 
 
 # We use also 'run' and 'get' to be more confident.

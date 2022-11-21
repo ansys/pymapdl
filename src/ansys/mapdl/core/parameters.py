@@ -407,6 +407,7 @@ class Parameters:
                 self._mapdl.run(format_str)
 
             st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+            u = self._mapdl.last_response[st:]
 
             if "**" not in self._mapdl.last_response[st:]:
                 escaped = True

@@ -2833,7 +2833,7 @@ class _MapdlCore(Commands):
         if array.ndim > 1:
             jmax = array.shape[1]
 
-        self.dim(name, "ARRAY", imax=imax, jmax=jmax, kmax="")
+        self.dim(name, "TABLE", imax=imax, jmax=jmax, kmax="")
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
@@ -2851,14 +2851,7 @@ class _MapdlCore(Commands):
             filename = base_name
 
         with self.non_interactive:
-            label = "jik"
-            n1 = jmax
-            n2 = imax
-            n3 = kmax
-            self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
-            fmt = "(" + ",',',".join(["E24.18" for i in range(jmax)]) + ")"
-            logger.info("Using *VREAD with format %s in %s", fmt, filename)
-            self.run(fmt)
+            self.tread(name, filename, nskip="1")
 
         if self._local:
             os.remove(filename)
