@@ -449,6 +449,7 @@ jobs:
 
       - name: Checking python
         run: |
+          python --version
           python -m pip install --upgrade pip
 
       - name: Install OS packages
