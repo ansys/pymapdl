@@ -1,17 +1,15 @@
 .. _ref_technology_showcase_examples:
 
 
-Technology Showcase Manual Examples
+Technology showcase manual examples
 ====================================
 This section demonstrates the broad simulation capabilities of Ansys Mechanical
 APDL. The problems demonstrate how to use PyMAPDL to effectively and accurately
 solve interdisciplinary problems from a variety of industries and engineering
 fields.
 
-
-These examples are a work-in-progress and will be extended during the life of
+These examples are a work-in-progress and are to be extended during the life of
 this project.
-
 
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | Name                       | Description                                                                                             |

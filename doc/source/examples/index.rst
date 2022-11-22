@@ -49,7 +49,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. _ref_download_files:
 
-Download Example Files
+Download example files
 ======================
 
 Each example should contain all the necessary resources to run the example.
@@ -59,9 +59,9 @@ These links refers to the following GitHub repository where you can find all of 
 
 `GitHub Example Data Repository <example_data_repo_>`_
 
-If you find out a missing or broken link, please open an issue in
+If you find a missing or broken link, open an issue in
 Github (`PyMAPDL Issues <pymapdl_issues_>`_) 
-or email us at `PyAnsys Support <pyansys_support_>`_. 
+or send an email to `PyAnsys Support <pyansys_support_>`_. 
 
 
 

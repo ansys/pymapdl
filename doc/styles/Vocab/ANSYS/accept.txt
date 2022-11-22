@@ -1,3 +1,37 @@
 ANSYS
 Ansys
 ansys
+PyMAPDL
+Arruda-Boyce
+Boyce
+CentOS7
+Docker
+eigensolvers
+Getting Started with PyMAPDL
+hostname
+Intro to Ansys Mechanical APDL Scripting
+Julia
+Krylov
+LDHI
+Linux
+MAPDL
+Newton-Raphson
+multipoint
+PowerShell
+powershell
+Prestressed
+Prony
+prony
+QRDAMP
+RNNN
+RST
+Tool-Narayanaswamy
+substep
+uncompress
+UPF
+UPFs
+UNSYM
+unsymmetric
+viscoplastic
+Windows
+Windows Subsystem

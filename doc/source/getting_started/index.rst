@@ -79,7 +79,7 @@ For example, on Linux with Python 3.7, unzip it and install it with the followin
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
 If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
-install using the same command as above.
+install using the preceding command.
 
 Consider installing using a `virtual environment <using_venv_>`_.
 

@@ -14,19 +14,19 @@ The following Python UPF Examples are available:
 1. Example: Python `UserMat` Subroutine
 ***************************************
 
-This example simulates a block modeled with 3-D elements. The
+This example simulates a block modeled with 3D elements. The
 `usermat.py` user material is equivalent to linear elastic.
 The block is under uniaxial compression. The final deformation is compared with the
 theoretical result.
 
 
-1.1. Input Data
+1.1. Input data
 ++++++++++++++++
 
 .. code::
 
     /batch,list
-    /title,upf-py1s, test usermat.py with 3-D elements
+    /title,upf-py1s, test usermat.py with 3D elements
 
     /prep7
     /upf,usermat.py
@@ -80,8 +80,8 @@ theoretical result.
 
 
 
-1.2. `usermat.py`
-+++++++++++++++++
+1.2. ```usermat.py```
++++++++++++++++++++
 
 
 .. code:: python
@@ -219,18 +219,18 @@ theoretical result.
 
 
 
-2. Example: Python `UsrShift` Subroutine
+2. Example: Python `UsrShift`` subroutine
 ****************************************
 
 
 This example describes a block of Prony viscoplastic material with a user-defined
 shift function following a Tool-Narayanaswamy shift function. Uniaxial tension is
 applied on one end and held for 15 seconds with a constant 280 K uniform
-temperature. The final stress is obtained to check stress relaxation.
+temperature. The final stress is obtained to verify stress relaxation.
 
 
 
-2.1. Input Data
+2.1. Input data
 +++++++++++++++
 
 
@@ -334,8 +334,8 @@ temperature. The final stress is obtained to check stress relaxation.
     /exit,nosave
 
 
-2.2. `usrshift.py`
-++++++++++++++++++
+2.2. ``usrshift.py``
+++++++++++++++++++++
 
 
 .. code:: python
@@ -385,16 +385,16 @@ temperature. The final stress is obtained to check stress relaxation.
 
 
 
-3. Example: Python `UserHyper` Subroutine
-*****************************************
+3. Example: Python ``UserHyper`` subroutine
+*******************************************
 
 This example models a block under simple uniaxial tension. The block is made of a
-user-defined hyper material that is identical to Arruda-Boyce Hyperelasticity. Large
+user-defined hyper material that is identical to Arruda-Boyce hyperelasticity. Large
 deformation effects are included. The final stress is printed out to compare against
 the reference.
 
 
-3.1. Input Data
+3.1. Input data
 +++++++++++++++
 
 .. code::
@@ -459,8 +459,8 @@ the reference.
 
 
 
-3.2. `userhyper.py`
-+++++++++++++++++++
+3.2. ``userhyper.py``
++++++++++++++++++++++
 
 
 .. code:: python

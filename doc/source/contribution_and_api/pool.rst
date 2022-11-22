@@ -1,6 +1,6 @@
 .. _ref_pool_api:
 
-Local MAPDL Pool
+Local MAPDL pool
 ================
 
 .. currentmodule:: ansys.mapdl.core

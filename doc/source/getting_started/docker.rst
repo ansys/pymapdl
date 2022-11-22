@@ -7,12 +7,12 @@ You can run MAPDL within a container on any OS using `docker` and
 connect to it via PyMAPDL.
 
 There are several situations in which it is advantageous to run MAPDL
-in a containerized environment (for example, Docker or Singularity):
+in a containerized environment such as Docker or Singularity:
 
 - Run in a consistent environment regardless of the host OS.
 - Portability and ease of install.
 - Large-scale cluster deployment using Kubernetes
-- Genuine application isolation through containerization.
+- Genuine app isolation through containerization.
 
 
 Install the MAPDL image

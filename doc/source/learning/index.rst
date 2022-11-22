@@ -68,7 +68,7 @@ Course content
 
 
 Intro to Ansys Mechanical APDL Scripting
----------------_------------------------
+----------------------------------------
 
 The `Intro to Ansys Mechanical APDL Scripting <course_intro_apdl_>`_
 course teaches you how APDL, the Mechanical solver syntax language, works.

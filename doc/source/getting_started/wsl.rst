@@ -216,8 +216,8 @@ This creates a log file (``log.txt``) in your current directory location.
 
 .. note:: Ensure that your port ``50053`` is open in your firewall.
 
-You shodld use a script (batch ``'.bat'`` or powershell ``'.ps'``
-file) to run the above commands all at once.
+You should use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
+to run the preceding commands all at once.
 
 Notice that the WSL internal gRPC port (``50052``) is being mapped to a
 different Windows host port (``50053``) to avoid ports conflicts.
