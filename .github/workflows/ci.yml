@@ -491,7 +491,7 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
-          python -m pip install -r requirements/requirements_tests.txt
+          pip install .[tests]
 
       # - name: DPF Server Activation
       #   run: |
