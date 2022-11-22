@@ -11,9 +11,6 @@ on:
 
 env:
   PACKAGE_NAME: PyMAPDL
-  PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-  PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
-  PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
@@ -120,6 +117,10 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
+    env:
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
 
     steps:
       - uses: actions/checkout@v3
@@ -307,6 +308,10 @@ jobs:
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu']
+    env:
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_START_INSTANCE: FALSE
 
     steps:
       - uses: actions/checkout@v3
@@ -488,7 +493,6 @@ jobs:
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-
       - name: Unit Testing Requirements Installation
         run: |
           pip install .[tests]
@@ -510,6 +514,56 @@ jobs:
         name: 'Upload coverage to Codecov'
         with:
           root_dir: ${{ github.workspace }}
+
+  test_windows:
+    name: Unit Testing on Windows
+    runs-on: [self-hosted, Windows, pymapdl]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # - name: Setup Python
+      #   uses: actions/setup-python@v4.3.2
+      #   with:
+      #     python-version: 3.9
+
+      - name: Checking python_
+        shell: powershell
+        run: |
+          python -m pip install --upgrade pip
+      
+      - name: Creating python venv
+        run: |
+          python -m venv .\.venv
+          .\.venv\Scripts\activate
+
+      - name: Install ansys-mapdl-core
+        shell: powershell
+        run: |
+          python -m pip install build
+          python -m build
+          $FILE_=Resolve-Path '.\dist\*.whl'
+          python -m pip install $FILE_.Path --upgrade
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: Unit Testing Requirements Installation
+        shell: powershell
+        run: |
+          python -m pip install .[tests]
+
+      # - name: DPF Server Activation
+      #   run: |
+      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
+      - name: Unit Testing
+        run: |
+          set PYMAPDL_PORT=
+          set PYMAPDL_START_INSTANCE=
+          python -m pytest -v -k "not test_database and not test_dpf" --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+
+      - uses: codecov/codecov-action@v3
+        name: 'Upload coverage to Codecov'
 
   Release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
