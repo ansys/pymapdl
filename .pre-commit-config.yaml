@@ -1,6 +1,6 @@
 repos:
 - repo: https://github.com/psf/black
-  rev: 22.3.0
+  rev: 22.10.0
   hooks:
   - id: black
 
@@ -13,13 +13,14 @@ repos:
     "--force-sort-within-sections",
     "--skip-glob", "*__init__.py",
     ]
-- repo: https://gitlab.com/PyCQA/flake8
-  rev: 3.9.2
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 5.0.4
   hooks:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.1.0
+  rev: v2.2.2
   hooks:
   - id: codespell
 
@@ -32,13 +33,13 @@ repos:
 #     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.1.0
+  rev: v4.3.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.14.0
+  rev: 0.19.1
   hooks:
     - id: check-github-workflows

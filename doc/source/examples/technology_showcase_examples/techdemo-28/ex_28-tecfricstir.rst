@@ -146,7 +146,7 @@ cylindrical shape tool, as shown in the following figure:
    # ***** Problem parameters ********
    l = 76.2e-03     # Length of each plate,m
    w = 31.75e-03    # Width of each plate,m
-   t = 3.18e-03     # Tickness of each plate,m
+   t = 3.18e-03     # Thickness of each plate,m
    r1 = 7.62e-03    # Shoulder radius of tool,m
    h = 15.24e-03    # Height of tool, m
    l1 = r1          # Starting location of tool on weldline
@@ -248,7 +248,7 @@ The height of the tool is equal to the shoulder diameter. Both the workpiece
     # ***** Problem parameters ********
     l = 76.2e-03     # Length of each plate,m
     w = 31.75e-03    # Width of each plate,m
-    t = 3.18e-03     # Tickness of each plate,m
+    t = 3.18e-03     # Thickness of each plate,m
     r1 = 7.62e-03    # Shoulder radius of tool,m
     h = 15.24e-03    # Height of tool, m
     l1 = r1          # Starting location of tool on weldline
