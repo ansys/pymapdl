@@ -115,12 +115,22 @@ def asserting_cdread_cdwrite_tests(mapdl):
     return "asdf1234" in mapdl.parameters["T_PAR"]
 
 
-def warns_in_cdread_error_log(mapdl):
+def warns_in_cdread_error_log(mapdl, tmpdir):
     """Check for specific warns in the error log associated with using /INPUT with CDB files
     instead of CDREAD command."""
-    error_files = [
-        each for each in os.listdir(mapdl.directory) if each.endswith(".err")
-    ]
+    if mapdl._local:
+        pth = mapdl.directory
+
+    else:
+        list_files = mapdl.list_files()
+        error_files = [each for each in list_files if each.endswith(".err")]
+        pth = str(tmpdir.mkdir(random_string()))
+
+        for each_file in error_files:
+            mapdl.download(each_file, pth)
+
+    list_files = os.listdir(pth)
+    error_files = [each for each in list_files if each.endswith(".err")]
 
     # "S 1", "1 H" and "5 H Ansys" are character at the end of lines in the CDB_FILE variable.
     # They are allowed in the CDREAD command, but it gives warnings in the /INPUT command.
@@ -130,7 +140,7 @@ def warns_in_cdread_error_log(mapdl):
 
     warns = []
     for each in error_files:
-        with open(os.path.join(mapdl.directory, each), errors="ignore") as fid:
+        with open(os.path.join(pth, each), errors="ignore") as fid:
             error_log = "".join(fid.readlines())
         warns.append(
             (warn_cdread_1 in error_log)
@@ -991,19 +1001,19 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
             "COMB", "model", "cdb"
         )  # 'COMB' is needed since we use the CDB with the strange line endings.
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread("COMB", "model.cdb")
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread("COMB", "model")
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
     finally:
@@ -1014,21 +1024,21 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     fullpath = str(tmpdir.join("model.cdb"))
     mapdl.cdread("COMB", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join("model"))
     mapdl.cdread("COMB", fullpath, "cdb")
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join("model"))
     mapdl.cdread("COMB", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
 
