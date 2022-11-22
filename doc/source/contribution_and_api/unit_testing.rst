@@ -85,8 +85,8 @@ While the code coverage in either case is 100% for the function, the second case
 more useful for debugging the function.
 
 
-Test Validation GitHub workflow
--------------------------------
+Continuous Integration and Continuous Deployment (CI/CD) approach
+-----------------------------------------------------------------
 
 Unit tests and integration tests are part of Continuous Integration (CI). 
 The automation of testing, monitoring, and deployment of newly added
@@ -96,8 +96,8 @@ lifecycle, providing a comprehensive CI/CD approach.
 .. figure:: ../images/cicd.jpg
     :width: 300pt
 
-Create a unit test 
-------------------
+Creation of a unit test
+-----------------------
 
 In the PyMAPDL repository, `pytest <pytest_>`_ is used to run tests. 
 
