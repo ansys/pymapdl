@@ -81,8 +81,8 @@ Or, if a method is a bit more complex, you can split the case in different tests
         assert get_report_colors('other') == ["red", "blue", "green"]
 
 
-In any of the cases, the coverage will be 100% for the function, but the second case will
-be more useful to debug the function.
+While the code coverage in either case is 100% for the function, the second case is
+more useful for debugging the function.
 
 
 Test Validation GitHub workflow
