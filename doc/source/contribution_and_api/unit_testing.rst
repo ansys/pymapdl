@@ -3,26 +3,25 @@
 Unit Testing
 ============
 
-Unit tests are functions that validate the software by testing that the
-logic implemented inside a certain method, class or module is
-working as expected. They should try to be as atomic and 
+Unit tests validate the software by testing that the logic
+implemented inside a certain method, class, or module is
+working as expected. They should be as atomic and 
 independent as possible.
 
-Unit testing is highly important. It enables to check that the
-changes on the code are consistent with other parts of the code
-and verify that the changes are the expected in the implementation.
+Unit testing is highly important. The tests check that code
+changes are consistent with other parts of the code
+and verify that these changes are implemented properly.
 
-Unit tests are in the `tests <pymapdl_tests_>`_ directory inside this repository.
-All the tests that you will find in this directory are not
-unit tests. Some of them are integration tests. The difference between
-a unit test and an integration test is that the latter will
-test several units of the code and ensure that they work together.
+Unit tests are in the `tests <pymapdl_tests_>`_ directory in this repository,
+along with integration tests. The difference between
+a unit test and an integration test is that the latter
+tests several units of the code to ensure that they all work together.
 
-To verify that all the code is properly tested, we need to make sure that every piece
-of code is used (covered) in, at least one, unit test. For this purpose, in this
-repository `Codecov <codecov_>`_ tool is used to generate a coverage report of the
-committed code. It details how merging the Pull Request will impact the coverage. It
-is one of the checks that must be approved to merge the code.
+To verify that all code is properly tested, you must ensure that every piece
+of code is used (covered) in at least one unit test. In this repository, the
+`Codecov <codecov_>`_ tool generates a coverage report of the
+committed code. It details how merging a pull request would impact coverage. It
+is one of the checks that must run successfully to merge code changes.
 
 
 .. figure:: ../images/codecov_increase.png
@@ -32,8 +31,8 @@ is one of the checks that must be approved to merge the code.
 Coverage example
 ----------------
 
-Let's show with an example how the coverage works.
-Let's suppose that we have the following library:
+To show how the coverage works, assume that you have
+this library:
 
 **My awesome library**
 
@@ -54,7 +53,7 @@ Let's suppose that we have the following library:
 
 **Tests**
 
-You can opt to run the tests with the following configuration:
+You can opt to run the tests with this configuration:
 
 .. code:: python
 
@@ -65,7 +64,7 @@ You can opt to run the tests with the following configuration:
         assert get_report_colors('other') == ["red", "blue", "green"]
 
 
-Or, if the function is a bit more complex, you split the case in different tests:
+Or, if a method is a bit more complex, you can split the case in different tests:
 
 .. code:: python
 
