@@ -39,23 +39,28 @@ permissions:
 
 jobs:
 
-  stylecheck:
-    name: Style Check
+  style:
+    name: Code style
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Python
-        uses: actions/setup-python@v4.3.0
+      - name: PyAnsys code style checks
+        uses: pyansys/actions/code-style@v1
         with:
           python-version: 3.9
-      - name: Install pre-commit
-        run: pip install pre-commit
-      - name: Run pre-commit
-        run: pre-commit run --all-files || ( git status --short ; git diff ; exit 1 )
+
+  doc-style:
+    name: Documentation style check
+    runs-on: ubuntu-latest
+    steps:
+      - name: PyAnsys documentation style checks
+        uses: pyansys/actions/doc-style@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   testimport:
     name: Smoke Tests
     runs-on: ${{ matrix.os }}
+    needs: [style]
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
@@ -119,7 +124,7 @@ jobs:
   docs_build:
     name: Build Documentation
     runs-on: ubuntu-latest
-
+    needs: [doc-style]
     steps:
       - uses: actions/checkout@v3
 
@@ -303,6 +308,7 @@ jobs:
   build_test:
     name: Build and Unit Testing
     runs-on: ubuntu-latest
+    needs: [style]
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0']
