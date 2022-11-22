@@ -88,11 +88,10 @@ more useful for debugging the function.
 Test Validation GitHub workflow
 -------------------------------
 
-Unit tests and integration tests are part of the Continuous Integration (CI) approach. 
-Combined with the Continuous Development (CD) approach, they form the CI/CD approach. 
-This approach provides continuous integration (CI) of the newly added code by
-automating its testing, monitoring and deployment which allow us a continuous
-deployment (CD) throughout the application lifecycle.
+Unit tests and integration tests are part of Continuous Integration (CI). 
+The automation of testing, monitoring, and deployment of newly added
+code allows Continuous Deployment (CD) throughout the application
+lifecycle, providing a comprehensive CI/CD approach.
 
 .. figure:: ../images/cicd.jpg
     :width: 300pt
@@ -100,34 +99,34 @@ deployment (CD) throughout the application lifecycle.
 Create a unit test 
 ------------------
 
-In the PyMAPDL repository, tests run using `pytest <pytest_>`_. 
+In the PyMAPDL repository, `pytest <pytest_>`_ is used to run tests. 
 
-To create a pytest file, its name must be in the form ``test_XXX.py``  where ``XXX``
-can be the function/method/class you are testing or some other explicative
-name. Please keep in mind that ``pytest`` can filter the tests to run in the command
-line using the argument ``-k``. For more information visit `pytest usage <pytest_usage_>`_.
+The name of a ``pytest`` file must be in the form ``test_XXX.py``, where ``XXX``
+is either the function, method, or class that you are testing or some other explicative
+name. In the command line, the ``-k`` argument can be used to filter the tests to run.
+For more information, see `pytest usage <pytest_usage_>`_.
 
-Here is some advice to follow when creating good unit tests: 
+Here are some guidelines for creating good unit tests: 
 
-1. The test method names are long and descriptive.
-2. The tests cover all the code implementation. You can check it with **Codecov**.
-3. The tests should return the same result each time. 
-4. The tests are independent.
-5. Each test verifies only one part of the code at a time.
-6. The tests should be as short and fast as possible.
+- Assign long and descriptive names to tests.
+- Use the `Codecov <codecov_>`_ tool to ensure all implemented code is tested.
+- Check that tests return the same results each time. 
+- Verify that tests are independent.
+- Write tests that verify only one part of the code at a time.
+- Make tests as short and fast as possible.
 
 `What makes a good unit test <article_good_unit_test_>`_ 
 is an exhaustive list of tips for creating good unit tests.
 
-Since the majority of PyMAPDL tests imply server connection, most of the
-test are integration tests and they require a running instance of MAPDL. If
-your test requires a running MAPDL instance, PyMAPDL library provides the
-`mapdl <mapdl_fixture_>`_ fixture which you can use as the following in your
-function signature. It will be executed upstream each test and not within all tests.
+Most PyMAPDL tests require a connection to a running instance of
+MAPDL, which makes them integration tests. If your test
+requires a running MAPDL instance, you can use the PyMAPDL
+`mapdl <mapdl_fixture_>`_ method in your function signature.
+It will be executed upstream of each test and not within all tests.
 
 .. code:: python
 
-   def test_my_new_feature(mapdl):  # just pass the 'mapdl' fixture as an argument.
+   def test_my_new_feature(mapdl):  # pass the 'mapdl' fixture as an argument.
 
        mapdl.prep7()
        # .... more code
@@ -138,11 +137,10 @@ function signature. It will be executed upstream each test and not within all te
 Example
 --------
 
-The unit tests and the integration tests of the `ansys.mapdl.core.math module <pymapdl_user_guide_math_>`_
-are in the python file `test_math.py <pymapdl_test_math_>`_.
-These are just some of the numerous tests that you can find in the `test directory <pymapdl_tests_>`_.
+The `test_math.py <pymapdl_test_math_>`_ file contains the unit tests and integration tests of the `ansys.mapdl.core.math module <pymapdl_user_guide_math_>`_. These are just some of the many
+tests that you can find in the `test directory <pymapdl_tests_>`_.
 
-Some examples of unit test to understand how you can use the ``pytest`` package are showed now:
+Here are some examples of how you use ``pytest``:
 
 .. code:: python
 
@@ -150,11 +148,11 @@ Some examples of unit test to understand how you can use the ``pytest`` package 
     import ansys.mapdl.core.math as apdl_math
 
     @pytest.fixture(scope="module")
-    def mm(mapdl):  # just pass the 'mapdl' fixture as an argument.
+    def mm(mapdl):  # pass the 'mapdl' fixture as an argument.
 
         return mapdl.math
 
-    def test_rand(mm):  # just pass the 'mm' fixture as an argument.
+    def test_rand(mm):  # pass the 'mm' fixture as an argument.
 
         w = mm.rand(10)
         assert w.size == 10  # if it is False, AssertionError is raised
@@ -167,4 +165,4 @@ Some examples of unit test to understand how you can use the ``pytest`` package 
         assert np.allclose(m1.asarray() + m2.asarray(), m3.asarray())  
                             # if it is False, AssertionError is raised
 
-You can find the `pytest documentation <pytest_>`_ for further explanations.
+For further explanations, see the `pytest documentation <pytest_>`_.
