@@ -468,6 +468,11 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --upgrade pip
+      
+      - name: Creating python venv
+        run: |
+          python -m venv ./venv
+          source ./venv/bin/activate.bat
 
       - name: Install ansys-mapdl-core
         shell: powershell
@@ -481,7 +486,7 @@ jobs:
       - name: Unit Testing Requirements Installation
         shell: powershell
         run: |
-          python -m pip install -r requirements/requirements_tests.txt
+          python -m pip install .[tests]
 
       # - name: DPF Server Activation
       #   run: |
