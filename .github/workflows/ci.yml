@@ -471,8 +471,8 @@ jobs:
       
       - name: Creating python venv
         run: |
-          python -m venv ./venv
-          source ./venv/bin/activate.bat
+          python -m venv .\.venv
+          .\.venv\Scripts\activate
 
       - name: Install ansys-mapdl-core
         shell: powershell
