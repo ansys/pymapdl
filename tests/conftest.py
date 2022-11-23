@@ -115,6 +115,39 @@ if START_INSTANCE and EXEC_FILE is None:
     raise RuntimeError(ERRMSG)
 
 
+def is_exited(mapdl):
+    try:
+        _ = mapdl._ctrl("VERSION")
+        return False
+    except MapdlExitedError:
+        return True
+
+
+@pytest.fixture(autouse=True)
+def run_before_and_after_tests(request, mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+    # Setup: fill with any logic you want
+    if mapdl._local and is_exited(mapdl):
+        # something to relaunch MAPDL
+        mapdl = launch_mapdl(
+            EXEC_FILE,
+            override=True,
+            run_location=mapdl._path,
+            cleanup_on_exit=mapdl._cleanup,
+        )
+
+        if HAS_GRPC:
+            mapdl._local = request.param  # CI: override for testing
+            mapdl._exited = False
+
+    yield  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    if mapdl._local and mapdl._exited:
+        # The test exited MAPDL, so it is fail.
+        assert False  # this will fail the test
+
+
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
