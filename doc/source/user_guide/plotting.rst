@@ -2,7 +2,7 @@
 Interactive plotting
 ********************
 When generating geometry from scratch within MAPDL, it is often
-necessary to plot the geometry, such askeypoints, lines, areas,
+necessary to plot the geometry, such as key points, lines, areas,
 and volumes. PyMAPDL supports plotting basic CAD using VTK. The
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class leverages the
 existing MAPDL commands by providing the following functions, which
@@ -107,7 +107,7 @@ Start PyMAPDL
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
-Create a square area using keypoints
+Create a square area using key points
 
 .. code:: python
 
@@ -182,7 +182,7 @@ Plotting boundary conditions
    conditions and targets.
 
 It is possible to plot the boundary conditions applied on the model by
-specifying ``plot_bc=True`` in plotting functions. For exmaple, this code
+specifying ``plot_bc=True`` in plotting functions. For example, this code
 specifies ``plot_bc=True``for the :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`
 method:
 

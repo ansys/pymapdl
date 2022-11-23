@@ -4,7 +4,7 @@ In an active MAPDL session, you can postprocess using the
 :class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>` class,
 an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
 One advantage of this approach is that it integrates well with existing MAPDL
-scripting or automation, Itcan also be carried out on result files generated
+scripting or automation. This approach can also be used on result files generated
 from other programs, including ANSYS Mechanical.
 
 Perhaps one of the biggest advantages of gRPC-based postprocessing is
@@ -16,7 +16,7 @@ streamed back to the client for review or visualization.
 
    You are encouraged to use the Data Processing Framework (DPF)
    modules at `DPF-Core <dpf_core_gh_>`_ and
-   `DPF-Post <dpf_post_gh_>`_ becausea they provide a
+   `DPF-Post <dpf_post_gh_>`_ because they provide a
    modern interface to Ansys result files using a client-server
    interface. They use the same software that is used within Ansys Workbench
    but via a Python client.
@@ -70,7 +70,7 @@ These commands are listed in Table-1_.
 | **Listing**    |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
 
-Here's a simple example demonstrating the the usage:
+Here's a simple example that demonstrates usage:
 
 .. code:: python
 

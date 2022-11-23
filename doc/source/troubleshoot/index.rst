@@ -19,7 +19,7 @@ some of the most common problems and frequently asked questions are posted here.
 More help needed?
 -----------------
 
-  *"My problem is not listed here. What should I do?"*  
+  *"What do you do if a problem is not listed here?"*  
 
 You can go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and ask about it.
 

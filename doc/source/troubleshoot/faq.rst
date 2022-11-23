@@ -68,10 +68,10 @@ advanced plots using `PyVista <pyvista_docs_>`_ or `Matplotlib <matplotlib_main_
 
 
 
-How do I end a simulation and restart a script?
------------------------------------------------
+How do you end a simulation and restart a script?
+-------------------------------------------------
 
-Closing and reopenting Python clears the solution within Python. To clear all previous
+Closing and reopening Python clears the solution within Python. To clear all previous
 data such as the mesh, you can use this code:
 
 .. code:: python
@@ -80,5 +80,5 @@ data such as the mesh, you can use this code:
     sys.modules[__name__].__dict__.clear()
 
 
-However, a more efficient way is to clear MAPDL using the``mapdl.clear()`` method. You
+However, a more efficient way is to clear MAPDL using the ``mapdl.clear()`` method. You
 can also exit and restart MAPDL.

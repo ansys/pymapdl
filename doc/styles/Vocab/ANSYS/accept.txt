@@ -45,6 +45,7 @@ Mises
 multipoint
 Newton-Raphson
 nonlinearities
+NumPy
 numpy
 performant
 postprocess
@@ -66,6 +67,7 @@ Python
 Pythonic
 Pythonically
 QRDAMP
+Radiosity
 Rao
 RNNN
 RST
@@ -73,6 +75,7 @@ spotweld
 thermomechanical
 thermomechanically
 Tool-Narayanaswamy
+subselected
 substep
 Subsystem
 uncompress
@@ -84,5 +87,6 @@ unsymmetric
 viscoplastic
 von
 Windows
+Windows Subsystem
 WSL
 Zhu

@@ -182,9 +182,13 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
    ff02::1 ip6-allnodes
    ff02::2 ip6-allrouters
 
+
+<!--vale on -->
+
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
 environment variable with this IP address:
 
+<!--vale off -->
 .. code:: bash
 
     winhostIP=$(grep -m 1 host.docker.internal /etc/hosts | awk '{print $1}')

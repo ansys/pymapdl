@@ -5,10 +5,10 @@ the mesh and geometry without writing to an intermediate file or
 interpreting the text output from various MAPDL commands. For
 example, to access the nodes and elements of a model, normally you
 would list the nodes within MAPDL using the :func:`Mapdl.nlist()
-<ansys.mapdl.core.Mapdl.nlist` method. However, this generates a string, and array
-access either requires cumbersome MAPDL GET commands or that the
+<ansys.mapdl.core.Mapdl.nlist` method. However, this generates a string.
+Array access requires either cumbersome MAPDL GET commands or that the
 nodes be written to an archive file and then read in with other
-software.  For example:
+software:
 
 .. code::
 

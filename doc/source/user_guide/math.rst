@@ -15,7 +15,7 @@ Python and MATLAB's eigensolver is based on the publicly available
 LAPACK libraries and provides reasonable solve time for relatively
 small degrees of freedom (dof) eigenproblems of perhaps 100,000.
 However, Ansys solvers are designed for the scale of 100 s of
-millions of dof, providing a variety of situations whereyou can
+millions of dof, providing a variety of situations where you can
 directly leverage Ansys high-performance solvers on a variety of
 eigenproblems. Fortunately, you can leverage this without relearning
 an entirely new language because APDL Math has been written in a similar manner
@@ -89,7 +89,7 @@ You now have solved for the first 10 modes of the cube:
 
 Next, load the mass and stiffness matrices that are stored by default
 in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlMath
-<ansys.mapdl.core.math.MapdlMath>` ckass as ``mm``:
+<ansys.mapdl.core.math.MapdlMath>` class as ``mm``:
 
 .. code:: python
 
@@ -106,7 +106,7 @@ in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlM
     print(k_py)
 
 After running the :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>` method,
-these matrices are stored solelywithin Python.
+these matrices are stored solely within Python.
 
 .. code:: 
 
@@ -157,6 +157,6 @@ initialize a matrix ``eigvec`` and send that to the
 The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
-APDLMath reference
+APDL Math reference
 ~~~~~~~~~~~~~~~~~~
-For more information, see the :ref:`ref_math_api` reference.
+For more information, see :ref:`ref_math_api`.

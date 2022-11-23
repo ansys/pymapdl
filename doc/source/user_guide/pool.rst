@@ -57,7 +57,7 @@ example, this code would run the first set of 20 verification files:
 Run a user function
 ~~~~~~~~~~~~~~~~~~~
 You can use the pool to run a custom user function on each MAPDL
-instance oover a set of inputs. As in the example for the
+instance over a set of inputs. As in the example for the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` function,
 the following code uses a set of verification files. However, it implements
 it as a function and outputs the final routine instead of the text

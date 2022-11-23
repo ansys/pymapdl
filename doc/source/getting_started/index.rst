@@ -67,9 +67,9 @@ of installing PyMAPDL is downloading the wheelhouse archive from the
 `Releases Page <pymapdl_releases_>`_ for your corresponding
 machine architecture.
 
-Each wheelhouse archive contains all the python wheels necessary to install
+Each wheelhouse archive contains all the Python wheels necessary to install
 PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
-this on an isolated system with a fresh python or on a virtual environment.
+this on an isolated system with a fresh Python or on a virtual environment.
 
 For example, on Linux with Python 3.7, unzip it and install it with the following:
 

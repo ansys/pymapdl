@@ -141,7 +141,8 @@ Incorrect environment variables
 ===============================
 
 The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-You can check the value of this environment variable.
+The following code examples show how you can see the value of this environment variable on
+either Windows or Linux.
 
 **On Windows**
 
@@ -166,10 +167,10 @@ you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you are likely missing some necessary
 dependencies.
 
-CentOS
-------
+CentOS 7
+--------
 
-On CentOS 7, you can install missing depenedicies with:
+On CentOS 7, you can install missing depenedencies with:
 
 .. code::
 
@@ -372,7 +373,7 @@ are several ways to improve performance and stability of MADPL:
   <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
   back the response from MAPDL for each command and marginally
   improves performance and stability. Consider having a debug flag in
-  your program or script so you can enable or disable logging and
+  your program or script so you can turn on or turn off logging and
   verbosity when needed.
 
 

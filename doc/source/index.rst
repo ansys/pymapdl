@@ -52,7 +52,7 @@ allow the MAPDL solver to function as a server, ready to respond to
 connecting clients.
 
 Google remote procedure calls, or gRPC, are used to establish secure 
-connections so that a client application can directly call methods on 
+connections so that a client app can directly call methods on 
 a potentially remote MAPDL instance as if it were a local object. The 
 use of HTTP/2 makes it friendly to modern internet infrastructures. 
 This, along with the use of binary transmission formats, favors higher

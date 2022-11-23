@@ -149,7 +149,7 @@ The preceding code returns a :class:`numpy array<numpy.ndarray>` if the kwarg ``
 is set to ``True``. Solution vectors are mapped to user order.
 
 .. note:: The :class:`numpy array<numpy.ndarray>` class returned by the
-   `:func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method contains
+   :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method contains
    the node number along with the degrees of freedom (dof) solution for each of
    the calculated frequencies.
 

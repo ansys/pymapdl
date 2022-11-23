@@ -46,7 +46,7 @@ ROUT``, you can access it with this code:
 For a full list of the methods and attributes available to the
 ``Parameters`` class, see :ref:`ref_parameters_api`.
 
-For addditional information on PyMAPDL array limitations, see :ref:`ref_numpy_arrays_in_mapdl`.
+For additional information on PyMAPDL array limitations, see :ref:`ref_numpy_arrays_in_mapdl`.
 
 .. _ref_special_named_param:
 
@@ -121,7 +121,7 @@ Parameters with both leading and trailing underscores are a special type. These 
 **CANNOT** be seen in the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute
 under any circumstances. Their use is not recommended.
 
-You can still retrieve thse special paraemtesr using any of the normal methods
+You can still retrieve these special parameters using any of the normal methods
 for retrieving parameters. However, you must know the parameter name:
 
 

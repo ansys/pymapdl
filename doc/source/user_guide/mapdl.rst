@@ -562,7 +562,7 @@ chain several commands together and send them to MAPDL for execution
 rather than executing them individually. Chaining commands can be helpful
 when you need to execute thousands of commands in a Python
 loop and don't need the individual results for each command. For
-example, if you want to create 1000 keypoints along the X axis, you
+example, if you want to create 1000 key points along the X axis, you
 would run:
 
 .. code:: python
