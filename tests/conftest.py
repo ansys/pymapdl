@@ -123,22 +123,29 @@ def is_exited(mapdl):
         return True
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests(request, mapdl):
     """Fixture to execute asserts before and after a test is run"""
     # Setup: fill with any logic you want
-    if mapdl._local and is_exited(mapdl):
-        # something to relaunch MAPDL
-        mapdl = launch_mapdl(
+    if START_INSTANCE and is_exited(mapdl):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+
+        # Relaunching MAPDL
+        mapdl_ = launch_mapdl(
             EXEC_FILE,
+            port=mapdl._port,
             override=True,
             run_location=mapdl._path,
             cleanup_on_exit=mapdl._cleanup,
         )
 
-        if HAS_GRPC:
-            mapdl._local = request.param  # CI: override for testing
-            mapdl._exited = False
+        # Cloning the new mapdl instance channel into the old one.
+        mapdl._channel = mapdl_._channel
+        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+
+        # Restoring the local configuration
+        mapdl._local = local_
 
     yield  # this is where the testing happens
 
@@ -326,8 +333,8 @@ def mapdl(request, tmpdir_factory):
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
-        if mapdl._local:
-            assert not os.path.isfile(mapdl._lockfile)
+        # if mapdl._local:
+        #     assert not os.path.isfile(mapdl._lockfile)
 
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
