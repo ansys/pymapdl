@@ -30,7 +30,7 @@ Install WSL
 Install WSL by following Microsoft's directions at 
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
-Currently there are two versions of WSL: WSL1 abd WSL2. Because WSL2 is
+Currently there are two versions of WSL: WSL1 and WSL2. Because WSL2 is
 the latest and includes many improvements over WSL1, using WSL2 is highly recommended.
 
 Install CentOS7 WSL distribution
@@ -138,9 +138,9 @@ See `Run MAPDL on a local Docker image`_.
 If you want to run MAPDL in the CentOS7 image and use the Windows license
 server, opening the ports might not work properly because the Windows firewall
 seems to block all traffic coming from WSL. For security purposes, you should
-still try to open ports ``1055`` and ``2325`` in the firewall and check if your
+still try to open ports ``1055`` and ``2325`` in the firewall and see if your
 MAPDL installation can communicate with the Windows hosts. If you are having
-problems after setting the firewall rules, you might have to disable the Windows
+problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution.
 See `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl_>`_.
@@ -159,6 +159,7 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
 
 
 **Example /etc/hosts/ file**
+<!--vale off -->
 
 .. code-block:: bash
    :emphasize-lines: 8
@@ -182,13 +183,15 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
    ff02::2 ip6-allrouters
 
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
-environment variable with that IP address:
+environment variable with this IP address:
 
 .. code:: bash
 
     winhostIP=$(grep -m 1 host.docker.internal /etc/hosts | awk '{print $1}')
     export ANSYSLMD_LICENSE_FILE=1055@$winhostIP
 
+
+<!--vale off -->
 
 Run MAPDL on a local Docker image
 *********************************

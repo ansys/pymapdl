@@ -88,7 +88,7 @@ Ansys software requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For the latest features, you must have a copy of Ansys 2021 R1
 installed locally. However, PyMAPDL is compatible with Ansys 17.0 and later
-on Windows and with ANsys 13.0 on Linux.
+on Windows and with Ansys 13.0 on Linux.
 
 .. note::
 

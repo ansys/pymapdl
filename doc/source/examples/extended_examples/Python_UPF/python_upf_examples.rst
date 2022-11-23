@@ -6,16 +6,16 @@ UPF in PyMAPDL
 
 The following Python UPF examples are available:
 
-* `Python UserMat Subroutine`_
-* `Python UsrShift Subroutine`_
-* `Python UserHyper Subroutine`_
+* `Python UserMat subroutine`_
+* `Python UsrShift subroutine`_
+* `Python UserHyper subroutine`_
 
 
-Python `UserMat` Subroutine
+Python ``UserMat`` subroutine
 ***************************
 
 This example simulates a block modeled with 3D elements. The
-user material in the `usermat.py` file is equivalent to linear elastic.
+user material in the ``usermat.py`` file is equivalent to linear elastic.
 The block is under uniaxial compression. The final deformation is compared
 with the theoretical result.
 
@@ -219,7 +219,7 @@ Input data
 
 
 
-Python `UsrShift`` subroutine
+Python ```UsrShift`` subroutine
 *****************************
 
 This example describes a block of Prony viscoplastic material with a user-defined

@@ -21,7 +21,7 @@ There is a Docker image hosted on the
 `PyMAPDL GitHub <pymapdl_repo_>`_ repository that you
 can download using your GitHub credentials.
 
-Assuming that you have docker installed, you can get started by
+Assuming that you have Docker installed, you can get started by
 authorizing Docker to access this repository using a personal access
 token. Create a GitHub personal access token with ``packages read`` permissions
 according to `Creating a personal access token <gh_creating_pat_>`_
@@ -43,7 +43,7 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
-You can now launch MAPDL directly from docker with a short script or
+You can now launch MAPDL directly from Docker with a short script or
 directly from the command line. Because this image contains no license
 server, you must enter your license server IP address in the
 ``LICENSE_SERVER`` environment variable. With that, you can launch
@@ -117,9 +117,9 @@ In the command:
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
 You can provide additional command line parameters to MAPDL by simply
-appending to the docker command. For example, you can increase the
+appending to the Docker command. For example, you can increase the
 number of processors (up to the number available on the host machine)
-with the ```-np``` switch. For example:
+with the ``-np`` switch:
 
 .. code::
 

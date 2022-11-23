@@ -113,8 +113,8 @@ on the left sidebar.
 
 While these methods might include some MAPDL commands, they are generally
 specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
-MAPDL methods in a Pythonic manner.  For a mapping of classic
-MAPDL commands to PyMAPDL, see :ref:`ref_mapdl_commands`.
+MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
+PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 
 .. toctree::

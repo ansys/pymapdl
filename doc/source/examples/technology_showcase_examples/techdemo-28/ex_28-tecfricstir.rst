@@ -92,8 +92,6 @@ contact is changed to bonded.
 Problem description
 -------------------
 
-**The Zhu and Chao Thermomechanical Model**
-
 The model used in this example is a simplified version of the thermomechanical
 model developed by Zhu and Chao for FSW with 304L stainless steel [Zhu2004]_.
 Zhu and Chao presented nonlinear thermal and thermomechanical simulations using
@@ -1151,11 +1149,13 @@ The observed temperature rise in the model shows that heat generation during
 the second and third load steps is due to friction between the tool shoulder
 and workpiece, as well as plastic deformation of the workpiece material.
 
-The melting temperature of 304L stainless steel is 1450 °C. As shown in the
+<!--vale off -->
+The melting temperature of 304L stainless steel is 1450 degrees C. As shown in the
 following figure, the maximum temperature range at the weld line region on the
 workpiece beneath the tool is well below the melting temperature of the
 workpiece material during the second and third load steps but above 70 percent
 of the melting temperature:
+<!--vale on -->
 
 .. jupyter-execute::
    :hide-code:
@@ -1527,13 +1527,15 @@ option.
     mapdl.plvar(11)  # Plot of frictional heat rate against time 
 
 
+<!--vale off -->
 A similar calculation is performed to check the heat generation from plastic
 deformation on the workpiece. The ``SOLID226`` element's output option
 ``PHEAT`` (``NMISC, 5``) gives the plastic heat generation rate per unit
-volume.  After multiplying this value with the corresponding element volume,
+volume. After multiplying this value with the corresponding element volume,
 the plastic heat generation rate for an element is calculated. By summing the
 values from each element (``SOLID226``) of the workpiece, the total plastic
 heat generation rate is calculated for a particular time.
+<!--vale on -->
 
 It is possible to calculate the total frictional heat generation rate at each
 time-step (:meth:`Mapdl.etable <ansys.mapdl.core.Mapdl.etable>`). The following
@@ -1633,8 +1635,8 @@ tool-penetration is shallow and the tool pin is ignored, the plastic heat is sma
 compared to frictional heat.
 
 
-28.8. Recommendations
----------------------
+Recommendations
+---------------
 
 To perform a similar FSW analysis, consider the following hints and
 recommendations:
@@ -1645,13 +1647,13 @@ recommendations:
   coupling is recommended for such processes. This method involves just one
   analysis that uses a coupled-field element containing all necessary degrees of
   freedom. Direct coupling is advantageous when the coupled-field interaction
-  involves strongly-coupled physics or is highly nonlinear.
+  involves strongly coupled physics or is highly nonlinear.
 * A nonlinear transient analysis is preferable for simulations where the
   objective is to study the transient temperature and transient heat
   transfer.
 * The dynamic effects of different physics should be controlled. In this
   problem, for example, the dynamic effects of the structural degrees of freedom
-  are disabled as they are unimportant.
+  are turned off as they are unimportant.
 * Separating the solution process into three load steps helps you to understand
   the physics and solve the problem.
 * The contact between the two plates must be nearly perfect to maintain
@@ -1682,11 +1684,11 @@ recommendations:
   To minimize computational time, the tool can be considered to be rigid with no
   temperature degrees of freedom.
 
-28.9. References
-----------------
+References
+----------
 
 The following papers are cited in this example problem:
-
+<!--vale off -->
 
 .. [Zhu2004] Zhu, X. K. & Chao, Y. J. (2004). Numerical simulation of transient
    temperature and residual stresses in friction stir welding of 304L stainless
@@ -1706,9 +1708,10 @@ The following papers are cited in this example problem:
    Processing*. Ed. R. S. Mishra and M. W. Mahoney. Materials Park,
    OH: ASM International.
 
+<!--vale on -->
 
-28.10. Input Files
-------------------
+Input files
+-----------
 
 The following files were used in this problem:
 

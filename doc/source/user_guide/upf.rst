@@ -1,76 +1,75 @@
 .. _python_upf:
 
 
-Using Python to Code UPF Subroutines
+Using Python to code UPF subroutines
 ------------------------------------
 
 As an alternative to compiled languages like C and Fortran, you can use the
 Python language to code user programmable subroutines. A subset of the
-documented UPF subroutines support the Python UPF capability (see `Supported UPF
-Subroutines`_).
+documented UPF subroutines support the Python UPF capability. For more information,
+see `Supported UPF subroutines`_).
 
 You must install a Python distribution before using this feature. Python 3.6
 through Python 3.7 are supported.
 
 Python UPFs are only supported on Linux.
 
-It is strongly recommended you start your code based on one of the examples in
-`Python UPF Examples`_.  In your Python code, you can make use of standard
+You are strongly advised to start your code based on one of the examples in
+`Python UPF examples`_.  In your Python code, you can make use of standard
 Python libraries like NumPy.
 
-The following topics are available:
+These topics are available:
 
-* `Supported UPF Subroutines`_
-* `Python UPF Methodology`_
-* `Accessing the Database from the Python Code`_
-* `Python UPF Limitations`_
-* `Python UPF Examples`_
+* `Supported UPF subroutines`_
+* `Python UPF methodology`_
+* `Accessing the database from the Python code`_
+* `Python UPF limitations`_
+* `Python UPF examples`_
 
 
-Supported UPF Subroutines
+Supported UPF subroutines
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A subset of the entire set of available UPF subroutines support Python coding (see the
-table below). This list will be expanded in the future. 
+A subset of the entire set of available UPF subroutines supports Python coding. The following
+table lists those that are supported.
 
-
-**Table 1: Python Support for Subroutines** 
+**Table 1: Python support for subroutines** 
 
 
 +---------------------------------------+--------------------------------------------------------------------------+
-| **Subroutine**                        | **Fortran Description**                                                  |
+| **Subroutine**                        | **Fortran description**                                                  |
 +=======================================+==========================================================================+
-|                              **Material Behavior**                                                               |
+|                              **Material behavior**                                                               |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UserMat`                             | Subroutine UserMat (Creating Your Own Material Model)                    |
+| `UserMat`                             | Subroutine `UserMat` (Creating Your Own Material Model)                  |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UserMatTh`                           | Subroutine UserMatTh (Creating Your Own Thermal Material Model)          |
+| `UserMatTh`                           | Subroutine `UserMatTh` (Creating Your Own Thermal Material Model)        |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UserHyper`                           | Subroutine UserHyper (Writing Your Own Isotropic Hyperelasticity Laws)   |
+| `UserHyper`                           | Subroutine `UserHyper` (Writing Your Own Isotropic Hyperelasticity Laws) |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UserCreep`                           | Subroutine UserCreep (Defining Creep Material Behavior)                  |
+| `UserCreep`                           | Subroutine `UserCreep` (Defining Creep Material Behavior)                |
 +---------------------------------------+--------------------------------------------------------------------------+
 |                              **Modifying and Monitoring Elements**                                               |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UsrShift`                            | Subroutine UsrShift (Calculating Pseudotime Time Increment)              |
+| `UsrShift`                            | Subroutine `UsrShift` (Calculating Pseudotime Time Increment)            |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UTimeInc`                            | Subroutine UTimeInc (Overriding the Program-Determined Time Step)        |
+| `UTimeInc`                            | Subroutine `UTimeInc` (Overriding the Program-Determined Time Step)      |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UCnvrg`                              | Subroutine UCnvrg (Overriding the Program-Determined Convergence)        |
+| `UCnvrg`                              | Subroutine `UCnvrg` (Overriding the Program-Determined Convergence)      |
 +---------------------------------------+--------------------------------------------------------------------------+
-|                              **Customizing Loads**                                                               |
+|                              **Customizing loads**                                                               |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `usrefl`                              | Subroutine usrefl (Changing Scalar Fields to User-Defined Values)        |
+| `usrefl`                              | Subroutine `usrefl` (Changing Scalar Fields to User-Defined Values)      |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `userpr`                              | Subroutine userpr (Changing Element Pressure Information)                |
+| `userpr`                              | Subroutine `userpr` (Changing Element Pressure Information)              |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `usercv`                              | Subroutine usercv (Changing Element Face Convection Surface Information) |
+| `usercv`                              | Subroutine `usercv` (Changing Element Face Convection Surface Information)|
 +---------------------------------------+--------------------------------------------------------------------------+
-| `userfx`                              | Subroutine userfx (Changing Element Face Heat Flux Surface Information)  |
+| `userfx`                              | Subroutine `userfx` (Changing Element Face Heat Flux Surface Information)|
 +---------------------------------------+--------------------------------------------------------------------------+
-|                              **Access Subroutines**                                                              |
+|                              **Accessing subroutines**                                                           |
 +---------------------------------------+--------------------------------------------------------------------------+
-| `UanBeg` / `UanFin`                   | Access at the Beginning and End of Various Operations                    |
+| `UanBeg` / `UanFin`                   | Access at the beginning and end of various operations                    |
 +                                       +                                                                          +
 | `USolBeg` / `USolFin`                 |                                                                          |
 +                                       +                                                                          +
@@ -82,24 +81,22 @@ table below). This list will be expanded in the future.
 +---------------------------------------+--------------------------------------------------------------------------+
 
 
-Python UPF Methodology
+Python UPF methodology
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Coding a Python UPF is different from using a compiled language like C/C++ or Fortran,
-mainly in terms of the API. Because the `gRPC technology <grpc_>`_ 
-is used to handle the
-communication and the exchange of data between the Python process and the Mechanical APDL
-process, you need to understand the way this feature handles the
-serialization/deserialization of data.
+mainly in terms of the API. Because the `gRPC technology <grpc_>`_ is used to handle
+the communication and the exchange of data between the Python process and the Mechanical APDL
+process, you need to understand the way this feature handles the serialization and
+deserialization of data.
 
 The main difference is in the subroutine arguments. Instead of having a full list of
 arguments as described for each of the subroutines, there are only two: the request
 object (for inputs), and the response object (for outputs). If an argument is both input
-and output of the subroutine, it will be part of both objects.
+and output of the subroutine, it is part of both objects.
 
 The description of the request object and the response object can be found in the
-**MapdlUser.proto** file stored in this installation
-directory:
+``MapdlUser.proto`` file stored in this installation directory:
 
 
 .. code::
@@ -136,7 +133,7 @@ First, create a Python file starting from this template:
 
 Note that the Mechanical APDL application automatically installs a Mechanical APDL Python package (a
 set of Python functions to handle the connection between Mechanical APDL and the Python
-environment). Each Python UPF must be imported, as noted by:
+environment). Each Python UPF must be imported:
 
 
 .. code:: python
@@ -144,14 +141,11 @@ environment). Each Python UPF must be imported, as noted by:
     from mapdl import *
 
 
-The above example redefines the `UAnBeg` routine and prints a
+The preceding example redefines the `UAnBeg` routine and prints a
 customized banner. This file must be in the same directory as the input file.
 
-To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your input file:
-
-
-
-**my\_inp.dat**
+To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your
+input file (``my\_inp.dat``).
 
 .. code::
 
@@ -165,7 +159,7 @@ To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to you
 This command is trapped by the Mechanical APDL Launcher so that a Python gRPC server is up
 and running when the Mechanical APDL process starts.
 
-When launching Mechanical APDL using this input file, you will see the following printout to
+When launching Mechanical APDL using this input file, you see the following printout to
 indicate Mechanical APDL detected the Python UPF instructions and has launched a Python
 server:
 
@@ -185,7 +179,7 @@ server:
     >> Server started on port [50054]
 
 
-During the Mechanical APDL process, you will see this Python printout:
+During the Mechanical APDL process, you see this Python printout:
 
 
 .. code::
@@ -196,7 +190,8 @@ During the Mechanical APDL process, you will see this Python printout:
     =======================================
 
 
-At the very end of the process, the Python server is automatically shutdown:
+At the very end of the process, the Python server is automatically shut
+down:
 
 
 .. code::
@@ -212,14 +207,14 @@ At the very end of the process, the Python server is automatically shutdown:
 
 
 
-Accessing the Database from the Python Code
+Accessing the database from the Python code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Within your UPF routine, you may need to access the Mechanical APDL database in read/write
+Within your UPF routine, you might need to access the Mechanical APDL database in read/write
 mode. 
 
 In the Python code, you can create a connection with the DB server. This command must
-be called only once, so you can protect the call based on the value of a static
+be called only once, so that you can protect the call based on the value of a static
 variable:
 
 
@@ -251,13 +246,11 @@ variable:
 Once the DB connection has been initialized, you can access the database of the
 Mechanical APDL instance in read/write mode. 
 
-A subset of the functions documented in _Accessing the Mechanical APDL Database
-have been exposed and can be called from the Python code.
+Of the functions documented in _Accessing the Mechanical APDL Database, a
+subset has been exposed so that they can be called from the Python code.
+The following table describes the exposed functions.
 
-Below is a list of those functions:
-
-
-**Table 2. Supported Database Access Functions.**
+**Table 2. Supported database access functions**
 
 +-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | **Supported Database Access Functions**                                                                                                                                                                                                             |
@@ -286,7 +279,7 @@ Below is a list of those functions:
 +---------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
-Python UPF Limitations
+Python UPF limitations
 ^^^^^^^^^^^^^^^^^^^^^^
 
 The Python UPF capability has these limitations:
@@ -296,12 +289,12 @@ The Python UPF capability has these limitations:
 
 
 
-Python UPF Examples
+Python UPF examples
 ^^^^^^^^^^^^^^^^^^^
 
-The following Python UPF Examples are available in :ref:`python_upf_examples` :
+The following Python UPF examples are available in :ref:`python_upf_examples`:
 
-* Example: Python `UserMat` Subroutine
-* Example: Python `UsrShift` Subroutine
-* Example: Python `UserHyper` Subroutine
+* Python `UserMat` subroutine
+* Python `UsrShift` subroutine
+* Python `UserHyper` subroutine
 
