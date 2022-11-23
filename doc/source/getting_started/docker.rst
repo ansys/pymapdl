@@ -3,7 +3,7 @@
 ************************
 Use MAPDL through Docker
 ************************
-You can run MAPDL within a container on any OS using `docker` and
+You can run MAPDL within a container on any OS using Docker and
 connect to it via PyMAPDL.
 
 There are several situations in which it is advantageous to run MAPDL
@@ -63,7 +63,7 @@ Note that port `50052` (local to the container) is being mapped to
 instances with different port mappings to allow for multiple instances
 of MAPDL.
 
-Once you've launched MAPDL you should see:
+Once you have launched MAPDL you should see:
 
 .. code::
 

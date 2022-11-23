@@ -5,7 +5,7 @@ Examples
 ========
 
 
-Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
+Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 
 .. === EXAMPLES Gallery ===
@@ -60,8 +60,5 @@ These links refers to the following GitHub repository where you can find all of 
 `GitHub Example Data Repository <example_data_repo_>`_
 
 If you find a missing or broken link, open an issue in
-Github (`PyMAPDL Issues <pymapdl_issues_>`_) 
+GitHub (`PyMAPDL Issues <pymapdl_issues_>`_) 
 or send an email to `PyAnsys Support <pyansys_support_>`_. 
-
-
-

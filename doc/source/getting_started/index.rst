@@ -87,14 +87,14 @@ Consider installing using a `virtual environment <using_venv_>`_.
 Ansys software requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For the latest features, you must have a copy of Ansys 2021 R1
-installed locally, but PyMAPDL is compatible with Ansys 17.0 and later
-on Windows and 13.0 on Linux.
+installed locally. However, PyMAPDL is compatible with Ansys 17.0 and later
+on Windows and with ANsys 13.0 on Linux.
 
 .. note::
 
-    The latest versions of Ansys provide signifiantly better support
-    and features. Certain features are not supported on earlier Ansys versions
-    versions such as APDL Math.
+    The latest versions of Ansys provide significantly better support
+    and features. Certain features, such as APDL Math, are not supported
+    on earlier Ansys versions.
 
 
 Verify your installation

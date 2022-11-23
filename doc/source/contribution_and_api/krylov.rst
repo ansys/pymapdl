@@ -1,7 +1,7 @@
 .. _ref_krylov_api:
 
-KrylovSolver
-============
+``KrylovSolver`` module
+=======================
 These classes are specific to the ``KrylovSolver`` module:
 
 .. currentmodule:: ansys.mapdl.core

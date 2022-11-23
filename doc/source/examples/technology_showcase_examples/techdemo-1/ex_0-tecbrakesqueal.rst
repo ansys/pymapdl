@@ -161,7 +161,7 @@ Meshing the brake disc-pad model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The sweep method is used to generate a hexahedral dominant mesh of the brake
-system assembly. Brake discs, pads and all other associated components are meshed
+system assembly. Brake discs, pads, and all other associated components are meshed
 with 20-node structural solid ``SOLID186`` elements with
 uniform reduced-integration element technology. The edge sizing tool is used to
 obtains a refined mesh at the pad-disc interface to improve the solution accuracy.
@@ -278,7 +278,7 @@ methods:
 *  `Partial nonlinear perturbed modal analysis`_
 *  `Full nonlinear perturbed modal analysis`_
 
-Linear Non-prestressed modal analysis
+Linear non-prestressed modal analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A linear non-prestressed modal analysis is effective when the stress-stiffening
@@ -559,7 +559,7 @@ Here is the process for solving a brake-squeal problem with this method:
 5. Obtain the linear perturbation modal solution using the QRDAMP or UNSYM eigensolver
    (:meth:`Mapdl.modopt() <ansys.mapdl.core.Mapdl.modopt>`).
 
-6. Expand the modes and postprocess the results (from the **Jobname.RSTP** file).
+6. Expand the modes and postprocess the results from the ``<jobname>.RSTP`` file.
    The following code shows the solution steps involved with this method.
 
 **First static solution:**
@@ -718,7 +718,7 @@ This figure is obtained from `Linear non-prestressed modal analysis`_ .
 
 
 **Figure 1.10: Mode Shape for Unstable Mode (Mode 22).**
-Tis figure is obtained from `Linear non-prestressed modal analysis`_ .
+This figure is obtained from `Linear non-prestressed modal analysis`_ .
 
 
 **Table 1.2: Solution output**
@@ -913,6 +913,7 @@ References
 ----------
 
 The following works were consulted when creating this example problem:
+<!--vale off -->
 
 1. Triches, M. Jr., Gerges, S. N. Y., & Jordon, R. (2004). Reduction of
    squeal noise from disc brake systems using constrained layer damping.
@@ -924,6 +925,8 @@ The following works were consulted when creating this example problem:
 3. Schroth, R., Hoffmann, N., Swift, R. (2004, January). Mechanism of brake
    squeal from theory to experimentally measured mode coupling. In
    *Proceedings of the 22nd International Modal Analysis Conference (IMAC XXII).*
+
+<!--vale on -->
 
 Input files
 -----------

@@ -1,6 +1,6 @@
 .. _ref_xpl_api:
 
-Database Explorer
+Database explorer
 =================
 .. currentmodule:: ansys.mapdl.core
 

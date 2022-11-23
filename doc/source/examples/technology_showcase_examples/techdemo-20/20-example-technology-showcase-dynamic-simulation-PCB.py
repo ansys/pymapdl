@@ -9,7 +9,7 @@ run a modal and PSD analysis. PyDPF modules are also used for post-processing.
 This example is inspired from the model and analysis defined in Chapter 20 of
 the Mechanical APDL Technology Showcase Manual.
 
-Additional Packages Used
+Additional packages used
 ------------------------
 
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
@@ -17,13 +17,13 @@ Additional Packages Used
 """
 
 ###############################################################################
-# Setting up model
+# Set up the model
 # ----------------
 #
-# The original FE model is given in the Ansys Mechanical APDL Technology
-# Showcase Manual.  The .cdb contains a FE model of a single circuit board. The
-# model is meshed with SOLID186, SHELL181 and BEAM188 elements. All components
-# of the PCB model is assigned with linear elastic isotropic materials. Bonded
+# The original FE model is given in the *Ansys Mechanical APDL Technology
+# Showcase Manual*.  The CDB file contains an FE model of a single circuit board. The
+# model is meshed with SOLID186, SHELL181, and BEAM188 elements. All components
+# of the PCB model are assigned with linear elastic isotropic materials. Bonded
 # and flexible surface-to-surface contact pairs are used to define the contact
 # between the IC packages and the circuit board.
 #
@@ -52,10 +52,10 @@ mapdl.eplot(background="w")
 mapdl.cmsel("all")
 
 ###############################################################################
-# Creating the complete layered model
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# The original model will be duplicated to create a layered PCB of three layers
-# that are binded together.
+# Create the complete layered model
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# The original model is duplicated to create a PCB with three layers
+# that are bound together.
 
 # duplicate single PCB to get three layers
 # get the maximum node number for the single layers PCB in the input file
@@ -115,7 +115,7 @@ mapdl.view(1, 1, 1, 1)
 mapdl.eplot(vtk=True)
 
 ###############################################################################
-# Modal Analysis
+# Modal analysis
 # --------------
 #
 # Run modal analysis
@@ -123,7 +123,7 @@ mapdl.eplot(vtk=True)
 #
 # A modal analysis is run using Block Lanzos.
 # Only 10 modes are extracted for the sake of run times, but using a higher
-# number of nodes is recommended (suggestion: 300 modes).
+# number of nodes is recommended (Using 300 modes is suggested.)
 #
 
 # enter solution processor and define analysis settings
@@ -140,12 +140,12 @@ print(output)
 
 
 ###############################################################################
-# Post-processing the modal results
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# This sections illustrates different methods to post-process the results of the
-# modal analysis : PyMAPDL method, PyMAPDL result reader, PyDPF-Post
-# and PyDPF-Core. All methods lead to the same result and are just given as an
-# example of how each module can be used.
+# Postprocessing the modal results
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# This sections illustrates these different methods to postprocess the results of the
+# modal analysis: PyMAPDL, PyMAPDL Reader, PyDPF-Post, and PyDPF-Core.
+# All methods lead to the same result. The example shows how each of
+# these modules can be used.
 
 # using MAPDL methods
 mapdl.post1()
@@ -154,19 +154,19 @@ mapdl.plnsol("u", "sum")
 
 
 ###############################################################################
-# Using PyMAPDL result reader
-# ***************************
+# Use PyMAPDL Reader
+# ******************
 #
-# *Not recommended* - PyMAPDL reader library is in process to being deprecated.
-# It is recommended to use `DPF Post <https://postdocs.pyansys.com/>`_.
+# This method is not recommended because PyMAPDL Reader is in the process of being deprecated.
+# You should use `DPF-Post <https://postdocs.pyansys.com/>`_ instead.
 #
 
 mapdl_result = mapdl.result
 mapdl_result.plot_nodal_displacement(0)
 
 ###############################################################################
-# Using DPF-Post
-# **************
+# Use DPF-Post
+# ************
 #
 
 from ansys.dpf import post
@@ -179,8 +179,8 @@ total_deformation = displacement.norm
 total_deformation.plot_contour(show_edges=True, background="w")
 
 ###############################################################################
-# Using DPF-Core
-# **************
+# Use DPF-Core
+# ************
 #
 
 from ansys.dpf import core
@@ -197,7 +197,7 @@ mesh.plot(total_def_container.get_field_by_time_id(1))
 ###############################################################################
 # Run PSD analysis
 # ----------------
-# The response spectrum analysis is defined, solved and post-processed.
+# The response spectrum analysis is defined, solved, and postprocessed.
 
 # define PSD analysis with input spectrum
 mapdl.slashsolu()
@@ -239,9 +239,9 @@ output = mapdl.solve()
 print(output)
 
 ###############################################################################
-# Post-process PSD analysis
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-# The response spectrum analysis is post-processed. First, the standard
+# Postprocess PSD analysis
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# The response spectrum analysis is postprocessed. First, the standard
 # MAPDL POST1 postprocessor is used. Then, the MAPDL time-history
 # POST26 postprocessor is used to generate the response power spectral
 # density.
@@ -249,13 +249,12 @@ print(output)
 # .. note::
 #    The graph generated through POST26 is exported as a picture in the working
 #    directory. Finally, the results from POST26 are saved to Python variables
-#    to be plotted in the Python environment with the use of Matplotlib
-#    library.
+#    to be plotted in the Python environment with the use of Matplotlib.
 
 
 ###############################################################################
-# Post-process PSD analysis in POST1
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Postprocess PSD analysis in POST1
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mapdl.post1()
 mapdl.set(1, 1)
@@ -264,8 +263,8 @@ mapdl.set("last")
 mapdl.plnsol("u", "sum")
 
 ###############################################################################
-# Post-process PSD analysis in POST26 (time-history post-processing)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Postprocess PSD analysis in POST26 (time-history postprocessing)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 mapdl.post26()
 
@@ -299,8 +298,8 @@ mapdl.plvar(3)
 mapdl.show("close")
 
 ###############################################################################
-# Post-process PSD analysis using Matplotlib
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Postprocess PSD analysis using Matplotlib
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # store MAPDL results to python variables
 mapdl.dim("frequencies", "array", 4000, 1)
