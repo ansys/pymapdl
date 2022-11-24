@@ -2776,7 +2776,10 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        if self._store_commands:
+        # check if we want to avoid the current non-interactive context.
+        avoid_non_interactive = kwargs.get("avoid_non_interactive", False)
+
+        if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
             self._stored_commands.append(command)
             return

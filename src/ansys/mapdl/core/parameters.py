@@ -280,7 +280,7 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        params = interp_star_status(self._mapdl.starstatus())
+        params = interp_star_status(self._mapdl.starstatus(avoid_non_interactive=True))
 
         if self.show_leading_underscore_parameters:
             _params = interp_star_status(self._mapdl.starstatus("_PRM"))
@@ -418,6 +418,8 @@ class Parameters:
                 self._mapdl.run(format_str)
 
             st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+            output = self._mapdl.last_response
+            u = output[st:]
 
             if "**" not in self._mapdl.last_response[st:]:
                 escaped = True
