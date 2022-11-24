@@ -24,7 +24,7 @@
 .. _matplotlib_main: https://matplotlib.org
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
-.. _scipy: https://docs.scipy.org/doc/scipy/reference/
+.. _scipy_docs: https://docs.scipy.org/doc/scipy/reference/
 .. _docker: https://www.docker.com/
 
 

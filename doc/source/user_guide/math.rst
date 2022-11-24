@@ -5,7 +5,7 @@ APDL Math overview
 APDL Math provides the ability to access and manipulate the large
 sparse matrices and solve a variety of eigenproblems. PyMAPDL classes
 and bindings present APDL Math in a similar manner to the popular
-`numpy <numpy_docs_>`_ and `scipy <scipy_>`_ libraries.
+`numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
 The APDL Math command set is based on tools for manipulating large mathematical
 matrices and vectors that provide access to standard linear algebra
 operations, access to the powerful sparse linear solvers of ANSYS
