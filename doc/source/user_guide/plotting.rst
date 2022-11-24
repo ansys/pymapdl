@@ -183,7 +183,7 @@ Plotting boundary conditions
 
 It is possible to plot the boundary conditions applied on the model by
 specifying ``plot_bc=True`` in plotting functions. For example, this code
-specifies ``plot_bc=True``for the :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`
+specifies ``plot_bc=True`` for the :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`
 method:
 
 .. code:: python

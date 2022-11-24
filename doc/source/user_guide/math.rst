@@ -158,5 +158,5 @@ The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
 APDL Math reference
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
 For more information, see :ref:`ref_math_api`.

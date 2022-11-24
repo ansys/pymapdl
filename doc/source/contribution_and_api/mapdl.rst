@@ -4,7 +4,8 @@
 ================
 
 ``Mapdl`` methods and attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. currentmodule:: ansys.mapdl.core
 
 .. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
