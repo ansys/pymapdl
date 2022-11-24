@@ -34,6 +34,9 @@ concurrency:
 permissions:
   packages: read
 
+defaults:
+  run:
+    shell: bash
 
 jobs:
 
@@ -361,7 +364,7 @@ jobs:
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: Pull, launch, and validate Ubuntu MAPDL service from private
-        run: bash .ci/start_mapdl_ubuntu.sh
+        run: .ci/start_mapdl_ubuntu.sh
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
