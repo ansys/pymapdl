@@ -538,6 +538,7 @@ jobs:
           python -m pip install --upgrade pip
       
       - name: Creating python venv
+        shell: powershell
         run: |
           python -m venv .\.venv
           .\.venv\Scripts\activate
@@ -562,6 +563,7 @@ jobs:
       #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: Unit Testing
+        shell: powershell
         run: |
           set PYMAPDL_PORT=
           set PYMAPDL_START_INSTANCE=
