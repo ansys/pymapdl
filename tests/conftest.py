@@ -2,10 +2,12 @@ from collections import namedtuple
 import os
 from pathlib import Path
 import signal
-import time
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
+
+# import time
+
 
 pytest_plugins = ["pytester"]
 
@@ -306,9 +308,9 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
             # verify PIDs are closed
-            time.sleep(1)  # takes a second for the processes to shutdown
-            for pid in mapdl._pids:
-                assert not check_pid(pid)
+            # time.sleep(1)  # takes a second for the processes to shutdown
+            # for pid in mapdl._pids:
+            #     assert not check_pid(pid)
 
 
 @pytest.fixture

@@ -123,7 +123,6 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
 
    commands
    database
-   building_example
    geometry
    helper
    inline
@@ -138,3 +137,5 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
+   building_example
+   unit_testing
