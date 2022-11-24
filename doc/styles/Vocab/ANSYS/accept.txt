@@ -1,16 +1,18 @@
+AMLs
 ANSYS
 Ansys
 ansys
 APDL Math
-PyMAPDL
 Arruda-Boyce
 Block Lanzos
+[Bb]ooleans
 Boyce
 breakpoint
 centerline
-CentOS7
+CentOS
 Chao
 Command Prompt
+command prompt
 Docker
 dof
 eigenfrequency
@@ -32,6 +34,7 @@ Hyperelasticity
 hyperelasticity
 Intro to Ansys Mechanical APDL Scripting
 Julia
+[Kk]eypoints
 Krylov
 kwarg
 Lanzos
@@ -48,6 +51,7 @@ nonlinearities
 NumPy
 numpy
 performant
+PMLs
 postprocess
 Postprocessing
 postprocessing
@@ -61,25 +65,31 @@ Prony
 prony
 Pseudotime
 Puri
+PyAnsys
+pyansys
 PyDPF-Core
 PyDPF-Post
+PyMAPDL
 Python
-Pythonic
-Pythonically
+[Pp]ythonic
+[Pp]ythonically
 QRDAMP
 Radiosity
 Rao
 RNNN
 RST
 spotweld
+tablet
 thermomechanical
 thermomechanically
 Tool-Narayanaswamy
 subselected
 substep
 Subsystem
+[Ss]uperelements
 uncompress
 unconverged
+UCnvrg
 UPF
 UPFs
 UNSYM
@@ -88,5 +98,7 @@ viscoplastic
 von
 Windows
 Windows Subsystem
+Windows Subsystem for Linux
 WSL
 Zhu
+3-D

@@ -3,7 +3,7 @@
 File explorer overview
 ======================
 A specific property under the ``Mapdl`` class is dedicated for XPL. It's
-based on the APDLMath ``*XPL`` command and can be used to explore binary
+based on the APDL Math ``*XPL`` command and can be used to explore binary
 files generated from APDL.
 
 All APDL files are organized the same way, as a tree or records. For

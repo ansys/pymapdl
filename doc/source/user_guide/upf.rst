@@ -36,48 +36,48 @@ table lists those that are supported.
 **Table 1: Python support for subroutines** 
 
 
-+---------------------------------------+---------------------------------------------------------------------------+
-| **Subroutine**                        | **Fortran description**                                                   |
-+=======================================+===========================================================================+
-|                              **Material behavior**                                                                |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UserMat`                             | Subroutine `UserMat` (Creating Your Own Material Model)                   |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UserMatTh`                           | Subroutine `UserMatTh` (Creating Your Own Thermal Material Model)         |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UserHyper`                           | Subroutine `UserHyper` (Writing Your Own Isotropic Hyperelasticity Laws)  |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UserCreep`                           | Subroutine `UserCreep` (Defining Creep Material Behavior)                 |
-+---------------------------------------+---------------------------------------------------------------------------+
-|                              **Modifying and Monitoring Elements**                                                |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UsrShift`                            | Subroutine `UsrShift` (Calculating Pseudotime Time Increment)             |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UTimeInc`                            | Subroutine `UTimeInc` (Overriding the Program-Determined Time Step)       |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UCnvrg`                              | Subroutine `UCnvrg` (Overriding the Program-Determined Convergence)       |
-+---------------------------------------+---------------------------------------------------------------------------+
-|                              **Customizing loads**                                                                |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `usrefl`                              | Subroutine `usrefl` (Changing Scalar Fields to User-Defined Values)       |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `userpr`                              | Subroutine `userpr` (Changing Element Pressure Information)               |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `usercv`                              | Subroutine `usercv` (Changing Element Face Convection Surface Information)|
-+---------------------------------------+---------------------------------------------------------------------------+
-| `userfx`                              | Subroutine `userfx` (Changing Element Face Heat Flux Surface Information) |
-+---------------------------------------+---------------------------------------------------------------------------+
-|                              **Accessing subroutines**                                                            |
-+---------------------------------------+---------------------------------------------------------------------------+
-| `UanBeg` / `UanFin`                   | Access at the beginning and end of various operations                     |
++---------------------------------------+-----------------------------------------------------------------------------+
+| **Subroutine**                        | **Fortran description**                                                     |
++=======================================+=============================================================================+
+|                              **Material behavior**                                                                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UserMat``                           | Subroutine ``UserMat`` (Creating Your Own Material Model)                   |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UserMatTh``                         | Subroutine ``UserMatTh`` (Creating Your Own Thermal Material Model)         |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UserHyper``                         | Subroutine ``UserHyper`` (Writing Your Own Isotropic Hyperelasticity Laws)  |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UserCreep``                         | Subroutine ``UserCreep`` (Defining Creep Material Behavior)                 |
++---------------------------------------+-----------------------------------------------------------------------------+
+|                              **Modifying and Monitoring Elements**                                                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UsrShift``                          | Subroutine ``UsrShift`` (Calculating Pseudotime Time Increment)             |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UTimeInc``                          | Subroutine ``UTimeInc`` (Overriding the Program-Determined Time Step)       |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UCnvrg``                            | Subroutine ``UCnvrg`` (Overriding the Program-Determined Convergence)       |
++---------------------------------------+-----------------------------------------------------------------------------+
+|                              **Customizing loads**                                                                  |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``usrefl``                            | Subroutine ``usrefl`` (Changing Scalar Fields to User-Defined Values)       |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``userpr``                            | Subroutine ``userpr`` (Changing Element Pressure Information)               |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``usercv``                            | Subroutine ``usercv`` (Changing Element Face Convection Surface Information)|
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``userfx``                            | Subroutine ``userfx`` (Changing Element Face Heat Flux Surface Information) |
++---------------------------------------+-----------------------------------------------------------------------------+
+|                              **Accessing subroutines**                                                              |
++---------------------------------------+-----------------------------------------------------------------------------+
+| ``UanBeg`` / ``UanFin``               | Access at the beginning and end of various operations                     |
 +                                       +                                                                           +
-| `USolBeg` / `USolFin`                 |                                                                           |
+| ``USolBeg`` / ``USolFin``             |                                                                           |
 +                                       +                                                                           +
-| `ULdBeg` / `ULdFin`                   |                                                                           |
+| ``ULdBeg`` / ``ULdFin``               |                                                                           |
 +                                       +                                                                           +
-| `UItBeg` / `UItFin`                   |                                                                           |
+| ``UItBeg`` / ``UItFin``               |                                                                           |
 +                                       +                                                                           +
-| `USsBeg` / `USsFin`                   |                                                                           |
+| ``USsBeg`` / ``USsFin``               |                                                                           |
 +---------------------------------------+---------------------------------------------------------------------------+
 
 
@@ -246,7 +246,7 @@ variable:
 Once the DB connection has been initialized, you can access the database of the
 Mechanical APDL instance in read/write mode. 
 
-Of the functions documented in _Accessing the Mechanical APDL Database, a
+Of the functions documented in accessing the Mechanical APDL Database, a
 subset has been exposed so that they can be called from the Python code.
 The following table describes the exposed functions.
 
@@ -259,23 +259,23 @@ The following table describes the exposed functions.
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``db.stop()``                                            | Closes the connection with the DB Server.                                                                                                                                                 |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.ndnext(next)``                                      | Equivalent to the function described in function ndnext (Getting the Next Node Number)                                                                                                    |
+| ``db.ndnext(next)``                                      | Equivalent to the function described in function ``ndnext`` (Getting the Next Node Number)                                                                                                |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.ndinqr(ind, key)``                                  | Equivalent to the function described in function ndinqr (Getting Information About a Node)                                                                                                |
+| ``db.ndinqr(ind, key)``                                  | Equivalent to the function described in function ``ndinqr`` (Getting Information About a Node)                                                                                            |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.getnod(inod)``                                      | Equivalent to the function described in function getnod (Getting a Nodal Point)                                                                                                           |
+| ``db.getnod(inod)``                                      | Equivalent to the function described in function ``getnod`` (Getting a Nodal Point)                                                                                                       |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.putnod(inod, x, y, z)``                             | Equivalent to the function described in function putnod (Storing a Node)                                                                                                                  |
+| ``db.putnod(inod, x, y, z)``                             | Equivalent to the function described in function ``putnod`` (Storing a Node)                                                                                                              |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.elnext(ielm)``                                      | Equivalent to the function described in function elnext (Getting the Number of the Next Element)                                                                                          |
+| ``db.elnext(ielm)``                                      | Equivalent to the function described in function ``elnext`` (Getting the Number of the Next Element)                                                                                      |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.getelem(ielm)``                                     | Equivalent to the function described in function elmget (Getting an Element's Attributes and Nodes)                                                                                       |
+| ``db.getelem(ielm)``                                     | Equivalent to the function described in function ``elmget`` (Getting an Element's Attributes and Nodes)                                                                                   |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.get_ElmInfo(inquire)``                              | Equivalent to the function get\_ElmInfo described in accessing Solution and Material Data                                                                                                 |
+| ``db.get_ElmInfo(inquire)``                              | Equivalent to the function ``get\_ElmInfo`` described in accessing Solution and Material Data                                                                                             |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.get_ElmData(kchar, elemId, kMatRecPt, ncomp, vect)``| Equivalent to the function get\_ElmData described in accessing Solution and Material Data                                                                                                 |
+| ``db.get_ElmData(kchar, elemId, kMatRecPt, ncomp, vect)``| Equivalent to the function ``get\_ElmData`` described in accessing Solution and Material Data                                                                                             |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``db.putElmData(inquire, elemId, kIntg, nvect, vect)``   | Equivalent to the function put\_ElmData described in accessing Solution and Material Data                                                                                                 |
+| ``db.putElmData(inquire, elemId, kIntg, nvect, vect)``   | Equivalent to the function ``put\_ElmData`` described in accessing Solution and Material Data                                                                                             |
 +----------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 

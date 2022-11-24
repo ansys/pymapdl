@@ -1,7 +1,7 @@
 .. _ref_gap_conditions_commands_api:
 
 **************
-Gap Conditions
+Gap conditions
 **************
 
 .. currentmodule:: ansys.mapdl.core

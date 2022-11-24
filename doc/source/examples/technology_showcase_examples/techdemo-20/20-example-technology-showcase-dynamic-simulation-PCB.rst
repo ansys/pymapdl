@@ -29,7 +29,7 @@ run a modal and PSD analysis. PyDPF modules are also used for post-processing.
 This example is inspired from the model and analysis defined in Chapter 20 of
 the Mechanical APDL Technology Showcase Manual.
 
-Additional Packages Used
+Additional packages used
 ------------------------
 
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
@@ -40,8 +40,8 @@ Setting up model
 ----------------
 
 The original FE model is given in the Ansys Mechanical APDL Technology
-Showcase Manual.  The .cdb contains a FE model of a single circuit board. The
-model is meshed with SOLID186, SHELL181 and BEAM188 elements. All components
+Showcase Manual. The .cdb contains a FE model of a single circuit board. The
+model is meshed with SOLID186, SHELL181, and BEAM188 elements. All components
 of the PCB model is assigned with linear elastic isotropic materials. Bonded
 and flexible surface-to-surface contact pairs are used to define the contact
 between the IC packages and the circuit board.
@@ -103,8 +103,8 @@ Starting MAPDL as a service and importing an external model
 
 Creating the complete layered model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The original model will be duplicated to create a layered PCB of three layers
-that are binded together.
+The original model is duplicated to create a layered PCB of three layers
+that are bonded together.
 
 .. GENERATED FROM PYTHON SOURCE LINES 59-117
 
@@ -182,7 +182,7 @@ that are binded together.
 
 .. GENERATED FROM PYTHON SOURCE LINES 118-128
 
-Modal Analysis
+Modal analysis
 --------------
 
 Run modal analysis
@@ -2148,7 +2148,7 @@ Using DPF-Core
 
 Run PSD analysis
 ----------------
-The response spectrum analysis is defined, solved and post-processed.
+The response spectrum analysis is defined, solved, and post-processed.
 
 .. GENERATED FROM PYTHON SOURCE LINES 201-241
 

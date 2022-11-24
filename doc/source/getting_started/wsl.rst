@@ -2,7 +2,7 @@
 
 
 PyAnsys libraries on a Windows Subsystem for Linux and Docker
-##############################################################
+#############################################################
 
 This page shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL). WSL is a compatibility layer for
@@ -33,13 +33,13 @@ Install WSL by following Microsoft's directions at
 Currently there are two versions of WSL: WSL1 and WSL2. Because WSL2 is
 the latest and includes many improvements over WSL1, using WSL2 is highly recommended.
 
-Install CentOS7 WSL distribution
-================================
+Install CentOS 7 WSL distribution
+=================================
 
-Install CentOS7 WSL distribution
-================================
+Install CentOS 7 WSL distribution
+=================================
 
-You should use the CentOS7 WSL distribution for working with PyAnsys
+You should use the CentOS 7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
@@ -49,8 +49,8 @@ You can install it using an unofficial WSL distribution from
 Optionally, you can try Ubuntu, but it has not been tested yet in the context of WSL.
 
 
-Install Ansys products in WSL CentOS7
-=====================================
+Install Ansys products in WSL CentOS 7
+======================================
 
 Prerequisites
 -------------
@@ -135,7 +135,7 @@ Docker image and these ports are open.
 See `Run MAPDL on a local Docker image`_.
 
 
-If you want to run MAPDL in the CentOS7 image and use the Windows license
+If you want to run MAPDL in the CentOS 7 image and use the Windows license
 server, opening the ports might not work properly because the Windows firewall
 seems to block all traffic coming from WSL. For security purposes, you should
 still try to open ports ``1055`` and ``2325`` in the firewall and see if your
@@ -159,7 +159,8 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
 
 
 **Example /etc/hosts/ file**
-<!--vale off -->
+.. vale off
+
 
 .. code-block:: bash
    :emphasize-lines: 8
@@ -183,19 +184,21 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
    ff02::2 ip6-allrouters
 
 
-<!--vale on -->
+.. vale on
 
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
 environment variable with this IP address:
 
-<!--vale off -->
+.. vale off
+
 .. code:: bash
 
     winhostIP=$(grep -m 1 host.docker.internal /etc/hosts | awk '{print $1}')
     export ANSYSLMD_LICENSE_FILE=1055@$winhostIP
 
 
-<!--vale off -->
+.. vale off
+
 
 Run MAPDL on a local Docker image
 *********************************
@@ -449,8 +452,8 @@ Kill all processes with a given name
    Get-Process "ANSYS212" | Stop-Process
 
 
-Install ``xvfb`` in CentOS7
-===========================
+Install ``xvfb`` in CentOS 7
+============================
 
 If you want to replicate the CI/CD behavior, ``xvfb`` is needed. For more
 information, see the ``.ci`` folder.

@@ -1,7 +1,7 @@
 .. _ref_failure_criteria_api:
 
 ****************
-Failure Criteria
+Failure criteria
 ****************
 
 .. currentmodule:: ansys.mapdl.core

@@ -170,7 +170,7 @@ dependencies.
 CentOS 7
 --------
 
-On CentOS 7, you can install missing depenedencies with:
+On CentOS 7, you can install missing dependencies with:
 
 .. code::
 

@@ -1,7 +1,7 @@
 .. _ref_constraint_equations_commands_api:
 
 ********************
-Constraint Equations
+Constraint equations
 ********************
 
 .. currentmodule:: ansys.mapdl.core

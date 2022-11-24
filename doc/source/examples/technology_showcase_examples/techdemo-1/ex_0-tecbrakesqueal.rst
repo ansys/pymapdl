@@ -913,7 +913,8 @@ References
 ----------
 
 The following works were consulted when creating this example problem:
-<!--vale off -->
+.. vale off
+
 
 1. Triches, M. Jr., Gerges, S. N. Y., & Jordon, R. (2004). Reduction of
    squeal noise from disc brake systems using constrained layer damping.
@@ -926,7 +927,7 @@ The following works were consulted when creating this example problem:
    squeal from theory to experimentally measured mode coupling. In
    *Proceedings of the 22nd International Modal Analysis Conference (IMAC XXII).*
 
-<!--vale on -->
+.. vale on
 
 Input files
 -----------

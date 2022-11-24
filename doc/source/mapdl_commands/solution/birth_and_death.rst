@@ -1,7 +1,7 @@
 .. _ref_birth_and_death_commands_api:
 
 ***************
-Birth and Death
+Birth and death
 ***************
 
 .. currentmodule:: ansys.mapdl.core
