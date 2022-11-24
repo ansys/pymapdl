@@ -372,7 +372,7 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
-          pip install .[tests]
+          python -m pip install .[tests]
 
       - name: DPF Server Activation
         run: |
@@ -500,7 +500,7 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
-          python pip install .[tests]
+          python -m pip install .[tests]
 
       # - name: DPF Server Activation
       #   run: |
