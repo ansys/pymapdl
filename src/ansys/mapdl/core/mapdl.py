@@ -2851,6 +2851,7 @@ class _MapdlCore(Commands):
             filename = base_name
 
         with self.non_interactive:
+            # Remember that the first ... blablaba
             self.tread(name, filename, nskip="1")
 
         if self._local:
