@@ -457,7 +457,6 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl()
     mapdl = launch_mapdl(log_apdl=filename)
 
     mapdl.prep7()
