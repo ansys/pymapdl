@@ -22,7 +22,7 @@ software:
         3   0.2500        0.0000        0.0000          0.00     0.00     0.00
 
 
-However, wit the :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>` class,
+However, with the :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>` class,
 you can interface with a current instance of the :class:`Mapdl
 <ansys.mapdl.core.Mapdl>` class and access the current nodes coordinates
 with this code:
