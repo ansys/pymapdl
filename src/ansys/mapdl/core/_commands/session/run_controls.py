@@ -520,7 +520,7 @@ class RunControls:
 
             ALL or blank
               Lists all parameters (except local macro parameters and those with names
-            beginning or ending with an underbar) and toolbar abbreviations.
+              beginning or ending with an underbar) and toolbar abbreviations.
 
             \_PRM
               Lists only parameters with names beginning with an underbar (\_).
