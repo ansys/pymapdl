@@ -35,8 +35,9 @@
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 .. _ansys_current_release: https://download.ansys.com/Current%20Release
 
-.. # techdemos
+.. # TechDemos related
 .. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
+.. _tech_demos_repo: https://techdemos.mapdl.docs.pyansys.com/
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com

@@ -18,7 +18,8 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-We will add the link the pymapdl-techdemos repository.
+The documentation to the PyMAPDL techdemos can be found in the following `link 
+<_tech_demos_repo_>`_.
 
 .. === EXTENDED EXAMPLES ===
 
