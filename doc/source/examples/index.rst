@@ -18,8 +18,18 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-The documentation to the PyMAPDL techdemos can be found in the following `link 
-<_tech_demos_repo_>`_.
+The PyMAPDL technology showcase examples are more complex test cases than
+the ones presented in the <gallery_examples_>. They demonstrate how to use
+PyMAPDL to effectively and accurately solve interdisciplinary problems from
+a variety of industries and engineering fields.
+
+The examples initially come from the `APDL Technology Showcase Manual
+<_tech_demo_intro_>`_ and are modeled with MAPDL files. Some of them have been
+reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
+library.
+
+The documentation to the exposed examples can be found in the
+`pymapdl-techdemos <_tech_demos_repo_>`_ repository.
 
 .. === EXTENDED EXAMPLES ===
 
