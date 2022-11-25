@@ -37,7 +37,8 @@
 
 .. # TechDemos related
 .. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
-.. _tech_demos_repo: https://techdemos.mapdl.docs.pyansys.com/
+.. _tech_demo_repo: https://github.com/pyansys/pymapdl-techdemos
+.. _tech_demos_doc: https://techdemos.mapdl.docs.pyansys.com/
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
