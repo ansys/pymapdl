@@ -19,7 +19,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
 The PyMAPDL technology showcase examples are more complex test cases than
-the ones presented in the <gallery_examples_>. They demonstrate how to use
+the ones presented above. They demonstrate how to use
 PyMAPDL to effectively and accurately solve interdisciplinary problems from
 a variety of industries and engineering fields.
 
