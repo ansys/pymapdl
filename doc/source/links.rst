@@ -90,6 +90,7 @@
 .. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
 .. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/examples/extended_examples/Krylov/krylov_example.html
 .. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
+.. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-techdemos/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://techdemos.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 

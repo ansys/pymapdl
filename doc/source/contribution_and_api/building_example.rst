@@ -41,7 +41,7 @@ Example: `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_
 .. vale on
 
 Here is a link to this dynamic example: 
-`MAPDL 2D Plane Stress Concentration Analysis <_pymapdl_doc_2d_plate_with_a_hole_>`_
+`MAPDL 2D Plane Stress Concentration Analysis <pymapdl_doc_2d_plate_with_a_hole_>`_
 
 When an example is executed, **Total running time of the script** appears at the end of
 the document.
