@@ -812,7 +812,7 @@ conditions are not imposed anywhere on the model.
     mapdl.nsel("r", "loc", "z", 0)
     mapdl.nsel("a", "loc", "x", -w)
     mapdl.nsel("a", "loc", "x", w)
-    mapdl.nsel("a", "loc", "y", -l1)nlinearities
+    mapdl.nsel("a", "loc", "y", -l1)
     mapdl.nsel("a", "loc", "y", l2)
     mapdl.sf("all", "conv", 30, 25)
 
