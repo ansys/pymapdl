@@ -290,11 +290,6 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
     >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
     >>> mapdl = launch_mapdl(exec_loc)
 
-If launching PyMAPDL fails or hangs while launching, pass ``verbose_mapdl=True``
-when using the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This prints
-the output of MAPDL within Python, which you use to debug why MAPDL
-isn't launching. On Windows, output is limited due to the way
-MAPDL launches.
 
 
 Default Location of the executable file
