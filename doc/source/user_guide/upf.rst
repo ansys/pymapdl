@@ -70,13 +70,13 @@ table lists those that are supported.
 |                              **Accessing subroutines**                                                              |
 +---------------------------------------+-----------------------------------------------------------------------------+
 | ``UanBeg`` / ``UanFin``               | Access at the beginning and end of various operations                       |
-+                                       +                                                                             +
+|                                       |                                                                             |
 | ``USolBeg`` / ``USolFin``             |                                                                             |
-+                                       +                                                                             +
+|                                       |                                                                             |
 | ``ULdBeg`` / ``ULdFin``               |                                                                             |
-+                                       +                                                                             +
+|                                       |                                                                             |
 | ``UItBeg`` / ``UItFin``               |                                                                             |
-+                                       +                                                                             +
+|                                       |                                                                             |
 | ``USsBeg`` / ``USsFin``               |                                                                             |
 +---------------------------------------+-----------------------------------------------------------------------------+
 
