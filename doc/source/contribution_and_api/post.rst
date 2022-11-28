@@ -4,7 +4,7 @@
 ``PostProcessing`` class
 ========================
 
-The ``PostProcessing`` class supports postprocessing directly from MAPDL.
+The ``PostProcessing`` class supports postprocessing directly from the MAPDL live instance.
 If you want to postprocess MAPDL result files outside of PyMAPDL,
 you can use one of these packages:
 

@@ -49,7 +49,7 @@ to access them:
     >>> mapdl.mesh
     >>> mapdl.geometry
 
-To view the current mesh status, you this code:
+To view the current mesh status, you can use this code:
 
 .. code::
 

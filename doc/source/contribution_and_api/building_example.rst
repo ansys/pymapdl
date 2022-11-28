@@ -33,15 +33,15 @@ Dynamic examples
 
 The dynamic examples are based on Python files and must be able to run in under three minutes.
 
-They are in the ``examples`` directory in this repository.
+They are in the `examples <pymapdl_examples_>`_ directory in this repository.
 
 .. vale off
 
-Example: `2d_plate_with_a_hole.py <https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py>`_
+Example: `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_
 .. vale on
 
 Here is a link to this dynamic example: 
-`MAPDL 2D Plane Stress Concentration Analysis <https://mapdl.docs.pyansys.com/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html#sphx-glr-examples-gallery-examples-00-mapdl-examples-2d-plate-with-a-hole-py>`_
+`MAPDL 2D Plane Stress Concentration Analysis <_pymapdl_doc_2d_plate_with_a_hole_>`_
 
 When an example is executed, **Total running time of the script** appears at the end of
 the document.
@@ -52,14 +52,13 @@ Static examples
 
 Static examples are based on RST files and are not executed. 
 
-They are in the ``doc\source`` directory.
-
+They are in the `doc\source <pymapdl_doc_source_>`_ directory.
 .. vale off
 
-Example: `krylov_example.rst <https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst>`_
+Example: `krylov_example.rst <pymapdl_doc_krylov_example_rst_>`_
 .. vale on
 
-Here is a link to this static example: `Harmonic analysis using the frequency-sweep Krylov method <https://mapdl.docs.pyansys.com/examples/extended_examples/Krylov/krylov_example.html>`_
+Here is a link to this static example: `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_
 
 
 Semi-dynamic examples
@@ -75,10 +74,10 @@ Semi-dynamic examples are RST files that execute Python code using this RST dire
 
 .. vale off
 
-Example: `tecfricstir.rst <https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst>`_
+Example: `tecfricstir.rst <pymapdl_techdemo_28_rst_>`_
 .. vale on
 
-Here is a link to this semi-dynamic example: `Friction Stir Welding (FSW) Simulation <https://mapdl.docs.pyansys.com/examples/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html>`_
+Here is a link to this semi-dynamic example: `Friction Stir Welding (FSW) Simulation <pymapdl_techdemo_28_>`_
 
 
 Recommendations

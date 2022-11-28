@@ -158,7 +158,7 @@ mapdl.plnsol("u", "sum")
 # ******************
 #
 # This method is not recommended because PyMAPDL Reader is in the process of being deprecated.
-# You should use `DPF-Post <https://postdocs.pyansys.com/>`_ instead.
+# You should use `DPF-Post <https://post.docs.pyansys.com/>`_ instead.
 #
 
 mapdl_result = mapdl.result
