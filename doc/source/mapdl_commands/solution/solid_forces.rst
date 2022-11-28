@@ -1,7 +1,7 @@
 .. _ref_solid_forces_commands_api:
 
 ************
-Solid Forces
+Solid forces
 ************
 
 .. currentmodule:: ansys.mapdl.core

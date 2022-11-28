@@ -1,6 +1,6 @@
 .. _launcher_api:
 
-Helper Functions
+Helper functions
 ================
 These methods simplify launching MAPDL, converting existing scripts,
 or automating other tasks.

@@ -1,7 +1,7 @@
 .. _ref_generation_pass_api:
 
 ***************
-Generation Pass
+Generation pass
 ***************
 
 .. currentmodule:: ansys.mapdl.core

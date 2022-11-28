@@ -15,7 +15,7 @@ This is the default and preferred interface to connect to MAPDL.
 Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
-This interface also allows to work with a docker image.
+This interface also allows to work with a Docker image.
 If you have the applicable license, you can install and use 
 MAPDL within Docker, enabling you
 to run and solve even on officially unsupported platforms like Mac
@@ -34,7 +34,7 @@ text to and from the MAPDL service, relying on file IO for all other
 operations. While not as performant as gRPC, this interface still
 allows you to control a local instance of MAPDL. These versions of
 MAPDL support specific versions of Windows and Linux.
-For more information on the supported platforms, see 
+For more information on supported platforms, see 
 `Ansys Platform Support <ansys_platform_support_>`_.
 
 The CORBA interface is likely to be phased out from MAPDL at some
@@ -42,7 +42,7 @@ point. The gRPC interface is faster, more stable, and can run in
 both local and remote connection configurations.
 
 
-Console Interface
+Console interface
 -----------------
 
 ``PyMAPDL`` project supports Ansys versions as early as 13.0 on Linux using a

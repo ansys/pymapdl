@@ -4,29 +4,29 @@
 UPF in PyMAPDL
 ^^^^^^^^^^^^^^
 
-The following Python UPF Examples are available:
+The following Python UPF examples are available:
 
-* `1. Example: Python UserMat Subroutine`_
-* `2. Example: Python UsrShift Subroutine`_
-* `3. Example: Python UserHyper Subroutine`_
-
-
-1. Example: Python `UserMat` Subroutine
-***************************************
-
-This example simulates a block modeled with 3-D elements. The
-`usermat.py` user material is equivalent to linear elastic.
-The block is under uniaxial compression. The final deformation is compared with the
-theoretical result.
+* `Python UserMat subroutine`_
+* `Python UsrShift subroutine`_
+* `Python UserHyper subroutine`_
 
 
-1.1. Input Data
-++++++++++++++++
+Python ``UserMat`` subroutine
+***************************
+
+This example simulates a block modeled with 3D elements. The
+user material in the ``usermat.py`` file is equivalent to linear elastic.
+The block is under uniaxial compression. The final deformation is compared
+with the theoretical result.
+
+
+Input data
+++++++++++
 
 .. code::
 
     /batch,list
-    /title,upf-py1s, test usermat.py with 3-D elements
+    /title,upf-py1s, test usermat.py with 3D elements
 
     /prep7
     /upf,usermat.py
@@ -80,8 +80,8 @@ theoretical result.
 
 
 
-1.2. `usermat.py`
-+++++++++++++++++
+``usermat.py`` file
++++++++++++++++++++
 
 
 .. code:: python
@@ -219,19 +219,18 @@ theoretical result.
 
 
 
-2. Example: Python `UsrShift` Subroutine
-****************************************
-
+Python ```UsrShift`` subroutine
+*****************************
 
 This example describes a block of Prony viscoplastic material with a user-defined
 shift function following a Tool-Narayanaswamy shift function. Uniaxial tension is
 applied on one end and held for 15 seconds with a constant 280 K uniform
-temperature. The final stress is obtained to check stress relaxation.
+temperature. The final stress is obtained to verify stress relaxation.
 
 
 
-2.1. Input Data
-+++++++++++++++
+Input data
+++++++++++
 
 
 .. code::
@@ -334,8 +333,8 @@ temperature. The final stress is obtained to check stress relaxation.
     /exit,nosave
 
 
-2.2. `usrshift.py`
-++++++++++++++++++
+``usrshift.py`` file
+++++++++++++++++++++
 
 
 .. code:: python
@@ -385,17 +384,17 @@ temperature. The final stress is obtained to check stress relaxation.
 
 
 
-3. Example: Python `UserHyper` Subroutine
-*****************************************
+Python ``UserHyper`` subroutine
+*******************************
 
 This example models a block under simple uniaxial tension. The block is made of a
-user-defined hyper material that is identical to Arruda-Boyce Hyperelasticity. Large
-deformation effects are included. The final stress is printed out to compare against
+user-defined hyper material that is identical to Arruda-Boyce hyperelasticity. Large
+deformation effects are included. The final stress is printed for comparison against
 the reference.
 
 
-3.1. Input Data
-+++++++++++++++
+Input data
+++++++++++
 
 .. code::
 
@@ -459,8 +458,8 @@ the reference.
 
 
 
-3.2. `userhyper.py`
-+++++++++++++++++++
+``userhyper.py`` file
++++++++++++++++++++++
 
 
 .. code:: python

@@ -1,7 +1,7 @@
 .. _ref_inqfun_api:
 
 *****************************
-Undocumented Inquire Commands
+Undocumented inquire commands
 *****************************
 
 .. currentmodule:: ansys.mapdl.core

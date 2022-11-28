@@ -1,7 +1,7 @@
 .. _ref_load_step_operations_commands_api:
 
 ********************
-Load Step Operations
+Load step operations
 ********************
 
 .. currentmodule:: ansys.mapdl.core

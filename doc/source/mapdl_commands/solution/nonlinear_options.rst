@@ -1,7 +1,7 @@
 .. _ref_nonlinear_options_commands_api:
 
 *****************
-Nonlinear Options
+Nonlinear options
 *****************
 
 .. currentmodule:: ansys.mapdl.core

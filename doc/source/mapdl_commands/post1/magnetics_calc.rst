@@ -1,7 +1,7 @@
 .. _ref_magnetics Calculations_api:
 
 **********************
-Magnetics Calculations
+Magnetics calculations
 **********************
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,7 +1,7 @@
 .. _ref_surface_operations_api:
 
 ******************
-Surface Operations
+Surface operations
 ******************
 
 .. currentmodule:: ansys.mapdl.core

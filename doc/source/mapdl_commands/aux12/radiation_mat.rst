@@ -1,7 +1,7 @@
 .. _ref_radiation Matrix Method_api:
 
 ***********************
-Radiation Matrix Method
+Radiation matrix method
 ***********************
 
 .. currentmodule:: ansys.mapdl.core

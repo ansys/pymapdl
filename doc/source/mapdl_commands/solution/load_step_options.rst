@@ -1,7 +1,7 @@
 .. _ref_load_step_options_commands_api:
 
 *****************
-Load Step Options
+Load step options
 *****************
 
 .. currentmodule:: ansys.mapdl.core
