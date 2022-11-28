@@ -186,9 +186,7 @@ On CentOS 7, you can install missing dependencies with:
 Ubuntu
 ------
 
-Because MAPDL isn't officially supported on Ubuntu, it's a bit more
-difficult to setup, but it's still possible. On Ubuntu 20.04 with
-Ansys 2021 R1, install the following:
+On Ubuntu 20.04 with Ansys 2021 R1, install the following:
 
 .. code::
 
