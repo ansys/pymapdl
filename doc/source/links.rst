@@ -59,11 +59,13 @@
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
 .. _open_port_windows_10: https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
+.. _article_good_unit_test: https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test 
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
 .. _gh_centos_wsl_1: https://github.com/wsldl-pg/CentWSL/
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
+.. _codecov: https://github.com/codecov
 
 .. #PyMAPDL related
 .. _pymapdl_main: pymapdl_docs_
@@ -76,11 +78,17 @@
 .. _pymapdl_dev_docs: https://dev.mapdl.docs.pyansys.com/
 .. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
 .. _pymapdl_cheatsheet: ./_assets/Cheat_Sheet_PyMAPDL.pdf
+.. _pymapdl_tests: https://github.com/pyansys/pymapdl/tree/main/tests
+.. _pymapdl_test_math: https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py
+.. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/user_guide/math.html
 .. _licensing_guide_pdf: ./_assets/lic_guide.pdf
+.. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
 .. _conda: https://conda.io
+.. _pytest: https://docs.pytest.org/en/7.2.x/
+.. _pytest_usage: https://docs.pytest.org/en/7.2.x/how-to/usage.html#specifying-which-tests-to-run
 
 .. #Julia
 .. _julia: https://julialang.org/
