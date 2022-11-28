@@ -18,17 +18,20 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-.. toctree::
-    :hidden:
-    :maxdepth: 3
+The PyMAPDL technology showcase examples are more complex test cases than
+the ones presented above. They demonstrate how to use PyMAPDL to effectively
+and accurately solve interdisciplinary problems from a variety of industries
+and engineering fields.
 
-    technology_showcase_examples/techdemo-1/ex_0-tecbrakesqueal
-    technology_showcase_examples/techdemo-20/20-example-technology-showcase-dynamic-simulation-PCB
-    technology_showcase_examples/techdemo-28/ex_28-tecfricstir
+The examples initially come from the `APDL Technology Showcase Manual
+<_tech_demo_intro_>`_ and are modeled with MAPDL files. Some of them have been
+reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
+library.
 
-.. include:: technology_showcase_examples/index.rst
-   :start-line: 2
+The examples are hosted in the  `PyMAPDL Techdemos repository <_tech_demos_repo_>`_.
 
+The documentation to the exposed examples can be found in the
+`PyMAPDL Techdemos documentation <_tech_demos_doc_>`_.
 
 .. === EXTENDED EXAMPLES ===
 
