@@ -110,10 +110,16 @@ For more comprehensive information, download the `ANSYS Licensing Guide <licensi
 Virtual private network (VPN) issues
 ====================================
 
-Sometimes, MAPDL has issues starting when VPN software is running. One
-issue stems from MPI communication and can be solved by passing
+From ANSYS 2022 R2 to ANSYS 2021 R1, MAPDL has issues launching when VPN software is running.
+One issue stems from MPI communication and can be solved by either passing
 the ``-smp`` option to set the execution mode to "Shared Memory
-Parallel" rather than the default "Distributed Memory Parallel".
+Parallel" which disables the default "Distributed Memory Parallel".
+Or using a different MPI compilation, for example, if you are using Windows, you can pass
+``-mpi msmpi`` to use the Microsoft MPI library instead of the default Intel MPI library.
+This issue does not affect the Linux version of MAPDL.
+
+.. note:: In you are using Windows in any of the versions from ANSYS 2022 R2 to ANSYS 2021 R1,
+   the default compiler is Microsoft MPI when the MAPDL instance is launched by PyMAPDL.
 
 .. code::
 
