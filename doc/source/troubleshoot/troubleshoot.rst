@@ -312,6 +312,14 @@ Ansys installations are normally under:
 .. code:: text
 
     /usr/ansys_inc/vXXX
+    
+Or under:
+
+.. code:: text
+
+   /ansys_inc/vXXX
+
+By default, Ansys installer uses the former one (``/usr/ansys_inc``) but also creates a symbolic to later one (``/ansys_inc``).
 
 If PyMAPDL finds a valid Ansys installation, it caches its
 path in the configuration file, ``config.txt``. The path for this file
