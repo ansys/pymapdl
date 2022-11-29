@@ -48,6 +48,9 @@ paths = [
     ("/usr/ansys_inc/v211/ansys/bin/mapdl", 211),
 ]
 
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
 
 @pytest.mark.skipif(
     get_start_instance() is False,
@@ -215,6 +218,7 @@ def test_license_type_keyword_names():
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_on_ci
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
