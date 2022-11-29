@@ -21,6 +21,13 @@ installer options can change, see the following figure for reference.
     :width: 400pt
 
 
+If you experience problems installing MAPDL on Linux, visit
+`Missing dependencies on Linux <missing_dependencies_on_linux_>`_.
+
+If you prefer, you can use Docker and avoid having to install MAPDL
+locally. Visit `Use MAPDL through Docker <pymapdl_docker_>`_ for
+more information.
+
 Launch MAPDL
 ------------
 
