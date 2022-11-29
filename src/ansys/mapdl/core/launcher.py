@@ -42,6 +42,7 @@ SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
+        LOG.debug(f"Created settings directory: {SETTINGS_DIR}")
     except:
         warnings.warn(
             "Unable to create settings directory.\n"
@@ -50,6 +51,9 @@ if not os.path.isdir(SETTINGS_DIR):
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
+
+LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"]]
+LINUX_DEFAULT_DIRS = [os.path.join(*each) for each in LINUX_DEFAULT_DIRS]
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
@@ -401,14 +405,17 @@ def launch_grpc(
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     """
+    LOG.debug("Starting 'launch_mapdl'.")
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
         run_location = create_temp_dir()
+        LOG.debug(f"Using temporary directory for MAPDL run location: {run_location}")
     elif not os.path.isdir(run_location):
         os.mkdir(run_location)
+        LOG.debug(f"Creating directory for MAPDL run location: {run_location}")
 
     if not os.access(run_location, os.W_OK):
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
@@ -424,21 +431,26 @@ def launch_grpc(
     if port is None:
         if not pymapdl._LOCAL_PORTS:
             port = MAPDL_DEFAULT_PORT
+            LOG.debug(f"Using default port: {port}")
         else:
             port = max(pymapdl._LOCAL_PORTS) + 1
+            LOG.debug(f"Using next available port: {port}")
 
     while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
         port += 1
+        LOG.debug(f"Port in use.  Incrementing port number. port={port}")
     pymapdl._LOCAL_PORTS.append(port)
 
     # setting ip for the grpc server
     if ip != LOCALHOST:  # Default local ip is 127.0.0.1
         create_ip_file(ip, run_location)
+        LOG.debug(f"Writing ip ({ip}) in 'mylocal.ip' file.")
 
     cpu_sw = "-np %d" % nproc
 
     if ram:
         ram_sw = "-m %d" % int(1024 * ram)
+        LOG.debug(f"Setting RAM: {ram_sw}")
     else:
         ram_sw = ""
 
@@ -455,6 +467,7 @@ def launch_grpc(
             if os.path.isfile(filename):
                 try:
                     os.remove(filename)
+                    LOG.debug(f"Removing temporary error file: {filename}")
                 except:
                     raise IOError(
                         f"Unable to remove {filename}.  There might be "
@@ -467,6 +480,7 @@ def launch_grpc(
         tmp_inp = ".__tmp__.inp"
         with open(os.path.join(run_location, tmp_inp), "w") as f:
             f.write("FINISH\r\n")
+            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
@@ -500,6 +514,8 @@ def launch_grpc(
         )
         command = " ".join(command_parm)
 
+    LOG.debug(f"Starting MAPDL with command: {command}")
+
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
@@ -517,6 +533,7 @@ def launch_grpc(
             stderr=subprocess.DEVNULL,
             env=env_vars,
         )
+        LOG.debug("MAPDL started in background.")
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -528,7 +545,7 @@ def launch_grpc(
         files = os.listdir(run_location)
         has_ans = any([filename for filename in files if ".err" in filename])
         if has_ans:
-            LOG.info("MAPDL session successfully started (Error file found)")
+            LOG.debug("MAPDL session successfully started (Error file found)")
             break
         time.sleep(sleep_time)
 
@@ -614,7 +631,14 @@ def get_start_instance(start_instance_default=True):
                 f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'
                 'PYMAPDL_START_INSTANCE should be either "TRUE" or "FALSE"'
             )
+        LOG.debug(
+            f"PYMAPDL_START_INSTANCE is set to {os.environ['PYMAPDL_START_INSTANCE']}"
+        )
         return os.environ["PYMAPDL_START_INSTANCE"].lower() == "true"
+
+    LOG.debug(
+        f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance_default}"
+    )
     return start_instance_default
 
 
@@ -670,6 +694,9 @@ def _get_available_base_ansys():
         }
 
         if installed_versions:
+            LOG.debug(
+                f"Found the following installed Ansys versions: {installed_versions}"
+            )
             return installed_versions
         else:  # pragma: no cover
             LOG.debug(
@@ -682,7 +709,7 @@ def _get_available_base_ansys():
                 )
                 return {}
     elif os.name == "posix":
-        for path in ["/usr/ansys_inc", "/ansys_inc"]:
+        for path in LINUX_DEFAULT_DIRS:
             if os.path.isdir(path):
                 base_path = path
     else:  # pragma: no cover
@@ -962,6 +989,7 @@ def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
 
 
 def check_lock_file(path, jobname, override):
+    LOG.debug("Checking for lock file")
     # Check for lock file
     lockfile = os.path.join(path, jobname + ".lock")
     if os.path.isfile(lockfile):
@@ -975,6 +1003,7 @@ def check_lock_file(path, jobname, override):
         else:
             try:
                 os.remove(lockfile)
+                LOG.debug("Removed lock file")
             except PermissionError:
                 raise LockFileException(
                     "Unable to remove lock file.  "
@@ -1410,6 +1439,9 @@ def launch_mapdl(
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
     else:  # pragma: no cover
+        LOG.debug(
+            f"Because IP is not None, we are going to attempt to connect to a remote session. ('START_INSTANCE' is set to False)"
+        )
         start_instance = False
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
@@ -1418,6 +1450,7 @@ def launch_mapdl(
     if port is None:
         port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
         check_valid_port(port)
+        LOG.debug(f"Using default port {port}")
 
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
@@ -1427,14 +1460,25 @@ def launch_mapdl(
 
     # connect to an existing instance if enabled
     if start_instance is None:
+        if "PYMAPDL_START_INSTANCE" in os.environ:
+            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable")
+
+        if os.environ.get("PYMAPDL_START_INSTANCE") and os.environ.get(
+            "PYMAPDL_START_INSTANCE"
+        ).lower() not in ["true", "false"]:
+            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False")
+
         start_instance = check_valid_start_instance(
             os.environ.get("PYMAPDL_START_INSTANCE", True)
         )
+
+        LOG.debug("Using 'start_instance' equal to %s", start_instance)
 
         # special handling when building the gallery outside of CI. This
         # creates an instance of mapdl the first time if PYMAPDL start instance
         # is False.
         if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            LOG.debug("Building gallery.")
             # launch an instance of pymapdl if it does not already exist and
             # we're allowed to start instances
             if start_instance and GALLERY_INSTANCE[0] is None:
@@ -1474,6 +1518,7 @@ def launch_mapdl(
             return mapdl
 
     if not start_instance:
+        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
         if clear_on_connect is None:  # pragma: no cover
             clear_on_connect = False
 
@@ -1490,6 +1535,7 @@ def launch_mapdl(
 
     # verify executable
     if exec_file is None:
+        LOG.debug("Using default executable")
         # Load cached path
         exec_file = get_ansys_path()
         if exec_file is None:
@@ -1507,11 +1553,13 @@ def launch_mapdl(
 
     # verify run location
     if run_location is None:
+        LOG.debug("Using default run location")
         temp_dir = tempfile.gettempdir()
         run_location = os.path.join(temp_dir, "ansys_%s" % random_string(10))
         if not os.path.isdir(run_location):
             try:
                 os.mkdir(run_location)
+                LOG.debug("Created run location at %s", run_location)
             except:
                 raise RuntimeError(
                     "Unable to create the temporary working "
@@ -1525,9 +1573,13 @@ def launch_mapdl(
             LOG.info("`run_location` set. Disabling the removal of temporary files.")
             remove_temp_dir_on_exit = False
 
+    LOG.debug("Using run location at %s", run_location)
+
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
+
     mode = check_mode(mode, _version_from_path(exec_file))
+    LOG.debug("Using mode %s", mode)
 
     # Setting SMP by default if student version is used.
     additional_switches = _force_smp_student_version(additional_switches, exec_file)
@@ -1538,6 +1590,7 @@ def launch_mapdl(
     )
 
     additional_switches = _check_license_argument(license_type, additional_switches)
+    LOG.debug(f"Using additional switches {additional_switches}")
 
     start_parm = {
         "exec_file": exec_file,
@@ -1555,14 +1608,18 @@ def launch_mapdl(
         start_parm["override"] = override
         start_parm["timeout"] = start_timeout
 
+    LOG.debug(f"Using start parameters {start_parm}")
+
     # Check the license server
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
+        LOG.debug(f"Checking license server.")
         lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
     try:
+        LOG.debug("Starting MAPDL")
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
@@ -1610,12 +1667,14 @@ def launch_mapdl(
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
         if license_server_check:
+            LOG.debug("Checking license server.")
             lic_check.check()
 
         raise exception
 
     # Stopping license checker
     if license_server_check:
+        LOG.debug(f"Stopping license server check.")
         lic_check.is_connected = True
 
     return mapdl
@@ -1716,6 +1775,7 @@ def update_env_vars(add_env_vars, replace_env_vars):
             )
 
         add_env_vars.update(os.environ)
+        LOG.debug(f"Updating environment variables with: {add_env_vars}")
         return add_env_vars
 
     elif replace_env_vars:
@@ -1723,7 +1783,7 @@ def update_env_vars(add_env_vars, replace_env_vars):
             raise TypeError(
                 "The variable 'replace_env_vars' should be a dict with env vars."
             )
-
+        LOG.debug(f"Replacing environment variables with: {replace_env_vars}")
         return replace_env_vars
 
 
