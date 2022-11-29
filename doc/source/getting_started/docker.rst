@@ -120,7 +120,20 @@ use:
   You need a valid license file to run the license server.
   You can use it together with ``docker-compose.local.yml`` hence you
   can connect to it the same way.
+  The call to this docker file should be always the last one in the
+  ``docker-compose`` command. For instance:
 
+  .. code:: bash
+
+     docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.license_server.yml up
+  
+
+.. warning:: About the license server image.
+   The license server is not intended to be used in production. 
+   It is only intended for testing/debugging purposes.
+   Its access is limited to collaborators of the PyAnsys project.
+   If you would like to have access to it, please contact us at 
+   `pyansys.support@ansys.com <pyansys_support_>`_.
 
 Connect to the MAPDL container from Python
 ==========================================
