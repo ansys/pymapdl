@@ -52,6 +52,7 @@ skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
 
+
 @pytest.mark.skipif(
     get_start_instance() is False,
     reason="Skip when start instance is disabled",
