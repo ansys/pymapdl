@@ -53,7 +53,12 @@ from ansys.mapdl.core.common_grpc import (
     DEFAULT_FILE_CHUNK_SIZE,
     parse_chunks,
 )
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+    protect_grpc,
+)
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_types import MapdlInt
 from ansys.mapdl.core.misc import (
@@ -361,8 +366,10 @@ class MapdlGrpc(_MapdlCore):
         self._pids = []
 
         if channel is None:
+            self._log.debug("Creating channel to %s:%s", ip, port)
             self._channel = self._create_channel(ip, port)
         else:
+            self._log.debug("Using provided channel")
             self._channel = channel
 
         # connect and validate to the channel
@@ -428,7 +435,7 @@ class MapdlGrpc(_MapdlCore):
             )
 
         if not connected:
-            raise IOError(
+            raise MapdlConnectionError(
                 f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
             )
         else:

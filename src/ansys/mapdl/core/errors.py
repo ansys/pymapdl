@@ -89,6 +89,13 @@ class MapdlDidNotStart(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class MapdlConnectionError(RuntimeError):
+    """Error to connect to the MAPDL instance"""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 class LicenseServerConnectionError(MapdlDidNotStart):
     """Error when the license server is not available."""
 
