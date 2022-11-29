@@ -19,6 +19,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core.launcher import LINUX_DEFAULT_DIRS
 
 try:
     import ansys.tools.report as pyansys_report
@@ -84,6 +85,11 @@ def check_valid_routine(routine):
 
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
+    if os.getenv(f"AWP_ROOT{rver}") is not None:
+        LOG.debug(
+            f"Found 'AWP_ROOT{rver}' environment variable and it has value {os.getenv(f'AWP_ROOT{rver}')}"
+        )
+
     if os.name == "nt":  # pragma: no cover
         program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
         ans_root = os.getenv(
@@ -91,12 +97,24 @@ def get_ansys_bin(rver):
         )
         mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
     else:
-        ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
-        mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
+        mapdlbins = []
+        for each_path in LINUX_DEFAULT_DIRS:
+            for each_file in [f"ansys{rver}", "mapdl"]:
 
-        # rare case where the versioned binary doesn't exist
-        if not os.path.isfile(mapdlbin):
-            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
+                ans_root = os.getenv(f"AWP_ROOT{rver}", each_path)
+                mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", each_file)
+                mapdlbins.append(mapdlbin)
+
+                # rare case where the versioned binary doesn't exist
+                if os.path.isfile(mapdlbin):
+                    LOG.debug(f"Found ANSYS binary at {mapdlbin}")
+                    break
+                else:
+                    LOG.debug(f"NOT found ANSYS binary at {mapdlbin}")
+        else:
+            raise FileNotFoundError(
+                f"Unable to find ANSYS executable.  Tried:\n{mapdlbins}"
+            )
 
     return mapdlbin
 
