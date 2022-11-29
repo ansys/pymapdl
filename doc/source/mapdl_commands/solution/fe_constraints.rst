@@ -1,7 +1,7 @@
 .. _ref_fe_constraints_commands_api:
 
 **************
-FE Constraints
+FE constraints
 **************
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,7 +1,7 @@
 .. _ref_master_dof_commands_api:
 
 *************************
-Master Degrees of Freedom
+Master degrees of freedom
 *************************
 
 .. currentmodule:: ansys.mapdl.core

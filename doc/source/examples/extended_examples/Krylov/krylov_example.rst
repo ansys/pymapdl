@@ -34,7 +34,7 @@ These are the main steps required:
 
 Perform required imports
 ------------------------
- Perform required imports and launch mapdl.
+ Perform required imports and launch MAPDL.
 
 .. code:: ipython3
 

@@ -1,7 +1,7 @@
 .. _ref_element_type_commands_api:
 
 ************
-Element Type
+Element type
 ************
 
 .. currentmodule:: ansys.mapdl.core

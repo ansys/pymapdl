@@ -1,7 +1,7 @@
 .. _ref_list_controls_commands_api:
 
 *************
-List Controls
+List controls
 *************
 
 .. currentmodule:: ansys.mapdl.core

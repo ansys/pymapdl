@@ -1,7 +1,7 @@
 .. _ref_binary File Manipulation_api:
 
 ************************
-Binary File Manipulation
+Binary file manipulation
 ************************
 
 .. currentmodule:: ansys.mapdl.core

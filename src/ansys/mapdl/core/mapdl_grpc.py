@@ -431,6 +431,8 @@ class MapdlGrpc(_MapdlCore):
             raise IOError(
                 f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
             )
+        else:
+            self._exited = False
 
     @property
     def _channel_str(self):

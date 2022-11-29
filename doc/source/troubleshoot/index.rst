@@ -4,7 +4,7 @@
 Troubleshooting
 ===============
 
-In order to help the users to overcome any problem they might have when using PyMAPDL,
+To help overcome any problem that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
 
@@ -19,9 +19,9 @@ some of the most common problems and frequently asked questions are posted here.
 More help needed?
 -----------------
 
-  *"My problem is not listed here. What should I do?"*  
+  *"What do you do if a problem is not listed here?"*  
 
 You can go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and ask about it.
 
-If you think you found out a bug or you would like to do a feature request you can do so by
+If you think you found a bug or would like to make a feature request, you can do so by
 opening an issue in `PyMAPDL Repository Issues <pymapdl_issues_>`_.

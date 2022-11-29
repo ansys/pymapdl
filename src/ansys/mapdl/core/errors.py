@@ -206,3 +206,10 @@ class MapdlVersionError(MapdlException):
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)
+
+
+class EmptyRecordError(RuntimeError):
+    """Raised when a record is empty"""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)

@@ -1,7 +1,7 @@
 .. _ref_element_table_api:
 
 *************
-Element Table
+Element table
 *************
 
 .. currentmodule:: ansys.mapdl.core

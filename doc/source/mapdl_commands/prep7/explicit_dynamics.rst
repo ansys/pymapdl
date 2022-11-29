@@ -1,7 +1,7 @@
 .. _ref_explicit_dynamics_commands_api:
 
 *****************
-Explicit Dynamics
+Explicit dynamics
 *****************
 
 .. currentmodule:: ansys.mapdl.core

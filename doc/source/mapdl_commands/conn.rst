@@ -1,7 +1,7 @@
 .. _ref_connection_commands_api:
 
 *******************
-Connection Commands
+Connection commands
 *******************
 
 .. currentmodule:: ansys.mapdl.core
