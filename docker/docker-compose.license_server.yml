@@ -1,7 +1,3 @@
-######################
-# INTERNAL USAGE ONLY
-######################
-
 version: '3.3'
 
 # DESCRIPTION
@@ -34,8 +30,6 @@ version: '3.3'
 #
 #      docker-compose -f docker-compose.yml -f docker-compose.license-server.yml up
 #
-
-
 
 services:
   license_server:
