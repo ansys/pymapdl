@@ -88,16 +88,16 @@ Once you have launched MAPDL you should see:
 
 
 Using ``docker-compose`` to launch MAPDL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can also use ``docker-compose`` command to launch MAPDL configured in
 a ``docker-compose`` file.
 This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
-For you convenience, in the folder `docker <pymapdl_docker_dir_>`_ you 
-can find three already configured ``docker-compose`` files that you can
-use: 
+For you convenience, the directory `docker <pymapdl_docker_dir_>`_ 
+contains pre-configured ``docker-compose`` files that you can
+use:
 
 * `docker-compose.yml <pymapdl_docker_compose_base_>`_: the **base** 
   configuration file which launch a remote instance of MAPDL which you
@@ -109,7 +109,7 @@ use:
   This is useful if you want to run MAPDL locally inside this container
   for example for debugging purposes.
   You can connect your VSCode instance to this container by selecting
-   ``Attach to a running container`` option from the command palette.
+  ``Attach to a running container`` option from the command palette.
   For more details visit `Attach to a running container <vscode_attach_to_container_>`_.
 
 * `docker-compose.license_server.yml <pymapdl_docker_compose_license_server_>`_:
@@ -132,7 +132,7 @@ use:
    The license server is not intended to be used in production. 
    It is only intended for testing/debugging purposes.
    Its access is limited to collaborators of the PyAnsys project.
-   If you would like to have access to it, please contact us at 
+   If you would like to have access to it, please contact PyAnsys support at
    `pyansys.support@ansys.com <pyansys_support_>`_.
 
 Connect to the MAPDL container from Python
@@ -187,7 +187,7 @@ with the ``-np`` switch:
 
 
 For additional command line arguments please see the *Notes* section
-for `launch_mapdl <_pymapdl_launch_mapdl_>`_.
+within `launch_mapdl <_pymapdl_launch_mapdl_>`_.
 Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products
