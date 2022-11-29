@@ -14,7 +14,7 @@ in a containerized environment such as Docker or Singularity:
 - Large-scale cluster deployment using Kubernetes
 - Genuine app isolation through containerization.
 
-Configure the docker registry
+Configure the Docker registry
 =============================
 
 There is a Docker image hosted on the 
@@ -60,8 +60,8 @@ MAPDL with:
     IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
-First time you run it, docker will login into the *ghcr.io* registry and
-will pull the image which can take some time.
+First time you run it, Docker logins into the *ghcr.io* registry and
+pulls the image which can take some time.
 
 Note that port `50052` (local to the container) is being mapped to
 50052 on the host. This makes it possible to launch several MAPDL
@@ -69,9 +69,9 @@ instances with different port mappings to allow for multiple instances
 of MAPDL.
 
 You can provide additional command line parameters to MAPDL by simply
-appending to the docker command.  For example, you can increase the
-number of processors (up to the number available on the host machine)
-with the `-np` switch.
+appending to the Docker command. 
+For example, you can increase the number of processors (up to the
+number available on the host machine) with the `-np` switch.
 
 Once you have launched MAPDL you should see:
 
@@ -105,7 +105,7 @@ use:
 
 * `docker-compose.local.yml <pymapdl_docker_compose_base_>`_: 
   This file is an extension of the base configuration file which launch
-  an Ubuntu docker image with MAPDL installed in it. 
+  an Ubuntu Docker image with MAPDL installed in it. 
   This is useful if you want to run MAPDL locally inside this container
   for example for debugging purposes.
   You can connect your VSCode instance to this container by selecting
