@@ -115,6 +115,46 @@ if START_INSTANCE and EXEC_FILE is None:
     raise RuntimeError(ERRMSG)
 
 
+def is_exited(mapdl):
+    try:
+        _ = mapdl._ctrl("VERSION")
+        return False
+    except MapdlExitedError:
+        return True
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request, mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+    # Setup: fill with any logic you want
+    if START_INSTANCE and is_exited(mapdl):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+
+        # Relaunching MAPDL
+        mapdl_ = launch_mapdl(
+            EXEC_FILE,
+            port=mapdl._port,
+            override=True,
+            run_location=mapdl._path,
+            cleanup_on_exit=mapdl._cleanup,
+        )
+
+        # Cloning the new mapdl instance channel into the old one.
+        mapdl._channel = mapdl_._channel
+        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+
+        # Restoring the local configuration
+        mapdl._local = local_
+
+    yield  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    if mapdl._local and mapdl._exited:
+        # The test exited MAPDL, so it is fail.
+        assert False  # this will fail the test
+
+
 def check_pid(pid):
     """Check For the existence of a pid."""
     try:
@@ -293,8 +333,8 @@ def mapdl(request, tmpdir_factory):
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
-        if mapdl._local:
-            assert not os.path.isfile(mapdl._lockfile)
+        # if mapdl._local:
+        #     assert not os.path.isfile(mapdl._lockfile)
 
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):

@@ -25,9 +25,15 @@ directory creation.
 
 skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
 
+
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
+
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -454,6 +460,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 
 
 @skip_in_cloud
+@skip_on_ci
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
