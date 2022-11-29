@@ -38,7 +38,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -65,7 +65,7 @@ jobs:
 
       - name: Unit Testing Requirements Installation
         run: |
-          pip install -r requirements/requirements_tests.txt
+          pip install .[tests]
 
       - name: DPF Server Activation
         run: |

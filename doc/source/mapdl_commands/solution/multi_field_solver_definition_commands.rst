@@ -1,7 +1,7 @@
 .. _ref_multi_field_solver_definition_commands_commands_api:
 
 **************************************
-Multi-Field Solver Definition Commands
+Multi-Field solver definition commands
 **************************************
 
 .. currentmodule:: ansys.mapdl.core

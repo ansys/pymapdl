@@ -1,7 +1,7 @@
 .. _ref_solution_status_commands_api:
 
 ***************
-Solution Status
+Solution status
 ***************
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,22 +1,19 @@
 .. _ref_array_parameters_commands_api:
 
 ****************
-Array Parameters
+Array parameters
 ****************
 
 .. currentmodule:: ansys.mapdl.core
 
-These APDL commands are used to operate on parameter arrays (i.e.,
-vectors and matrices).
+These APDL commands are used to operate on parameter arrays (vectors and matrices).
 
 .. note::
-   Many of these commands here have been kept for legacy
-   compatibility.
+   Many of these commands are kept for legacy compatibility.
 
-   See the parameters class :ref:`ref_parameters_api` for a more
-   pythonic manner for interacting with arrays.
+   To interact with arrays in a more Pythonic manner, see the parameters class :ref:`ref_parameters_api` .
 
-   Consider using ``numpy`` for working with arrays outside of MAPDL.
+   For working with arrays outside of MAPDL, consider using `NumPy <https://numpy.org/>`_.
 
 
 .. autosummary::

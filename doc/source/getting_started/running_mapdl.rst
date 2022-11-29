@@ -89,7 +89,7 @@ MAPDL is running.
 
 You can then set up the IP address.
 
-In Windows (Powershell and CMD), use:
+In Windows PowerShell or Command Prompt, use:
 
 .. code::
     

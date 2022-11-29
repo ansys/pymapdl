@@ -1,7 +1,7 @@
 .. _ref_spectrum_options_commands_api:
 
 ****************
-Spectrum Options
+Spectrum options
 ****************
 
 .. currentmodule:: ansys.mapdl.core

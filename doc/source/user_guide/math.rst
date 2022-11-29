@@ -1,11 +1,11 @@
 .. _mapdl_math_class_ref:
 
-APDL Math Overview
+APDL Math overview
 ==================
 APDL Math provides the ability to access and manipulate the large
-sparse matrices and solve a variety of eigenproblems.  PyMAPDL classes
+sparse matrices and solve a variety of eigenproblems. PyMAPDL classes
 and bindings present APDL Math in a similar manner to the popular
-`numpy <numpy_docs_>`_ and `scipy <scipy_>`_ libraries.
+`numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
 The APDL Math command set is based on tools for manipulating large mathematical
 matrices and vectors that provide access to standard linear algebra
 operations, access to the powerful sparse linear solvers of ANSYS
@@ -13,14 +13,14 @@ Mechanical APDL (MAPDL), and the ability to solve eigenproblems.
 
 Python and MATLAB's eigensolver is based on the publicly available
 LAPACK libraries and provides reasonable solve time for relatively
-small DOF (degree of freedom) eigenproblems of perhaps 100,000.
-However, ANSYS's solvers are designed for the scale of 100s of
-millions of DOF and there are a variety of situations where users can
-directly leverage ANSYS's high performance solvers on a variety of
-eigenproblems.  Fortunately, you can leverage this without relearning
-an entirely new language as this has been written in a similar manner
-as ``numpy`` and ``scipy``.  For example, here is a comparison between
-the ``scipy`` linear algebra solver and ANSYS's solver:
+small degrees of freedom (dof) eigenproblems of perhaps 100,000.
+However, Ansys solvers are designed for the scale of 100 s of
+millions of dof, providing a variety of situations where you can
+directly leverage Ansys high-performance solvers on a variety of
+eigenproblems. Fortunately, you can leverage this without relearning
+an entirely new language because APDL Math has been written in a similar manner
+as the ``numpy`` and ``scipy`` libraries. For example, here is a comparison between
+the NumPy and SciPy linear algebra solvers and the Ansys MAPDL Math solver:
 
 .. table:: ``numpy`` vs PyMAPDL Math Implementation
 
@@ -37,17 +37,17 @@ the ``scipy`` linear algebra solver and ANSYS's solver:
    +--------------------------------------------+-----------------------------------+
 
 What follows is a basic example and a detailed description of the
-PyMAPDL Math API.  For additional PyMAPDL Math examples, visit
+PyMAPDL Math API. For additional PyMAPDL Math examples, see
 :ref:`ref_apdl_math_examples`.
 
 
-MAPDL Matrix Example
+MAPDL matrix example
 ~~~~~~~~~~~~~~~~~~~~
 This example demonstrates how to send an MAPDL Math matrix from MAPDL
-to Python and then send it back to be solved.  While this example runs
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` on mass
+to Python and then send it back to be solved. While this example runs the
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method on mass
 and stiffness matrices generated from MAPDL, you could instead use
-mass and stiffness matrices generated from an external FEM tool, or
+mass and stiffness matrices generated from an external FEM tool or
 even modify the mass and stiffness matrices within Python.
 
 First, solve the first 10 modes of a 1 x 1 x 1 steel meter cube
@@ -81,15 +81,15 @@ in MAPDL.
     w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
     print(w_n)
 
-We now have solved for the first 10 modes of the cube:
+You now have solved for the first 10 modes of the cube:
 
 .. code:: 
 
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
 Next, load the mass and stiffness matrices that are stored by default
-at ``<jobname>.full``.  First, create an instance of :class:`MapdlMath
-<ansys.mapdl.core.math.MapdlMath>` as ``mm``:
+in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlMath
+<ansys.mapdl.core.math.MapdlMath>` class as ``mm``:
 
 .. code:: python
 
@@ -105,8 +105,8 @@ at ``<jobname>.full``.  First, create an instance of :class:`MapdlMath
     mapdl.clear()
     print(k_py)
 
-These matrices are now solely stored within Python now that we've
-run :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>`.
+After running the :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>` method,
+these matrices are stored solely within Python.
 
 .. code:: 
 
@@ -120,8 +120,8 @@ run :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>`.
 
 
 The final step is to send these matrices back to MAPDL to be solved.
-While we have cleared MAPDL, we could have shutdown MAPDL, or even
-transferred them to a different MAPDL session to be solved.
+While you have cleared MAPDL, you could have shut down MAPDL or even
+transferred the matrices to a different MAPDL session to be solved:
 
 .. code:: python
 
@@ -134,19 +134,19 @@ transferred them to a different MAPDL session to be solved.
     eigval = mapdl_vec.asarray()
     print(eigval)
 
-As expected, the natural frequencies obtained from
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` is
-identical to the result from :func:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
-within MAPDL.
+As expected, the natural frequencies obtained from the
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method is
+identical to the result from the :func:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
+method within MAPDL.
 
 .. code::
 
     [1475.1333421  1475.1333426  2018.83737064 2018.83737109 2018.83737237
      2024.78684466 2024.78684561 2024.7868466  2242.21532585 2274.82997741]
 
-If you wish to obtain the eigenvectors as well as the eigenvalues,
-initialize a matrix ``eigvec`` and send that to
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>`:
+If you want to obtain the eigenvectors as well as the eigenvalues,
+initialize a matrix ``eigvec`` and send that to the
+:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method:
 
 .. code::
 
@@ -157,6 +157,6 @@ initialize a matrix ``eigvec`` and send that to
 The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
-APDLMath Reference
-~~~~~~~~~~~~~~~~~~
-For additional details, please see the :ref:`ref_math_api` reference.
+APDL Math reference
+~~~~~~~~~~~~~~~~~~~
+For more information, see :ref:`ref_math_api`.

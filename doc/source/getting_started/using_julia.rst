@@ -84,7 +84,7 @@ To install PyMAPDL, first locate the Python executable with:
     julia> PyCall.python
     "C:\\Users\\USER\\.julia\\conda\\3\\python.exe"
 
-In Linux, the above code prints the following, where ``python3`` is the default Python3 installation for the operating system.
+In Linux, the preceding code prints the following, where ``python3`` is the default Python3 installation for the operating system.
 
 .. code-block:: julia
     
@@ -136,7 +136,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
 Use PyMAPDL in Julia
 ====================
 
-Here is a simple example of using PyMAPDL in Julia:
+Here is a simple example of how you use PyMAPDL in Julia:
 
 .. code-block:: julia
 

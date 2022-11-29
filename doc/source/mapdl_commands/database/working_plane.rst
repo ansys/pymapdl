@@ -1,7 +1,7 @@
 .. _ref_working_plane_api:
 
 *************
-Working Plane
+Working plane
 *************
 
 .. currentmodule:: ansys.mapdl.core

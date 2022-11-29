@@ -1,7 +1,7 @@
 .. _ref_multi_field_solver_global_controls_commands_api:
 
 **********************************
-Multi-Field Solver Global Controls
+Multi-Field solver global controls
 **********************************
 
 .. currentmodule:: ansys.mapdl.core

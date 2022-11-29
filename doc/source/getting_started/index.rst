@@ -67,9 +67,9 @@ of installing PyMAPDL is downloading the wheelhouse archive from the
 `Releases Page <pymapdl_releases_>`_ for your corresponding
 machine architecture.
 
-Each wheelhouse archive contains all the python wheels necessary to install
+Each wheelhouse archive contains all the Python wheels necessary to install
 PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
-this on an isolated system with a fresh python or on a virtual environment.
+this on an isolated system with a fresh Python or on a virtual environment.
 
 For example, on Linux with Python 3.7, unzip it and install it with the following:
 
@@ -79,7 +79,7 @@ For example, on Linux with Python 3.7, unzip it and install it with the followin
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
 If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
-install using the same command as above.
+install using the preceding command.
 
 Consider installing using a `virtual environment <using_venv_>`_.
 
@@ -87,14 +87,14 @@ Consider installing using a `virtual environment <using_venv_>`_.
 Ansys software requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For the latest features, you must have a copy of Ansys 2021 R1
-installed locally, but PyMAPDL is compatible with Ansys 17.0 and later
-on Windows and 13.0 on Linux.
+installed locally. However, PyMAPDL is compatible with Ansys 17.0 and later
+on Windows and with Ansys 13.0 on Linux.
 
 .. note::
 
-    The latest versions of Ansys provide signifiantly better support
-    and features. Certain features are not supported on earlier Ansys versions
-    versions such as APDL Math.
+    The latest versions of Ansys provide significantly better support
+    and features. Certain features, such as APDL Math, are not supported
+    on earlier Ansys versions.
 
 
 Verify your installation

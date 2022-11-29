@@ -1,7 +1,7 @@
 .. _ref_real_constants_commands_api:
 
 **************
-Real Constants
+Real constants
 **************
 
 .. currentmodule:: ansys.mapdl.core

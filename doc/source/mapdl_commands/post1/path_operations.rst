@@ -1,7 +1,7 @@
 .. _ref_path_operations_api:
 
 ***************
-Path Operations
+Path operations
 ***************
 
 .. currentmodule:: ansys.mapdl.core
