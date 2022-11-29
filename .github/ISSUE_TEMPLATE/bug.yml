@@ -16,6 +16,8 @@ body:
       label: Before submitting the issue
       description: Please, make sure the following conditions are met
       options:
+      - label: I have visited the [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html).
+        required: true
       - label: I have searched among the existing issues
         required: true
       - label: I am using a Python virtual environment
@@ -135,3 +137,26 @@ body:
 
     validations:
       required: true
+
+  - type: textarea
+    id: logger_log
+    attributes:
+      label: Logger output file
+      description: |
+        Please attach the logger output file. 
+        Visit [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html)
+        for more information on how to set the logger and its output file.
+      value: |
+        <details><summary>
+        Show the logger output file!
+        </summary>
+
+        ```text
+
+        # PASTE HERE THE CONTENT OF THE LOGGER OUTPUT FILE.
+
+        ```
+        </details>
+
+    validations:
+      required: false
