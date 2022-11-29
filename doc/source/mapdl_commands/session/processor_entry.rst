@@ -1,7 +1,7 @@
 .. _ref_processor_entry_commands_api:
 
 ***************
-Processor Entry
+Processor entry
 ***************
 
 .. currentmodule:: ansys.mapdl.core

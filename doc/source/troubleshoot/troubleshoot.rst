@@ -11,23 +11,26 @@ Troubleshooting PyMAPDL
 Launching MAPDL
 *****************
 
-For any number of reasons, Python may fail to launch MAPDL.  Here's
-some approaches to debug the start:
+For any number of reasons, Python may fail to launch MAPDL. Here are
+some approaches for debugging:
 
-In some cases, it may be necessary to debug why MAPDL isn't launching
-by running the launch command manually from the command line.  In
-Windows, open up a command prompt and run the following (version
-dependent) command:
+In some cases, it may be necessary to run the launch command manually from the command line.
+
+**On Windows**
+
+Open up a command prompt and run the version-dependent command:
 
 .. code::
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
 .. note::
-   Powershell users can run the above without quotes.
+   PowerShell users can run the preceding command without quotes.
 
 
-For Linux:
+**On Linux**
+
+Run the version-dependent command:
 
 .. code::
 
@@ -64,7 +67,7 @@ If this command doesn't launch MAPDL, look at the command output:
     variable to OFF.
 
 
-There are many issues that can cause Ansys not to launch, including:
+There are many issues that can cause MAPDL not to launch, including:
 
 - License server setup
 - Running behind a VPN
@@ -72,11 +75,11 @@ There are many issues that can cause Ansys not to launch, including:
 - Conflicts with a student version
 
 
-Licensing Issues
+Licensing issues
 ================
 
-Incorrect license server configuration can prevent Ansys from being able to get a valid license.
-In those cases, you might see output **similar** to:
+Incorrect license server configuration can prevent MAPDL from being able to get a valid license.
+In such cases, you might see output **similar** to:
 
 .. code:: pwsh
 
@@ -96,22 +99,27 @@ In those cases, you might see output **similar** to:
    FlexNet Licensing error:-5,357
 
 
-PADT has a great blog regarding ANSYS issues, and licensing is always a common issue 
-(for example `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_).  
-Should you be responsible for maintaining Ansys licensing or have a personal install of Ansys,
-please check the online Ansys licensing documentation at 
-`Installation and Licensing <ansys_installation_and_licensing_>`_.
+PADT has a great blog regarding ANSYS issues, and licensing is always a common issue. For 
+example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. If you are responsible
+for maintaining Ansys licensing or have a personal install of Ansys, see the online
+`Ansys Installation and Licensing documentation <ansys_installation_and_licensing_>`_.
 
 For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
 
 
-VPN Issues
-==========
+Virtual private network (VPN) issues
+====================================
 
-Sometimes, MAPDL has issues starting when VPN software is running.  One
-issue stems from MPI communication and can be solved by passing
-the ``-smp`` option that sets the execution mode to "Shared Memory
-Parallel", rather than the default "Distributed Memory Parallel" mode.
+From ANSYS 2022 R2 to ANSYS 2021 R1, MAPDL has issues launching when VPN software is running.
+One issue stems from MPI communication and can be solved by either passing
+the ``-smp`` option to set the execution mode to "Shared Memory
+Parallel" which disables the default "Distributed Memory Parallel".
+Or using a different MPI compilation, for example, if you are using Windows, you can pass
+``-mpi msmpi`` to use the Microsoft MPI library instead of the default Intel MPI library.
+This issue does not affect the Linux version of MAPDL.
+
+.. note:: In you are using Windows in any of the versions from ANSYS 2022 R2 to ANSYS 2021 R1,
+   the default compiler is Microsoft MPI when the MAPDL instance is launched by PyMAPDL.
 
 .. code::
 
@@ -120,14 +128,15 @@ Parallel", rather than the default "Distributed Memory Parallel" mode.
 
 While this approach has the disadvantage of using the potentially slower shared
 memory parallel mode, you'll at least be able to run MAPDL.
-For more details on shared vs distributed memory, see
+For more information on shared versus distributed memory, see
 `High-Performance Computing for Mechanical Simulations using ANSYS <ansys_parallel_computing_guide_>`_.
 
 
-In addition, if your device is inside a virtual private network (VPN), ANSYS might have some problems to correctly
-resolve the IP of the license server. Please do check that the hostname or IP of the license server
+In addition, if your device is inside a VPN, MAPDL might not be able to correctly
+resolve the IP of the license server. Verify that the hostname or IP address of the license server
 is correct.
-In Windows, you can find the license configuration file that points to the license server in:
+
+On Windows, you can find the license configuration file that points to the license server in:
 
 .. code:: text
 
@@ -138,32 +147,36 @@ Incorrect environment variables
 ===============================
 
 The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-You can check the value of this environment variable by issuing on Windows:
+The following code examples show how you can see the value of this environment variable on
+either Windows or Linux.
+
+**On Windows**
 
   .. code:: pwsh
     
     $env:ANSYSLMD_LICENSE_FILE
     1055@1.1.1.1
 
-  And on linux:
+
+**On Linux**
 
   .. code:: bash
 
     printenv | grep ANSYSLMD_LICENSE_FILE
 
 
-Missing Dependencies on Linux
+Missing dependencies on Linux
 =============================
 
-Some Linux installations may be missing required dependencies.  Should
+Some Linux installations might be missing required dependencies. If
 you get errors like ``libXp.so.6: cannot open shared object file: No
-such file or directory``, you may be missing some necessary
+such file or directory``, you are likely missing some necessary
 dependencies.
 
-CentOS
-------
+CentOS 7
+--------
 
-On CentOS 7, you can install these with:
+On CentOS 7, you can install missing dependencies with:
 
 .. code::
 
@@ -173,24 +186,22 @@ On CentOS 7, you can install these with:
 Ubuntu
 ------
 
-Since MAPDL isn't officially supported on Ubuntu, it's a bit more
-difficult to setup, but it's still possible.  On Ubuntu 20.04 with
-Ansys 2021R1, install the following:
+On Ubuntu 20.04 with Ansys 2021 R1, install the following:
 
 .. code::
 
     sudo apt-get install libx11-6 libgl1 libxm4 libxt6 libxext6 libxi6 libx11-6 libsm6 libice6 libxxf86vm1 libglu1
 
-This takes care of everything except for ``libxp6``.  Should you be
+This takes care of everything except for ``libxp6``. If you are
 using Ubuntu 16.04, you can install that simply with ``sudo apt
-install libxp6``.  However, on Ubuntu 18.04+, you must manually
+install libxp6``. However, on Ubuntu 18.04+, you must manually
 download and install the package.
 
-Since ``libxpl6`` also pre-depends on ``multiarch-support``, which is
-also outdated, it must be removed, otherwise you'll have a broken
-package configuration.  The following step downloads and modifies the
-``libxp6`` package to remove the ``multiarch-support`` dependency, and
-then installs it via ``dpkg``.
+Because ``libxpl6`` pre-depends on ``multiarch-support``, which is
+also outdated, it must be removed. Otherwise you'll have a broken
+package configuration. The following code downloads and modifies the
+``libxp6`` package to remove the ``multiarch-support`` dependency and
+then installs it via the ``dpkg`` package.
 
 .. code::
 
@@ -206,12 +217,12 @@ then installs it via ``dpkg``.
 
 .. _conflicts_student_version:
 
-Conflicts with Student Version
+Conflicts with student version
 ==============================
 
 Although you can install Ansys together with other Ansys products or versions, on Windows, you
 should not install a student version of an Ansys product together with its non-student version.
-For example, installing both the Ansys MAPDL2022 R2 Student Version and Ansys MAPDL 2022
+For example, installing both the Ansys MAPDL 2022 R2 Student Version and Ansys MAPDL 2022
 R2 might cause license conflicts due to overwriting of environment variables. Having different
 versions, for example the Ansys MAPDL 2022 R2 Student Version and Ansys MAPDL 2021 R1,
 is fine.
@@ -225,8 +236,8 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\ANSYS Student\v222
-    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This will overwrite the env var for the terminal session only.
-    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This will change the env var permanently.
+    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v222"  # This overwrites the env var for the terminal session only.
+    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v222',[System.EnvironmentVariableTarget]::User)  # This changes the env var permanently.
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\v222
 
@@ -244,23 +255,24 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
 
 .. note:: Launching MAPDL Student Version
-   By default if a Student version is detected, PyMAPDL will launch the MAPDL instance in
+   By default if a student version is detected, PyMAPDL launches the MAPDL instance in
    ``SMP`` mode, unless another MPI option is specified.
 
 *****************
 Launching PyMAPDL
 *****************
 
-Even if you are able to correctly launch MAPDL, PyMAPDL might have some problems to launch
-MAPDL by itself.
+Even if you are able to successfully launch MAPDL, PyMAPDL itself might not launch
+successfully.
 
 
-Manually Set the Executable Location
-====================================
-If you have a non-standard install, ``pymapdl`` may be unable find
-your installation.  If that's the case, provide the location of MAPDL
-as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  For example, on Windows,
-this will be:
+Manually set the location of the executable file
+================================================
+If you have a non-standard install, PyMAPDL might be unable find
+your MAPDL installation. If this is the case, provide the location of MAPDL
+as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
+
+**On Windows**
 
 .. code:: python
 
@@ -268,7 +280,7 @@ this will be:
     >>> exec_loc = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe'
     >>> mapdl = launch_mapdl(exec_loc)
 
-For Linux:
+**On Linux**
 
 .. code:: python
 
@@ -276,34 +288,40 @@ For Linux:
     >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
     >>> mapdl = launch_mapdl(exec_loc)
 
-Should this fail to launch or hang while launching, pass
-``verbose_mapdl=True`` when using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  This will print
-the output of MAPDL within Python and can be used to debug why MAPDL
-isn't launching. On Windows, output is limited due to the way
-MAPDL launches.
 
 
-Default Executable Location
-===========================
+Default Location of the executable file
+=======================================
 
 The first time that you run PyMAPDL, it detects the
 available Ansys installations.
 
-On Windows, Ansys installations are normally under:
+**On Windows**
+
+Ansys installations are normally under:
 
 .. code:: text
 
     C:/Program Files/ANSYS Inc/vXXX
 
-On Linux, Ansys installations are normally under:
+**On Linux**
+Ansys installations are normally under:
 
 .. code:: text
 
     /usr/ansys_inc/vXXX
+    
+Or under:
+
+.. code:: text
+
+   /ansys_inc/vXXX
+
+By default, Ansys installer uses the former one (``/usr/ansys_inc``) but also creates a symbolic to later one (``/ansys_inc``).
 
 If PyMAPDL finds a valid Ansys installation, it caches its
-path in the configuration file, ``config.txt``, whose path is shown in the
-following code:
+path in the configuration file, ``config.txt``. The path for this file
+is shown in this code:
 
 .. code:: python
 
@@ -312,8 +330,9 @@ following code:
     'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\config.txt'
 
 
-In certain cases, this configuration might become obsolete. For example, when a new
+In certain cases, this configuration file might become obsolete. For example, when a new
 Ansys version is installed and an earlier installation is removed.
+
 To update this configuration file with the latest path, use:
 
 .. code:: python
@@ -322,7 +341,7 @@ To update this configuration file with the latest path, use:
     >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
     'C:\\Program Files\\ANSYS Inc\\v222\\ansys\\bin\\winx64\\ansys222.exe'
 
-If you want to check which Ansys installations PyMAPDL has detected, use:
+If you want to see which Ansys installations PyMAPDL has detected, use:
 
 .. code:: python
 
@@ -346,22 +365,22 @@ method lists higher versions first and student versions last.
 .. _ref_pymapdl_stability:
 
 *****************
-PyMAPDL Stability
+PyMAPDL stability
 *****************
 
 Recommendations
 ===============
 
-When connecting to an instance of MAPDL using grpc (default), there are some cases
-where the MAPDL server might exit unexpectedly.  There
+When connecting to an instance of MAPDL using gRPC (default), there are some cases
+where the MAPDL server might exit unexpectedly. There
 are several ways to improve performance and stability of MADPL:
 
 - When possible, pass ``mute=True`` to individual MAPDL commands or
-  set it globally with :func:`Mapdl.mute
-  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`.  This disables streaming
-  back the response from MAPDL for each command and will marginally
-  improve performance and stability.  Consider having a debug flag in
-  your program or script so you can enable or disable logging and
+  set it globally with the :func:`Mapdl.mute
+  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
+  back the response from MAPDL for each command and marginally
+  improves performance and stability. Consider having a debug flag in
+  your program or script so you can turn on or turn off logging and
   verbosity when needed.
 
 
@@ -369,12 +388,12 @@ Issues
 ======
 
 .. note::
-   MAPDL 2021R1 has a stability issue with :func:`Mapdl.input()
-   <ansys.mapdl.core.Mapdl.input>`.  Avoid using input files if
-   possible.  Attempt to :func:`Mapdl.upload()
-   <ansys.mapdl.core.Mapdl.upload>` nodes and elements and read them
-   in via :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
-   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>`.
+   MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
+   <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
+   possible. Attempt to use the :func:`Mapdl.upload()
+   <ansys.mapdl.core.Mapdl.upload>` method to upload nodes and elements and read them
+   in via the :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
 
 
 
@@ -383,18 +402,18 @@ Issues
 .. _ref_pymapdl_limitations:
 
 *******************
-PyMAPDL Limitations
+PyMAPDL limitations
 *******************
 
 
 .. _ref_numpy_arrays_in_mapdl:
 
-Issues when Importing and Exporting Numpy Arrays in MAPDL
+Issues when importing and exporting numpy arrays in MAPDL
 =========================================================
 
 Because of the way MAPDL is designed, there is no way to store an
 array where one or more dimensions are zero.
-This can happens in Numpy arrays, where its first dimension can be
+This can happens in numpy arrays, where its first dimension can be
 set to zero. For example:
 
 .. code:: python
@@ -407,7 +426,8 @@ set to zero. For example:
    array([1, 2, 3, 4])
 
 
-These types of array dimensions will be always converted to ``1``.
+These types of array dimensions are always converted to ``1``.
+
 For example:
 
 .. code:: python
@@ -422,8 +442,8 @@ For example:
    (4, 1)
 
 This means that when you pass two arrays, one with the second axis equal
-to zero (e.g. ``my_array``) and another one with the second axis equal
-to one, if later retrieved, they will have the same shape.
+to zero (for example, ``my_array``) and another one with the second axis equal
+to one, have the same shape if later retrieved.
 
 .. code:: python
 

@@ -5,7 +5,7 @@ Examples
 ========
 
 
-Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
+Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 
 .. === EXAMPLES Gallery ===
@@ -18,17 +18,20 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-.. toctree::
-    :hidden:
-    :maxdepth: 3
+The PyMAPDL technology showcase examples are more complex test cases than
+the ones presented above. They demonstrate how to use PyMAPDL to effectively
+and accurately solve interdisciplinary problems from a variety of industries
+and engineering fields.
 
-    technology_showcase_examples/techdemo-1/ex_0-tecbrakesqueal
-    technology_showcase_examples/techdemo-20/20-example-technology-showcase-dynamic-simulation-PCB
-    technology_showcase_examples/techdemo-28/ex_28-tecfricstir
+The examples initially come from the `APDL Technology Showcase Manual
+<_tech_demo_intro_>`_ and are modeled with MAPDL files. Some of them have been
+reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
+library.
 
-.. include:: technology_showcase_examples/index.rst
-   :start-line: 2
+The examples are hosted in the  `PyMAPDL Techdemos repository <_tech_demos_repo_>`_.
 
+The documentation to the exposed examples can be found in the
+`PyMAPDL Techdemos documentation <_tech_demos_doc_>`_.
 
 .. === EXTENDED EXAMPLES ===
 
@@ -49,7 +52,7 @@ Here are a series of examples using MAPDL with ``ansys-mapdl-core``.
 
 .. _ref_download_files:
 
-Download Example Files
+Download example files
 ======================
 
 Each example should contain all the necessary resources to run the example.
@@ -59,9 +62,6 @@ These links refers to the following GitHub repository where you can find all of 
 
 `GitHub Example Data Repository <example_data_repo_>`_
 
-If you find out a missing or broken link, please open an issue in
-Github (`PyMAPDL Issues <pymapdl_issues_>`_) 
-or email us at `PyAnsys Support <pyansys_support_>`_. 
-
-
-
+If you find a missing or broken link, open an issue in
+GitHub (`PyMAPDL Issues <pymapdl_issues_>`_) 
+or send an email to `PyAnsys Support <pyansys_support_>`_. 

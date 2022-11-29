@@ -13,7 +13,7 @@ contribute to PyMAPDL.
 The following contribution information is specific to PyMAPDL.
 
 
-Cloning the PyMAPDL Repository
+Cloning the PyMAPDL repository
 ==============================
 
 Run this code to clone and install the latest version of PyMAPDL in development mode:
@@ -26,12 +26,12 @@ Run this code to clone and install the latest version of PyMAPDL in development 
     pip install -e .
 
 
-Posting Issues
+Posting issues
 ==============
 
 Use the `PyMAPDL Issues <pymapdl_issues_>`_
-page to submit questions, report bugs, and request new features. When possible, we
-recommend that you use these issue templates:
+page to submit questions, report bugs, and request new features. When possible,
+use these issue templates:
 
 * Bug report template
 * Feature request template
@@ -40,7 +40,7 @@ If your issue does not fit into one of these categories, create your own issue.
 
 To reach the project support team, email `pyansys.support@ansys.com <pyansys_support_>`_.
 
-Viewing PyMAPDL Documentation
+Viewing PyMAPDL documentation
 =============================
 
 Documentation for the latest stable release of PyMAPDL is hosted at
@@ -77,7 +77,7 @@ This tells ``ansys.mapdl.core`` to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
 
 
-Code Style
+Code style
 ==========
 
 PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
@@ -105,16 +105,16 @@ This way, it's not possible for you to push code that fails the style checks. Fo
 
 .. _ref_index_api:
 
-API Reference
+API reference
 =============
 This page gives an overview of the API of several public PyMAPDL
 classes, functions, and attributes. You can find them
 on the left sidebar.
 
-These methods may include some MAPDL commands but are generally
-specific to pymapdl specific methods and classes (i.e. methods that
-extend existing MAPDL methods in a pythonic manner).  For classic
-MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
+While these methods might include some MAPDL commands, they are generally
+specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
+MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
+PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 
 .. toctree::

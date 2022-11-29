@@ -25,16 +25,16 @@ using the Krylov method:
 
 #. Mechanical APDL commands
 #. APDL macros as described in `Frequency-Sweep Harmonic Analysis via the Krylov Method
-   <ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide
+   <ansys_krylov_sweep_harmonic_analysis_>`_ in the *Structural Analysis* guide
    for Mechanical APDL
 
-PyMAPDL also provides a way to implement a harmonic analysis using the Kylov method.
+PyMAPDL also provides a way to implement a harmonic analysis using the Krylov method.
 Subsequent sections describe how to use the Krylov method in PyMAPDL.
 
 
 **Assumptions**
 ---------------
-The following assumptions are made when using the Kylov PyMAPDL method
+The following assumptions are made when using the Krylov PyMAPDL method
 to obtain the solution:
 
 * The stiffness, mass, and damping matrices are assumed to be constant
@@ -58,7 +58,7 @@ If you do not require customization, you can use the Mechanical APDL
 commands to solve a harmonic analysis with the Krylov method. For more
 information, including the theory behind this method, see
 `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide
+<ansys_krylov_sweep_harmonic_analysis_>`_ in the *Structural Analysis* guide
 for Mechanical APDL. 
 
 For additional theory information and equations for
@@ -148,10 +148,10 @@ solution, and calculate the residual:
 The preceding code returns a :class:`numpy array<numpy.ndarray>` if the kwarg ``out_key``
 is set to ``True``. Solution vectors are mapped to user order.
 
-.. note:: The :class:`numpy array<numpy.ndarray>` returned by the
-   `:func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method contains
-   the node number along with the dof solution for each of the calculated
-   frequencies.
+.. note:: The :class:`numpy array<numpy.ndarray>` class returned by the
+   :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method contains
+   the node number along with the degrees of freedom (dof) solution for each of
+   the calculated frequencies.
 
 Get the dof solution at a specific frequency
 --------------------------------------------
@@ -172,8 +172,7 @@ Examples of using the Krylov method in PyMAPDL are available in :ref:`krylov_exa
 Requirements
 ============
 
-To use the Krylov method in PyMAPDL, Mechanical APDL version 2022 R2 or later
-must be used.
+To use the Krylov method in PyMAPDL, you must use Mechanical APDL version 2022 R2 or later.
 
 .. warning:: This feature does not support Distributed Ansys. 
     However, you can still run Mechanical APDL Math commands without
@@ -182,7 +181,7 @@ must be used.
 Reference
 =========
 For more information on the Krylov method, see `Frequency-Sweep Harmonic Analysis via the Krylov Method 
-<ansys_krylov_sweep_harmonic_analysis_>`_ in the **Structural Analysis** guide for Mechanical APDL
+<ansys_krylov_sweep_harmonic_analysis_>`_ in the *Structural Analysis* guide for Mechanical APDL
 and these resources:
 
 .. [1] Puri, S. R. (2009). Krylov Subspace Based Direct Projection Techniques for Low Frequency,
@@ -190,4 +189,4 @@ and these resources:
    Mechanical Engineering Department. Oxford, UK.
 
 .. [2] Eser, M. C. (2019) Efficient Evaluation of Sound Radiation of an Electric Motor using Model Order
-   Reduction.MSc Thesis. Technical University of Munich, Mechanical Engineering Department. Munich, DE.
+   Reduction. MSc Thesis. Technical University of Munich, Mechanical Engineering Department. Munich, DE.

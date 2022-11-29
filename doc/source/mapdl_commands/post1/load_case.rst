@@ -1,7 +1,7 @@
 .. _ref_load Case Calculations_api:
 
 **********************
-Load Case Calculations
+Load case calculations
 **********************
 
 .. currentmodule:: ansys.mapdl.core

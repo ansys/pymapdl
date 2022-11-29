@@ -54,8 +54,8 @@ your current directory with:
     mapdl = launch_mapdl(run_location=path)
 
 MAPDL is now active, and you can send commands to it as a genuine a
-Python class.  For example, if you wanted to create a surface using
-keypoints, you could run:
+Python class. For example, if you wanted to create a surface using
+key points, you could run:
 
 .. code:: python
 
@@ -105,7 +105,7 @@ Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from an instance of
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
-to simplify calling Anys, especially when inputs are variables within
+to simplify calling Ansys, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 
 .. code:: python

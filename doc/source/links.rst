@@ -24,7 +24,7 @@
 .. _matplotlib_main: https://matplotlib.org
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
-.. _scipy: https://docs.scipy.org/doc/scipy/reference/
+.. _scipy_docs: https://docs.scipy.org/doc/scipy/reference/
 .. _docker: https://www.docker.com/
 
 
@@ -35,8 +35,10 @@
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 .. _ansys_current_release: https://download.ansys.com/Current%20Release
 
-.. # techdemos
+.. # TechDemos related
 .. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
+.. _tech_demo_repo: https://github.com/pyansys/pymapdl-techdemos
+.. _tech_demos_doc: https://techdemos.mapdl.docs.pyansys.com/
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
@@ -83,6 +85,15 @@
 .. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/user_guide/math.html
 .. _licensing_guide_pdf: ./_assets/lic_guide.pdf
 .. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
+.. _pymapdl_examples: https://github.com/pyansys/pymapdl/tree/main/examples
+.. _pymapdl_2d_plate_with_a_hole: https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
+.. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
+.. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/examples/extended_examples/Krylov/krylov_example.html
+.. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
+.. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
+.. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-techdemos/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
+.. _pymapdl_techdemo_28: https://techdemos.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
+
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html

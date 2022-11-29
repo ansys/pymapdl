@@ -1,7 +1,7 @@
 .. _ref_material_data_tables_commands_api:
 
 ********************
-Material Data Tables
+Material data tables
 ********************
 
 .. currentmodule:: ansys.mapdl.core

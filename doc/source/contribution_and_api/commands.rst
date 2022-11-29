@@ -1,6 +1,6 @@
 .. _ref_commands_api:
 
-Commands Output
+Commands output
 ===============
 
 Various PyMAPDL classes and commands which helps in data post-processing.

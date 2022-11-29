@@ -1,13 +1,13 @@
-Create a Pool of MAPDL Instances
+Create a pool of MAPDL instances
 ================================
-The PyMAPDL library contains the :class:`MapdlLocalPool
+PyMAPDL contains the :class:`MapdlLocalPool
 <ansys.mapdl.core.MapdlLocalPool>` class to simplify creating multiple
-local instances of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
-for batch processing.  This can be used for the batch processing of a
+local instances of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+class for batch processing. This can be used for the batch processing of a
 set of input files, convergence analysis, or other batch related
 processes.
 
-To create the pool:
+This code creates a pool:
 
 .. code:: python
 
@@ -15,9 +15,9 @@ To create the pool:
     >>> pool = LocalMapdlPool(10)
     'MAPDL Pool with 10 active instances'
 
-You can also supply additional keyword arguments when creating the
-pool.  For instance, create several instances with 1 CPU each running
-at the current directory within their own isolated directories.
+You can supply additional keyword arguments when creating the
+pool. This code creates several instances with one CPU each running
+at the current directory within their own isolated directories:
 
 .. code:: python
 
@@ -26,24 +26,24 @@ at the current directory within their own isolated directories.
     >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
-Each individual instance of mapdl can be accessed with:
+You can access each individual MAPDL instance with this code:
 
 .. code:: python
 
     >>> pool[0]
     <ansys.mapdl.core.mapdl.MapdlGrpc object at 0x7f66270cc8d0>
 
-Note that this is a self healing pool.  If an instance of MAPDL dies
-during a batch process, that instance will be automatically restarted.
-You can disable this behavior by setting ``restart_failed=False`` when
+Note that this is a self-healing pool. If an instance of MAPDL dies
+during a batch process, that instance is automatically restarted.
+You can turn off this behavior by setting ``restart_failed=False`` when
 creating the pool.
 
 
-Run a Set of Input Files
+Run a set of input files
 ~~~~~~~~~~~~~~~~~~~~~~~~
-You can use the pool to run a set of pre-generated input files using
-:func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>`.  For
-example, you can run the first set of 20 verification files with:
+You can use the pool to run a set of pre-generated input files using the
+:func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` method. For
+example, this code would run the first set of 20 verification files:
 
 .. code:: python
 
@@ -54,12 +54,12 @@ example, you can run the first set of 20 verification files with:
     20
 
 
-Run a User Function
+Run a user function
 ~~~~~~~~~~~~~~~~~~~
-You can also use the pool to run a custom user function to run on each
-instance of MAPDL over a set of inputs.  This example again uses set
-of verification files as in the :func:`run_batch
-<ansys.mapdl.core.MapdlLocalPool.run_batch>` example, but implements
+You can use the pool to run a custom user function on each MAPDL
+instance over a set of inputs. As in the example for the
+:func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` function,
+the following code uses a set of verification files. However, it implements
 it as a function and outputs the final routine instead of the text
 output from MAPDL.
 
@@ -85,6 +85,6 @@ output from MAPDL.
      'Begin level']
 
 
-API Description
+API description
 ~~~~~~~~~~~~~~~
-For a full description of the PyMAPDL Pool API see :ref:`ref_pool_api`.
+For a comprehensive description, see :ref:`ref_pool_api`.

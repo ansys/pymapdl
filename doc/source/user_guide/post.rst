@@ -1,46 +1,45 @@
-Post-Processing
-===============
-You can post process using an active MAPDL session using the
-:class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>`
+Postprocessing
+==============
+In an active MAPDL session, you can postprocess using the
+:class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>` class,
 an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
-One advantage of this approach
-is it integrates well with existing MAPDL scripting or automation, but
-can also be carried out on result files generated from other programs,
-including ANSYS Mechanical.
+One advantage of this approach is that it integrates well with existing MAPDL
+scripting or automation. This approach can also be used on result files generated
+from other programs, including ANSYS Mechanical.
 
-Perhaps on of the biggest advantages of gRPC based post-processing is
-it can be done remotely without any file exchange.  Multi gigabyte
-result files can remain remote and only the necessary data needs to be
+Perhaps one of the biggest advantages of gRPC-based postprocessing is
+that it can be done remotely without any file exchange. Multi gigabyte
+result files can remain remote, with only the necessary data being
 streamed back to the client for review or visualization.
 
 .. note::
 
-   You are encouraged to use the new Data Processing Framework (DPF)
+   You are encouraged to use the Data Processing Framework (DPF)
    modules at `DPF-Core <dpf_core_gh_>`_ and
-   `DPF-Post <dpf_post_gh_>`_ as they provide a
-   modern interface to ANSYS result files using a client/server
-   interface using the same software used within Ansys Workbench, but
-   via a Python client.
+   `DPF-Post <dpf_post_gh_>`_ because they provide a
+   modern interface to Ansys result files using a client-server
+   interface. They use the same software that is used within Ansys Workbench
+   but via a Python client.
 
 
 
-Enriched Command Output
+Enriched command output
 ~~~~~~~~~~~~~~~~~~~~~~~
-All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands output
-a string object which can be parsed to obtain specific data from it.
+All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands output
+a string object that can be parsed to obtain specific data from it.
 
-In certain :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` commands
+In certain :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands
 the returned string contains some methods to process the output.
 These commands are listed in Table-1_.
 
 .. _Table-1:
 
-**Table 1. Commands with extra processing methods in the output.**
+**Table 1. Commands with extra processing methods in the output**
 
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-| Category       | Extra Methods Available                                                                           | Mapdl Commands                                                           |
+| Category       | Extra methods available                                                                           | MAPDL commands                                                           |
 +================+===================================================================================================+==========================================================================+
-| **Listing**    | * :class:`cmd.to_list() <ansys.mapdl.core.commands.CommandListingOutput>`                         | **Results Listing**                                                      |
+| **Listing**    | * :class:`cmd.to_list() <ansys.mapdl.core.commands.CommandListingOutput>`                         | **Results listing**                                                      |
 |                | * :class:`cmd.to_array() <ansys.mapdl.core.commands.CommandListingOutput>`                        |                                                                          |
 |                | * :class:`cmd.to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput>`                    | * :func:`Mapdl.prcint() <ansys.mapdl.core.Mapdl.prcint>`                 |
 |                |                                                                                                   | * :func:`Mapdl.prenergy() <ansys.mapdl.core.Mapdl.prenergy>`             |
@@ -71,7 +70,7 @@ These commands are listed in Table-1_.
 | **Listing**    |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
 
-Here's a simple example demonstrating the the usage:
+Here's a simple example that demonstrates usage:
 
 .. code:: python
 
@@ -109,8 +108,8 @@ Here's a simple example demonstrating the the usage:
 
 Examples
 ~~~~~~~~
-Classically, one would request nodal results from MAPDL using the
-``PRNSOL`` command.  For example:
+You would typically request nodal results from MAPDL using the
+``PRNSOL`` command:
 
 .. code::
 
@@ -139,9 +138,8 @@ Classically, one would request nodal results from MAPDL using the
      MORE (YES,NO OR CONTINUOUS)=
 
 
-However, using an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`, 
-you can instead request the
-nodal displacement with:
+However, using an instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+class, you can instead request the nodal displacement:
 
 .. code:: python
 
@@ -150,7 +148,7 @@ nodal displacement with:
     array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
            5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
 
-You could also plot the nodal displacement with:
+You could also plot the nodal displacement with this code:
 
     >>> mapdl.post_processing.plot_nodal_displacement('X')
 
@@ -161,14 +159,14 @@ You could also plot the nodal displacement with:
     Normalized Displacement of a Cylinder from MAPDL
 
 
-Selected Nodes
+Selected nodes
 ~~~~~~~~~~~~~~
-The MAPDL database processes some results independently of if nodes or
-elements are selected.  If you have subselected a certain component
-and wish to also limit the result of a certain output
-(i.e. :func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement>`), 
+The MAPDL database processes some results independently if nodes or
+elements are selected. If you have subselected a certain component
+and want to also limit the result of a certain output
+(:func:`nodal_displacement() <ansys.mapdl.core.post.PostProcessing.nodal_displacement>`), 
 use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes>` attribute to get
-a mask of the currently selected nodes.
+a mask of the currently selected nodes:
 
 .. code::
 
@@ -177,7 +175,7 @@ a mask of the currently selected nodes.
     >>> mask = mapdl.post_processing.selected_nodes
 
 
-Post Processing Object Methods
+Postprocessing object methods
 ------------------------------
-For a full list of all available post-processing methods, see
+For a full list of all available postprocessing methods, see
 :ref:`post_processing_api`.

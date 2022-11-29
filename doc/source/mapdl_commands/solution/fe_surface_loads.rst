@@ -1,7 +1,7 @@
 .. _ref_fe_surface_loads_commands_api:
 
 ****************
-FE Surface Loads
+FE surface loads
 ****************
 
 .. currentmodule:: ansys.mapdl.core

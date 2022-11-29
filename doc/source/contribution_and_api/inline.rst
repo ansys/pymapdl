@@ -1,6 +1,6 @@
 .. _inline_functions_api:
 
-Inline Functions
+Inline functions
 ================
 
 .. currentmodule:: ansys.mapdl.core.inline_functions

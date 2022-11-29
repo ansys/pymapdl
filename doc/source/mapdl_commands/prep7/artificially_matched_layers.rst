@@ -1,7 +1,7 @@
 .. _ref_artificially_matched_layers_commands_api:
 
 ***************************
-Artificially Matched Layers
+Artificially matched layers
 ***************************
 
 .. currentmodule:: ansys.mapdl.core

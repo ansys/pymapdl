@@ -1,8 +1,10 @@
 :orphan:
 
+.. vale off
+
 Oops!
 =====
-
+.. vale on
 
 This is unexpected.
 

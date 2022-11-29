@@ -1,7 +1,7 @@
 .. _ref_matrix_operations_commands_api:
 
 *****************
-Matrix Operations
+Matrix operations
 *****************
 
 .. currentmodule:: ansys.mapdl.core

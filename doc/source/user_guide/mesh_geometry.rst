@@ -1,14 +1,14 @@
-Mesh and Geometry
+Mesh and geometry
 =================
 The :class:`Mapdl <ansys.mapdl.core.Mapdl>` class allows you to access
 the mesh and geometry without writing to an intermediate file or
-interpreting the text output from various MAPDL commands.  For
-example, to access the nodes and elements of a model, normally one
-would list the nodes within MAPDL :func:`Mapdl.nlist()
-<ansys.mapdl.core.Mapdl.nlist`, but this generates a string and array
-access either requires cumbersome MAPDL GET commands, or requires the
-nodes be written to a archive file and then read in within other
-software.  For example:
+interpreting the text output from various MAPDL commands. For
+example, to access the nodes and elements of a model, normally you
+would list the nodes within MAPDL using the :func:`Mapdl.nlist()
+<ansys.mapdl.core.Mapdl.nlist` method. However, this generates a string.
+Array access requires either cumbersome MAPDL GET commands or that the
+nodes be written to an archive file and then read in with other
+software:
 
 .. code::
 
@@ -22,10 +22,10 @@ software.  For example:
         3   0.2500        0.0000        0.0000          0.00     0.00     0.00
 
 
-However, with :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>`
-possible to interface with a current instance of :class:`Mapdl
-<ansys.mapdl.core.Mapdl>` and access the current nodes coordinates
-with:
+However, with the :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>` class,
+you can interface with a current instance of the :class:`Mapdl
+<ansys.mapdl.core.Mapdl>` class and access the current nodes coordinates
+with this code:
 
 .. code:: python
 
@@ -41,14 +41,15 @@ with:
 
 Both the :attr:`Mapdl.geometry <ansys.mapdl.core.Mapdl.geometry` and
 :attr:`Mapdl.mesh <ansys.mapdl.core.Mapdl.mesh` attributes support
-additional, lower level access to MAPDL data.  Access them with:
+additional, lower-level access to MAPDL data. You can use this code
+to access them:
 
 .. code:: python
 
     >>> mapdl.mesh
     >>> mapdl.geometry
 
-View the current mesh status with:
+To view the current mesh status, you can use this code:
 
 .. code::
 
@@ -61,13 +62,13 @@ View the current mesh status with:
       Number of Element Components: 0
 
 
-Geometry Commands
+Geometry commands
 ~~~~~~~~~~~~~~~~~
-See the :ref:`ref_prep_commands` commands for additional MAPDL
-commands for creating geometries.
+For additional MAPDLcommands for creating geometries, see the
+:ref:`ref_prep_commands` commands.
 
 
-API Reference
+API reference
 ~~~~~~~~~~~~~
-For a full description of the ``Mesh`` and ``Geometry`` classes, please
+For a full description of the ``Mesh`` and ``Geometry`` classes,
 see :ref:`ref_mesh_api` and :ref:`ref_geometry_api`.

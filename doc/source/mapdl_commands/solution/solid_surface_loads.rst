@@ -1,7 +1,7 @@
 .. _ref_solid_surface_loads_commands_api:
 
 *******************
-Solid Surface Loads
+Solid surface loads
 *******************
 
 .. currentmodule:: ansys.mapdl.core

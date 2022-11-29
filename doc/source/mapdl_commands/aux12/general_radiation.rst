@@ -1,7 +1,7 @@
 .. _ref_general Radiation_api:
 
 *****************
-General Radiation
+General radiation
 *****************
 
 .. currentmodule:: ansys.mapdl.core

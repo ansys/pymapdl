@@ -1,7 +1,7 @@
 .. _ref_pressure_mapping_api:
 
 ****************
-Pressure Mapping
+Pressure mapping
 ****************
 
 .. currentmodule:: ansys.mapdl.core

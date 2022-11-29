@@ -50,11 +50,11 @@ classifiers = [
 
 [project.optional-dependencies]
 tests = [
-    "ansys-dpf-core==0.6.2",
+    "ansys-dpf-core==0.7.0",
     "autopep8==2.0.0",
     "matplotlib==3.6.2",
     "scipy==1.9.3",
-    "pandas==1.5.1",
+    "pandas==1.5.2",
     "pytest==7.2.0",
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
@@ -64,7 +64,7 @@ tests = [
 ]
 doc = [
     "Sphinx==5.3.0",
-    "ansys-dpf-core==0.6.2",
+    "ansys-dpf-core==0.7.0",
     "ansys-mapdl-reader==0.52.3",
     "ansys-sphinx-theme==0.7.1",
     "grpcio==1.43.0",
@@ -74,7 +74,7 @@ doc = [
     "jupyterlab>=3.2.8",
     "matplotlib==3.6.2",
     "numpydoc==1.5.0",
-    "pandas==1.5.1",
+    "pandas==1.5.2",
     "plotly==5.11.0",
     "pypandoc==1.10",
     "pytest-sphinx==0.5.0",

@@ -1,7 +1,7 @@
 .. _ref_results_files_api:
 
 *************
-Results Files
+Results files
 *************
 
 .. currentmodule:: ansys.mapdl.core

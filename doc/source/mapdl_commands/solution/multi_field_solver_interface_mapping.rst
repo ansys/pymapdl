@@ -1,7 +1,7 @@
 .. _ref_multi_field_solver_interface_mapping_commands_api:
 
 ************************************
-Multi-Field Solver Interface Mapping
+Multi-Field solver interface mapping
 ************************************
 
 .. currentmodule:: ansys.mapdl.core
