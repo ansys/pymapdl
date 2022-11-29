@@ -30,10 +30,9 @@ version: '3.3'
 #      docker-compose -f docker-compose.yml -f docker-compose.license-server.yml -f docker-compose.local.yml up
 #
 
-
 services:
   mapdl:
     volumes:
-      - ./:/local
+      - ../:/local
     # Overwriting entrypoint
-    entrypoint: /bin/sh -c "while sleep 1000; do :; done"
+    entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"

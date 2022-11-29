@@ -41,9 +41,9 @@ services:
       - '1084:1084'
     restart: always
     volumes:
-      - ./licenses:/ansyslm/shared_files/licensing/license_files:cached
+      - ../licenses:/ansyslm/shared_files/licensing/license_files:cached
     hostname: ${LICENSE_SERVER_HOSTNAME}
-    container_name: lmutil
+    container_name: license_server
     mac_address: ${LICENSE_SERVER_MAC_ADDRESS}
     environment:
       - LM_LICENSE_FILE=/ansyslm/shared_files/licensing/license_files/license.lic
