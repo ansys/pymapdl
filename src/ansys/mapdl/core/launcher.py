@@ -1440,7 +1440,7 @@ def launch_mapdl(
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
     else:  # pragma: no cover
         LOG.debug(
-            f"Because IP is not None, we are going to attempt to connect to a remote session. ('START_INSTANCE' is set to False)"
+            "Because IP is not None, we are going to attempt to connect to a remote session. ('START_INSTANCE' is set to False)"
         )
         start_instance = False
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
@@ -1614,7 +1614,7 @@ def launch_mapdl(
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
-        LOG.debug(f"Checking license server.")
+        LOG.debug("Checking license server.")
         lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
@@ -1674,7 +1674,7 @@ def launch_mapdl(
 
     # Stopping license checker
     if license_server_check:
-        LOG.debug(f"Stopping license server check.")
+        LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
 
     return mapdl
