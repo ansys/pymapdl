@@ -9,6 +9,9 @@ remote instance of MAPDL to communicate with it. This section covers
 launching and interfacing with MAPDL from a local instance by
 launching it from Python.
 
+
+.. _install_mapdl:
+
 Install MAPDL
 -------------
 
@@ -21,12 +24,20 @@ installer options can change, see the following figure for reference.
     :width: 400pt
 
 
+If you prefer, you can use Docker to avoid having to install MAPDL
+locally.
+This is specially convenient if you are using a non-supported platform such
+as MacOS.
+Visit `Use MAPDL through Docker <pymapdl_docker_>`_ for
+more information.
+
+You can also try the Student Version of Ansys products in
+`Ansys Student Versions <ansys_student_version_>`_.
+The Student Version is valid during a calendar year with limited capabilities,
+such as on the number of nodes and elements.
+
 If you experience problems installing MAPDL on Linux, visit
 `Missing dependencies on Linux <missing_dependencies_on_linux_>`_.
-
-If you prefer, you can use Docker and avoid having to install MAPDL
-locally. Visit `Use MAPDL through Docker <pymapdl_docker_>`_ for
-more information.
 
 Launch MAPDL
 ------------
@@ -88,32 +99,9 @@ port 50005 with:
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
-You can also configure the IP address. 
-However, because of an Ansys limitation to receive
-strings from a command line, the IP address must be read from an external file 
-named ``mylocal.ip``. This file is read automatically from the directory where 
-MAPDL is running.
-
-You can then set up the IP address.
-
-In Windows PowerShell or Command Prompt, use:
-
-.. code::
-    
-    echo "127.0.0.1" > mylocal.ip
-    C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
-
-
-In Linux, use:
-
-.. code::
-    
-    echo "127.0.0.1" > mylocal.ip
-    /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
-
 
 Connect to a gRPC MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 A MAPDL gRPC server can be connected to from either the same host or an
 external host. For example, you can connect to a MAPDL service
@@ -126,7 +114,7 @@ running **locally** with:
 
 
 This assumes that your MAPDL service is running locally on the default IP address 
-(127.0.0.1) and on the default port (50052).
+(``127.0.0.1``) and on the default port (``50052``).
 
 If you want to connect to a **remote** instance of MAPDL and you know the IP 
 address of that instance, you can connect to it.
@@ -145,7 +133,25 @@ Alternatively you can use a hostname:
 
 Note that you must have started MAPDL in gRPC mode on the computer with
 the mentioned IP address/hostname for this to work.
+
 If you have MAPDL installed on your local host, you
 can use the ``launch_mapdl`` method to both start and connect to MAPDL.
 
 If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`
+
+Connect to a dockerized MAPDL session
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you work with Docker, for example using the
+`docker-compose.yml <pymapdl_docker_compose_base_>`_ file provided in the
+directory `docker <pymapdl_docker_dir_>`_, then you need to connect to the
+MAPDL instance running on the docker container as if it was a remote MAPDL
+instance. However, because of the ports are exposed to the host (``ports`` field
+in `docker-compose.yml <pymapdl_docker_compose_base_>`_ file) you can connect
+to it without specifying the IP address of the Docker container.
+
+If you are using the local configuration specified in 
+`docker-compose.local.yml <pymapdl_docker_compose_local_>`_ , then,
+after attaching your VSCode instance, you can work with MAPDL as it is local, meaning 
+you can launch MAPDL instances using `launch_mapdl <pymapdl_launch_mapdl_>`_.
+
