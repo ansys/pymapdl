@@ -21,7 +21,7 @@ except ModuleNotFoundError:  # pragma: no cover
 import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
@@ -52,8 +52,6 @@ if not os.path.isdir(SETTINGS_DIR):
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
 
-LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"]]
-LINUX_DEFAULT_DIRS = [os.path.join(*each) for each in LINUX_DEFAULT_DIRS]
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052

@@ -18,8 +18,7 @@ import weakref
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
-from ansys.mapdl.core.launcher import LINUX_DEFAULT_DIRS
+from ansys.mapdl.core import _HAS_PYVISTA, LINUX_DEFAULT_DIRS, LOG
 
 try:
     import ansys.tools.report as pyansys_report
