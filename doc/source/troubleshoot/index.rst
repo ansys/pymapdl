@@ -15,16 +15,14 @@ some of the most common problems and frequently asked questions are posted here.
    faq
 
 
-Attempting to debug it yourself
--------------------------------
+Debug in PyMAPDL
+----------------
 
-In PyAnsys we are constantly trying to improve the user experience and performance
-of the libraries. We aim to provide a high quality product that is easy to use and
-easy to debug.  If you are having trouble with PyMAPDL, you can examine the content
-of the output file to identify any issue. 
+If you are having trouble with PyMAPDL, you can examine the content
+of the output file to help to identify any issue. 
 
 You can set the logger output file to be ``mylog.log`` by
-running the following commands in a python terminal or at the beginning of your
+running the following commands in a Python terminal or at the beginning of your
 script:
 
 .. code:: python
@@ -37,8 +35,11 @@ script:
 
     mapdl = launch_mapdl(loglevel="DEBUG")
 
-You can send this file to a bug report in the PyMAPDL GitHub repository if you are
-not able to identify the issue.
+You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
+If you are not able to identify the issue, you can open a discussion in
+`PyMAPDL - Discussions <pymapdl_discussions_>`_.
+If you believe you have found a bug, please open an issue in the
+`PyMAPDL GitHub repository <pymapdl_issues_>`_.
 
    
 
