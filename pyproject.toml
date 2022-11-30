@@ -116,3 +116,18 @@ markers = [
     "gui: skip tests that launch the GUI interface",
 ]
 testpaths = "tests"
+
+[tool.coverage.run]
+source = ["ansys/pymapdl"]
+omit = [
+    # omit commands
+    "ansys/mapdl/core/_commands/*",
+
+    # ignore legacy interfaces
+    "ansys/mapdl/core/mapdl_console.py",
+    "ansys/mapdl/core/mapdl_corba.py",
+    "ansys/mapdl/core/jupyter.py",
+]
+
+[tool.coverage.report]
+show_missing = true
