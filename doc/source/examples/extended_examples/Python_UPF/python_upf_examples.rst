@@ -219,8 +219,8 @@ Input data
 
 
 
-Python ```UsrShift`` subroutine
-*******************************
+Python ``UsrShift`` subroutine
+******************************
 
 This example describes a block of Prony viscoplastic material with a user-defined
 shift function following a Tool-Narayanaswamy shift function. Uniaxial tension is
