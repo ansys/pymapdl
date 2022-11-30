@@ -16,6 +16,8 @@ in a containerized environment such as Docker or Singularity:
 
 Configure the Docker registry
 =============================
+Configure the Docker registry
+=============================
 
 There is a Docker image hosted on the 
 `PyMAPDL GitHub <pymapdl_repo_>`_ repository that you
@@ -43,7 +45,7 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
-Run the MAPDL image
+Run an MAPDL image
 ===================
 
 You can now launch MAPDL directly from Docker with a short script or
@@ -187,7 +189,7 @@ with the ``-np`` switch:
 
 
 For additional command line arguments please see the *Notes* section
-within `launch_mapdl <_pymapdl_launch_mapdl_>`_.
+within `launch_mapdl <pymapdl_launch_mapdl_>`_.
 Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products

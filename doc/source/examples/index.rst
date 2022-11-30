@@ -31,7 +31,7 @@ The examples initially come from the `APDL Technology Showcase Manual
 reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
 library.
 
-The examples are hosted in the  `PyMAPDL Techdemos repository <tech_demos_repo_>`_.
+The examples are hosted in the  `PyMAPDL Techdemos repository <tech_demo_repo_>`_.
 
 The documentation to the exposed examples can be found in the
 `PyMAPDL Techdemos documentation <tech_demos_doc_>`_.
