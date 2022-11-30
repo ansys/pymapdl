@@ -8,11 +8,6 @@ repos:
   rev: 5.10.1
   hooks:
   - id: isort
-    args: [
-    "--profile", "black",
-    "--force-sort-within-sections",
-    "--skip-glob", "*__init__.py",
-    ]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.0.0
