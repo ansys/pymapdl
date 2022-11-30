@@ -12,7 +12,7 @@ The following Python UPF examples are available:
 
 
 Python ``UserMat`` subroutine
-***************************
+*****************************
 
 This example simulates a block modeled with 3D elements. The
 user material in the ``usermat.py`` file is equivalent to linear elastic.
@@ -220,7 +220,7 @@ Input data
 
 
 Python ```UsrShift`` subroutine
-*****************************
+*******************************
 
 This example describes a block of Prony viscoplastic material with a user-defined
 shift function following a Tool-Narayanaswamy shift function. Uniaxial tension is
