@@ -98,3 +98,49 @@ Source = "https://github.com/pyansys/pymapdl"
 
 [project.scripts]
 pymapdl_convert_script = "ansys.mapdl.core.convert:cli"
+
+[tool.pytest.ini_options]
+junit_family = "legacy"
+filterwarnings = [
+    "ignore::FutureWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::DeprecationWarning",
+    # bogus numpy ABI warning (see numpy/#432)
+    "ignore:.*numpy.dtype size changed.*:RuntimeWarning",
+    "ignore:.*numpy.ufunc size changed.*:RuntimeWarning",
+    "ignore::UserWarning",
+]
+markers = [
+    "skip_grpc: skip tests using grpc",
+    "corba: skip tests using the CORBA interface",
+    "gui: skip tests that launch the GUI interface",
+]
+testpaths = "tests"
+
+[tool.isort]
+profile = "black"
+force_sort_within_sections = true
+default_section = "THIRDPARTY"
+skip_glob = ["__init__.py"]
+src_paths = ["doc", "src", "tests"]
+
+
+[tool.coverage.run]
+source = ["ansys/pymapdl"]
+omit = [
+    # omit commands
+    "ansys/mapdl/core/_commands/*",
+
+    # ignore legacy interfaces
+    "ansys/mapdl/core/mapdl_console.py",
+    "ansys/mapdl/core/mapdl_corba.py",
+    "ansys/mapdl/core/jupyter.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.codespell]
+skip = "*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*"
+ignore-words-list = "doc/styles/Vocab/ANSYS/accept.txt"
+quiet-level = 3
