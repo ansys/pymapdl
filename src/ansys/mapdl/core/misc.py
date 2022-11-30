@@ -104,6 +104,11 @@ def get_linux_default_ansys_bin(rver):
             else:
                 LOG.debug(f"NOT found ANSYS binary at {mapdlbin}")
 
+    # We could not find a binary, returning a default one
+    return os.path.join(
+        LINUX_DEFAULT_DIRS[0], f"v{rver}", "ansys", "bin", f"ansys{rver}"
+    )
+
 
 def get_windows_default_ansys_bin(rver):
     """Find the MAPDL executable using standard Windows installation paths"""
