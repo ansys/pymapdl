@@ -28,8 +28,7 @@ If you prefer, you can use Docker to avoid having to install MAPDL
 locally.
 This is specially convenient if you are using a non-supported platform such
 as MacOS.
-Visit `Use MAPDL through Docker <pymapdl_docker_>`_ for
-more information.
+Visit :ref:`pymapdl_docker` for more information.
 
 You can also try the Student Version of Ansys products in
 `Ansys Student Versions <ansys_student_version_>`_.
@@ -37,7 +36,7 @@ The Student Version is valid during a calendar year with limited capabilities,
 such as on the number of nodes and elements.
 
 If you experience problems installing MAPDL on Linux, visit
-`Missing dependencies on Linux <missing_dependencies_on_linux_>`_.
+:ref:`missing_dependencies_on_linux`.
 
 Launch MAPDL
 ------------
