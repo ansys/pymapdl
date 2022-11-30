@@ -95,9 +95,9 @@
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-techdemos/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://techdemos.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_launch_mapdl: https://mapdl.docs.pyansys.com/contribution_and_api/_autosummary/ansys.mapdl.core.launch_mapdl.html
-.. _pymapdl_docker_dir:https://github.com/pyansys/pymapdl/blob/main/docker
-.. _pymapdl_docker_compose_base:https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
-.. _pymapdl_docker_compose_local:https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.local.yml
+.. _pymapdl_docker_dir: https://github.com/pyansys/pymapdl/blob/main/docker
+.. _pymapdl_docker_compose_base: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
+.. _pymapdl_docker_compose_local: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.local.yml
 .. _pymapdl_docker_compose_license_server: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
 
 .. #Python
