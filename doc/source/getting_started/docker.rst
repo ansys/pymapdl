@@ -14,9 +14,9 @@ in a containerized environment such as Docker or Singularity:
 - Large-scale cluster deployment using Kubernetes
 - Genuine app isolation through containerization.
 
+Configure the Docker registry
+=============================
 
-Install the MAPDL image
------------------------
 There is a Docker image hosted on the 
 `PyMAPDL GitHub <pymapdl_repo_>`_ repository that you
 can download using your GitHub credentials.
@@ -43,6 +43,9 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
+Run the MAPDL image
+===================
+
 You can now launch MAPDL directly from Docker with a short script or
 directly from the command line. Because this image contains no license
 server, you must enter your license server IP address in the
@@ -57,11 +60,18 @@ MAPDL with:
     IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
 
+First time you run it, Docker logins into the *ghcr.io* registry and
+pulls the image which can take some time.
 
 Note that port `50052` (local to the container) is being mapped to
 50052 on the host. This makes it possible to launch several MAPDL
 instances with different port mappings to allow for multiple instances
 of MAPDL.
+
+You can provide additional command line parameters to MAPDL by simply
+appending to the Docker command. 
+For example, you can increase the number of processors (up to the
+number available on the host machine) with the `-np` switch.
 
 Once you have launched MAPDL you should see:
 
@@ -76,8 +86,57 @@ Once you have launched MAPDL you should see:
     Server Executable   : MapdlGrpc Server
     Server listening on : 0.0.0.0:50052
 
+
+Using ``docker-compose`` to launch MAPDL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can also use ``docker-compose`` command to launch MAPDL configured in
+a ``docker-compose`` file.
+This is useful if you want to load an already configured environment, or
+if you want to launch multiple instances of MAPDL or services.
+
+For you convenience, the directory `docker <pymapdl_docker_dir_>`_ 
+contains pre-configured ``docker-compose`` files that you can
+use:
+
+* `docker-compose.yml <pymapdl_docker_compose_base_>`_: the **base** 
+  configuration file which launch a remote instance of MAPDL which you
+  can connect to. Similar approach to the one described above.
+
+* `docker-compose.local.yml <pymapdl_docker_compose_base_>`_: 
+  This file is an extension of the base configuration file which launch
+  an Ubuntu Docker image with MAPDL installed in it. 
+  This is useful if you want to run MAPDL locally inside this container
+  for example for debugging purposes.
+  You can connect your VSCode instance to this container by selecting
+  ``Attach to a running container`` option from the command palette.
+  For more details visit `Attach to a running container <vscode_attach_to_container_>`_.
+
+* `docker-compose.license_server.yml <pymapdl_docker_compose_license_server_>`_:
+  This file is an extension of the base configuration file which launch
+  a license server. 
+  This is useful if you want to run MAPDL remotely and you don't have 
+  access to a license server.
+  You need a valid license file to run the license server.
+  You can use it together with ``docker-compose.local.yml`` hence you
+  can connect to it the same way.
+  The call to this docker file should be always the last one in the
+  ``docker-compose`` command. For instance:
+
+  .. code:: bash
+
+     docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.license_server.yml up
+  
+
+.. warning:: About the license server image.
+   The license server is not intended to be used in production. 
+   It is only intended for testing/debugging purposes.
+   Its access is limited to collaborators of the PyAnsys project.
+   If you would like to have access to it, please contact PyAnsys support at
+   `pyansys.support@ansys.com <pyansys_support_>`_.
+
 Connect to the MAPDL container from Python
--------------------------------------------
+==========================================
 
 You can now connect to the instance with:
 
@@ -104,7 +163,7 @@ Verify your connection with:
     PyMAPDL Version:     Version: 0.57.0
 
 Additional considerations
--------------------------
+=========================
 
 Append MAPDL options to the container
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,9 +185,10 @@ with the ``-np`` switch:
     IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
     docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
 
-For additional command-line arguments, see the Ansys
-documentation at `ANSYS help <ansys_help_>`_.  Also,
-be sure to have the appropriate license for additional HPC features.
+
+For additional command line arguments please see the *Notes* section
+within `launch_mapdl <pymapdl_launch_mapdl_>`_.
+Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
