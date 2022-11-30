@@ -62,6 +62,7 @@
 .. _open_port_windows_10: https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
 .. _article_good_unit_test: https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test 
+.. _vscode_attach_to_container: https://code.visualstudio.com/docs/devcontainers/attach-container
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
@@ -93,7 +94,11 @@
 .. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-techdemos/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://techdemos.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
-
+.. _pymapdl_launch_mapdl: https://mapdl.docs.pyansys.com/contribution_and_api/_autosummary/ansys.mapdl.core.launch_mapdl.html
+.. _pymapdl_docker_dir: https://github.com/pyansys/pymapdl/blob/main/docker
+.. _pymapdl_docker_compose_base: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
+.. _pymapdl_docker_compose_local: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.local.yml
+.. _pymapdl_docker_compose_license_server: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
