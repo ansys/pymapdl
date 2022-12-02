@@ -195,7 +195,7 @@ On CentOS 7, you can install missing dependencies with:
 Ubuntu
 ------
 
-On Ubuntu 22.04, it is needed to install the following:
+On Ubuntu 22.04, use this code to install the needed dependencies:
 
 .. code::
 
@@ -209,7 +209,8 @@ On Ubuntu 22.04, it is needed to install the following:
     libxm4 \
     libxi6
 
-This takes care of everything except for ``libxp6`` for which you need the following:
+The preceding code takes care of everything except for ``libxp6``, which you must install
+using this code:
 
 .. code:: bash
 
@@ -224,8 +225,13 @@ This takes care of everything except for ``libxp6`` for which you need the follo
 Ubuntu 20.04 and older
 ----------------------
 
-If you are using Ubuntu 16.04, you can install that simply with ``sudo apt
-install libxp6``. However, on Ubuntu 18.04+ up to 20.04, you must manually
+If you are using Ubuntu 16.04, you can install ``libxp16`` with this code:
+
+.. code:: bash
+
+   sudo apt install libxp6. 
+   
+However, if you are using Ubuntu 18.04 through 20.04, you must manually
 download and install the package.
 
 Because ``libxpl6`` pre-depends on ``multiarch-support``, which is

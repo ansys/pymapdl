@@ -24,18 +24,15 @@ installer options can change, see the following figure for reference.
     :width: 400pt
 
 
-If you prefer, you can use Docker to avoid having to install MAPDL
-locally.
-This is specially convenient if you are using a non-supported platform such
-as MacOS.
-Visit :ref:`pymapdl_docker` for more information.
+If you want to avoid having to install MAPDL locally, you can use Docker.
+This is especially convenient if you are using a non-supported platform such
+as MacOS. For more information, see :ref:`pymapdl_docker`.
 
-You can also try the Student Version of Ansys products in
-`Ansys Student Versions <ansys_student_version_>`_.
-The Student Version is valid during a calendar year with limited capabilities,
-such as on the number of nodes and elements.
+You can also download and try `Ansys Student Versions <ansys_student_version_>`_.
+A Student Version is valid during a calendar year with limited capabilities. For
+example, there is a limit on the number of nodes and elements.
 
-If you experience problems installing MAPDL on Linux, visit
+If you experience problems installing MAPDL on Linux, see
 :ref:`missing_dependencies_on_linux`.
 
 Launch MAPDL
@@ -134,23 +131,23 @@ Note that you must have started MAPDL in gRPC mode on the computer with
 the mentioned IP address/hostname for this to work.
 
 If you have MAPDL installed on your local host, you
-can use the ``launch_mapdl`` method to both start and connect to MAPDL.
+can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to both start and connect to MAPDL.
 
-If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`
+If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`.
 
 Connect to a dockerized MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you work with Docker, for example using the
+If you work with Docker, for example you use the
 `docker-compose.yml <pymapdl_docker_compose_base_>`_ file provided in the
-directory `docker <pymapdl_docker_dir_>`_, then you need to connect to the
-MAPDL instance running on the docker container as if it was a remote MAPDL
-instance. However, because of the ports are exposed to the host (``ports`` field
-in `docker-compose.yml <pymapdl_docker_compose_base_>`_ file) you can connect
-to it without specifying the IP address of the Docker container.
+directory `docker <pymapdl_docker_dir_>`_, then you must connect to the
+MAPDL instance running on the Docker container as if it was a remote MAPDL
+instance. However, because the ports are exposed to the host via the ``ports`` field
+in the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file, you can connect
+to this MAPDL instance without specifying the IP address of the Docker container.
 
-If you are using the local configuration specified in 
-`docker-compose.local.yml <pymapdl_docker_compose_local_>`_ , then,
-after attaching your VSCode instance, you can work with MAPDL as it is local, meaning 
-you can launch MAPDL instances using `launch_mapdl <pymapdl_launch_mapdl_>`_.
+If you are using the local configuration specified in the
+`docker-compose.local.yml <pymapdl_docker_compose_local_>`_ file,
+after attaching your VSCode instance, you can work with MAPDL as if it were local.
+This means that you can launch MAPDL instances using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
 

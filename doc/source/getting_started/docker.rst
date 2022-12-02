@@ -12,10 +12,8 @@ in a containerized environment such as Docker or Singularity:
 - Run in a consistent environment regardless of the host OS.
 - Portability and ease of install.
 - Large-scale cluster deployment using Kubernetes
-- Genuine app isolation through containerization.
+- Genuine app isolation through containerization
 
-Configure the Docker registry
-=============================
 Configure the Docker registry
 =============================
 

@@ -92,7 +92,7 @@ on Windows and with Ansys 13.0 on Linux.
     and features. Certain features, such as APDL Math, are not supported
     on earlier Ansys versions.
 
-Visit :ref:`install_mapdl` for more information.
+For more information, see :ref:`install_mapdl`.
 
 Verify your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~
