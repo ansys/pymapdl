@@ -58,8 +58,8 @@ tests = [
     "pytest==7.2.0",
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
-    "pyansys-tools-report==0.4.0",
-    "vtk==9.0.3",
+    "pyansys-tools-report==0.4.1",
+    "vtk==9.2.2",
     "pytest-rerunfailures==10.3",
 ]
 doc = [
@@ -67,7 +67,7 @@ doc = [
     "ansys-dpf-core==0.7.0",
     "ansys-mapdl-reader==0.52.3",
     "ansys-sphinx-theme==0.7.2",
-    "grpcio==1.43.0",
+    "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.7",
     "imageio==2.22.4",
     "jupyter_sphinx==0.4.0",
@@ -87,7 +87,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
-    "vtk==9.0.3",
+    "vtk==9.2.2",
 ]
 
 [tool.flit.module]
