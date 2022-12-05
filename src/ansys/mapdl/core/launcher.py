@@ -1438,7 +1438,7 @@ def launch_mapdl(
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
     else:  # pragma: no cover
         LOG.debug(
-            "Because IP is not None, we are going to attempt to connect to a remote session. ('START_INSTANCE' is set to False)"
+            "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
         )
         start_instance = False
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
@@ -1459,12 +1459,12 @@ def launch_mapdl(
     # connect to an existing instance if enabled
     if start_instance is None:
         if "PYMAPDL_START_INSTANCE" in os.environ:
-            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable")
+            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable.")
 
         if os.environ.get("PYMAPDL_START_INSTANCE") and os.environ.get(
             "PYMAPDL_START_INSTANCE"
         ).lower() not in ["true", "false"]:
-            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False")
+            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False.")
 
         start_instance = check_valid_start_instance(
             os.environ.get("PYMAPDL_START_INSTANCE", True)
@@ -1533,7 +1533,7 @@ def launch_mapdl(
 
     # verify executable
     if exec_file is None:
-        LOG.debug("Using default executable")
+        LOG.debug("Using default executable.")
         # Load cached path
         exec_file = get_ansys_path()
         if exec_file is None:
@@ -1551,7 +1551,7 @@ def launch_mapdl(
 
     # verify run location
     if run_location is None:
-        LOG.debug("Using default run location")
+        LOG.debug("Using default run location.")
         temp_dir = tempfile.gettempdir()
         run_location = os.path.join(temp_dir, "ansys_%s" % random_string(10))
         if not os.path.isdir(run_location):
@@ -1588,7 +1588,7 @@ def launch_mapdl(
     )
 
     additional_switches = _check_license_argument(license_type, additional_switches)
-    LOG.debug(f"Using additional switches {additional_switches}")
+    LOG.debug(f"Using additional switches {additional_switches}.")
 
     start_parm = {
         "exec_file": exec_file,

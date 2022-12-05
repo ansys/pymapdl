@@ -436,7 +436,7 @@ class MapdlGrpc(_MapdlCore):
 
         if not connected:
             raise MapdlConnectionError(
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
             )
         else:
             self._exited = False

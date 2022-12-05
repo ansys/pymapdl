@@ -83,13 +83,13 @@ def check_valid_routine(routine):
 
 
 def get_linux_default_ansys_bin(rver):
-    """Find the MAPDL executable using standard Linux installation paths
+    """Find the MAPDL executable file using standard Linux installation paths,
 
     Raises:
         FileNotFoundError: When no binary is found.
 
     Returns:
-        str: Path to MAPDL executable
+        str: Path to MAPDL executable.
     """
     for each_path in LINUX_DEFAULT_DIRS:
         for each_file in [f"ansys{rver}", "mapdl"]:
@@ -102,7 +102,7 @@ def get_linux_default_ansys_bin(rver):
                 LOG.debug(f"Found ANSYS binary at {mapdlbin}")
                 return mapdlbin
             else:
-                LOG.debug(f"NOT found ANSYS binary at {mapdlbin}")
+                LOG.debug(f"NOT found Ansys binary at {mapdlbin}")
 
     # We could not find a binary, returning a default one
     return os.path.join(
