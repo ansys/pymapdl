@@ -37,8 +37,8 @@
 
 .. # TechDemos related
 .. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
-.. _tech_demo_repo: https://github.com/pyansys/pymapdl-techdemos
-.. _tech_demos_doc: https://techdemos.mapdl.docs.pyansys.com/
+.. _tech_demo_repo: https://github.com/pyansys/pymapdl-examples
+.. _tech_demos_doc: https://examples.mapdl.docs.pyansys.com/
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
@@ -92,8 +92,8 @@
 .. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/examples/extended_examples/Krylov/krylov_example.html
 .. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
-.. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-techdemos/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
-.. _pymapdl_techdemo_28: https://techdemos.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
+.. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
+.. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_launch_mapdl: https://mapdl.docs.pyansys.com/contribution_and_api/_autosummary/ansys.mapdl.core.launch_mapdl.html
 .. _pymapdl_docker_dir: https://github.com/pyansys/pymapdl/blob/main/docker
 .. _pymapdl_docker_compose_base: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
