@@ -165,6 +165,8 @@ either Windows or Linux.
     printenv | grep ANSYSLMD_LICENSE_FILE
 
 
+.. _missing_dependencies_on_linux:
+
 Missing dependencies on Linux
 =============================
 
@@ -172,6 +174,10 @@ Some Linux installations might be missing required dependencies. If
 you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you are likely missing some necessary
 dependencies.
+
+
+
+.. _installing_mapdl_on_centos7:
 
 CentOS 7
 --------
@@ -183,18 +189,49 @@ On CentOS 7, you can install missing dependencies with:
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
+
+.. _installing_mapdl_on_ubuntu:
+
 Ubuntu
 ------
 
-On Ubuntu 20.04 with Ansys 2021 R1, install the following:
+On Ubuntu 22.04, use this code to install the needed dependencies:
 
 .. code::
 
-    sudo apt-get install libx11-6 libgl1 libxm4 libxt6 libxext6 libxi6 libx11-6 libsm6 libice6 libxxf86vm1 libglu1
+    apt-get update
 
-This takes care of everything except for ``libxp6``. If you are
-using Ubuntu 16.04, you can install that simply with ``sudo apt
-install libxp6``. However, on Ubuntu 18.04+, you must manually
+    # Install dependencies
+    apt-get install -y \
+    openssh-client \
+    libgl1 \
+    libglu1 \
+    libxm4 \
+    libxi6
+
+The preceding code takes care of everything except for ``libxp6``, which you must install
+using this code:
+
+.. code:: bash
+
+    # This is a workaround
+    # Source: https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
+    apt install -y software-properties-common
+    add-apt-repository -y ppa:zeehio/libxp
+    apt-get update
+    apt-get install -y libxp6
+
+
+Ubuntu 20.04 and older
+----------------------
+
+If you are using Ubuntu 16.04, you can install ``libxp16`` with this code:
+
+.. code:: bash
+
+   sudo apt install libxp6. 
+   
+However, if you are using Ubuntu 18.04 through 20.04, you must manually
 download and install the package.
 
 Because ``libxpl6`` pre-depends on ``multiarch-support``, which is
