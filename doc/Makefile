@@ -5,8 +5,8 @@
 SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
-BUILDDIR      = build
-LINKCHECKDIR  = build/linkcheck
+BUILDDIR      = _build
+LINKCHECKDIR  = _build/linkcheck
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -53,12 +53,12 @@ deploy:
 	@echo "This overwrites the history of gh-pages."
 	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo "Deploying..."
-	touch build/html/.nojekyll
+	touch _build/html/.nojekyll
 	echo "mapdl.docs.pyansys.com" >> build/html/CNAME
-	cd build/html && git init
-	cd build/html && git add .
-	cd build/html && git checkout -b gh-pages
-	cd build/html && git commit -am "manual build"
-	cd build/html && git remote add origin https://github.com/pyansys/pymapdl-docs
-	cd build/html && git push -u origin gh-pages --force
-	rm -rf build/html/.git
+	cd _build/html && git init
+	cd _build/html && git add .
+	cd _build/html && git checkout -b gh-pages
+	cd _build/html && git commit -am "manual build"
+	cd _build/html && git remote add origin https://github.com/pyansys/pymapdl-docs
+	cd _build/html && git push -u origin gh-pages --force
+	rm -rf _build/html/.git
