@@ -11,7 +11,7 @@ on:
 
 env:
   PACKAGE_NAME: PyMAPDL
-  MAIN_PYTHON_VERSION: '3.10'
+  MAIN_PYTHON_VERSION: '3.9'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
@@ -539,18 +539,18 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: 'Upload coverage to Codecov'
 
- release:
-    name: Release project
+  release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [docs_build, build_test, build_test_ubuntu]
     runs-on: ubuntu-latest
     steps:
-      - name: Release to the private PyPI repository
-        uses: pyansys/actions/release-pypi-private@v1
+      
+      - name: "Release to the public PyPI repository"
+        uses: pyansys/actions/release-pypi-public@v1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           twine-username: "__token__"
-          twine-token: ${{ secrets.PYANSYS_PYPI_PRIVATE_PAT }}
+          twine-token: ${{ secrets.PYPI_TOKEN }}
 
       - name: Release to GitHub
         uses: pyansys/actions/release-github@v1
