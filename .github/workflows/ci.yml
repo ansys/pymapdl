@@ -465,7 +465,7 @@ jobs:
   build_test_ubuntu:
     name: Local Unit Testing on Ubuntu
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       options: "--entrypoint /bin/bash"
