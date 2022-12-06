@@ -11,6 +11,10 @@ on:
 
 env:
   PACKAGE_NAME: PyMAPDL
+  MAIN_PYTHON_VERSION: '3.10'
+  PACKAGE_NAME: 'ansys-mapdl-core'
+  PACKAGE_NAMESPACE: 'ansys.mapdl.core'
+  DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
@@ -58,69 +62,24 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  testimport:
-    name: Smoke Tests
+  smoke-tests:
+    name: Build and Smoke tests
     runs-on: ${{ matrix.os }}
     needs: [style]
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10']
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.3.0
+      - name: Build wheelhouse and perform smoke test
+        uses: pyansys/actions/build-wheelhouse@v1
         with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          library-namespace: ${{ env.PACKAGE_NAMESPACE }}
+          operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
-
-      - name: Linux pip cache
-        uses: actions/cache@v3
-        if: ${{ runner.os == 'Linux' }}
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
-
-      - name: Window pip cache
-        uses: actions/cache@v3
-        if: ${{ runner.os == 'Windows' }}
-        with:
-          path: ~\AppData\Local\pip\Cache
-          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
-
-      - name: Install PyMAPDL
-        run: pip install .
-
-      - name: Test import
-        working-directory: tests
-        run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report(gpu=False))"
-
-      - name: Retrieve PyMAPDL version
-        run: |
-          echo "{PYMAPDL_VERSION}={$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')}" >> $GITHUB_OUTPUT
-          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
-        id: version
-
-      - name: Generate wheelhouse
-        run: pip wheel . -w wheelhouse
-
-      - name: Zip wheelhouse
-        uses: vimtor/action-zip@master
-        with:
-          files: wheelhouse
-          dest: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}.zip
-
-      - name: Upload Wheelhouse
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.PACKAGE_NAME }}-v${{ steps.version.outputs.PYMAPDL_VERSION }}-wheelhouse-${{ runner.os }}-${{ matrix.python-version }}
-          path: '*.zip'
-          retention-days: 7
 
   docs_build:
     name: Build Documentation
@@ -580,38 +539,23 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: 'Upload coverage to Codecov'
 
-  Release:
+ release:
+    name: Release project
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [docs_build, build_test, build_test_ubuntu]
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v4.3.0
+      - name: Release to the private PyPI repository
+        uses: pyansys/actions/release-pypi-private@v1
         with:
-          python-version: 3.9
+          library-name: ${{ env.PACKAGE_NAME }}
+          twine-username: "__token__"
+          twine-token: ${{ secrets.PYANSYS_PYPI_PRIVATE_PAT }}
 
-      - uses: actions/download-artifact@v3
-
-      - name: Display structure of downloaded files
-        run: ls -R
-
-      - name: Upload to Public PyPi
-        run: |
-          pip install twine
-          twine upload --skip-existing ./**/*.whl
-          twine upload --skip-existing ./**/*.tar.gz
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
+      - name: Release to GitHub
+        uses: pyansys/actions/release-github@v1
         with:
-          files: |
-            ./**/*.whl
-            ./**/*.tar.gz
-            ./**/*.pdf
-            ./**/*.zip
+          library-name: ${{ env.PACKAGE_NAME }}
 
       - name: Notify if fail
         uses: skitionek/notify-microsoft-teams@master
@@ -624,3 +568,28 @@ jobs:
           overwrite: "{
             title: `Release FAILED!`,
             }"
+
+  upload_dev_docs:
+    name: Upload dev documentation
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [docs_build]
+    steps:
+      - name: Deploy the latest documentation
+        uses: pyansys/actions/doc-deploy-dev@v1
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  upload_docs_release:
+    name: Upload release documentation
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    needs: [release]
+    steps:
+      - name: Deploy the stable documentation
+        uses: pyansys/actions/doc-deploy-stable@v1
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
