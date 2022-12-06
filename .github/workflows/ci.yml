@@ -44,7 +44,7 @@ defaults:
 
 jobs:
 
-  style:
+  code-style:
     name: Code style
     runs-on: ubuntu-latest
     steps:
@@ -65,7 +65,7 @@ jobs:
   smoke-tests:
     name: Build and Smoke tests
     runs-on: ${{ matrix.os }}
-    needs: [style]
+    needs: [code-style]
     strategy:
       fail-fast: false
       matrix:
@@ -189,25 +189,15 @@ jobs:
 
       - name: Zip documentation
         run: |
-          cd doc/build/html
+          cd doc/_build/html
           zip -r PyMAPDL_documentation.zip *
 
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v3
         with:
           name: HTML-Documentation
-          path: doc/build/html/PyMAPDL_documentation.zip
+          path: doc/_build/html/PyMAPDL_documentation.zip
           retention-days: 7
-
-      - name: Deploy
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          repository-name: pyansys/pymapdl-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          branch: gh-pages
-          folder: doc/build/html
-          clean: true
 
       - name: Build PDF Documentation
         working-directory: doc
@@ -217,7 +207,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: PDF-Documentation
-          path: doc/build/latex/pymapdl*.pdf
+          path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
       - name: Display files structure
@@ -246,7 +236,7 @@ jobs:
       - name: Tar logs
         if: always()
         run: |
-          cp -f doc/build/latex/*.log ./logs-build-docs/
+          cp -f doc/_build/latex/*.log ./logs-build-docs/
           cp log.txt ./logs-build-docs/
           tar cvzf ./logs-build-docs.tgz ./logs-build-docs
 
@@ -264,7 +254,7 @@ jobs:
       - name: List main files
         if: always()
         run: |
-          if compgen -G 'doc/build/latex/*.log' > /dev/null ;then for f in doc/build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done; fi
+          if compgen -G 'doc/_build/latex/*.log' > /dev/null ;then for f in doc/_build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done; fi
           if compgen -G './logs-build-docs/*.err' > /dev/null ;then for f in ./logs-build-docs/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi
           if compgen -G './logs-build-docs/*.log' > /dev/null ;then for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi
           if compgen -G './logs-build-docs/*.out' > /dev/null ;then for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
@@ -272,7 +262,7 @@ jobs:
   build_test:
     name: Build and Unit Testing
     runs-on: ubuntu-latest
-    needs: [style]
+    needs: [smoke-tests]
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu']
