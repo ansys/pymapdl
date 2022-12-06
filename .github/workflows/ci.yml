@@ -45,35 +45,34 @@ defaults:
 jobs:
 
   code-style:
-    name: Code style
+    name: "Code style"
     runs-on: ubuntu-latest
     steps:
-      - name: PyAnsys code style checks
+      - name: "PyAnsys code style checks"
         uses: pyansys/actions/code-style@v1
         with:
-          python-version: 3.9
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
   doc-style:
-    name: Documentation style check
+    name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
-      - name: PyAnsys documentation style checks
+      - name: "PyAnsys documentation style checks"
         uses: pyansys/actions/doc-style@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   smoke-tests:
-    name: Build and Smoke tests
+    name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
-    needs: [code-style]
+    needs: code-style
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10']
-
     steps:
-      - name: Build wheelhouse and perform smoke test
+      - name: "Build wheelhouse and perform smoke test"
         uses: pyansys/actions/build-wheelhouse@v1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
@@ -82,9 +81,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
   docs_build:
-    name: Build Documentation
+    name: "Build documentation"
     runs-on: ubuntu-latest
-    needs: [doc-style]
+    needs: doc-style
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -161,7 +160,7 @@ jobs:
       - name: Cache docs build directory
         uses: actions/cache@v3
         with:
-          path: doc/build
+          path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -202,6 +201,10 @@ jobs:
       - name: Build PDF Documentation
         working-directory: doc
         run: make pdf
+
+      - name: Show latex dir
+        working-directory: doc
+        run: ls _build/latex
 
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v3
