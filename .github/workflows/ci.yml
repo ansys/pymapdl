@@ -10,7 +10,7 @@ on:
       - main
 
 env:
-  PACKAGE_NAME: PyMAPDL
+  PROJECT_NAME: PyMAPDL
   MAIN_PYTHON_VERSION: '3.9'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
