@@ -203,6 +203,10 @@ jobs:
         working-directory: doc
         run: make pdf
 
+      - name: Show latex dir
+        working-directory: doc
+        run: ls _build/latex
+
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v3
         with:
