@@ -58,7 +58,7 @@ tests = [
     "pytest==7.2.0",
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
-    "pyansys-tools-report==0.4.0",
+    "pyansys-tools-report==0.4.1",
     "vtk==9.0.3",
     "pytest-rerunfailures==10.3",
 ]
@@ -66,7 +66,7 @@ doc = [
     "Sphinx==5.3.0",
     "ansys-dpf-core==0.7.0",
     "ansys-mapdl-reader==0.52.3",
-    "ansys-sphinx-theme==0.7.2",
+    "ansys-sphinx-theme==0.8.0",
     "grpcio==1.43.0",
     "imageio-ffmpeg==0.4.7",
     "imageio==2.22.4",
