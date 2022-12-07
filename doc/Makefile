@@ -6,7 +6,7 @@ SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
-LINKCHECKDIR  = _build/linkcheck
+LINKCHECKDIR  = $(SPHINXBUILD)/linkcheck
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -37,8 +37,8 @@ clean-except-examples:
 pdf:
 	@$(SPHINXBUILD) -M latex "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	python validate_png.py  # clean-up GIFs mislabeled as PNG
-	cd _build/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
-	(test -f _build/latex/*.pdf && echo pdf exists) || exit 1
+	cd $(SPHINXBUILD)/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
+	(test -f $(SPHINXBUILD)/latex/*.pdf && echo pdf exists) || exit 1
 
 checklinks:
 	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) $(LINKCHECKDIR)
@@ -53,12 +53,12 @@ deploy:
 	@echo "This overwrites the history of gh-pages."
 	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
 	@echo "Deploying..."
-	touch _build/html/.nojekyll
+	touch $(SPHINXBUILD)/html/.nojekyll
 	echo "mapdl.docs.pyansys.com" >> build/html/CNAME
-	cd _build/html && git init
-	cd _build/html && git add .
-	cd _build/html && git checkout -b gh-pages
-	cd _build/html && git commit -am "manual build"
-	cd _build/html && git remote add origin https://github.com/pyansys/pymapdl-docs
-	cd _build/html && git push -u origin gh-pages --force
-	rm -rf _build/html/.git
+	cd $(SPHINXBUILD)/html && git init
+	cd $(SPHINXBUILD)/html && git add .
+	cd $(SPHINXBUILD)/html && git checkout -b gh-pages
+	cd $(SPHINXBUILD)/html && git commit -am "manual build"
+	cd $(SPHINXBUILD)/html && git remote add origin https://github.com/pyansys/pymapdl-docs
+	cd $(SPHINXBUILD)/html && git push -u origin gh-pages --force
+	rm -rf $(SPHINXBUILD)/html/.git
