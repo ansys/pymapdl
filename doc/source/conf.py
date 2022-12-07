@@ -3,8 +3,8 @@ from datetime import datetime
 import os
 import warnings
 
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
-from pyansys_sphinx_theme import pyansys_logo_black
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
@@ -45,6 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
+cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
 
 
 # -- General configuration ---------------------------------------------------
@@ -106,7 +107,7 @@ numpydoc_validation_exclude = {  # set of regex
 }
 
 # Favicon
-html_favicon = "favicon.png"
+html_favicon = ansys_favicon
 
 # notfound.extension
 notfound_template = "404.rst"
@@ -179,12 +180,17 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
-html_theme = "pyansys_sphinx_theme"
+html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
+    "switcher": {
+        "json_url": f"https://{cname}/release/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
