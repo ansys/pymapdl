@@ -8,7 +8,8 @@ if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
 set SOURCEDIR=source
-set BUILDDIR=build
+set BUILDDIR=_build
+set LINKCHECKDIR=\%BUILDDIR%\linkcheck
 
 if "%1" == "" goto help
 if "%1" == "clean" goto clean
