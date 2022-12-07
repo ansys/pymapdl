@@ -203,16 +203,11 @@ jobs:
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
-      - name: Zip documentation
-        run: |
-          cd doc/_build/html
-          zip -r PyMAPDL_documentation.zip *
-
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
         with:
-          name: HTML-Documentation
-          path: doc/_build/html/PyMAPDL_documentation.zip
+          name: documentation-html
+          path: doc/_build/html
           retention-days: 7
 
       - name: Build PDF Documentation
@@ -222,7 +217,7 @@ jobs:
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v2
         with:
-          name: PDF-Documentation
+          name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
