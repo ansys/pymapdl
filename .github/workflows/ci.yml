@@ -112,12 +112,12 @@ jobs:
 
       - name: "Test virtual framebuffer"
         run: |
-          python -m pip install -r .ci/requirements_test_xvfb.txt
+          pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: "Install ansys-mapdl-core"
         run: |
-          python -m pip install .
+          pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
@@ -165,7 +165,7 @@ jobs:
 
       - name: "Install docs build requirements"
         run: |
-          python -m pip install .[doc]
+          pip install .[doc]
 
       - name: "DPF server activation"
         run: |
@@ -288,7 +288,7 @@ jobs:
 
       - name: Install ansys-mapdl-core
         run: |
-          python -m pip install .
+          pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
@@ -330,7 +330,7 @@ jobs:
 
       - name: "Check package"
         run: |
-          python -m pip install twine
+          pip install twine
           twine check dist/*
 
       - name: "Upload wheel and binaries"
@@ -426,19 +426,19 @@ jobs:
           python -m venv ./.venv
           source ./.venv/bin/activate
 
-      - name: Install OS packages
+      - name: "Install OS packages"
         run: |
           apt update
           apt install -y libgl1-mesa-glx xvfb
 
-      - name: Test virtual framebuffer
+      - name: "Test virtual framebuffer"
         run: |
           python -m pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
-      - name: Install ansys-mapdl-core
+      - name: "Install ansys-mapdl-core"
         run: |
-          python -m pip install .
+          pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Unit testing requirements installation"
