@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "PyAnsys code style checks"
-        uses: pyansys/actions/code-style@v1
+        uses: pyansys/actions/code-style@v2
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v1
+        uses: pyansys/actions/doc-style@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,7 +73,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v1
+        uses: pyansys/actions/build-wheelhouse@v2
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
@@ -535,14 +535,14 @@ jobs:
     steps:
       
       - name: "Release to the public PyPI repository"
-        uses: pyansys/actions/release-pypi-public@v1
+        uses: pyansys/actions/release-pypi-public@v2
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           twine-username: "__token__"
           twine-token: ${{ secrets.PYPI_TOKEN }}
 
       - name: Release to GitHub
-        uses: pyansys/actions/release-github@v1
+        uses: pyansys/actions/release-github@v2
         with:
           library-name: ${{ env.PACKAGE_NAME }}
 
@@ -565,7 +565,7 @@ jobs:
     needs: [docs_build]
     steps:
       - name: Deploy the latest documentation
-        uses: pyansys/actions/doc-deploy-dev@v1
+        uses: pyansys/actions/doc-deploy-dev@v2
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -577,7 +577,7 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v1
+        uses: pyansys/actions/doc-deploy-stable@v2
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
