@@ -137,7 +137,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_docs*.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_doc*.txt') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -193,7 +193,7 @@ jobs:
 
       - name: Install Docs Build Requirements
         run: |
-          pip install -r requirements/requirements_docs.txt
+          pip install -r requirements/requirements_doc.txt
 
       - name: Build Documentation
         run: |
