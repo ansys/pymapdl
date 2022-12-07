@@ -13,8 +13,8 @@ repos:
     "--force-sort-within-sections",
     "--skip-glob", "*__init__.py",
     ]
-- repo: https://gitlab.com/PyCQA/flake8
-  rev: 3.9.2
+- repo: https://github.com/PyCQA/flake8
+  rev: 6.0.0
   hooks:
   - id: flake8
 
