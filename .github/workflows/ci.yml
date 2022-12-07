@@ -27,7 +27,6 @@ env:
   RESET_EXAMPLES_CACHE: 5
   RESET_DOC_BUILD_CACHE: 5
   RESET_AUTOSUMMARY_CACHE: 5
-  PACKAGE_NAME: PyMAPDL
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
