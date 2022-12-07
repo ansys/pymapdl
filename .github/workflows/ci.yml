@@ -51,9 +51,7 @@ jobs:
   testimport:
     name: Smoke Tests
     runs-on: ${{ matrix.os }}
-    needs: code-style
     strategy:
-      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest]
         python-version: ['3.7', '3.8', '3.9', '3.10']
@@ -280,7 +278,6 @@ jobs:
   build_test:
     name: Build and Unit Testing
     runs-on: ubuntu-latest
-    needs: [smoke-tests]
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0']
