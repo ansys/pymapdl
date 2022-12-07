@@ -3,8 +3,8 @@ from datetime import datetime
 import os
 import warnings
 
-import numpy as np
 from ansys_sphinx_theme import get_version_match, pyansys_logo_black
+import numpy as np
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
@@ -177,7 +177,7 @@ html_theme_options = {
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
-        "switcher": {
+    "switcher": {
         "json_url": f"https://{cname}/release/versions.json",
         "version_match": get_version_match(__version__),
     },
