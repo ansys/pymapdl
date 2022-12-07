@@ -25,14 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # used for documentation deployment
-      - name: Get Bot Application Token
-        id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v2
-        with:
-          application_id: ${{ secrets.BOT_APPLICATION_ID }}
-          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
-
       - name: Setup Python
         uses: actions/setup-python@v4.3.0
         with:
@@ -73,15 +65,6 @@ jobs:
         run: |
           pip install .[doc]
           xvfb-run make -C doc html
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
-        with:
-          repository-name: pyansys/pymapdl-dev-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          branch: gh-pages
-          folder: doc/build/html
-          clean: true
 
       - name: Display files structure
         if: always()
