@@ -37,6 +37,7 @@ concurrency:
 
 permissions:
   packages: read
+  pages: write
 
 defaults:
   run:
