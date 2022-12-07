@@ -28,6 +28,10 @@ env:
   PACKAGE_NAME: PyMAPDL
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   stylecheck:
@@ -178,7 +182,7 @@ jobs:
       - name: Cache docs build directory
         uses: actions/cache@v2
         with:
-          path: doc/build
+          path: doc/_build
           key: doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
           restore-keys: |
             doc-build-${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -201,14 +205,14 @@ jobs:
 
       - name: Zip documentation
         run: |
-          cd doc/build/html
+          cd doc/_build/html
           zip -r PyMAPDL_documentation.zip *
 
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
         with:
           name: HTML-Documentation
-          path: doc/build/html/PyMAPDL_documentation.zip
+          path: doc/_build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
       - name: Deploy
@@ -218,7 +222,7 @@ jobs:
           repository-name: pyansys/pymapdl-docs
           token: ${{ steps.get_workflow_token.outputs.token }}
           BRANCH: gh-pages
-          FOLDER: doc/build/html
+          FOLDER: doc/_build/html
           CLEAN: true
 
       - name: Build PDF Documentation
@@ -229,7 +233,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: PDF-Documentation
-          path: doc/build/latex/pymapdl*.pdf
+          path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
   build_test:
