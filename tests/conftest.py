@@ -3,8 +3,9 @@ import os
 from pathlib import Path
 import signal
 
-from common import Element, Node, get_details_of_elements, get_details_of_nodes
 import pytest
+
+from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
 # import time
 

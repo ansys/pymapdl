@@ -8,11 +8,6 @@ repos:
   rev: 5.10.1
   hooks:
   - id: isort
-    args: [
-    "--profile", "black",
-    "--force-sort-within-sections",
-    "--skip-glob", "*__init__.py",
-    ]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.0.0
@@ -23,8 +18,9 @@ repos:
   rev: v2.2.2
   hooks:
   - id: codespell
+    args: ["--toml", "pyproject.toml"]
+    additional_dependencies: ["tomli"]
 
-# add this eventually
 # - repo: https://github.com/pycqa/pydocstyle
 #   rev: 6.1.1
 #   hooks:

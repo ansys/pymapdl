@@ -4,12 +4,12 @@ import os
 import time
 import types
 
-from conftest import LOCAL as IS_LOCAL
 import pytest
 
 from ansys.mapdl.core import errors, launch_mapdl, licensing
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import threaded
+from conftest import LOCAL as IS_LOCAL
 
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())

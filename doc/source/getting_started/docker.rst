@@ -12,7 +12,7 @@ in a containerized environment such as Docker or Singularity:
 - Run in a consistent environment regardless of the host OS.
 - Portability and ease of install.
 - Large-scale cluster deployment using Kubernetes
-- Genuine app isolation through containerization.
+- Genuine app isolation through containerization
 
 Configure the Docker registry
 =============================
@@ -43,7 +43,7 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
-Run the MAPDL image
+Run an MAPDL image
 ===================
 
 You can now launch MAPDL directly from Docker with a short script or
