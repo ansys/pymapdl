@@ -4,10 +4,11 @@ import os
 import warnings
 
 import numpy as np
-from pyansys_sphinx_theme import pyansys_logo_black
+from ansys_sphinx_theme import get_version_match, pyansys_logo_black
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
+cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
 from ansys.mapdl.core import __version__
 
 # Manage errors
@@ -176,6 +177,11 @@ html_theme_options = {
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
+        "switcher": {
+        "json_url": f"https://{cname}/release/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
