@@ -402,7 +402,7 @@ jobs:
     name: "Local unit testing on ubuntu"
     runs-on: ubuntu-latest
     needs: [smoke-tests]
-    timeout-minutes: 20
+    timeout-minutes: 35
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       options: "--entrypoint /bin/bash"
