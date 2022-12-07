@@ -215,16 +215,6 @@ jobs:
           path: doc/_build/html/PyMAPDL_documentation.zip
           retention-days: 7
 
-      - name: Deploy
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@4.1.4
-        with:
-          repository-name: pyansys/pymapdl-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/_build/html
-          CLEAN: true
-
       - name: Build PDF Documentation
         working-directory: doc
         run: make pdf
@@ -354,7 +344,18 @@ jobs:
           overwrite: "{
             title: `Release FAILED!`,
             }"
-
+  upload_dev_docs:
+    name: "Upload dev documentation"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [docs_build]
+    steps:
+      - name: Deploy the latest documentation
+        uses: pyansys/actions/doc-deploy-dev@v2
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+  
   upload_docs_release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
@@ -367,3 +368,4 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: '3.9'
+  
