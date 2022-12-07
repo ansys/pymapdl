@@ -51,15 +51,6 @@ jobs:
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
-  doc-style:
-    name: "Documentation style check"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v2
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
@@ -81,7 +72,6 @@ jobs:
   docs_build:
     name: "Build documentation"
     runs-on: ubuntu-latest
-    needs: doc-style
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
