@@ -33,6 +33,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  packages: read
+  pages: write
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   code-style:
