@@ -341,7 +341,7 @@ class Materials:
 
         This command is also valid in SOLUTION.
         """
-        command = "MPCOPY,%s,%s" % (str(matf), str(matt))
+        command = "MPCOPY,,%s,%s" % (str(matf), str(matt))
         return self.run(command, **kwargs)
 
     def mpdata(
