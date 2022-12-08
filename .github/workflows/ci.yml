@@ -14,6 +14,7 @@ env:
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
+  DOCUMENTATION_CNAME: "mapdl.docs.pyansys.com"
   DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
   # Following env vars when changed will "reset" the mentioned cache,
@@ -26,6 +27,10 @@ env:
   RESET_DOC_BUILD_CACHE: 0
   RESET_AUTOSUMMARY_CACHE: 0
   PACKAGE_NAME: PyMAPDL
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
 
@@ -197,33 +202,18 @@ jobs:
 
       - name: Install Docs Build Requirements
         run: |
-          pip install -r requirements/requirements_docs.txt
+          pip install -r requirements/requirements_doc.txt
 
       - name: Build Documentation
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
-      - name: Zip documentation
-        run: |
-          cd doc/build/html
-          zip -r PyMAPDL_documentation.zip *
-
       - name: Upload HTML Documentation
         uses: actions/upload-artifact@v2
         with:
-          name: HTML-Documentation
-          path: doc/build/html/PyMAPDL_documentation.zip
+          name: documentation-html
+          path: doc/_build/html
           retention-days: 7
-
-      - name: Deploy
-        if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-        uses: JamesIves/github-pages-deploy-action@4.1.4
-        with:
-          repository-name: pyansys/pymapdl-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          BRANCH: gh-pages
-          FOLDER: doc/build/html
-          CLEAN: true
 
       - name: Build PDF Documentation
         working-directory: doc
@@ -232,8 +222,8 @@ jobs:
       - name: Upload PDF Documentation
         uses: actions/upload-artifact@v2
         with:
-          name: PDF-Documentation
-          path: doc/build/latex/pymapdl*.pdf
+          name: documentation-pdf
+          path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
   build_test:
@@ -359,3 +349,16 @@ jobs:
           overwrite: "{
             title: `Release FAILED!`,
             }"
+
+  upload_docs_release:
+    name: "Upload release documentation"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    needs: [Release]
+    steps:
+      - name: Deploy the stable documentation
+        uses: pyansys/actions/doc-deploy-stable@v2
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          python-version: '3.10'
