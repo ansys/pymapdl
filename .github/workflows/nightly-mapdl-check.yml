@@ -10,6 +10,11 @@ env:
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
   MAPDL_IMAGE: 'ghcr.io/pyansys/mapdl:latest'
+  DPF_START_SERVER: False
+  DPF_PORT: 21002
+
+permissions:
+  packages: read
 
 jobs:
 
@@ -20,9 +25,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install OS packages
         run: |
@@ -33,7 +38,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('setup.py') }}-${{ hashFiles('requirements/requirements_tests.txt') }}
+          key: Python-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
             Python-${{ runner.os }}-${{ matrix.python-version }}
 
@@ -58,11 +63,18 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
 
+      - name: Unit Testing Requirements Installation
+        run: |
+          pip install .[tests]
+
+      - name: DPF Server Activation
+        run: |
+          docker pull ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
       - name: Unit Testing
         run: |
-          pip install -r requirements/requirements_tests.txt
-          cd tests
-          xvfb-run pytest -v --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
 
       - name: Display files structure
         if: always()

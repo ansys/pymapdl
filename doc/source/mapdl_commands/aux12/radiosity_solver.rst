@@ -1,7 +1,7 @@
 .. _ref_radiosity Solver_api:
 
 ****************
-Radiosity Solver
+Radiosity solver
 ****************
 
 .. currentmodule:: ansys.mapdl.core

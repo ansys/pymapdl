@@ -1,7 +1,7 @@
 .. _ref_dynamic_options_commands_api:
 
 ***************
-Dynamic Options
+Dynamic options
 ***************
 
 .. currentmodule:: ansys.mapdl.core

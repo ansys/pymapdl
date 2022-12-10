@@ -1,10 +1,10 @@
 .. _ref_mapdl_commands:
 
 ==============
-MAPDL Commands
+MAPDL commands
 ==============
 This section gives an overview of the classic MAPDL commands that have
-been wrapped pythonically via PyMapdl.  Most commands have been
+been wrapped pythonically via PyMAPDL. Most commands have been
 wrapped, but there are a few commands that are not supported natively
 or only have partial support within PyMAPDL.  See
 :ref:`ref_unsupported_commands` for more details.
@@ -243,7 +243,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
 
 
 *****************
-Mapping Processor
+Mapping processor
 *****************
 The ``/MAP`` processor allows you to map data from an external file
 onto the existing geometry.
@@ -255,14 +255,14 @@ onto the existing geometry.
 
 
 ***************
-DISPLAY Program
+DISPLAY program
 ***************
 These commands are used for the DISPLAY program. The DISPLAY program
 is a companion program to ANSYS, used for recovering graphics displays
 produced within ANSYS.
 
 .. note::
-   Many of these commands will not be applicable when using PyMAPDL.
+   Many of these commands are not applicable when using PyMAPDL.
 
 .. toctree::
    :maxdepth: 1
@@ -271,7 +271,7 @@ produced within ANSYS.
 
 
 **********************
-REDUCED Order Modeling
+REDUCED order modeling
 **********************
 These commands are used for the DISPLAY program. The DISPLAY program
 is a companion program to ANSYS, used for recovering graphics displays
@@ -286,7 +286,7 @@ produced within ANSYS.
    reduced/use_pass
 
 *******************
-Connection Commands
+Connection commands
 *******************
 
 These commands read in external CAD files into MAPDL.
@@ -298,7 +298,7 @@ These commands read in external CAD files into MAPDL.
 
 
 **********************
-Miscellaneous Commands
+Miscellaneous commands
 **********************
 
 Undocumented miscellaneous commands.
@@ -311,7 +311,7 @@ Undocumented miscellaneous commands.
 
 
 *****************************
-Undocumented Inquire Commands
+Undocumented inquire commands
 *****************************
 
 Undocumented inquire commands.

@@ -217,6 +217,8 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
 
     def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
+        if isinstance(level, str):
+            level = string_to_loglevel[level.upper()]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
@@ -271,7 +273,9 @@ class InstanceFilter(logging.Filter):
     """Ensures that instance_name record always exists."""
 
     def filter(self, record):
-        if not hasattr(record, "instance_name"):
+        if not hasattr(record, "instance_name") and hasattr(record, "name"):
+            record.instance_name = record.name
+        elif not hasattr(record, "instance_name"):  # pragma: no cover
             record.instance_name = ""
         return True
 
@@ -341,6 +345,9 @@ class Logger:
         # create default main logger
         self.logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
+        if isinstance(level, str):
+            level = level.upper()
+
         self.logger.setLevel(level)
         self.logger.propagate = True
         self.level = self.logger.level  # TODO: TO REMOVE
@@ -400,6 +407,8 @@ class Logger:
 
     def setLevel(self, level="DEBUG"):
         """Change the log level of the object and the attached handlers."""
+        if isinstance(level, str):
+            level = string_to_loglevel[level.upper()]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
@@ -428,7 +437,12 @@ class Logger:
                     # The logger handlers are copied and changed the loglevel is
                     # the specified log level is lower than the one of the
                     # global.
-                    if each_handler.level > string_to_loglevel[level.upper()]:
+                    if isinstance(level, str):
+                        new_loglevel = string_to_loglevel[level.upper()]
+                    elif isinstance(level, (int, float)):  # pragma: no cover
+                        new_loglevel = level
+
+                    if each_handler.level > new_loglevel:
                         new_handler.setLevel(level)
 
                 logger.addHandler(new_handler)

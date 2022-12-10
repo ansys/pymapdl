@@ -1,7 +1,7 @@
 .. _ref_hard_points_commands_api:
 
 ***********
-Hard Points
+Hard points
 ***********
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,7 +1,7 @@
 .. _ref_special_purpose_api:
 
 ***************
-Special Purpose
+Special purpose
 ***************
 
 .. currentmodule:: ansys.mapdl.core

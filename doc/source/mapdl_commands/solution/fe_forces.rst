@@ -1,7 +1,7 @@
 .. _ref_fe_forces_commands_api:
 
 *********
-FE Forces
+FE forces
 *********
 
 .. currentmodule:: ansys.mapdl.core

@@ -10,6 +10,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
@@ -24,9 +25,15 @@ directory creation.
 
 skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
 
+
 skip_no_xserver = pytest.mark.skipif(
     not system_supports_plotting(), reason="Requires active X Server"
 )
+
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -114,12 +121,22 @@ def asserting_cdread_cdwrite_tests(mapdl):
     return "asdf1234" in mapdl.parameters["T_PAR"]
 
 
-def warns_in_cdread_error_log(mapdl):
+def warns_in_cdread_error_log(mapdl, tmpdir):
     """Check for specific warns in the error log associated with using /INPUT with CDB files
     instead of CDREAD command."""
-    error_files = [
-        each for each in os.listdir(mapdl.directory) if each.endswith(".err")
-    ]
+    if mapdl._local:
+        pth = mapdl.directory
+
+    else:
+        list_files = mapdl.list_files()
+        error_files = [each for each in list_files if each.endswith(".err")]
+        pth = str(tmpdir.mkdir(random_string()))
+
+        for each_file in error_files:
+            mapdl.download(each_file, pth)
+
+    list_files = os.listdir(pth)
+    error_files = [each for each in list_files if each.endswith(".err")]
 
     # "S 1", "1 H" and "5 H Ansys" are character at the end of lines in the CDB_FILE variable.
     # They are allowed in the CDREAD command, but it gives warnings in the /INPUT command.
@@ -129,7 +146,7 @@ def warns_in_cdread_error_log(mapdl):
 
     warns = []
     for each in error_files:
-        with open(os.path.join(mapdl.directory, each), errors="ignore") as fid:
+        with open(os.path.join(pth, each), errors="ignore") as fid:
             error_log = "".join(fid.readlines())
         warns.append(
             (warn_cdread_1 in error_log)
@@ -443,6 +460,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 
 
 @skip_in_cloud
+@skip_on_ci
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
@@ -990,19 +1008,19 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
             "COMB", "model", "cdb"
         )  # 'COMB' is needed since we use the CDB with the strange line endings.
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread("COMB", "model.cdb")
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
         clearing_cdread_cdwrite_tests(mapdl)
         mapdl.cdread("COMB", "model")
         assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-            mapdl
+            mapdl, tmpdir
         )
 
     finally:
@@ -1013,21 +1031,21 @@ def test_cdread_in_python_directory(mapdl, cleared, tmpdir):
     fullpath = str(tmpdir.join("model.cdb"))
     mapdl.cdread("COMB", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join("model"))
     mapdl.cdread("COMB", fullpath, "cdb")
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
     clearing_cdread_cdwrite_tests(mapdl)
     fullpath = str(tmpdir.join("model"))
     mapdl.cdread("COMB", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl) and not warns_in_cdread_error_log(
-        mapdl
+        mapdl, tmpdir
     )
 
 
@@ -1415,7 +1433,7 @@ def test_result_file(mapdl, solved_box):
 
 @skip_in_cloud
 def test_file_command_local(mapdl, cube_solve, tmpdir):
-    rst_file = mapdl._result_file
+    rst_file = mapdl.result_file
 
     # check for raise of non-exising file
     with pytest.raises(FileNotFoundError):
@@ -1424,11 +1442,16 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     # change directory
     try:
         old_path = mapdl.directory
-        mapdl.directory = str(tmpdir)
-        assert Path(mapdl.directory) == tmpdir
+        tmp_dir = tmpdir.mkdir("asdf")
+        mapdl.directory = str(tmp_dir)
+        assert Path(mapdl.directory) == tmp_dir
+
+        mapdl.slashsolu()
+        mapdl.solve()
 
         mapdl.post1()
         mapdl.file(rst_file)
+
     finally:
         # always revert to preserve state
         mapdl.directory = old_path
@@ -1571,3 +1594,59 @@ def test_get_fallback(mapdl, cleared):
 
     with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
         mapdl.get_value("elem", 0, "num", "maxd")
+
+
+def test_use_uploading(mapdl, cleared, tmpdir):
+    mymacrofile_name = "mymacrofile.mac"
+    mymacrofile = tmpdir.join(mymacrofile_name)
+    with open(mymacrofile, "w") as fid:
+        fid.write("/prep7\n/eof")
+
+    assert mymacrofile_name not in mapdl.list_files()
+    out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert mymacrofile_name in mapdl.list_files()
+
+    os.remove(mymacrofile)
+    out = mapdl.use(mymacrofile)
+
+    # Raises an error.
+    with pytest.raises(RuntimeError):
+        mapdl.use("myinexistentmacro.mac")
+
+    # Raise an error
+    with pytest.raises(FileNotFoundError):
+        mapdl.use("asdf/myinexistentmacro.mac")
+
+
+def test_set_list(mapdl, cube_solve):
+    mapdl.post1()
+    obj = mapdl.set("list")
+
+    assert isinstance(obj, CommandListingOutput)
+
+    assert obj.to_array() is not None
+    assert obj.to_array().size != 0
+
+    obj = mapdl.set("list", 1)
+
+    assert not isinstance(obj, CommandListingOutput)
+
+
+def test_mode(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "corba"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert mapdl.is_corba
+    assert not mapdl.is_console
+
+    mapdl._mode = "console"  # overwriting underlying parameter
+    assert not mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert mapdl.is_console
+
+    mapdl._mode = "grpc"  # Going back to default

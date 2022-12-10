@@ -9,7 +9,7 @@ import os
 from PIL import Image
 
 this_path = os.path.dirname(os.path.abspath(__file__))
-check_path = os.path.join(this_path, "build", "latex")
+check_path = os.path.join(this_path, "_build", "latex")
 if not os.path.isdir(check_path):
     raise FileNotFoundError(f"Invalid path {check_path}")
 

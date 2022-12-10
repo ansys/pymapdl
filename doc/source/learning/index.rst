@@ -9,22 +9,28 @@ Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
 Resources
 =========
 
-- View and download `PyMAPDL cheatsheet <../_static/Cheat_Sheet_PyMAPDL.pdf>`_.
+- You can also try the Student Version of Ansys products in
+  `Ansys Student Versions <ansys_student_version_>`_.
+  These are versions valid during a year and with limited capabilities 
+  regarding number of nodes, elements, etc.
+
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`_.
 
 
 Courses
 =======
 
-Ansys has prepared high quality courses which will guide you through your learning process stages:
+Ansys has prepared high quality courses to guide you through the learning process.
 
 
-Intro to Python Course
-----------------------
+Intro to Python
+---------------
 
-In `Intro to Python Course <https://courses.ansys.com/index.php/courses/intro-to-python/>`_ you will learn the basis of Python programming language.
+The `Intro to Python <course_intro_python_>`_ course teaches you
+the basis of the Python programming language.
 
 
-Course Content
+Course content
 ~~~~~~~~~~~~~~
 
 * Prerequisites - Installation of Python
@@ -46,10 +52,12 @@ Course Content
 Getting Started with PyMAPDL
 ----------------------------
 
-In this course `Getting Started with PyMAPDL <https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/>`_, learn about PyMAPDL, the pythonic way to access Ansys MAPDL. 
+The `Getting Started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
+you about PyMAPDL, the Pythonic way to access Ansys MAPDL. 
 
-Course Content
+Course content
 ~~~~~~~~~~~~~~
+
 * Overview of PyMAPDL - Lesson 1
 * PyMAPDL Language and Usage - Lesson 2
 * PyMAPDL Categories - Lesson 3
@@ -59,21 +67,22 @@ Course Content
 
 
 
-Intro to Ansys Parametric Design Language Scripting
----------------------------------------------------
+Intro to Ansys Mechanical APDL Scripting
+----------------------------------------
 
-In `Intro to APDL Scripting <https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/>`_ you will learn how APDL, the Mechanical solver syntax language, works.
+The `Intro to Ansys Mechanical APDL Scripting <course_intro_apdl_>`_
+course teaches you how APDL, the Mechanical solver syntax language, works.
 
-Course Content
+Course content
 ~~~~~~~~~~~~~~
 
-* Overview of MAPDL — Lesson 1
-* Basics of APDL Language — Lesson 2
-* Solid Modeling & Meshing — Lesson 3
-* Defining Loads, BCs, and Solver Controls — Lesson 4
-* General Postprocessing — Lesson 5
-* Selection Logic — Lesson 6
-* More on Parameters (Arrays, \*GET) — Lesson 7
+* Overview of MAPDL (Lesson 1)
+* Basics of APDL Language (Lesson 2)
+* Solid Modeling & Meshing (Lesson 3)
+* Defining Loads, BCs, and Solver Controls (Lesson 4)
+* General Postprocessing (Lesson 5)
+* Selection Logic (Lesson 6)
+* More on Parameters (Arrays, \*GET) (Lesson 7)
 * Post Completion Survey
 * Meet the Instructors
 
@@ -81,7 +90,7 @@ Course Content
 Recommended links
 =================
 
-* `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside Ansys - PADT Inc. <https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/>`_.
-* `Ansys Innovation Space - Courses <https://courses.ansys.com/>`_
+* PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
+* `Ansys Innovation Courses <ansys_innovation_space_>`_
 
-Feel free to email any educational or learning resources to `PyAnsys Support <pyansys.support@ansys.com>`_.
+Feel free to email any educational or learning resource to `PyAnsys Support <pyansys_support_>`_.

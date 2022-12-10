@@ -1,7 +1,7 @@
 .. _ref_multi_field_solver_convergence_controls_commands_api:
 
 ***************************************
-Multi-Field Solver Convergence Controls
+Multi-Field solver convergence controls
 ***************************************
 
 .. currentmodule:: ansys.mapdl.core

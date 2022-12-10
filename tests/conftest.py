@@ -2,10 +2,16 @@ from collections import namedtuple
 import os
 from pathlib import Path
 import signal
-import time
+
+import pytest
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
-import pytest
+
+# import time
+
+
+pytest_plugins = ["pytester"]
+
 import pyvista
 
 from ansys.mapdl.core import launch_mapdl
@@ -80,7 +86,7 @@ HAS_GRPC = int(rver) >= 211 or ON_CI
 
 # determine if we can launch an instance of MAPDL locally
 # start with ``False`` and always assume the remote case
-local = [False]
+LOCAL = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -108,6 +114,46 @@ alexander.kaszynski@ansys.com
 
 if START_INSTANCE and EXEC_FILE is None:
     raise RuntimeError(ERRMSG)
+
+
+def is_exited(mapdl):
+    try:
+        _ = mapdl._ctrl("VERSION")
+        return False
+    except MapdlExitedError:
+        return True
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request, mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+    # Setup: fill with any logic you want
+    if START_INSTANCE and is_exited(mapdl):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+
+        # Relaunching MAPDL
+        mapdl_ = launch_mapdl(
+            EXEC_FILE,
+            port=mapdl._port,
+            override=True,
+            run_location=mapdl._path,
+            cleanup_on_exit=mapdl._cleanup,
+        )
+
+        # Cloning the new mapdl instance channel into the old one.
+        mapdl._channel = mapdl_._channel
+        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+
+        # Restoring the local configuration
+        mapdl._local = local_
+
+    yield  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    if mapdl._local and mapdl._exited:
+        # The test exited MAPDL, so it is fail.
+        assert False  # this will fail the test
 
 
 def check_pid(pid):
@@ -247,7 +293,7 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
-@pytest.fixture(scope="session", params=local)
+@pytest.fixture(scope="session", params=LOCAL)
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
@@ -262,7 +308,10 @@ def mapdl(request, tmpdir_factory):
         port = MAPDL_DEFAULT_PORT
 
     mapdl = launch_mapdl(
-        EXEC_FILE, override=True, run_location=run_path, cleanup_on_exit=cleanup
+        EXEC_FILE,
+        override=True,
+        run_location=run_path,
+        cleanup_on_exit=cleanup,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
@@ -285,8 +334,8 @@ def mapdl(request, tmpdir_factory):
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
-        if mapdl._local:
-            assert not os.path.isfile(mapdl._lockfile)
+        # if mapdl._local:
+        #     assert not os.path.isfile(mapdl._lockfile)
 
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
@@ -300,9 +349,9 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
             # verify PIDs are closed
-            time.sleep(1)  # takes a second for the processes to shutdown
-            for pid in mapdl._pids:
-                assert not check_pid(pid)
+            # time.sleep(1)  # takes a second for the processes to shutdown
+            # for pid in mapdl._pids:
+            #     assert not check_pid(pid)
 
 
 @pytest.fixture
@@ -487,7 +536,14 @@ def make_block(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def coupled_example(mapdl, cleared):
-    mapdl.input(vmfiles["vm33"])
+    vm33 = vmfiles["vm33"]
+    with open(vm33, "r") as fid:
+        mapdl_code = fid.read()
+
+    mapdl_code = mapdl_code.replace(
+        "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
+    )
+    mapdl.input_strings(mapdl_code)
 
 
 @pytest.fixture(scope="function")
@@ -501,7 +557,7 @@ def contact_solve(mapdl):
     # ***** Problem parameters ********
     l = 76.2e-03 / 3  # Length of each plate,m
     w = 31.75e-03 / 2  # Width of each plate,m
-    t = 3.18e-03  # Tickness of each plate,m
+    t = 3.18e-03  # Thickness of each plate,m
     r1 = 7.62e-03  # Shoulder radius of tool,m
     h = 15.24e-03  # Height of tool, m
     l1 = r1  # Starting location of tool on weldline

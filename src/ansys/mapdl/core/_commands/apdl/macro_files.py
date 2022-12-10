@@ -566,4 +566,6 @@ class MacroFiles:
         """
         command = f"*USE,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{ar10},{ar11},{ar12},{ar13},{ar14},{ag15},{ar16},{ar17},{ar18}"
         with self.non_interactive:
-            return self.run(command, **kwargs)
+            self.run(command, **kwargs)
+
+        return self._response  # returning last response

@@ -273,7 +273,7 @@ mapdl.cyl4(xcenter=0, ycenter=0, rad1=1, theta1=0, rad2=2, depth=1)
 mapdl.vsymm("Y", "ALL")
 
 # Plot while showing bounds and disabling extra line plotting.
-mapdl.vplot(show_bounds=True, show_lines=False, quality=5)
+mapdl.vplot(show_bounds=True, show_lines=False, quality=1)
 
 
 ###############################################################################

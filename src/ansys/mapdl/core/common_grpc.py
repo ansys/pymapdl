@@ -1,6 +1,8 @@
 """Common gRPC functions"""
 import numpy as np
 
+from ansys.mapdl.core.errors import EmptyRecordError
+
 # chunk sizes for streaming and file streaming
 DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
 DEFAULT_FILE_CHUNK_SIZE = 1024 * 1024  # 1MB
@@ -148,7 +150,7 @@ def parse_chunks(chunks, dtype=None):
         generator from grpc.  Each chunk contains a bytes payload
 
     dtype : np.dtype
-        Numpy data type to interpert chunks as.
+        Numpy data type to interpret chunks as.
 
     Returns
     -------
@@ -157,7 +159,7 @@ def parse_chunks(chunks, dtype=None):
 
     """
     if not chunks.is_active():
-        raise RuntimeError("Empty Record")
+        raise EmptyRecordError("Empty Record")
 
     try:
         chunk = chunks.next()

@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import pyansys_logo_black
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
@@ -45,6 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
+cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
 
 
 # -- General configuration ---------------------------------------------------
@@ -74,6 +75,7 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/", None),
 }
 
 suppress_warnings = ["label.*"]
@@ -106,7 +108,7 @@ numpydoc_validation_exclude = {  # set of regex
 }
 
 # Favicon
-html_favicon = "favicon.png"
+html_favicon = ansys_favicon
 
 # notfound.extension
 notfound_template = "404.rst"
@@ -140,7 +142,14 @@ exclude_patterns = [
     ".DS_Store",
     # because we include this in examples/index.rst
     "examples/gallery_examples/index.rst",
+    "links.rst",
 ]
+
+# make rst_epilog a variable, so you can add other epilog parts to it
+rst_epilog = ""
+# Read link all targets from file
+with open("links.rst") as f:
+    rst_epilog += f.read()
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -161,7 +170,7 @@ sphinx_gallery_conf = {
     "examples_dirs": ["../../examples/"],
     # path where to save gallery generated examples
     "gallery_dirs": ["examples/gallery_examples"],
-    # Patter to search for example files
+    # Pattern to search for example files
     "filename_pattern": r"\.py",
     # Remove the "Download all examples" button from the top level gallery
     "download_all_examples": False,
@@ -185,11 +194,32 @@ html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
+    "collapse_navigation": True,
+    "use_edit_page_button": True,
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
+    "icon_links": [
+        {
+            "name": "Support",
+            "url": "https://github.com/pyansys/pymapdl/discussions",
+            "icon": "fa fa-comment fa-fw",
+        },
+    ],
+    "switcher": {
+        "json_url": f"https://{cname}/release/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
 }
 
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "pyansys",
+    "github_repo": "pymapdl",
+    "github_version": "main",
+    "doc_path": "doc/source",
+}
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
