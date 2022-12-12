@@ -18,7 +18,7 @@ import weakref
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, LINUX_DEFAULT_DIRS, LOG
 
 try:
     import ansys.tools.report as pyansys_report
@@ -82,21 +82,54 @@ def check_valid_routine(routine):
     return True
 
 
+def get_linux_default_ansys_bin(rver):
+    """Find the MAPDL executable file using standard Linux installation paths,
+
+    Raises:
+        FileNotFoundError: When no binary is found.
+
+    Returns:
+        str: Path to MAPDL executable.
+    """
+    for each_path in LINUX_DEFAULT_DIRS:
+        for each_file in [f"ansys{rver}", "mapdl"]:
+
+            ans_root = os.getenv(f"AWP_ROOT{rver}", each_path)
+            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", each_file)
+
+            # rare case where the versioned binary doesn't exist
+            if os.path.isfile(mapdlbin):
+                LOG.debug(f"Found ANSYS binary at {mapdlbin}")
+                return mapdlbin
+            else:
+                LOG.debug(f"NOT found Ansys binary at {mapdlbin}")
+
+    # We could not find a binary, returning a default one
+    return os.path.join(
+        LINUX_DEFAULT_DIRS[0], f"v{rver}", "ansys", "bin", f"ansys{rver}"
+    )
+
+
+def get_windows_default_ansys_bin(rver):
+    """Find the MAPDL executable using standard Windows installation paths"""
+    program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
+    ans_root = os.getenv(
+        f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
+    )
+    return os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
+
+
 def get_ansys_bin(rver):
     """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.name == "nt":  # pragma: no cover
-        program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
-        ans_root = os.getenv(
-            f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
+    if os.getenv(f"AWP_ROOT{rver}") is not None:
+        LOG.debug(
+            f"Found 'AWP_ROOT{rver}' environment variable and it has value {os.getenv(f'AWP_ROOT{rver}')}"
         )
-        mapdlbin = os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
-    else:
-        ans_root = os.getenv(f"AWP_ROOT{rver}", os.path.join("/", "usr", "ansys_inc"))
-        mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", f"ansys{rver}")
 
-        # rare case where the versioned binary doesn't exist
-        if not os.path.isfile(mapdlbin):
-            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", "mapdl")
+    if os.name == "nt":  # pragma: no cover
+        mapdlbin = get_windows_default_ansys_bin(rver)
+    else:
+        mapdlbin = get_linux_default_ansys_bin(rver)
 
     return mapdlbin
 
