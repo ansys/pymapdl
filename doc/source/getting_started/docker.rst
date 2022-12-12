@@ -62,6 +62,9 @@ MAPDL with:
 
 First time you run it, Docker logins into the *ghcr.io* registry and
 pulls the image which can take some time.
+There are several images in the registry, each corresponding to a different
+version of MAPDL. It is recommended to use the latest version of MAPDL for
+the Ubuntu systems (any image tagged as ``Ubuntu``).
 
 Note that port `50052` (local to the container) is being mapped to
 50052 on the host. This makes it possible to launch several MAPDL
@@ -101,14 +104,14 @@ use:
 
 * `docker-compose.yml <pymapdl_docker_compose_base_>`_: the **base** 
   configuration file which launch a remote instance of MAPDL which you
-  can connect to. Similar approach to the one described above.
+  can connect to.
 
 * `docker-compose.local.yml <pymapdl_docker_compose_base_>`_: 
   This file is an extension of the base configuration file which launch
   an Ubuntu Docker image with MAPDL installed in it. 
   This is useful if you want to run MAPDL locally inside this container
   for example for debugging purposes.
-  You can connect your VSCode instance to this container by selecting
+  You can connect your Visual Code instance to this container by selecting
   ``Attach to a running container`` option from the command palette.
   For more details visit `Attach to a running container <vscode_attach_to_container_>`_.
 
@@ -128,7 +131,7 @@ use:
      docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.license_server.yml up
   
 
-.. warning:: About the license server image.
+.. warning::
    The license server is not intended to be used in production. 
    It is only intended for testing/debugging purposes.
    Its access is limited to collaborators of the PyAnsys project.
@@ -187,7 +190,7 @@ with the ``-np`` switch:
 
 
 For additional command line arguments please see the *Notes* section
-within `launch_mapdl <pymapdl_launch_mapdl_>`_.
+within :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
 Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products

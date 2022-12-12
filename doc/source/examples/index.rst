@@ -22,7 +22,7 @@ Technology showcase examples
 ============================
 
 The PyMAPDL technology showcase examples are more complex test cases than
-the ones presented above. They demonstrate how to use PyMAPDL to effectively
+the ones preceding. They demonstrate how to use PyMAPDL to effectively
 and accurately solve interdisciplinary problems from a variety of industries
 and engineering fields.
 
