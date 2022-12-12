@@ -3667,8 +3667,8 @@ class _MapdlCore(Commands):
                     partial_output = response
                 else:
                     partial_output = "\n".join(
-                    response.splitlines()[index : (index + lines_number)]
-                )
+                        response.splitlines()[index : (index + lines_number)]
+                    )
 
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
@@ -3685,7 +3685,9 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.group(0)  # Catching only the first error.
+                    error_message = error_message.group(
+                        0
+                    )  # Catching only the first error.
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
