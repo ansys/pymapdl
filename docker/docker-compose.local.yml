@@ -33,6 +33,6 @@ version: '3.3'
 services:
   mapdl:
     volumes:
-      - ../:/local
+      - ../:/local:cached
     # Overwriting entrypoint
     entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"
