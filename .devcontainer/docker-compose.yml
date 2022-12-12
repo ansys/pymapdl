@@ -29,7 +29,7 @@ services:
     ports:
       - '50052:50052'
       - '50055:50055'
-    image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
+    image: ghcr.io/pyansys/mapdl:ubuntu
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
       - ../:/local:cached
