@@ -146,6 +146,7 @@ On Windows, you can find the license configuration file that points to the licen
     C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
 
 
+
 Incorrect environment variables
 ===============================
 
