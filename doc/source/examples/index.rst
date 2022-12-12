@@ -22,7 +22,7 @@ Technology showcase examples
 ============================
 
 The PyMAPDL technology showcase examples are more complex test cases than
-the ones presented above. They demonstrate how to use PyMAPDL to effectively
+the ones preceding. They demonstrate how to use PyMAPDL to effectively
 and accurately solve interdisciplinary problems from a variety of industries
 and engineering fields.
 
@@ -31,7 +31,7 @@ The examples initially come from the `APDL Technology Showcase Manual
 reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
 library.
 
-The examples are hosted in the  `PyMAPDL Techdemos repository <tech_demos_repo_>`_.
+The examples are hosted in the  `PyMAPDL Techdemos repository <tech_demo_repo_>`_.
 
 The documentation to the exposed examples can be found in the
 `PyMAPDL Techdemos documentation <tech_demos_doc_>`_.

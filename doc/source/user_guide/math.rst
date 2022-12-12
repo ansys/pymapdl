@@ -11,7 +11,7 @@ matrices and vectors that provide access to standard linear algebra
 operations, access to the powerful sparse linear solvers of ANSYS
 Mechanical APDL (MAPDL), and the ability to solve eigenproblems.
 
-Python and MATLAB's eigensolver is based on the publicly available
+Python and MATLAB eigensolvers are based on the publicly available
 LAPACK libraries and provides reasonable solve time for relatively
 small degrees of freedom (dof) eigenproblems of perhaps 100,000.
 However, Ansys solvers are designed for the scale of 100 s of

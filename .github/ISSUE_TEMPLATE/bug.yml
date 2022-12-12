@@ -14,11 +14,13 @@ body:
     id: new-bug
     attributes:
       label: Before submitting the issue
-      description: Please, make sure the following conditions are met
+      description: Ensure that the following conditions are met:
       options:
-      - label: I have searched among the existing issues
+      - label: I have visited the [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html).
         required: true
-      - label: I am using a Python virtual environment
+      - label: I have searched among the existing issues.
+        required: true
+      - label: I am using a Python virtual environment.
         required: true
       - label: I have a fully updated virtual environment (i.e. ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``)
         required: true
@@ -135,3 +137,27 @@ body:
 
     validations:
       required: true
+
+  - type: textarea
+    id: logger_log
+    attributes:
+      label: Logger output file
+      description: |
+        Attach the logger output file. For more information on how to set the logger and
+        attach its output file, see the [Troubleshooting section]
+        (https://mapdl.docs.pyansys.com/troubleshoot/index.html).
+        
+      value: |
+        <details><summary>
+        Show the logger output file.
+        </summary>
+
+        ```text
+
+        # PASTE HERE THE CONTENT OF THE LOGGER OUTPUT FILE.
+
+        ```
+        </details>
+
+    validations:
+      required: false

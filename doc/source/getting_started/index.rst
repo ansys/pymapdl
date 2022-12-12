@@ -6,12 +6,8 @@ version of Ansys installed dictates the interface and features
 available to you.
 
 For more information on getting a licensed copy of Ansys, visit
-`Ansys <ansys_>`_ .
+`Ansys <ansys_>`_.
 
-You can also try the Student Version of Ansys products in
-`Ansys Student Versions <ansys_student_version_>`_.
-The Student Version is valid during a calendar year with limited capabilities,
-such as on the number of nodes and elements.
 
 .. toctree::
    :hidden:
@@ -47,7 +43,7 @@ Alternatively, install the latest from
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
-For a local "development" version, install with:
+For a local *development* version, install with:
 
 .. code::
 
@@ -96,6 +92,7 @@ on Windows and with Ansys 13.0 on Linux.
     and features. Certain features, such as APDL Math, are not supported
     on earlier Ansys versions.
 
+For more information, see :ref:`install_mapdl`.
 
 Verify your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~

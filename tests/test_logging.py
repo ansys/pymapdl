@@ -3,11 +3,11 @@ import logging as deflogging  # Default logging
 import os
 import re
 
-from conftest import HAS_GRPC
 import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
+from conftest import HAS_GRPC
 
 ## Notes
 # Use the next fixtures for:
