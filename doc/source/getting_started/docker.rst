@@ -187,7 +187,7 @@ with the ``-np`` switch:
 
 
 For additional command line arguments please see the *Notes* section
-within `launch_mapdl <pymapdl_launch_mapdl_>`_.
+within :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
 Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products
