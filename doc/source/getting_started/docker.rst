@@ -62,6 +62,9 @@ MAPDL with:
 
 First time you run it, Docker logins into the *ghcr.io* registry and
 pulls the image which can take some time.
+There are several images in the registry, each corresponding to a different
+version of MAPDL. It is recommended to use the latest version of MAPDL for
+the Ubuntu systems (any image tagged as ``Ubuntu``).
 
 Note that port `50052` (local to the container) is being mapped to
 50052 on the host. This makes it possible to launch several MAPDL
@@ -128,7 +131,7 @@ use:
      docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.license_server.yml up
   
 
-.. warning:: About the license server image.
+.. warning::
    The license server is not intended to be used in production. 
    It is only intended for testing/debugging purposes.
    Its access is limited to collaborators of the PyAnsys project.
