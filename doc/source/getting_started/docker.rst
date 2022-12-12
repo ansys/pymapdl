@@ -104,14 +104,14 @@ use:
 
 * `docker-compose.yml <pymapdl_docker_compose_base_>`_: the **base** 
   configuration file which launch a remote instance of MAPDL which you
-  can connect to. Similar approach to the one described above.
+  can connect to.
 
 * `docker-compose.local.yml <pymapdl_docker_compose_base_>`_: 
   This file is an extension of the base configuration file which launch
   an Ubuntu Docker image with MAPDL installed in it. 
   This is useful if you want to run MAPDL locally inside this container
   for example for debugging purposes.
-  You can connect your VSCode instance to this container by selecting
+  You can connect your Visual Code instance to this container by selecting
   ``Attach to a running container`` option from the command palette.
   For more details visit `Attach to a running container <vscode_attach_to_container_>`_.
 

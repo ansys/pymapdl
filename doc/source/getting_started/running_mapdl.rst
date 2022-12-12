@@ -148,6 +148,6 @@ to this MAPDL instance without specifying the IP address of the Docker container
 
 If you are using the local configuration specified in the
 `docker-compose.local.yml <pymapdl_docker_compose_local_>`_ file,
-after attaching your VSCode instance, you can work with MAPDL as if it were local.
+after attaching your Visual Code instance, you can work with MAPDL as if it were local.
 This means that you can launch MAPDL instances using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
 

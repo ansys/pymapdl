@@ -13,7 +13,7 @@ or only have partial support within PyMAPDL.  See
 Session
 *******
 These commands provide general control to the session. The commands
-are grouped by functionality.
+are grouped by capability.
 
 .. toctree::
    :maxdepth: 1

@@ -312,7 +312,7 @@ Using a proxy server
 ====================
 In some rare cases, you might experience some problems to connect to the MAPDL instance if you are
 using a proxy.
-When `gRPC <grpc_>`_ is used in a proxy environment, if a local loopback address is specified (i.e. ``127.0.0.1``)
+When `gRPC <grpc_>`_ is used in a proxy environment, if a local address is specified (that is ``127.0.0.1``)
 as the connection destination, the gRPC implementation refers automatically to the proxy address.
 In this case, the local address cannot be referred, resulting in a connection error.
 As a workaround, you can set the environment variable ``NO_PROXY`` to your local address ``127.0.0.1``,
@@ -329,10 +329,10 @@ If you are using a firewall, you should allow MAPDL to receive inbound connectio
 * 50053+ (TCP) for extra gRPC connection.
 * 50055 (TCP) for gRPC connection to the MAPDL database.
 
-Python process must be allowed to connect to the above ports (outbound connections).
+Python process must be allowed to connect to the mentioned ports (outbound connections).
 
 Normally most of the firewall rules focus on the inbound connections, so you should not need to
-configure the outbound connections. However, if you are experiencing problems, you should check
+configure the outbound connections. However, if you are experiencing problems, you should make sure
 that the firewall is not blocking the outbound connections on the following ports:
 
 * 5005X (TCP) for gRPC connections.

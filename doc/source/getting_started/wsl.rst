@@ -159,8 +159,8 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
 
 
 **Example /etc/hosts/ file**
-.. vale off
 
+.. vale off
 
 .. code-block:: bash
    :emphasize-lines: 8
