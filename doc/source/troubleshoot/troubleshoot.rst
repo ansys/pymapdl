@@ -109,6 +109,30 @@ for maintaining Ansys licensing or have a personal install of Ansys, see the onl
 
 For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
 
+Incorrect licensing environment variables
+-----------------------------------------
+
+The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
+The following code examples show how you can see the value of this environment variable on
+either Windows or Linux.
+
+**On Windows**
+
+  .. code:: pwsh
+    
+    $env:ANSYSLMD_LICENSE_FILE
+    1055@1.1.1.1
+
+
+**On Linux**
+
+  .. code:: bash
+
+    printenv | grep ANSYSLMD_LICENSE_FILE
+
+
+.. _missing_dependencies_on_linux:
+
 
 Virtual private network (VPN) issues
 ====================================
@@ -147,30 +171,6 @@ On Windows, you can find the license configuration file that points to the licen
 
 
 
-Incorrect environment variables
-===============================
-
-The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-The following code examples show how you can see the value of this environment variable on
-either Windows or Linux.
-
-**On Windows**
-
-  .. code:: pwsh
-    
-    $env:ANSYSLMD_LICENSE_FILE
-    1055@1.1.1.1
-
-
-**On Linux**
-
-  .. code:: bash
-
-    printenv | grep ANSYSLMD_LICENSE_FILE
-
-
-.. _missing_dependencies_on_linux:
-
 Missing dependencies on Linux
 =============================
 
@@ -178,7 +178,6 @@ Some Linux installations might be missing required dependencies. If
 you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you are likely missing some necessary
 dependencies.
-
 
 
 .. _installing_mapdl_on_centos7:
