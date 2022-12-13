@@ -1,9 +1,9 @@
 .. _using_julia:
 
 
-********************
-Use PyMAPDL in Julia
-********************
+*****************
+Julia and PyMAPDL
+*****************
 
 If you like to work with Julia, you can use Python libraries as if they were Julia packages.
 

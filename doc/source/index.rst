@@ -8,10 +8,8 @@ PyMAPDL documentation |version|
    getting_started/index
    user_guide/index
    mapdl_commands/index
+   api/index
    examples/index
-   learning/index
-   troubleshoot/index
-   contribution_and_api/index
 
 
 

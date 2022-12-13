@@ -1,22 +1,71 @@
 
 
-.. _debugging_launch_mapdl:
+
+.. _ref_troubleshooting:
+
 
 =======================
 Troubleshooting PyMAPDL
 =======================
 
 
+To help overcome any problem that you might have when using PyMAPDL,
+some of the most common problems and frequently asked questions are posted here.
+
+
 *****************
-Launching MAPDL
+Debug in PyMAPDL
 *****************
 
-For any number of reasons, Python may fail to launch MAPDL. Here are
-some approaches for debugging:
+If you are having trouble with PyMAPDL, you can record some internal
+logs into a file using a logger. 
+This file can be examined to help to identify any issue. 
+
+You can set the logger output file to be ``mylog.log`` by
+running the following commands in a Python terminal or at the beginning of your
+script:
+
+.. code:: python
+
+    from ansys.mapdl.core import LOG
+    LOG.setLevel("DEBUG")
+    LOG.log_to_file("mylog.log")
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(loglevel="DEBUG")
+
+You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
+If you are not able to identify the issue, you can open a discussion on the
+`PyMAPDL Discussions page <pymapdl_discussions_>`_.
+If you believe you have found a bug, open an issue on the
+`PyMAPDL Issues page <pymapdl_issues_>`_.
+
+
+.. _debugging_launch_mapdl:
+
+****************
+Launching issues
+****************
+
+There are several issues that can cause MAPDL not to launch, including:
+
+- `Licensing issues`_
+- `Virtual private network (VPN) issues`_
+- `Missing dependencies on Linux`_
+- `Conflicts with student version`_
+- `Incorrect environment variables`_
+- `Using a proxy server`_
+- `Firewall settings`_
+
+
+Testing MAPDL launching
+=======================
 
 In some cases, it may be necessary to run the launch command manually from the command line.
 
-**On Windows**
+On Windows
+----------
 
 Open up a command prompt and run the version-dependent command:
 
@@ -28,7 +77,8 @@ Open up a command prompt and run the version-dependent command:
    PowerShell users can run the preceding command without quotes.
 
 
-**On Linux**
+On Linux
+--------
 
 Run the version-dependent command:
 
@@ -65,17 +115,6 @@ If this command doesn't launch MAPDL, look at the command output:
     directory or the file.lock file has not been deleted from an abnormally
     terminated Ansys run. To disable this check, set the ANSYS_LOCK environment
     variable to OFF.
-
-
-There are many issues that can cause MAPDL not to launch, including:
-
-- `Licensing issues`_
-- `Virtual private network (VPN) issues`_
-- `Missing dependencies on Linux`_
-- `Conflicts with student version`_
-- `Incorrect environment variables`_
-- `Using a proxy server`_
-- `Firewall settings`_
 
 
 Licensing issues
@@ -346,14 +385,6 @@ For more information on how to **configure your firewall on Ubuntu Linux**, plea
 link `Security-Firewall | Ubuntu <ubuntu_firewall_>`_.
 
 
-*****************
-Launching PyMAPDL
-*****************
-
-Even if you are able to successfully launch MAPDL, PyMAPDL itself might not launch
-successfully.
-
-
 Manually set the location of the executable file
 ================================================
 If you have a non-standard install, PyMAPDL might be unable find
@@ -379,7 +410,7 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
 
 
 Default Location of the executable file
-=======================================
+---------------------------------------
 
 The first time that you run PyMAPDL, it detects the
 available Ansys installations.
@@ -449,50 +480,11 @@ method lists higher versions first and student versions last.
     information, see :ref:`conflicts_student_version`.
 
 
-
-.. _ref_pymapdl_stability:
-
-*****************
-PyMAPDL stability
-*****************
-
-Recommendations
-===============
-
-When connecting to an instance of MAPDL using gRPC (default), there are some cases
-where the MAPDL server might exit unexpectedly. There
-are several ways to improve performance and stability of MADPL:
-
-- When possible, pass ``mute=True`` to individual MAPDL commands or
-  set it globally with the :func:`Mapdl.mute
-  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
-  back the response from MAPDL for each command and marginally
-  improves performance and stability. Consider having a debug flag in
-  your program or script so you can turn on or turn off logging and
-  verbosity when needed.
-
-
-Issues
-======
-
-.. note::
-   MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
-   <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
-   possible. Attempt to use the :func:`Mapdl.upload()
-   <ansys.mapdl.core.Mapdl.upload>` method to upload nodes and elements and read them
-   in via the :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
-   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
-
-
-
-
-
 .. _ref_pymapdl_limitations:
 
-*******************
-PyMAPDL limitations
-*******************
-
+*********************
+PyMAPDL Usage issues
+*********************
 
 .. _ref_numpy_arrays_in_mapdl:
 
@@ -549,3 +541,53 @@ to one, have the same shape if later retrieved.
       [4.]])
    >>> np.allclose(mapdl.parameters['mapdlarray'], mapdl.parameters['mapdlarray_b'])
    True
+
+
+
+.. _ref_pymapdl_stability:
+
+*****************
+PyMAPDL stability
+*****************
+
+Recommendations
+===============
+
+When connecting to an instance of MAPDL using gRPC (default), there are some cases
+where the MAPDL server might exit unexpectedly. There
+are several ways to improve performance and stability of MADPL:
+
+- When possible, pass ``mute=True`` to individual MAPDL commands or
+  set it globally with the :func:`Mapdl.mute
+  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
+  back the response from MAPDL for each command and marginally
+  improves performance and stability. Consider having a debug flag in
+  your program or script so you can turn on or turn off logging and
+  verbosity when needed.
+
+
+Issues
+======
+
+.. note::
+   MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
+   <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
+   possible. Attempt to use the :func:`Mapdl.upload()
+   <ansys.mapdl.core.Mapdl.upload>` method to upload nodes and elements and read them
+   in via the :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
+
+
+
+More help needed?
+-----------------
+
+  *"What do you do if a problem is not listed here?"*  
+
+
+You can check if there is an issue already tracking your problem in `PyMAPDL Repository Issues <pymapdl_issues_>`_.
+
+You can go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and ask about it.
+
+If you think you found a bug or would like to make a feature request, you can do so by
+opening an feature request in `PyMAPDL Repository Issues <pymapdl_issues_>`_.
