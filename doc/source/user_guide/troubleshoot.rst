@@ -483,7 +483,7 @@ method lists higher versions first and student versions last.
 .. _ref_pymapdl_limitations:
 
 *********************
-PyMAPDL Usage issues
+PyMAPDL usage issues
 *********************
 
 .. _ref_numpy_arrays_in_mapdl:
@@ -585,9 +585,9 @@ More help needed?
   *"What do you do if a problem is not listed here?"*  
 
 
-You can check if there is an issue already tracking your problem in `PyMAPDL Repository Issues <pymapdl_issues_>`_.
+Visit `PyMAPDL Repository Issues <pymapdl_issues_>`_ and search if your issue is already listed. 
+If not, you can do one of the following:
 
-You can go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and ask about it.
-
-If you think you found a bug or would like to make a feature request, you can do so by
+* Go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and create a discussion about your issue.
+* If you think you found a bug or would like to make a feature request, you can do so by
 opening an feature request in `PyMAPDL Repository Issues <pymapdl_issues_>`_.

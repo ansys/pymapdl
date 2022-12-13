@@ -1,8 +1,8 @@
 .. _pymapdl_docker:
 
-************************
-Docker Containers
-************************
+*****************
+Docker containers
+*****************
 You can run MAPDL within a container on any OS using Docker and
 connect to it via PyMAPDL.
 
@@ -50,7 +50,7 @@ Run an MAPDL image
 
 You can now launch MAPDL directly from Docker with a short script or
 directly from the command line.
-You can use then your host python environment to connect to that MAPDL
+You can use then your host Python environment to connect to that MAPDL
 instance.
 
 .. graphviz::
@@ -93,7 +93,7 @@ Successive runs should restart the container or just delete it and rerun it usin
 
     docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
 
-You can use the docker flag ``--rm`` to automatically clean up the container
+You can use the Docker flag ``--rm`` to automatically clean up the container
 and remove the file system when the container exits
 
 This creates a log file (``log.txt``) in your current directory location.
@@ -101,10 +101,10 @@ This creates a log file (``log.txt``) in your current directory location.
 Notice that the WSL internal gRPC port (``50052``) is being mapped to a
 different Windows host port (``50053``) to avoid ports conflicts with local
 MAPDL instances running on the host.
-You could Additionally launch more docker containers in different ports if
+You could additionally launch more Docker containers in different ports if
 you wish to run multiple simulations at the same time.
 The module ``ansys-mapdl-core-pool`` does not work when you are connecting
-to an MAPDL docker image.
+to an MAPDL Docker image.
 
 .. note:: Ensure that your port ``50053`` is open in your firewall.
 
@@ -221,7 +221,7 @@ to an existing MAPDL instance by using the argument ``start_instance=False``:
     mapdl = launch_mapdl(port=50053, start_instance=False) 
 
 
-Because of the linking between host ports and docker ports (``-p`` argument),
+Because of the linking between host ports and Docker ports (``-p`` argument),
 you do not need to specify the IP when connecting to a local container.
 However, if you are trying to connect to a WSL local distribution you need
 to specify the IP address of the WSL instance (normally ``127.0.0.1``) since
