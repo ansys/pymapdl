@@ -3,6 +3,11 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      test_dev_docs:
+        description: 'Publish the documentation before merging'
+        type: boolean
+        required: false
   push:
     tags:
       - "*"
@@ -97,8 +102,8 @@ jobs:
 
       - name: "Install OS packages"
         run: |
-          sudo apt update
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk
+          sudo apt update 
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
 
       - name: "Cache pip"
         uses: actions/cache@v3
@@ -550,7 +555,7 @@ jobs:
 
   upload_dev_docs:
     name: "Upload dev documentation"
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true' }}
     runs-on: ubuntu-latest
     needs: [docs_build]
     steps:
