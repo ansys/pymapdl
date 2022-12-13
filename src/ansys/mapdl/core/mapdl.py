@@ -1568,8 +1568,12 @@ class _MapdlCore(Commands):
             # color individual areas
             if color_areas:
                 anum = surf["entity_num"]
-                rand = np.random.random(anum[-1] + 1)
-                area_color = rand[anum]
+                size_ = anum[-1] + 1
+                rand = np.random.random(size_)
+                if size_ == 1:
+                    area_color = rand[0]
+                else:
+                    area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
                 meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
