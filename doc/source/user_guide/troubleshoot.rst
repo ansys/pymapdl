@@ -585,9 +585,13 @@ More help needed?
   *"What do you do if a problem is not listed here?"*  
 
 
-Visit `PyMAPDL Repository Issues <pymapdl_issues_>`_ and search if your issue is already listed. 
-If not, you can do one of the following:
+Visit `PyMAPDL Repository Issues <pymapdl_issues_>`_ and search if your 
+issue is already listed. If not, you can do one of the following:
 
-* Go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and create a discussion about your issue.
-* If you think you found a bug or would like to make a feature request, you can do so by
-opening an feature request in `PyMAPDL Repository Issues <pymapdl_issues_>`_.
+* Go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and
+  create a discussion about your issue.
+
+* If you think you found a bug or would like to make a feature request,
+  you can do so by opening an feature request in
+  `PyMAPDL Repository Issues <pymapdl_issues_>`_.
+

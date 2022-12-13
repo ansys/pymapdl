@@ -45,6 +45,8 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
+.. _run_an_mapdl_image:
+
 Run an MAPDL image
 ===================
 
