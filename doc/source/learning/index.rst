@@ -14,7 +14,7 @@ Resources
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download :download:`PyMAPDL cheatsheet <pymapdl_cheatsheet_>`.
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`.
 
 
 Courses

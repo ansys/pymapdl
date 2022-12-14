@@ -16,7 +16,7 @@ For this example, install modules as needed:
 
 * ``dash``
 * ``dash_bootstrap_components``
-* ``plotly.express ``
+* ``plotly.express``
 * ``webbrowser``
 * ``pandas``
 
