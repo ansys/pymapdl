@@ -3,11 +3,11 @@ import logging as deflogging  # Default logging
 import os
 import re
 
-from conftest import HAS_GRPC
 import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
+from conftest import HAS_GRPC
 
 ## Notes
 # Use the next fixtures for:
@@ -314,3 +314,13 @@ def test_instance_log_to_file(mapdl, tmpdir):
         text = "".join(fid.readlines())
 
     assert file_msg_debug in text
+
+
+def test_lowercases():
+    # test that all loggers are lowercase
+    for each_loglevel in LOG_LEVELS.keys():
+
+        LOG.setLevel(each_loglevel.lower())
+
+        for each_logger in LOG._instances.values():
+            each_logger.setLevel(each_loglevel.lower())

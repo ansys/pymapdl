@@ -188,6 +188,7 @@ class MapdlCorba(_MapdlCore):
             **start_parm,
         )
 
+        self._mode = "corba"
         self._broadcast_logger = None
         self._server = None
         self._outfile = None

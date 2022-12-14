@@ -1,7 +1,7 @@
 .. _ref_parameter_definition_commands_api:
 
 ********************
-Parameter Definition
+Parameter definition
 ********************
 
 .. currentmodule:: ansys.mapdl.core

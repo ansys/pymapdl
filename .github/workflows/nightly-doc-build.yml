@@ -5,6 +5,9 @@ on:
     - cron:  '0 4 * * *'
   workflow_dispatch:
 
+permissions:
+  packages: read
+
 jobs:
   nightly_docs_build:
     runs-on: ubuntu-20.04
@@ -12,25 +15,20 @@ jobs:
     env:
       DISPLAY: ':99.0'
       MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v21.2.1'
-      PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_START_INSTANCE: FALSE
+      PYMAPDL_PORT: 21000  # default won't work on azure
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYANSYS_OFF_SCREEN: True
+      DPF_START_SERVER: False
+      DPF_PORT: 21002
 
     steps:
       - uses: actions/checkout@v3
 
-      # used for documentation deployment
-      - name: Get Bot Application Token
-        id: get_workflow_token
-        uses: peter-murray/workflow-application-token-action@v2
-        with:
-          application_id: ${{ secrets.BOT_APPLICATION_ID }}
-          application_private_key: ${{ secrets.BOT_APPLICATION_PRIVATE_KEY }}
-
       - name: Setup Python
-        uses: actions/setup-python@v4.2.0
+        uses: actions/setup-python@v4.3.0
         with:
-          python-version: 3.8
+          python-version: 3.9
 
       - name: Install OS packages
         run: |
@@ -40,8 +38,7 @@ jobs:
       - name: Install ansys-mapdl-core
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements/requirements_build.txt
-          pip install .
+          pip install .[doc]
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: Login in Github Container registry
@@ -60,19 +57,14 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
   
+      - name: DPF Server Activation
+        run: |
+          docker run -d -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
+
       - name: Build Documentation
         run: |
-          pip install -r requirements/requirements_docs.txt
+          pip install .[doc]
           xvfb-run make -C doc html
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.4.0
-        with:
-          repository-name: pyansys/pymapdl-dev-docs
-          token: ${{ steps.get_workflow_token.outputs.token }}
-          branch: gh-pages
-          folder: doc/build/html
-          clean: true
 
       - name: Display files structure
         if: always()

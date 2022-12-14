@@ -1,10 +1,11 @@
 .. _ref_mapdl_api:
 
-Mapdl
-=====
+``Mapdl`` module
+================
 
-Mapdl Class Specific Classes or Attributes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``Mapdl`` methods and attributes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. currentmodule:: ansys.mapdl.core
 
 .. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
@@ -46,7 +47,7 @@ Constants
    plotting.BCS
 
 
-Latest 2021R1 and newer features
+``mapdl_grpc.MapdlGrpc`` methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: ansys.mapdl.core.mapdl_grpc.MapdlGrpc
@@ -62,8 +63,8 @@ Latest 2021R1 and newer features
    mapdl_grpc.MapdlGrpc.upload
 
 
-Mapdl Information Class
-~~~~~~~~~~~~~~~~~~~~~~~
+``Information`` class attributes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: ansys.mapdl.core.misc
 

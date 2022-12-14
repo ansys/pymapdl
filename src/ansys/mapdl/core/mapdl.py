@@ -55,6 +55,7 @@ from ansys.mapdl.core.post import PostProcessing
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
+    r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
 # test for png file
@@ -165,6 +166,7 @@ class _MapdlCore(Commands):
         self._store_commands = False
         self._stored_commands = []
         self._response = None
+        self._mode = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -191,6 +193,7 @@ class _MapdlCore(Commands):
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
+        self._kylov = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -235,6 +238,26 @@ class _MapdlCore(Commands):
             raise ValueError(
                 f"The property ``print_com`` only allows booleans, but type {type(value)} was supplied."
             )
+
+    @property
+    def mode(self):
+        """Return the type of instance, namely: grpc, corba or console."""
+        return self._mode
+
+    @property
+    def is_grpc(self):
+        """Return true if using grpc to connect to the MAPDL instance."""
+        return self._mode == "grpc"
+
+    @property
+    def is_corba(self):
+        """Return true if using corba to connect to the MAPDL instance."""
+        return self._mode == "corba"
+
+    @property
+    def is_console(self):
+        """Return true if using console to connect to the MAPDL instance."""
+        return self._mode == "console"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -3334,7 +3357,7 @@ class _MapdlCore(Commands):
         match_reserved_leading_underscored_parameter_name = (
             r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
         )
-        # If it also ends in undescore, this won't be triggered.
+        # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
             raise ValueError(
                 f"It is discouraged the use of parameters starting with underscore ('_'). "
@@ -3741,3 +3764,78 @@ class _MapdlCore(Commands):
         fname = str(filename).replace(ext, "")
         ext = ext.replace(".", "")
         return self.run(f"FILE,{fname},{ext}", **kwargs)
+
+    @wraps(Commands.lsread)
+    def use(self, *args, **kwargs):
+        # Because of `name` can be a macro file or a macro block on a macro library
+        # file, we are going to test if the file exists locally first, then remote,
+        # and if not, silently assume that it is a macro in a macro library.
+        # I do not think there is a way to check if the macro exists before use it.
+        name = kwargs.get("name", args[0])
+        base_name = os.path.basename(name)
+
+        # Check if it is a file local
+        if os.path.exists(name):
+            self.upload(name)
+
+        elif base_name in self.list_files():
+            # the file exists in the MAPDL working directory, so do nothing.
+            pass
+
+        else:
+            if os.path.dirname(name):
+                # It seems you provided a path (or something like that)
+                raise FileNotFoundError(
+                    f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
+                    "working directory, nor in the MAPDL working directory. "
+                )
+            # Preferring logger.warning over warn (from warnings), since it is less intrusive.
+            self._log.warning(
+                f"The name supplied to 'mapdl.use' ('{name}') is not a file in the Python "
+                "working directory, nor in the MAPDL working directory. "
+                "PyMAPDL will assume it is a macro block inside a macro library "
+                "file previously defined using 'mapdl.ulib'."
+            )
+            # If MAPDL cannot find named macro file, it will throw a runtime error.
+
+        # Update arg because the path is no longer needed
+        args = (base_name, *args[1:])
+        return super().use(*args, **kwargs)
+
+    @wraps(Commands.set)
+    def set(
+        self,
+        lstep="",
+        sbstep="",
+        fact="",
+        kimg="",
+        time="",
+        angle="",
+        nset="",
+        order="",
+        **kwargs,
+    ):
+        """Wraps SET to return a Command listing"""
+        output = super().set(
+            lstep, sbstep, fact, kimg, time, angle, nset, order, **kwargs
+        )
+
+        if (
+            isinstance(lstep, str)
+            and lstep.upper() == "LIST"
+            and not sbstep
+            and not fact
+        ):
+            return CommandListingOutput(
+                output,
+                magicwords=["SET", "TIME/FREQ"],
+                columns_names=[
+                    "SET",
+                    "TIME/FREQ",
+                    "LOAD STEP",
+                    "SUBSTEP",
+                    "CUMULATIVE",
+                ],
+            )
+        else:
+            return output

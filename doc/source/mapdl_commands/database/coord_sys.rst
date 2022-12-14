@@ -1,7 +1,7 @@
 .. _ref_coordinate System_api:
 
 *****************
-Coordinate System
+Coordinate system
 *****************
 
 .. currentmodule:: ansys.mapdl.core

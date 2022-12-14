@@ -5,16 +5,15 @@ Contributing and API
 ====================
 
 Overall guidance on contributing to a PyAnsys library appears in the
-`Contributing <https://dev.docs.pyansys.com/overview/contributing.html>`_ topic
+`Contributing <dev_guide_contributing_>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
-with it and all `Guidelines and Best Practices
-<https://dev.docs.pyansys.com/guidelines/index.html>`_ before attempting to
+with it and all `Coding style <dev_guide_coding_style_>`_ before attempting to
 contribute to PyMAPDL.
  
 The following contribution information is specific to PyMAPDL.
 
 
-Cloning the PyMAPDL Repository
+Cloning the PyMAPDL repository
 ==============================
 
 Run this code to clone and install the latest version of PyMAPDL in development mode:
@@ -27,28 +26,29 @@ Run this code to clone and install the latest version of PyMAPDL in development 
     pip install -e .
 
 
-Posting Issues
+Posting issues
 ==============
 
-Use the `PyMAPDL Issues <https://github.com/pyansys/pymapdl/issues>`_
-page to submit questions, report bugs, and request new features. When possible, we
-recommend that you use these issue templates:
+Use the `PyMAPDL Issues <pymapdl_issues_>`_
+page to submit questions, report bugs, and request new features. When possible,
+use these issue templates:
 
 * Bug report template
 * Feature request template
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email `pyansys.support@ansys.com <pyansys.support@ansys.com>`_.
+To reach the project support team, email `pyansys.support@ansys.com <pyansys_support_>`_.
 
-Viewing PyMAPDL Documentation
+Viewing PyMAPDL documentation
 =============================
 
 Documentation for the latest stable release of PyMAPDL is hosted at
-`PyMAPDL Documentation <https://mapdldocs.pyansys.com>`_.
+`PyMAPDL Documentation <pymapdl_docs_>`_.
 
 Documentation for the latest development version, which tracks the
-``main`` branch, is hosted at  `Development PyMAPDL Documentation <https://dev.mapdldocs.pyansys.com/>`_.
+``main`` branch, is hosted at 
+`Development PyMAPDL Documentation <pymapdl_dev_docs_>`_.
 This version is automatically kept up to date via GitHub actions.
 
 Testing MAPDL
@@ -77,12 +77,12 @@ This tells ``ansys.mapdl.core`` to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
 
 
-Code Style
+Code style
 ==========
 
 PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
-<https://dev.docs.pyansys.com>`_ and implements style checking using
-`pre-commit <https://pre-commit.com/>`_.
+<dev_guide_pyansys_>`_ and implements style checking using
+`pre-commit <precommit_>`_.
 
 To ensure your code meets minimum code styling standards, run::
 
@@ -105,15 +105,16 @@ This way, it's not possible for you to push code that fails the style checks. Fo
 
 .. _ref_index_api:
 
-API Reference
+API reference
 =============
-This section gives an overview of the API of several public PyMAPDL
-classes, functions, and attributes.
+This page gives an overview of the API of several public PyMAPDL
+classes, functions, and attributes. You can find them
+on the left sidebar.
 
-These methods may include some MAPDL commands but are generally
-specific to pymapdl specific methods and classes (i.e. methods that
-extend existing MAPDL methods in a pythonic manner).  For classic
-MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
+While these methods might include some MAPDL commands, they are generally
+specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
+MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
+PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 
 .. toctree::
@@ -125,6 +126,7 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    geometry
    helper
    inline
+   krylov
    logging
    mapdl
    math
@@ -135,4 +137,5 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
-   
+   building_example
+   unit_testing

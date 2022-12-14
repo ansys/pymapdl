@@ -1,13 +1,13 @@
 .. _ref_run_controls_commands_api:
 
 ************
-Run Controls
+Run controls
 ************
 
 .. currentmodule:: ansys.mapdl.core
 
 These SESSION commands control the overall characteristics of the
-session, including the jobname, Graphical User Interface behavior, and
+session, including the job name, Graphical User Interface behavior, and
 file switching.
 
 .. autosummary::

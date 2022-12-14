@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 from typing import Optional
+import warnings
 from warnings import warn
 import weakref
 
@@ -52,7 +53,12 @@ from ansys.mapdl.core.common_grpc import (
     DEFAULT_FILE_CHUNK_SIZE,
     parse_chunks,
 )
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+    protect_grpc,
+)
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_types import MapdlInt
 from ansys.mapdl.core.misc import (
@@ -215,7 +221,7 @@ class MapdlGrpc(_MapdlCore):
         Sets MAPDL to not abort at the first error within /BATCH mode.
         Default ``True``.
 
-    remove_temp_files : bool, optional
+    remove_temp_dir : bool, optional
         When this parameter is ``True``, the MAPDL working directory will be
         deleted when MAPDL is exited provided that it is within the temporary
         user directory. Default ``False``.
@@ -282,13 +288,24 @@ class MapdlGrpc(_MapdlCore):
         cleanup_on_exit=False,
         log_apdl=None,
         set_no_abort=True,
-        remove_temp_files=False,
+        remove_temp_files=None,
+        remove_temp_dir_on_exit=False,
         print_com=False,
         channel=None,
         remote_instance=None,
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
+        if remove_temp_files is not None:  # pragma: no cover
+            warnings.warn(
+                "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+                "Please use ``remove_temp_dir_on_exit`` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            remove_temp_dir_on_exit = remove_temp_files
+            remove_temp_files = None
+
         self.__distributed = None
         self._remote_instance = remote_instance
 
@@ -310,6 +327,7 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
+        self._mode = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
@@ -319,7 +337,7 @@ class MapdlGrpc(_MapdlCore):
         self._locked = False  # being used within MapdlPool
         self._stub = None
         self._cleanup = cleanup_on_exit
-        self._remove_tmp = remove_temp_files
+        self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
         self._jobname = start_parm.get("jobname", "file")
         self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
@@ -348,12 +366,14 @@ class MapdlGrpc(_MapdlCore):
         self._pids = []
 
         if channel is None:
+            self._log.debug("Creating channel to %s:%s", ip, port)
             self._channel = self._create_channel(ip, port)
         else:
+            self._log.debug("Using provided channel")
             self._channel = channel
 
         # connect and validate to the channel
-        self._multi_connect(timeout=timeout)
+        self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
 
         # double check we have access to the local path if not
         # explicitly specified
@@ -415,9 +435,11 @@ class MapdlGrpc(_MapdlCore):
             )
 
         if not connected:
-            raise IOError(
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}"
+            raise MapdlConnectionError(
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
             )
+        else:
+            self._exited = False
 
     @property
     def _channel_str(self):
@@ -863,19 +885,19 @@ class MapdlGrpc(_MapdlCore):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()  # pragma: no cover
 
-        self._remove_temp_files()
+        self._remove_temp_dir_on_exit()
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
 
-    def _remove_temp_files(self):
+    def _remove_temp_dir_on_exit(self):
         """Removes the temporary directory created by the launcher.
 
         This only runs if the current working directory of MAPDL is within the
         user temporary directory.
 
         """
-        if self._remove_tmp and self._local:
+        if self.__remove_temp_dir_on_exit and self._local:  # pragma: no cover
             path = self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
@@ -1075,8 +1097,21 @@ class MapdlGrpc(_MapdlCore):
                 return fobj.read()
         return self._download_as_raw(tmp_file).decode()
 
-    def download_result(self, path, progress_bar=False, preference=None):
+    def download_result(self, path=None, progress_bar=False, preference=None):
         """Download remote result files to a local directory
+
+        Parameters
+        ----------
+        path : str, Path, optional
+          Path where the files are downloaded, by default the current
+          python path (``os.getcwd()``)
+
+        progress_bar : bool, optional
+          Show the progress bar or not, default to False.
+
+        preference : str
+          Specify the preferred result file, either ``rst`` or ``rth``.
+          Only required when both files are present. Defaults to 'rst'.
 
         Examples
         --------
@@ -1086,6 +1121,8 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_result(os.getcwd())
 
         """
+        if path is None:  # if not path seems to not work in same cases.
+            path = os.getcwd()
 
         def _download(targets):
             for target in targets:
@@ -1226,7 +1263,7 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        # the old behaviour is to supplied the name and the extension separatelly.
+        # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
         basename = os.path.basename(fname)
         if len(basename.split(".")) == 1:
@@ -2049,6 +2086,24 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.math import MapdlMath
 
         return MapdlMath(self)
+
+    @property
+    def krylov(self):
+        """APDL krylov interface.
+
+        For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        Returns
+        -------
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        """
+        if self._kylov is None:
+            from ansys.mapdl.core.krylov import KrylovSolver
+
+            self._kylov = KrylovSolver(self)
+
+        return self._kylov
 
     @property
     def db(self):

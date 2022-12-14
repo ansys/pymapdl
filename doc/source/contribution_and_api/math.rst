@@ -1,7 +1,7 @@
 .. _ref_math_api:
 
-MapdlMath
-=========
+``MapdlMath`` module
+====================
 These classes are specific to the ``MapdlMath`` module:
 
 .. currentmodule:: ansys.mapdl.core

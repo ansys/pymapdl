@@ -779,7 +779,7 @@ class Isotropic:
 
 
 ###############################################################################
-# Aplying the created classes.
+# Applying the created classes.
 
 isotropic = Isotropic(30e6, 0.25)
 elem = Elem2D(nodes)

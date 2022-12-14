@@ -89,8 +89,15 @@ class MapdlDidNotStart(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class MapdlConnectionError(RuntimeError):
+    """Provides the error when connecting to the MAPDL instance fails."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 class LicenseServerConnectionError(MapdlDidNotStart):
-    """Error when the license server is not available."""
+    """Provides the error when the license server is not available."""
 
     def __init__(self, msg=""):
         MapdlDidNotStart.__init__(self, msg)
@@ -206,3 +213,10 @@ class MapdlVersionError(MapdlException):
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)
+
+
+class EmptyRecordError(RuntimeError):
+    """Raised when a record is empty"""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)

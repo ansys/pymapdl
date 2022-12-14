@@ -32,6 +32,7 @@ dependencies = [
     "pyvista>=0.33.0",
     "scipy>=1.3.0",  # for sparse (consider optional?)
     "tqdm>=4.45.0",
+    "click>=8.1.3", # for CLI interface
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -47,8 +48,99 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 
+[project.optional-dependencies]
+tests = [
+    "ansys-dpf-core==0.7.0",
+    "autopep8==2.0.0",
+    "matplotlib==3.6.2",
+    "scipy==1.9.3",
+    "pandas==1.5.2",
+    "pytest==7.2.0",
+    "pytest-cov==4.0.0",
+    "pyvista==0.37.0",
+    "pyansys-tools-report==0.4.1",
+    "vtk==9.0.3",
+    "pytest-rerunfailures==10.3",
+]
+doc = [
+    "Sphinx==5.3.0",
+    "ansys-dpf-core==0.7.0",
+    "ansys-mapdl-reader==0.52.3",
+    "ansys-sphinx-theme==0.8.0",
+    "grpcio==1.43.0",
+    "imageio-ffmpeg==0.4.7",
+    "imageio==2.22.4",
+    "jupyter_sphinx==0.4.0",
+    "jupyterlab>=3.2.8",
+    "matplotlib==3.6.2",
+    "numpydoc==1.5.0",
+    "pandas==1.5.2",
+    "plotly==5.11.0",
+    "pypandoc==1.10",
+    "pytest-sphinx==0.5.0",
+    "pythreejs==2.4.1",
+    "pyvista==0.37.0",
+    "sphinx-autobuild==2021.3.14",
+    "sphinx-autodoc-typehints==1.19.5",
+    "sphinx-copybutton==0.5.1",
+    "sphinx-gallery==0.11.1",
+    "sphinx-notfound-page==0.8.3",
+    "sphinxcontrib-websupport==1.2.4",
+    "sphinxemoji==0.2.0",
+    "vtk==9.0.3",
+]
+
 [tool.flit.module]
 name = "ansys.mapdl.core"
 
 [project.urls]
 Source = "https://github.com/pyansys/pymapdl"
+
+[project.scripts]
+pymapdl_convert_script = "ansys.mapdl.core.convert:cli"
+
+[tool.pytest.ini_options]
+junit_family = "legacy"
+filterwarnings = [
+    "ignore::FutureWarning",
+    "ignore::PendingDeprecationWarning",
+    "ignore::DeprecationWarning",
+    # bogus numpy ABI warning (see numpy/#432)
+    "ignore:.*numpy.dtype size changed.*:RuntimeWarning",
+    "ignore:.*numpy.ufunc size changed.*:RuntimeWarning",
+    "ignore::UserWarning",
+]
+markers = [
+    "skip_grpc: skip tests using grpc",
+    "corba: skip tests using the CORBA interface",
+    "gui: skip tests that launch the GUI interface",
+]
+testpaths = "tests"
+
+[tool.isort]
+profile = "black"
+force_sort_within_sections = true
+default_section = "THIRDPARTY"
+skip_glob = ["__init__.py"]
+src_paths = ["doc", "src", "tests"]
+
+
+[tool.coverage.run]
+source = ["ansys/pymapdl"]
+omit = [
+    # omit commands
+    "ansys/mapdl/core/_commands/*",
+
+    # ignore legacy interfaces
+    "ansys/mapdl/core/mapdl_console.py",
+    "ansys/mapdl/core/mapdl_corba.py",
+    "ansys/mapdl/core/jupyter.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.codespell]
+skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
+ignore-words = "doc/styles/Vocab/ANSYS/accept.txt"
+quiet-level = 3

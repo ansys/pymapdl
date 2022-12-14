@@ -27,7 +27,9 @@ from ._commands import (
 
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
-REG_FLOAT_INT = re.compile(r"[+-]?[0-9]*[.]?[0-9]+[Ee]?[+-]?[0-9]+|\s[0-9]+\s")
+REG_FLOAT_INT = re.compile(
+    r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
+)  # match number groups
 BC_REGREP = re.compile(
     r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
 )
@@ -53,7 +55,7 @@ GROUP_DATA_START = ["NODE", "ELEM"]
 # Some of them are not documented (already deprecated?)
 # So they are not in the Mapdl class,
 # so they won't be wrapped.
-CMD_LISTING = [
+CMD_RESULT_LISTING = [
     "NLIN",  # not documented
     "PRCI",
     "PRDI",  # Not documented.
@@ -78,11 +80,23 @@ CMD_LISTING = [
     "PRST",  # Not documented.
     "PRVE",
     "PRXF",  # Not documented.
-    "STAT",
     "SWLI",
 ]
 
 CMD_BC_LISTING = ["FLIS", "DLIS"]
+
+CMD_ENTITY_LISTING = [
+    "NLIS",
+    # "ELIS", # To be implemented later
+    # "KLIS",
+    # "LLIS",
+    # "ALIS",
+    # "VLIS",
+]
+
+CMD_LISTING = []
+CMD_LISTING.extend(CMD_ENTITY_LISTING)
+CMD_LISTING.extend(CMD_RESULT_LISTING)
 
 # Adding empty lines to match current format.
 docstring_injection = """
@@ -100,7 +114,7 @@ str
 
     * ``str.to_dataframe()`` (Only if Pandas is installed)
 
-    For more information visit `PyMAPDL Post-Processing <https://mapdldocs.pyansys.com/user_guide/post.html>`_.
+    For more information visit `PyMAPDL Post-Processing <https://mapdl.docs.pyansys.com/user_guide/post.html>`_.
 
 """
 
@@ -478,20 +492,30 @@ class CommandListingOutput(CommandOutput):
     a list of lists, a Numpy array or a Pandas DataFrame.
     """
 
+    def __new__(cls, content, cmd=None, magicwords=None, columns_names=None):
+        obj = super().__new__(cls, content)
+        obj._cmd = cmd
+        obj._magicwords = magicwords
+        obj._columns_names = columns_names
+        return obj
+
     def __init__(self, *args, **kwargs):
         self._cache = None
 
-    def _is_data_start(self, line, magicword=None):
+    def _is_data_start(self, line, magicwords=None):
         """Check if line is the start of a data group."""
-        if not magicword:
-            magicword = GROUP_DATA_START
+        if not magicwords:
+            if self._magicwords:
+                magicwords = self._magicwords
+            else:
+                magicwords = GROUP_DATA_START
 
         # Checking if we are supplying a custom start function.
         if self.custom_data_start(line) is not None:
             return self.custom_data_start(line)
 
         if line.split():
-            if line.split()[0] in magicword or self.custom_data_start(line):
+            if line.split()[0] in magicwords or self.custom_data_start(line):
                 return True
         return False
 
@@ -557,7 +581,7 @@ class CommandListingOutput(CommandOutput):
                 body = body[:i]
         return body
 
-    def _get_data_group_indexes(self, body, magicword=None):
+    def _get_data_group_indexes(self, body, magicwords=None):
         """Return the indexes of the start and end of the data groups."""
         if "*****ANSYS VERIFICATION RUN ONLY*****" in str(self[:1000]):
             shift = 2
@@ -568,7 +592,7 @@ class CommandListingOutput(CommandOutput):
         start_idxs = [
             ind
             for ind, each in enumerate(body)
-            if self._is_data_start(each, magicword=magicword)
+            if self._is_data_start(each, magicwords=magicwords)
         ]
         end_idxs = [
             ind - shift for ind, each in enumerate(body) if self._is_empty_line(each)
@@ -590,6 +614,9 @@ class CommandListingOutput(CommandOutput):
         List of strings
 
         """
+        if self._columns_names:
+            return self._columns_names
+
         body = self._get_body()
         pairs = list(self._get_data_group_indexes(body))
         try:
@@ -609,7 +636,7 @@ class CommandListingOutput(CommandOutput):
         parsed_lines = []
         for line in self.splitlines():
             # exclude any line containing characters [A-Z] except for E
-            if line and not REG_LETTERS.search(line):
+            if line.strip() and not REG_LETTERS.search(line):
                 items = REG_FLOAT_INT.findall(line)
                 if items:
                     parsed_lines.append(items)

@@ -54,6 +54,7 @@ tests/cyclic/htmlcov
 *,cover
 .benchmarks/
 test-output.xml
+coverage.xml
 
 \#*
 .\#*
@@ -89,3 +90,4 @@ venv/
 
 # Pycharm local settings
 .idea/
+/.vs
