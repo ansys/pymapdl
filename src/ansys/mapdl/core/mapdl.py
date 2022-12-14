@@ -1566,7 +1566,7 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:
+            if color_areas:  # pragma: no cover
                 anum = surf["entity_num"]
                 size_ = max(anum) + 1
                 rand = np.random.random(size_)
