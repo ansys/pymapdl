@@ -13,6 +13,8 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
+    -w /jobs \
+    -u=0:0 \
     $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt &
 grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
 # python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
