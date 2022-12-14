@@ -593,5 +593,4 @@ issue is already listed. If not, you can do one of the following:
 
 * Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
   or want to create a feature request.
- .
 
