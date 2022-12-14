@@ -591,7 +591,7 @@ issue is already listed. If not, you can do one of the following:
 * Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and
   create a discussion about your issue.
 
-*  Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
-   or want to create a feature request.
+* Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
+  or want to create a feature request.
  .
 
