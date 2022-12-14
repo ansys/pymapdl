@@ -246,7 +246,7 @@ jobs:
           if compgen -G './logs-build-docs/*.out' > /dev/null ;then for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
   build_test:
-    name: "Build and unit testing"
+    name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
     needs: [smoke-tests]
     strategy:
@@ -399,13 +399,13 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi
 
   build_test_ubuntu:
-    name: "Local unit testing on ubuntu"
+    name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
     needs: [smoke-tests]
     timeout-minutes: 35
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
-      options: "--entrypoint /bin/bash"
+      options: "-u=0:0 --entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -466,7 +466,7 @@ jobs:
           root_dir: ${{ github.workspace }}
 
   test_windows:
-    name: "Unit testing on windows"
+    name: "Local: Build and unit testing on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
 
