@@ -14,9 +14,13 @@ body:
     id: new-bug
     attributes:
       label: Before submitting the issue
-      description: Ensure that the following conditions are met:
+      description: |
+        Ensure that the following conditions are met.
+
+        Visit [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html) for more information.
+
       options:
-      - label: I have visited the [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html).
+      - label: I have visited the Troubleshooting section.
         required: true
       - label: I have searched among the existing issues.
         required: true
