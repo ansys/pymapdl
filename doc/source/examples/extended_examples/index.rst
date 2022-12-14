@@ -19,6 +19,8 @@ this project.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`python_upf_examples` | Demonstrates the interoperability between ``MAPDL`` user programmable functions and Python.             |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
+| :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                              |
++----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html
