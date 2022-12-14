@@ -26,10 +26,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 2
-  RESET_EXAMPLES_CACHE: 2
-  RESET_DOC_BUILD_CACHE: 2
-  RESET_AUTOSUMMARY_CACHE: 2
+  RESET_PIP_CACHE: 3
+  RESET_EXAMPLES_CACHE: 3
+  RESET_DOC_BUILD_CACHE: 3
+  RESET_AUTOSUMMARY_CACHE: 3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -466,6 +466,7 @@ jobs:
           root_dir: ${{ github.workspace }}
 
   test_windows:
+    if: github.repository == ''
     name: "Local: Build and unit testing on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
@@ -473,6 +474,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Skipping because it is installed locally.
       # - name: Setup Python
       #   uses: actions/setup-python@v4.3.2
       #   with:
