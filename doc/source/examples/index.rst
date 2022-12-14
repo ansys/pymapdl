@@ -46,6 +46,7 @@ The documentation to the exposed examples can be found in the
     extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
     extended_examples/Python_UPF/python_upf_examples
     extended_examples/Krylov/krylov_example
+    extended_examples/dash/dash_example
 
 .. include:: extended_examples/index.rst
    :start-line: 2

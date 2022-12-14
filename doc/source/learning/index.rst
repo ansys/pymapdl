@@ -14,11 +14,11 @@ Resources
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`_.
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`.
 
 
 Courses
-=======
+===============
 
 Ansys has prepared high quality courses to guide you through the learning process.
 
