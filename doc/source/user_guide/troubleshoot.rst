@@ -9,7 +9,7 @@ Troubleshooting PyMAPDL
 =======================
 
 
-To help overcome any problem that you might have when using PyMAPDL,
+To help you resolve any problems that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
 
@@ -555,15 +555,15 @@ Recommendations
 
 When connecting to an instance of MAPDL using gRPC (default), there are some cases
 where the MAPDL server might exit unexpectedly. There
-are several ways to improve performance and stability of MADPL:
+are several ways to improve MADPL performance and stability:
 
 - When possible, pass ``mute=True`` to individual MAPDL commands or
   set it globally with the :func:`Mapdl.mute
   <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
   back the response from MAPDL for each command and marginally
   improves performance and stability. Consider having a debug flag in
-  your program or script so you can turn on or turn off logging and
-  verbosity when needed.
+  your program or script so that you can turn on and off logging and
+  verbosity as needed.
 
 
 Issues
@@ -585,13 +585,13 @@ More help needed?
   *"What do you do if a problem is not listed here?"*  
 
 
-Visit `PyMAPDL Repository Issues <pymapdl_issues_>`_ and search if your 
+Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
 issue is already listed. If not, you can do one of the following:
 
-* Go to `PyMAPDL Repository Discussion <pymapdl_discussions_>`_ and
+* Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and
   create a discussion about your issue.
 
-* If you found a bug or you want to make a feature request,
-  you can open a feature request in
-  `PyMAPDL Repository Issues <pymapdl_issues_>`_.
+*  Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
+   or want to create a feature request.
+ .
 

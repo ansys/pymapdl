@@ -132,7 +132,7 @@ This works if you want to run a Docker image using WSL Linux image to host that
 Docker image. The Docker image successfully communicates with the Windows
 License Server using these ports if you use the ``'-p'`` flag when running the
 Docker image and these ports are open. 
-See `Run an MAPDL image <run_an_mapdl_image_>`.
+For more information, see `Run an MAPDL image <run_an_mapdl_image_>`.
 
 
 If you want to run MAPDL in the CentOS 7 image and use the Windows license
@@ -202,9 +202,9 @@ environment variable with this IP address:
 Launch MAPDL in WSL
 ===================
 
-To launch MAPDL in WSL, you need to do as in 
+To launch MAPDL in WSL, you must follow the procedure in 
 `Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`.
-For example:
+An example follows.
 
 .. code:: bash
 
@@ -221,10 +221,10 @@ If you want to change the working directory, you can use the ``-dir`` flag.
 Connect to an MAPDL instance running in WSL
 ===========================================
 
-To connect to the WSL instance which is running the MAPDL instance follow the
-instructions given in 
+To connect to the WSL instance that is running the MAPDL instance, follow the
+procedure in 
 `Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`
-but specifying the IP address of the WSL instance. For example:
+but specify the IP address of the WSL instance:
 
 .. code:: python 
 
