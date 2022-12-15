@@ -11,8 +11,6 @@ on:
   push:
     tags:
       - "*"
-    branches:
-      - main
 
 env:
   PROJECT_NAME: 'PyMAPDL'
@@ -31,10 +29,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 3
-  RESET_EXAMPLES_CACHE: 3
-  RESET_DOC_BUILD_CACHE: 3
-  RESET_AUTOSUMMARY_CACHE: 3
+  RESET_PIP_CACHE: 4
+  RESET_EXAMPLES_CACHE: 4
+  RESET_DOC_BUILD_CACHE: 4
+  RESET_AUTOSUMMARY_CACHE: 4
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -109,9 +107,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -253,7 +251,6 @@ jobs:
   build_test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
-    needs: [smoke-tests]
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu']
@@ -280,9 +277,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-${{ runner.os }}-${{ matrix.python-version }}
+            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -406,7 +403,6 @@ jobs:
   build_test_ubuntu:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
-    needs: [smoke-tests]
     timeout-minutes: 35
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
@@ -527,7 +523,7 @@ jobs:
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, build_test_ubuntu]
+    needs: [docs_build, build_test, build_test_ubuntu, smoke-tests]
     runs-on: ubuntu-latest
     steps:
       
@@ -554,18 +550,6 @@ jobs:
           overwrite: "{
             title: `Release FAILED!`,
             }"
-
-  upload_dev_docs:
-    name: "Upload dev documentation"
-    if: ${{ github.ref == 'refs/heads/main' || github.event.inputs.publish == 'true' }}
-    runs-on: ubuntu-latest
-    needs: [docs_build]
-    steps:
-      - name: Deploy the latest documentation
-        uses: pyansys/actions/doc-deploy-dev@v2
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   upload_docs_release:
     name: "Upload release documentation"
