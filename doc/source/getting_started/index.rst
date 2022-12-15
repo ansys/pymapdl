@@ -13,11 +13,15 @@ For more information on getting a licensed copy of Ansys, visit
    :hidden:
    :maxdepth: 2
 
-   running_mapdl
+   learning
    versioning
+   running_mapdl
    docker
-   using_julia
    wsl
+   using_julia
+   faq
+   contribution
+
 
 ************
 Installation
