@@ -55,6 +55,22 @@ directly from the command line.
 You can then use your host Python environment to connect to that MAPDL
 instance.
 
+.. graphviz::
+
+    digraph {
+      node [];
+      subgraph cluster_frontend {
+        label="*HOST*";
+        Python;
+      subgraph cluster_backend {
+        MAPDL;
+        label="*DOCKER*";
+        }
+      }
+      Python -> MAPDL
+      MAPDL -> Python
+    }
+
 Because this image does not contain a license server, you must enter your
 license server IP address in the ``ANSYSLMD_LICENSE_FILE`` environment variable. 
 
