@@ -588,9 +588,11 @@ More help needed?
 Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
 issue is already listed. If not, you can do one of the following:
 
-* Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and
-  create a discussion about your issue.
+* Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and 
+   create a discussion about your issue.
 
 * Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
-  or want to create a feature request.
+   or want to create a feature request.
+
+For more complex issues or queries please contact `PyAnsys Support <pyansys_support_>`_.
 

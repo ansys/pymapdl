@@ -86,7 +86,7 @@ There are several images in the registry, each corresponding to a different
 version of MAPDL. For Ubuntu systems (any image tagged as ``Ubuntu``), you should
 use the latest version of MAPDL.
 
-To rerun it again, you should restart the container or just delete it and run it again using:
+To rerun it, you should restart the container or just delete it and run it again using:
 
 .. code:: pwsh
 
