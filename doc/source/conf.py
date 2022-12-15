@@ -63,6 +63,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
+    "sphinx.ext.graphviz",
 ]
 
 # Intersphinx mapping
@@ -204,6 +205,11 @@ html_theme_options = {
             "name": "Support",
             "url": "https://github.com/pyansys/pymapdl/discussions",
             "icon": "fa fa-comment fa-fw",
+        },
+        {
+            "name": "Contribute",
+            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "icon": "fa fa-wrench",
         },
     ],
     "switcher": {

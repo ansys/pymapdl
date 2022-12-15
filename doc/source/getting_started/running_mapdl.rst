@@ -1,8 +1,8 @@
 .. _using_standard_install:
 
-******************************************
-Use PyMAPDL from the standard installation
-******************************************
+*********************
+Standard installation
+*********************
 
 The PyAnsys ``ansys-mapdl-core`` package requires either a local or
 remote instance of MAPDL to communicate with it. This section covers
@@ -57,6 +57,8 @@ automatically connect to it:
 
 This is the easiest and fastest way to get PyMAPDL up and running. 
 But you need to have an ANSYS license server installed locally. 
+
+.. _launch_grpc_madpl_session:
 
 Launch a gRPC MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

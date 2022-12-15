@@ -1,8 +1,8 @@
 .. _pymapdl_docker:
 
-************************
-Use MAPDL through Docker
-************************
+*****************
+Docker containers
+*****************
 You can run MAPDL within a container on any OS using Docker and
 connect to it via PyMAPDL.
 
@@ -17,7 +17,9 @@ in a containerized environment such as Docker or Singularity:
 Configure the Docker registry
 =============================
 
-There is a Docker image hosted on the 
+**Only for images in private repositories.**
+
+There are several Docker images hosted on the 
 `PyMAPDL GitHub <pymapdl_repo_>`_ repository that you
 can download using your GitHub credentials.
 
@@ -43,38 +45,79 @@ with:
     cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
 
 
+.. _run_an_mapdl_image:
+
 Run an MAPDL image
 ===================
 
 You can now launch MAPDL directly from Docker with a short script or
-directly from the command line. Because this image contains no license
-server, you must enter your license server IP address in the
-``LICENSE_SERVER`` environment variable. With that, you can launch
-MAPDL with:
+directly from the command line.
+You can then use your host Python environment to connect to that MAPDL
+instance.
 
-.. code::
+.. graphviz::
 
-    LICENSE_SERVER=1055@XXX.XXX.XXX.XXX
-    VERSION=v21.1.0
+    digraph {
+      node [];
+      subgraph cluster_frontend {
+        label="*HOST*";
+        Python;
+      subgraph cluster_backend {
+        MAPDL;
+        label="*DOCKER*";
+        }
+      }
+      Python -> MAPDL
+      MAPDL -> Python
+    }
 
-    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
-    docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
+Because this image does not contain a license server, you must enter your
+license server IP address in the ``ANSYSLMD_LICENSE_FILE`` environment variable. 
+
+Additionally, you run a Docker image of PyMAPDL with:
+
+.. code:: pwsh
+
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
 
 First time you run it, Docker logins into the *ghcr.io* registry and
-pulls the image which can take some time.
+pulls the image, which can take some time.
 There are several images in the registry, each corresponding to a different
-version of MAPDL. It is recommended to use the latest version of MAPDL for
-the Ubuntu systems (any image tagged as ``Ubuntu``).
+version of MAPDL. For Ubuntu systems (any image tagged as ``Ubuntu``), you should
+use the latest version of MAPDL.
 
-Note that port `50052` (local to the container) is being mapped to
-50052 on the host. This makes it possible to launch several MAPDL
-instances with different port mappings to allow for multiple instances
-of MAPDL.
+To rerun it, you should restart the container or just delete it and run it again using:
+
+.. code:: pwsh
+
+    docker stop mapdl
+    docker container prune
+
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+
+You can use the Docker flag ``--rm`` to automatically clean up the container
+and remove the file system when the container exits.
+
+This creates a log file (``log.txt``) in your current directory location.
+
+Notice that the WSL internal gRPC port (``50052``) is being mapped to a
+different Windows host port (``50053``) to avoid port conflicts with local
+MAPDL instances running on the host.
+You could additionally launch more Docker containers in different ports if
+you want to run multiple simulations at the same time.
+The module ``ansys-mapdl-core-pool`` does not work when you are connecting
+to an MAPDL Docker image.
+
+.. note:: Ensure that your port ``50053`` is open in your firewall.
 
 You can provide additional command line parameters to MAPDL by simply
 appending to the Docker command. 
 For example, you can increase the number of processors (up to the
-number available on the host machine) with the `-np` switch.
+number available on the host machine) with the ``-np`` switch.
+
+You should use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
+to run the preceding commands all at once.
+
 
 Once you have launched MAPDL you should see:
 
@@ -88,6 +131,7 @@ Once you have launched MAPDL you should see:
 
     Server Executable   : MapdlGrpc Server
     Server listening on : 0.0.0.0:50052
+
 
 
 Using ``docker-compose`` to launch MAPDL
@@ -135,8 +179,11 @@ use:
    The license server is not intended to be used in production. 
    It is only intended for testing/debugging purposes.
    Its access is limited to collaborators of the PyAnsys project.
-   If you would like to have access to it, please contact PyAnsys support at
+   If you would like to have access to the license server, contact PyAnsys support at
    `pyansys.support@ansys.com <pyansys_support_>`_.
+
+
+.. _pymapdl_connect_to_MAPDL_container:
 
 Connect to the MAPDL container from Python
 ==========================================
@@ -164,6 +211,67 @@ Verify your connection with:
     Product:             ANSYS Mechanical Enterprise
     MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
     PyMAPDL Version:     Version: 0.57.0
+
+
+To connect to an existing MAPDL instance, you can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method with the argument ``start_instance=False``:
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(port=50053, start_instance=False) 
+
+
+Because of the linking between host ports and Docker ports (``-p`` argument),
+you do not need to specify the IP address when connecting to a local container.
+However, if you are trying to connect to a WSL local distribution, you must
+specify the IP address of the WSL instance (normally ``127.0.0.1``) because
+no port mapping is done between both.
+
+Here is an example:
+
+.. code:: python 
+
+    from ansys.mapdl.core import Mapdl
+    
+    mapdl = Mapdl(ip='127.0.0.1', port=50053)
+
+
+You can also specify the port and IP address using environment variables that are read when
+launching the MAPDL instance:
+
+.. code:: bash
+
+    export PYMAPDL_START_INSTANCE=False
+    export PYMAPDL_PORT=50053
+    export PYMAPDL_IP=127.0.0.1
+
+
+
+Launch Docker with UPF capabilities
+===================================
+
+If you want to specify a custom Python UPF routine, you must have the
+environment variables ``ANS_USER_PATH`` and ``ANS_USE_UPF`` defined. The
+former should be equal to the path where the UPF routines are located, and the
+latter should be equal to ``TRUE``.
+
+In WSL, you can do this using:
+
+.. code:: bash
+
+    export ANS_USER_PATH=/home/user/UPFs # Use your own path to your UPF files.
+    export ANS_USE_UPF=TRUE
+
+You can then run the Docker image with:
+
+.. code:: bash
+
+    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp  1>log.txt
+
+.. warning:: The use of UPFs with Docker images or PyMAPDL is still in the alpha state.
+
+
 
 Additional considerations
 =========================
