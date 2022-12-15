@@ -1052,6 +1052,7 @@ class MapdlGrpc(_MapdlCore):
                 if os.path.isdir(local_path):
                     return os.listdir(local_path)
             return []
+
         elif self._exited:
             raise RuntimeError("Cannot list remote files since MAPDL has exited")
 
