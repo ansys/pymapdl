@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from ansys.mapdl.core import examples, launch_mapdl
+from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
@@ -192,13 +192,6 @@ def test__download_missing_file(mapdl, tmpdir):
     target = tmpdir.join("tmp")
     with pytest.raises(FileNotFoundError):
         mapdl._download("__notafile__", target)
-
-
-@skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
-def test_grpc_custom_ip():
-    ip = "127.0.0.2"
-    mapdl = launch_mapdl(ip=ip)
-    assert mapdl._ip == ip
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
