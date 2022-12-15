@@ -409,7 +409,7 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
 
 
 
-Default Location of the executable file
+Default location of the executable file
 ---------------------------------------
 
 The first time that you run PyMAPDL, it detects the
@@ -557,13 +557,16 @@ When connecting to an instance of MAPDL using gRPC (default), there are some cas
 where the MAPDL server might exit unexpectedly. There
 are several ways to improve MADPL performance and stability:
 
-- When possible, pass ``mute=True`` to individual MAPDL commands or
-  set it globally with the :func:`Mapdl.mute
-  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
-  back the response from MAPDL for each command and marginally
-  improves performance and stability. Consider having a debug flag in
-  your program or script so that you can turn on and off logging and
-  verbosity as needed.
+Use ``mute`` to improve stability
+-----------------------------------
+
+When possible, pass ``mute=True`` to individual MAPDL commands or
+set it globally with the :func:`Mapdl.mute
+<ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
+back the response from MAPDL for each command and marginally
+improves performance and stability. Consider having a debug flag in
+your program or script so that you can turn on and off logging and
+verbosity as needed.
 
 
 Issues
@@ -589,10 +592,9 @@ Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your
 issue is already listed. If not, you can do one of the following:
 
 * Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and 
-   create a discussion about your issue.
-
+  create a discussion about your issue.
 * Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
-   or want to create a feature request.
+  or want to create a feature request.
 
-For more complex issues or queries please contact `PyAnsys Support <pyansys_support_>`_.
+For more complex issues or queries, contact `PyAnsys Support <pyansys_support_>`_.
 
