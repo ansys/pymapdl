@@ -202,7 +202,8 @@ class LicenseChecker:
 
         """
         licdebug_file = os.path.join(
-            get_ansys_license_debug_file_path(), get_ansys_license_debug_file_name()
+            get_ansys_license_debug_file_path(),
+            get_ansys_license_debug_file_name(),
         )
         file_iterator = get_ansys_license_debug_file_tail(licdebug_file)
 

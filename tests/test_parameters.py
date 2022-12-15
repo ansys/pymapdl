@@ -75,7 +75,9 @@ def test__get_parameter_array(mapdl, number):
             "123asdf", marks=pytest.mark.xfail, id="Starting by several numbers"
         ),
         pytest.param(
-            "asa12df+", marks=pytest.mark.xfail, id="Invalid symbol in parameter name."
+            "asa12df+",
+            marks=pytest.mark.xfail,
+            id="Invalid symbol in parameter name.",
         ),
         # function args
         pytest.param(

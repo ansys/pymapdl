@@ -325,7 +325,11 @@ class Logger:
     _instances = {}
 
     def __init__(
-        self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME
+        self,
+        level=logging.DEBUG,
+        to_file=False,
+        to_stdout=True,
+        filename=FILE_NAME,
     ):
         """Customized logger class for Pymapdl.
 
@@ -549,7 +553,8 @@ class Logger:
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
             logger.critical(
-                "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+                "Uncaught exception",
+                exc_info=(exc_type, exc_value, exc_traceback),
             )
 
         sys.excepthook = handle_exception

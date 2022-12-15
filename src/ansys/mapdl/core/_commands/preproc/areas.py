@@ -753,7 +753,15 @@ class Areas:
         return self.run(command, **kwargs)
 
     def arsym(
-        self, ncomp="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        ncomp="",
+        na1="",
+        na2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Generates areas from an area pattern by symmetry reflection.
 
@@ -968,7 +976,15 @@ class Areas:
         return self.run(command, **kwargs)
 
     def atran(
-        self, kcnto="", na1="", na2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        kcnto="",
+        na1="",
+        na2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Transfers a pattern of areas to another coordinate system.
 

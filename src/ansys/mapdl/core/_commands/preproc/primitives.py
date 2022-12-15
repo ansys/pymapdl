@@ -661,7 +661,14 @@ class Primitives:
         return self.run(command, **kwargs)
 
     def rpr4(
-        self, nsides="", xcenter="", ycenter="", radius="", theta="", depth="", **kwargs
+        self,
+        nsides="",
+        xcenter="",
+        ycenter="",
+        radius="",
+        theta="",
+        depth="",
+        **kwargs,
     ):
         """Creates a regular polygonal area or prism volume anywhere on the working plane.
 
