@@ -866,14 +866,15 @@ class MapdlGrpc(_MapdlCore):
         if self._exited:
             return
 
-        self._exiting = True
-        self._log.debug("Exiting MAPDL")
-
         if save:
             try:
+                self._log.debug("Saving MAPDL database")
                 self.save()
             except:
                 pass
+
+        self._exiting = True
+        self._log.debug("Exiting MAPDL")
 
         if self._local:
             if os.name == "nt":
@@ -882,6 +883,7 @@ class MapdlGrpc(_MapdlCore):
             self._remove_lock_file()
         else:
             self._kill_server()
+
         self._exited = True
 
         if self._remote_instance:
@@ -924,6 +926,7 @@ class MapdlGrpc(_MapdlCore):
         a local process.
 
         """
+        self._log.debug("Killing MAPDL server")
         self._ctrl("EXIT")
 
     def _close_process(self):  # pragma: no cover
@@ -939,7 +942,9 @@ class MapdlGrpc(_MapdlCore):
         if self._local:
             for pid in self._pids:
                 try:
+                    self._log.debug(f"Killing MAPDL process: {pid}")
                     os.kill(pid, 9)
+                    self._pids.remove(pid)
                 except OSError:
                     pass
 
@@ -969,6 +974,7 @@ class MapdlGrpc(_MapdlCore):
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
+        self._log.debug("Removing lock file after exit.")
         mapdl_path = self.directory
         if mapdl_path:
             for lockname in [self.jobname + ".lock", "file.lock"]:
