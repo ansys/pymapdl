@@ -6,8 +6,6 @@ on:
   push:
     tags:
       - "*"
-    branches:
-      - main
 
 env:
   PROJECT_NAME: 'PyMAPDL'
@@ -547,18 +545,6 @@ jobs:
           overwrite: "{
             title: `Release FAILED!`,
             }"
-
-  upload_dev_docs:
-    name: "Upload dev documentation"
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    needs: [docs_build]
-    steps:
-      - name: Deploy the latest documentation
-        uses: pyansys/actions/doc-deploy-dev@v2
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   upload_docs_release:
     name: "Upload release documentation"

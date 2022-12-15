@@ -1,0 +1,32 @@
+name: Dev docs publisher
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "*"
+    branches:
+      - main
+
+env:
+  DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upload_dev_docs:
+    name: "Upload dev documentation"
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy the latest documentation
+        uses: pyansys/actions/doc-deploy-dev@v2
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
