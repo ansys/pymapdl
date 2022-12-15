@@ -17,6 +17,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: documentation-html
+
       - name: Deploy the latest documentation
         uses: pyansys/actions/doc-deploy-dev@v2
         with:
