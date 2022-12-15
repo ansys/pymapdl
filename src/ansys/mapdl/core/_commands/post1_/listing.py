@@ -1,6 +1,13 @@
 class Listing:
     def format(
-        self, ndigit="", ftype="", nwidth="", dsignf="", line="", char="", **kwargs
+        self,
+        ndigit="",
+        ftype="",
+        nwidth="",
+        dsignf="",
+        line="",
+        char="",
+        **kwargs,
     ):
         """Specifies format controls for tables.
 
@@ -56,7 +63,14 @@ class Listing:
         return self.run(command, **kwargs)
 
     def header(
-        self, header="", stitle="", idstmp="", notes="", colhed="", minmax="", **kwargs
+        self,
+        header="",
+        stitle="",
+        idstmp="",
+        notes="",
+        colhed="",
+        minmax="",
+        **kwargs,
     ):
         """Sets page and table heading print controls.
 

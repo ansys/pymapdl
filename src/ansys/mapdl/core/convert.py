@@ -634,7 +634,8 @@ class FileTranslator:
 
         if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
-                "com", ["The following line has been commented due to `comment_solve`:"]
+                "com",
+                ["The following line has been commented due to `comment_solve`:"],
             )
             self.store_command("com", [line])
             return
@@ -842,8 +843,14 @@ class FileTranslator:
             func_name,
             ", ".join(["ARG%d=''" % i for i in range(1, 7)]),
         )
-        line += "%s%s," % (spacing, ", ".join(["ARG%d=''" % i for i in range(7, 13)]))
-        line += "%s%s):" % (spacing, ", ".join(["ARG%d=''" % i for i in range(13, 19)]))
+        line += "%s%s," % (
+            spacing,
+            ", ".join(["ARG%d=''" % i for i in range(7, 13)]),
+        )
+        line += "%s%s):" % (
+            spacing,
+            ", ".join(["ARG%d=''" % i for i in range(13, 19)]),
+        )
         self.lines.append(line)
         self.indent = self.indent + "    "
 
@@ -930,7 +937,12 @@ class FileTranslator:
                 self.comment,
             )
         else:
-            line = "%s%s.%s(%s)" % (self.indent, self.obj_name, function, parameter_str)
+            line = "%s%s.%s(%s)" % (
+                self.indent,
+                self.obj_name,
+                function,
+                parameter_str,
+            )
 
         self.lines.append(line)
 

@@ -57,7 +57,12 @@ def launch_pexpect(
     """
     import pexpect
 
-    command = "%s -j %s -np %d %s" % (exec_file, jobname, nproc, additional_switches)
+    command = "%s -j %s -np %d %s" % (
+        exec_file,
+        jobname,
+        nproc,
+        additional_switches,
+    )
     process = pexpect.spawn(command, cwd=run_location)
     process.delaybeforesend = None
 
@@ -166,7 +171,9 @@ class MapdlConsole(_MapdlCore):
 
             elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
                 self._log.debug(
-                    "Error index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "Error index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 self._log.error(response)
                 response += ready_items[i].decode("utf-8")
@@ -174,7 +181,9 @@ class MapdlConsole(_MapdlCore):
 
             elif i >= PROMPT_IDX:  # prompt
                 self._log.debug(
-                    "Prompt index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "Prompt index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 self._log.info(response + ready_items[i].decode("utf-8"))
                 raise RuntimeError(
@@ -182,7 +191,9 @@ class MapdlConsole(_MapdlCore):
                 )
             else:  # continue item
                 self._log.debug(
-                    "continue index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "continue index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 break
 

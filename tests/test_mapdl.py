@@ -816,7 +816,10 @@ def test_cyclic_solve(mapdl, cleared):
 @pytest.mark.parametrize(
     "dim_cols",
     np.concatenate(
-        (np.ones(2, dtype=int) * 2, np.random.randint(2, 100, size=2, dtype=int))
+        (
+            np.ones(2, dtype=int) * 2,
+            np.random.randint(2, 100, size=2, dtype=int),
+        )
     ),
 )
 def test_load_table(mapdl, dim_rows, dim_cols):
@@ -1203,7 +1206,11 @@ def test_get_file_path(mapdl, tmpdir):
 
 @pytest.mark.parametrize(
     "option2,option3,option4",
-    [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
+    [
+        ("expdata.dat", "", ""),
+        ("expdata", ".dat", ""),
+        ("expdata", "dat", "DIR"),
+    ],
 )
 def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
@@ -1312,7 +1319,8 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(
-        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float
+        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"),
+        float,
     )
 
 

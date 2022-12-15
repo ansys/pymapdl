@@ -466,7 +466,14 @@ class ArrayParam:
         return self.run(command, **kwargs)
 
     def sread(
-        self, strarray="", fname="", ext="", nchar="", nskip="", nread="", **kwargs
+        self,
+        strarray="",
+        fname="",
+        ext="",
+        nchar="",
+        nskip="",
+        nread="",
+        **kwargs,
     ):
         """Reads a file into a string array parameter.
 
@@ -509,7 +516,15 @@ class ArrayParam:
         return self.run(command, **kwargs)
 
     def toper(
-        self, parr="", par1="", oper="", par2="", fact1="", fact2="", con1="", **kwargs
+        self,
+        parr="",
+        par1="",
+        oper="",
+        par2="",
+        fact1="",
+        fact2="",
+        con1="",
+        **kwargs,
     ):
         """Operates on table parameters.
 

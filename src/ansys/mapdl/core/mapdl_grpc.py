@@ -535,7 +535,8 @@ class MapdlGrpc(_MapdlCore):
             self._t_trigger = time.time()
             self._t_delay = 30
             self._timer = threading.Thread(
-                target=MapdlGrpc._threaded_heartbeat, args=(weakref.proxy(self),)
+                target=MapdlGrpc._threaded_heartbeat,
+                args=(weakref.proxy(self),),
             )
             self._timer.daemon = True
             self._timer.start()
@@ -1003,7 +1004,9 @@ class MapdlGrpc(_MapdlCore):
                     # always communicate to allow process to run
                     output, err = process.communicate()
                     self._log.debug(
-                        "Cleanup output:\n\n%s\n%s", output.decode(), err.decode()
+                        "Cleanup output:\n\n%s\n%s",
+                        output.decode(),
+                        err.decode(),
                     )
 
     def list_files(self, refresh_cache=True):
@@ -1880,10 +1883,16 @@ class MapdlGrpc(_MapdlCore):
             out_file_name = target_name
 
         request = pb_types.DownloadFileRequest(name=target_name)
-        metadata = [("time_step_stream", "200"), ("chunk_size", str(chunk_size))]
+        metadata = [
+            ("time_step_stream", "200"),
+            ("chunk_size", str(chunk_size)),
+        ]
         chunks = self._stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
-            chunks, out_file_name, progress_bar=progress_bar, target_name=target_name
+            chunks,
+            out_file_name,
+            progress_bar=progress_bar,
+            target_name=target_name,
         )
 
         if not file_size:
@@ -2352,7 +2361,10 @@ class MapdlGrpc(_MapdlCore):
                     result_path = self._result_file
                 else:
                     # return the file with the last access time
-                    filenames = [self._distributed_result_file, self._result_file]
+                    filenames = [
+                        self._distributed_result_file,
+                        self._result_file,
+                    ]
                     result_path = last_created(filenames)
                     if result_path is None:  # if same return result_file
                         result_path = self._result_file
@@ -2398,7 +2410,13 @@ class MapdlGrpc(_MapdlCore):
 
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(
-        self, symfac="", condname="", numcond="", grndkey="", capname="", **kwargs
+        self,
+        symfac="",
+        condname="",
+        numcond="",
+        grndkey="",
+        capname="",
+        **kwargs,
     ):
         """Run CMATRIX in non-interactive mode and return the response
         from file.
@@ -2612,7 +2630,14 @@ class MapdlGrpc(_MapdlCore):
 
     @wraps(_MapdlCore.nsol)
     def nsol(
-        self, nvar=VAR_IR, node="", item="", comp="", name="", sector="", **kwargs
+        self,
+        nvar=VAR_IR,
+        node="",
+        item="",
+        comp="",
+        name="",
+        sector="",
+        **kwargs,
     ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
@@ -2711,7 +2736,16 @@ class MapdlGrpc(_MapdlCore):
         )
 
     def get_esol(
-        self, elem, node, item, comp, name="", sector="", tstrt="", kcplx="", **kwargs
+        self,
+        elem,
+        node,
+        item,
+        comp,
+        name="",
+        sector="",
+        tstrt="",
+        kcplx="",
+        **kwargs,
     ):
         """Get ESOL data.
 

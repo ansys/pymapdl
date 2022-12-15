@@ -483,7 +483,17 @@ class KeyPoints:
         return self.run(command, **kwargs)
 
     def kmove(
-        self, npt="", kc1="", x1="", y1="", z1="", kc2="", x2="", y2="", z2="", **kwargs
+        self,
+        npt="",
+        kc1="",
+        x1="",
+        y1="",
+        z1="",
+        kc2="",
+        x2="",
+        y2="",
+        z2="",
+        **kwargs,
     ):
         """Calculates and moves a keypoint to an intersection.
 
@@ -725,7 +735,15 @@ class KeyPoints:
         return self.run(command, **kwargs)
 
     def ksymm(
-        self, ncomp="", np1="", np2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        ncomp="",
+        np1="",
+        np2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Generates a reflected set of keypoints.
 
@@ -788,7 +806,15 @@ class KeyPoints:
         return self.run(command, **kwargs)
 
     def ktran(
-        self, kcnto="", np1="", np2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        kcnto="",
+        np1="",
+        np2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Transfers a pattern of keypoints to another coordinate system.
 

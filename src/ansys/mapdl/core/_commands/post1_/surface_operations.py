@@ -70,7 +70,13 @@ class SurfaceOperations:
         return self.run(command, **kwargs)
 
     def sucr(
-        self, surfname="", surftype="", nrefine="", radius="", tolout="", **kwargs
+        self,
+        surfname="",
+        surftype="",
+        nrefine="",
+        radius="",
+        tolout="",
+        **kwargs,
     ):
         """Create a surface.
 

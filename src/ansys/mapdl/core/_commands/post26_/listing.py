@@ -108,7 +108,14 @@ class Listing:
         return self.run(command, **kwargs)
 
     def prvar(
-        self, nvar1="", nvar2="", nvar3="", nvar4="", nvar5="", nvar6="", **kwargs
+        self,
+        nvar1="",
+        nvar2="",
+        nvar3="",
+        nvar4="",
+        nvar5="",
+        nvar6="",
+        **kwargs,
     ):
         """Lists variables vs. time (or frequency).
 

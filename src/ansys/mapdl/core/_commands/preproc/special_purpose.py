@@ -169,7 +169,14 @@ class SpecialPurpose:
         return self.run(command, **kwargs)
 
     def cycfreq(
-        self, option="", value1="", value2="", value3="", value4="", value5="", **kwargs
+        self,
+        option="",
+        value1="",
+        value2="",
+        value3="",
+        value4="",
+        value5="",
+        **kwargs,
     ):
         """Specifies solution options for a cyclic symmetry mode-superposition
 
@@ -296,7 +303,14 @@ class SpecialPurpose:
         return self.run(command, **kwargs)
 
     def cyclic(
-        self, nsector="", angle="", kcn="", name="", usrcomp="", usrnmap="", **kwargs
+        self,
+        nsector="",
+        angle="",
+        kcn="",
+        name="",
+        usrcomp="",
+        usrnmap="",
+        **kwargs,
     ):
         """Specifies a cyclic symmetry analysis.
 

@@ -255,7 +255,14 @@ class Animation:
         return self.run(command, **kwargs)
 
     def andyna(
-        self, delay="", ncycl="", start="", end="", inc="", autocontourkey="", **kwargs
+        self,
+        delay="",
+        ncycl="",
+        start="",
+        end="",
+        inc="",
+        autocontourkey="",
+        **kwargs,
     ):
         """Produces an animated sequence of contour values through substeps.
 

@@ -685,7 +685,13 @@ def test_magicwords(output, last_element):
     obj = CommandListingOutput(
         output,
         magicwords=magicwords,
-        columns_names=["SET", "TIME/FREQ", "LOAD STEP", "SUBSTEP", "CUMULATIVE"],
+        columns_names=[
+            "SET",
+            "TIME/FREQ",
+            "LOAD STEP",
+            "SUBSTEP",
+            "CUMULATIVE",
+        ],
     )
 
     assert obj.to_list() is not None

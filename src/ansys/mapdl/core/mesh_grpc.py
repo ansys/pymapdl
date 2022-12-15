@@ -543,7 +543,10 @@ class MeshGrpc:
     def _update_cache_elem(self):
         """Update the element and element offset cache"""
         if self._cache_elem is None:
-            self._cache_elem, self._cache_elem_off = self._load_elements_offset()
+            (
+                self._cache_elem,
+                self._cache_elem_off,
+            ) = self._load_elements_offset()
 
     @property
     def _elem(self):

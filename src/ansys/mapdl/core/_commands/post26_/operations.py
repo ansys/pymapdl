@@ -351,7 +351,15 @@ class Operations:
         return self.run(f"IMAGIN,{ir},{ia},,,{name},,,{facta}", **kwargs)
 
     def int1(
-        self, ir="", iy="", ix="", name="", facta="", factb="", const="", **kwargs
+        self,
+        ir="",
+        iy="",
+        ix="",
+        name="",
+        facta="",
+        factb="",
+        const="",
+        **kwargs,
     ):
         """Integrates a variable.
 
@@ -522,7 +530,8 @@ class Operations:
         ``IR = (FACTA x IA) x (FACTB x IB) x (FACTC x IC)``
         """
         return self.run(
-            f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}", **kwargs
+            f"PROD,{ir},{ia},{ib},{ic},{name},,,{facta},{factb},{factc}",
+            **kwargs,
         )
 
     def quot(self, ir="", ia="", ib="", name="", facta="", factb="", **kwargs):

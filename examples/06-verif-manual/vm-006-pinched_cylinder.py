@@ -239,7 +239,12 @@ def meshing():
 
     # Plot the nodes using VTK.
     mapdl.nplot(
-        vtk=True, nnum=True, background="", cpos="iso", show_bounds=True, point_size=10
+        vtk=True,
+        nnum=True,
+        background="",
+        cpos="iso",
+        show_bounds=True,
+        point_size=10,
     )
 
     # Print the list of nodes.

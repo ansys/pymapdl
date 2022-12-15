@@ -178,7 +178,10 @@ def test_bc_plot_options(
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_labels=bc_labels
+        return_plotter=True,
+        plot_bc=True,
+        plot_bc_labels=True,
+        bc_labels=bc_labels,
     )
     assert isinstance(p, Plotter)
 
@@ -197,7 +200,10 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_target=bc_target
+        return_plotter=True,
+        plot_bc=True,
+        plot_bc_labels=True,
+        bc_target=bc_target,
     )
     assert isinstance(p, Plotter)
 
@@ -272,7 +278,10 @@ def test_pick_nodes(mapdl, make_block, selection):
         point = (0.5, 0.5)
 
     selected = mapdl.nsel(
-        selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        selection,
+        "P",
+        _debug=lambda x: debug_orders(x, point=point),
+        tolerance=0.2,
     )  # Selects node 2
 
     assert selected
@@ -327,7 +336,10 @@ def test_pick_kp(mapdl, make_block, selection):
         point = (0.5, 0.5)
 
     selected = mapdl.ksel(
-        selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        selection,
+        "P",
+        _debug=lambda x: debug_orders(x, point=point),
+        tolerance=0.2,
     )
 
     assert selected
