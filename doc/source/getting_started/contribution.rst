@@ -1,8 +1,8 @@
 .. _ref_contributing:
 
-====================
-Contributing and API
-====================
+============
+Contributing
+============
 
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <dev_guide_contributing_>`_ topic
@@ -102,40 +102,3 @@ This way, it's not possible for you to push code that fails the style checks. Fo
   flake8...................................................................Passed
   codespell................................................................Passed
 
-
-.. _ref_index_api:
-
-API reference
-=============
-This page gives an overview of the API of several public PyMAPDL
-classes, functions, and attributes. You can find them
-on the left sidebar.
-
-While these methods might include some MAPDL commands, they are generally
-specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
-MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
-PyMAPDL, see :ref:`ref_mapdl_commands`.
-
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-
-   commands
-   database
-   geometry
-   helper
-   inline
-   krylov
-   logging
-   mapdl
-   math
-   mesh
-   parameters
-   plotting
-   pool
-   post
-   solution
-   xpl
-   building_example
-   unit_testing

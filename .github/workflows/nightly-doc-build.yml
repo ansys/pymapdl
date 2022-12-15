@@ -33,7 +33,7 @@ jobs:
       - name: Install OS packages
         run: |
           sudo apt-get update
-          sudo apt-get install libgl1-mesa-glx xvfb pandoc -qy
+          sudo apt-get install libgl1-mesa-glx xvfb pandoc graphviz -qy
 
       - name: Install ansys-mapdl-core
         run: |

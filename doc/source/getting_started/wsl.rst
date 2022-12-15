@@ -1,8 +1,8 @@
   .. _ref_guide_wsl:
 
 
-PyAnsys libraries on a Windows Subsystem for Linux and Docker
-#############################################################
+Windows Subsystem for Linux
+###########################
 
 This page shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL). WSL is a compatibility layer for
@@ -132,7 +132,7 @@ This works if you want to run a Docker image using WSL Linux image to host that
 Docker image. The Docker image successfully communicates with the Windows
 License Server using these ports if you use the ``'-p'`` flag when running the
 Docker image and these ports are open. 
-See `Run MAPDL on a local Docker image`_.
+For more information, see `Run an MAPDL image <run_an_mapdl_image_>`.
 
 
 If you want to run MAPDL in the CentOS 7 image and use the Windows license
@@ -199,49 +199,32 @@ environment variable with this IP address:
 
 .. vale off
 
+Launch MAPDL in WSL
+===================
 
-Run MAPDL on a local Docker image
-*********************************
+To launch MAPDL in WSL, you must follow the procedure in 
+`Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`.
+An example follows.
 
-To run a Docker image, you must follow all steps in `Run PyMAPDL on WSL`_ .
+.. code:: bash
 
-Additionally, you run a Docker image of PyMAPDL with:
+    /ansys_inc/v222/ansys/bin/ansys222 -grpc
 
-.. code:: pwsh
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
-
-Successive runs should restart the container or just delete it and rerun it using:
-
-.. code:: pwsh
-
-    docker stop mapdl
-    docker container prune
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+This launches an MAPDL instance whose working directory is the current directory.
+If you want to change the working directory, you can use the ``-dir`` flag.
 
 
-This creates a log file (``log.txt``) in your current directory location.
+.. code:: bash
 
+    /ansys_inc/v222/ansys/bin/ansys222 -grpc -dir /tmp/ansys_jobs/myjob
 
-.. note:: Ensure that your port ``50053`` is open in your firewall.
+Connect to an MAPDL instance running in WSL
+===========================================
 
-You should use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
-to run the preceding commands all at once.
-
-Notice that the WSL internal gRPC port (``50052``) is being mapped to a
-different Windows host port (``50053``) to avoid ports conflicts.
-
-This image is ready to be connected to from WSL or Windows Host but the port
-and IP should be specified as:
-
-.. code:: python
-
-    from ansys.mapdl.core import launch_mapdl
-
-    mapdl = launch_mapdl(ip='127.0.0.1', port=50053, start_instance=False) 
-
-Or:
+To connect to the WSL instance that is running the MAPDL instance, follow the
+procedure in 
+`Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`
+but specify the IP address of the WSL instance:
 
 .. code:: python 
 
@@ -250,44 +233,10 @@ Or:
     mapdl = Mapdl(ip='127.0.0.1', port=50053)
 
 
-You can also specify the port and IP address using environment variables that are read when
-launching the MAPDL instance:
-
-.. code:: bash
-
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=50053
-    export PYMAPDL_IP=127.0.0.1
-
-
-Launch Docker with UPF capabilities
-===================================
-
-If you want to specify a custom Python UPF routine, you must have the
-environment variables ``ANS_USER_PATH`` and ``ANS_USE_UPF`` defined. The
-former should be equal to the path where the UPF routines are located, and the
-latter should be equal to ``TRUE``.
-
-In WSL, you can do this using:
-
-.. code:: bash
-
-    export ANS_USER_PATH=/home/user/UPFs # Use your own path to your UPF files.
-    export ANS_USE_UPF=TRUE
-
-You can then run the Docker image with:
-
-.. code:: bash
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp  1>log.txt
-
-.. warning:: The use of UPFs with Docker images or PyMAPDL is still in the alpha state.
-
-
 Notes
 =====
 
-The specified IP address ``127.0.0.1`` in `Run MAPDL on a local Docker image`_ is
+The specified IP address ``127.0.0.1`` in `Run an MAPDL image <run_an_mapdl_image_>` is
 the IP address of WSL CentOS from the WSL perspective, whereas the Windows host IP address is
 normally ``127.0.1.1``. Docker builds the PyMAPDL images using the WSL
 distribution as the base. Hence, PyMAPDL is running on a Linux WSL
