@@ -22,6 +22,8 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           name: documentation-html
+          workflow: ci.yml
+          commit: ${{github.event.pull_request.head.sha}}
 
       - name: Deploy the latest documentation
         uses: pyansys/actions/doc-deploy-dev@v2
