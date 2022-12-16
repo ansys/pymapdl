@@ -130,6 +130,7 @@ jobs:
 
   upload_dev_docs:
     name: "Upload dev documentation"
+    needs: [docs_build]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
