@@ -23,7 +23,7 @@ jobs:
         with:
           name: documentation-html
           workflow: ci.yml
-          commit: ${{github.event.pull_request.head.sha}}
+          commit: ${{github.event.pull.before}}
 
       - name: Deploy the latest documentation
         uses: pyansys/actions/doc-deploy-dev@v2
