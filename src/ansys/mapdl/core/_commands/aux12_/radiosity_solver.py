@@ -299,7 +299,14 @@ class RadiositySolver:
         return self.run(command, **kwargs)
 
     def vfopt(
-        self, opt="", filename="", ext="", dir_="", filetype="", fileformat="", **kwargs
+        self,
+        opt="",
+        filename="",
+        ext="",
+        dir_="",
+        filetype="",
+        fileformat="",
+        **kwargs,
     ):
         """Specifies options for the view factor file and calculates view factors.
 

@@ -215,7 +215,10 @@ plt.annotate(
 )
 
 # Define stress - strain properties of the aluminum.
-aluminum = {"stress_a": [0, 55000, 55000, 55000], "strain_a": [0, 0.05, 0.1, 0.2]}
+aluminum = {
+    "stress_a": [0, 55000, 55000, 55000],
+    "strain_a": [0, 0.05, 0.1, 0.2],
+}
 
 # Define yielding strength point of the Aluminum on the curve.
 xp = aluminum["strain_a"][1]
@@ -492,7 +495,11 @@ def getload():
     load_181 = load_181_theta * 360 / theta
 
     # Return load results of each element model.
-    return abs(round(load_288, 0)), abs(round(load_185, 0)), abs(round(load_181, 0))
+    return (
+        abs(round(load_288, 0)),
+        abs(round(load_185, 0)),
+        abs(round(load_181, 0)),
+    )
 
 
 ###############################################################################
@@ -525,7 +532,17 @@ pipe288_ls3, solid185_ls3, shell181_ls3 = getload()
 # - 3rd Load Step with deflection :math:`\delta = 0.1 (in)` has :math:`load_3 = 1262000\,(lb)`.
 
 target_res = np.asarray(
-    [1024400, 1262000, 1262000, 1024400, 1262000, 1262000, 1024400, 1262000, 1262000]
+    [
+        1024400,
+        1262000,
+        1262000,
+        1024400,
+        1262000,
+        1262000,
+        1024400,
+        1262000,
+        1262000,
+    ]
 )
 
 simulation_res = np.asarray(

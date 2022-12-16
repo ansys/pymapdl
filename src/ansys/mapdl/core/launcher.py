@@ -596,7 +596,9 @@ def launch_remote_mapdl(
         ]
     )
     return MapdlGrpc(
-        channel=channel, cleanup_on_exit=cleanup_on_exit, remote_instance=instance
+        channel=channel,
+        cleanup_on_exit=cleanup_on_exit,
+        remote_instance=instance,
     )
 
 
@@ -623,7 +625,10 @@ def get_start_instance(start_instance_default=True):
 
     """
     if "PYMAPDL_START_INSTANCE" in os.environ:
-        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in ["true", "false"]:
+        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in [
+            "true",
+            "false",
+        ]:
             val = os.environ["PYMAPDL_START_INSTANCE"]
             raise OSError(
                 f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'

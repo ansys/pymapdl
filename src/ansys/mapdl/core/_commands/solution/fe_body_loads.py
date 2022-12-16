@@ -170,7 +170,15 @@ class FeBodyLoads:
         return self.run(command, **kwargs)
 
     def bfe(
-        self, elem="", lab="", stloc="", val1="", val2="", val3="", val4="", **kwargs
+        self,
+        elem="",
+        lab="",
+        stloc="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        **kwargs,
     ):
         """Defines an element body force load.
 
@@ -535,7 +543,15 @@ class FeBodyLoads:
         return self.run(command, **kwargs)
 
     def ldread(
-        self, lab="", lstep="", sbstep="", time="", kimg="", fname="", ext="", **kwargs
+        self,
+        lab="",
+        lstep="",
+        sbstep="",
+        time="",
+        kimg="",
+        fname="",
+        ext="",
+        **kwargs,
     ):
         """Reads results from the results file and applies them as loads.
 

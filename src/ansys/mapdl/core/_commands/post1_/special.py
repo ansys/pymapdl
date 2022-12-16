@@ -1499,7 +1499,14 @@ class Special:
         return self.run(command, **kwargs)
 
     def plmc(
-        self, lstep="", sbstep="", timfrq="", kimg="", hibeg="", hiend="", **kwargs
+        self,
+        lstep="",
+        sbstep="",
+        timfrq="",
+        kimg="",
+        hibeg="",
+        hiend="",
+        **kwargs,
     ):
         """Plots the modal coordinates from a mode-superposition solution.
 

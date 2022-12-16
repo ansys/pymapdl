@@ -103,7 +103,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def asel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of areas.
 
@@ -249,7 +257,15 @@ class Selecting:
         return self.run(f"ASLV,{type_}", **kwargs)
 
     def dofsel(
-        self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="", dof6="", **kwargs
+        self,
+        type_="",
+        dof1="",
+        dof2="",
+        dof3="",
+        dof4="",
+        dof5="",
+        dof6="",
+        **kwargs,
     ):
         """Selects a DOF label set for reference by other commands.
 
@@ -607,7 +623,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def ksel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kabs="",
+        **kwargs,
     ):
         """Selects a subset of keypoints or hard points.
 
@@ -769,7 +793,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def lsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of lines.
 
@@ -941,7 +973,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def nsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kabs="",
+        **kwargs,
     ):
         """Selects a subset of nodes.
 
@@ -1375,11 +1415,24 @@ class Selecting:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
+        command = "PARTSEL,%s,%s,%s,%s" % (
+            str(type_),
+            str(pmin),
+            str(pmax),
+            str(pinc),
+        )
         return self.run(command, **kwargs)
 
     def vsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of volumes.
 

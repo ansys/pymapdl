@@ -325,7 +325,9 @@ def test_is_valid_executable_path(tmpdir, file, result):
         pytest.param("random/v221/random/bin/ans221", False, id="No ansys directory"),
         pytest.param("random/v221/ansys/random/ans221", False, id="No bin directory"),
         pytest.param(
-            "random/v221/ansys/bin/ansys22", False, id="version number incomplete"
+            "random/v221/ansys/bin/ansys22",
+            False,
+            id="version number incomplete",
         ),
         pytest.param("random/v221/ansys/bin/ansys222", False, id="Different version"),
     ],
@@ -346,7 +348,8 @@ def test_is_common_executable_path(tmpdir, file_path, result):
 
 def test_warn_uncommon_executable_path():
     with pytest.warns(
-        UserWarning, match="does not match the usual ansys executable path style"
+        UserWarning,
+        match="does not match the usual ansys executable path style",
     ):
         warn_uncommon_executable_path("")
 

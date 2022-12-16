@@ -662,7 +662,15 @@ class Sections:
         return self.run(command, **kwargs)
 
     def secjoint(
-        self, kywrd="", val1="", val2="", val3="", val4="", val5="", val6="", **kwargs
+        self,
+        kywrd="",
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        **kwargs,
     ):
         """Defines local coordinate systems at joint element nodes and other data
 

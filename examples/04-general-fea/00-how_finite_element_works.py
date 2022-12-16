@@ -145,7 +145,12 @@ plt.show()
 
 def shape_functions(self, s, t):
     return 0.25 * np.array(
-        [(1 - s) * (1 - t), (1 + s) * (1 - t), (1 + s) * (1 + t), (1 - s) * (1 + t)],
+        [
+            (1 - s) * (1 - t),
+            (1 + s) * (1 - t),
+            (1 + s) * (1 + t),
+            (1 - s) * (1 + t),
+        ],
         dtype=float,
     )
 
@@ -553,7 +558,8 @@ class Isotropic:
 
     def evaluate(self):
         d = np.array(
-            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
+            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]],
+            dtype=float,
         )
 
         return d * (self.ex / (1 - self.nu**2))
@@ -772,7 +778,8 @@ class Isotropic:
 
     def evaluate(self):
         d = np.array(
-            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
+            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]],
+            dtype=float,
         )
 
         return d * (self.ex / (1 - self.nu**2))

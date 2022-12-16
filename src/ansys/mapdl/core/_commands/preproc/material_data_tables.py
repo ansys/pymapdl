@@ -388,7 +388,12 @@ class MaterialDataTables:
         -----
         This command is also valid in SOLUTION.
         """
-        command = "TBDELE,%s,%s,%s,%s" % (str(lab), str(mat1), str(mat2), str(inc))
+        command = "TBDELE,%s,%s,%s,%s" % (
+            str(lab),
+            str(mat1),
+            str(mat2),
+            str(inc),
+        )
         return self.run(command, **kwargs)
 
     def tbeo(self, par="", value="", **kwargs):

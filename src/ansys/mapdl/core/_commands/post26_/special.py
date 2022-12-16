@@ -263,7 +263,15 @@ class Special:
         return self.run(command, **kwargs)
 
     def rpsd(
-        self, ir="", ia="", ib="", itype="", datum="", name="", signif="", **kwargs
+        self,
+        ir="",
+        ia="",
+        ib="",
+        itype="",
+        datum="",
+        name="",
+        signif="",
+        **kwargs,
     ):
         """Calculates response power spectral density (PSD).
 
