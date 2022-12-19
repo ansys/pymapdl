@@ -21,6 +21,7 @@ jobs:
         id: download-artifact
         uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
           name: documentation-html
           workflow: ci.yml
           commit: ${{github.event.pull.before}}
