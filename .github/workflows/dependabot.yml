@@ -20,5 +20,5 @@ jobs:
           directory: /
           branch: main
           username: ${{ secrets.GH_USERNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DEPENDABOT_PAT }}
 
