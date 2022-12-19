@@ -5,6 +5,8 @@ on:
     # Every Sunday at 1PM UTC (9AM EST)
     - cron: "0 0 * * 0"
 
+permissions: write-all
+
 jobs:
   check-dependencies:
     runs-on: ubuntu-latest
