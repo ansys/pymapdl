@@ -25,7 +25,7 @@ dependencies = [
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
-    "numpy>=1.14.0,<1.24.0",
+    "numpy>=1.14.0",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "pyiges>=0.1.4",
@@ -59,7 +59,7 @@ tests = [
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
     "pyansys-tools-report==0.4.1",
-    "vtk==9.0.3",
+    "vtk==9.2.2",
     "pytest-rerunfailures==10.3",
 ]
 doc = [
@@ -87,7 +87,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
-    "vtk==9.0.3",
+    "vtk==9.2.2",
 ]
 
 [tool.flit.module]
