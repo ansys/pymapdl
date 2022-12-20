@@ -21,6 +21,14 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 Technology showcase examples
 ============================
 
+
+.. toctree::
+    :hidden:
+    :maxdepth: 3
+    
+    Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
+
+
 The PyMAPDL technology showcase examples are more complex test cases than
 the ones preceding. They demonstrate how to use PyMAPDL to effectively
 and accurately solve interdisciplinary problems from a variety of industries
@@ -41,7 +49,7 @@ The documentation to the exposed examples can be found in the
 .. toctree::
     :hidden:
     :maxdepth: 3
-
+    
     Cart-Pole Simulation <https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html>
     extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
     extended_examples/Python_UPF/python_upf_examples
