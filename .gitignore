@@ -30,11 +30,7 @@ dist/
 _build/
 pyansys/Interface.py
 *.bat
-doc/source/examples/gallery_examples/00-mapdl-examples/*
-doc/source/examples/gallery_examples/01-apdlmath-examples/*
-doc/source/examples/gallery_examples/02-geometry/*
-doc/source/examples/gallery_examples/03-tips-n-tricks/*
-doc/source/examples/gallery_examples/04-general-fea/*
+doc/source/examples/gallery_examples/*
 *.out
 *.tar.gz
 *.mypy_cache
