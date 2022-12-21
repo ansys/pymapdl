@@ -35,10 +35,12 @@
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 .. _ansys_current_release: https://download.ansys.com/Current%20Release
 
-.. # TechDemos related
-.. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
-.. _tech_demo_repo: https://github.com/pyansys/pymapdl-examples
-.. _tech_demos_doc: https://examples.mapdl.docs.pyansys.com/
+.. # PyMAPDL Examples related
+.. _pymapdl_ex_doc: https://examples.mapdl.docs.pyansys.com/
+.. _pymapdl_ex_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
+.. _pymapdl_ex_repo: https://github.com/pyansys/pymapdl-examples
+.. _pymapdl_ex_ts: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html
+.. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
