@@ -183,7 +183,7 @@ mapdl.post1()
 # Visualize a Slice
 # ~~~~~~~~~~~~~~~~~
 # Visualize a slice through the dataset using ``pyvista``
-# for more details visit <https://docs.pyvista.org/>`_.
+# for more details visit `pyvista documentation <pyvista_docs_>`_.
 
 # get the temperature of the 30th result set
 mapdl.set(1, 30)
