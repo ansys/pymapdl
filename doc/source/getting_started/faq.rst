@@ -80,5 +80,44 @@ data such as the mesh, you can use this code:
     sys.modules[__name__].__dict__.clear()
 
 
-However, a more efficient way is to clear MAPDL using the ``mapdl.clear()`` method. You
+However, a more efficient way is to clear MAPDL using the :meth:`clear() <ansys.mapdl.core.Mapdl.clear>` method. You
 can also exit and restart MAPDL.
+
+
+Why my PyMAPDL results are different than the ones shown in the MAPDL GUI?
+-------------------------------------------------------------------------
+
+There might be several reasons why there is a difference between the results shown in the MAPDL GUI and
+the ones obtained using PyMAPDL. The most common reason is that the MAPDL GUI is using a different
+configuration.
+
+In the MAPDL GUI the graphics configuration can change how the results are shown.
+By default, the graphics configuration is set to ``Power graphics``.
+However, PyMAPDL connects to an MAPDL instance running in batch mode which by default
+uses ``Full Graphics`` configuration. This can affect the averaging as well.
+
+You can change the graphics configuration using the following PyMAPDL commands:
+
+.. code:: python
+
+    mapdl.graphics('POWER')
+
+Or you can change the graphics configuration in the MAPDL GUI using the ``POWRGRPH`` button or
+the following commands:
+
+.. code:: text
+
+    /GRAPHICS,FULL
+
+
+In addition, how the results are averaged on the nodes can also affect the results.
+By default, MAPDL averages the results on the nodes except where material type discontinuities
+exists. See :meth:`avres() <ansys.mapdl.core.Mapdl.avres>` for more details.
+
+Further more, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` can also how the results are shown.
+
+It is recommended to make sure the values of the commands :meth:`avres() <ansys.mapdl.core.Mapdl.avres>`
+and :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` are the same in both the MAPDL GUI and PyMAPDL.
+
+
+.. note:: Further reading on `this discussion <pymapdl_discussion_differences_mapdl_pymapdl_>`_
