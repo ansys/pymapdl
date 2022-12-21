@@ -92,7 +92,7 @@ anum
 # Area Geometry
 # ~~~~~~~~~~~~~
 # Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
-# saved or plotted.  For more details, visit https://docs.pyvista.org/
+# saved or plotted.  For more details, visit `Pyvista documentation <pyvista_docs_>`_
 #
 # Note that this is a method so you can select the quality of the
 # areas (mesh density), and if you would like a merged output or
