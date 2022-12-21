@@ -29,7 +29,7 @@ Additional Packages used
 ~~~~~~~~~~~~~~~~~~~~~~~~
 * `Numpy <numpy_org_>`_ for using data as arrays
 * `Pandas <pandas_org_>`_ to import csv file (to install use: **pip install pandas**)
-* `PyVista <pyvista_docs_>`_ for performing Gauissian interpolation
+* `PyVista <pyvista_docs_>`_ for performing Gaussian interpolation
 
 Boundary Conditions
 ~~~~~~~~~~~~~~~~~~~
