@@ -26,6 +26,7 @@ Technology showcase examples
     :hidden:
     :maxdepth: 3
     
+    Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
     Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
 
 

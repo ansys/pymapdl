@@ -688,7 +688,7 @@ These examples demonstrate miscellaneous tips and tricks for using PyMAPDL.
 Academic Finite Element Examples
 ================================
 These examples demonstrate finite element method as applicable to
-Python and MAPDL while emphasising Python libraries such as `Matplotlib
+Python and MAPDL while emphasising Python libraries such as `matplotlib
 <https://matplotlib.org/>`_
 
 
@@ -719,17 +719,6 @@ Python and MAPDL while emphasising Python libraries such as `Matplotlib
 
     </div>
 
-Verification Manual Examples
-============================
-This section demonstrates a range of Mechanical APDL elements and
-capabilities in straightforward problems which have "classical" or
-readily obtainable theoretical solutions using PyMAPDL.
-
-These problems may then serve as the basis for additional validation
-and qualification of Mechanical APDL capabilities for specific
-applications that may be of interest.
-
-
 
 .. toctree::
    :hidden:
@@ -740,7 +729,6 @@ applications that may be of interest.
    /examples/gallery_examples/02-geometry/index.rst
    /examples/gallery_examples/03-tips-n-tricks/index.rst
    /examples/gallery_examples/04-general-fea/index.rst
-   Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
 
 
 
