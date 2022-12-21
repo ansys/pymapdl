@@ -5,7 +5,7 @@ Frequently asked questions
 **************************
 
 How do you report issues?
--------------------------
+=========================
 
 To report bugs and documentation errors and to make feature requests, use the `pymapdl_issues`_ page of 
 the GitHub repository.
@@ -15,7 +15,7 @@ of the GitHub repository.
 
 
 What are the pros and cons of PyMAPDL versus Ansys ACT?
--------------------------------------------------------
+=======================================================
 
 The pros and cons depend on your pipeline and software approach.
 Ansys ACT is an Ansys Workbench-dependent approach, where extensions are
@@ -42,7 +42,7 @@ like to develop software.
 
 
 Has APDL been "deprecated" by Ansys? If so, what does that mean for PyMAPDL?
-----------------------------------------------------------------------------
+============================================================================
 
 APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's generating an input file
 (``ds.dat``) that's fed into MAPDL. However, what's changed over the past several years is where the geometry,
@@ -53,7 +53,7 @@ far superior to the ones in MAPDL, their biggest limitation is that they're diff
 
 
 What are the main reasons to use PyMAPDL over other Ansys products like Workbench?
-----------------------------------------------------------------------------------
+==================================================================================
 There are always tasks where it's better to use one over the
 other. Workbench is great tool to rapidly prototype, mesh, set
 boundary conditions, and solve. Because it is where a ton of development has
@@ -69,7 +69,7 @@ advanced plots using `PyVista <pyvista_docs_>`_ or `Matplotlib <matplotlib_main_
 
 
 How do you end a simulation and restart a script?
--------------------------------------------------
+================================================
 
 Closing and reopening Python clears the solution within Python. To clear all previous
 data such as the mesh, you can use this code:
@@ -80,16 +80,21 @@ data such as the mesh, you can use this code:
     sys.modules[__name__].__dict__.clear()
 
 
-However, a more efficient way is to clear MAPDL using the :meth:`clear() <ansys.mapdl.core.Mapdl.clear>` method. You
-can also exit and restart MAPDL.
+However, a more efficient way is to clear MAPDL using the 
+:meth:`clear() <ansys.mapdl.core.Mapdl.clear>`
+method. You can also exit and restart MAPDL.
 
 
-Why my PyMAPDL results are different than the ones shown in the MAPDL GUI?
--------------------------------------------------------------------------
+Why PyMAPDL results are different than the ones shown in the MAPDL GUI?
+======================================================================
 
-There might be several reasons why there is a difference between the results shown in the MAPDL GUI and
-the ones obtained using PyMAPDL. The most common reason is that the MAPDL GUI is using a different
-configuration.
+Listing results
+---------------
+
+There might be several reasons why there is a difference between the results
+shown in the MAPDL GUI and the ones obtained using PyMAPDL. The most common
+reason is that the MAPDL GUI is using a different configuration than the one
+used by PyMAPDL.
 
 In the MAPDL GUI the graphics configuration can change how the results are shown.
 By default, the graphics configuration is set to ``Power graphics``.
@@ -102,22 +107,37 @@ You can change the graphics configuration using the following PyMAPDL commands:
 
     mapdl.graphics('POWER')
 
-Or you can change the graphics configuration in the MAPDL GUI using the ``POWRGRPH`` button or
-the following commands:
+Or you can change the graphics configuration in the MAPDL GUI using the 
+``POWRGRPH`` button or the following command:
 
 .. code:: text
 
     /GRAPHICS,FULL
 
+In addition, how the results are averaged on the nodes can also affect the
+results. By default, MAPDL averages the results on the nodes except where
+material type discontinuities exists. 
+See :meth:`avres() <ansys.mapdl.core.Mapdl.avres>` for more details.
+Furthermore, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>`
+can also how the results are shown.
 
-In addition, how the results are averaged on the nodes can also affect the results.
-By default, MAPDL averages the results on the nodes except where material type discontinuities
-exists. See :meth:`avres() <ansys.mapdl.core.Mapdl.avres>` for more details.
+It is recommended to make sure the values of the commands
+:meth:`avres() <ansys.mapdl.core.Mapdl.avres>` and 
+:meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` are the same in both
+the MAPDL GUI and PyMAPDL.
 
-Further more, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` can also how the results are shown.
-
-It is recommended to make sure the values of the commands :meth:`avres() <ansys.mapdl.core.Mapdl.avres>`
-and :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` are the same in both the MAPDL GUI and PyMAPDL.
-
+Finally, the depending on the results you are trying to obtain, you
+might be using a different MAPDL command. For example, the command
+:meth:`post.element_displacement() <ansys.mapdl.core.post.PostProcessing.element_displacement>`
+uses a combination of ``PRETAB`` and ``ETAB`` commands to obtain the results.
+This command then might show different results than the ones obtained
+using the :meth:`presol() <ansys.mapdl.core.Mapdl.presol>`.
+It is recommended you compare the results obtained using both commands
+to make sure you are using the correct one.
 
 .. note:: Further reading on `this discussion <pymapdl_discussion_differences_mapdl_pymapdl_>`_
+
+Plotting results
+----------------
+
+(To be added)
