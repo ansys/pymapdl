@@ -69,7 +69,7 @@ advanced plots using `PyVista <pyvista_docs_>`_ or `Matplotlib <matplotlib_main_
 
 
 How do you end a simulation and restart a script?
-================================================
+=================================================
 
 Closing and reopening Python clears the solution within Python. To clear all previous
 data such as the mesh, you can use this code:
@@ -86,7 +86,7 @@ method. You can also exit and restart MAPDL.
 
 
 Why PyMAPDL results are different than the ones shown in the MAPDL GUI?
-======================================================================
+=======================================================================
 
 Listing results
 ---------------
