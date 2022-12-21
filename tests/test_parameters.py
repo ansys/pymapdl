@@ -366,3 +366,16 @@ def test_str_arrays(mapdl):
         "hello there!",
         "General Kenobi, you are a bold one!",
     ]
+
+
+def test_3d_array(mapdl):
+    mapdl.dim("myarr", "array", 2, 2, 2)
+    mapdl.run("myarr(1,1,1)= 100")
+    mapdl.run("myarr(1,1,2)= 200")
+    mapdl.run("myarr(1,2,2)= 300")
+    mapdl.run("myarr(2,1,2)= 400")
+
+    assert np.allclose(
+        mapdl.parameters["myarr"],
+        np.array([[[100.0, 200.0], [0.0, 300.0]], [[0.0, 400.0], [0.0, 0.0]]]),
+    )
