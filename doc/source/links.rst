@@ -19,6 +19,8 @@
 .. _pyvista_docs: https://docs.pyvista.org
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
+.. _pandas_org: https://pandas.pydata.org
+.. _numpy_org: https://numpy.org
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib_docs: https://matplotlib.org/stable/contents.html
 .. _matplotlib_main: https://matplotlib.org
@@ -66,6 +68,7 @@
 .. _article_good_unit_test: https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test 
 .. _vscode_attach_to_container: https://code.visualstudio.com/docs/devcontainers/attach-container
 .. _ubuntu_firewall: https://ubuntu.com/server/docs/security-firewall
+.. _pyvista_eye_dome_lighting: https://docs.pyvista.org/examples/02-plot/edl.html
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
