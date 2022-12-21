@@ -27,9 +27,9 @@ Procedure
 
 Additional Packages used
 ~~~~~~~~~~~~~~~~~~~~~~~~
-* `Numpy <https://numpy.org>`_ for using data as arrays
-* `Pandas <https://pandas.pydata.org>`_ to import csv file (to install use: **pip install pandas**)
-* `PyVista <https://docs.pyvista.org>`_ for performing Gauissian interpolation
+* `Numpy <numpy_org_>`_ for using data as arrays
+* `Pandas <pandas_org_>`_ to import csv file (to install use: **pip install pandas**)
+* `PyVista <pyvista_docs_>`_ for performing Gaussian interpolation
 
 Boundary Conditions
 ~~~~~~~~~~~~~~~~~~~

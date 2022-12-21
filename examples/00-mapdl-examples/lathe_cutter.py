@@ -279,7 +279,7 @@ mapdl.post_processing.plot_nodal_principal_stress(
 
 ###############################################################################
 # Let's try out some scalar bar options from the
-# `PyVista documentation <https://docs.pyvista.org/>`_.
+# `PyVista documentation <pyvista_docs_>`_.
 # For example, let's set black text on a beige background.
 #
 # The scalar bar keywords defined as a Python dictionary are an alternate
@@ -393,7 +393,7 @@ sbar_kwargs = {
 # .. note::
 #    We're using ``eye_dome_lighting`` here to enhance the plots of our slices.
 #    Read more about it at `Eye Dome Lighting
-#    <https://docs.pyvista.org/examples/02-plot/edl.html>`_
+#    <pyvista_eye_dome_lighting_>`_
 
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(

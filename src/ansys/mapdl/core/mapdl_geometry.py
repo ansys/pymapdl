@@ -888,7 +888,7 @@ class Geometry:
         items = np.asarray(items)
         if not np.issubdtype(items.dtype, np.number):
             raise TypeError("Item numbers must be a numeric type")
-        items = items.ravel().astype(np.int, copy=False)
+        items = items.ravel().astype(np.int_, copy=False)
 
         # consider logic for negative values to support ranges.  This
         # is the 'ORDER' option
