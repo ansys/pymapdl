@@ -43,17 +43,14 @@ jobs:
         run: rm -rf dev/ && mkdir dev/
 
       - name: "Download the HTML documentation artifact"
-        uses: actions/download-artifact@v3
-        if: ${{ github.event.inputs.use-downloaded-artifact == false }}
+        uses: dawidd6/action-download-artifact@v2
         with:
-          name: ${{ inputs.doc-artifact-name }}
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          name: documentation-html
+          workflow: ci.yml
+          commit: ${{github.event.pull.before}}
           path: dev
-
-      - name: "Move artifact to dev folder"
-        if: ${{ github.event.inputs.use-downloaded-artifact == true }}
-        run: |
-          unzip ${{ inputs.doc-artifact-name }}.zip ./dev/* -r
-
+          
       - name: "Display structure of downloaded files"
         shell: bash
         run: |
