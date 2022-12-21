@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 import weakref
 
@@ -13,6 +14,7 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
 
@@ -318,7 +320,16 @@ class Parameters:
             parameters = self._parm
 
         if key not in parameters:
-            raise IndexError("%s not a valid parameter_name" % key)
+            try:
+                val_ = interp_star_status(self._mapdl.starstatus(key))
+                val_ = val_[list(val_.keys())[0]]["value"]
+                if len(val_) == 1:
+                    return val_[0]
+                else:
+                    return val_
+                return
+            except MapdlRuntimeError:
+                raise IndexError("%s not a valid parameter_name" % key)
 
         parm = parameters[key]
         if parm["type"] in ["ARRAY", "TABLE"]:  # Array case
@@ -588,6 +599,37 @@ class Parameters:
             )
 
 
+def find_parameter_listing_line(status):
+    for ind, each in enumerate(status.splitlines()):
+        if "PARAMETER STATUS-" in each:
+            return ind
+    raise ValueError("Could not find parameter listing line")
+
+
+def parameter_header(line):
+    return "NAME" in line and "VALUE" in line and "TYPE" in line
+
+
+def math_header(line):
+    return "Name" in line and "Type" in line and "Dims" in line and "Workspace" in line
+
+
+def array_header(line):
+    return "LOCATION" in line and "VALUE" in line
+
+
+def is_parameter_listing(status):
+    return any([parameter_header(each) for each in status.splitlines()])
+
+
+def is_math_listing(status):
+    return any([math_header(each) for each in status.splitlines()])
+
+
+def is_array_listing(status):
+    return any([array_header(each) for each in status.splitlines()])
+
+
 def interp_star_status(status):
     """Interprets \*STATUS command output from MAPDL
 
@@ -601,20 +643,53 @@ def interp_star_status(status):
     parameters : dict
         Dictionary of parameters.
     """
+    # If there is a general call to *STATUS (no arguments), the output has some extra
+    # parameters that we don't want to include in the analysis.
+    ind = find_parameter_listing_line(status)
+    status = "\n".join(status.splitlines()[ind:])
+
+    if "PARAMETER STATUS" not in status:
+        raise ValueError(
+            f"The expected output does not seem a parameter listing. \n--\n{status}"
+        )
+
     parameters = {}
-    if "APDLMATH" in status:
-        header = "  Name                   Type"
-        incr = 84
-    else:  # normal parameters
+    is_string_array = False
+    if is_parameter_listing(status):
+        # Works for one parameter or general listing
         header = "NAME                              VALUE"
         incr = 80
+    elif is_math_listing(status):
+        # listing of math parameters
+        header = "  Name                   Type"
+        incr = 84
+    elif is_array_listing(status):
+        # listing of one array parameter
+        header = "LOCATION                VALUE"
+        incr = 30
+        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+    else:
+        # listing of a string array
+        is_string_array = True
+        header = ""  # no header. Find will return 0.
+        incr = sum([len(each) for each in status.splitlines()[0:2]]) + 1
+        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
 
     st = status.find(header)
 
     if st == -1:
         return {}
 
-    for line in status[st + incr :].splitlines():
+    lines = status[st + incr :].splitlines()
+    elements = []
+    if is_array_listing(status):
+        myarray = np.array([each.split() for each in lines]).astype(float)
+        idim = int(myarray[:, 0].max())
+        jdim = int(myarray[:, 1].max())
+        kdim = int(myarray[:, 2].max())
+        myarray = np.zeros((idim, jdim, kdim))
+
+    for line in lines:
         items = line.split()
         if not items:
             continue
@@ -632,6 +707,22 @@ def interp_star_status(status):
             else:
                 value = items[1]
             parameters[name] = {"type": items[2], "value": value}
+        elif len(items) == 4:
+            # it is an array or string array
+            if is_array_listing(status):
+                # Probably I could get rid of this loop
+                myarray[
+                    int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
+                ] = float(items[3])
+            elif is_string_array:
+                elements.append(items[-1])
+
+        elif is_string_array:
+            last_element = (
+                re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line).group(1).strip()
+            )
+            elements.append(last_element)
+
         elif len(items) == 5:
             if items[1] in ["DMAT", "VEC", "SMAT"]:
                 parameters[name] = {
@@ -648,7 +739,20 @@ def interp_star_status(status):
             else:
                 shape = (int(items[2]), int(items[3]), int(items[4]))
                 parameters[name] = {"type": items[1], "shape": shape}
-    return parameters
+
+    if is_array_listing(status):
+        dims = [ind for ind, each in enumerate([idim, jdim, kdim]) if each == 1]
+        if dims:
+            try:
+                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}
+            except ValueError:
+                return {name_: {"type": "ARRAY", "value": myarray}}
+        else:
+            return {name_: {"type": "ARRAY", "value": myarray}}
+    elif is_string_array:
+        return {name_: {"type": "STRING_ARRAY", "value": elements}}
+    else:
+        return parameters
 
 
 def get_apdl_math_dimensions(dimensions_str):
