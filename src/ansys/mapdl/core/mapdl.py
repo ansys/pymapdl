@@ -3870,27 +3870,6 @@ class _MapdlCore(Commands):
         else:
             return output
 
-    def get_mapdl_envvar(self, envvar):
-        """Get the value of an MAPDL environment variable.
-
-        This variable can be only in one line.
-
-        Parameters
-        ----------
-        envvar : str
-            The name of the environment variable.
-
-        Returns
-        -------
-        str
-            The value of the environment variable.
-
-        Examples
-        --------
-        >>> mapdl.get_mapdl_envvar('ANSYS_VER')"""
-        self.inquire("MYSTRARR", "ENV", envvar)
-        return self.parameters["MYSTRARR"]
-
     def _check_mapdl_os(self):
         platform = self.get_value("active", 0, "platform").strip()
         if "l" in platform.lower():
