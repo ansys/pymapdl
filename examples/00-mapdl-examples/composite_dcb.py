@@ -448,5 +448,8 @@ camera_pos = disp.animate(
 ###############################################################################
 #
 # Exit MAPDL
-os.remove("file.rst")
+try:
+    os.remove(rst_path)
+except FileNotFoundError:
+    pass
 mapdl.exit()
