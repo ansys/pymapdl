@@ -1913,7 +1913,7 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
                     filenames = [
                         self._distributed_result_file,

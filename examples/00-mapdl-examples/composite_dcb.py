@@ -45,7 +45,7 @@ These additional packages are imported for use:
 # Start MAPDL as a service
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # This example begins by importing the required packages and then launching Ansys Mechanical APDL.
-
+import os
 import tempfile
 
 from ansys.dpf import core as dpf
@@ -448,4 +448,8 @@ camera_pos = disp.animate(
 ###############################################################################
 #
 # Exit MAPDL
+try:
+    os.remove(rst_path)
+except FileNotFoundError:
+    pass
 mapdl.exit()
