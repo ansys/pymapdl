@@ -45,7 +45,7 @@ These additional packages are imported for use:
 # Start MAPDL as a service
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # This example begins by importing the required packages and then launching Ansys Mechanical APDL.
-
+import os
 import tempfile
 
 from ansys.dpf import core as dpf
