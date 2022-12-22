@@ -63,6 +63,7 @@ MAPDL
 mater
 MATLAB
 Matplotlib
+matplotlib
 mesher
 midside
 Mises
