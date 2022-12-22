@@ -226,7 +226,6 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
         with open(os.path.join(file_), "r") as fid:
             assert "empty" in fid.read()
-        os.remove(file_)
 
     with pytest.warns(UserWarning, match=f"The file '{file_}' is present in both,"):
         load_file(mapdl, file_path)
@@ -241,6 +240,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     if mapdl._local:
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
+        os.remove(file_)
     else:
         mapdl.download(file_)
         with open(os.path.join(file_), "r") as fid:
@@ -248,7 +248,10 @@ def test_load_file_local(mapdl, tmpdir, file_):
         os.remove(file_)
 
     # File is in the MAPDL working directory
-    os.remove(file_path)  # removing local file
+    try:
+        os.remove(file_path)  # removing local file
+    except FileNotFoundError:
+        pass
     assert not os.path.exists(file_path)
 
     mapdl.slashdelete(file_)
