@@ -685,7 +685,7 @@ These examples demonstrate miscellaneous tips and tricks for using PyMAPDL.
 
     </div>
 
-Academic Finite Element Examples
+Academic finite element examples
 ================================
 These examples demonstrate finite element method as applicable to
 Python and MAPDL while emphasising Python libraries such as `matplotlib
