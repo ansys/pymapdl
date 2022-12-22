@@ -1658,3 +1658,13 @@ def test_mode(mapdl):
     assert mapdl.is_console
 
     mapdl._mode = "grpc"  # Going back to default
+
+
+def test_remove_lock_file(mapdl, tmpdir):
+    tmpdir_ = tmpdir.mkdir("ansys")
+    lock_file = tmpdir_.join("file.lock")
+    with open(lock_file, "w") as fid:
+        fid.write("test")
+
+    mapdl._remove_lock_file(tmpdir_)
+    assert not os.path.exists(lock_file)
