@@ -154,7 +154,7 @@ You can even plot directly from the Python environment with:
 .. figure:: ./images/eplot_vtk.png
     :width: 400pt
 
-    Element pot from MAPDL using ``PyMAPDL`` and ``vtk``
+    Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 For a full listing of PyMAPDL features, see the
 :ref:`ref_user_guide`.
