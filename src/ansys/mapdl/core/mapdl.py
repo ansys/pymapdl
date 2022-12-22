@@ -3897,7 +3897,7 @@ class _MapdlCore(Commands):
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
 
-        if self.is_grpc and not self._local:
+        if self.is_grpc and not self.is_local:
             return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
         else:
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
@@ -3910,3 +3910,8 @@ class _MapdlCore(Commands):
         if self._on_docker is None:
             self._on_docker = self._check_on_docker()
         return self._on_docker
+
+    @property
+    def is_local(self):
+        """Check if the instance is running locally or remotely."""
+        return self._local
