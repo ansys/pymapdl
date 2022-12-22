@@ -829,7 +829,16 @@ class SpectrumOptions:
         return self.run(command, **kwargs)
 
     def psdval(
-        self, tblno="", sv1="", sv2="", sv3="", sv4="", sv5="", sv6="", sv7="", **kwargs
+        self,
+        tblno="",
+        sv1="",
+        sv2="",
+        sv3="",
+        sv4="",
+        sv5="",
+        sv6="",
+        sv7="",
+        **kwargs,
     ):
         """Defines PSD values.
 

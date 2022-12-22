@@ -5,7 +5,16 @@ from ansys.mapdl.core.mapdl_types import MapdlInt
 
 class ElementTable:
     def detab(
-        self, elem="", lab="", v1="", v2="", v3="", v4="", v5="", v6="", **kwargs
+        self,
+        elem="",
+        lab="",
+        v1="",
+        v2="",
+        v3="",
+        v4="",
+        v5="",
+        v6="",
+        **kwargs,
     ):
         """Modifies element table results in the database.
 
@@ -105,7 +114,12 @@ class ElementTable:
         return self.run(command, **kwargs)
 
     def etable(
-        self, lab: str = "", item: str = "", comp: str = "", option: str = "", **kwargs
+        self,
+        lab: str = "",
+        item: str = "",
+        comp: str = "",
+        option: str = "",
+        **kwargs,
     ) -> Optional[str]:
         """Fills a table of element values for further processing.
 
@@ -499,7 +513,14 @@ class ElementTable:
         return self.run(command, **kwargs)
 
     def sallow(
-        self, strs1="", strs2="", strs3="", strs4="", strs5="", strs6="", **kwargs
+        self,
+        strs1="",
+        strs2="",
+        strs3="",
+        strs4="",
+        strs5="",
+        strs6="",
+        **kwargs,
     ):
         """Defines the allowable stress table for safety factor calculations.
 
@@ -768,7 +789,14 @@ class ElementTable:
         return self.run(command, **kwargs)
 
     def tallow(
-        self, temp1="", temp2="", temp3="", temp4="", temp5="", temp6="", **kwargs
+        self,
+        temp1="",
+        temp2="",
+        temp3="",
+        temp4="",
+        temp5="",
+        temp6="",
+        **kwargs,
     ):
         """Defines the temperature table for safety factor calculations.
 

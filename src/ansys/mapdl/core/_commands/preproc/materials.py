@@ -341,7 +341,7 @@ class Materials:
 
         This command is also valid in SOLUTION.
         """
-        command = "MPCOPY,%s,%s" % (str(matf), str(matt))
+        command = "MPCOPY,,%s,%s" % (str(matf), str(matt))
         return self.run(command, **kwargs)
 
     def mpdata(
@@ -556,7 +556,12 @@ class Materials:
 
         This command is also valid in SOLUTION.
         """
-        command = "MPDRES,%s,%s,%s,%s" % (str(labf), str(matf), str(labt), str(matt))
+        command = "MPDRES,%s,%s,%s,%s" % (
+            str(labf),
+            str(matf),
+            str(labt),
+            str(matt),
+        )
         return self.run(command, **kwargs)
 
     def mplib(self, r_w_opt="", path="", **kwargs):
@@ -816,7 +821,12 @@ class Materials:
 
         This command is also valid in SOLUTION.
         """
-        command = "MPTGEN,%s,%s,%s,%s" % (str(stloc), str(num), str(tstrt), str(tinc))
+        command = "MPTGEN,%s,%s,%s,%s" % (
+            str(stloc),
+            str(num),
+            str(tstrt),
+            str(tinc),
+        )
         return self.run(command, **kwargs)
 
     def mptres(self, lab="", mat="", **kwargs):
@@ -996,7 +1006,15 @@ class Materials:
         return self.run(command, **kwargs)
 
     def uimp(
-        self, mat="", lab1="", lab2="", lab3="", val1="", val2="", val3="", **kwargs
+        self,
+        mat="",
+        lab1="",
+        lab2="",
+        lab3="",
+        val1="",
+        val2="",
+        val3="",
+        **kwargs,
     ):
         """APDL Command: UIMP
 

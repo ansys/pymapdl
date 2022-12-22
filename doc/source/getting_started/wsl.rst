@@ -1,8 +1,8 @@
   .. _ref_guide_wsl:
 
 
-PyAnsys libraries on a Windows Subsystem for Linux and Docker
-##############################################################
+Windows Subsystem for Linux
+###########################
 
 This page shows you how to use a PyAnsys library, more specifically PyMAPDL,
 in the Windows Subsystem for Linux (WSL). WSL is a compatibility layer for
@@ -30,16 +30,16 @@ Install WSL
 Install WSL by following Microsoft's directions at 
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
-Currently there are two versions of WSL: WSL1 abd WSL2. Because WSL2 is
+Currently there are two versions of WSL: WSL1 and WSL2. Because WSL2 is
 the latest and includes many improvements over WSL1, using WSL2 is highly recommended.
 
-Install CentOS7 WSL distribution
-================================
+Install CentOS 7 WSL distribution
+=================================
 
-Install CentOS7 WSL distribution
-================================
+Install CentOS 7 WSL distribution
+=================================
 
-You should use the CentOS7 WSL distribution for working with PyAnsys
+You should use the CentOS 7 WSL distribution for working with PyAnsys
 libraries.
 
 You can install it using an unofficial WSL distribution from
@@ -49,8 +49,8 @@ You can install it using an unofficial WSL distribution from
 Optionally, you can try Ubuntu, but it has not been tested yet in the context of WSL.
 
 
-Install Ansys products in WSL CentOS7
-=====================================
+Install Ansys products in WSL CentOS 7
+======================================
 
 Prerequisites
 -------------
@@ -132,15 +132,15 @@ This works if you want to run a Docker image using WSL Linux image to host that
 Docker image. The Docker image successfully communicates with the Windows
 License Server using these ports if you use the ``'-p'`` flag when running the
 Docker image and these ports are open. 
-See `Run MAPDL on a local Docker image`_.
+For more information, see `Run an MAPDL image <run_an_mapdl_image_>`.
 
 
-If you want to run MAPDL in the CentOS7 image and use the Windows license
+If you want to run MAPDL in the CentOS 7 image and use the Windows license
 server, opening the ports might not work properly because the Windows firewall
 seems to block all traffic coming from WSL. For security purposes, you should
-still try to open ports ``1055`` and ``2325`` in the firewall and check if your
+still try to open ports ``1055`` and ``2325`` in the firewall and see if your
 MAPDL installation can communicate with the Windows hosts. If you are having
-problems after setting the firewall rules, you might have to disable the Windows
+problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution.
 See `Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl_>`_.
@@ -159,6 +159,8 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
 
 
 **Example /etc/hosts/ file**
+
+.. vale off
 
 .. code-block:: bash
    :emphasize-lines: 8
@@ -181,8 +183,13 @@ The Windows host IP address is given in the WSL file ``/etc/hosts`` before the n
    ff02::1 ip6-allnodes
    ff02::2 ip6-allrouters
 
+
+.. vale on
+
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
-environment variable with that IP address:
+environment variable with this IP address:
+
+.. vale off
 
 .. code:: bash
 
@@ -190,48 +197,34 @@ environment variable with that IP address:
     export ANSYSLMD_LICENSE_FILE=1055@$winhostIP
 
 
-Run MAPDL on a local Docker image
-*********************************
+.. vale off
 
-To run a Docker image, you must follow all steps in `Run PyMAPDL on WSL`_ .
+Launch MAPDL in WSL
+===================
 
-Additionally, you run a Docker image of PyMAPDL with:
+To launch MAPDL in WSL, you must follow the procedure in 
+`Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`.
+An example follows.
 
-.. code:: pwsh
+.. code:: bash
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+    /ansys_inc/v222/ansys/bin/ansys222 -grpc
 
-Successive runs should restart the container or just delete it and rerun it using:
-
-.. code:: pwsh
-
-    docker stop mapdl
-    docker container prune
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+This launches an MAPDL instance whose working directory is the current directory.
+If you want to change the working directory, you can use the ``-dir`` flag.
 
 
-This creates a log file (``log.txt``) in your current directory location.
+.. code:: bash
 
+    /ansys_inc/v222/ansys/bin/ansys222 -grpc -dir /tmp/ansys_jobs/myjob
 
-.. note:: Ensure that your port ``50053`` is open in your firewall.
+Connect to an MAPDL instance running in WSL
+===========================================
 
-You shodld use a script (batch ``'.bat'`` or powershell ``'.ps'``
-file) to run the above commands all at once.
-
-Notice that the WSL internal gRPC port (``50052``) is being mapped to a
-different Windows host port (``50053``) to avoid ports conflicts.
-
-This image is ready to be connected to from WSL or Windows Host but the port
-and IP should be specified as:
-
-.. code:: python
-
-    from ansys.mapdl.core import launch_mapdl
-
-    mapdl = launch_mapdl(ip='127.0.0.1', port=50053, start_instance=False) 
-
-Or:
+To connect to the WSL instance that is running the MAPDL instance, follow the
+procedure in 
+`Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`
+but specify the IP address of the WSL instance:
 
 .. code:: python 
 
@@ -240,44 +233,10 @@ Or:
     mapdl = Mapdl(ip='127.0.0.1', port=50053)
 
 
-You can also specify the port and IP address using environment variables that are read when
-launching the MAPDL instance:
-
-.. code:: bash
-
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=50053
-    export PYMAPDL_IP=127.0.0.1
-
-
-Launch Docker with UPF capabilities
-===================================
-
-If you want to specify a custom Python UPF routine, you must have the
-environment variables ``ANS_USER_PATH`` and ``ANS_USE_UPF`` defined. The
-former should be equal to the path where the UPF routines are located, and the
-latter should be equal to ``TRUE``.
-
-In WSL, you can do this using:
-
-.. code:: bash
-
-    export ANS_USER_PATH=/home/user/UPFs # Use your own path to your UPF files.
-    export ANS_USE_UPF=TRUE
-
-You can then run the Docker image with:
-
-.. code:: bash
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp  1>log.txt
-
-.. warning:: The use of UPFs with Docker images or PyMAPDL is still in the alpha state.
-
-
 Notes
 =====
 
-The specified IP address ``127.0.0.1`` in `Run MAPDL on a local Docker image`_ is
+The specified IP address ``127.0.0.1`` in `Run an MAPDL image <run_an_mapdl_image_>` is
 the IP address of WSL CentOS from the WSL perspective, whereas the Windows host IP address is
 normally ``127.0.1.1``. Docker builds the PyMAPDL images using the WSL
 distribution as the base. Hence, PyMAPDL is running on a Linux WSL
@@ -442,8 +401,8 @@ Kill all processes with a given name
    Get-Process "ANSYS212" | Stop-Process
 
 
-Install ``xvfb`` in CentOS7
-===========================
+Install ``xvfb`` in CentOS 7
+============================
 
 If you want to replicate the CI/CD behavior, ``xvfb`` is needed. For more
 information, see the ``.ci`` folder.

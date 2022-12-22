@@ -12,13 +12,13 @@ Overview
 When calling MAPDL commands as functions, each command has been
 translated from its original MAPDL all CAPS format to a PEP8
 compatible format. For example, ``ESEL`` is now the
-:func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>` function.
+:func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>` method.
 Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
 this causes a conflict with an existing name. Most notable is
 ``/SOLU``, which would conflict with ``SOLU``. Therefore,
 ``/SOLU`` is renamed to the :func:`Mapdl.slashsolu()
-<ansys.mapdl.core.Mapdl.slashsolu>` function to differentiate it from ``solu``.
+<ansys.mapdl.core.Mapdl.slashsolu>` method to differentiate it from ``solu``.
 Out of the 1500 MAPDL commands, about 15 start with ``slash (/)`` and 8
 start with ``star (*)``.
 
@@ -35,8 +35,8 @@ Or, these commands can be called using keyword arguments:
 
     mapdl.esel('s', 'type', vmin=1)
 
-None of these restrictions apply to commands run with :func:`Mapdl.run()
-<ansys.mapdl.core.Mapdl.run>`. It might be easier to run some of
+None of these restrictions apply to commands run with the :func:`Mapdl.run()
+<ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
 these commands, such as ``"/SOLU"``:
 
 .. code:: python
@@ -57,7 +57,7 @@ group of commands that must be run non-interactively, set the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class to run a series
 of commands as an input file by using the
 :func:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
-function. Here is an example:
+method. Here is an example:
 
 .. code:: python
 
@@ -85,7 +85,7 @@ a file) do not appear to run correctly. For example, here is the macro
     *USE,DISP,-.05
     *USE,DISP,-.1
 
-It should be written as:
+It should be written as follows:
 
 .. code:: python
 
@@ -105,7 +105,7 @@ It should be written as:
 
 If you have an existing input file with a macro, you can convert it
 using the :func:`convert_script() <ansys.mapdl.core.convert_script>`
-function with the setting ``macros_as_functions=True``:
+method, setting``macros_as_functions=True``:
 
 .. code:: python
 
@@ -231,7 +231,7 @@ attribute. For example:
       *GET,ARG9,KZ,ARG3
     *ENDIF
 
-This should be implemented as:
+This should be implemented as follows:
 
 .. code:: python
 
@@ -252,7 +252,7 @@ This should be implemented as:
         mapdl.run("*GET,ARG9,KZ,ARG3")
         mapdl.run("*ENDIF")
 
-Or, implemented Ppythonically as:
+Or, implemented Pythonically as follows:
 
 .. code:: python
 
@@ -360,16 +360,16 @@ This code writes the following to the ``"apdl.log"`` file:
 This allows for the translation of a Python script to an APDL script
 except for conditional statements, loops, or functions.
 
-Use ``lgwrite``
-~~~~~~~~~~~~~~~
-Alternatively, if you just want the database command output, you can use the
+Use the ``lgwrite`` method
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+Alternatively, if you only want the database command output, you can use the
 :func:`Mapdl.lgwrite <Mapdl.ansys.mapdl.core.Mapdl.lgwrite>` method to write the
 entire database command log to a file.
 
 
 Interactive breakpoint
 ----------------------
-In most circumstances it is necessary or preferable to open up the
+In most circumstances, it is necessary or preferable to open up the
 MAPDL GUI. The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class
 has the :func:`Mapdl.open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method, which
 allows you to seamlessly open up the GUI without losing work or
@@ -533,7 +533,7 @@ with torsional loading.
     # Exit MAPDL
     mapdl.exit()
 
-This is the result from the script:
+Here is the output from the script:
 
 .. code::
 
@@ -557,12 +557,12 @@ This is the result from the script:
 Chain commands in MAPDL
 -----------------------
 MAPDL permits several commands on one line by using the separation
-character ``"$"``. This can be utilized within ``ansys-mapdl-core``
-to effectively chain several commands together and send them to
-MAPDL for execution rather than executing them individually. Chaining
-commands can be helpful when you need to execute thousands of commands in a Python
+character ``"$"``. This can be utilized within PyMAPDL to effectively
+chain several commands together and send them to MAPDL for execution
+rather than executing them individually. Chaining commands can be helpful
+when you need to execute thousands of commands in a Python
 loop and don't need the individual results for each command. For
-example, if you want to create 1000 keypoints along the X axis, you
+example, if you want to create 1000 key points along the X axis, you
 would run:
 
 .. code:: python
@@ -603,7 +603,7 @@ You can send ``numpy`` arrays or Python lists directly to MAPDL using
 the :attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>` attribute.
 This is far more efficient than individually sending parameters to
 MAPDL through Python with the :func:`Mapdl.run()
-<ansys.mapdl.core.Mapdl.run>` method.  It uses the :func:`Mapdl.vread()
+<ansys.mapdl.core.Mapdl.run>` method because it uses the :func:`Mapdl.vread()
 <ansys.mapdl.core._commands.ParameterDefinition>` method behind the scenes.
 
 .. code:: python
@@ -634,7 +634,7 @@ Download a remote MAPDL file
 When running MAPDL in gRPC mode, remote MAPDL files can be listed and
 downloaded using the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class with the :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`
-function. For example, to list the remote files and download one of them:
+function. For example, the following code lists the remote files and downloads one of them:
 
 .. code:: python
 
@@ -652,7 +652,7 @@ function. For example, to list the remote files and download one of them:
 
 Alternatively, you can download several files at once using the glob pattern 
 or a list of file names in the :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`
-method. For example:
+method:
 
 .. code:: python
 
@@ -663,13 +663,14 @@ method. For example:
     mapdl.download('file*')
 
 You can also download all files in the MAPDL working directory
-(:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`) using:
+(:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`) using
+this function:
 
 .. code:: python
 
     mapdl.download_project()
 
-Or, filter by extensions. For example:
+Or, filter by extensions as shown in this example:
 
 .. code:: python
 
@@ -679,8 +680,7 @@ Or, filter by extensions. For example:
 Upload a local MAPDL file
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 You can upload a local MAPDL file as the remote MAPDL instance with the
-:func:`Mapdl.upload() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>` function.
-For example:
+:func:`Mapdl.upload() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>` method:
 
 .. code:: python
 
@@ -698,21 +698,21 @@ For example:
 
 Unsupported MAPDL commands and other considerations
 ---------------------------------------------------
-Most MAPDl commands have been mapped Pythonically into their
-equivalent methods. Some commands, however, are not supported, either
-because they are not applicable to an interactive session or require
+Most MAPDL commands have been mapped Pythonically into their
+equivalent methods. Some commands, however, are not supported
+because either they are not applicable to an interactive session or they require
 additional commands that are incompatible with the way inputs are
 handled on the MAPDL server.
 
 
 .. _ref_unsupported_commands:
 
-Non-available commands
-~~~~~~~~~~~~~~~~~~~~~~~
-Some commands are not available in PyMAPDL for a variety of reasons.
+Unavailable commands
+~~~~~~~~~~~~~~~~~~~~
+Some commands are unavailable in PyMAPDL for a variety of reasons.
 
 Some of these commands do not make sense in a Python context.
-Some examples follow.
+Here are some examples:
 
 - The ``*ASK`` command can be replaced with a Python ``input``.
 - The ``*IF`` command can be replaced with a Python ``if`` statement.
@@ -721,10 +721,10 @@ Some examples follow.
 Other commands do not make sense in a non-GUI session. For example, the ``/ERASE``
 and ``ERASE`` commands that clear the graphics screen are not needed in a non-GUI session.
 
-Other commands are quietly ignored by MAPDL, but you are still free to
-use them. For example, the ``/BATCH`` command can be run as the
-:func:`mapdl.run("/BATCH") <ansys.mapdl.core.Mapdl.run>` function,
-which returns:
+Other commands are quietly ignored by MAPDL, but you can still
+use them. For example, the ``/BATCH`` command can be run using the
+:func:`mapdl.run("/BATCH") <ansys.mapdl.core.Mapdl.run>` method,
+which returns the following warning:
 
 .. code::
 
@@ -734,7 +734,7 @@ which returns:
 
 
 
-Table-1_ provides comprehensive information on the commands that are non-available.
+Table-1_ Comprehensive information on commands that are unavailable
 
 .. _Table-1:
 
@@ -744,7 +744,7 @@ Table-1_ provides comprehensive information on the commands that are non-availab
   :class: longtable
 
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | MAPDL Command     | Interactive            | Non-interactive                         | Direct run                                   | Notes                                                                                                                                                   |
+  |                           | MAPDL command     | Interactive            | Non-interactive                         | Direct run                                   | Notes                                                                                                                                                   |
   +===========================+===================+========================+=========================================+==============================================+=========================================================================================================================================================+
   | **GUI commands**          | * ``*ASK``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | When used in :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` it automatically assumes the user input is 0. Use Python ``input`` instead.               |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -791,12 +791,12 @@ Table-1_ provides comprehensive information on the commands that are non-availab
 
 
 .. note::
-    * **Interactive** means there is a method in the MAPDL such as 
-      :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
+    * **Interactive** means there is a method in MAPDL, such as the
+      :func:`Mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>` method.
     * **Non-interactive** means it is run inside a 
       :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` context block,
-      :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method, or
-      :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>` method.
+      the :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method, or
+      the :func:`Mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>` method.
       For example:
 
       .. code:: python
@@ -806,16 +806,16 @@ Table-1_ provides comprehensive information on the commands that are non-availab
 
     * **Direct run** means that the :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` 
       method is used to run the MAPDL command.
-      For example, :func:`mapdl.run("/PREP7") <ansys.mapdl.core.Mapdl.run>`.
+      An example is the :func:`mapdl.run("/PREP7") <ansys.mapdl.core.Mapdl.run>` method.
 
 
 Note that running these commands with the
-:func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` function does
+:func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` method does
 not cause MAPDL to exit. However, it might raise runtime exceptions.
 
 These MAPDL commands can also be executed using the
 :func:`mapdl.input() <ansys.mapdl.core.Mapdl.input>` method
-or
+or the
 :func:`mapdl.input_strings() <ansys.mapdl.core.Mapdl.input_strings>`
 method. The results should be same as running them in a normal batch MAPDL session.
 
@@ -826,6 +826,7 @@ Unsupported "interactive" commands
 The following commands can be only run in non-interactive mode (inside a
 :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>` block or
 using the :func:`mapdl.input() <ansys.mapdl.core.Mapdl.input>` method).
+
 Table-2_ provides comprehensive information on the "interactive" commands that
 are unsupported.
 
@@ -847,8 +848,6 @@ are unsupported.
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 | * ``LSWRITE`` | |:heavy_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  |                                                                                                     |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-
-
 
 
 Environment variables

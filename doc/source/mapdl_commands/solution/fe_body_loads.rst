@@ -1,7 +1,7 @@
 .. _ref_fe_body_loads_commands_api:
 
 *************
-FE Body Loads
+FE body loads
 *************
 
 .. currentmodule:: ansys.mapdl.core

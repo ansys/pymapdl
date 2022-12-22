@@ -1,7 +1,7 @@
 .. _ref_binary File Dump_api:
 
 ****************
-Binary File Dump
+Binary file dump
 ****************
 
 .. currentmodule:: ansys.mapdl.core

@@ -203,7 +203,10 @@ def inject_docs(docstring):
                 indentation = get_section_indentation(sect_after_parameter, docstring)
                 indented_doc_inject = indent_text(indentation, docstring_injection)
                 return inject_before(
-                    sect_after_parameter, indentation, indented_doc_inject, docstring
+                    sect_after_parameter,
+                    indentation,
+                    indented_doc_inject,
+                    docstring,
                 )
 
         elif "notes" in sections:

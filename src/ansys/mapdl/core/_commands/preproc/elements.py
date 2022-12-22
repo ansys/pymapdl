@@ -151,7 +151,11 @@ class Elements:
         return self.run("ECPCHG", **kwargs)
 
     def edele(
-        self, iel1: MapdlInt = "", iel2: MapdlInt = "", inc: MapdlInt = "", **kwargs
+        self,
+        iel1: MapdlInt = "",
+        iel2: MapdlInt = "",
+        inc: MapdlInt = "",
+        **kwargs,
     ) -> Optional[str]:
         """Deletes selected elements from the model.
 
@@ -1337,7 +1341,11 @@ class Elements:
         return self.run(command, **kwargs)
 
     def errang(
-        self, emin: MapdlInt = "", emax: MapdlInt = "", einc: MapdlInt = "", **kwargs
+        self,
+        emin: MapdlInt = "",
+        emax: MapdlInt = "",
+        einc: MapdlInt = "",
+        **kwargs,
     ) -> Optional[str]:
         """Specifies the element range to be read from a file.
 
@@ -1686,7 +1694,13 @@ class Elements:
         return self.run(command, **kwargs)
 
     def gcgen(
-        self, option="", featureangle="", edgekey="", splitkey="", selopt="", **kwargs
+        self,
+        option="",
+        featureangle="",
+        edgekey="",
+        splitkey="",
+        selopt="",
+        **kwargs,
     ):
         """Creates contact elements for general contact.
 

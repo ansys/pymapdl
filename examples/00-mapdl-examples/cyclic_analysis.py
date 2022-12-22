@@ -44,7 +44,9 @@ def gen_sector(mapdl, sectors):
     # radius
     rad = 0.01  # M
     arc = pv.CircularArc(
-        [rad, 0, 0], [np.cos(arc_end) * rad, np.sin(arc_end) * rad, 0], [0, 0, 0]
+        [rad, 0, 0],
+        [np.cos(arc_end) * rad, np.sin(arc_end) * rad, 0],
+        [0, 0, 0],
     )
 
     # interior circle

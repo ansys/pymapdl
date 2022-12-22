@@ -182,7 +182,15 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def arefine(
-        self, na1="", na2="", ninc="", level="", depth="", post="", retain="", **kwargs
+        self,
+        na1="",
+        na2="",
+        ninc="",
+        level="",
+        depth="",
+        post="",
+        retain="",
+        **kwargs,
     ):
         """Refines the mesh around specified areas.
 
@@ -304,7 +312,15 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def cpcyc(
-        self, lab="", toler="", kcn="", dx="", dy="", dz="", knonrot="", **kwargs
+        self,
+        lab="",
+        toler="",
+        kcn="",
+        dx="",
+        dy="",
+        dz="",
+        knonrot="",
+        **kwargs,
     ):
         """Couples the two side faces of a cyclically symmetric model
         for loading that are the same on every segment.
@@ -388,7 +404,14 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def czmesh(
-        self, ecomps1="", ecomps2="", kcn="", kdir="", value="", cztol="", **kwargs
+        self,
+        ecomps1="",
+        ecomps2="",
+        kcn="",
+        kdir="",
+        value="",
+        cztol="",
+        **kwargs,
     ):
         """Create and mesh an interface area composed of cohesive zone elements.
 
@@ -886,7 +909,16 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def imesh(
-        self, laky="", nsla="", ntla="", kcn="", dx="", dy="", dz="", tol="", **kwargs
+        self,
+        laky="",
+        nsla="",
+        ntla="",
+        kcn="",
+        dx="",
+        dy="",
+        dz="",
+        tol="",
+        **kwargs,
     ):
         """Generates nodes and interface elements along lines or areas.
 
@@ -1073,7 +1105,15 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def krefine(
-        self, np1="", np2="", ninc="", level="", depth="", post="", retain="", **kwargs
+        self,
+        np1="",
+        np2="",
+        ninc="",
+        level="",
+        depth="",
+        post="",
+        retain="",
+        **kwargs,
     ):
         """Refines the mesh around specified keypoints.
 
@@ -1479,7 +1519,15 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def lrefine(
-        self, nl1="", nl2="", ninc="", level="", depth="", post="", retain="", **kwargs
+        self,
+        nl1="",
+        nl2="",
+        ninc="",
+        level="",
+        depth="",
+        post="",
+        retain="",
+        **kwargs,
     ):
         """Refines the mesh around specified lines.
 
@@ -1963,7 +2011,15 @@ class Meshing:
         return self.run(command, **kwargs)
 
     def nrefine(
-        self, nn1="", nn2="", ninc="", level="", depth="", post="", retain="", **kwargs
+        self,
+        nn1="",
+        nn2="",
+        ninc="",
+        level="",
+        depth="",
+        post="",
+        retain="",
+        **kwargs,
     ):
         """Refines the mesh around specified nodes.
 

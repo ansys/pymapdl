@@ -1,3 +1,0 @@
-VERSION=v21.2.1
-REPO=ghcr.io/pyansys/pymapdl
-IMAGE=$REPO/mapdl:$VERSION

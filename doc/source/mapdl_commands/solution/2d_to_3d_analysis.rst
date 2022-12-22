@@ -1,7 +1,7 @@
 .. _ref_2d_to_3d_analysis_commands_api:
 
 *****************
-2D to 3D Analysis
+2D to 3D analysis
 *****************
 
 .. currentmodule:: ansys.mapdl.core

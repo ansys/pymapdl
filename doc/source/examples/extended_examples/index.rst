@@ -1,14 +1,11 @@
 .. _ref_extended_examples:
 
-Extended Examples
+Extended examples
 =================
 
 
-These extended examples aim to explain other concepts such as interoperability
+These extended examples explain other concepts such as interoperability
 with other programs, libraries, and features in development.
-
-These examples are a work-in-progress and will be extended during the life of
-this project.
 
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | Name                       | Description                                                                                             |
@@ -21,5 +18,8 @@ this project.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`krylov_example`      | Demonstrates the usage of the Krylov method for solving a customized harmonic analysis.                 |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
+| :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                              |
++----------------------------+---------------------------------------------------------------------------------------------------------+
+
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html

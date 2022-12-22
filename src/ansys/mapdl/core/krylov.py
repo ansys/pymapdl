@@ -586,7 +586,10 @@ class KrylovSolver:
                 xii_usr_ordered.append(dof_each_freq)
 
             # Compute residual norm (if requested)
-            if residual_computation or residual_algorithm.lower() in ["no", "off"]:
+            if residual_computation or residual_algorithm.lower() in [
+                "no",
+                "off",
+            ]:
                 norm_rz, norm_fz = self.compute_residuals(iFreq, RzV, Xi, omega)
                 if not self.residuals:
                     self.residuals = []
@@ -596,7 +599,8 @@ class KrylovSolver:
         # Storing solution in class
         if compute_solution_vectors:
             self.solution_vectors = np.array(
-                xii_usr_ordered, dtype=[("node", "i4"), ("equ", "i4"), ("x", "c8")]
+                xii_usr_ordered,
+                dtype=[("node", "i4"), ("equ", "i4"), ("x", "c8")],
             )
 
         if return_solution:

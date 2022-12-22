@@ -8,10 +8,8 @@ PyMAPDL documentation |version|
    getting_started/index
    user_guide/index
    mapdl_commands/index
+   api/index
    examples/index
-   learning/index
-   troubleshoot/index
-   contribution_and_api/index
 
 
 
@@ -40,8 +38,8 @@ Accelerate the preparation of your simulations using PyMAPDL. Combine the
 expressiveness of general-purpose Python code to control the flow in your
 input decks with methods that drive the solver. Explore proof of concept 
 studies or capture knowledge using interactive Jupyter notebooks. Tap
-the solver as the physics engine in your next Artificial Intelligence
-application. It is now open source: Enjoy it! Contributions are welcome.
+the solver as the physics engine in your next AI app. PyMAPDL is now open source,
+so enjoy it. Contributions are welcome.
 
 
 Background
@@ -52,7 +50,7 @@ allow the MAPDL solver to function as a server, ready to respond to
 connecting clients.
 
 Google remote procedure calls, or gRPC, are used to establish secure 
-connections so that a client application can directly call methods on 
+connections so that a client app can directly call methods on 
 a potentially remote MAPDL instance as if it were a local object. The 
 use of HTTP/2 makes it friendly to modern internet infrastructures. 
 This, along with the use of binary transmission formats, favors higher
@@ -77,7 +75,7 @@ Here's a brief example of how PyMAPDL works:
 
 MAPDL is now active and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
-keypoints, you could run:
+key points, you could run:
 
 .. code:: python
 
@@ -156,7 +154,7 @@ You can even plot directly from the Python environment with:
 .. figure:: ./images/eplot_vtk.png
     :width: 400pt
 
-    Element pot from MAPDL using ``PyMAPDL`` and ``vtk``
+    Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 For a full listing of PyMAPDL features, see the
 :ref:`ref_user_guide`.

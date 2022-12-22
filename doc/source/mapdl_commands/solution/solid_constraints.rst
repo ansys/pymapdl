@@ -1,7 +1,7 @@
 .. _ref_solid_constraints_commands_api:
 
 *****************
-Solid Constraints
+Solid constraints
 *****************
 
 .. currentmodule:: ansys.mapdl.core

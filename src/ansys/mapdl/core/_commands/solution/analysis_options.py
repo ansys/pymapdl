@@ -546,7 +546,13 @@ class AnalysisOptions:
         return self.run(command, **kwargs)
 
     def cmatrix(
-        self, symfac="", condname="", numcond="", grndkey="", capname="", **kwargs
+        self,
+        symfac="",
+        condname="",
+        numcond="",
+        grndkey="",
+        capname="",
+        **kwargs,
     ):
         """Performs electrostatic field solutions and calculates the
         self and mutual capacitances between multiple conductors.x
@@ -1141,7 +1147,14 @@ class AnalysisOptions:
         return self.run(command, **kwargs)
 
     def dmpext(
-        self, smode="", tmode="", dmpname="", freqb="", freqe="", nsteps="", **kwargs
+        self,
+        smode="",
+        tmode="",
+        dmpname="",
+        freqb="",
+        freqe="",
+        nsteps="",
+        **kwargs,
     ):
         """Extracts modal damping coefficients in a specified frequency range.
 
@@ -1317,7 +1330,12 @@ class AnalysisOptions:
         return self.run(command, **kwargs)
 
     def dspoption(
-        self, reord_option="", memory_option="", memory_size="", solve_info="", **kwargs
+        self,
+        reord_option="",
+        memory_option="",
+        memory_size="",
+        solve_info="",
+        **kwargs,
     ):
         """Sets memory option for the distributed sparse solver.
 
@@ -3185,7 +3203,14 @@ class AnalysisOptions:
         return self.run(command, **kwargs)
 
     def seopt(
-        self, sename="", sematr="", sepr="", sesst="", expmth="", seoclvl="", **kwargs
+        self,
+        sename="",
+        sematr="",
+        sepr="",
+        sesst="",
+        expmth="",
+        seoclvl="",
+        **kwargs,
     ):
         """Specifies substructure analysis options.
 

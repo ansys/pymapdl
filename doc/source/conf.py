@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import pyansys_logo_black
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
@@ -45,6 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
+cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
 
 
 # -- General configuration ---------------------------------------------------
@@ -62,6 +63,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
+    "sphinx.ext.graphviz",
 ]
 
 # Intersphinx mapping
@@ -107,7 +109,7 @@ numpydoc_validation_exclude = {  # set of regex
 }
 
 # Favicon
-html_favicon = "favicon.png"
+html_favicon = ansys_favicon
 
 # notfound.extension
 notfound_template = "404.rst"
@@ -204,7 +206,17 @@ html_theme_options = {
             "url": "https://github.com/pyansys/pymapdl/discussions",
             "icon": "fa fa-comment fa-fw",
         },
+        {
+            "name": "Contribute",
+            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "icon": "fa fa-wrench",
+        },
     ],
+    "switcher": {
+        "json_url": f"https://{cname}/release/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
 }
 
 html_context = {
@@ -242,7 +254,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "ansys.mapdl.core", "ansys.mapdl.core Documentation", [author], 1)
+    (
+        master_doc,
+        "ansys.mapdl.core",
+        "ansys.mapdl.core Documentation",
+        [author],
+        1,
+    )
 ]
 
 

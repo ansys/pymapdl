@@ -1212,7 +1212,15 @@ class Lines:
         return self.run(command, **kwargs)
 
     def lsymm(
-        self, ncomp="", nl1="", nl2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        ncomp="",
+        nl1="",
+        nl2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Generates lines from a line pattern by symmetry reflection.
 
@@ -1319,7 +1327,15 @@ class Lines:
         return parse.parse_line_no(self.run(command, **kwargs))
 
     def ltran(
-        self, kcnto="", nl1="", nl2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        kcnto="",
+        nl1="",
+        nl2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Transfers a pattern of lines to another coordinate system.
 

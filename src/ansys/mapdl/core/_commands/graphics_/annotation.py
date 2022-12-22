@@ -398,7 +398,17 @@ class Annotation:
         return self.run(command, **kwargs)
 
     def polygon(
-        self, nvert="", x1="", y1="", x2="", y2="", x3="", y3="", x4="", y4="", **kwargs
+        self,
+        nvert="",
+        x1="",
+        y1="",
+        x2="",
+        y2="",
+        x3="",
+        y3="",
+        x4="",
+        y4="",
+        **kwargs,
     ):
         """Creates annotation polygons (GUI).
 
