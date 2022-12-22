@@ -1658,3 +1658,15 @@ def test_mode(mapdl):
     assert mapdl.is_console
 
     mapdl._mode = "grpc"  # Going back to default
+
+
+def test_is_local(mapdl):
+    assert mapdl.is_local == mapdl._local
+
+
+def test_on_docker(mapdl):
+    assert mapdl.on_docker == mapdl._on_docker
+    if os.getenv("PYMAPDL_START_INSTANCE", "false") == "true":
+        assert mapdl.on_docker
+    else:
+        assert not mapdl.on_docker
