@@ -351,7 +351,7 @@ These examples demonstrate full examples using the PyMAPDL module.
     </div>
 
 
-PyMAPDL Math Examples
+PyMAPDL math examples
 =====================
 These examples demonstrate using APDL Math from the PyMAPDL library.
 
