@@ -194,6 +194,8 @@ class _MapdlCore(Commands):
         self._cached_routine = None
         self._geometry = None
         self._kylov = None
+        self._on_docker = None
+        self._platform = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -3867,3 +3869,65 @@ class _MapdlCore(Commands):
             )
         else:
             return output
+
+    def get_mapdl_envvar(self, envvar):
+        """Get the value of an MAPDL environment variable.
+
+        This variable can be only in one line.
+
+        Parameters
+        ----------
+        envvar : str
+            The name of the environment variable.
+
+        Returns
+        -------
+        str
+            The value of the environment variable.
+
+        Examples
+        --------
+        >>> mapdl.get_mapdl_envvar('ANSYS_VER')"""
+        self.inquire("MYSTRARR", "ENV", envvar)
+        return self.parameters["MYSTRARR"]
+
+    def _check_mapdl_os(self):
+        platform = self.get_value("active", 0, "platform").strip()
+        if "l" in platform.lower():
+            self._platform = "linux"
+        elif "w" in platform.lower():
+            self._platform = "windows"
+        else:
+            raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+
+    @property
+    def platform(self):
+        """Return the platform where MAPDL is running."""
+        if self._platform is None:
+            self._check_mapdl_os()
+        return self._platform
+
+    def _check_on_docker(self):
+        """Check if MAPDL is running on docker."""
+        # self.get_mapdl_envvar("ON_DOCKER") # for later
+
+        if self.platform == "linux":
+            self.sys(
+                "if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
+            )
+        elif self.platform == "windows":  # pragma: no cover
+            return False  # TODO: check if it is running a windows docker container. So far it is not supported.
+
+        if self.is_grpc and not self._local:
+            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        else:
+            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            with open(file_, "r") as f:
+                return f.read().strip() == "true"
+
+    @property
+    def on_docker(self):
+        """Check if MAPDL is running on docker."""
+        if self._on_docker is None:
+            self._on_docker = self._check_on_docker()
+        return self._on_docker
