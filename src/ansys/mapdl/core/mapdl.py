@@ -3874,9 +3874,9 @@ class _MapdlCore(Commands):
         platform = self.get_value("active", 0, "platform").strip()
         if "l" in platform.lower():
             self._platform = "linux"
-        elif "w" in platform.lower():
+        elif "w" in platform.lower():  # pragma: no cover
             self._platform = "windows"
-        else:
+        else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
 
     @property
@@ -3899,7 +3899,7 @@ class _MapdlCore(Commands):
 
         if self.is_grpc and not self.is_local:
             return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
-        else:
+        else:  # pragma: no cover
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
                 return f.read().strip() == "true"
