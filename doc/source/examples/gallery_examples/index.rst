@@ -502,7 +502,7 @@ These examples demonstrate using APDL Math from the PyMAPDL library.
 
     </div>
 
-Geometry Examples
+Geometry examples
 =================
 These examples demonstrate using PyMAPDL to create basic geometry.
 
