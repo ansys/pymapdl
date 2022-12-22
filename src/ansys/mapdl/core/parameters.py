@@ -636,13 +636,17 @@ def interp_star_status(status):
     Parameters
     ----------
     status : str
-        Output from MAPDL *STATUS
+        Output from MAPDL \*STATUS
 
     Returns
     -------
     parameters : dict
         Dictionary of parameters.
     """
+    # Exiting if there is no parameters
+    if "There are no parameters defined." in status:
+        return {}
+
     # If there is a general call to *STATUS (no arguments), the output has some extra
     # parameters that we don't want to include in the analysis.
     ind = find_parameter_listing_line(status)
