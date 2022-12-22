@@ -172,11 +172,12 @@ def convert_script(
     :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
     since you do not need to write the file.
 
+    >>> import os
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
     >>> from ansys.mapdl.core import convert_script
     >>> in_file = examples.vmfiles['vm10']
-    >>> filename = in_file.split('\\')[-1]
+    >>> filename = os.path.basename(in_file)
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
     >>> output = convert_script(file, out_file, line_ending='\\n')
     >>> mapdl = launch_mapdl()

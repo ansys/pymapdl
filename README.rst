@@ -237,15 +237,6 @@ you can use to send or receive arrays between MAPDL and Python.
 For more information, see the full documentation at `PyMAPDL Documentation
 <https://mapdl.docs.pyansys.com>`_.
 
-
-Run on Docker
-~~~~~~~~~~~~~
-You can run MAPDL within a container on any OS with ``docker``.
-
-For information on using MAPDL within a container, see `MAPDL on Docker README
-<https://github.com/pyansys/pymapdl/blob/master/docker/README.md>`_.
-
-
 Citing this module
 -------------------
 If you use ``PyMAPDL`` for research and would like to cite the module
