@@ -776,7 +776,7 @@ class DPFResult(Result):
         scope_ids : Union([int, floats, List[int]]), optional
             List of entities (nodal/elements) to get the results from, by default None
         result_in_entity_cs : bool, optional
-            Obtain the results in the entity coordenate system, by default False
+            Obtain the results in the entity coordinate system, by default False
         return_operator : bool, optional
             Return the last used operator (most of the times it will be a Rescope operator).
             Defaults to ``False``.
@@ -883,7 +883,7 @@ class DPFResult(Result):
 
         Examples
         --------
-        Return the nodal soltuion (in this case, displacement) for the
+        Return the nodal solution (in this case, displacement) for the
         first result of ``"file.rst"``
 
         >>> from ansys.mapdl.core.reader import DPFResult as Result
@@ -945,7 +945,7 @@ class DPFResult(Result):
 
         Examples
         --------
-        Return the nodal soltuion (in this case, displacement) for the
+        Return the nodal solution (in this case, displacement) for the
         first result of ``"file.rst"``
 
         >>> from ansys.mapdl.core.reader import DPFResult as Result
