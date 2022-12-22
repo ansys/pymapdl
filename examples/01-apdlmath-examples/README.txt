@@ -1,5 +1,5 @@
 .. _ref_apdl_math_examples:
 
-PyMAPDL Math Examples
+PyMAPDL math examples
 =====================
 These examples demonstrate using APDL Math from the PyMAPDL library.

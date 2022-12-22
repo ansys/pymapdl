@@ -1,6 +1,6 @@
 .. _ref_pymapdl_examples_repository:
 
-PyMAPDL Examples repository
+PyMAPDL examples repository
 ===========================
 
 
@@ -12,7 +12,7 @@ The documentation to these examples can be found in the
 
 .. === VERIFICATION MANUAL EXAMPLES ===
 
-Verification Manual examples
+Verification manual examples
 ----------------------------
 
 The Verification Manual examples demonstrate a range of Mechanical APDL
@@ -29,7 +29,7 @@ The documentation to these examples can be found in the
 
 .. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-Technology Showcase examples
+Technology showcase examples
 ----------------------------
 
 The PyMAPDL technology showcase examples are more complex test cases than

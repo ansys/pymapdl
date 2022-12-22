@@ -1562,7 +1562,7 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
-        >>> v.asarray(dtype=np.int)
+        >>> v.asarray(dtype=np.int_)
         [1 1 1 1 1 1 1 1 1 1]
 
         """

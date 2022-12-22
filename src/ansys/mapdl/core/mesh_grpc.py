@@ -492,7 +492,7 @@ class MeshGrpc:
             keyopt = einfo[2:20]
             if keyopt.any():
                 # convert to fortran/ANSYS format
-                valid_keyopt = keyopt[keyopt.astype(np.bool)]
+                valid_keyopt = keyopt[keyopt.astype(np.bool_)]
                 ans_keyopt = np.vstack((np.nonzero(keyopt)[0] + 1, valid_keyopt))
                 key_opt[einfo[0]] = ans_keyopt.T.tolist()
 
