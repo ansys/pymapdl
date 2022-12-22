@@ -448,4 +448,5 @@ camera_pos = disp.animate(
 ###############################################################################
 #
 # Exit MAPDL
+os.remove("file.rst")
 mapdl.exit()
