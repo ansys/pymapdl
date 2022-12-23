@@ -330,15 +330,14 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          name: "CentOS ${{ matrix.mapdl-version }} Local Coverage"
-          path_to_write_report: ./coverage/centos_${{ matrix.mapdl-version }}_remote.xml
-          flags: centos,remote
+          name: centos-${{ matrix.mapdl-version }}-remote.xml
+          flags: centos,remote,${{ matrix.mapdl-version }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: centos_${{ matrix.mapdl-version }}_remote.xml
-          path: ./coverage/centos_${{ matrix.mapdl-version }}_remote.xml
+          name: centos-${{ matrix.mapdl-version }}-remote.xml
+          path: ./centos-${{ matrix.mapdl-version }}-remote.xml
 
       - name: "Check package"
         run: |
@@ -475,15 +474,14 @@ jobs:
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
-          name: "Ubuntu Local Coverage"
-          path_to_write_report: ./coverage/ubuntu_local.xml
-          flags: ubuntu,local
+          name: ubuntu-v22.2.0-local.xml
+          flags: ubuntu,local,v22.2.0
 
       - name: 'Upload coverage artifacts'
         uses: actions/upload-artifact@v3
         with:
-          name: ubuntu_local.xml
-          path: ./coverage/ubuntu_local.xml
+          name: ubuntu-v22.2.0-local.xml
+          path: ./ubuntu-v22.2.0-local.xml
 
   test_windows:
     if: github.repository == ''
@@ -540,15 +538,14 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          name: "Windows Local Coverage"
-          path_to_write_report: ./coverage/windows_local.xml
-          flags: windows,local
+          name: windows-v22.2.0-local.xml
+          flags: windows,local,v22.2.0
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: windows_local.xml
-          path: ./coverage/windows_local.xml
+          name: windows-v22.2.0-local.xml
+          path: ./windows_local.xml
 
 
 
