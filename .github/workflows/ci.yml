@@ -329,6 +329,16 @@ jobs:
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
+        with:
+          name: "CentOS ${{ matrix.mapdl-version }} Local Coverage"
+          path_to_write_report: ./coverage/centos_${{ matrix.mapdl-version }}_remote.xml
+          flags: centos,remote
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: centos_${{ matrix.mapdl-version }}_remote.xml
+          path: ./coverage/centos_${{ matrix.mapdl-version }}_remote.xml
 
       - name: "Check package"
         run: |
@@ -465,6 +475,15 @@ jobs:
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
+          name: "Ubuntu Local Coverage"
+          path_to_write_report: ./coverage/ubuntu_local.xml
+          flags: ubuntu,local
+
+      - name: 'Upload coverage artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu_local.xml
+          path: ./coverage/ubuntu_local.xml
 
   test_windows:
     if: github.repository == ''
@@ -520,6 +539,18 @@ jobs:
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
+        with:
+          name: "Windows Local Coverage"
+          path_to_write_report: ./coverage/windows_local.xml
+          flags: windows,local
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows_local.xml
+          path: ./coverage/windows_local.xml
+
+
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
