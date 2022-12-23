@@ -29,13 +29,17 @@ jobs:
     name: 'Update coverage report'
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    continue-on-error: True
+    strategy:
+      matrix:
+        version: ['centos-v21.1.1-remote',  'centos-v21.2.1-remote',  'centos-v22.1.0-remote',  'centos-v22.2-ubuntu-remote',  'centos-v22.2.0-remote',  'ubuntu-v22.2.0-local']
     steps:
       - uses: actions/checkout@v3
-
       - name: 'Download the previously generated coverage reports'
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: ci.yml
+          name: ${{ matrix.version }}.xml
           commit: ${{github.event.pull.before}}
           path: ./artifacts
           github_token: ${{secrets.GITHUB_TOKEN}}
@@ -48,7 +52,7 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          directory: ./artifacts/
-
-
-
+          fail_ci_if_error: true
+          files: ./artifacts/${{ matrix.version }}.xml
+  
+  
