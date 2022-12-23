@@ -16,32 +16,26 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 .. include:: gallery_examples/index.rst
    :start-line: 2
 
-.. === TECHNOLOGY SHOWCASE EXAMPLES ===
 
-Technology showcase examples
-============================
+.. === PYMAPDL EXAMPLES ===
 
-The PyMAPDL technology showcase examples are more complex test cases than
-the ones preceding. They demonstrate how to use PyMAPDL to effectively
-and accurately solve interdisciplinary problems from a variety of industries
-and engineering fields.
+.. toctree::
+    :hidden:
+    :maxdepth: 3
+    
+    Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
+    Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
 
-The examples initially come from the `APDL Technology Showcase Manual
-<tech_demo_intro_>`_ and are modeled with MAPDL files. Some of them have been
-reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
-library.
 
-The examples are hosted in the  `PyMAPDL Techdemos repository <tech_demo_repo_>`_.
-
-The documentation to the exposed examples can be found in the
-`PyMAPDL Techdemos documentation <tech_demos_doc_>`_.
+.. include:: pymapdl_examples_repo/index.rst
+   :start-line: 2
 
 .. === EXTENDED EXAMPLES ===
 
 .. toctree::
     :hidden:
     :maxdepth: 3
-
+    
     Cart-Pole Simulation <https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html>
     extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
     extended_examples/Python_UPF/python_upf_examples

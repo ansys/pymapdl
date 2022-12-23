@@ -58,6 +58,12 @@ performance. Using gRPC, PyMAPDL can convert Python statements into APDL
 commands that can then be transmitted to an MAPDL instance running anywhere, 
 while producing network footprints that are compact and efficient.
 
+The following diagram presents a simplified architecture of PyMAPDL.
+
+.. figure:: ./images/architecture_diagram.png
+    :width: 400pt
+
+    PyMAPDL architecture diagram
 
 Quick code
 ----------
