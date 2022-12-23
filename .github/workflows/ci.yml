@@ -548,7 +548,6 @@ jobs:
           path: ./windows_local.xml
 
 
-
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [docs_build, build_test, build_test_ubuntu, smoke-tests]
