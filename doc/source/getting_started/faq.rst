@@ -140,4 +140,6 @@ to make sure you are using the correct one.
 Plotting results
 ----------------
 
-(To be added)
+Even in cases where PyMAPDL and MAPDL agree on the result values, there may still be
+display differences. For instance, interpolating scalar values at the nodes of a
+quadrilateral facet across the whole facet is not deterministic.
