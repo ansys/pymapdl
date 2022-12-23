@@ -97,7 +97,8 @@ reason is that the MAPDL GUI is using a different graphics configuration
 than the one used by PyMAPDL.
 
 In the MAPDL GUI, the graphics configuration can change how the results are shown.
-By default, the graphics configuration is set to ``Power graphics``.
+Each graphics configuration realizes entity selection and averaging differently.
+By default, the graphics configuration is set to ``Power Graphics``.
 However, PyMAPDL connects to an MAPDL instance running in batch mode, which by default
 uses the ``Full Graphics`` configuration. This difference in the graphics configuration can
 affect averaging as well.
