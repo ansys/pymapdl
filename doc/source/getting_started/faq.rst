@@ -91,49 +91,50 @@ Why PyMAPDL results are different than the ones shown in the MAPDL GUI?
 Listing results
 ---------------
 
-There might be several reasons why there is a difference between the results
-shown in the MAPDL GUI and the ones obtained using PyMAPDL. The most common
-reason is that the MAPDL GUI is using a different configuration than the one
-used by PyMAPDL.
+There might be several reasons why the results shown in the MAPDL GUI
+differ from the results obtained using PyMAPDL. The most common
+reason is that the MAPDL GUI is using a different graphics configuration
+than the one used by PyMAPDL.
 
-In the MAPDL GUI the graphics configuration can change how the results are shown.
+In the MAPDL GUI, the graphics configuration can change how the results are shown.
 By default, the graphics configuration is set to ``Power graphics``.
-However, PyMAPDL connects to an MAPDL instance running in batch mode which by default
-uses ``Full Graphics`` configuration. This can affect the averaging as well.
+However, PyMAPDL connects to an MAPDL instance running in batch mode, which by default
+uses the ``Full Graphics`` configuration. This difference in the graphics configuration can
+affect averaging as well.
 
-You can change the graphics configuration using the following PyMAPDL commands:
+You can change the graphics configuration in PyMAPDL using this command:
 
 .. code:: python
 
     mapdl.graphics('POWER')
 
-Or you can change the graphics configuration in the MAPDL GUI using the 
-``POWRGRPH`` button or the following command:
+Or, you can change the graphics configuration in the MAPDL GUI using the 
+``POWRGRPH`` button or this command:
 
 .. code:: text
 
     /GRAPHICS,FULL
 
-In addition, how the results are averaged on the nodes can also affect the
+How the results are averaged on the nodes can also affect the
 results. By default, MAPDL averages the results on the nodes except where
 material type discontinuities exists. 
-See :meth:`avres() <ansys.mapdl.core.Mapdl.avres>` for more details.
-Furthermore, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>`
-can also how the results are shown.
+For more information, see :meth:`avres() <ansys.mapdl.core.Mapdl.avres>`.
+Additionally, the command :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>`
+can affect how the results are shown.
 
-It is recommended to make sure the values of the commands
+You should make sure that the values of the commands
 :meth:`avres() <ansys.mapdl.core.Mapdl.avres>` and 
 :meth:`efacet() <ansys.mapdl.core.Mapdl.efacet>` are the same in both
 the MAPDL GUI and PyMAPDL.
 
-Finally, the depending on the results you are trying to obtain, you
+Finally, depending on the results that you are trying to obtain, you
 might be using a different MAPDL command. For example, the command
 :meth:`post.element_displacement() <ansys.mapdl.core.post.PostProcessing.element_displacement>`
 uses a combination of ``PRETAB`` and ``ETAB`` commands to obtain the results.
-This command then might show different results than the ones obtained
-using the :meth:`presol() <ansys.mapdl.core.Mapdl.presol>`.
-It is recommended you compare the results obtained using both commands
-to make sure you are using the correct one.
+This MAPDL command then might show different results than the ones obtained
+using the PyMAPDL :meth:`presol() <ansys.mapdl.core.Mapdl.presol>` method.
+To make sure you are using the correct command, you should compare the
+results obtained using both the MAPLD and PyMAPDL commands.
 
 .. note:: Further reading on `this discussion <pymapdl_discussion_differences_mapdl_pymapdl_>`_
 
