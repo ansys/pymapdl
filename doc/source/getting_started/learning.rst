@@ -22,7 +22,7 @@ Downloads
 - View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>` to help
   you to learn PyMAPDL.
 
-- Visit `PyMAPDL examples <ref_examples_>`_ to learn how PyMAPDL can be
+- Visit :ref:`ref_examples` to learn how PyMAPDL can be
   used to solve different real life problems.
 
 
