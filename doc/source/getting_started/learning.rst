@@ -23,7 +23,7 @@ Downloads
   you to learn PyMAPDL.
 
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be
-  used to solve different real life problems.
+  used to solve different real problems.
 
 
 Courses
