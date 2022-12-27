@@ -1,3 +1,5 @@
+.. _user_guide_postprocessing:
+
 Postprocessing
 ==============
 In an active MAPDL session, you can postprocess using the

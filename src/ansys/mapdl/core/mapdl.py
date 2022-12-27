@@ -22,6 +22,7 @@ from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
+    CMD_XSEL,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
@@ -222,7 +223,12 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
+        # Wrapping listing functions for "to_array" methods
         self._wrap_listing_functions()
+
+        # Wrapping XSEL commands to return ids.
+        self._xsel_mapdl_output = False
+        self._wrap_xsel_commands()
 
         self._info = Information(self)
 
@@ -299,6 +305,46 @@ class _MapdlCore(Commands):
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_bc_listing_function(func))
+
+    def _wrap_xsel_commands(self):
+        # Wrapping XSEL commands.
+        def wrap_xsel_function(func):
+            def wrap_xsel_function_output(method):
+                # Injecting doc string modification
+                name = method.__func__.__name__.upper()
+                if name == "NSEL":
+                    return self.mesh.nnum
+                elif name == "ESEL":
+                    return self.mesh.enum
+                elif name == "KSEL":
+                    return self.geometry.knum
+                elif name == "LSEL":
+                    return self.geometry.lnum
+                elif name == "ASEL":
+                    return self.geometry.anum
+                elif name == "VSEL":
+                    return self.geometry.vnum
+                else:
+                    return None
+
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                return_mapdl_output = kwargs.pop(
+                    "return_mapdl_output", self._xsel_mapdl_output
+                )
+                output = func(*args, **kwargs)
+                if not return_mapdl_output:
+                    output = wrap_xsel_function_output(func)
+                return output
+
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_XSEL and name in dir(
+                Commands
+            ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+                method = self.__getattribute__(name)
+                setattr(self, name, wrap_xsel_function(method))
 
     @property
     def name(self):  # pragma: no cover

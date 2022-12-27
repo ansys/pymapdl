@@ -99,24 +99,38 @@ CMD_LISTING.extend(CMD_ENTITY_LISTING)
 CMD_LISTING.extend(CMD_RESULT_LISTING)
 
 # Adding empty lines to match current format.
-docstring_injection = """
+docstring_injection = r"""
 Returns
 -------
 
 str
     Str object with the command console output.
 
+
     This object also has the extra methods:
+
 
     * ``str.to_list()``
 
+
     * ``str.to_array()`` (Only on listing commands)
+
 
     * ``str.to_dataframe()`` (Only if Pandas is installed)
 
-    For more information visit `PyMAPDL Post-Processing <https://mapdl.docs.pyansys.com/user_guide/post.html>`_.
+
+    For more information visit :ref:`user_guide_postprocessing`.
 
 """
+
+CMD_XSEL = [
+    "NSEL",
+    "ESEL",
+    "KSEL",
+    "LSEL",
+    "ASEL",
+    "VSEL",
+]
 
 
 def get_indentation(indentation_regx, docstring):
@@ -133,7 +147,6 @@ def indent_text(indentation, docstring_injection):
             if each.strip()
         ]
     )
-    # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
 
 
 def get_docstring_indentation(docstring):
@@ -180,7 +193,10 @@ def inject_after_return_section(indented_doc_inject, docstring):
 def inject_docs(docstring):
     """Inject a string in a docstring"""
     return_header = r"Returns\n\s*-*"
-    if re.search(return_header, docstring):
+    if docstring_injection.splitlines()[-2].strip() in docstring:
+        # In case the docstring already has the injection.
+        return docstring
+    elif re.search(return_header, docstring):
         # There is a return block already, probably it should not.
         indentation = get_section_indentation("Returns", docstring)
         indented_doc_inject = indent_text(indentation, docstring_injection)
