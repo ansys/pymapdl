@@ -5,20 +5,29 @@ Learning PyMAPDL
 ================
 
 Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
+You can access them from the website `Ansys Learning Resources <learning_resources_>`_.
+In this page, you can find a summary of the available resources for MAPDL and PyMAPDL.
 
-Resources
+
+
+
+Downloads
 =========
 
-- You can also try the Student Version of Ansys products in
+- You can try the Student Version of Ansys products in
   `Ansys Student Versions <ansys_student_version_>`_.
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`.
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>` to help
+  you to learn PyMAPDL.
+
+- Visit :ref:`ref_examples` to learn how PyMAPDL can be
+  used to solve different real problems.
 
 
 Courses
-===============
+=======
 
 Ansys has prepared high quality courses to guide you through the learning process.
 

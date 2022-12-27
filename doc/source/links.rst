@@ -53,6 +53,7 @@
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html
 
 .. #Ansys learning
+.. _learning_resources: https://www.ansys.com/academic/learning-resources
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
 .. _course_intro_apdl: https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/
