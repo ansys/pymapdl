@@ -106,16 +106,13 @@ Returns
 str
     Str object with the command console output.
 
-    This object also has the extra methods:\\
+    This object also has the extra methods.
 
-    * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`
-      (All commands)
+    * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`- All commands.
 
-    * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`
-      (Only on listing commands)
+    * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` - (Only on listing commands.
 
-    * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`
-      (Only if Pandas is installed)
+    * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` - Only if Pandas is installed.
 
     For more information visit :ref:`user_guide_postprocessing`.
 
