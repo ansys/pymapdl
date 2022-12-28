@@ -637,7 +637,8 @@ def _get_available_base_ansys():
 
     Returns
     -------
-    Return all installed Ansys paths in Windows.
+    dict[int: str]
+        Return all installed Ansys paths in Windows.
 
     Notes
     -----
