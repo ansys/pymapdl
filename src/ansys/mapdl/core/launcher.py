@@ -1234,7 +1234,17 @@ def launch_mapdl(
     ----------
     exec_file : str, optional
         The location of the MAPDL executable.  Will use the cached
-        location when left at the default ``None``.
+        location when left at the default ``None`` and no environment
+        variable is set.
+
+        .. note::
+
+           The executable path can be also set through the environment variable
+           ``PYMAPDL_MAPDL_EXEC``. For example:
+
+           .. code:: bash
+
+              export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
@@ -1659,6 +1669,9 @@ def launch_mapdl(
     version = _verify_version(version)  # return a int version or none
 
     # verify executable
+    if exec_file is None:
+        exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
+
     if exec_file is None:
         LOG.debug("Using default executable.")
         # Load cached path
