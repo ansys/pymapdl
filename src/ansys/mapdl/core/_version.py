@@ -18,17 +18,17 @@ except ModuleNotFoundError:  # pragma: no cover
 __version__ = importlib_metadata.version("ansys-mapdl-core")
 
 # In descending order
-SUPPORTED_ANSYS_VERSIONS = [
-    231,
-    222,
-    221,
-    212,
-    211,
-    202,
-    201,
-    195,
-    194,
-    193,
-    192,
-    191,
-]
+SUPPORTED_ANSYS_VERSIONS = {
+    231: "2023R1",
+    222: "2022R2",
+    221: "2022R1",
+    212: "2021R2",
+    211: "2021R1",
+    202: "2020R2",
+    201: "2020R1",
+    195: "19.5",
+    194: "19.4",
+    193: "19.3",
+    192: "19.2",
+    191: "19.1",
+}

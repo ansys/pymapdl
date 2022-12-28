@@ -740,6 +740,10 @@ def get_available_ansys_installations():
     -------
     Return all installed Ansys paths in Windows.
 
+    Examples
+    --------
+
+    >>> from ansys.mapdl.core import get_available_ansys_installations
     >>> get_available_ansys_installations()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
      212: 'C:\\Program Files\\ANSYS Inc\\v212',
@@ -755,9 +759,14 @@ def get_available_ansys_installations():
     return _get_available_base_ansys()
 
 
-def find_ansys():
+def find_ansys(version=None):
     """Searches for ansys path within the standard install location
     and returns the path of the latest version.
+
+    Parameters
+    ----------
+    version : float, optional
+        Version of ANSYS to search for.  If ``None``, use latest.
 
     Returns
     -------
@@ -783,8 +792,17 @@ def find_ansys():
     versions = _get_available_base_ansys()
     if not versions:
         return "", ""
-    version = max(versions.keys())
-    ans_path = versions[version]
+
+    if not version:
+        version = max(versions.keys())
+
+    try:
+        ans_path = versions[version]
+    except KeyError as e:
+        raise ValueError(
+            f"Version {version} not found. Available versions are {list(versions.keys())}"
+        ) from e
+
     version = abs(version)
     if os.name == "nt":
         ansys_bin = os.path.join(
@@ -795,19 +813,109 @@ def find_ansys():
     return ansys_bin, version / 10
 
 
-def get_ansys_path(allow_input=True):
-    """Acquires ANSYS Path from a cached file or user input"""
+def get_default_ansys():
+    """Searches for ansys path within the standard install location
+    and returns the path and version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    ansys_path : str
+        Full path to ANSYS executable.
+
+    version : float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
+
+    Within Linux
+
+    >>> get_default_ansys()
+    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
+    """
+    return find_ansys()
+
+
+def get_default_ansys_path():
+    """Searches for ansys path within the standard install location
+    and returns the path of the latest MAPDL version installed.
+
+    Returns
+    -------
+    ansys_path : str
+        Full path to ANSYS executable.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys_path()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe'
+
+    Within Linux
+
+    >>> get_default_ansys_path()
+    '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    """
+    return get_default_ansys()[0]
+
+
+def get_default_ansys_version():
+    """Searches for ansys path within the standard install location
+    and returns the version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    version : float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys_version()
+    21.1
+
+    Within Linux
+
+    >>> get_default_ansys_version()
+    21.1
+    """
+    return get_default_ansys()[1]
+
+
+def get_ansys_path(allow_input=True, version=None):
+    """Acquires ANSYS Path from a cached file or user input
+
+    Parameters
+    ----------
+    allow_input : bool, optional
+        Allow user input to find ANSYS path.  The default is ``True``.
+
+    version : float, optional
+        Version of ANSYS to search for. For example ``version=22.2``.
+        If ``None``, use latest.
+
+    """
     exe_loc = None
-    if os.path.isfile(CONFIG_FILE):
+    if not version and os.path.isfile(CONFIG_FILE):
         with open(CONFIG_FILE) as f:
             exe_loc = f.read()
         # verify
         if not os.path.isfile(exe_loc) and allow_input:
             exe_loc = save_ansys_path()
-    elif allow_input:  # create configuration file
+    elif not version and allow_input:  # create configuration file
         exe_loc = save_ansys_path()
+
     if exe_loc is None:
-        exe_loc = find_ansys()[0]
+        exe_loc = find_ansys(version=version)[0]
         if not exe_loc:
             exe_loc = None
 
@@ -1117,6 +1225,7 @@ def launch_mapdl(
     print_com=False,
     add_env_vars=None,
     replace_env_vars=None,
+    version=None,
     **kwargs,
 ) -> _MapdlCore:
     """Start MAPDL locally.
@@ -1184,9 +1293,9 @@ def launch_mapdl(
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.  Defaults to
-        50052.  You can also override the default behavior of this
-        keyword argument with the environment variable
-        ``PYMAPDL_PORT=<VALID PORT>``
+        50052.  You can also override the port default with the
+        environment variable ``PYMAPDL_PORT=<VALID PORT>``
+        This argument has priority over the environment variable.
 
     custom_bin : str, optional
         Path to the MAPDL custom executable.  On release 2020R2 on
@@ -1211,7 +1320,8 @@ def launch_mapdl(
         You can also provide a hostname as an alternative to an IP address.
         Defaults to ``'127.0.0.1'``. You can also override the
         default behavior of this keyword argument with the
-        environment variable ``PYMAPDL_IP=FALSE``.
+        environment variable ``PYMAPDL_IP=<IP>``.
+        This argument has priority over the environment variable.
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
@@ -1274,6 +1384,22 @@ def launch_mapdl(
         environment variables. To just add some environment variables to the MAPDL
         process, use ``add_env_vars``. Defaults to ``None``.
 
+    version : float, optional
+        Version of MAPDL to launch. If ``None``, the latest version is used.
+        Versions can be provided as integers (i.e. ``version=222``) or
+        floats (i.e. ``version=22.2``).
+        To retrieve the available installed versions, use the function
+        :meth:`ansys.mapdl.core.get_available_ansys_installations`.
+
+        .. note::
+
+           The default version can be also set through the environment variable
+           ``PYMAPDL_MAPDL_VERSION``. For example:
+
+           .. code:: bash
+
+              export PYMAPDL_MAPDL_VERSION=22.2
+
     Returns
     -------
     ansys.mapdl.core.mapdl._MapdlCore
@@ -1281,8 +1407,8 @@ def launch_mapdl(
 
     Notes
     -----
-    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in SMP mode
-    unless another option is specified.
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in
+    shared-memory parallelism (SMP) mode unless another option is specified.
 
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
@@ -1526,11 +1652,17 @@ def launch_mapdl(
             mapdl.clear()
         return mapdl
 
+    # verify version
+    if version is None:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
+
+    version = _verify_version(version)  # return a int version or none
+
     # verify executable
     if exec_file is None:
         LOG.debug("Using default executable.")
         # Load cached path
-        exec_file = get_ansys_path()
+        exec_file = get_ansys_path(version=version)
         if exec_file is None:
             raise FileNotFoundError(
                 "Invalid exec_file path or cannot load cached "
@@ -1847,3 +1979,32 @@ def _check_license_argument(license_type, additional_switches):
         raise TypeError("The argument 'license_type' does only accept str or None.")
 
     return additional_switches
+
+
+def _verify_version(version):
+    """Verify the MAPDL version is valid."""
+    if isinstance(version, float):
+        version = int(version * 10)
+
+    if isinstance(version, str):
+        if version.upper().strip() in [
+            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(version)
+        elif version.upper().strip() in [
+            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(float(version) * 10)
+        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
+            version = [
+                key
+                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
+                if value == version.upper().strip()
+            ][0]
+
+    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
+        raise ValueError(
+            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
+        )
+
+    return version
