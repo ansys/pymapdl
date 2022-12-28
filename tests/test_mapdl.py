@@ -1192,8 +1192,9 @@ def test_inquire(mapdl):
 def test_ksel(mapdl, cleared):
     mapdl.k(1, 0, 0, 0)
     mapdl.prep7()
-    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
-    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
+    assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
 def test_get_file_path(mapdl, tmpdir):
