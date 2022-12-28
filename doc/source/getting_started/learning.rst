@@ -12,7 +12,7 @@ In this page, you can find a summary of the available resources for MAPDL and Py
 
 
 Downloads
-=========
+===========
 
 - You can try the Student Version of Ansys products in
   `Ansys Student Versions <ansys_student_version_>`_.
@@ -22,12 +22,12 @@ Downloads
 - View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>` to help
   you to learn PyMAPDL.
 
-- Visit `PyMAPDL examples <ref_examples_>`_ to learn how PyMAPDL can be
-  used to solve different real life problems.
+- Visit :ref:`ref_examples` to learn how PyMAPDL can be
+  used to solve different real problems.
 
 
 Courses
-=======
+==============
 
 Ansys has prepared high quality courses to guide you through the learning process.
 
