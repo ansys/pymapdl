@@ -7,10 +7,10 @@ Frequently asked questions
 How do you report issues?
 =========================
 
-To report bugs and documentation errors and to make feature requests, use the `pymapdl_issues`_ page of 
+To report bugs and documentation errors and to make feature requests, use the `PyMAPDL issues <pymapdl_issues_>`_ page of 
 the GitHub repository.
 
-To ask more open-ended questions or seek advice from the community, use the `pymapdl_discussions`_ page
+To ask more open-ended questions or seek advice from the community, use the `PyMAPDL discussions <pymapdl_discussions_>`_ page
 of the GitHub repository.
 
 

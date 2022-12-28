@@ -11,7 +11,7 @@ If you like to work with Julia, you can use Python libraries as if they were Jul
 Install Julia
 =============
 
-To install Julia, go to their website `julia`_ and follow the instructions given in the **Download** section.
+To install Julia, go to `their website <julia_>`_ and follow the instructions given in the **Download** section.
 
 * `Windows <julia_windows_>`_
 * `Linux <julia_linux_and_freebsd_>`_
