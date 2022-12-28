@@ -106,13 +106,10 @@ Returns
 str
     Str object with the command console output.
 
-    This object also has the extra methods.
-
-    * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`- All commands.
-
-    * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` - (Only on listing commands.
-
-    * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` - Only if Pandas is installed.
+    This object also has the extra methods:
+    :meth:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`,
+    :meth:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` (only on listing commands) and
+    :meth:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` (only if Pandas is installed).
 
     For more information visit :ref:`user_guide_postprocessing`.
 
@@ -122,7 +119,7 @@ XSEL_DOCSTRING_INJECTION = r"""
 Returns
 -------
 
-np.array
+np.ndarray
     Numpy array with the ids of the selected entities.
 
     For more information visit :ref:`user_guide_postprocessing`.
@@ -479,9 +476,13 @@ def _requires_pandas(func):
 class CommandOutput(str):
     """Custom string subclass for handling the commands output.
 
-    This class add two method to track the cmd which generated this output.
-    * ``cmd`` - The MAPDL command which generated the output.
-    * ``command`` - The full command line (with arguments) which generated the output.
+    This class is a subclass of python :class`str`, hence it has all the methods of
+    a string python object.
+
+    Additionally it provides the following attributes:
+
+    * :attr:`cmd() <ansys.mapdl.core.commands.CommandOutput.cmd>`
+    * :attr:`command() <ansys.mapdl.core.commands.CommandOutput.command>`
 
     """
 
@@ -520,6 +521,16 @@ class CommandListingOutput(CommandOutput):
 
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
+
+    This class is a subclass of python :class:`str`, hence it has all the methods of
+    a string python object.
+
+    Additionally it provides the following methods:
+
+    * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`
+    * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`
+    * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`
+
     """
 
     def __new__(cls, content, cmd=None, magicwords=None, columns_names=None):
@@ -747,6 +758,15 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     Custom class for handling the boundary condition listing commands
     whose output is sensible to be converted to a list of lists,
     or a Pandas DataFrame.
+
+    This class is a subclass of python :class:`str`, hence it has all the methods of
+    a string python object and it can be used as such.
+
+    Additionally it provides the following methods:
+
+    * :func:`to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_list>`
+    * :func:`to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_dataframe>`
+
     """
 
     def _parse_table(self):
