@@ -493,3 +493,8 @@ def test_get_ansys():
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(version=version)
+
+
+def test_raise_exec_path_and_version_launcher():
+    with pytest.raises(ValueError):
+        launch_mapdl(exec_file="asdf", version="asdf")
