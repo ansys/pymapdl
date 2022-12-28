@@ -474,6 +474,10 @@ def test__verify_version_pass():
         assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_find_ansys(mapdl):
     version = int(mapdl.version * 10)
     assert find_ansys() is not None
@@ -483,6 +487,10 @@ def test_find_ansys(mapdl):
         assert find_ansys(version="11")
 
 
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_get_ansys():
     assert get_default_ansys is not None
     assert get_default_ansys_path is not None
@@ -490,11 +498,19 @@ def test_get_ansys():
     assert get_ansys_path is not None
 
 
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(version=version)
 
 
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(exec_file="asdf", version="asdf")
