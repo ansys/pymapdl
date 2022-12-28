@@ -1663,6 +1663,9 @@ def launch_mapdl(
         return mapdl
 
     # verify version
+    if exec_file and version:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
     if version is None:
         version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
 
