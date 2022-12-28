@@ -11,8 +11,8 @@ Various PyMAPDL specific launcher commands.
 
    launcher.change_default_ansys_path
    launcher.get_available_ansys_installations
-   launcher.save_ansys_path
    launcher.get_default_ansys
-   launcher.get_default_ansys_version
    launcher.get_default_ansys_path
+   launcher.get_default_ansys_version
+   launcher.save_ansys_path
     
