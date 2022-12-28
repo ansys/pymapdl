@@ -99,7 +99,7 @@ CMD_LISTING.extend(CMD_ENTITY_LISTING)
 CMD_LISTING.extend(CMD_RESULT_LISTING)
 
 # Adding empty lines to match current format.
-docstring_injection = r"""
+CMD_DOCSTRING_INJECTION = r"""
 Returns
 -------
 
@@ -113,15 +113,29 @@ str
     * ``str.to_list()``
 
 
-    * ``str.to_array()`` (Only on listing commands)
+    * ``str.to_array()``
+      (Only on listing commands)
 
 
-    * ``str.to_dataframe()`` (Only if Pandas is installed)
+    * ``str.to_dataframe()``
+      (Only if Pandas is installed)
 
 
     For more information visit :ref:`user_guide_postprocessing`.
 
 """
+
+XSEL_DOCSTRING_INJECTION = r"""
+Returns
+-------
+
+np.array
+    Numpy array with the ids of the selected entities.
+
+    For more information visit :ref:`user_guide_postprocessing`.
+
+"""
+
 
 CMD_XSEL = [
     "NSEL",
@@ -190,9 +204,13 @@ def inject_after_return_section(indented_doc_inject, docstring):
     )
 
 
-def inject_docs(docstring):
+def inject_docs(docstring, docstring_injection=None):
     """Inject a string in a docstring"""
+    if not docstring_injection:
+        docstring_injection = CMD_DOCSTRING_INJECTION
+
     return_header = r"Returns\n\s*-*"
+
     if docstring_injection.splitlines()[-2].strip() in docstring:
         # In case the docstring already has the injection.
         return docstring

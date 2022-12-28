@@ -23,6 +23,7 @@ from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
     CMD_XSEL,
+    XSEL_DOCSTRING_INJECTION,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
@@ -309,6 +310,14 @@ class _MapdlCore(Commands):
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
         def wrap_xsel_function(func):
+
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(
+                    func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
+                )
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__, XSEL_DOCSTRING_INJECTION)
+
             def wrap_xsel_function_output(method):
                 # Injecting doc string modification
                 name = method.__func__.__name__.upper()
