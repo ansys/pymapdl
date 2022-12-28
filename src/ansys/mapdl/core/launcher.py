@@ -646,6 +646,10 @@ def _get_available_base_ansys():
     -------
     Return all installed Ansys paths in Windows.
 
+    Examples
+    --------
+
+    >>> from ansys.mapdl.core import _get_available_base_ansys
     >>> _get_available_base_ansys()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
      212: 'C:\\Program Files\\ANSYS Inc\\v212',
