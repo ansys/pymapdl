@@ -24,6 +24,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    helper
    inline
    krylov
+   launcher
    logging
    mapdl
    math
