@@ -642,21 +642,29 @@ class Selecting:
         type\_
             Label identifying the type of select:
 
-            S - Select a new set (default).
+            S
+              Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+              Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+              Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+              Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+              Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+              Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+              Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+              Display the current select status.
 
 
         The following fields are used only with Type = S, R, A, or U:
