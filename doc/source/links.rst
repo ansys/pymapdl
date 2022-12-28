@@ -37,10 +37,12 @@
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 .. _ansys_current_release: https://download.ansys.com/Current%20Release
 
-.. # TechDemos related
-.. _tech_demo_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
-.. _tech_demo_repo: https://github.com/pyansys/pymapdl-examples
-.. _tech_demos_doc: https://examples.mapdl.docs.pyansys.com/
+.. # PyMAPDL Examples related
+.. _pymapdl_ex_doc: https://examples.mapdl.docs.pyansys.com/
+.. _pymapdl_ex_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
+.. _pymapdl_ex_repo: https://github.com/pyansys/pymapdl-examples
+.. _pymapdl_ex_ts: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html
+.. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 
 .. #Ansys internal documentation
 .. _ansys_help: https://ansyshelp.ansys.com
@@ -51,6 +53,7 @@
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html
 
 .. #Ansys learning
+.. _learning_resources: https://www.ansys.com/academic/learning-resources
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
 .. _course_intro_apdl: https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/
@@ -102,6 +105,7 @@
 .. _pymapdl_docker_compose_base: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
 .. _pymapdl_docker_compose_local: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.local.yml
 .. _pymapdl_docker_compose_license_server: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
+.. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/pyansys/pymapdl-reader/issues/185
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html

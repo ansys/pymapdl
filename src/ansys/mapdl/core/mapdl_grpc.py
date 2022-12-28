@@ -980,14 +980,15 @@ class MapdlGrpc(_MapdlCore):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-    def _remove_lock_file(self):
+    def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
 
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
         self._log.debug("Removing lock file after exit.")
-        mapdl_path = self.directory
+        if mapdl_path is None:  # pragma: no cover
+            mapdl_path = self.directory
         if mapdl_path:
             for lockname in [self.jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
@@ -2385,7 +2386,7 @@ class MapdlGrpc(_MapdlCore):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
                     filenames = [
                         self._distributed_result_file,

@@ -1920,7 +1920,7 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
                     filenames = [
                         self._distributed_result_file,
@@ -3939,3 +3939,8 @@ class _MapdlCore(Commands):
         if self._on_docker is None:
             self._on_docker = self._check_on_docker()
         return self._on_docker
+
+    @property
+    def is_local(self):
+        """Check if the instance is running locally or remotely."""
+        return self._local

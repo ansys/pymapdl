@@ -1,3 +1,5 @@
+.. _versions_and_interfaces:
+
 ***********************
 Versions and interfaces
 ***********************

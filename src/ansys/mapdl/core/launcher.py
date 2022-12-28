@@ -203,14 +203,6 @@ def port_in_use(port, host=LOCALHOST):
             return True
 
 
-def create_ip_file(ip, path):
-    """Create 'mylocal.ip' file required for ansys to change the IP of the gRPC server."""
-
-    file_name = os.path.join(path, "mylocal.ip")
-    with open(file_name, "w") as f:
-        f.write(ip)
-
-
 def launch_grpc(
     exec_file="",
     jobname="file",
@@ -438,11 +430,6 @@ def launch_grpc(
         port += 1
         LOG.debug(f"Port in use.  Incrementing port number. port={port}")
     pymapdl._LOCAL_PORTS.append(port)
-
-    # setting ip for the grpc server
-    if ip != LOCALHOST:  # Default local ip is 127.0.0.1
-        create_ip_file(ip, run_location)
-        LOG.debug(f"Writing ip ({ip}) in 'mylocal.ip' file.")
 
     cpu_sw = "-np %d" % nproc
 
@@ -1142,7 +1129,7 @@ def launch_mapdl(
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
-        directory.  If directory doesn't exist, will create one.
+        directory.  If directory doesn't exist, one is created.
 
     jobname : str, optional
         MAPDL jobname.  Defaults to ``'file'``.
@@ -1168,15 +1155,16 @@ def launch_mapdl(
         ``ansys_corba`` module.  Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
+        Visit :ref:`versions_and_interfaces` for more information.
 
     override : bool, optional
-        Attempts to delete the lock file at the run_location.
+        Attempts to delete the lock file at the ``run_location``.
         Useful when a prior MAPDL session has exited prematurely and
         the lock file has not been deleted.
 
     loglevel : str, optional
         Sets which messages are printed to the console.  ``'INFO'``
-        prints out all ANSYS messages, ``'WARNING``` prints only
+        prints out all ANSYS messages, ``'WARNING'`` prints only
         messages containing ANSYS warnings, and ``'ERROR'`` logs only
         error messages.
 
@@ -1186,7 +1174,7 @@ def launch_mapdl(
 
         - ``additional_switches="-aa_r"``
 
-        Avoid adding switches like -i -o or -b as these are already
+        Avoid adding switches like ``-i``, ``-o`` or ``-b`` as these are already
         included to start up the MAPDL server.  See the notes
         section for additional details.
 
@@ -1211,7 +1199,7 @@ def launch_mapdl(
 
     start_instance : bool, optional
         When False, connect to an existing MAPDL instance at ``ip``
-        and ``port``, which default to ``'127.0.0.1'`` at 50052.
+        and ``port``, which default to ip ``'127.0.0.1'`` at port 50052.
         Otherwise, launch a local instance of MAPDL.  You can also
         override the default behavior of this keyword argument with
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
@@ -1219,10 +1207,11 @@ def launch_mapdl(
     ip : bool, optional
         Used only when ``start_instance`` is ``False``. If provided,
         it will force ``start_instance`` to be ``False``.
+        Specify the IP address of the MAPDL instance to connect to.
         You can also provide a hostname as an alternative to an IP address.
         Defaults to ``'127.0.0.1'``. You can also override the
         default behavior of this keyword argument with the
-        environment variable "PYMAPDL_IP=FALSE".
+        environment variable ``PYMAPDL_IP=FALSE``.
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
@@ -1233,11 +1222,12 @@ def launch_mapdl(
         Enables logging every APDL command to the local disk.  This
         can be used to "record" all the commands that are sent to
         MAPDL via PyMAPDL so a script can be run within MAPDL without
-        PyMAPDL. This string is the path of the output file (e.g.
+        PyMAPDL. This argument is the path of the output file (e.g.
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Deprecated option, please use ``remove_temp_dir_on_exit``.
+        .. deprecated:: 0.64.0
+           Use argument ``remove_temp_dir_on_exit`` instead.
 
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with

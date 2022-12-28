@@ -486,7 +486,7 @@ class ansXpl:
         elif data_info.objtype in [
             mapdl_pb2.DataType.DMAT,
             mapdl_pb2.DataType.SMAT,
-        ]:
+        ]:  # pragma: no cover
             out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
         else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")

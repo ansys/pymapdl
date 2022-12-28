@@ -149,6 +149,7 @@ def test_basic_input_output(mapdl, tmpdir):
     mapdl._send_command("/OUT, TERM", mute=True)
     mapdl.download(tmpfile)
     assert os.path.isfile(tmpfile)
+    os.remove(tmpfile)
     # input file won't actually run, but we want to see if the output switches
 
 

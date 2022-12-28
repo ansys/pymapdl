@@ -325,10 +325,21 @@ jobs:
 
       - name: "Unit testing"
         run: |
-          xvfb-run pytest -v --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v --durations=10 \
+              --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
+              --cov=ansys.mapdl.core --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
+        with:
+          name: centos-${{ matrix.mapdl-version }}-remote.xml
+          flags: centos,remote,${{ matrix.mapdl-version }}
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: centos-${{ matrix.mapdl-version }}-remote.xml
+          path: ./centos-${{ matrix.mapdl-version }}-remote.xml
 
       - name: "Check package"
         run: |
@@ -459,12 +470,23 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -v -k "not test_database and not test_dpf" --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          xvfb-run pytest -v -k "not test_database and not test_dpf" \
+            --durations=10 \
+            --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
+            --cov=ansys.mapdl.core --cov-report=xml:ubuntu-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
+          name: ubuntu-v22.2.0-local.xml
+          flags: ubuntu,local,v22.2.0
+
+      - name: 'Upload coverage artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-v22.2.0-local.xml
+          path: ./ubuntu-v22.2.0-local.xml
 
   test_windows:
     if: github.repository == ''
@@ -516,10 +538,23 @@ jobs:
         run: |
           set PYMAPDL_PORT=
           set PYMAPDL_START_INSTANCE=
-          python -m pytest -v -k "not test_database and not test_dpf" --durations=10 --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError  --cov=ansys.mapdl.core --cov-report=xml --cov-report=html
+          python -m pytest -v -k "not test_database and not test_dpf" \
+            --durations=10 \
+            --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
+            --cov=ansys.mapdl.core --cov-report=xml:windows-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
+        with:
+          name: windows-v22.2.0-local.xml
+          flags: windows,local,v22.2.0
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-v22.2.0-local.xml
+          path: ./windows_local.xml
+
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
