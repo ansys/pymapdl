@@ -338,9 +338,26 @@ class _MapdlCore(Commands):
 
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
+                # in interactive mode (item='p'), the output is not suppressed
+                is_interactive_arg = (
+                    True
+                    if len(args) >= 2
+                    and isinstance(args[1], str)
+                    and args[1].upper() == "P"
+                    else False
+                )
+                is_interactive_kwarg = (
+                    True
+                    if "item" in kwargs and kwargs["item"].upper() == "P"
+                    else False
+                )
+
                 return_mapdl_output = kwargs.pop(
                     "return_mapdl_output", self._xsel_mapdl_output
                 )
+                if is_interactive_arg or is_interactive_kwarg:
+                    return_mapdl_output = True
+
                 output = func(*args, **kwargs)
                 if not return_mapdl_output:
                     output = wrap_xsel_function_output(func)

@@ -444,7 +444,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     selected = mapdl.nsel(
         "S", "P", _debug=lambda x: debug_orders_0(x, point=point), tolerance=0.2
     )  # Selects node 2
-    assert selected == []
+    assert selected == np.array([])
     assert np.allclose(mapdl._get_selected_("node"), [1, 2])
 
     # we pick something already picked

@@ -1270,7 +1270,7 @@ def wrap_point_SEL(entity="node"):
 
                 if kwargs.pop("Used_P", False):
                     # we want to return the
-                    return vmin
+                    return np.array(vmin)
                 else:
                     return
             else:
