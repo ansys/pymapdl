@@ -635,16 +635,16 @@ def get_start_instance(start_instance_default=True):
 def _get_available_base_ansys():
     """Return a dictionary of available Ansys versions with their base paths.
 
+    Returns
+    -------
+    Return all installed Ansys paths in Windows.
+
     Notes
     -----
 
     On Windows, It uses the environment variable ``AWP_ROOTXXX``.
 
     The student versions are returned at the end of the dict and with negative value for the version.
-
-    Returns
-    -------
-    Return all installed Ansys paths in Windows.
 
     Examples
     --------
@@ -733,16 +733,17 @@ def _get_available_base_ansys():
 def get_available_ansys_installations():
     """Return a dictionary of available Ansys versions with their base paths.
 
+    Returns
+    -------
+    dict[int: str]
+        Return all installed Ansys paths in Windows.
+
     Notes
     -----
 
     On Windows, It uses the environment variable ``AWP_ROOTXXX``.
 
     The student versions are returned at the end of the dict and with negative value for the version.
-
-    Returns
-    -------
-    Return all installed Ansys paths in Windows.
 
     Examples
     --------
@@ -851,7 +852,7 @@ def get_default_ansys_path():
 
     Returns
     -------
-    ansys_path : str
+    str
         Full path to ANSYS executable.
 
     Examples
@@ -876,7 +877,7 @@ def get_default_ansys_version():
 
     Returns
     -------
-    version : float
+    float
         Version float.  For example, 21.1 corresponds to 2021R1.
 
     Examples
