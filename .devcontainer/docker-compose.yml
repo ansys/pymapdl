@@ -45,5 +45,5 @@ services:
     #   - seccomp:unconfined
 
     # Overrides default command so things don't shut down after the process ends.
-    command: /bin/sh -c "while sleep 1000; do :; done"
+    entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"
  
