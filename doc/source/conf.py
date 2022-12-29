@@ -64,6 +64,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
+    "sphinxcontrib.googleanalytics",
 ]
 
 # Intersphinx mapping
@@ -157,6 +158,10 @@ pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
+
+# Google analytics setup
+googleanalytics_id = "G-JQJKPV6ZVB"
+googleanalytics_enabled = True
 
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
