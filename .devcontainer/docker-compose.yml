@@ -26,6 +26,7 @@ services:
     environment:
       - ANSYS_LOCK=OFF
       - AWP_ROOT222=/ansys_inc
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
     ports:
       - '50052:50052'
       - '50055:50055'
