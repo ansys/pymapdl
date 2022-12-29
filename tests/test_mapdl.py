@@ -1562,6 +1562,7 @@ def test_non_interactive(mapdl, cleared):
 
 
 def test_ignored_command(mapdl, cleared):
+    mapdl.ignore_errors = False
     mapdl.prep7(mute=True)
     mapdl.n(mute=True)
     with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
@@ -1681,3 +1682,22 @@ def test_on_docker(mapdl):
         assert mapdl.on_docker
     else:
         assert not mapdl.on_docker
+
+
+def test_deprecation_allow_ignore_warning(mapdl):
+    with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
+        mapdl.allow_ignore = True
+
+
+def test_deprecation_allow_ignore_errors_mapping(mapdl):
+    mapdl.allow_ignore = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.allow_ignore = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors
