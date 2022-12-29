@@ -1562,6 +1562,7 @@ def test_non_interactive(mapdl, cleared):
 
 
 def test_ignored_command(mapdl, cleared):
+    mapdl.ignore_errors = False
     mapdl.prep7(mute=True)
     mapdl.n(mute=True)
     with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
