@@ -490,6 +490,7 @@ def twisted_sheet(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, "SHELL181")
     mapdl.mp("EX", 1, 2e5)
+    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
     mapdl.rectng(0, 1, 0, 1)
     mapdl.sectype(1, "SHELL")
     mapdl.secdata(0.1)
