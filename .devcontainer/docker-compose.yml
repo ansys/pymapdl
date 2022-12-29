@@ -33,7 +33,7 @@ services:
     image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
-      - ../:/local:cached
+      - ../:/local
 
     # Uncomment the next line to use Docker from inside the container. See https://aka.ms/vscode-remote/samples/docker-from-docker-compose for details.
     # - /var/run/docker.sock:/var/run/docker.sock 
