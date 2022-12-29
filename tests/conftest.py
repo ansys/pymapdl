@@ -446,7 +446,7 @@ def solved_box(mapdl, cleared):
     # Define a material (nominal steel in SI)
     mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
     mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
-    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
     # Fix the left-hand side.
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX")
