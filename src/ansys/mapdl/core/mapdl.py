@@ -922,7 +922,7 @@ class _MapdlCore(Commands):
         This command will be ignored.
 
         """
-        warn.warn(
+        warn(
             "'allow_ignore' is being deprecated and will be removed in a future release. "
             "Use ``mapdl.ignore_errors`` instead.",
             DeprecationWarning,
@@ -932,7 +932,7 @@ class _MapdlCore(Commands):
     @allow_ignore.setter
     def allow_ignore(self, value):
         """Set allow ignore"""
-        warn.warn(
+        warn(
             "'allow_ignore' is being deprecated and will be removed in a future release. "
             "Use ``mapdl.ignore_errors`` instead.",
             DeprecationWarning,
