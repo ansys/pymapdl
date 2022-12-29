@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pytest
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.parameters import interp_star_status
 
 parm_status = """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
