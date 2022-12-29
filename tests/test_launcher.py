@@ -12,7 +12,13 @@ from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
     _validate_MPI,
+    _verify_version,
     _version_from_path,
+    find_ansys,
+    get_ansys_path,
+    get_default_ansys,
+    get_default_ansys_path,
+    get_default_ansys_version,
     get_start_instance,
     is_common_executable_path,
     is_valid_executable_path,
@@ -452,3 +458,59 @@ def test_license_product_argument_p_arg(license_short, license_name):
 def test_license_product_argument_p_arg_warning():
     with pytest.warns(UserWarning):
         assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
+
+
+def test__verify_version_pass():
+    valid_versions = []
+    valid_versions.extend(list(versions.keys()))
+    valid_versions.extend([each / 10 for each in versions.keys()])
+    valid_versions.extend([str(each) for each in list(versions.keys())])
+    valid_versions.extend([str(each / 10) for each in versions.keys()])
+    valid_versions.extend(list(versions.values()))
+
+    for version in valid_versions:
+        ver = _verify_version(version)
+        assert isinstance(ver, int)
+        assert min(versions.keys()) <= ver <= max(versions.keys())
+
+
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
+def test_find_ansys(mapdl):
+    version = int(mapdl.version * 10)
+    assert find_ansys() is not None
+    assert find_ansys(version=version) is not None
+
+    with pytest.raises(ValueError):
+        assert find_ansys(version="11")
+
+
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
+def test_get_ansys():
+    assert get_default_ansys is not None
+    assert get_default_ansys_path is not None
+    assert get_default_ansys_version is not None
+    assert get_ansys_path is not None
+
+
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
+def test_version(mapdl):
+    version = int(10 * mapdl.version)
+    mapdl_ = launch_mapdl(version=version)
+
+
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
+def test_raise_exec_path_and_version_launcher():
+    with pytest.raises(ValueError):
+        launch_mapdl(exec_file="asdf", version="asdf")

@@ -76,6 +76,10 @@ In Linux, use:
 This tells ``ansys.mapdl.core`` to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
 
+Additionally you can use the environment variables ``PYMAPDL_MAPDL_EXEC`` 
+and ``PYMAPDL_MAPDL_VERSION`` to specify MAPDL executable path and the
+version to launch (if multiple versions of MAPDL are installed).
+
 
 Code style
 ==========

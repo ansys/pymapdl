@@ -12,7 +12,7 @@ In this page, you can find a summary of the available resources for MAPDL and Py
 
 
 Downloads
-=========
+===========
 
 - You can try the Student Version of Ansys products in
   `Ansys Student Versions <ansys_student_version_>`_.
@@ -27,7 +27,7 @@ Downloads
 
 
 Courses
-=======
+==============
 
 Ansys has prepared high quality courses to guide you through the learning process.
 
