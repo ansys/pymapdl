@@ -103,7 +103,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def asel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of areas.
 
@@ -249,7 +257,15 @@ class Selecting:
         return self.run(f"ASLV,{type_}", **kwargs)
 
     def dofsel(
-        self, type_="", dof1="", dof2="", dof3="", dof4="", dof5="", dof6="", **kwargs
+        self,
+        type_="",
+        dof1="",
+        dof2="",
+        dof3="",
+        dof4="",
+        dof5="",
+        dof6="",
+        **kwargs,
     ):
         """Selects a DOF label set for reference by other commands.
 
@@ -607,7 +623,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def ksel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kabs="",
+        **kwargs,
     ):
         """Selects a subset of keypoints or hard points.
 
@@ -618,21 +642,29 @@ class Selecting:
         type\_
             Label identifying the type of select:
 
-            S - Select a new set (default).
+            S
+              Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+              Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+              Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+              Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+              Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+              Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+              Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+              Display the current select status.
 
 
         The following fields are used only with Type = S, R, A, or U:
@@ -769,7 +801,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def lsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of lines.
 
@@ -941,7 +981,15 @@ class Selecting:
         return self.run(command, **kwargs)
 
     def nsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kabs="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kabs="",
+        **kwargs,
     ):
         """Selects a subset of nodes.
 
@@ -1375,11 +1423,24 @@ class Selecting:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = "PARTSEL,%s,%s,%s,%s" % (str(type_), str(pmin), str(pmax), str(pinc))
+        command = "PARTSEL,%s,%s,%s,%s" % (
+            str(type_),
+            str(pmin),
+            str(pmax),
+            str(pinc),
+        )
         return self.run(command, **kwargs)
 
     def vsel(
-        self, type_="", item="", comp="", vmin="", vmax="", vinc="", kswp="", **kwargs
+        self,
+        type_="",
+        item="",
+        comp="",
+        vmin="",
+        vmax="",
+        vinc="",
+        kswp="",
+        **kwargs,
     ):
         """Selects a subset of volumes.
 
@@ -1518,7 +1579,7 @@ class Selecting:
         Parameters
         ----------
         toler
-            Tolerance value. If blank, restores the default tolerance
+            Tolerance value. If blank or None, restores the default tolerance
             logic.
 
         Notes
@@ -1551,4 +1612,8 @@ class Selecting:
         >>> seltol(1E-5)
 
         """
-        return self.run(f"SELTOL{toler}", **kwargs)
+        if toler:
+            cmd = f"SELTOL,{toler}"
+        else:
+            cmd = "SELTOL"
+        return self.run(cmd, **kwargs)

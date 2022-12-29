@@ -71,7 +71,7 @@ circ_anum = mapdl.cyl4(length / 2, width / 2, radius)
 plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 
 # finally, plot the lines of the plate
-_ = mapdl.lplot(cpos="xy", line_width=3, font_size=26, color_lines=True, background="w")
+mapdl.lplot(cpos="xy", line_width=3, font_size=26, color_lines=True, background="w")
 
 ###############################################################################
 # Meshing
@@ -97,8 +97,13 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
-_ = mapdl.eplot(
-    vtk=True, cpos="xy", show_edges=True, show_axes=False, line_width=2, background="w"
+mapdl.eplot(
+    vtk=True,
+    cpos="xy",
+    show_edges=True,
+    show_axes=False,
+    line_width=2,
+    background="w",
 )
 
 ###############################################################################
@@ -137,7 +142,7 @@ mapdl.nsel("R", "LOC", "Y", width / 2)
 mapdl.f("ALL", "FX", 1000)
 
 # finally, be sure to select all nodes again to solve the entire solution
-_ = mapdl.allsel()
+mapdl.allsel(mute=True)
 
 
 ###############################################################################
@@ -160,7 +165,13 @@ print(output)
 # grab the result from the ``mapdl`` instance
 result = mapdl.result
 result.plot_principal_nodal_stress(
-    0, "SEQV", lighting=False, cpos="xy", background="w", text_color="k", add_text=False
+    0,
+    "SEQV",
+    lighting=False,
+    cpos="xy",
+    background="w",
+    text_color="k",
+    add_text=False,
 )
 
 nnum, stress = result.principal_nodal_stress(0)
@@ -331,7 +342,7 @@ def compute_stress_con(ratio):
 ###############################################################################
 # Run the batch and record the stress concentration
 k_t_exp = []
-ratios = np.linspace(0.01, 0.5, 15)
+ratios = np.linspace(0.01, 0.5, 10)
 print("    Ratio  : Stress Concentration (K_t)")
 for ratio in ratios:
     stress_con = compute_stress_con(ratio)

@@ -50,7 +50,14 @@ class Aux3:
         return self.run(command, **kwargs)
 
     def modify(
-        self, set_="", lstep="", iter_="", cumit="", time="", ktitle="", **kwargs
+        self,
+        set_="",
+        lstep="",
+        iter_="",
+        cumit="",
+        time="",
+        ktitle="",
+        **kwargs,
     ):
         """Changes the listed values of the data in a set.
 

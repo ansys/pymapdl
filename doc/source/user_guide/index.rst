@@ -1,10 +1,9 @@
 .. _ref_user_guide:
 
 ==========
-User Guide
+User guide
 ==========
-This guide provides a general overview of the basics and usage of the
-PyMAPDL library.
+This section provides a general overview of PyMAPDL and how you use it.
 
 
 ..
@@ -22,27 +21,29 @@ PyMAPDL library.
    mesh_geometry
    post
    parameters
+   database
    convert
    math
    pool
    xpl
    upf
-   extended_examples/index
+   krylov
+   troubleshoot
 
 
-PyMAPDL Basic Overview
-======================
+PyMAPDL overview
+================
 The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
-within the ``ansys-mapdl-core`` library creates an instance of of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in the background and sends
-commands to that service.  Errors and warnings are processed
-Pythonically letting the user develop a script real-time without
-worrying about if it will function correctly when deployed in batch
+within the ``ansys-mapdl-core`` library creates an instance of the
+:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
+commands to that service. Errors and warnings are processed
+Pythonically, letting you develop a script in real time, without
+worrying about it functioning correctly when deployed in batch
 mode.
 
-MAPDL can be started from python in gRPC mode using
-:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.  This starts
-MAPDL in a temporary directory by default.  You can change this to
+MAPDL can be started from Python in gRPC mode using the
+:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This starts
+MAPDL in a temporary directory by default. You can change this to
 your current directory with:
 
 .. code:: python
@@ -53,9 +54,9 @@ your current directory with:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active and you can send commands to it as a genuine a
-Python class.  For example, if we wanted to create a surface using
-keypoints we could run:
+MAPDL is now active, and you can send commands to it as a genuine a
+Python class. For example, if you wanted to create a surface using
+key points, you could run:
 
 .. code:: python
 
@@ -70,8 +71,8 @@ keypoints we could run:
     mapdl.run('L, 4, 1')
     mapdl.run('AL, 1, 2, 3, 4')
 
-MAPDL interactively returns the result of each command and it is
-stored to the logging module.  Errors are caught immediately.  For
+MAPDL interactively returns the result of each command, which is
+stored to the logging module. Errors are caught immediately. For
 example, if you input an invalid command:
 
 .. code:: python
@@ -89,58 +90,37 @@ example, if you input an invalid command:
    Keypoint 1 is referenced by only one line.  Improperly connected line   
    set for AL command.                                                     
 
-This ``MapdlRuntimeError`` was caught immediately, and this means that
-you can write your MAPDL scripts in python, run them interactively and
-then as a batch without worrying if the script will run correctly if
+This ``MapdlRuntimeError`` was caught immediately. This means that
+you can write your MAPDL scripts in Python, run them interactively, and
+then run them as a batch without worrying if the script would run correctly if
 you had instead outputted it to a script file.
 
 The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
-than just sending text to MAPDL and includes higher level wrapping
-allowing for better scripting and interaction with MAPDL.  See the
-:ref:`ref_example_gallery` for an overview of the various advanced
-methods to visualize, script, and interact with MAPDL.
-
-Interactive Command output
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The command output has stored the command and arguments that created it.
-You can inspect this command using:
-
-.. code:: python
-
-    >>> output = mapdl.prep7()
-    >>> print(output.command())
-    prep7
-
-
-or if you want to see only the command you can:
-
-.. code:: python
-
-    print(output.cmd())
-
-.. Certain PyMAPDL commands such as :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>`
+than just sending text to MAPDL. It includes higher-level wrapping,
+allowing for better scripting and interaction with MAPDL. For an overview of the
+various advanced methods to visualize, script, and interact with MAPDL, see
+:ref:`ref_examples`.
 
 
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from an instance of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a pythonic manner.  This is
-to simplify calling ANSYS, especially when inputs are variables within
-Python.  For example, the following two commands are equivalent:
+:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
+to simplify calling Ansys, especially when inputs are variables within
+Python. For example, the following two commands are equivalent:
 
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
     mapdl.run('K, 1, 0, 0, 0')
 
-This approach has some obvious advantages, chiefly that it's a easier
-to script as ``ansys-mapdl-core`` takes care of the string formatting for you.
-For example, inputting points from a numpy array:
+This approach has some obvious advantages. Chiefly, it's easier
+to script because ``ansys-mapdl-core`` takes care of the string formatting for you.
+For example, you can input points from a numpy array with:
 
 .. code:: python
 
-   # make 10 random keypoints in ANSYS
+   # make 10 random keypoints in Ansys
    points = np.random.random((10, 3))
    for i, (x, y, z) in enumerate(points):
        mapdl.k(i + 1, x, y, z)
@@ -164,7 +144,7 @@ Additionally, exceptions are caught and handled within Python.
 
 
 For longer scripts, instead of sending commands to MAPDL as in the
-area creation example, we can instead run:
+area creation example, you can instead run:
 
 .. code:: python
 
@@ -186,7 +166,7 @@ area creation example, we can instead run:
 
 This approach has some obvious advantages, chiefly that it's a bit
 easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
-takes care of the string formatting for you.  For example, inputting
+takes care of the string formatting for you. For example, inputting
 points from a numpy array:
 
 .. code:: python
@@ -199,7 +179,7 @@ points from a numpy array:
        mapdl.k(i + 1, x, y, z)
 
 Additionally, each function with the MAPDL class has help associated
-within it.  For example:
+with it. For example:
 
 .. code:: python
 
@@ -217,12 +197,12 @@ within it.  For example:
         Parameters
         ----------
         npt
-            Reference number for keypoint.  If zero, the lowest
+            Reference number for keypoint. If zero, the lowest
             available number is assigned [NUMSTR].
 
         x, y, z
             Keypoint location in the active coordinate system (may be
-            R, θ, Z or R, θ, Φ).  If X = P, graphical picking is
+            R, θ, Z or R, θ, Φ). If X = P, graphical picking is
             enabled and all other fields (including NPT) are ignored
             (valid only in the GUI).
 
@@ -235,36 +215,11 @@ within it.  For example:
         Notes
         -----
         Defines a keypoint in the active coordinate system [CSYS] for
-        line, area, and volume descriptions.  A previously defined
-        keypoint of the same number will be redefined.  Keypoints may
+        line, area, and volume descriptions. A previously defined
+        keypoint of the same number is then redefined. A keypoint may
         be redefined only if it is not yet attached to a line or is
-        not yet meshed.  Solid modeling in a toroidal system is not
+        not yet meshed. Solid modeling in a toroidal system is not
         recommended.
 
 
-Remote Stability Considerations
--------------------------------
-.. note::
-   This is only valid for instances of MAPDL launched in 2021R1 or
-   newer launching with ``mode=grpc`` (default).
-
-When connecting to a remote instance of MAPDL, there are some cases
-where the MAPDL server will exit unexpectedly.  These issues are being
-corrected and will be solved in 2021R2, but for the time being, there
-are several ways to improve performance and stability of MADPL:
-
-- When possible, pass ``mute=True`` to individual MAPDL commands or
-  set it globally with :func:`Mapdl.mute
-  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`.  This disables streaming
-  back the response from MAPDL for each command and will marginally
-  improve performance and stability.  Consider having a debug flag in
-  your program or script so you can enable or disable logging and
-  verbosity when needed.
-
-.. note::
-   MAPDL 2021R1 has a stability issue with :func:`Mapdl.input()
-   <ansys.mapdl.core.Mapdl.input>`.  Avoid using input files if
-   possible.  Attempt to :func:`Mapdl.upload()
-   <ansys.mapdl.core.Mapdl.upload>` nodes and elements and read them
-   in via :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
-   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>`.
+For stability considerations, see :ref:`ref_pymapdl_stability`.

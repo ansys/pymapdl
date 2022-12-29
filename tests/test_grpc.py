@@ -1,11 +1,14 @@
 """gRPC service specific tests"""
 import os
+import re
 
 import pytest
 
-from ansys.mapdl.core import examples, launch_mapdl
+from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
+from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -27,10 +30,10 @@ directory creation.
 )
 
 
-def write_tmp(mapdl, filename, ext="txt"):
+def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
     """Write a temporary file from MAPDL."""
     with mapdl.non_interactive:
-        mapdl.cfopen(filename, "txt")
+        mapdl.cfopen(filename, ext)
         mapdl.vwrite("dummy_file")  # Needs to write something, File cannot be empty.
         mapdl.run("(A10)")
         mapdl.cfclos()
@@ -82,10 +85,27 @@ def setup_for_cmatrix(mapdl, cleared):
     mapdl.run("/solu")
 
 
+def test_connect_via_channel(mapdl):
+    """Validate MapdlGrpc can be created directly from a channel."""
+
+    import grpc
+
+    from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
+
+    channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ],
+    )
+    mapdl = MapdlGrpc(channel=channel)
+    assert mapdl.is_alive
+
+
 def test_clear_nostart(mapdl):
     resp = mapdl._send_command("FINISH")
     resp = mapdl._send_command("/CLEAR, NOSTART")
-    assert "CLEAR ANSYS DATABASE AND RESTART" in resp
+    assert re.search("CLEAR (ANSYS|MAPDL) DATABASE AND RESTART", resp)
 
 
 # NOTE: This command cannot be run repeately, otherwise we end up with
@@ -104,7 +124,7 @@ def test_clear_multiple(mapdl):
 
 
 def test_invalid_get(mapdl):
-    with pytest.raises(ValueError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -129,6 +149,7 @@ def test_basic_input_output(mapdl, tmpdir):
     mapdl._send_command("/OUT, TERM", mute=True)
     mapdl.download(tmpfile)
     assert os.path.isfile(tmpfile)
+    os.remove(tmpfile)
     # input file won't actually run, but we want to see if the output switches
 
 
@@ -174,13 +195,6 @@ def test__download_missing_file(mapdl, tmpdir):
         mapdl._download("__notafile__", target)
 
 
-@skip_launch_mapdl  # need to be able to start/stop an instance of MAPDL
-def test_grpc_custom_ip():
-    ip = "127.0.0.2"
-    mapdl = launch_mapdl(ip=ip)
-    assert mapdl._ip == ip
-
-
 def test_cmatrix(mapdl, setup_for_cmatrix):
     cap_name = "aaaaa"
     output = mapdl.cmatrix(1, "cond", 3, 0, cap_name)
@@ -210,19 +224,20 @@ def test_read_input_file_verbose(mapdl):
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
-test_files = ["full26.dat", "static.dat"]
-
-
-@pytest.mark.parametrize("file_name", test_files)
+@pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
 def test_read_input_file(mapdl, file_name):
     test_file = os.path.join(PATH, "test_files", file_name)
     mapdl.finish()
     mapdl.clear()
     response = mapdl.input(test_file)
-    assert "*****  ANSYS SOLUTION ROUTINE  *****" in response
+
+    assert (
+        re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+        or "PyMAPDL: Simulation Finished." in response
+    )
 
 
 def test_no_get_value_non_interactive(mapdl):
@@ -233,7 +248,7 @@ def test_no_get_value_non_interactive(mapdl):
 
 def test__download(mapdl, tmpdir):
     # Creating temp file
-    write_tmp(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
 
     file_name = "myfile0.txt"
     assert file_name in mapdl.list_files()
@@ -264,8 +279,8 @@ def test__download(mapdl, tmpdir):
     ],
 )
 def test_download(mapdl, tmpdir, option, expected_files):
-    write_tmp(mapdl, "myfile0")
-    write_tmp(mapdl, "myfile1")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
     mapdl.download(option, target_dir=tmpdir)
     for file_to_check in expected_files:
@@ -273,8 +288,8 @@ def test_download(mapdl, tmpdir, option, expected_files):
 
 
 def test_download_without_target_dir(mapdl, tmpdir):
-    write_tmp(mapdl, "myfile0")
-    write_tmp(mapdl, "myfile1")
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
     old_cwd = os.getcwd()
     try:
@@ -324,20 +339,44 @@ def test_download_recursive(mapdl, tmpdir):
 def test_download_project(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(target_dir=target_dir)
-    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    assert "log" in files_extensions
-    assert "out" in files_extensions
-    assert "err" in files_extensions
-    assert "lock" in files_extensions
+    expected = {"log", "out", "err"}
+    assert expected.intersection(files_extensions) == expected
 
 
 def test_download_project_extensions(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(extensions=["log", "out"], target_dir=target_dir)
-    files_extensions = [each.split(".")[-1] for each in os.listdir(target_dir)]
+    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    assert "log" in files_extensions
-    assert "out" in files_extensions
-    assert "err" not in files_extensions
-    assert "lock" not in files_extensions
+    expected = {"log", "out", "err", "lock"}
+    assert expected.intersection(files_extensions) == {"log", "out"}
+
+
+def test_download_result(mapdl, cleared, tmpdir):
+    if "file.rst" not in mapdl.list_files():
+        write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
+    target_dir = tmpdir.mkdir(f"tmp_{random_string()}")
+    mapdl.download_result(target_dir)
+    assert os.path.exists(os.path.join(target_dir, "file.rst"))
+
+    assert not os.path.exists("file.rst")
+    mapdl.download_result()  # with default argument
+    assert os.path.exists("file.rst")
+
+    os.remove("file.rst")
+
+
+def test__channel_str(mapdl):
+    assert mapdl._channel_str is not None
+    assert ":" in mapdl._channel_str
+    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search("\d{4,6}", mapdl._channel_str)
+
+
+def test_mode_corba(mapdl):
+    assert mapdl.mode == "grpc"
+    assert mapdl.is_grpc
+    assert not mapdl.is_corba
+    assert not mapdl.is_console

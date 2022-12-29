@@ -11,8 +11,17 @@ LOG.debug("Loaded logging module as LOG")
 
 _LOCAL_PORTS = []
 
+LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"]]
+LINUX_DEFAULT_DIRS = [os.path.join(*each) for each in LINUX_DEFAULT_DIRS]
+
 # Per contract with Sphinx-Gallery, this method must be available at top level
-from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+try:
+    from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+
+    _HAS_PYVISTA = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'Pyvista' is not installed.")
+    _HAS_PYVISTA = False
 
 try:
     import importlib.metadata as importlib_metadata
@@ -22,16 +31,25 @@ except ModuleNotFoundError:  # pragma: no cover
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import (
     change_default_ansys_path,
     close_all_local_instances,
     find_ansys,
     get_ansys_path,
-    launch_mapdl,
+    get_available_ansys_installations,
+    save_ansys_path,
 )
+
+# override default launcher when on pyansys.com
+if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
+    from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+else:
+    from ansys.mapdl.core.launcher import launch_mapdl
+
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Report, _check_has_ansys
+from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
 from ansys.mapdl.core.pool import LocalMapdlPool
 from ansys.mapdl.core.theme import MapdlTheme
 
@@ -50,7 +68,4 @@ try:
 except:  # pragma: no cover
     pass
 
-
-# override default launcher when on pyansys.com
-if "ANSJUPHUB_VER" in os.environ:
-    from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+BUILDING_GALLERY = False

@@ -226,7 +226,15 @@ class Ocean:
         return self.run(command, **kwargs)
 
     def octable(
-        self, val1="", val2="", val3="", val4="", val5="", val6="", val7="", **kwargs
+        self,
+        val1="",
+        val2="",
+        val3="",
+        val4="",
+        val5="",
+        val6="",
+        val7="",
+        **kwargs,
     ):
         """Defines an ocean load using table data.
 

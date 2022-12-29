@@ -92,7 +92,7 @@ anum
 # Area Geometry
 # ~~~~~~~~~~~~~
 # Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
-# saved or plotted.  For more details, visit https://docs.pyvista.com
+# saved or plotted.  For more details, visit `Pyvista documentation <pyvista_docs_>`_
 #
 # Note that this is a method so you can select the quality of the
 # areas (mesh density), and if you would like a merged output or
@@ -175,13 +175,13 @@ print(items)
 # Note that the `cpos` keyword argument can be used to describe the
 # camera direction from the following:
 #
-# - 'iso' - Isometric view
-# - 'xy' - XY Plane view
-# - 'xz' - XZ Plane view
-# - 'yx' - YX Plane view
-# - 'yz' - YZ Plane view
-# - 'zx' - ZX Plane view
-# - 'zy' - ZY Plane view
+# - ``iso`` - Isometric view
+# - ``xy`` - XY Plane view
+# - ``xz`` - XZ Plane view
+# - ``yx`` - YX Plane view
+# - ``yz`` - YZ Plane view
+# - ``zx`` - ZX Plane view
+# - ``zy`` - ZY Plane view
 
 mapdl.aplot(quality=1, show_bounds=True, cpos="iso", show_lines=True)
 

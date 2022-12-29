@@ -217,7 +217,15 @@ class PathOperations:
         return self.run(command, **kwargs)
 
     def pcalc(
-        self, oper="", labr="", lab1="", lab2="", fact1="", fact2="", const="", **kwargs
+        self,
+        oper="",
+        labr="",
+        lab1="",
+        lab2="",
+        fact1="",
+        fact2="",
+        const="",
+        **kwargs,
     ):
         """Forms additional labeled path items by operating on existing path
 

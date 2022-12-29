@@ -138,9 +138,14 @@ print(items)
 # There are a variety of plotting options available for all the common
 # plotting methods.
 mapdl.kplot(
-    show_keypoint_numbering=True, background="black", show_bounds=True, font_size=26
+    show_keypoint_numbering=True,
+    background="black",
+    show_bounds=True,
+    font_size=26,
 )
 
 ###############################################################################
+#
 # stop mapdl
+#
 mapdl.exit()

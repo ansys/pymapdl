@@ -145,7 +145,12 @@ plt.show()
 
 def shape_functions(self, s, t):
     return 0.25 * np.array(
-        [(1 - s) * (1 - t), (1 + s) * (1 - t), (1 + s) * (1 + t), (1 - s) * (1 + t)],
+        [
+            (1 - s) * (1 - t),
+            (1 + s) * (1 - t),
+            (1 + s) * (1 + t),
+            (1 - s) * (1 + t),
+        ],
         dtype=float,
     )
 
@@ -553,7 +558,8 @@ class Isotropic:
 
     def evaluate(self):
         d = np.array(
-            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
+            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]],
+            dtype=float,
         )
 
         return d * (self.ex / (1 - self.nu**2))
@@ -772,14 +778,15 @@ class Isotropic:
 
     def evaluate(self):
         d = np.array(
-            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]], dtype=float
+            [[1, self.nu, 0], [self.nu, 1, 0], [0, 0, (1 - self.nu) / 2.0]],
+            dtype=float,
         )
 
         return d * (self.ex / (1 - self.nu**2))
 
 
 ###############################################################################
-# Aplying the created classes.
+# Applying the created classes.
 
 isotropic = Isotropic(30e6, 0.25)
 elem = Elem2D(nodes)
@@ -845,7 +852,7 @@ for node_id, dof in dof_list:
     mapdl.d(node_id, dof, 1)
     mapdl.solve()
 
-_ = mapdl.finish()
+mapdl.finish()
 
 ###############################################################################
 # The columns of the stiffness matrix appear as nodal force reactions

@@ -648,7 +648,14 @@ class FeConstraints:
         return self.run(command, **kwargs)
 
     def gsbdata(
-        self, labz="", valuez="", labx="", valuex="", laby="", valuey="", **kwargs
+        self,
+        labz="",
+        valuez="",
+        labx="",
+        valuex="",
+        laby="",
+        valuey="",
+        **kwargs,
     ):
         """Specifies the constraints or applies the load at the ending point for
 

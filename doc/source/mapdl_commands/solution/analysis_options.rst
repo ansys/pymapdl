@@ -1,7 +1,7 @@
 .. _ref_analysis_options_commands_api:
 
 ****************
-Analysis Options
+Analysis options
 ****************
 
 .. currentmodule:: ansys.mapdl.core

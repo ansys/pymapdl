@@ -3,11 +3,12 @@ from datetime import datetime
 import os
 import warnings
 
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
-from pyansys_sphinx_theme import pyansys_logo_black
 import pyvista
 from sphinx_gallery.sorting import FileNameSortKey
 
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
 # Manage errors
@@ -26,6 +27,7 @@ if not os.path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
+pymapdl.BUILDING_GALLERY = True
 
 # suppress annoying matplotlib bug
 warnings.filterwarnings(
@@ -43,6 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
+cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
 
 
 # -- General configuration ---------------------------------------------------
@@ -60,17 +63,26 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
+    "sphinx.ext.graphviz",
+    "sphinxcontrib.googleanalytics",
 ]
 
 # Intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/dev", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/devdocs", None),
     "matplotlib": ("https://matplotlib.org/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "pyvista": ("https://docs.pyvista.org/", None),
+    "grpc": ("https://grpc.github.io/grpc/python/", None),
+    "pypim": ("https://pypim.docs.pyansys.com/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/", None),
 }
+
+suppress_warnings = ["label.*"]
+# supress_warnings = ["ref.option"]
+
 
 # numpydoc configuration
 numpydoc_use_plots = True
@@ -97,8 +109,15 @@ numpydoc_validation_exclude = {  # set of regex
     r"\.*MeshGrpc\.*",
 }
 
+# Favicon
+html_favicon = ansys_favicon
+
+# notfound.extension
+notfound_template = "404.rst"
+notfound_urls_prefix = "/../"
+
 # static path
-html_static_path = ["_static"]
+html_static_path = ["_static", "_assets"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -114,12 +133,25 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+    # because we include this in examples/index.rst
+    "examples/gallery_examples/index.rst",
+    "links.rst",
+]
+
+# make rst_epilog a variable, so you can add other epilog parts to it
+rst_epilog = ""
+# Read link all targets from file
+with open("links.rst") as f:
+    rst_epilog += f.read()
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -127,11 +159,14 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Google analytics setup
+googleanalytics_id = "G-JQJKPV6ZVB"
+googleanalytics_enabled = True
+
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
-
 
 # -- Sphinx Gallery Options ---------------------------------------------------
 sphinx_gallery_conf = {
@@ -140,8 +175,8 @@ sphinx_gallery_conf = {
     # path to your examples scripts
     "examples_dirs": ["../../examples/"],
     # path where to save gallery generated examples
-    "gallery_dirs": ["examples"],
-    # Patter to search for example files
+    "gallery_dirs": ["examples/gallery_examples"],
+    # Pattern to search for example files
     "filename_pattern": r"\.py",
     # Remove the "Download all examples" button from the top level gallery
     "download_all_examples": False,
@@ -159,17 +194,43 @@ sphinx_gallery_conf = {
 
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
-html_theme = "pyansys_sphinx_theme"
+html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
+    "collapse_navigation": True,
+    "use_edit_page_button": True,
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],
+    "icon_links": [
+        {
+            "name": "Support",
+            "url": "https://github.com/pyansys/pymapdl/discussions",
+            "icon": "fa fa-comment fa-fw",
+        },
+        {
+            "name": "Contribute",
+            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "icon": "fa fa-wrench",
+        },
+    ],
+    "switcher": {
+        "json_url": f"https://{cname}/release/versions.json",
+        "version_match": get_version_match(__version__),
+    },
+    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
 }
 
+html_context = {
+    "display_github": True,  # Integrate GitHub
+    "github_user": "pyansys",
+    "github_repo": "pymapdl",
+    "github_version": "main",
+    "doc_path": "doc/source",
+}
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -198,7 +259,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "ansys.mapdl.core", "ansys.mapdl.core Documentation", [author], 1)
+    (
+        master_doc,
+        "ansys.mapdl.core",
+        "ansys.mapdl.core Documentation",
+        [author],
+        1,
+    )
 ]
 
 

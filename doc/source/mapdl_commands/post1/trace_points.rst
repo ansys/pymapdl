@@ -1,7 +1,7 @@
 .. _ref_trace Points_api:
 
 ************
-Trace Points
+Trace points
 ************
 
 .. currentmodule:: ansys.mapdl.core

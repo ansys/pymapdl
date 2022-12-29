@@ -7,32 +7,32 @@ import io
 import os
 import re
 import shutil
-import socket
 import subprocess
 import tempfile
 import threading
 import time
+from typing import Optional
+import warnings
 from warnings import warn
 import weakref
 
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
-from tqdm import tqdm
 
-MSG_IMPORT = """There was a problem importing the ANSYS API module (ansys.api.mapdl).
+MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
-MSG_MODULE = """ANSYS API module (ansys.api.mapdl) could not be found.
+MSG_MODULE = """ANSYS API module `ansys.api.mapdl` could not be found.
 This might be due to a faulty installation or obsolete API module version.
 Please make sure you have the latest updated version using:
 
-'pip install ansys-api-mapdl-v0' or 'pip install --upgrade ansys-api-mapdl-v0'
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'.
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
@@ -41,10 +41,8 @@ try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
     from ansys.api.mapdl.v0 import mapdl_pb2 as pb_types
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
-
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
-
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
@@ -55,21 +53,40 @@ from ansys.mapdl.core.common_grpc import (
     DEFAULT_FILE_CHUNK_SIZE,
     parse_chunks,
 )
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError, protect_grpc
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+    protect_grpc,
+)
 from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl_types import MapdlInt
 from ansys.mapdl.core.misc import (
+    check_valid_ip,
     last_created,
     random_string,
+    requires_package,
     run_as_prep7,
     supress_logging,
 )
 from ansys.mapdl.core.post import PostProcessing
+
+# Checking if tqdm is installed.
+# If it is, the default value for progress_bar is true.
+try:
+    from tqdm import tqdm
+
+    _HAS_TQDM = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_TQDM = False
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
 # Default 256 MB message length
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
+
+VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
 
 def chunk_raw(raw, save_as):
@@ -89,12 +106,19 @@ def get_file_chunks(filename, progress_bar=False):
     """Serializes a file into chunks"""
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                "To use the keyword argument 'progress_bar', you need to have "
+                "installed the `tqdm` package. "
+                "To avoid this message set `progress_bar=False`."
+            )
+
         n_bytes = os.path.getsize(filename)
 
         base_name = os.path.basename(filename)
         pbar = tqdm(
             total=n_bytes,
-            desc="Uploading %s" % base_name,
+            desc=f"Uploading {base_name}",
             unit="B",
             unit_scale=True,
             unit_divisor=1024,
@@ -119,7 +143,7 @@ def get_file_chunks(filename, progress_bar=False):
 
 
 def save_chunks_to_file(
-    chunks, filename, progress_bar=True, file_size=None, target_name=""
+    chunks, filename, progress_bar=False, file_size=None, target_name=""
 ):
     """Saves chunks to a local file
 
@@ -128,9 +152,14 @@ def save_chunks_to_file(
     file_size : int
         File size saved in bytes.  ``0`` means no file was written.
     """
-
     pbar = None
     if progress_bar:
+        if not _HAS_TQDM:  # pragma: no cover
+            raise ModuleNotFoundError(
+                f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package."
+                "To avoid this message you can set 'progress_bar=False'."
+            )
+
         pbar = tqdm(
             total=file_size,
             desc="Downloading %s" % target_name,
@@ -163,13 +192,6 @@ class RepeatingTimer(threading.Timer):
             self.finished.wait(self.interval)
 
 
-def check_valid_ip(ip):
-    """Check for valid IP address"""
-    if ip != "localhost":
-        ip = ip.replace('"', "").replace("'", "")
-        socket.inet_aton(ip)
-
-
 class MapdlGrpc(_MapdlCore):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
@@ -199,9 +221,10 @@ class MapdlGrpc(_MapdlCore):
         Sets MAPDL to not abort at the first error within /BATCH mode.
         Default ``True``.
 
-    remove_temp_files : bool, optional
-        Removes temporary files on exit if MAPDL is local.  Default
-        ``False``.
+    remove_temp_dir : bool, optional
+        When this parameter is ``True``, the MAPDL working directory will be
+        deleted when MAPDL is exited provided that it is within the temporary
+        user directory. Default ``False``.
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
@@ -211,6 +234,15 @@ class MapdlGrpc(_MapdlCore):
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
 
+    channel : grpc.Channel, optional
+        gRPC channel to use for the connection. Can be used as an
+        alternative to the ``ip`` and ``port`` parameters.
+
+    remote_instance : ansys.platform.instancemanagement.Instance
+        The corresponding remote instance when MAPDL is launched through
+        PyPIM. This instance will be deleted when calling
+        :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -219,13 +251,27 @@ class MapdlGrpc(_MapdlCore):
     >>> from ansys.mapdl import core as pymapdl
     >>> mapdl = pymapdl.Mapdl()
 
-    Connect to an instance of MAPDL running on the LAN on a default port
+    Connect to an instance of MAPDL running on the LAN on a default port.
 
     >>> mapdl = pymapdl.Mapdl('192.168.1.101')
 
-    Connect to an instance of MAPDL running on the LAN on a non-default port
+    Connect to an instance of MAPDL running on the LAN on a non-default port.
 
     >>> mapdl = pymapdl.Mapdl('192.168.1.101', port=60001)
+
+    If you wish to customize the channel, you can also directly connect
+    directly to gRPC channels. For example, if you wanted to create an insecure
+    channel with a maximum message length of 8 MB.
+
+    >>> import grpc
+    >>> channel = grpc.insecure_channel(
+    ...     '127.0.0.1:50052',
+    ...     options=[
+    ...         ("grpc.max_receive_message_length", 8*1024**2),
+    ...     ],
+    ... )
+    >>> mapdl = pymapdl.Mapdl(channel=channel)
+
     """
 
     # Required by `_name` method to be defined before __init__ be
@@ -234,7 +280,7 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(
         self,
-        ip="127.0.0.1",
+        ip=None,
         port=None,
         timeout=15,
         loglevel="WARNING",
@@ -242,12 +288,34 @@ class MapdlGrpc(_MapdlCore):
         cleanup_on_exit=False,
         log_apdl=None,
         set_no_abort=True,
-        remove_temp_files=False,
+        remove_temp_files=None,
+        remove_temp_dir_on_exit=False,
         print_com=False,
-        **kwargs,
+        channel=None,
+        remote_instance=None,
+        **start_parm,
     ):
         """Initialize connection to the mapdl server"""
+        if remove_temp_files is not None:  # pragma: no cover
+            warnings.warn(
+                "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+                "Please use ``remove_temp_dir_on_exit`` instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            remove_temp_dir_on_exit = remove_temp_files
+            remove_temp_files = None
+
         self.__distributed = None
+        self._remote_instance = remote_instance
+
+        if channel is not None:
+            if ip is not None or port is not None:
+                raise ValueError(
+                    "If `channel` is specified, neither `port` nor `ip` can be specified."
+                )
+        elif ip is None:
+            ip = "127.0.0.1"
 
         # port and ip are needed to setup the log
         self._port = port
@@ -257,10 +325,9 @@ class MapdlGrpc(_MapdlCore):
             log_apdl=log_apdl,
             log_file=log_file,
             print_com=print_com,
-            **kwargs,
+            **start_parm,
         )
-
-        check_valid_ip(ip)
+        self._mode = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock = False
@@ -270,44 +337,95 @@ class MapdlGrpc(_MapdlCore):
         self._locked = False  # being used within MapdlPool
         self._stub = None
         self._cleanup = cleanup_on_exit
-        self._remove_tmp = remove_temp_files
-        self._jobname = kwargs.pop("jobname", "file")
-        self._path = kwargs.pop("run_location", None)
+        self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
+        self._jobname = start_parm.get("jobname", "file")
+        self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
-        self._channel_str = None
         self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        if "local" in kwargs:  # pragma: no cover  # allow this to be overridden
-            self._local = kwargs["local"]
+        if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
+            self._local = start_parm["local"]
         self._health_response_queue = None
         self._exiting = False
         self._exited = None
         self._mute = False
+        self._db = None
+        self.__server_version = None
+
+        # saving for later use (for example open_gui)
+        start_parm["ip"] = ip
+        start_parm["port"] = port
+        self._start_parm = start_parm
 
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
 
             port = MAPDL_DEFAULT_PORT
-        self._server = None
-        self._channel = None
         self._state = None
         self._stub = None
         self._timeout = timeout
         self._pids = []
 
-        # try to connect over a series of attempts rather than one
-        # single one.  This prevents a single failed connection from
-        # blocking other attempts
-        n_attempts = 5  # consider adding this as a kwarg
+        if channel is None:
+            self._log.debug("Creating channel to %s:%s", ip, port)
+            self._channel = self._create_channel(ip, port)
+        else:
+            self._log.debug("Using provided channel")
+            self._channel = channel
+
+        # connect and validate to the channel
+        self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
+
+        # double check we have access to the local path if not
+        # explicitly specified
+        if "local" not in start_parm:
+            self._verify_local()
+
+        # only cache process IDs if launched locally
+        if self._local and "exec_file" in start_parm:
+            self._cache_pids()
+
+    def __del__(self):
+        """Delete the instance."""
+        self.exit()
+
+    def _create_channel(self, ip, port):
+        """Create an insecured grpc channel."""
+        check_valid_ip(ip)
+
+        # open the channel
+        channel_str = f"{ip}:{port}"
+        self._log.debug("Opening insecure channel at %s", channel_str)
+        return grpc.insecure_channel(
+            channel_str,
+            options=[
+                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+            ],
+        )
+
+    def _multi_connect(self, n_attempts=5, timeout=15, set_no_abort=True):
+        """Try to connect over a series of attempts to the channel.
+
+        Parameters
+        ----------
+        n_attempts : int, optional
+            Number of connection attempts.
+        timeout : float, optional
+            Total timeout.
+        set_no_abort : bool, optional
+            Sets MAPDL to not abort at the first error within /BATCH mode.
+            Default ``True``.
+
+        """
+        # This prevents a single failed connection from blocking other attempts
         connected = False
         attempt_timeout = timeout / n_attempts
 
         max_time = time.time() + timeout
         i = 0
-
         while time.time() < max_time and i <= n_attempts:
             self._log.debug("Connection attempt %d", i + 1)
             connected = self._connect(
-                port, timeout=attempt_timeout, set_no_abort=set_no_abort
+                timeout=attempt_timeout, set_no_abort=set_no_abort
             )
             i += 1
             if connected:
@@ -315,22 +433,28 @@ class MapdlGrpc(_MapdlCore):
                 break
         else:
             self._log.debug(
-                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
+                "Reached either maximum amount of connection attempts (%d) or timeout (%f s).",
+                n_attempts,
+                timeout,
             )
 
         if not connected:
-            raise IOError(
-                "Unable to connect to MAPDL gRPC instance at %s" % self._channel_str
+            raise MapdlConnectionError(
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
             )
+        else:
+            self._exited = False
 
-        # double check we have access to the local path if not
-        # explicitly specified
-        if "local" not in kwargs:
-            self._verify_local()
+    @property
+    def _channel_str(self):
+        """Return the target string.
 
-        # only cache process IDs if launched locally
-        if self._local and "exec_file" in kwargs:
-            self._cache_pids()
+        Generally of the form of "ip:port", like "127.0.0.1:50052".
+
+        """
+        if self._channel is not None:
+            return self._channel._channel.target().decode()
+        return ""
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
@@ -388,7 +512,7 @@ class MapdlGrpc(_MapdlCore):
         info = super().__repr__()
         return info
 
-    def _connect(self, port, timeout=5, set_no_abort=True, enable_health_check=False):
+    def _connect(self, timeout=5, set_no_abort=True, enable_health_check=False):
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
@@ -396,18 +520,6 @@ class MapdlGrpc(_MapdlCore):
         timeout : float
             Time in seconds to wait until the connection has been established
         """
-        self._server = {"ip": self._ip, "port": port}
-
-        # open the channel
-        self._channel_str = "%s:%d" % (self._ip, port)
-        self._log.debug("Opening insecure channel at %s", self._channel_str)
-        self._channel = grpc.insecure_channel(
-            self._channel_str,
-            options=[
-                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
-            ],
-        )
-
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_grpc.MapdlServiceStub(self._channel)
 
@@ -427,24 +539,28 @@ class MapdlGrpc(_MapdlCore):
             self._t_trigger = time.time()
             self._t_delay = 30
             self._timer = threading.Thread(
-                target=MapdlGrpc._threaded_heartbeat, args=(weakref.proxy(self),)
+                target=MapdlGrpc._threaded_heartbeat,
+                args=(weakref.proxy(self),),
             )
             self._timer.daemon = True
             self._timer.start()
 
         # initialize mesh, post processing, and file explorer interfaces
-        from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        try:
+            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+
+            self._mesh_rep = MeshGrpc(self)
+        except ModuleNotFoundError:  # pragma: no cover
+            self._mesh_rep = None
+
         from ansys.mapdl.core.xpl import ansXpl
 
-        self._mesh_rep = MeshGrpc(self)
         self._post = PostProcessing(self)
         self._xpl = ansXpl(self)
 
         # enable health check
         if enable_health_check:
             self._enable_health_check()
-
-        self.__server_version = None
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
@@ -453,6 +569,7 @@ class MapdlGrpc(_MapdlCore):
         if set_no_abort:
             self._set_no_abort()
 
+        self._run_at_connect()
         return True
 
     @property
@@ -583,15 +700,25 @@ class MapdlGrpc(_MapdlCore):
 
     @supress_logging
     def _set_no_abort(self):
-        """Do not abort MAPDL"""
+        """Do not abort MAPDL."""
         self.nerr(abort=-1, mute=True)
 
+    def _run_at_connect(self):
+        """Run house-keeping commands when initially connecting to MAPDL."""
+        # increase the number of variables allowed in POST26 to the maximum
+        with self.run_as_routine("POST26"):
+            self.numvar(200, mute=True)
+
     def _reset_cache(self):
-        """Reset cached items"""
-        self._mesh_rep._reset_cache()
-        self._geometry._reset_cache()
+        """Reset cached items."""
+        if self._mesh_rep is not None:
+            self._mesh_rep._reset_cache()
+
+        if self._geometry is not None:
+            self._geometry._reset_cache()
 
     @property
+    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -730,46 +857,106 @@ class MapdlGrpc(_MapdlCore):
             if not get_start_instance():
                 self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
                 return
+            # or building the gallery
+            from ansys.mapdl import core as pymapdl
+
+            if pymapdl.BUILDING_GALLERY:
+                self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
+                return
 
         if self._exited:
             return
 
-        self._exiting = True
-        self._log.debug("Exiting MAPDL")
-
         if save:
             try:
+                self._log.debug("Saving MAPDL database")
                 self.save()
             except:
                 pass
 
-        self._kill()  # sets self._exited = True
-        self._close_process()
-        self._remove_lock_file()
+        self._exiting = True
+        self._log.debug("Exiting MAPDL")
 
-        if self._remove_tmp and self._local:
-            self._log.debug("Removing local temporary files")
-            shutil.rmtree(self.directory, ignore_errors=True)
+        if self._local:
+            if os.name == "nt":
+                self._kill_server()
+            self._close_process()
+            self._remove_lock_file()
+        else:
+            self._kill_server()
+
+        self._exited = True
+
+        if self._remote_instance:
+            # No cover: The CI is working with a single MAPDL instance
+            self._remote_instance.delete()  # pragma: no cover
+
+        self._remove_temp_dir_on_exit()
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
 
-    def _kill(self):
-        """Call exit(0) on the server."""
-        self._ctrl("EXIT")
-        self._exited = True
+    def _remove_temp_dir_on_exit(self):
+        """Removes the temporary directory created by the launcher.
 
-    def _close_process(self):
-        """Close all MAPDL processes"""
+        This only runs if the current working directory of MAPDL is within the
+        user temporary directory.
+
+        """
+        if self.__remove_temp_dir_on_exit and self._local:  # pragma: no cover
+            path = self.directory
+            tmp_dir = tempfile.gettempdir()
+            ans_temp_dir = os.path.join(tmp_dir, "ansys_")
+            if path.startswith(ans_temp_dir):
+                self._log.debug("Removing the MAPDL temporary directory %s", path)
+                shutil.rmtree(path, ignore_errors=True)
+            else:
+                self._log.debug(
+                    "MAPDL working directory is not in the temporary directory '%s'"
+                    ", not removing the MAPDL working directory.",
+                    tmp_dir,
+                )
+
+    def _kill_server(self):  # pragma: no cover
+        """Call exit(0) on the server.
+
+        Notes
+        -----
+        This only shuts down the mapdl server process and leaves the other
+        processes orphaned. This is useful for killing a remote process but not
+        a local process.
+
+        """
+        self._log.debug("Killing MAPDL server")
+        self._ctrl("EXIT")
+
+    def _close_process(self):  # pragma: no cover
+        """Close all MAPDL processes.
+
+        Notes
+        -----
+        This is effectively the only way to completely close down MAPDL locally on
+        linux. Just killing the server with ``_kill_server`` leaves orphaned
+        processes making this method ineffective for a local instance of MAPDL.
+
+        """
         if self._local:
             for pid in self._pids:
                 try:
+                    self._log.debug(f"Killing MAPDL process: {pid}")
                     os.kill(pid, 9)
+                    self._pids.remove(pid)
                 except OSError:
                     pass
 
     def _cache_pids(self):
-        """Store the process IDs used when launching MAPDL"""
+        """Store the process IDs used when launching MAPDL.
+
+        These PIDs are stored in a "cleanup<GUID>.sh/bat" file and are the PIDs
+        of the MAPDL process. Killing these kills all dependent MAPDL
+        processes.
+
+        """
         for filename in self.list_files():
             if "cleanup" in filename:
                 script = os.path.join(self.directory, filename)
@@ -782,13 +969,15 @@ class MapdlGrpc(_MapdlCore):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-    def _remove_lock_file(self):
+    def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
 
-        Necessary to call this as a segfault of MAPDL or sys(0) will
+        Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
-        mapdl_path = self.directory
+        self._log.debug("Removing lock file after exit.")
+        if mapdl_path is None:  # pragma: no cover
+            mapdl_path = self.directory
         if mapdl_path:
             for lockname in [self.jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
@@ -825,7 +1014,9 @@ class MapdlGrpc(_MapdlCore):
                     # always communicate to allow process to run
                     output, err = process.communicate()
                     self._log.debug(
-                        "Cleanup output:\n\n%s\n%s", output.decode(), err.decode()
+                        "Cleanup output:\n\n%s\n%s",
+                        output.decode(),
+                        err.decode(),
                     )
 
     def list_files(self, refresh_cache=True):
@@ -865,6 +1056,7 @@ class MapdlGrpc(_MapdlCore):
                 if os.path.isdir(local_path):
                     return os.listdir(local_path)
             return []
+
         elif self._exited:
             raise RuntimeError("Cannot list remote files since MAPDL has exited")
 
@@ -912,15 +1104,28 @@ class MapdlGrpc(_MapdlCore):
 
         """
         # always redirect system output to a temporary file
-        tmp_file = "__tmp_sys_out__"
+        tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
                 return fobj.read()
         return self._download_as_raw(tmp_file).decode()
 
-    def download_result(self, path, progress_bar=False, preference=None):
+    def download_result(self, path=None, progress_bar=False, preference=None):
         """Download remote result files to a local directory
+
+        Parameters
+        ----------
+        path : str, Path, optional
+          Path where the files are downloaded, by default the current
+          python path (``os.getcwd()``)
+
+        progress_bar : bool, optional
+          Show the progress bar or not, default to False.
+
+        preference : str
+          Specify the preferred result file, either ``rst`` or ``rth``.
+          Only required when both files are present. Defaults to 'rst'.
 
         Examples
         --------
@@ -930,6 +1135,8 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.download_result(os.getcwd())
 
         """
+        if path is None:  # if not path seems to not work in same cases.
+            path = os.getcwd()
 
         def _download(targets):
             for target in targets:
@@ -999,7 +1206,6 @@ class MapdlGrpc(_MapdlCore):
                 targets = rth_files
             else:
                 remote_files_str = "\n".join("\t%s" % item for item in remote_files)
-                print("\t".join("\n%s" % item for item in ["a", "b", "c"]))
                 raise FileNotFoundError(
                     "Unable to locate any result file from the "
                     "following remote result files:\n\n" + remote_files_str
@@ -1071,7 +1277,7 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        # the old behaviour is to supplied the name and the extension separatelly.
+        # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
         basename = os.path.basename(fname)
         if len(basename.split(".")) == 1:
@@ -1125,18 +1331,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     raise FileNotFoundError(f"File '{filename}' could not be found.")
 
-            return super().tbft(
-                oper,
-                id_,
-                option1,
-                option2,
-                option3,
-                option4,
-                option5,
-                option6,
-                option7,
-                **kwargs,
-            )
+        return super().tbft(
+            oper,
+            id_,
+            option1,
+            option2,
+            option3,
+            option4,
+            option5,
+            option6,
+            option7,
+            **kwargs,
+        )
 
     @protect_grpc
     def input(
@@ -1147,6 +1353,7 @@ class MapdlGrpc(_MapdlCore):
         time_step_stream=None,
         chunk_size=512,
         orig_cmd="/INP",
+        write_to_log=True,
         **kwargs,
     ):
         """Stream a local input file to a remote mapdl instance.
@@ -1232,10 +1439,12 @@ class MapdlGrpc(_MapdlCore):
         ]
 
         # since we can't directly run /INPUT, we have to write a
-        # temporary input file that tells mainan to read the input
+        # temporary input file that tells MAPDL to read the input
         # file.
-        tmp_name = "_input_tmp_.inp"
-        tmp_out = "_input_tmp_.out"
+        id_ = random_string()
+        tmp_name = f"_input_tmp_{id_}_.inp"
+        tmp_out = f"_input_tmp_{id_}_.out"
+
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
@@ -1244,12 +1453,17 @@ class MapdlGrpc(_MapdlCore):
             # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
 
+        if write_to_log and self._apdl_log is not None:
+            if not self._apdl_log.closed:
+                self._apdl_log.write(tmp_dat)
+
         if self._local:
             local_path = self.directory
             with open(os.path.join(local_path, tmp_name), "w") as f:
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
         request = pb_types.InputFileRequest(filename=tmp_name)
 
         # even though we don't care about the output, we still
@@ -1259,12 +1473,30 @@ class MapdlGrpc(_MapdlCore):
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
-        if self._local:
+        if self._local:  # pragma: no cover
             with open(os.path.join(local_path, tmp_out)) as f:
-                return f.read()
+                output = f.read()
+
+            # delete the files to avoid overwriting:
+            try:
+                os.remove(tmp_name)
+            except OSError:
+                pass
+
+            try:
+                os.remove(tmp_out)
+            except OSError:
+                pass
 
         # otherwise, read remote file
-        return self._download_as_raw(tmp_out).decode("latin-1")
+        else:
+            output = self._download_as_raw(tmp_out).decode("latin-1")
+
+            # Deleting the previous files
+            self.slashdelete(tmp_name)
+            self.slashdelete(tmp_out)
+
+        return output
 
     def _get_file_path(self, fname, progress_bar=False):
         """Find files in the Python and MAPDL working directories.
@@ -1284,6 +1516,12 @@ class MapdlGrpc(_MapdlCore):
         fpath = os.path.dirname(fname)
         fname = os.path.basename(fname)
         fext = fname.split(".")[-1]
+
+        # if there is no dirname, we are assuming the file is
+        # in the python working directory.
+        if not fpath:
+            fpath = os.getcwd()
+
         ffullpath = os.path.join(fpath, fname)
 
         if os.path.exists(ffullpath) and self._local:
@@ -1357,6 +1595,11 @@ class MapdlGrpc(_MapdlCore):
         self._response = out[out.find("LINE=       0") + 13 :]
         self._log.info(self._response)
 
+        if "*** ERROR ***" in self._response:
+            raise RuntimeError(
+                self._response.split("*** ERROR ***")[1].splitlines()[1].strip()
+            )
+
         # try/except here because MAPDL might have not closed the temp file
         try:
             os.remove(tmp_filename)
@@ -1390,11 +1633,18 @@ class MapdlGrpc(_MapdlCore):
             self._get_lock = False
 
         if getresponse.type == 0:
-            raise ValueError(
-                "This is either an invalid get request, or MAPDL is set"
-                " to the wrong processor (e.g. on BEGIN LEVEL vs."
-                " POST26)"
+            self._log.debug(
+                "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
+            try:
+                out = self.run("*GET,__temp__," + cmd)
+            except MapdlRuntimeError:
+                # Get can thrown some errors, in that case, they are caught in the default run method.
+                raise
+            else:
+                # Here we catch the rest of the errors and warnings
+                raise ValueError(out)
+
         if getresponse.type == 1:
             return getresponse.dval
         elif getresponse.type == 2:
@@ -1402,7 +1652,7 @@ class MapdlGrpc(_MapdlCore):
 
         raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
 
-    def download_project(self, extensions=None, target_dir=None):  # pragma: no cover
+    def download_project(self, extensions=None, target_dir=None, progress_bar=False):
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -1414,6 +1664,11 @@ class MapdlGrpc(_MapdlCore):
         target_dir : Str, optional
             Path where the downloaded files will be located, by default None.
 
+        progress_bar : bool, optional
+            Display a progress bar using
+            ``tqdm`` when ``True``.  Helpful for showing download
+            progress. Default to ``False``.
+
         Returns
         -------
         List[Str]
@@ -1421,13 +1676,19 @@ class MapdlGrpc(_MapdlCore):
         """
         if not extensions:
             files = self.list_files()
-            list_of_files = self.download(files, target_dir=target_dir)
+            list_of_files = self.download(
+                files, target_dir=target_dir, progress_bar=progress_bar
+            )
 
         else:
             list_of_files = []
             for each_extension in extensions:
                 list_of_files.extend(
-                    self.download(files=f"*.{each_extension}", target_dir=target_dir)
+                    self.download(
+                        files=f"*.{each_extension}",
+                        target_dir=target_dir,
+                        progress_bar=progress_bar,
+                    )
                 )
 
         return list_of_files
@@ -1436,11 +1697,13 @@ class MapdlGrpc(_MapdlCore):
         self,
         files,
         target_dir=None,
-        chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        chunk_size=None,
+        progress_bar=None,
         recursive=False,
     ):  # pragma: no cover
         """Download files from the gRPC instance workind directory
+
+        .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
         Parameters
         ----------
@@ -1465,27 +1728,19 @@ class MapdlGrpc(_MapdlCore):
         recursive : bool
             Use recursion when using glob pattern.
 
-        .. warning::
-            This feature is only available for MAPDL 2021R1 or newer.
+        Notes
+        -----
+        There are some considerations to keep in mind when using this command:
 
-        .. note::
-            * The glob pattern search does not search recursively in remote instances.
-            * In a remote instance, it is not possible to list or download files in different
-              locations than the MAPDL working directory.
-            * If you are in local and provide a file path, downloading files
-              from a different folder is allowed.
-              However it is not a recommended approach.
+        * The glob pattern search does not search recursively in remote instances.
+        * In a remote instance, it is not possible to list or download files in different
+          locations than the MAPDL working directory.
+        * If you are in local and provide a file path, downloading files
+          from a different folder is allowed.
+          However it is not a recommended approach.
 
         Examples
         --------
-        Download all the simulation files ('out', 'full', 'rst', 'cdb', 'err', 'db', or 'log'):
-
-        >>> mapdl.download('all')
-
-        Download every single file in the MAPDL workind directory:
-
-        >>> mapdl.download('everything')
-
         Download a single file:
 
         >>> mapdl.download('file.out')
@@ -1494,7 +1749,24 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
+        Download every single file in the MAPDL workind directory:
+
+        >>> mapdl.download('*.*')
+
+        Alternatively, you can download all the files using
+        :func:`Mapdl.download_project <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download_project>` (recommended):
+
+        >>> mapdl.download_project()
+
         """
+        if chunk_size is None:
+            chunk_size = DEFAULT_CHUNKSIZE
+
+        if chunk_size > 4 * 1024 * 1024:  # 4MB
+            raise ValueError(
+                f"Chunk sizes bigger than 4 MB can generate unstable behaviour in PyMAPDL. "
+                "Please decrease ``chunk_size`` value."
+            )
 
         self_files = self.list_files()  # to avoid calling it too much
 
@@ -1586,9 +1858,9 @@ class MapdlGrpc(_MapdlCore):
         target_name,
         out_file_name=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=True,
+        progress_bar=None,
     ):
-        """Download a file from the gRPC instance
+        """Download a file from the gRPC instance.
 
         Parameters
         ----------
@@ -1614,18 +1886,28 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file.rst', 'my_result.rst')
         """
+
+        if progress_bar and _HAS_TQDM:
+            progress_bar = True
+
         if out_file_name is None:
             out_file_name = target_name
 
         request = pb_types.DownloadFileRequest(name=target_name)
-        metadata = [("time_step_stream", "200"), ("chunk_size", str(chunk_size))]
+        metadata = [
+            ("time_step_stream", "200"),
+            ("chunk_size", str(chunk_size)),
+        ]
         chunks = self._stub.DownloadFile(request, metadata=metadata)
         file_size = save_chunks_to_file(
-            chunks, out_file_name, progress_bar=progress_bar, target_name=target_name
+            chunks,
+            out_file_name,
+            progress_bar=progress_bar,
+            target_name=target_name,
         )
 
         if not file_size:
-            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist')
+            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist.')
 
     @protect_grpc
     def upload(self, file_name, progress_bar=True):
@@ -1652,6 +1934,7 @@ class MapdlGrpc(_MapdlCore):
         """
         if not os.path.isfile(file_name):
             raise FileNotFoundError(f"Unable to locate filename {file_name}")
+        self._log.debug(f"Uploading file '{file_name}' to the MAPDL instance.")
 
         chunks_generator = get_file_chunks(file_name, progress_bar=progress_bar)
         response = self._stub.UploadFile(chunks_generator)
@@ -1824,6 +2107,70 @@ class MapdlGrpc(_MapdlCore):
 
         return MapdlMath(self)
 
+    @property
+    def krylov(self):
+        """APDL krylov interface.
+
+        For more information, see the :class:`KrylovSolver <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        Returns
+        -------
+        :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
+
+        """
+        if self._kylov is None:
+            from ansys.mapdl.core.krylov import KrylovSolver
+
+            self._kylov = KrylovSolver(self)
+
+        return self._kylov
+
+    @property
+    def db(self):
+        """
+        MAPDL database interface.
+
+        Returns
+        -------
+        :class:`MapdlDb <ansys.mapdl.core.database.MapdlDb>`
+
+        Examples
+        --------
+        Create a nodes instance.
+
+        >>> from ansys.mapdl.core import launch_mapdl
+        >>> mapdl = launch_mapdl()
+        >>> # create nodes...
+        >>> nodes = mapdl.db.nodes
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 270641
+            Maximum node number:      270641
+
+        >>> mapdl.nsel("NONE")
+        >>> print(nodes)
+        MAPDL Database Nodes
+            Number of nodes:          270641
+            Number of selected nodes: 0
+            Maximum node number:      270641
+
+        Return the selection status and the coordinates of node 22.
+
+        >>> nodes = mapdl.db.nodes
+        >>> sel, coord = nodes.coord(22)
+        >>> coord
+        (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
+
+        """
+        from ansys.mapdl.core.database import MapdlDb
+
+        if self._db is None:
+            self._db = MapdlDb(self)
+            self._db.start()
+
+        return self._db
+
     @protect_grpc
     def _data_info(self, pname):
         """Returns the data type of a parameter
@@ -1866,7 +2213,9 @@ class MapdlGrpc(_MapdlCore):
             if raw:  # for debug
                 return vals, indices, indptr, shape
             else:
-                return sparse.csr_matrix((vals, indices, indptr), shape=shape)
+                return sparse.csr_matrix(
+                    (vals, indices, indptr), dtype=stype, shape=shape
+                )
 
         raise ValueError(f'Invalid matrix type "{mtype}"')
 
@@ -1947,39 +2296,6 @@ class MapdlGrpc(_MapdlCore):
             return rst_file
 
     @property
-    def _result_file(self):
-        """Path of the non-distributed result file"""
-        try:
-            filename = self.inquire("", "RSTFILE")
-            if not filename:
-                filename = self.jobname
-        except:
-            filename = self.jobname
-
-        try:
-            ext = self.inquire("", "RSTEXT")
-        except:  # check if rth file exists
-            ext = ""
-
-        if ext == "":
-            rth_file = os.path.join(self.directory, "%s.%s" % (filename, "rth"))
-            rst_file = os.path.join(self.directory, "%s.%s" % (filename, "rst"))
-
-            if self._prioritize_thermal and os.path.isfile(rth_file):
-                return rth_file
-
-            if os.path.isfile(rth_file) and os.path.isfile(rst_file):
-                return last_created([rth_file, rst_file])
-            elif os.path.isfile(rth_file):
-                return rth_file
-            elif os.path.isfile(rst_file):
-                return rst_file
-        else:
-            filename = os.path.join(self.directory, "%s.%s" % (filename, ext))
-            if os.path.isfile(filename):
-                return filename
-
-    @property
     def thermal_result(self):
         """The thermal result object"""
         self._prioritize_thermal = True
@@ -2010,6 +2326,7 @@ class MapdlGrpc(_MapdlCore):
         return self._download_as_raw(error_file).decode("latin-1")
 
     @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
         """Binary interface to the result file using ``pyansys.Result``
 
@@ -2053,9 +2370,12 @@ class MapdlGrpc(_MapdlCore):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
-                    filenames = [self._distributed_result_file, self._result_file]
+                    filenames = [
+                        self._distributed_result_file,
+                        self._result_file,
+                    ]
                     result_path = last_created(filenames)
                     if result_path is None:  # if same return result_file
                         result_path = self._result_file
@@ -2090,7 +2410,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             if not os.path.isfile(fname):
                 raise FileNotFoundError(
-                    f"Unable to find {fname}.  You may need to"
+                    f"Unable to find {fname}.  You may need to "
                     "input the full path to the file."
                 )
 
@@ -2101,7 +2421,13 @@ class MapdlGrpc(_MapdlCore):
 
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(
-        self, symfac="", condname="", numcond="", grndkey="", capname="", **kwargs
+        self,
+        symfac="",
+        condname="",
+        numcond="",
+        grndkey="",
+        capname="",
+        **kwargs,
     ):
         """Run CMATRIX in non-interactive mode and return the response
         from file.
@@ -2119,13 +2445,13 @@ class MapdlGrpc(_MapdlCore):
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        if self._ip or self._port:
-            return f"GRPC_{self._ip}:{self._port}"
-        return f"GRPC_instance_{id(self)}"
-
-    def get_name(self):
+        if not self._name:
+            if self._ip or self._port:
+                self._name = f"GRPC_{self._ip}:{self._port}"
+            else:
+                self._name = f"GRPC_instance_{id(self)}"
         return self._name
 
     @property
@@ -2254,3 +2580,284 @@ class MapdlGrpc(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.file)
+    def file(self, fname="", ext="", **kwargs):
+        """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
+        filename = fname + ext
+        if self._local:  # pragma: no cover
+            out = super().file(fname, ext, **kwargs)
+        elif filename in self.list_files():
+            # this file is already remote
+            out = self._file(filename)
+        else:
+            if not os.path.isfile(filename):
+                raise FileNotFoundError(
+                    f"Unable to find '{filename}'. You may need to "
+                    "input the full path to the file."
+                )
+
+            progress_bar = kwargs.pop("progress_bar", False)
+            basename = self.upload(filename, progress_bar=progress_bar)
+            out = self._file(basename, **kwargs)
+
+        return out
+
+    @wraps(_MapdlCore.vget)
+    def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
+        """Wraps VGET"""
+        super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
+        return self.parameters[par]
+
+    def get_variable(self, ir, tstrt="", kcplx="", **kwargs):
+        """
+        Obtain the variable values.
+
+        Parameters
+        ----------
+        ir : str, optional
+            Reference number of the variable (1 to NV [NUMVAR]).
+
+        tstrt : str, optional
+            Time (or frequency) corresponding to start of IR data.  If between
+            values, the nearer value is used. By default it is the first value.
+
+        kcplx : str, optional
+            Complex number key:
+
+            * ``0`` - Use the real part of the IR data. Default.
+
+            * ``1`` - Use the imaginary part of the IR data.
+
+        Returns
+        -------
+        np.array
+            Variable values as array.
+        """
+        par = "temp_var"
+        variable = self.vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
+        del self.parameters[par]
+        return variable
+
+    @wraps(_MapdlCore.nsol)
+    def nsol(
+        self,
+        nvar=VAR_IR,
+        node="",
+        item="",
+        comp="",
+        name="",
+        sector="",
+        **kwargs,
+    ):
+        """Wraps NSOL to return the variable as an array."""
+        super().nsol(
+            nvar=nvar,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+        return self.vget("_temp", nvar)
+
+    @wraps(_MapdlCore.esol)
+    def esol(
+        self,
+        nvar: MapdlInt = VAR_IR,
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        **kwargs,
+    ) -> Optional[str]:
+        """Wraps ESOL to return the variable as an array."""
+        super().esol(
+            nvar=nvar,
+            elem=elem,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            kwargs=kwargs,
+        )
+        return self.vget("_temp", nvar)
+
+    def get_nsol(self, node, item, comp, name="", sector="", **kwargs):
+        """
+        Get NSOL solutions
+
+        Parameters
+        ----------
+        node
+            Node for which data are to be stored.
+
+        item
+            Label identifying the item.  Valid item labels are shown in the
+            table below.  Some items also require a component label.
+
+        comp
+            Component of the item (if required).  Valid component labels are
+            shown in the table below.
+
+        name
+            Thirty-two character name identifying the item on printouts and
+            displays.  Defaults to a label formed by concatenating the first
+            four characters of the Item and Comp labels.
+
+        sector
+            For a full harmonic cyclic symmetry solution, the sector number for
+            which the results from NODE are to be stored.
+
+        Returns
+        -------
+        np.array
+            Variable values
+
+        Notes
+        -----
+        By default, this command store temporally the variable on the
+        variable number set by ``VAR_IR`` in the class MapdlGrpc.
+        Therefore, any variable in that slot will be deleted when using
+        this command.
+
+        Stores nodal degree of freedom and solution results in a variable. For
+        more information, see Data Interpreted in the Nodal Coordinate System
+        in the Modeling and Meshing Guide.
+
+        For SECTOR>1, the result is in the nodal coordinate system of the base
+        sector, and it is rotated to the expanded sector’s location. Refer to
+        Using the /CYCEXPAND Command in the Cyclic Symmetry Analysis Guide for
+        more information.
+
+        For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use the
+        labels TBOT, TE2, TE3, . . ., TTOP instead of TEMP.
+
+        """
+        return self.nsol(
+            VAR_IR,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+
+    def get_esol(
+        self,
+        elem,
+        node,
+        item,
+        comp,
+        name="",
+        sector="",
+        tstrt="",
+        kcplx="",
+        **kwargs,
+    ):
+        """Get ESOL data.
+
+        /POST26 APDL Command: ESOL
+
+        Parameters
+        ----------
+        elem
+            Element for which data are to be stored.
+
+        node
+            Node number on this element for which data are to be
+            stored. If blank, store the average element value (except
+            for FMAG values, which are summed instead of averaged).
+
+        item
+            Label identifying the item. General item labels are shown
+            in Table 134: ESOL - General Item and Component Labels
+            below. Some items also require a component label.
+
+        comp
+            Component of the item (if required). General component
+            labels are shown in Table 134: ESOL - General Item and
+            Component Labels below.  If Comp is a sequence number (n),
+            the NODE field will be ignored.
+
+        name
+            Thirty-two character name for identifying the item on the
+            printout and displays.  Defaults to a label formed by
+            concatenating the first four characters of the Item and
+            Comp labels.
+
+        tstrt : str, optional
+            Time (or frequency) corresponding to start of IR data.  If between
+            values, the nearer value is used. By default it is the first value.
+
+        kcplx : str, optional
+            Complex number key:
+
+            * ``0`` - Use the real part of the IR data. Default.
+
+            * ``1`` - Use the imaginary part of the IR data.
+
+        Returns
+        -------
+        np.array
+            Variable values
+
+        Notes
+        -----
+        By default, this command store temporally the variable on the
+        variable number set by ``VAR_IR`` in the class MapdlGrpc.
+        Therefore, any variable in that slot will be deleted when using
+        this command.
+
+        See Table: 134:: ESOL - General Item and Component Labels for
+        a list of valid item and component labels for element (except
+        line element) results.
+
+        The ESOL command defines element results data to be stored
+        from a results file (FILE). Not all items are valid for all
+        elements. To see the available items for a given element,
+        refer to the input and output summary tables in the
+        documentation for that element.
+
+        Two methods of data access are available via the ESOL
+        command. You can access some simply by using a generic label
+        (component name method), while others require a label and
+        number (sequence number method).
+
+        Use the component name method to access general element data
+        (that is, element data generally available to most element
+        types or groups of element types).
+
+        The sequence number method is required for data that is not
+        averaged (such as pressures at nodes and temperatures at
+        integration points), or data that is not easily described in a
+        generic fashion (such as all derived data for structural line
+        elements and contact elements, all derived data for thermal
+        line elements, and layer data for layered elements).
+
+        Element results are in the element coordinate system, except
+        for layered elements where results are in the layer coordinate
+        system.  Element forces and moments are in the nodal
+        coordinate system. Results are obtainable for an element at a
+        specified node. Further location specifications can be made
+        for some elements via the SHELL, LAYERP26, and FORCE commands.
+
+        For more information on the meaning of contact status and its
+        possible values, see Reviewing Results in POST1 in the Contact
+        Technology Guide.
+        """
+        self.esol(
+            VAR_IR,
+            elem=elem,
+            node=node,
+            item=item,
+            comp=comp,
+            name=name,
+            sector=sector,
+            kwargs=kwargs,
+        )
+        # Using get_variable because it deletes the intermediate parameter after using it.
+        return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)

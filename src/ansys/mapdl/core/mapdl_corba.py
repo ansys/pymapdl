@@ -61,8 +61,9 @@ def launch_corba(
     verbose=False,
     additional_switches="",
     start_timeout=60,
+    **kwargs,  # ignore extra kwargs
 ):
-    """Start MAPDL in AAS mode
+    """Start MAPDL in AAS mode.
 
     Notes
     -----
@@ -184,10 +185,10 @@ class MapdlCorba(_MapdlCore):
             log_apdl=log_apdl,
             log_file=log_file,
             log_broadcast=False,
-            print_com=print_com,
             **start_parm,
         )
 
+        self._mode = "corba"
         self._broadcast_logger = None
         self._server = None
         self._outfile = None
@@ -401,8 +402,10 @@ class MapdlCorba(_MapdlCore):
         self._outfile = None
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        if hasattr(self, "_corba_key"):
-            return f"CORBA_PID_{self._corba_key}"
-        return f"CORBA_INSTANCE_{id(self)}"
+        if not self._name:
+            if hasattr(self, "_corba_key"):
+                self._name = f"CORBA_PID_{self._corba_key}"
+            self._name = f"CORBA_INSTANCE_{id(self)}"
+        return self._name

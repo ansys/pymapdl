@@ -1,10 +1,20 @@
 import os
+import re
 import tempfile
 import weakref
 
-from ansys.mapdl.reader._reader import write_array
+try:
+    from ansys.mapdl.reader._reader import write_array
+
+    _HAS_READER = True
+except ModuleNotFoundError:  # pragma: no cover
+    from ansys.mapdl.core.misc import write_array
+
+    _HAS_READER = False
+
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
 
@@ -34,7 +44,12 @@ UNITS_MAP = {
 
 
 class Parameters:
-    """Collection of MAPDL parameters obtainable from the :func:`ansys.mapdl.core.Mapdl.get` command.
+    """Collection of MAPDL parameters.
+
+    Notes
+    -----
+
+    See :ref:`ref_parameters` for additional notes.
 
     Examples
     --------
@@ -64,6 +79,9 @@ class Parameters:
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
+        self.show_leading_underscore_parameters = False
+        self.show_trailing_underscore_parameters = False
+        self.full_parameters_output = self._full_parameter_output(self)
 
     @property
     def _mapdl(self):
@@ -262,7 +280,17 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        return interp_star_status(self._mapdl.starstatus())
+        params = interp_star_status(self._mapdl.starstatus())
+
+        if self.show_leading_underscore_parameters:
+            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            params.update(_params)
+
+        if self.show_trailing_underscore_parameters:
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params.update(params_)
+
+        return params
 
     def __repr__(self):
         """Return the current parameters in a pretty format"""
@@ -288,27 +316,49 @@ class Parameters:
             raise TypeError("Parameter name must be a string")
         key = key.upper()
 
-        parameters = self._parm
+        with self.full_parameters_output:
+            parameters = self._parm
+
         if key not in parameters:
-            raise IndexError("%s not a valid parameter_name" % key)
+            try:
+                val_ = interp_star_status(self._mapdl.starstatus(key))
+                val_ = val_[list(val_.keys())[0]]["value"]
+                if len(val_) == 1:
+                    return val_[0]
+                else:
+                    return val_
+                return
+            except MapdlRuntimeError:
+                raise IndexError("%s not a valid parameter_name" % key)
 
         parm = parameters[key]
-        if parm["type"] in ["ARRAY", "TABLE"]:
+        if parm["type"] in ["ARRAY", "TABLE"]:  # Array case
             try:
                 return self._get_parameter_array(key, parm["shape"])
             except ValueError:
                 # allow a second attempt
                 return self._get_parameter_array(key, parm["shape"])
-
-        return parm["value"]
+        else:
+            if "grpc" in self._mapdl.name.lower() and parm["type"] not in ["CHARACTER"]:
+                return self._mapdl.scalar_param(key)  # Only works with numbers
+            else:
+                return parm["value"]
 
     def __setitem__(self, key, value):
         """Set a parameter"""
+        self._mapdl._check_parameter_name(key)
+
         # parameters = self._parm  # check parameter exists
         if isinstance(value, (np.ndarray, list)):
             self._set_parameter_array(key, value)
         else:
             self._set_parameter(key, value)
+
+    def __contains__(self, key):
+        return key in self._parm.keys()
+
+    def __iter__(self):
+        yield from self._parm.keys()
 
     @supress_logging
     def _set_parameter(self, name, value):
@@ -359,12 +409,26 @@ class Parameters:
         array : np.ndarray
             Numpy array.
         """
-        format_str = "(1F20.12)"
-        with self._mapdl.non_interactive:
-            self._mapdl.mwrite(parm_name.upper(), label="kji")  # use C ordering
-            self._mapdl.run(format_str)
+        escaped = False
+        for each_format_number in [20, 30, 40, 64, 100]:
+            format_str = f"(1F{each_format_number}.12)"
+            with self._mapdl.non_interactive:
+                # use C ordering
+                self._mapdl.mwrite(parm_name.upper(), label="kji")
+                self._mapdl.run(format_str)
 
-        st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+            st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+
+            if "**" not in self._mapdl.last_response[st:]:
+                escaped = True
+                break
+
+        if not escaped:  # pragma: no cover
+            raise RuntimeError(
+                f"The array '{parm_name}' has a number format "
+                "that could not be read using '{format_str}'."
+            )
+
         arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(
             shape
         )
@@ -496,6 +560,75 @@ class Parameters:
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
 
+    def __delitem__(self, parameter):
+        parameter = parameter.upper()
+        if parameter in self:
+            self._parm.__delitem__(parameter)
+            self._mapdl.run(f"{parameter}=")  # Deleting parameter in MAPDL.
+        else:
+            raise KeyError(f"The parameter '{parameter}' does not exist.")
+
+    class _full_parameter_output:
+        """Change the show_** options to true to allow full parameter output."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.show_leading_underscore_parameters = None
+            self.show_trailing_underscore_parameters = None
+
+        def __enter__(self):
+            """Storing current state."""
+            self.show_leading_underscore_parameters = (
+                self._parent().show_leading_underscore_parameters
+            )
+            self.show_trailing_underscore_parameters = (
+                self._parent().show_trailing_underscore_parameters
+            )
+
+            # Getting full output.
+            self._parent().show_leading_underscore_parameters = True
+            self._parent().show_trailing_underscore_parameters = True
+
+        def __exit__(self, *args):
+            """Coming back to previous state."""
+            self._parent().show_leading_underscore_parameters = (
+                self.show_leading_underscore_parameters
+            )
+            self._parent().show_trailing_underscore_parameters = (
+                self.show_trailing_underscore_parameters
+            )
+
+
+def find_parameter_listing_line(status):
+    for ind, each in enumerate(status.splitlines()):
+        if "PARAMETER STATUS-" in each:
+            return ind
+    raise ValueError("Could not find parameter listing line")
+
+
+def parameter_header(line):
+    return "NAME" in line and "VALUE" in line and "TYPE" in line
+
+
+def math_header(line):
+    return "Name" in line and "Type" in line and "Dims" in line and "Workspace" in line
+
+
+def array_header(line):
+    return "LOCATION" in line and "VALUE" in line
+
+
+def is_parameter_listing(status):
+    return any([parameter_header(each) for each in status.splitlines()])
+
+
+def is_math_listing(status):
+    return any([math_header(each) for each in status.splitlines()])
+
+
+def is_array_listing(status):
+    return any([array_header(each) for each in status.splitlines()])
+
 
 def interp_star_status(status):
     """Interprets \*STATUS command output from MAPDL
@@ -503,16 +636,64 @@ def interp_star_status(status):
     Parameters
     ----------
     status : str
-        Output from MAPDL *STATUS
+        Output from MAPDL \*STATUS
 
     Returns
     -------
     parameters : dict
         Dictionary of parameters.
     """
+    # Exiting if there is no parameters
+    if "There are no parameters defined." in status:
+        return {}
+
+    # If there is a general call to *STATUS (no arguments), the output has some extra
+    # parameters that we don't want to include in the analysis.
+    ind = find_parameter_listing_line(status)
+    status = "\n".join(status.splitlines()[ind:])
+
+    if "PARAMETER STATUS" not in status:
+        raise ValueError(
+            f"The expected output does not seem a parameter listing. \n--\n{status}"
+        )
+
     parameters = {}
-    st = status.find("NAME                              VALUE")
-    for line in status[st + 80 :].splitlines():
+    is_string_array = False
+    if is_parameter_listing(status):
+        # Works for one parameter or general listing
+        header = "NAME                              VALUE"
+        incr = 80
+    elif is_math_listing(status):
+        # listing of math parameters
+        header = "  Name                   Type"
+        incr = 84
+    elif is_array_listing(status):
+        # listing of one array parameter
+        header = "LOCATION                VALUE"
+        incr = 30
+        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+    else:
+        # listing of a string array
+        is_string_array = True
+        header = ""  # no header. Find will return 0.
+        incr = sum([len(each) for each in status.splitlines()[0:2]]) + 1
+        name_ = re.search(r"STATUS-(.*)[^\(]\(", status).group(1).strip()
+
+    st = status.find(header)
+
+    if st == -1:
+        return {}
+
+    lines = status[st + incr :].splitlines()
+    elements = []
+    if is_array_listing(status):
+        myarray = np.array([each.split() for each in lines]).astype(float)
+        idim = int(myarray[:, 0].max())
+        jdim = int(myarray[:, 1].max())
+        kdim = int(myarray[:, 2].max())
+        myarray = np.zeros((idim, jdim, kdim))
+
+    for line in lines:
         items = line.split()
         if not items:
             continue
@@ -530,7 +711,57 @@ def interp_star_status(status):
             else:
                 value = items[1]
             parameters[name] = {"type": items[2], "value": value}
+        elif len(items) == 4:
+            # it is an array or string array
+            if is_array_listing(status):
+                # Probably I could get rid of this loop
+                myarray[
+                    int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
+                ] = float(items[3])
+            elif is_string_array:
+                elements.append(items[-1])
+
+        elif is_string_array:
+            last_element = (
+                re.search(r"\s*\d+\s+\d+\s+\d+\s+(.*)$", line).group(1).strip()
+            )
+            elements.append(last_element)
+
         elif len(items) == 5:
-            shape = (int(items[2]), int(items[3]), int(items[4]))
-            parameters[name] = {"type": items[1], "shape": shape}
-    return parameters
+            if items[1] in ["DMAT", "VEC", "SMAT"]:
+                parameters[name] = {
+                    "type": items[1],
+                    "MemoryMB": float(items[2]),
+                    "dimensions": get_apdl_math_dimensions(items[3]),
+                    "workspace": int(items[4]),
+                }
+            elif items[1] in ["LSENGINE"]:
+                parameters[name] = {
+                    "type": items[1],
+                    "workspace": int(items[4]),
+                }
+            else:
+                shape = (int(items[2]), int(items[3]), int(items[4]))
+                parameters[name] = {"type": items[1], "shape": shape}
+
+    if is_array_listing(status):
+        dims = [ind for ind, each in enumerate([idim, jdim, kdim]) if each == 1]
+        if dims:
+            try:
+                return {name_: {"type": "ARRAY", "value": myarray.squeeze(tuple(dims))}}
+            except ValueError:
+                return {name_: {"type": "ARRAY", "value": myarray}}
+        else:
+            return {name_: {"type": "ARRAY", "value": myarray}}
+    elif is_string_array:
+        return {name_: {"type": "STRING_ARRAY", "value": elements}}
+    else:
+        return parameters
+
+
+def get_apdl_math_dimensions(dimensions_str):
+    """Convert the dimensions string to a tuple (arrays) or int (vectors)"""
+    if ":" in dimensions_str:
+        return tuple([int(each) for each in dimensions_str[1:-1].split(":")])
+    else:
+        return int(dimensions_str)

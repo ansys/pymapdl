@@ -484,3 +484,12 @@ def test_ndist(cleared, mapdl):
     assert node_xdist == node2[0] - node1[0]
     assert node_ydist == node2[1] - node1[1]
     assert node_zdist == node2[2] - node1[2]
+
+
+def test_empty_model(mapdl):
+    mapdl.clear()
+
+    assert mapdl.geometry.knum.size == 0
+    assert mapdl.geometry.lnum.size == 0
+    assert mapdl.geometry.anum.size == 0
+    assert mapdl.geometry.vnum.size == 0

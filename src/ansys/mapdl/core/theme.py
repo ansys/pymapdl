@@ -1,8 +1,20 @@
 """Store parameters for a PyMAPDL-specific theme for pyvista"""
-from pyvista import themes
+from ansys.mapdl.core import _HAS_PYVISTA
+
+if _HAS_PYVISTA:
+    from pyvista import themes
+
+    base_class = themes.DefaultTheme
+
+else:  # pragma: no cover
+
+    class myEmptyClass:
+        pass
+
+    base_class = myEmptyClass
 
 
-class MapdlTheme(themes.DefaultTheme):
+class MapdlTheme(base_class):
     """PyMAPDL-specific theme for pyvista.
 
     Theme includes the following defaults:

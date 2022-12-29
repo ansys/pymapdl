@@ -92,7 +92,7 @@ mphi = m.dot(phi)
 
 
 ######################################################################
-# Next, compute the `math`:||K.\phi_1||_2 quantity and normalize the
+# Next, compute the :math:`||K.\phi_1||_2` quantity and normalize the
 # residual value.
 
 # APDL Command: *MULT,K,,Phi,,KPhi
@@ -171,7 +171,7 @@ plt.ylim([10e-13, 10e-7])
 plt.xlabel("Frequency #")
 plt.ylabel("Errors (%)")
 ax.bar(x, mapdl_acc, label="MAPDL Results")
-
+plt.show()
 
 ###############################################################################
 # stop mapdl

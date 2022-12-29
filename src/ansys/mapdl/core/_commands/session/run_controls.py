@@ -145,7 +145,6 @@ class RunControls:
         if not (dirpath.startswith("'") and dirpath.endswith("'")) and "'" in dirpath:
             raise RuntimeError(
                 'The CWD command does not accept paths that contain singular quotes "'
-                ""
             )
         return self.run(f"/CWD,'{dirpath}'", **kwargs)
 

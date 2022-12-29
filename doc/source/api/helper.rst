@@ -1,6 +1,6 @@
 .. _launcher_api:
 
-Helper Functions
+Helper functions
 ================
 These methods simplify launching MAPDL, converting existing scripts,
 or automating other tasks.
@@ -9,9 +9,12 @@ or automating other tasks.
 
 .. autosummary::
    :toctree: _autosummary
-
-   convert_script
+   
    launch_mapdl
+   convert_apdl_block
+   convert_script
+   Information
    change_default_ansys_path
    find_ansys
    close_all_local_instances
+   save_ansys_path

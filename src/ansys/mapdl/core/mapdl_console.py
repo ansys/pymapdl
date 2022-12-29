@@ -57,7 +57,12 @@ def launch_pexpect(
     """
     import pexpect
 
-    command = "%s -j %s -np %d %s" % (exec_file, jobname, nproc, additional_switches)
+    command = "%s -j %s -np %d %s" % (
+        exec_file,
+        jobname,
+        nproc,
+        additional_switches,
+    )
     process = pexpect.spawn(command, cwd=run_location)
     process.delaybeforesend = None
 
@@ -99,6 +104,7 @@ class MapdlConsole(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
+        self._mode = "console"
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
@@ -165,7 +171,9 @@ class MapdlConsole(_MapdlCore):
 
             elif i >= ERROR_IDX and i < PROMPT_IDX:  # error
                 self._log.debug(
-                    "Error index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "Error index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 self._log.error(response)
                 response += ready_items[i].decode("utf-8")
@@ -173,7 +181,9 @@ class MapdlConsole(_MapdlCore):
 
             elif i >= PROMPT_IDX:  # prompt
                 self._log.debug(
-                    "Prompt index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "Prompt index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 self._log.info(response + ready_items[i].decode("utf-8"))
                 raise RuntimeError(
@@ -181,7 +191,9 @@ class MapdlConsole(_MapdlCore):
                 )
             else:  # continue item
                 self._log.debug(
-                    "continue index %i.  Matched %s", i, ready_items[i].decode("utf-8")
+                    "continue index %i.  Matched %s",
+                    i,
+                    ready_items[i].decode("utf-8"),
                 )
                 break
 
@@ -235,6 +247,8 @@ class MapdlConsole(_MapdlCore):
                 self._log.debug("Killed process %d", self._process.pid)
 
     @property
-    def _name(self):
+    def name(self):
         """Instance unique identifier."""
-        return f"Console_PID_{self._process.pid}"
+        if not self._name:
+            self._name = f"Console_PID_{self._process.pid}"
+        return self._name

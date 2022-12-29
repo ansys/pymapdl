@@ -1,7 +1,7 @@
 .. _ref_use_pass_api:
 
 ********
-Use Pass
+Use pass
 ********
 
 .. currentmodule:: ansys.mapdl.core

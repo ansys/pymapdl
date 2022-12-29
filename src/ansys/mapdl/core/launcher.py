@@ -1,5 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
+import atexit
 from glob import glob
 import os
 import platform
@@ -10,29 +11,47 @@ import tempfile
 import time
 import warnings
 
+try:
+    import ansys.platform.instancemanagement as pypim
+
+    _HAS_PIM = True
+except ModuleNotFoundError:  # pragma: no cover
+    _HAS_PIM = False
+
 import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LOG
-from ansys.mapdl.core.errors import LockFileException, VersionError
+from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import create_temp_dir, is_float, random_string, threaded
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
+from ansys.mapdl.core.misc import (
+    check_valid_ip,
+    check_valid_port,
+    check_valid_start_instance,
+    create_temp_dir,
+    is_float,
+    random_string,
+    threaded,
+)
 
 # settings directory
 SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
+        LOG.debug(f"Created settings directory: {SETTINGS_DIR}")
     except:
         warnings.warn(
             "Unable to create settings directory.\n"
-            + "Will be unable to cache MAPDL executable location"
+            "Will be unable to cache MAPDL executable location"
         )
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
+
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
@@ -47,9 +66,24 @@ launch_mapdl(..., force_intel=True, additional_switches='-mpi INTELMPI')
 Be aware of possible errors or unexpected behavior with this configuration.
 """
 
+GALLERY_INSTANCE = [None]
+
+
+def _cleanup_gallery_instance():  # pragma: no cover
+    """This cleans up any left over instances of MAPDL from building the gallery."""
+    if GALLERY_INSTANCE[0] is not None:
+        mapdl = MapdlGrpc(
+            ip=GALLERY_INSTANCE[0]["ip"],
+            port=GALLERY_INSTANCE[0]["port"],
+        )
+        mapdl.exit(force=True)
+
+
+atexit.register(_cleanup_gallery_instance)
+
 
 def _is_ubuntu():
-    """Determine if running as Ubuntu
+    """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
     Ubuntu, but the kernel has been recompiled and no longer has the
@@ -169,14 +203,6 @@ def port_in_use(port, host=LOCALHOST):
             return True
 
 
-def create_ip_file(ip, path):
-    """Create 'mylocal.ip' file required for ansys to change the IP of the gRPC server."""
-
-    file_name = os.path.join(path, "mylocal.ip")
-    with open(file_name, "w") as f:
-        f.write(ip)
-
-
 def launch_grpc(
     exec_file="",
     jobname="file",
@@ -189,8 +215,10 @@ def launch_grpc(
     override=True,
     timeout=20,
     verbose=False,
+    add_env_vars=None,
+    replace_env_vars=None,
     **kwargs,
-) -> tuple:
+) -> tuple:  # pragma: no cover
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -367,14 +395,17 @@ def launch_grpc(
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     """
+    LOG.debug("Starting 'launch_mapdl'.")
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
         run_location = create_temp_dir()
+        LOG.debug(f"Using temporary directory for MAPDL run location: {run_location}")
     elif not os.path.isdir(run_location):
         os.mkdir(run_location)
+        LOG.debug(f"Creating directory for MAPDL run location: {run_location}")
 
     if not os.access(run_location, os.W_OK):
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
@@ -390,21 +421,21 @@ def launch_grpc(
     if port is None:
         if not pymapdl._LOCAL_PORTS:
             port = MAPDL_DEFAULT_PORT
+            LOG.debug(f"Using default port: {port}")
         else:
             port = max(pymapdl._LOCAL_PORTS) + 1
+            LOG.debug(f"Using next available port: {port}")
 
     while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
         port += 1
+        LOG.debug(f"Port in use.  Incrementing port number. port={port}")
     pymapdl._LOCAL_PORTS.append(port)
-
-    # setting ip for the grpc server
-    if ip != LOCALHOST:  # Default local ip is 127.0.0.1
-        create_ip_file(ip, run_location)
 
     cpu_sw = "-np %d" % nproc
 
     if ram:
         ram_sw = "-m %d" % int(1024 * ram)
+        LOG.debug(f"Setting RAM: {ram_sw}")
     else:
         ram_sw = ""
 
@@ -421,6 +452,7 @@ def launch_grpc(
             if os.path.isfile(filename):
                 try:
                     os.remove(filename)
+                    LOG.debug(f"Removing temporary error file: {filename}")
                 except:
                     raise IOError(
                         f"Unable to remove {filename}.  There might be "
@@ -433,6 +465,7 @@ def launch_grpc(
         tmp_inp = ".__tmp__.inp"
         with open(os.path.join(run_location, tmp_inp), "w") as f:
             f.write("FINISH\r\n")
+            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
@@ -466,9 +499,15 @@ def launch_grpc(
         )
         command = " ".join(command_parm)
 
-    if verbose:
-        print(f"Running {command}")
-        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location)
+    LOG.debug(f"Starting MAPDL with command: {command}")
+
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
+    LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
+
+    if verbose:  # pragma: no cover
+        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
+
     else:
         subprocess.Popen(
             command,
@@ -477,7 +516,9 @@ def launch_grpc(
             stdin=subprocess.DEVNULL,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            env=env_vars,
         )
+        LOG.debug("MAPDL started in background.")
 
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
@@ -489,10 +530,63 @@ def launch_grpc(
         files = os.listdir(run_location)
         has_ans = any([filename for filename in files if ".err" in filename])
         if has_ans:
+            LOG.debug("MAPDL session successfully started (Error file found)")
             break
         time.sleep(sleep_time)
 
+    if not has_ans:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start (No err file generated in '{run_location}')"
+        )
+
     return port, run_location
+
+
+def launch_remote_mapdl(
+    version=None,
+    cleanup_on_exit=True,
+) -> _MapdlCore:
+    """Start MAPDL remotely using the product instance management API.
+
+    When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
+    This can be verified with :func:`pypim.is_configured <ansys.platform.instancemanagement.is_configured>`.
+
+    Parameters
+    ----------
+    version : str, optional
+        The MAPDL version to run, in the 3 digits format, such as "212".
+
+        If unspecified, the version will be chosen by the server.
+
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
+
+        If unspecified, it will be cleaned up.
+
+    Returns
+    -------
+    ansys.mapdl.core.mapdl._MapdlCore
+        An instance of Mapdl.
+    """
+    if not _HAS_PIM:  # pragma: no cover
+        raise ModuleNotFoundError(
+            "The package 'ansys-platform-instancemanagement' is required to use this function."
+        )
+
+    pim = pypim.connect()
+    instance = pim.create_instance(product_name="mapdl", product_version=version)
+    instance.wait_for_ready()
+    channel = instance.build_grpc_channel(
+        options=[
+            ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+        ]
+    )
+    return MapdlGrpc(
+        channel=channel,
+        cleanup_on_exit=cleanup_on_exit,
+        remote_instance=instance,
+    )
 
 
 def get_start_instance(start_instance_default=True):
@@ -518,29 +612,51 @@ def get_start_instance(start_instance_default=True):
 
     """
     if "PYMAPDL_START_INSTANCE" in os.environ:
-        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in ["true", "false"]:
+        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in [
+            "true",
+            "false",
+        ]:
             val = os.environ["PYMAPDL_START_INSTANCE"]
             raise OSError(
                 f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'
                 'PYMAPDL_START_INSTANCE should be either "TRUE" or "FALSE"'
             )
+        LOG.debug(
+            f"PYMAPDL_START_INSTANCE is set to {os.environ['PYMAPDL_START_INSTANCE']}"
+        )
         return os.environ["PYMAPDL_START_INSTANCE"].lower() == "true"
+
+    LOG.debug(
+        f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance_default}"
+    )
     return start_instance_default
 
 
 def _get_available_base_ansys():
-    """Return a dictionary of available ANSYS versions with their base paths.
+    """Return a dictionary of available Ansys versions with their base paths.
 
     Returns
     -------
-    Return all installed ANSYS paths in Windows
+    dict[int: str]
+        Return all installed Ansys paths in Windows.
 
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
+
+    Examples
+    --------
+
+    >>> from ansys.mapdl.core import _get_available_base_ansys
     >>> _get_available_base_ansys()
-    {194: 'C:\\Program Files\\ANSYS INC\\v194',
-     202: 'C:\\Program Files\\ANSYS INC\\v202',
-     211: 'C:\\Program Files\\ANSYS INC\\v211'}
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
-    Within Linux
+    Return all installed Ansys paths in Linux.
 
     >>> _get_available_base_ansys()
     {194: '/usr/ansys_inc/v194',
@@ -548,29 +664,60 @@ def _get_available_base_ansys():
      211: '/usr/ansys_inc/v211'}
     """
     base_path = None
-    if os.name == "nt":
-        supported_versions = [194, 202, 211, 212, 221]
-        awp_roots = {
-            ver: os.environ.get(f"AWP_ROOT{ver}", "") for ver in supported_versions
-        }
+    if os.name == "nt":  # pragma: no cover
+        supported_versions = SUPPORTED_ANSYS_VERSIONS
+        # The student version overwrites the AWP_ROOT env var (if it is installed later)
+        # However the priority should be given to the non-student version.
+        awp_roots = []
+        awp_roots_student = []
+
+        for ver in supported_versions:
+            path_ = os.environ.get(f"AWP_ROOT{ver}", "")
+            path_non_student = path_.replace("\\ANSYS Student", "")
+
+            if "student" in path_.lower() and os.path.exists(path_non_student):
+                # Check if also exist a non-student version
+                awp_roots.append([ver, path_non_student])
+                awp_roots_student.insert(0, [-1 * ver, path_])
+
+            else:
+                awp_roots.append([ver, path_])
+
+        awp_roots.extend(awp_roots_student)
         installed_versions = {
-            ver: path for ver, path in awp_roots.items() if path and os.path.isdir(path)
+            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
         }
+
         if installed_versions:
+            LOG.debug(
+                f"Found the following installed Ansys versions: {installed_versions}"
+            )
             return installed_versions
-        else:
+        else:  # pragma: no cover
+            LOG.debug(
+                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
+            )
             base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
+            if not os.path.exists(base_path):
+                LOG.debug(
+                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
+                )
+                return {}
     elif os.name == "posix":
-        for path in ["/usr/ansys_inc", "/ansys_inc"]:
+        for path in LINUX_DEFAULT_DIRS:
             if os.path.isdir(path):
                 base_path = path
-    else:
+    else:  # pragma: no cover
         raise OSError(f"Unsupported OS {os.name}")
 
     if base_path is None:
         return {}
 
     paths = glob(os.path.join(base_path, "v*"))
+
+    # Testing for ANSYS STUDENT version
+    if not paths:  # pragma: no cover
+        paths = glob(os.path.join(base_path, "ANSYS*"))
 
     if not paths:
         return {}
@@ -584,9 +731,48 @@ def _get_available_base_ansys():
     return ansys_paths
 
 
-def find_ansys():
+def get_available_ansys_installations():
+    """Return a dictionary of available Ansys versions with their base paths.
+
+    Returns
+    -------
+    dict[int: str]
+        Return all installed Ansys paths in Windows.
+
+    Notes
+    -----
+
+    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
+
+    The student versions are returned at the end of the dict and with negative value for the version.
+
+    Examples
+    --------
+
+    >>> from ansys.mapdl.core import get_available_ansys_installations
+    >>> get_available_ansys_installations()
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
+     212: 'C:\\Program Files\\ANSYS Inc\\v212',
+     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
+
+    Return all installed Ansys paths in Linux.
+
+    >>> get_available_ansys_installations()
+    {194: '/usr/ansys_inc/v194',
+     202: '/usr/ansys_inc/v202',
+     211: '/usr/ansys_inc/v211'}
+    """
+    return _get_available_base_ansys()
+
+
+def find_ansys(version=None):
     """Searches for ansys path within the standard install location
     and returns the path of the latest version.
+
+    Parameters
+    ----------
+    version : float, optional
+        Version of ANSYS to search for.  If ``None``, use latest.
 
     Returns
     -------
@@ -612,8 +798,18 @@ def find_ansys():
     versions = _get_available_base_ansys()
     if not versions:
         return "", ""
-    version = max(versions.keys())
-    ans_path = versions[version]
+
+    if not version:
+        version = max(versions.keys())
+
+    try:
+        ans_path = versions[version]
+    except KeyError as e:
+        raise ValueError(
+            f"Version {version} not found. Available versions are {list(versions.keys())}"
+        ) from e
+
+    version = abs(version)
     if os.name == "nt":
         ansys_bin = os.path.join(
             ans_path, "ansys", "bin", "winx64", f"ansys{version}.exe"
@@ -623,19 +819,109 @@ def find_ansys():
     return ansys_bin, version / 10
 
 
-def get_ansys_path(allow_input=True):
-    """Acquires ANSYS Path from a cached file or user input"""
+def get_default_ansys():
+    """Searches for ansys path within the standard install location
+    and returns the path and version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    ansys_path : str
+        Full path to ANSYS executable.
+
+    version : float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
+
+    Within Linux
+
+    >>> get_default_ansys()
+    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
+    """
+    return find_ansys()
+
+
+def get_default_ansys_path():
+    """Searches for ansys path within the standard install location
+    and returns the path of the latest MAPDL version installed.
+
+    Returns
+    -------
+    str
+        Full path to ANSYS executable.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys_path()
+    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe'
+
+    Within Linux
+
+    >>> get_default_ansys_path()
+    '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    """
+    return get_default_ansys()[0]
+
+
+def get_default_ansys_version():
+    """Searches for ansys path within the standard install location
+    and returns the version of the latest MAPDL version installed.
+
+    Returns
+    -------
+    float
+        Version float.  For example, 21.1 corresponds to 2021R1.
+
+    Examples
+    --------
+    Within Windows
+
+    >>> from ansys.mapdl.core.launcher import get_default_ansys
+    >>> get_default_ansys_version()
+    21.1
+
+    Within Linux
+
+    >>> get_default_ansys_version()
+    21.1
+    """
+    return get_default_ansys()[1]
+
+
+def get_ansys_path(allow_input=True, version=None):
+    """Acquires ANSYS Path from a cached file or user input
+
+    Parameters
+    ----------
+    allow_input : bool, optional
+        Allow user input to find ANSYS path.  The default is ``True``.
+
+    version : float, optional
+        Version of ANSYS to search for. For example ``version=22.2``.
+        If ``None``, use latest.
+
+    """
     exe_loc = None
-    if os.path.isfile(CONFIG_FILE):
+    if not version and os.path.isfile(CONFIG_FILE):
         with open(CONFIG_FILE) as f:
             exe_loc = f.read()
         # verify
         if not os.path.isfile(exe_loc) and allow_input:
             exe_loc = save_ansys_path()
-    elif allow_input:  # create configuration file
+    elif not version and allow_input:  # create configuration file
         exe_loc = save_ansys_path()
+
     if exe_loc is None:
-        exe_loc = find_ansys()[0]
+        exe_loc = find_ansys(version=version)[0]
         if not exe_loc:
             exe_loc = None
 
@@ -683,40 +969,131 @@ def change_default_ansys_path(exe_loc):
         raise FileNotFoundError("File %s is invalid or does not exist" % exe_loc)
 
 
-def save_ansys_path(exe_loc=""):
-    """Find ANSYS path or query user"""
-    # if exe_loc.strip():
-    #     print('Cached ANSYS executable %s not found' % exe_loc)
-    # else:
-    #     print('Cached ANSYS executable not found')
-    exe_loc, ver = find_ansys()
-    if os.path.isfile(exe_loc):
-        # automatically cache this path
-        # print('Found ANSYS at %s' % exe_loc)
-        # resp = input('Use this location?  [Y/n]')
-        # if resp != 'n':
+def save_ansys_path(exe_loc=None):  # pragma: no cover
+    """Find MAPDL's path or query user.
+
+    If no ``exe_loc`` argument is supplied, this function attempt
+    to obtain the MAPDL executable from (and in order):
+
+    - The default ansys paths (i.e. ``'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX'``)
+    - The configuration file
+    - User input
+
+    If ``exe_loc`` is supplied, this function does some checks.
+    If successful, it will write that ``exe_loc`` into the config file.
+
+    Parameters
+    ----------
+    exe_loc : str, optional
+        Path of the MAPDL executable ('ansysXXX'), by default ``None``.
+
+    Returns
+    -------
+    str
+        Path of the MAPDL executable.
+
+    Notes
+    -----
+    The configuration file location (``config.txt``) can be found in
+    ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
+
+    .. code:: python
+
+        >>> import appdirs
+        >>> import os
+        >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
+        C:/Users/user/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
+
+    Examples
+    --------
+    You can change the default ``exe_loc`` either by modifying the mentioned
+    ``config.txt`` file or by executing:
+
+    >>> from ansys.mapdl.core import save_ansys_path
+    >>> save_ansys_path('/new/path/to/executable')
+
+    """
+    if exe_loc is None:
+        exe_loc, _ = find_ansys()
+
+    if is_valid_executable_path(exe_loc):  # pragma: not cover
+        if not is_common_executable_path(exe_loc):
+            warn_uncommon_executable_path(exe_loc)
+
         change_default_ansys_path(exe_loc)
         return exe_loc
 
     if exe_loc is not None:
-        if os.path.isfile(exe_loc):
-            return exe_loc
+        if is_valid_executable_path(exe_loc):
+            return exe_loc  # pragma: no cover
 
     # otherwise, query user for the location
-    with open(CONFIG_FILE, "w") as f:
-        print("Cached ANSYS executable not found")
-        exe_loc = input("Enter location of ANSYS executable: ")
-        if not os.path.isfile(exe_loc):
-            raise FileNotFoundError(
-                "ANSYS executable not found at this location:\n%s" % exe_loc
-            )
+    print("Cached ANSYS executable not found")
+    print(
+        "You are about to enter manually the path of the ANSYS MAPDL executable (ansysXXX, where XXX is the version"
+        "This file is very likely to contained in path ending in 'vXXX/ansys/bin/ansysXXX', but it is not required.\n"
+        "\nIf you experience problems with the input path you can overwrite the configuration file by typing:\n"
+        ">>> from ansys.mapdl.core.launcher import save_ansys_path\n"
+        ">>> save_ansys_path('/new/path/to/executable/')\n"
+    )
+    need_path = True
+    while need_path:  # pragma: no cover
+        exe_loc = input("Enter the location of an ANSYS executable (ansysXXX):")
 
-        f.write(exe_loc)
+        if is_valid_executable_path(exe_loc):
+            if not is_common_executable_path(exe_loc):
+                warn_uncommon_executable_path(exe_loc)
+            with open(CONFIG_FILE, "w") as f:
+                f.write(exe_loc)
+            need_path = False
+        else:
+            print(
+                "The supplied path is either: not a valid file path, or does not match 'ansysXXX' name."
+            )
 
     return exe_loc
 
 
+def is_valid_executable_path(exe_loc):  # pragma: no cover
+    return (
+        os.path.isfile(exe_loc)
+        and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
+        is not None
+    )
+
+
+def is_common_executable_path(exe_loc):  # pragma: no cover
+    path = os.path.normpath(exe_loc)
+    path = path.split(os.sep)
+    if (
+        re.search("v(\d\d\d)", exe_loc) is not None
+        and re.search("ansys(\d\d\d)", exe_loc) is not None
+    ):
+        equal_version = (
+            re.search("v(\d\d\d)", exe_loc)[1] == re.search("ansys(\d\d\d)", exe_loc)[1]
+        )
+    else:
+        equal_version = False
+
+    return (
+        is_valid_executable_path(exe_loc)
+        and re.search("v\d\d\d", exe_loc)
+        and "ansys" in path
+        and "bin" in path
+        and equal_version
+    )
+
+
+def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
+    warnings.warn(
+        f"The supplied path ('{exe_loc}') does not match the usual ansys executable path style"
+        "('directory/vXXX/ansys/bin/ansysXXX'). "
+        "You might have problems at later use."
+    )
+
+
 def check_lock_file(path, jobname, override):
+    LOG.debug("Checking for lock file")
     # Check for lock file
     lockfile = os.path.join(path, jobname + ".lock")
     if os.path.isfile(lockfile):
@@ -730,6 +1107,7 @@ def check_lock_file(path, jobname, override):
         else:
             try:
                 os.remove(lockfile)
+                LOG.debug("Removed lock file")
             except PermissionError:
                 raise LockFileException(
                     "Unable to remove lock file.  "
@@ -738,8 +1116,11 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_add_sw(add_sw, exec_path, force_intel=False):
-    """Validate additional switches.
+def _validate_MPI(add_sw, exec_path, force_intel=False):
+    """Validate MPI configuration.
+
+    Enforce Microsoft MPI in version 21.0 or later, to fix a
+    VPN issue on Windows.
 
     Parameters
     ----------
@@ -763,10 +1144,18 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
     if "smp" not in add_sw:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
+            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
-        if os.name == "nt" and not force_intel:
+
+        if (
+            os.name == "nt"
+            and not force_intel
+            and (222 > _version_from_path(exec_path) >= 210)
+        ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
+            # This is due to the intel compiler, and only afects versions between
+            # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
             # are running VPN in Windows in python, it seems we will
@@ -774,16 +1163,46 @@ def _validate_add_sw(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-
             if "intelmpi" in add_sw:
+                LOG.debug(
+                    "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
+                )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
                 add_sw = re.sub(regex, "", add_sw)
                 warnings.warn(INTEL_MSG)
 
-            if _version_from_path(exec_path) >= 210:
-                add_sw += " -mpi msmpi"
+            LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
+            add_sw += " -mpi msmpi"
 
+    return add_sw
+
+
+def _force_smp_student_version(add_sw, exec_path):
+    """Force SMP in student version.
+
+    Parameters
+    ----------
+    add_sw : str
+        Additional swtiches.
+    exec_path : str
+        Path to the MAPDL executable.
+
+    Returns
+    -------
+    str
+        Validated additional switches.
+
+    """
+    # Converting additional_switches to lower case to avoid mismatches.
+    add_sw = add_sw.lower()
+
+    if (
+        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+    ):  # pragma: no cover
+        if "student" in exec_path.lower():
+            add_sw += " -smp"
+            LOG.debug("Student version detected, using '-smp' switch by default.")
     return add_sw
 
 
@@ -797,30 +1216,45 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=120,
+    start_timeout=15,
     port=None,
     cleanup_on_exit=True,
-    start_instance=True,
-    ip=LOCALHOST,
+    start_instance=None,
+    ip=None,
     clear_on_connect=True,
     log_apdl=None,
+    remove_temp_files=None,
+    remove_temp_dir_on_exit=False,
     verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
     print_com=False,
+    add_env_vars=None,
+    replace_env_vars=None,
+    version=None,
     **kwargs,
 ) -> _MapdlCore:
-    """Start MAPDL locally in gRPC mode.
+    """Start MAPDL locally.
 
     Parameters
     ----------
     exec_file : str, optional
         The location of the MAPDL executable.  Will use the cached
-        location when left at the default ``None``.
+        location when left at the default ``None`` and no environment
+        variable is set.
+
+        .. note::
+
+           The executable path can be also set through the environment variable
+           ``PYMAPDL_MAPDL_EXEC``. For example:
+
+           .. code:: bash
+
+              export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
-        directory.  If directory doesn't exist, will create one.
+        directory.  If directory doesn't exist, one is created.
 
     jobname : str, optional
         MAPDL jobname.  Defaults to ``'file'``.
@@ -846,15 +1280,16 @@ def launch_mapdl(
         ``ansys_corba`` module.  Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
+        Visit :ref:`versions_and_interfaces` for more information.
 
     override : bool, optional
-        Attempts to delete the lock file at the run_location.
+        Attempts to delete the lock file at the ``run_location``.
         Useful when a prior MAPDL session has exited prematurely and
         the lock file has not been deleted.
 
     loglevel : str, optional
         Sets which messages are printed to the console.  ``'INFO'``
-        prints out all ANSYS messages, ``'WARNING``` prints only
+        prints out all ANSYS messages, ``'WARNING'`` prints only
         messages containing ANSYS warnings, and ``'ERROR'`` logs only
         error messages.
 
@@ -864,7 +1299,7 @@ def launch_mapdl(
 
         - ``additional_switches="-aa_r"``
 
-        Avoid adding switches like -i -o or -b as these are already
+        Avoid adding switches like ``-i``, ``-o`` or ``-b`` as these are already
         included to start up the MAPDL server.  See the notes
         section for additional details.
 
@@ -874,9 +1309,9 @@ def launch_mapdl(
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.  Defaults to
-        50052.  You can also override the default behavior of this
-        keyword argument with the environment variable
-        ``PYMAPDL_PORT=<VALID PORT>``
+        50052.  You can also override the port default with the
+        environment variable ``PYMAPDL_PORT=<VALID PORT>``
+        This argument has priority over the environment variable.
 
     custom_bin : str, optional
         Path to the MAPDL custom executable.  On release 2020R2 on
@@ -889,31 +1324,49 @@ def launch_mapdl(
 
     start_instance : bool, optional
         When False, connect to an existing MAPDL instance at ``ip``
-        and ``port``, which default to ``'127.0.0.1'`` at 50052.
+        and ``port``, which default to ip ``'127.0.0.1'`` at port 50052.
         Otherwise, launch a local instance of MAPDL.  You can also
         override the default behavior of this keyword argument with
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
     ip : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``'127.0.0.1'``. You can also override the default behavior of
-        this keyword argument with the environment variable
-        "PYMAPDL_IP=FALSE".
+        Used only when ``start_instance`` is ``False``. If provided,
+        it will force ``start_instance`` to be ``False``.
+        Specify the IP address of the MAPDL instance to connect to.
+        You can also provide a hostname as an alternative to an IP address.
+        Defaults to ``'127.0.0.1'``. You can also override the
+        default behavior of this keyword argument with the
+        environment variable ``PYMAPDL_IP=<IP>``.
+        This argument has priority over the environment variable.
 
     clear_on_connect : bool, optional
-        Used only when ``start_instance`` is ``False``.  Defaults to
-        ``True``, giving you a fresh environment when connecting to
-        MAPDL.
+        Defaults to ``True``, giving you a fresh environment when
+        connecting to MAPDL. When if ``start_instance`` is specified
+        it defaults to ``False``.
 
     log_apdl : str, optional
         Enables logging every APDL command to the local disk.  This
         can be used to "record" all the commands that are sent to
         MAPDL via PyMAPDL so a script can be run within MAPDL without
-        PyMAPDL. This string is the path of the output file (e.g.
+        PyMAPDL. This argument is the path of the output file (e.g.
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        Removes temporary files on exit.  Default ``False``.
+        .. deprecated:: 0.64.0
+           Use argument ``remove_temp_dir_on_exit`` instead.
+
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
+
+    remove_temp_dir_on_exit : bool, optional
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        ``True``, this directory will be deleted when MAPDL is exited. Default
+        ``False``.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -937,6 +1390,32 @@ def launch_mapdl(
         Print the command ``/COM`` arguments to the standard output.
         Default ``False``.
 
+    add_env_vars : dict, optional
+        The provided dictionary will be used to extend the system or process
+        environment variables. If you want to control all of the environment
+        variables, use ``replace_env_vars``. Defaults to ``None``.
+
+    replace_env_vars : dict, optional
+        The provided dictionary will be used to replace all the system or process
+        environment variables. To just add some environment variables to the MAPDL
+        process, use ``add_env_vars``. Defaults to ``None``.
+
+    version : float, optional
+        Version of MAPDL to launch. If ``None``, the latest version is used.
+        Versions can be provided as integers (i.e. ``version=222``) or
+        floats (i.e. ``version=22.2``).
+        To retrieve the available installed versions, use the function
+        :meth:`ansys.mapdl.core.get_available_ansys_installations`.
+
+        .. note::
+
+           The default version can be also set through the environment variable
+           ``PYMAPDL_MAPDL_VERSION``. For example:
+
+           .. code:: bash
+
+              export PYMAPDL_MAPDL_VERSION=22.2
+
     Returns
     -------
     ansys.mapdl.core.mapdl._MapdlCore
@@ -944,6 +1423,9 @@ def launch_mapdl(
 
     Notes
     -----
+    If an Ansys Student version is detected, PyMAPDL will launch MAPDL in
+    shared-memory parallelism (SMP) mode unless another option is specified.
+
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
@@ -1041,6 +1523,11 @@ def launch_mapdl(
         Enables shared-memory parallelism.
         See the Parallel Processing Guide for more information.
 
+    If the environment is configured to use `PyPIM <https://pypim.docs.pyansys.com>`_
+    and ``start_instance`` is ``True``, then starting the instance will be delegated to PyPIM.
+    In this event, most of the options will be ignored and the server side configuration will
+    be used.
+
     Examples
     --------
     Launch MAPDL using the best protocol.
@@ -1049,7 +1536,7 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl()
 
     Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
+    the Ansys binary.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
@@ -1059,7 +1546,7 @@ def launch_mapdl(
     mode.
 
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
-                             port=50001)
+    ...                      port=50001)
 
     Force the usage of the CORBA protocol.
 
@@ -1068,19 +1555,108 @@ def launch_mapdl(
     Run MAPDL using the console mode (available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
-                              mode='console')
+    ...                       mode='console')
 
     """
+    if remove_temp_files is not None:  # pragma: no cover
+        warnings.warn(
+            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "Please use ``remove_temp_dir_on_exit`` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        remove_temp_dir_on_exit = remove_temp_files
+        remove_temp_files = None
+
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
-    ip = os.environ.get("PYMAPDL_IP", ip)
-    if "PYMAPDL_PORT" in os.environ:
-        port = int(os.environ.get("PYMAPDL_PORT", "50052"))
+
+    if ip is None:
+        ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
+    else:  # pragma: no cover
+        LOG.debug(
+            "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
+        )
+        start_instance = False
+        ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
+
+    check_valid_ip(ip)  # double check
+
     if port is None:
-        port = MAPDL_DEFAULT_PORT
+        port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+        check_valid_port(port)
+        LOG.debug(f"Using default port {port}")
+
+    # Start MAPDL with PyPIM if the environment is configured for it
+    # and the user did not pass a directive on how to launch it.
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
 
     # connect to an existing instance if enabled
-    if not get_start_instance(start_instance):
+    if start_instance is None:
+        if "PYMAPDL_START_INSTANCE" in os.environ:
+            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable.")
+
+        if os.environ.get("PYMAPDL_START_INSTANCE") and os.environ.get(
+            "PYMAPDL_START_INSTANCE"
+        ).lower() not in ["true", "false"]:
+            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False.")
+
+        start_instance = check_valid_start_instance(
+            os.environ.get("PYMAPDL_START_INSTANCE", True)
+        )
+
+        LOG.debug("Using 'start_instance' equal to %s", start_instance)
+
+        # special handling when building the gallery outside of CI. This
+        # creates an instance of mapdl the first time if PYMAPDL start instance
+        # is False.
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            LOG.debug("Building gallery.")
+            # launch an instance of pymapdl if it does not already exist and
+            # we're allowed to start instances
+            if start_instance and GALLERY_INSTANCE[0] is None:
+                mapdl = launch_mapdl(
+                    start_instance=True,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
+                return mapdl
+
+                # otherwise, connect to the existing gallery instance if available
+            elif GALLERY_INSTANCE[0] is not None:
+                mapdl = MapdlGrpc(
+                    ip=GALLERY_INSTANCE[0]["ip"],
+                    port=GALLERY_INSTANCE[0]["port"],
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+                if clear_on_connect:
+                    mapdl.clear()
+                return mapdl
+
+                # finally, if running on CI/CD, connect to the default instance
+            else:
+                mapdl = MapdlGrpc(
+                    ip=ip,
+                    port=port,
+                    cleanup_on_exit=False,
+                    loglevel=loglevel,
+                    set_no_abort=set_no_abort,
+                )
+            if clear_on_connect:
+                mapdl.clear()
+            return mapdl
+
+    if not start_instance:
+        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
+        if clear_on_connect is None:  # pragma: no cover
+            clear_on_connect = False
+
         mapdl = MapdlGrpc(
             ip=ip,
             port=port,
@@ -1092,10 +1668,23 @@ def launch_mapdl(
             mapdl.clear()
         return mapdl
 
+    # verify version
+    if exec_file and version:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
+    if version is None:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
+
+    version = _verify_version(version)  # return a int version or none
+
     # verify executable
     if exec_file is None:
+        exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
+
+    if exec_file is None:
+        LOG.debug("Using default executable.")
         # Load cached path
-        exec_file = get_ansys_path()
+        exec_file = get_ansys_path(version=version)
         if exec_file is None:
             raise FileNotFoundError(
                 "Invalid exec_file path or cannot load cached "
@@ -1111,11 +1700,13 @@ def launch_mapdl(
 
     # verify run location
     if run_location is None:
+        LOG.debug("Using default run location.")
         temp_dir = tempfile.gettempdir()
         run_location = os.path.join(temp_dir, "ansys_%s" % random_string(10))
         if not os.path.isdir(run_location):
             try:
                 os.mkdir(run_location)
+                LOG.debug("Created run location at %s", run_location)
             except:
                 raise RuntimeError(
                     "Unable to create the temporary working "
@@ -1125,75 +1716,28 @@ def launch_mapdl(
     else:
         if not os.path.isdir(run_location):
             raise FileNotFoundError(f'"{run_location}" is not a valid directory')
+        if remove_temp_dir_on_exit:
+            LOG.info("`run_location` set. Disabling the removal of temporary files.")
+            remove_temp_dir_on_exit = False
+
+    LOG.debug("Using run location at %s", run_location)
 
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
-    mode = check_mode(mode, _version_from_path(exec_file))
 
-    # cache start parameters
-    additional_switches = _validate_add_sw(
+    mode = check_mode(mode, _version_from_path(exec_file))
+    LOG.debug("Using mode %s", mode)
+
+    # Setting SMP by default if student version is used.
+    additional_switches = _force_smp_student_version(additional_switches, exec_file)
+
+    #
+    additional_switches = _validate_MPI(
         additional_switches, exec_file, kwargs.pop("force_intel", False)
     )
 
-    if isinstance(license_type, str):
-        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
-        # For example:
-        # ```bash
-        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
-        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
-        # ```
-        #
-        # In older versions probably it might raise an error. But not sure.
-        license_type = license_type.lower().strip()
-
-        if "enterprise" in license_type and "solver" not in license_type:
-            license_type = "ansys"
-
-        elif "enterprise" in license_type and "solver" in license_type:
-            license_type = "meba"
-
-        elif "premium" in license_type:
-            license_type = "mech_2"
-
-        elif "pro" in license_type:
-            license_type = "mech_1"
-
-        elif license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-
-        additional_switches += " -p " + license_type
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
-        )
-
-    elif "-p " in additional_switches:
-        # There is already a license request in additional switches.
-        license_type = re.findall(r"-p \b(\w*)", additional_switches)[
-            0
-        ]  # getting only the first product license.
-
-        if license_type not in ALLOWABLE_LICENSES:
-            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
-            warn_text = (
-                f"The additional switch product value ('-p {license_type}') is not a recognized license name or has been deprecated.\n"
-                + "Still PyMAPDL will try to use it but in older versions you might experience problems connecting to the server.\n"
-                + f"Recognized license names: {' '.join(allow_lics)}"
-            )
-            warnings.warn(warn_text, UserWarning)
-            LOG.warning(warn_text)
-
-        LOG.debug(
-            f"Using specified license name '{license_type}' in the additional switches parameter."
-        )
-
-    elif license_type is not None:
-        raise TypeError("The argument 'license_type' does only accept str or None.")
+    additional_switches = _check_license_argument(license_type, additional_switches)
+    LOG.debug(f"Using additional switches {additional_switches}.")
 
     start_parm = {
         "exec_file": exec_file,
@@ -1211,24 +1755,28 @@ def launch_mapdl(
         start_parm["override"] = override
         start_parm["timeout"] = start_timeout
 
+    LOG.debug(f"Using start parameters {start_parm}")
+
     # Check the license server
     if license_server_check:
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
-        lic_check = LicenseChecker(timeout=start_timeout * 0.9, verbose=verbose_mapdl)
+        LOG.debug("Checking license server.")
+        lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
     try:
+        LOG.debug("Starting MAPDL")
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
             mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
         elif mode == "corba":
             try:
-                # pending deprication to ansys-mapdl-corba
+                # pending deprecation to ansys-mapdl-corba
                 from ansys.mapdl.core.mapdl_corba import MapdlCorba
-            except ImportError:
-                raise ImportError(
+            except ModuleNotFoundError:  # pragma: no cover
+                raise ModuleNotFoundError(
                     "To use this feature, install the MAPDL CORBA package"
                     " with:\n\npip install ansys_corba"
                 ) from None
@@ -1243,7 +1791,12 @@ def launch_mapdl(
             )
         elif mode == "grpc":
             port, actual_run_location = launch_grpc(
-                port=port, verbose=verbose_mapdl, ip=ip, **start_parm
+                port=port,
+                verbose=verbose_mapdl,
+                ip=ip,
+                add_env_vars=add_env_vars,
+                replace_env_vars=replace_env_vars,
+                **start_parm,
             )
             mapdl = MapdlGrpc(
                 ip=ip,
@@ -1251,7 +1804,7 @@ def launch_mapdl(
                 cleanup_on_exit=cleanup_on_exit,
                 loglevel=loglevel,
                 set_no_abort=set_no_abort,
-                remove_temp_files=kwargs.pop("remove_temp_files", False),
+                remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 **start_parm,
             )
@@ -1261,9 +1814,15 @@ def launch_mapdl(
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
         if license_server_check:
+            LOG.debug("Checking license server.")
             lic_check.check()
-            # pass
+
         raise exception
+
+    # Stopping license checker
+    if license_server_check:
+        LOG.debug("Stopping license server check.")
+        lic_check.is_connected = True
 
     return mapdl
 
@@ -1327,3 +1886,147 @@ def check_mode(mode, version):
         warnings.warn("MAPDL as a service has not been tested on MAPDL < v13")
 
     return mode
+
+
+def update_env_vars(add_env_vars, replace_env_vars):
+    """
+    Update environment variables for the MAPDL process.
+
+    Parameters
+    ----------
+    add_env_vars : dict, None
+        Dictionary with a mapping of env variables.
+    replace_env_vars : dict, None
+        Dictionary with a mapping of env variables.
+
+    Raises
+    ------
+    TypeError
+        'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one.
+    TypeError
+        The variable 'add_env_vars' should be a dict with env vars.
+    TypeError
+        The variable 'replace_env_vars' should be a dict with env vars.
+    """
+
+    # Expanding/replacing env variables for the process.
+    if add_env_vars and replace_env_vars:
+        raise ValueError(
+            "'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one."
+        )
+
+    elif add_env_vars:
+        if not isinstance(add_env_vars, dict):
+            raise TypeError(
+                "The variable 'add_env_vars' should be a dict with env vars."
+            )
+
+        add_env_vars.update(os.environ)
+        LOG.debug(f"Updating environment variables with: {add_env_vars}")
+        return add_env_vars
+
+    elif replace_env_vars:
+        if not isinstance(replace_env_vars, dict):
+            raise TypeError(
+                "The variable 'replace_env_vars' should be a dict with env vars."
+            )
+        LOG.debug(f"Replacing environment variables with: {replace_env_vars}")
+        return replace_env_vars
+
+
+def _check_license_argument(license_type, additional_switches):
+
+    if isinstance(license_type, str):
+        # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
+        # For example:
+        # ```bash
+        # mapdl.exe -p meba    # works fine because 'meba' is a valid license in ALLOWABLE_LICENSES.
+        # mapdl.exe -p yoyoyo  # The -p flag is ignored and it run the default license.
+        # ```
+        #
+        # In older versions probably it might raise an error. But not sure.
+        license_type = license_type.lower().strip()
+
+        if "enterprise" in license_type and "solver" not in license_type:
+            license_type = "ansys"
+
+        elif "enterprise" in license_type and "solver" in license_type:
+            license_type = "meba"
+
+        elif "premium" in license_type:
+            license_type = "mech_2"
+
+        elif "pro" in license_type:
+            license_type = "mech_1"
+
+        elif license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The keyword argument 'license_type' value ('{license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+
+        additional_switches += " -p " + license_type
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the 'license_type' keyword argument."
+        )
+
+    elif "-p " in additional_switches:
+        # There is already a license request in additional switches.
+        license_type = re.findall(r"-p\s+\b(\w*)", additional_switches)[
+            0
+        ]  # getting only the first product license.
+
+        if license_type not in ALLOWABLE_LICENSES:
+            allow_lics = [f"'{each}'" for each in ALLOWABLE_LICENSES]
+            warn_text = (
+                f"The additional switch product value ('-p {license_type}') is not a recognized\n"
+                "license name or has been deprecated.\n"
+                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "problems connecting to the server.\n"
+                f"Recognized license names: {' '.join(allow_lics)}"
+            )
+            warnings.warn(warn_text, UserWarning)
+            LOG.warning(warn_text)
+
+        LOG.debug(
+            f"Using specified license name '{license_type}' in the additional switches parameter."
+        )
+
+    elif license_type is not None:
+        raise TypeError("The argument 'license_type' does only accept str or None.")
+
+    return additional_switches
+
+
+def _verify_version(version):
+    """Verify the MAPDL version is valid."""
+    if isinstance(version, float):
+        version = int(version * 10)
+
+    if isinstance(version, str):
+        if version.upper().strip() in [
+            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(version)
+        elif version.upper().strip() in [
+            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(float(version) * 10)
+        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
+            version = [
+                key
+                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
+                if value == version.upper().strip()
+            ][0]
+
+    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
+        raise ValueError(
+            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
+        )
+
+    return version

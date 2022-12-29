@@ -1,0 +1,167 @@
+name: 🐞 Bug, problem, error
+description: Fill a bug report here
+title: "Bug located in ..."
+labels: ["bug"]
+assignees: [""]
+
+body:
+
+  - type: markdown
+    attributes:
+      value: '# 🐞 **Problem**'
+
+  - type: checkboxes
+    id: new-bug
+    attributes:
+      label: Before submitting the issue
+      description: |
+        Ensure that the following conditions are met.
+
+        Visit [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html) for more information.
+
+      options:
+      - label: I have visited the Troubleshooting section.
+        required: true
+      - label: I have searched among the existing issues.
+        required: true
+      - label: I am using a Python virtual environment.
+        required: true
+      - label: I have a fully updated virtual environment (i.e. ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``)
+        required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Description of the bug
+      placeholder: Describe what bug you encountered and what should have happened.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps To Reproduce
+      description: |
+        Please write the steps in a list form e.g.:
+        * Install this package...
+        * Run this input file (attached)
+        * Run the following commands:
+        ```py
+        mapdl.command1()
+        mapdl.command2()
+        ...
+        ```
+        * Check obtained error...
+
+      value: |
+        Steps:
+          * First I did...
+          * ...
+
+        And I ran the following code:
+
+        ```py
+
+        from ansys.mapdl.core import launch_mapdl
+        mapdl = launch_mapdl()
+
+        # Insert your code here
+
+        ```
+
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '# 🖥️ **System Information**'
+
+  - type: dropdown
+    id: os-name
+    attributes:
+      label: Which Operating System are you using?
+      multiple: false
+      options:
+       - 'Windows'
+       - 'MacOS'
+       - 'Linux'
+    validations:
+      required: false
+
+  - type: dropdown
+    id: python-version
+    attributes:
+      label: Which Python version are you using?
+      description: Run `python --version` to verify your Python version
+      multiple: false
+      options:
+       - '3.7'
+       - '3.8'
+       - '3.9'
+       - '3.10'
+    validations:
+      required: false
+
+  - type: textarea
+    id: pymapdl-report
+    attributes:
+      label: PyMAPDL Report
+      description: Run `python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"` to get the PyMAPDL Report
+      value: |
+        <details><summary>
+        Show the Report!
+        </summary>
+
+        ```text
+
+        # PASTE HERE THE OUTPUT OF `python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"` here
+
+        ```
+        </details>
+
+    validations:
+      required: true
+
+  - type: textarea
+    id: installed-packages
+    attributes:
+      label: Installed packages
+      description: Run `python -m pip freeze` to list installed packages
+      value: |
+        <details><summary>
+        Show the installed packages!
+        </summary>
+
+        ```text
+
+        # PASTE HERE THE OUTPUT OF `python -m pip freeze` here
+
+        ```
+        </details>
+
+    validations:
+      required: true
+
+  - type: textarea
+    id: logger_log
+    attributes:
+      label: Logger output file
+      description: |
+        Attach the logger output file. For more information on how to set the logger and
+        attach its output file, see the [Troubleshooting section]
+        (https://mapdl.docs.pyansys.com/troubleshoot/index.html).
+        
+      value: |
+        <details><summary>
+        Show the logger output file.
+        </summary>
+
+        ```text
+
+        # PASTE HERE THE CONTENT OF THE LOGGER OUTPUT FILE.
+
+        ```
+        </details>
+
+    validations:
+      required: false

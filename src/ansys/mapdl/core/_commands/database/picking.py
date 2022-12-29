@@ -49,7 +49,12 @@ class Picking:
 
         This command is valid in any processor.
         """
-        command = "FITEM,%s,%s,%s,%s" % (str(nfield), str(item), str(itemy), str(itemz))
+        command = "FITEM,%s,%s,%s,%s" % (
+            str(nfield),
+            str(item),
+            str(itemy),
+            str(itemz),
+        )
         return self.run(command, **kwargs)
 
     def flst(self, nfield="", narg="", type_="", otype="", leng="", **kwargs):

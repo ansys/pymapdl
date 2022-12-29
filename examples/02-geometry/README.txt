@@ -1,5 +1,3 @@
-.. _ref_pymapdl_geometry_examples:
-
-Geometry Examples
+Geometry examples
 =================
 These examples demonstrate using PyMAPDL to create basic geometry.

@@ -1,7 +1,7 @@
 .. _ref_solid_body_loads_commands_api:
 
 ****************
-Solid Body Loads
+Solid body loads
 ****************
 
 .. currentmodule:: ansys.mapdl.core

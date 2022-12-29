@@ -1,7 +1,7 @@
 .. _ref_pressure_mapping_api:
 
 ****************
-Pressure Mapping
+Pressure mapping
 ****************
 
 .. currentmodule:: ansys.mapdl.core
@@ -13,7 +13,6 @@ and map it onto a geometry.
    :toctree: _autosummary/
 
    Mapdl.ftype
-   Mapdl.map_
    Mapdl.plgeom
    Mapdl.plmap
    Mapdl.read

@@ -1,7 +1,7 @@
 .. _ref_miscellaneous_loads_commands_api:
 
 *******************
-Miscellaneous Loads
+Miscellaneous loads
 *******************
 
 .. currentmodule:: ansys.mapdl.core

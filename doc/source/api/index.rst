@@ -1,15 +1,17 @@
+
 .. _ref_index_api:
 
+API reference
 =============
-API Reference
-=============
-This section gives an overview of the API of several public PyMAPDL
-classes, functions, and attributes.
 
-These methods may include some MAPDL commands but are generally
-specific to pymapdl specific methods and classes (i.e. methods that
-extend existing MAPDL methods in a pythonic manner).  For classic
-MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
+This page gives an overview of the API of several public PyMAPDL
+classes, functions, and attributes. You can find them
+on the left sidebar.
+
+While these methods might include some MAPDL commands, they are generally
+specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
+MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
+PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 
 .. toctree::
@@ -17,9 +19,12 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    :hidden:
 
    commands
+   database
    geometry
    helper
    inline
+   krylov
+   launcher
    logging
    mapdl
    math
@@ -30,4 +35,5 @@ MAPDL commands mapped to PyMAPDL, see :ref:`ref_mapdl_commands`.
    post
    solution
    xpl
-   
+   building_example
+   unit_testing

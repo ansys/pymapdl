@@ -56,7 +56,17 @@ def _retrieve_file(url, filename):
 
 def _download_file(filename, directory=None):
     url = _get_file_url(filename, directory)
-    return _retrieve_file(url, filename)
+    try:
+        return _retrieve_file(url, filename)
+    except Exception as e:  # Genering exception
+        raise RuntimeError(
+            "For the reason mentioned below, retrieving the file from internet failed.\n"
+            "You can download this file from:\n"
+            f"{url}\n"
+            "\n"
+            "The reported error message is:\n"
+            f"{str(e)}"
+        )
 
 
 def download_bracket():
@@ -85,5 +95,39 @@ def download_vtk_rotor():
 
 
 def _download_rotor_tech_demo_plot():
-    """Download rotor surface vtk file."""
+    """Download the rotor surface VTK file."""
     return _download_file("rotor2.vtk", "geometry")[0]
+
+
+def download_example_data(filename, directory=None):
+    return _download_file(filename, directory=directory)[0]
+
+
+def download_manifold_example_data() -> dict:
+    """Download the manifold example data and return the
+    download paths into a dictionary domain id->path.
+    Examples files are downloaded to a persistent cache to avoid
+    re-downloading the same file twice.
+    Returns
+    -------
+    dict[str:str]
+        Path to the example files.
+    Examples
+    --------
+    Download the manifold geometry, ans file and return the path of the file
+    >>> from ansys.mapdl.core.examples import download_manifold_example_data
+    >>> paths = download_manifold_example_data()
+    >>> paths
+    {geometry: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_geometry.anf',
+     mapping_data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_cht-final_temp.csv'}
+    """
+
+    files_dir = "pymapdl/manifold"
+    return {
+        "geometry": _download_file(
+            filename="manifold_geometry.anf", directory=files_dir
+        )[0],
+        "mapping_data": _download_file(
+            filename="manifold_cht-final_temp.csv", directory=files_dir
+        )[0],
+    }

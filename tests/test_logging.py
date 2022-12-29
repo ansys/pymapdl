@@ -3,18 +3,24 @@ import logging as deflogging  # Default logging
 import os
 import re
 
-from conftest import HAS_GRPC
 import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
+from conftest import HAS_GRPC
 
 ## Notes
 # Use the next fixtures for:
 # - capfd: for testing console printing.
 # - caplog: for testing logging printing.
 
-LOG_LEVELS = {"CRITICAL": 50, "ERROR": 40, "WARNING": 30, "INFO": 20, "DEBUG": 10}
+LOG_LEVELS = {
+    "CRITICAL": 50,
+    "ERROR": 40,
+    "WARNING": 30,
+    "INFO": 20,
+    "DEBUG": 10,
+}
 
 
 def fake_record(
@@ -118,7 +124,11 @@ def test_global_logger_logging(caplog):
         msg = f"This is an {each_log_name} message."
         LOG.logger.log(each_log_number, msg)
         # Make sure we are using the right logger, the right level and message.
-        assert caplog.record_tuples[-1] == ("pymapdl_global", each_log_number, msg)
+        assert caplog.record_tuples[-1] == (
+            "pymapdl_global",
+            each_log_number,
+            msg,
+        )
 
 
 def test_global_logger_debug_mode():
@@ -277,7 +287,7 @@ def test_log_to_file(tmpdir):
 
 def test_log_instance_name(mapdl):
     # verify we can access via an instance name
-    LOG[mapdl._name] == mapdl._log
+    LOG[mapdl.name] == mapdl._log
 
 
 def test_instance_log_to_file(mapdl, tmpdir):
@@ -314,3 +324,13 @@ def test_instance_log_to_file(mapdl, tmpdir):
         text = "".join(fid.readlines())
 
     assert file_msg_debug in text
+
+
+def test_lowercases():
+    # test that all loggers are lowercase
+    for each_loglevel in LOG_LEVELS.keys():
+
+        LOG.setLevel(each_loglevel.lower())
+
+        for each_logger in LOG._instances.values():
+            each_logger.setLevel(each_loglevel.lower())

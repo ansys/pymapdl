@@ -1,7 +1,7 @@
 .. _ref_multi_field_solver_time_controls_commands_api:
 
 ********************************
-Multi-Field Solver Time Controls
+Multi-Field solver time controls
 ********************************
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,7 +1,7 @@
 .. _ref_process_controls_api:
 
 ****************
-Process Controls
+Process controls
 ****************
 
 .. currentmodule:: ansys.mapdl.core

@@ -1,7 +1,7 @@
 .. _ref_coupled_dof_commands_api:
 
 **************************
-Coupled Degrees of Freedom
+Coupled degrees of freedom
 **************************
 
 .. currentmodule:: ansys.mapdl.core

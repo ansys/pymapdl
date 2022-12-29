@@ -20,6 +20,10 @@ skip_launch_mapdl = pytest.mark.skipif(
     reason="Must be able to launch MAPDL locally",
 )
 
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
 MAPDL194PATH = "/usr/ansys_inc/v194/ansys/bin/mapdl"
 skip_requires_194 = pytest.mark.skipif(
     not os.path.isfile(MAPDL194PATH), reason="Requires MAPDL 194"
@@ -27,7 +31,10 @@ skip_requires_194 = pytest.mark.skipif(
 
 TWAIT = 90
 
-valid_rver = ["221", "212", "211", "202", "201", "195", "194", "193", "192", "191"]
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+
+valid_rver = [str(each) for each in SUPPORTED_ANSYS_VERSIONS]
+
 EXEC_FILE = None
 for rver in valid_rver:
     if os.path.isfile(get_ansys_bin(rver)):
@@ -66,6 +73,7 @@ def test_invalid_exec():
         mapdl_pool = LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
 
 
+@skip_on_ci
 @skip_launch_mapdl
 def test_heal(pool):
     pool_sz = len(pool)
