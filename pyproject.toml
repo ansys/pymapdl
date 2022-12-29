@@ -50,8 +50,8 @@ classifiers = [
 
 [project.optional-dependencies]
 tests = [
-    "ansys-dpf-core==0.7.0",
-    "autopep8==2.0.0",
+    "ansys-dpf-core==0.7.2",
+    "autopep8==2.0.1",
     "matplotlib==3.6.2",
     "scipy==1.9.3",
     "pandas==1.5.2",
@@ -59,17 +59,17 @@ tests = [
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
     "pyansys-tools-report==0.4.1",
-    "vtk==9.0.3",
+    "vtk==9.2.2",
     "pytest-rerunfailures==10.3",
 ]
 doc = [
     "Sphinx==5.3.0",
-    "ansys-dpf-core==0.7.0",
-    "ansys-mapdl-reader==0.52.3",
+    "ansys-dpf-core==0.7.2",
+    "ansys-mapdl-reader==0.52.5",
     "ansys-sphinx-theme==0.8.0",
     "grpcio==1.43.0",
     "imageio-ffmpeg==0.4.7",
-    "imageio==2.22.4",
+    "imageio==2.23.0",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
     "matplotlib==3.6.2",
@@ -87,7 +87,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
-    "vtk==9.0.3",
+    "vtk==9.2.2",
 ]
 
 [tool.flit.module]

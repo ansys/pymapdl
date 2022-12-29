@@ -14,7 +14,13 @@ from conftest import HAS_GRPC
 # - capfd: for testing console printing.
 # - caplog: for testing logging printing.
 
-LOG_LEVELS = {"CRITICAL": 50, "ERROR": 40, "WARNING": 30, "INFO": 20, "DEBUG": 10}
+LOG_LEVELS = {
+    "CRITICAL": 50,
+    "ERROR": 40,
+    "WARNING": 30,
+    "INFO": 20,
+    "DEBUG": 10,
+}
 
 
 def fake_record(
@@ -118,7 +124,11 @@ def test_global_logger_logging(caplog):
         msg = f"This is an {each_log_name} message."
         LOG.logger.log(each_log_number, msg)
         # Make sure we are using the right logger, the right level and message.
-        assert caplog.record_tuples[-1] == ("pymapdl_global", each_log_number, msg)
+        assert caplog.record_tuples[-1] == (
+            "pymapdl_global",
+            each_log_number,
+            msg,
+        )
 
 
 def test_global_logger_debug_mode():

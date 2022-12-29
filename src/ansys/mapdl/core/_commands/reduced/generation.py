@@ -138,7 +138,15 @@ class Generation:
         return self.run(command, **kwargs)
 
     def rmmrange(
-        self, mode="", key="", min_="", max_="", nstep="", damp="", scale="", **kwargs
+        self,
+        mode="",
+        key="",
+        min_="",
+        max_="",
+        nstep="",
+        damp="",
+        scale="",
+        **kwargs,
     ):
         """Defines and edits various modal parameters for the ROM method.
 

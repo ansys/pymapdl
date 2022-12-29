@@ -1,6 +1,16 @@
 class WorkingPlane:
     def kwpave(
-        self, p1="", p2="", p3="", p4="", p5="", p6="", p7="", p8="", p9="", **kwargs
+        self,
+        p1="",
+        p2="",
+        p3="",
+        p4="",
+        p5="",
+        p6="",
+        p7="",
+        p8="",
+        p9="",
+        **kwargs,
     ):
         """Moves the working plane origin to the average location of keypoints.
 
@@ -100,7 +110,17 @@ class WorkingPlane:
         return self.run(command, **kwargs)
 
     def nwpave(
-        self, n1="", n2="", n3="", n4="", n5="", n6="", n7="", n8="", n9="", **kwargs
+        self,
+        n1="",
+        n2="",
+        n3="",
+        n4="",
+        n5="",
+        n6="",
+        n7="",
+        n8="",
+        n9="",
+        **kwargs,
     ):
         """Moves the working plane origin to the average location of nodes.
 
@@ -166,7 +186,17 @@ class WorkingPlane:
         return self.run(command, **kwargs)
 
     def wpave(
-        self, x1="", y1="", z1="", x2="", y2="", z2="", x3="", y3="", z3="", **kwargs
+        self,
+        x1="",
+        y1="",
+        z1="",
+        x2="",
+        y2="",
+        z2="",
+        x3="",
+        y3="",
+        z3="",
+        **kwargs,
     ):
         """Moves the working plane origin to the average of specified points.
 

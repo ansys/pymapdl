@@ -197,7 +197,14 @@ class MatrixOP:
         return self.run(command, **kwargs)
 
     def export(
-        self, matrix="", format_="", fname="", val1="", val2="", val3="", **kwargs
+        self,
+        matrix="",
+        format_="",
+        fname="",
+        val1="",
+        val2="",
+        val3="",
+        **kwargs,
     ):
         """Exports a matrix to a file in the specified format.
 

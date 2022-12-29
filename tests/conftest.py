@@ -28,7 +28,8 @@ from ansys.mapdl.core.misc import get_ansys_bin
 pyvista.OFF_SCREEN = True
 
 SpacedPaths = namedtuple(
-    "SpacedPaths", ["path_without_spaces", "path_with_spaces", "path_with_single_quote"]
+    "SpacedPaths",
+    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
 
 from _pytest.terminal import TerminalReporter
@@ -174,11 +175,17 @@ def pytest_addoption(parser):
         "--corba", action="store_true", default=False, help="run CORBA tests"
     )
     parser.addoption(
-        "--console", action="store_true", default=False, help="run console tests"
+        "--console",
+        action="store_true",
+        default=False,
+        help="run console tests",
     )
     parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
     parser.addoption(
-        "--only-gui", action="store_true", default=False, help="run only GUI tests"
+        "--only-gui",
+        action="store_true",
+        default=False,
+        help="run only GUI tests",
     )
 
 

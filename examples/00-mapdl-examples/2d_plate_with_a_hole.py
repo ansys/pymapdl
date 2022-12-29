@@ -98,7 +98,12 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
 mapdl.eplot(
-    vtk=True, cpos="xy", show_edges=True, show_axes=False, line_width=2, background="w"
+    vtk=True,
+    cpos="xy",
+    show_edges=True,
+    show_axes=False,
+    line_width=2,
+    background="w",
 )
 
 ###############################################################################
@@ -160,7 +165,13 @@ print(output)
 # grab the result from the ``mapdl`` instance
 result = mapdl.result
 result.plot_principal_nodal_stress(
-    0, "SEQV", lighting=False, cpos="xy", background="w", text_color="k", add_text=False
+    0,
+    "SEQV",
+    lighting=False,
+    cpos="xy",
+    background="w",
+    text_color="k",
+    add_text=False,
 )
 
 nnum, stress = result.principal_nodal_stress(0)

@@ -1,6 +1,13 @@
 class Controls:
     def cfact(
-        self, rfacta="", ifacta="", rfactb="", ifactb="", rfactc="", ifactc="", **kwargs
+        self,
+        rfacta="",
+        ifacta="",
+        rfactb="",
+        ifactb="",
+        rfactc="",
+        ifactc="",
+        **kwargs,
     ):
         """Defines complex scaling factors to be used with operations.
 

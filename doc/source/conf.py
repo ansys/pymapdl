@@ -63,6 +63,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
+    "sphinx.ext.graphviz",
 ]
 
 # Intersphinx mapping
@@ -205,6 +206,11 @@ html_theme_options = {
             "url": "https://github.com/pyansys/pymapdl/discussions",
             "icon": "fa fa-comment fa-fw",
         },
+        {
+            "name": "Contribute",
+            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "icon": "fa fa-wrench",
+        },
     ],
     "switcher": {
         "json_url": f"https://{cname}/release/versions.json",
@@ -248,7 +254,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "ansys.mapdl.core", "ansys.mapdl.core Documentation", [author], 1)
+    (
+        master_doc,
+        "ansys.mapdl.core",
+        "ansys.mapdl.core Documentation",
+        [author],
+        1,
+    )
 ]
 
 

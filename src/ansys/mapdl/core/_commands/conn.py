@@ -107,7 +107,14 @@ class Conn:
         return self.run(f"~CATIAIN,{name},{extension},{path},,,{blank}", **kwargs)
 
     def parain(
-        self, name="", extension="", path="", entity="", fmt="", scale="", **kwargs
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        scale="",
+        **kwargs,
     ):
         """Transfers a Parasolid file into the ANSYS program.
 
@@ -277,7 +284,14 @@ class Conn:
         return self.run(command, **kwargs)
 
     def ugin(
-        self, name="", extension="", path="", entity="", layer="", fmt="", **kwargs
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        layer="",
+        fmt="",
+        **kwargs,
     ):
         """Transfers an NX part into the ANSYS program.
 

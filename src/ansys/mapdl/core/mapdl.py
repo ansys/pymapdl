@@ -22,6 +22,8 @@ from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
+    CMD_XSEL,
+    XSEL_DOCSTRING_INJECTION,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
@@ -194,6 +196,8 @@ class _MapdlCore(Commands):
         self._cached_routine = None
         self._geometry = None
         self._kylov = None
+        self._on_docker = None
+        self._platform = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -220,7 +224,12 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
+        # Wrapping listing functions for "to_array" methods
         self._wrap_listing_functions()
+
+        # Wrapping XSEL commands to return ids.
+        self._xsel_mapdl_output = False
+        self._wrap_xsel_commands()
 
         self._info = Information(self)
 
@@ -297,6 +306,71 @@ class _MapdlCore(Commands):
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_bc_listing_function(func))
+
+    def _wrap_xsel_commands(self):
+        # Wrapping XSEL commands.
+        def wrap_xsel_function(func):
+
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(
+                    func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
+                )
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__, XSEL_DOCSTRING_INJECTION)
+
+            def wrap_xsel_function_output(method):
+                # Injecting doc string modification
+                name = method.__func__.__name__.upper()
+                if name == "NSEL":
+                    return self.mesh.nnum
+                elif name == "ESEL":
+                    return self.mesh.enum
+                elif name == "KSEL":
+                    return self.geometry.knum
+                elif name == "LSEL":
+                    return self.geometry.lnum
+                elif name == "ASEL":
+                    return self.geometry.anum
+                elif name == "VSEL":
+                    return self.geometry.vnum
+                else:
+                    return None
+
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                # in interactive mode (item='p'), the output is not suppressed
+                is_interactive_arg = (
+                    True
+                    if len(args) >= 2
+                    and isinstance(args[1], str)
+                    and args[1].upper() == "P"
+                    else False
+                )
+                is_interactive_kwarg = (
+                    True
+                    if "item" in kwargs and kwargs["item"].upper() == "P"
+                    else False
+                )
+
+                return_mapdl_output = kwargs.pop(
+                    "return_mapdl_output", self._xsel_mapdl_output
+                )
+                if is_interactive_arg or is_interactive_kwarg:
+                    return_mapdl_output = True
+
+                output = func(*args, **kwargs)
+                if not return_mapdl_output:
+                    output = wrap_xsel_function_output(func)
+                return output
+
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_XSEL and name in dir(
+                Commands
+            ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+                method = self.__getattribute__(name)
+                setattr(self, name, wrap_xsel_function(method))
 
     @property
     def name(self):  # pragma: no cover
@@ -1566,9 +1640,10 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:
+            if color_areas:  # pragma: no cover
                 anum = surf["entity_num"]
-                rand = np.random.random(anum[-1] + 1)
+                size_ = max(anum) + 1
+                rand = np.random.random(size_)
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
@@ -1598,7 +1673,10 @@ class _MapdlCore(Commands):
                     )
                 if show_line_numbering:
                     labels.append(
-                        {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                        {
+                            "points": lines.points[50::101],
+                            "labels": lines["entity_num"],
+                        }
                     )
 
             return general_plotter(meshes, [], labels, **kwargs)
@@ -1762,12 +1840,18 @@ class _MapdlCore(Commands):
             labels = []
             if show_line_numbering:
                 labels.append(
-                    {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                    {
+                        "points": lines.points[50::101],
+                        "labels": lines["entity_num"],
+                    }
                 )
 
             if show_keypoint_numbering:
                 labels.append(
-                    {"points": self.geometry.keypoints, "labels": self.geometry.knum}
+                    {
+                        "points": self.geometry.keypoints,
+                        "labels": self.geometry.knum,
+                    }
                 )
 
             return general_plotter(meshes, [], labels, **kwargs)
@@ -1901,9 +1985,12 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
-                    filenames = [self._distributed_result_file, self._result_file]
+                    filenames = [
+                        self._distributed_result_file,
+                        self._result_file,
+                    ]
                     result_path = last_created(filenames)
                     if result_path is None:  # if same return result_file
                         result_path = self._result_file
@@ -2085,7 +2172,14 @@ class _MapdlCore(Commands):
             self._log.info(self._response)
 
     def get_value(
-        self, entity="", entnum="", item1="", it1num="", item2="", it2num="", **kwargs
+        self,
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        **kwargs,
     ):
         """Runs the MAPDL GET command and returns a Python value.
 
@@ -3179,7 +3273,15 @@ class _MapdlCore(Commands):
             self._vget_arr_counter += 1
 
         out = self.starvget(
-            parm_name, entity, entnum, item1, it1num, item2, it2num, kloop, mute=False
+            parm_name,
+            entity,
+            entnum,
+            item1,
+            it1num,
+            item2,
+            it2num,
+            kloop,
+            mute=False,
         )
 
         # check if empty array
@@ -3844,3 +3946,49 @@ class _MapdlCore(Commands):
             )
         else:
             return output
+
+    def _check_mapdl_os(self):
+        platform = self.get_value("active", 0, "platform").strip()
+        if "l" in platform.lower():
+            self._platform = "linux"
+        elif "w" in platform.lower():  # pragma: no cover
+            self._platform = "windows"
+        else:  # pragma: no cover
+            raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+
+    @property
+    def platform(self):
+        """Return the platform where MAPDL is running."""
+        if self._platform is None:
+            self._check_mapdl_os()
+        return self._platform
+
+    def _check_on_docker(self):
+        """Check if MAPDL is running on docker."""
+        # self.get_mapdl_envvar("ON_DOCKER") # for later
+
+        if self.platform == "linux":
+            self.sys(
+                "if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
+            )
+        elif self.platform == "windows":  # pragma: no cover
+            return False  # TODO: check if it is running a windows docker container. So far it is not supported.
+
+        if self.is_grpc and not self.is_local:
+            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        else:  # pragma: no cover
+            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            with open(file_, "r") as f:
+                return f.read().strip() == "true"
+
+    @property
+    def on_docker(self):
+        """Check if MAPDL is running on docker."""
+        if self._on_docker is None:
+            self._on_docker = self._check_on_docker()
+        return self._on_docker
+
+    @property
+    def is_local(self):
+        """Check if the instance is running locally or remotely."""
+        return self._local
