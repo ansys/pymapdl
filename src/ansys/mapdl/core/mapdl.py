@@ -163,7 +163,7 @@ class _MapdlCore(Commands):
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
-        self._allow_ignore = False
+        self._ignore_errors = False
         self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
@@ -191,7 +191,6 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
-        self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
