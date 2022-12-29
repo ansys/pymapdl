@@ -666,9 +666,9 @@ def test_docstring_injector(mapdl, method):
             docstring = func.__doc__
 
             assert "Returns" in docstring
-            assert "``str.to_list()``" in docstring
-            assert "``str.to_array()``" in docstring
-            assert "``str.to_dataframe()``" in docstring
+            assert "to_list()" in docstring
+            assert "to_array()" in docstring
+            assert "to_dataframe()" in docstring
 
 
 def test_string_with_literal():

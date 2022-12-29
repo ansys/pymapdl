@@ -1,3 +1,5 @@
+.. _user_guide_postprocessing:
+
 Postprocessing
 ==============
 In an active MAPDL session, you can postprocess using the
@@ -88,18 +90,18 @@ Here's a simple example that demonstrates usage:
     >>> mapdl.post1()
     >>> cmd = mapdl.prnsol('U', 'X')
 
-    Output as a list.
+    # Output as a list.
 
     >>> cmd.to_list()
     [['1', '0.0000'], ['2', '0.0000']]
 
-    Output as array.
+    # Output as array.
 
     >>> cmd.to_array()
     array([[1., 0.],
            [2., 0.]])
 
-    Output as dataframe.
+    # Output as dataframe.
 
     >>> cmd.to_dataframe()
     NODE   UX
@@ -159,8 +161,34 @@ You could also plot the nodal displacement with this code:
     Normalized Displacement of a Cylinder from MAPDL
 
 
+Selecting entities
+------------------
+You can select entities such as nodes, or lines using the following methods:
+
+* :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+* :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`
+* :func:`Mapdl.ksel() <ansys.mapdl.core.Mapdl.ksel>`
+* :func:`Mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>`
+* :func:`Mapdl.asel() <ansys.mapdl.core.Mapdl.asel>`
+* :func:`Mapdl.vsel() <ansys.mapdl.core.Mapdl.vsel>`
+
+These methods returns the ids of the selected entities. For example:
+
+.. code:: python
+
+    >>> selected_nodes = mapdl.nsel('S', 'NODE', vmin=1, vmax=2000)
+    >>> print(selected_nodes)
+    array([   1    2    3 ... 1998 1999 2000])
+
+.. code:: python
+
+    >>> mapdl.ksel("all")
+    array([1, 2, 3, ..., 1998, 1999, 2000])
+
+
 Selected nodes
 ~~~~~~~~~~~~~~
+
 The MAPDL database processes some results independently if nodes or
 elements are selected. If you have subselected a certain component
 and want to also limit the result of a certain output
