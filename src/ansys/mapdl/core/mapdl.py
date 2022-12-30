@@ -169,6 +169,10 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
+        self._mapdl_process = None
+        self._launched = False
+        self._stderr = None
+        self._stdout = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -4016,3 +4020,8 @@ class _MapdlCore(Commands):
     def is_local(self):
         """Check if the instance is running locally or remotely."""
         return self._local
+
+    @property
+    def launched(self):
+        """Check if the MAPDL instance has been launched by PyMAPDL."""
+        return self._launched
