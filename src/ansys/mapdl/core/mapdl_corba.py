@@ -162,7 +162,11 @@ class MapdlCorba(_MapdlCore):
         additional_switches='', timeout
 
     verbose : bool
-        Print all output from MAPDL to Python.  Useful for debugging
+        Print all output from MAPDL to Python.  Useful for debugging.
+
+        .. deprecated:: v0.65.0
+           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
+           Use a logger instead. See :ref:`api_logging` for more details.
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
@@ -180,7 +184,7 @@ class MapdlCorba(_MapdlCore):
         use_vtk=True,
         log_file=True,
         log_broadcast=False,
-        verbose=False,
+        verbose=None,
         **start_parm,
     ):
         """Open a connection to MAPDL via a CORBA interface"""
@@ -192,6 +196,15 @@ class MapdlCorba(_MapdlCore):
             log_broadcast=False,
             **start_parm,
         )
+
+        if verbose is not None:
+            warnings.warn(
+                "The ``verbose`` argument is deprecated and will be removed in a future release. "
+                "Use a logger instead. See :ref:`api_logging` for more details.",
+                DeprecationWarning,
+            )
+        elif verbose is None:
+            verbose = False
 
         self._mode = "corba"
         self._broadcast_logger = None
