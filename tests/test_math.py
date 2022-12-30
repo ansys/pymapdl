@@ -38,7 +38,7 @@ def cube_with_damping(mapdl, cleared):
     mapdl.prep7()
     db = os.path.join(lib_path, "model_damping.db")
     mapdl.upload(db)
-    mapdl.resume(db)
+    mapdl.resume("model_damping.db")
     mapdl.mp("dens", 1, 7800 / 0.5)
 
     mapdl.slashsolu()
