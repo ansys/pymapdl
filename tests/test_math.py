@@ -24,9 +24,34 @@ directory creation.
 )
 
 
+PATH = os.path.dirname(os.path.abspath(__file__))
+lib_path = os.path.join(PATH, "test_files")
+
+
 @pytest.fixture(scope="module")
 def mm(mapdl):
     return mapdl.math
+
+
+@pytest.fixture()
+def cube_with_damping(mapdl, cleared):
+    mapdl.prep7()
+    db = os.path.join(lib_path, "model_damping") + ".db"
+    mapdl.resume(db)
+    mapdl.mp("dens", 1, 7800 / 0.5)
+
+    mapdl.slashsolu()
+    mapdl.antype("modal")
+    mapdl.modopt("damp", 5)
+    mapdl.mxpand(5)
+    mapdl.mascale(0.15)
+
+    mapdl.alphad(10)
+    mapdl.solve()
+    mapdl.save()
+    mapdl.aux2()
+    mapdl.combine("full")
+    mapdl.slashsolu()
 
 
 def test_ones(mm):
@@ -784,10 +809,7 @@ def test_vec2(mm, mapdl):
     assert parameter_["dimensions"] == vec_.size
 
 
-def test_damp_matrix(mm, cube_solve):
-    mm._mapdl.prep7()
-    mm._mapdl.dmprat(0.01)
-    mm._mapdl.finish()
+def test_damp_matrix(mm, cube_with_damping):
     d = mm.damp()
     m = mm.mass()
 
@@ -795,7 +817,8 @@ def test_damp_matrix(mm, cube_solve):
     assert isinstance(d, apdl_math.AnsMat)
 
 
-def test_damp_matrix_as_array(mm, cube_solve):
+def test_damp_matrix_as_array(mm, cube_with_damping):
+
     d = mm.damp()
     d = d.asarray()
 
@@ -808,7 +831,7 @@ def test_damp_matrix_as_array(mm, cube_solve):
 
 
 @pytest.mark.parametrize("dtype_", [np.int64, np.double])
-def test_damp_matrix_dtype(mm, cube_solve, dtype_):
+def test_damp_matrix_dtype(mm, cube_with_damping, dtype_):
     d = mm.stiff(asarray=True, dtype=dtype_)
 
     assert sparse.issparse(d)
