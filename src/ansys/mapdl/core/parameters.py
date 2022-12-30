@@ -418,10 +418,9 @@ class Parameters:
                 self._mapdl.run(format_str)
 
             st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
-            output = self._mapdl.last_response
-            u = output[st:]
+            output = self._mapdl.last_response[st:]
 
-            if "**" not in self._mapdl.last_response[st:]:
+            if "**" not in output:
                 escaped = True
                 break
 
@@ -431,9 +430,7 @@ class Parameters:
                 "that could not be read using '{format_str}'."
             )
 
-        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(
-            shape
-        )
+        arr_flat = np.fromstring(output, sep="\n").reshape(shape)
 
         if len(shape) == 3:
             if shape[2] == 1:
