@@ -45,7 +45,7 @@ These additional packages are imported for use:
 # Start MAPDL as a service
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # This example begins by importing the required packages and then launching Ansys Mechanical APDL.
-
+import os
 import tempfile
 
 from ansys.dpf import core as dpf
@@ -223,7 +223,11 @@ mapdl.cm("bot_nod", "node")
 # Apply the fix condition
 mapdl.allsel()
 mapdl.nsel(
-    type_="s", item="loc", comp="x", vmin=length + pre_crack, vmax=length + pre_crack
+    type_="s",
+    item="loc",
+    comp="x",
+    vmin=length + pre_crack,
+    vmax=length + pre_crack,
 )
 mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
@@ -435,10 +439,17 @@ plt.show()
 # an animation.
 disp = model.results.displacement.on_all_time_freqs.eval()
 camera_pos = disp.animate(
-    scale_factor=10.0, save_as="dcb_animate.gif", return_cpos=True, show_axes=True
+    scale_factor=10.0,
+    save_as="dcb_animate.gif",
+    return_cpos=True,
+    show_axes=True,
 )
 
 ###############################################################################
 #
 # Exit MAPDL
+try:
+    os.remove(rst_path)
+except FileNotFoundError:
+    pass
 mapdl.exit()

@@ -28,6 +28,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    xpl
    upf
    krylov
+   troubleshoot
 
 
 PyMAPDL overview

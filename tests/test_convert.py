@@ -321,7 +321,9 @@ def test_header():
 
 def test_com():
     converted_output = convert_apdl_block(
-        "/com, this is a comment !inline comment!", header=False, add_imports=False
+        "/com, this is a comment !inline comment!",
+        header=False,
+        add_imports=False,
     )
 
     assert 'mapdl.com("this is a comment")' in converted_output
@@ -369,7 +371,9 @@ def test_commands_to_not_be_converted(cmd):
 @pytest.mark.parametrize("ending", ["\n", "\r\n"])
 def test_detect_line_ending(ending):
     assert ending in convert_apdl_block(
-        f"/com First line{ending}/com Second line", header=False, add_imports=False
+        f"/com First line{ending}/com Second line",
+        header=False,
+        add_imports=False,
     )
     assert ending in convert_apdl_block(
         f"/com First line{ending}/com Second line",

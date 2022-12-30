@@ -90,7 +90,12 @@ class RealConstants:
 
         This command is also valid in SOLUTION.
         """
-        command = "RDELE,%s,%s,%s,%s" % (str(nset1), str(nset2), str(ninc), str(lchk))
+        command = "RDELE,%s,%s,%s,%s" % (
+            str(nset1),
+            str(nset2),
+            str(ninc),
+            str(lchk),
+        )
         return self.run(command, **kwargs)
 
     def rlist(self, nset1="", nset2="", ninc="", **kwargs):
@@ -117,7 +122,16 @@ class RealConstants:
         return self.run(command, **kwargs)
 
     def rmodif(
-        self, nset="", stloc="", v1="", v2="", v3="", v4="", v5="", v6="", **kwargs
+        self,
+        nset="",
+        stloc="",
+        v1="",
+        v2="",
+        v3="",
+        v4="",
+        v5="",
+        v6="",
+        **kwargs,
     ):
         """APDL Command: RMODIF
 
@@ -205,7 +219,15 @@ class RealConstants:
         return self.run(command, **kwargs)
 
     def setfgap(
-        self, gap="", ropt="", pamb="", acf1="", acf2="", pref="", mfp="", **kwargs
+        self,
+        gap="",
+        ropt="",
+        pamb="",
+        acf1="",
+        acf2="",
+        pref="",
+        mfp="",
+        **kwargs,
     ):
         """APDL Command: SETFGAP
 

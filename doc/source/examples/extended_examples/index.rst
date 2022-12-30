@@ -18,5 +18,8 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`krylov_example`      | Demonstrates the usage of the Krylov method for solving a customized harmonic analysis.                 |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
+| :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                              |
++----------------------------+---------------------------------------------------------------------------------------------------------+
+
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html

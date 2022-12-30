@@ -28,7 +28,8 @@ from ansys.mapdl.core.misc import get_ansys_bin
 pyvista.OFF_SCREEN = True
 
 SpacedPaths = namedtuple(
-    "SpacedPaths", ["path_without_spaces", "path_with_spaces", "path_with_single_quote"]
+    "SpacedPaths",
+    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
 
 from _pytest.terminal import TerminalReporter
@@ -174,11 +175,17 @@ def pytest_addoption(parser):
         "--corba", action="store_true", default=False, help="run CORBA tests"
     )
     parser.addoption(
-        "--console", action="store_true", default=False, help="run console tests"
+        "--console",
+        action="store_true",
+        default=False,
+        help="run console tests",
     )
     parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
     parser.addoption(
-        "--only-gui", action="store_true", default=False, help="run only GUI tests"
+        "--only-gui",
+        action="store_true",
+        default=False,
+        help="run only GUI tests",
     )
 
 
@@ -439,7 +446,7 @@ def solved_box(mapdl, cleared):
     # Define a material (nominal steel in SI)
     mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
     mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
-    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
     # Fix the left-hand side.
     mapdl.nsel("S", "LOC", "Z", 0)
     mapdl.d("ALL", "UX")
@@ -483,6 +490,7 @@ def twisted_sheet(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, "SHELL181")
     mapdl.mp("EX", 1, 2e5)
+    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
     mapdl.rectng(0, 1, 0, 1)
     mapdl.sectype(1, "SHELL")
     mapdl.secdata(0.1)

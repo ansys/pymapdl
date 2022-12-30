@@ -425,7 +425,9 @@ class ansXpl:
 
         rand_name = id_generator()
         self._mapdl._log.info(
-            "Calling MAPDL to extract the %s matrix from %s", recordname, self._filename
+            "Calling MAPDL to extract the %s matrix from %s",
+            recordname,
+            self._filename,
         )
         num_first = 1
         num_last = 1
@@ -481,7 +483,10 @@ class ansXpl:
         # return either vector or matrix type
         if data_info.objtype == mapdl_pb2.DataType.VEC:
             out = self._mapdl.math.vec(dtype=dtype, name=rand_name)
-        elif data_info.objtype in [mapdl_pb2.DataType.DMAT, mapdl_pb2.DataType.SMAT]:
+        elif data_info.objtype in [
+            mapdl_pb2.DataType.DMAT,
+            mapdl_pb2.DataType.SMAT,
+        ]:  # pragma: no cover
             out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
         else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")

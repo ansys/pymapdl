@@ -816,7 +816,10 @@ def test_cyclic_solve(mapdl, cleared):
 @pytest.mark.parametrize(
     "dim_cols",
     np.concatenate(
-        (np.ones(2, dtype=int) * 2, np.random.randint(2, 100, size=2, dtype=int))
+        (
+            np.ones(2, dtype=int) * 2,
+            np.random.randint(2, 100, size=2, dtype=int),
+        )
     ),
 )
 def test_load_table(mapdl, dim_rows, dim_cols):
@@ -1189,8 +1192,9 @@ def test_inquire(mapdl):
 def test_ksel(mapdl, cleared):
     mapdl.k(1, 0, 0, 0)
     mapdl.prep7()
-    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
-    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
+    assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
 def test_get_file_path(mapdl, tmpdir):
@@ -1203,7 +1207,11 @@ def test_get_file_path(mapdl, tmpdir):
 
 @pytest.mark.parametrize(
     "option2,option3,option4",
-    [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
+    [
+        ("expdata.dat", "", ""),
+        ("expdata", ".dat", ""),
+        ("expdata", "dat", "DIR"),
+    ],
 )
 def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
@@ -1312,7 +1320,8 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(
-        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float
+        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"),
+        float,
     )
 
 
@@ -1553,6 +1562,7 @@ def test_non_interactive(mapdl, cleared):
 
 
 def test_ignored_command(mapdl, cleared):
+    mapdl.ignore_errors = False
     mapdl.prep7(mute=True)
     mapdl.n(mute=True)
     with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
@@ -1650,3 +1660,44 @@ def test_mode(mapdl):
     assert mapdl.is_console
 
     mapdl._mode = "grpc"  # Going back to default
+
+
+def test_remove_lock_file(mapdl, tmpdir):
+    tmpdir_ = tmpdir.mkdir("ansys")
+    lock_file = tmpdir_.join("file.lock")
+    with open(lock_file, "w") as fid:
+        fid.write("test")
+
+    mapdl._remove_lock_file(tmpdir_)
+    assert not os.path.exists(lock_file)
+
+
+def test_is_local(mapdl):
+    assert mapdl.is_local == mapdl._local
+
+
+def test_on_docker(mapdl):
+    assert mapdl.on_docker == mapdl._on_docker
+    if os.getenv("PYMAPDL_START_INSTANCE", "false") == "true":
+        assert mapdl.on_docker
+    else:
+        assert not mapdl.on_docker
+
+
+def test_deprecation_allow_ignore_warning(mapdl):
+    with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
+        mapdl.allow_ignore = True
+
+
+def test_deprecation_allow_ignore_errors_mapping(mapdl):
+    mapdl.allow_ignore = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.allow_ignore = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors

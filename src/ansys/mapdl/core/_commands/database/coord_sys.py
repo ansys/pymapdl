@@ -357,7 +357,12 @@ class CoordinateSystem:
 
         This command is valid in any processor.
         """
-        command = "CSWPLA,%s,%s,%s,%s" % (str(kcn), str(kcs), str(par1), str(par2))
+        command = "CSWPLA,%s,%s,%s,%s" % (
+            str(kcn),
+            str(kcs),
+            str(par1),
+            str(par2),
+        )
         return self.run(command, **kwargs)
 
     def csys(self, kcn="", **kwargs):

@@ -50,7 +50,7 @@ and stiffness matrices generated from MAPDL, you could instead use
 mass and stiffness matrices generated from an external FEM tool or
 even modify the mass and stiffness matrices within Python.
 
-First, solve the first 10 modes of a 1 x 1 x 1 steel meter cube
+First, solve the first 10 modes of a ``1 x 1 x 1`` steel meter cube
 in MAPDL.
 
 .. code:: python

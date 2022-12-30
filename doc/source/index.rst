@@ -8,10 +8,8 @@ PyMAPDL documentation |version|
    getting_started/index
    user_guide/index
    mapdl_commands/index
+   api/index
    examples/index
-   learning/index
-   troubleshoot/index
-   contribution_and_api/index
 
 
 
@@ -60,6 +58,12 @@ performance. Using gRPC, PyMAPDL can convert Python statements into APDL
 commands that can then be transmitted to an MAPDL instance running anywhere, 
 while producing network footprints that are compact and efficient.
 
+The following diagram presents a simplified architecture of PyMAPDL.
+
+.. figure:: ./images/architecture_diagram.png
+    :width: 400pt
+
+    PyMAPDL architecture diagram
 
 Quick code
 ----------
@@ -156,7 +160,7 @@ You can even plot directly from the Python environment with:
 .. figure:: ./images/eplot_vtk.png
     :width: 400pt
 
-    Element pot from MAPDL using ``PyMAPDL`` and ``vtk``
+    Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 For a full listing of PyMAPDL features, see the
 :ref:`ref_user_guide`.

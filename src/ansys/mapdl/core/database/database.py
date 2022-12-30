@@ -175,7 +175,9 @@ class MapdlDb:
             port = int(status.split(":")[1])
         except Exception as e:  # pragma: no cover
             self._mapdl._log.error(
-                "Unable to read port number from '%s' due to\n%s", status, str(e)
+                "Unable to read port number from '%s' due to\n%s",
+                status,
+                str(e),
             )
             port = 50055
 

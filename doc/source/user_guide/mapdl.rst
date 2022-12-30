@@ -307,12 +307,12 @@ running a command in the wrong session raises an error:
 
 You can change this behavior so ignored commands can be logged as
 warnings and not raised as exceptions by using the
-:func:`Mapdl.allow_ignore() <ansys.mapdl.core.Mapdl.allow_ignore>` function. For
+:func:`Mapdl.ignore_errors() <ansys.mapdl.core.Mapdl.ignore_errors>` function. For
 example:
 
 .. code:: python
 
-   >>> mapdl.allow_ignore = True
+   >>> mapdl.ignore_errors = True
    >>> mapdl.k()  # warning silently ignored
 
 

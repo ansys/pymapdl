@@ -1,12 +1,14 @@
+.. _versions_and_interfaces:
+
 ***********************
 Versions and interfaces
 ***********************
+
 The PyMAPDL project attempts to maintain compatibility with legacy
 versions of MAPDL while allowing for support of faster and better
 interfaces with the latest versions of MAPDL.
 
 There are three interfaces PyMAPDL can use to connect to MAPDL.
-
 
 
 gRPC interface
@@ -15,11 +17,6 @@ This is the default and preferred interface to connect to MAPDL.
 Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
-This interface also allows to work with a Docker image.
-If you have the applicable license, you can install and use 
-MAPDL within Docker, enabling you
-to run and solve even on officially unsupported platforms like Mac
-OS. For more information visit :ref:`pymapdl_docker`.
 
 
 Legacy interfaces

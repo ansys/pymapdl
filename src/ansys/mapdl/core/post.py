@@ -664,7 +664,10 @@ class PostProcessing:
         labels = []
         if show_elem_numbering:
             labels = [
-                {"points": surf.cell_centers().points, "labels": surf["ansys_elem_num"]}
+                {
+                    "points": surf.cell_centers().points,
+                    "labels": surf["ansys_elem_num"],
+                }
             ]
 
         return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
@@ -852,7 +855,9 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nTemperature"})
         return self._plot_point_scalars(
-            self.nodal_temperature(), show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_temperature(),
+            show_node_numbering=show_node_numbering,
+            **kwargs,
         )
 
     def nodal_displacement(self, component="NORM") -> np.ndarray:
@@ -1164,7 +1169,11 @@ class PostProcessing:
         return self.element_values("U", component, option)
 
     def plot_element_displacement(
-        self, component="NORM", option="AVG", show_elem_numbering=False, **kwargs
+        self,
+        component="NORM",
+        option="AVG",
+        show_elem_numbering=False,
+        **kwargs,
     ):
         """Plot element displacement.
 
@@ -1363,11 +1372,13 @@ class PostProcessing:
 
         if component in COMPONENT_STRESS_TYPE:
             kwargs.setdefault(
-                "scalar_bar_args", {"title": f"{component} Component Element Stress"}
+                "scalar_bar_args",
+                {"title": f"{component} Component Element Stress"},
             )
         elif component in ["1", "2", "3"]:
             kwargs.setdefault(
-                "scalar_bar_args", {"title": f"{component} Principal Element Stress"}
+                "scalar_bar_args",
+                {"title": f"{component} Principal Element Stress"},
             )
         elif component == "INT":
             kwargs.setdefault("scalar_bar_args", {"title": "Element Stress Intensity"})
@@ -1549,7 +1560,9 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nPressure"})
         return self._plot_point_scalars(
-            self.nodal_pressure(), show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_pressure(),
+            show_node_numbering=show_node_numbering,
+            **kwargs,
         )
 
     def nodal_voltage(self) -> np.ndarray:
@@ -1636,7 +1649,9 @@ class PostProcessing:
         """
         kwargs.setdefault("scalar_bar_args", {"title": "Nodal\nVoltage"})
         return self._plot_point_scalars(
-            self.nodal_voltage(), show_node_numbering=show_node_numbering, **kwargs
+            self.nodal_voltage(),
+            show_node_numbering=show_node_numbering,
+            **kwargs,
         )
 
     def nodal_component_stress(self, component) -> np.ndarray:
@@ -2116,7 +2131,8 @@ class PostProcessing:
         """
         disp = self.nodal_total_component_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": f"{component} Total Nodal\nComponent Strain"}
+            "scalar_bar_args",
+            {"title": f"{component} Total Nodal\nComponent Strain"},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
@@ -2221,7 +2237,8 @@ class PostProcessing:
         """
         disp = self.nodal_total_principal_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+            "scalar_bar_args",
+            {"title": "%s Nodal\nPrincipal Strain" % component},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
@@ -2604,7 +2621,8 @@ class PostProcessing:
         """
         disp = self.nodal_elastic_principal_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+            "scalar_bar_args",
+            {"title": "%s Nodal\nPrincipal Strain" % component},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
@@ -2990,7 +3008,8 @@ class PostProcessing:
         """
         disp = self.nodal_plastic_principal_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+            "scalar_bar_args",
+            {"title": "%s Nodal\nPrincipal Strain" % component},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
@@ -3289,7 +3308,8 @@ class PostProcessing:
         """
         disp = self.nodal_thermal_component_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": f"{component} Thermal Nodal\nComponent Strain"}
+            "scalar_bar_args",
+            {"title": f"{component} Thermal Nodal\nComponent Strain"},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs
@@ -3390,7 +3410,8 @@ class PostProcessing:
         """
         disp = self.nodal_thermal_principal_strain(component)
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "%s Nodal\nPrincipal Strain" % component}
+            "scalar_bar_args",
+            {"title": "%s Nodal\nPrincipal Strain" % component},
         )
         return self._plot_point_scalars(
             disp, show_node_numbering=show_node_numbering, **kwargs

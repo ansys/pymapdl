@@ -1726,7 +1726,15 @@ class ExplicitDynamics:
         return self.run(command, **kwargs)
 
     def edale(
-        self, option="", afac="", bfac="", dfac="", efac="", start="", end="", **kwargs
+        self,
+        option="",
+        afac="",
+        bfac="",
+        dfac="",
+        efac="",
+        start="",
+        end="",
+        **kwargs,
     ):
         """Assigns mesh smoothing to explicit dynamic elements that use
 

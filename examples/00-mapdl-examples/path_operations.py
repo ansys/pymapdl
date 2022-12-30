@@ -190,7 +190,11 @@ pl.add_mesh(
     scalar_bar_args={"title": "Stress YZ"},
 )
 pl.add_mesh(
-    stress_slice, scalars="Stress YZ", opacity=0.25, clim=clim, show_scalar_bar=False
+    stress_slice,
+    scalars="Stress YZ",
+    opacity=0.25,
+    clim=clim,
+    show_scalar_bar=False,
 )
 pl.add_mesh(rst.grid, color="w", style="wireframe", show_scalar_bar=False)
 pl.camera_position = cpos
