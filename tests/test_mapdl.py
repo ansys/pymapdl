@@ -112,7 +112,7 @@ FINISH
 """
 
 
-def _get_process(poll, stdout, stderr):
+def fake_mapdl_process(poll, stdout, stderr):
     class FakeBuffer:
         def __init__(self, message):
             self.message = message
@@ -1775,7 +1775,7 @@ def test_post_mortem_checks_no_process(mapdl):
 
 def test_post_mortem_ok(mapdl):
     # Test with a process that is still running
-    myprocess = _get_process(None, b"None", b"None")
+    myprocess = fake_mapdl_process(None, b"None", b"None")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
     assert mapdl._is_alive_subprocess()
@@ -1785,7 +1785,7 @@ def test_post_mortem_ok(mapdl):
 
 
 def test_post_mortem_empty(mapdl):
-    myprocess = _get_process(None, b"", b"")
+    myprocess = fake_mapdl_process(None, b"", b"")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
     assert mapdl._is_alive_subprocess()
@@ -1795,7 +1795,7 @@ def test_post_mortem_empty(mapdl):
 
 
 def test_post_mortem_error_stdout(mapdl):
-    myprocess = _get_process(None, b"error to connect", b"")
+    myprocess = fake_mapdl_process(None, b"error to connect", b"")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
     assert mapdl._is_alive_subprocess()
@@ -1806,7 +1806,7 @@ def test_post_mortem_error_stdout(mapdl):
 
 
 def test_post_mortem_error_stderr(mapdl):
-    myprocess = _get_process(None, b"", b"other error")
+    myprocess = fake_mapdl_process(None, b"", b"other error")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
     assert mapdl._is_alive_subprocess()
@@ -1817,7 +1817,7 @@ def test_post_mortem_error_stderr(mapdl):
 
 
 def test_post_mortem_error_both(mapdl):
-    myprocess = _get_process(None, b"std error", b"other warning")
+    myprocess = fake_mapdl_process(None, b"std error", b"other warning")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
     assert mapdl._is_alive_subprocess()
@@ -1835,7 +1835,7 @@ def test_launched_property(mapdl):
 
 
 def test_custom_stds_error(mapdl):
-    myprocess = _get_process(
+    myprocess = fake_mapdl_process(
         None, b"", b"Error. Only one usage of each socket address."
     )
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
