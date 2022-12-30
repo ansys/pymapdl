@@ -163,7 +163,7 @@ class _MapdlCore(Commands):
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
-        self._allow_ignore = False
+        self._ignore_errors = False
         self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
@@ -191,7 +191,6 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
-        self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
@@ -922,12 +921,22 @@ class _MapdlCore(Commands):
         This command will be ignored.
 
         """
-        return self._allow_ignore
+        warn(
+            "'allow_ignore' is being deprecated and will be removed in a future release. "
+            "Use ``mapdl.ignore_errors`` instead.",
+            DeprecationWarning,
+        )
+        return self._ignore_errors
 
     @allow_ignore.setter
     def allow_ignore(self, value):
         """Set allow ignore"""
-        self._allow_ignore = bool(value)
+        warn(
+            "'allow_ignore' is being deprecated and will be removed in a future release. "
+            "Use ``mapdl.ignore_errors`` instead.",
+            DeprecationWarning,
+        )
+        self._ignore_errors = bool(value)
 
     def open_apdl_log(self, filename, mode="w"):
         """Start writing all APDL commands to an MAPDL input file.
@@ -2837,20 +2846,19 @@ class _MapdlCore(Commands):
             self._response = None
             return self._response
 
-        if "is not a recognized" in text:
-            if not self.allow_ignore:
+        if not self.ignore_errors:
+            if "is not a recognized" in text:
                 text = text.replace("This command will be ignored.", "")
-                text += "\n\nIgnore these messages by setting allow_ignore=True"
+                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
                 raise MapdlInvalidRoutineError(text)
 
-        if "command is ignored" in text:
-            if not self.allow_ignore:
-                text += "\n\nIgnore these messages by setting allow_ignore=True"
+            if "command is ignored" in text:
+                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
                 raise MapdlCommandIgnoredError(text)
 
-        # flag errors
-        if "*** ERROR ***" in self._response and not self._ignore_errors:
-            self._raise_output_errors(self._response)
+            # flag errors
+            if "*** ERROR ***" in self._response:
+                self._raise_output_errors(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -2862,12 +2870,33 @@ class _MapdlCore(Commands):
 
     @property
     def ignore_errors(self) -> bool:
-        """
-        Flag to ignore MAPDL errors.
+        """Invalid commands will be ignored rather than exceptions
 
         Normally, any string containing "*** ERROR ***" from MAPDL
         will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
         ignore these errors.
+
+        For example, a command executed in the wrong processor will
+        raise an exception when ``ignore_errors=False``.
+        This is the default behavior.
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.k(1, 0, 0, 0)
+        Exception:  K is not a recognized POST1 command, abbreviation, or macro.
+
+        Ignore these messages by setting ignore_errors=True
+
+        >>> mapdl.ignore_errors = True
+        2020-06-08 21:39:58,094 [INFO] : K is not a
+        recognized POST1 command, abbreviation, or macro.  This
+        command will be ignored.
+
+        *** WARNING *** CP = 0.372 TIME= 21:39:58
+        K is not a recognized POST1 command, abbreviation, or macro.
+        This command will be ignored.
+
         """
         return self._ignore_errors
 
