@@ -11,7 +11,11 @@ from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -1163,7 +1167,7 @@ def test_cwd(mapdl, tmpdir):
         assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
 
         wrong_path = "wrong_path"
-        with pytest.raises(MapdlCommandIgnoredError, match="working directory"):
+        with pytest.raises(IncorrectWorkingDirectory, match="working directory"):
             mapdl.directory = wrong_path
 
     finally:

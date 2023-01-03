@@ -103,6 +103,15 @@ class LicenseServerConnectionError(MapdlDidNotStart):
         MapdlDidNotStart.__init__(self, msg)
 
 
+class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
+    """Raised when the MAPDL working directory does not exist."""
+
+    # The working directory specified (wrong_path) is not a directory.
+
+    def __init__(self, msg=""):
+        MapdlRuntimeError.__init__(self, msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
