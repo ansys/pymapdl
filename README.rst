@@ -28,6 +28,9 @@ PyMAPDL
   :target: https://github.com/psf/black
   :alt: black
 
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/pyansys/pymapdl/main.svg
+   :target: https://results.pre-commit.ci/latest/github/pyansys/pymapdl/main
+   :alt: pre-commit.ci status
 
 Overview
 --------
