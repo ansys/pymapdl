@@ -1152,7 +1152,8 @@ def test_cwd(mapdl, tmpdir):
         tempdir_ = tmpdir
     else:
         if mapdl.platform == "linux":
-            tempdir_ = "\\tmp"
+            mapdl.sys("mkdir -p /tmp")
+            tempdir_ = "/tmp"
         elif mapdl.platform == "windows":
             tempdir_ = "C:\\Windows\\Temp"
         else:
