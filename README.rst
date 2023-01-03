@@ -93,21 +93,21 @@ Python 3.10 on Windows, Mac OS, and Linux.
 Install the latest release from `PyPi
 <https://pypi.org/project/ansys-mapdl-core/>`_ with:
 
-.. code::
+.. code:: console
 
    pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
 <https://github.com/pyansys/pymapdl/issues>`_ via:
 
-.. code::
+.. code:: console
 
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
 For a local "development" version, install with (requires pip >= 22.0):
 
-.. code::
+.. code:: console
 
    git clone https://github.com/pyansys/pymapdl.git
    cd pymapdl
@@ -127,7 +127,7 @@ this on an isolated system with a fresh python or on a virtual environment.
 
 For example, on Linux with Python 3.7, unzip it and install it with the following:
 
-.. code::
+.. code:: console
 
    unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
@@ -156,6 +156,7 @@ You can launch MAPDL locally directly from Python using ``launch_mapdl``:
 .. code:: python
 
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
 
 This automatically searches for the latest local version of MAPDL,
@@ -174,23 +175,23 @@ adapted to run from Linux, or the LAN provided the necessary ports are
 open. This example specifies the port with ``-port 50052``, but this
 option can be left out if you plan on using the default port 50052.
 
-.. code::
+.. code:: pwsh
 
     start "MAPDL" "%ANSYS211_DIR%\bin\winx64\ANSYS211.exe" -port 50052 -grpc
 
 Next, connect to the instance of MAPDL from python with:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import Mapdl
-    >>> ip = '127.0.0.1'
+    >>> ip = "127.0.0.1"
     >>> mapdl = Mapdl(ip=ip, port=50052, start_instance=False)
     >>> print(mapdl)
 
 
 A successful connection returns:
 
-.. code::
+.. code:: output
 
     Product:             ANSYS Mechanical Enterprise
     MAPDL Version:       RELEASE  2020 R2           BUILD 20.2TEST  UPDATE 20200601
@@ -210,7 +211,7 @@ You run MAPDL commands via:
 
 .. code:: python
 
-    mapdl.run('/PREP7')
+    mapdl.run("/PREP7")
 
 
 Nearly all the built-in MAPDL commands have an associated pythonic
@@ -244,7 +245,7 @@ and source, you can visit `pyansys Zenodo
 <https://zenodo.org/badge/latestdoi/70696039>`_ and generate the
 correct citation.  For example, the BibTex citation is:
 
-.. code::
+.. code:: bibtex
 
     @software{alexander_kaszynski_2020_4009467,
       author       = {Alexander Kaszynski},

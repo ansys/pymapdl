@@ -20,13 +20,13 @@ are prompted for the location of the MAPDL executable.
 
 Here is a sample input for Linux:
 
-.. code::
+.. code:: output
 
     Enter location of MAPDL executable: /usr/ansys_inc/v222/ansys/bin/ansys222
 
 Here is a sample input for Windows:
 
-.. code::
+.. code:: output
 
     Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v222\ANSYS\bin\winx64\ansys222.exe
 

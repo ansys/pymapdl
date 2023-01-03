@@ -128,7 +128,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
 .. note:: 
     If you experience errors when using PyCall, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
     
-    .. code::
+    .. code:: jlcon
         
         pkg> build PyCall
 

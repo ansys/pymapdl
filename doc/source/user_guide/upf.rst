@@ -99,10 +99,12 @@ The description of the request object and the response object can be found in th
 ``MapdlUser.proto`` file stored in this installation directory:
 
 
-.. code::
+.. code:: output
 
-    Ansys Inc\v212\ansys\syslib\ansGRPC\User
+    Ansys Inc\vXXX\ansys\syslib\ansGRPC\User
 
+Where ``XXX`` is the version of Mechanical APDL you are using.
+For example ``222`` for Mechanical APDL 2022R2.
 
 First, create a Python file starting from this template:
 
@@ -149,7 +151,7 @@ customized banner. This file must be in the same directory as the input file.
 To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your
 input file (``my\_inp.dat``).
 
-.. code::
+.. code:: apdl
 
     /UPF,my_upf.py
 
@@ -166,7 +168,7 @@ indicate Mechanical APDL detected the Python UPF instructions and has launched a
 server:
 
 
-.. code::
+.. code:: output
 
     Processing "/upf" found in input file "my_inp.dat"
 
@@ -184,7 +186,7 @@ server:
 During the Mechanical APDL process, you see this Python printout:
 
 
-.. code::
+.. code:: output
 
     RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v212/ansys/apdl/start.ans
     =======================================
@@ -196,7 +198,7 @@ At the very end of the process, the Python server is automatically shut
 down:
 
 
-.. code::
+.. code:: output
     
     |-----------------------------------------------------------------|
     |                                                                 |

@@ -23,7 +23,7 @@ with the theoretical result.
 Input data
 ++++++++++
 
-.. code::
+.. code:: apdl
 
     /batch,list
     /title,upf-py1s, test usermat.py with 3D elements
@@ -233,7 +233,7 @@ Input data
 ++++++++++
 
 
-.. code::
+.. code:: apdl
 
     /batch,list
     /title,upf-py10s, test usrshift.py 
@@ -398,7 +398,7 @@ the reference.
 Input data
 ++++++++++
 
-.. code::
+.. code:: apdl
 
     /BATCH,LIST 
     /title, upf-py16s, test UserHyper.py with MAPDL 

@@ -997,7 +997,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     The configuration file location (``config.txt``) can be found in
     ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
 
-    .. code:: python
+    .. code:: pycon
 
         >>> import appdirs
         >>> import os

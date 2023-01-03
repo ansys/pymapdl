@@ -150,7 +150,7 @@ grid.plot(
 # This grid can be also saved to disk in the compact cross-platform VTK
 # format and loaded again with ``pyvista`` or ParaView.
 #
-# ..code::
+# ..code:: pycon
 #
 #     >>> grid.save('my_mesh.vtk')
 #     >>> import pyvista

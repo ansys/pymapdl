@@ -18,7 +18,7 @@ Cloning the PyMAPDL repository
 
 Run this code to clone and install the latest version of PyMAPDL in development mode:
 
-.. code::
+.. code:: console
 
     git clone https://github.com/pyansys/pymapdl
     cd pymapdl
@@ -59,7 +59,7 @@ unit testing, you must set up the following environment variables.
 
 In Windows, use:
 
-.. code::
+.. code:: pwsh
 
     SET PYMAPDL_START_INSTANCE=False
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -67,7 +67,7 @@ In Windows, use:
 
 In Linux, use:
 
-.. code::
+.. code:: bash
 
     export PYMAPDL_START_INSTANCE=False
     export PYMAPDL_PORT=<MAPDL Port> (default 50052)

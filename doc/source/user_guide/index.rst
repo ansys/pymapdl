@@ -60,35 +60,35 @@ key points, you could run:
 
 .. code:: python
 
-    mapdl.run('/PREP7')
-    mapdl.run('K, 1, 0, 0, 0')
-    mapdl.run('K, 2, 1, 0, 0')
-    mapdl.run('K, 3, 1, 1, 0')
-    mapdl.run('K, 4, 0, 1, 0')
-    mapdl.run('L, 1, 2')
-    mapdl.run('L, 2, 3')
-    mapdl.run('L, 3, 4')
-    mapdl.run('L, 4, 1')
-    mapdl.run('AL, 1, 2, 3, 4')
+    mapdl.run("/PREP7")
+    mapdl.run("K, 1, 0, 0, 0")
+    mapdl.run("K, 2, 1, 0, 0")
+    mapdl.run("K, 3, 1, 1, 0")
+    mapdl.run("K, 4, 0, 1, 0")
+    mapdl.run("L, 1, 2")
+    mapdl.run("L, 2, 3")
+    mapdl.run("L, 3, 4")
+    mapdl.run("L, 4, 1")
+    mapdl.run("AL, 1, 2, 3, 4")
 
 MAPDL interactively returns the result of each command, which is
 stored to the logging module. Errors are caught immediately. For
 example, if you input an invalid command:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('AL, 1, 2, 3')
+   >>> mapdl.run("AL, 1, 2, 3")
 
-   MapdlRuntimeError: 
-   AL, 1, 2, 3
+   apdlRuntimeError: 
+   L, 1, 2, 3
 
-   DEFINE AREA BY LIST OF LINES
-   LINE LIST =     1    2    3
-   (TRAVERSED IN SAME DIRECTION AS LINE     1)
+   EFINE AREA BY LIST OF LINES
+   INE LIST =     1    2    3
+   TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   Keypoint 1 is referenced by only one line.  Improperly connected line   
-   set for AL command.                                                     
+   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   eypoint 1 is referenced by only one line.  Improperly connected line   
+   et for AL command.                                                     
 
 This ``MapdlRuntimeError`` was caught immediately. This means that
 you can write your MAPDL scripts in Python, run them interactively, and
@@ -112,7 +112,7 @@ Python. For example, the following two commands are equivalent:
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
-    mapdl.run('K, 1, 0, 0, 0')
+    mapdl.run("K, 1, 0, 0, 0")
 
 This approach has some obvious advantages. Chiefly, it's easier
 to script because ``ansys-mapdl-core`` takes care of the string formatting for you.
@@ -127,20 +127,20 @@ For example, you can input points from a numpy array with:
 
 Additionally, exceptions are caught and handled within Python.
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('AL, 1, 2, 3')
+   >>> mapdl.run("AL, 1, 2, 3")
 
-   Exception: 
-   AL, 1, 2, 3
+   xception: 
+   L, 1, 2, 3
 
-   DEFINE AREA BY LIST OF LINES
-   LINE LIST =     1    2    3
-   (TRAVERSED IN SAME DIRECTION AS LINE     1)
+   EFINE AREA BY LIST OF LINES
+   INE LIST =     1    2    3
+   TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   Keypoint 1 is referenced by only one line.  Improperly connected line   
-   set for AL command.                                                     
+   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   eypoint 1 is referenced by only one line.  Improperly connected line   
+   et for AL command.                                                     
 
 
 For longer scripts, instead of sending commands to MAPDL as in the
@@ -157,7 +157,7 @@ area creation example, you can instead run:
     mapdl.k(1, 0, 0, 0)
     mapdl.k(2, 1, 0, 0)
     mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)    
+    mapdl.k(4, 0, 1, 0)
     mapdl.l(1, 2)
     mapdl.l(2, 3)
     mapdl.l(3, 4)
@@ -181,7 +181,7 @@ points from a numpy array:
 Additionally, each function with the MAPDL class has help associated
 with it. For example:
 
-.. code:: python
+.. code:: pycon
 
     >>> help(mapdl.k)
 
@@ -210,7 +210,7 @@ with it. For example:
         --------
         Create a keypoint at (1, 1, 2)
 
-        >>> mapdl.k(1, 1, 1, 2)
+    >>> mapdl.k(1, 1, 1, 2)
 
         Notes
         -----
