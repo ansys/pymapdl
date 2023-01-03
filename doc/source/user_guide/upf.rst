@@ -115,20 +115,22 @@ First, create a Python file starting from this template:
     import sys
     from mapdl import *
 
-    class MapdlUserService( MapdlUser_pb2_grpc.MapdlUserServiceServicer ):
 
-    #   #################################################################
-        def UAnBeg( self, request, context):
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
 
-            print( " ======================================= ")
-            print( " >> Inside the PYTHON UAnBeg routine  << ")
-            print( " ======================================= \n")
+        #   #################################################################
+        def UAnBeg(self, request, context):
+
+            print(" ======================================= ")
+            print(" >> Inside the PYTHON UAnBeg routine  << ")
+            print(" ======================================= \n")
 
             response = google_dot_protobuf_dot_empty__pb2._EMPTY()
             return response
 
-    if __name__ == '__main__':
-        upf.launch( sys.argv[0])
+
+    if __name__ == "__main__":
+        upf.launch(sys.argv[0])
 
 
 Note that Mechanical APDL automatically installs a Mechanical APDL Python package (a
@@ -226,16 +228,16 @@ variable:
 
     firstcall = 1
 
-    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-        
 
-    #   ###############################################################
-        def UserMat( self, request, context):
-            
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+
+        #   ###############################################################
+        def UserMat(self, request, context):
+
             global firstcall
-            
+
             if firstcall == 1:
-                print( ">> Connection to the MAPDL DB Server\n")
+                print(">> Connection to the MAPDL DB Server\n")
                 db.start()
                 firstcall = 0
 

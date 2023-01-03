@@ -270,6 +270,7 @@ def convert_apdl_block(
         .. code:: python
 
            from ansys.mapdl.core import launch_mapdl
+
            mapdl = launch_mapdl(loglevel="WARNING")
 
         This option is useful if you are planning to use the output

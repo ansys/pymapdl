@@ -396,8 +396,8 @@ over a range of frequencies, such as 0 to 1000 Hz.
     step_val = (end_freq - start_freq) / num_steps
     dic = {}
 
-    for freq in range (0,num_steps):        
-        pressure = get_pressure_at(node_number, freq)['x']
+    for freq in range(0, num_steps):
+        pressure = get_pressure_at(node_number, freq)["x"]
         abs_pressure = abs(pressure)
 
         dic[start_freq] = abs_pressure
@@ -409,20 +409,19 @@ Sort the results.
 
     frf_List = dic.items()
     frf_List = sorted(frf_List)
-    frf_x, frf_y = zip(*frf_List) 
-        
-        
+    frf_x, frf_y = zip(*frf_List)
 
 Plot the frequency response function for the selected node. 
 
 .. code:: python3
-    
-    plt.plot(frf_x, frf_y, linewidth= 3.0, color='b')
+    plt.plot(frf_x, frf_y, linewidth=3.0, color="b")
 
     # Plot the natural frequency as vertical lines on the FRF graph
-    for itr in range(0,6):
-        plt.axvline(x=eigenvalues[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
-        
+    for itr in range(0, 6):
+        plt.axvline(
+            x=eigenvalues[itr], ymin=0, ymax=2, color="r", linestyle="dotted", linewidth=1
+        )
+
     # Name the graph and the x-axis and y-axis
     plt.title("Frequency Response Function")
     plt.xlabel("Frequency (HZ)")

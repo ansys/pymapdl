@@ -58,6 +58,7 @@ in MAPDL.
     import re
 
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
 
     # setup the full file
@@ -65,20 +66,20 @@ in MAPDL.
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.5)
-    mapdl.vmesh('all')
+    mapdl.vmesh("all")
 
     # Define a material (nominal steel in SI)
-    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
     # store the first 10 natural frequencies
     mapdl.post1()
-    resp = mapdl.set('LIST')
-    w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
     print(w_n)
 
 You now have solved for the first 10 modes of the cube:
