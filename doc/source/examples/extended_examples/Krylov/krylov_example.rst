@@ -388,7 +388,7 @@ This code plots the frequency response function for a node along 0.2 in the X di
 Get the response of the system for the selected node
 over a range of frequencies, such as 0 to 1000 Hz.
 
-.. code:: python3
+.. code:: python
 
     start_freq = 0
     end_freq = 1000
@@ -405,7 +405,7 @@ over a range of frequencies, such as 0 to 1000 Hz.
 
 Sort the results.
 
-.. code:: python3
+.. code:: python
 
     frf_List = dic.items()
     frf_List = sorted(frf_List)
@@ -413,7 +413,8 @@ Sort the results.
 
 Plot the frequency response function for the selected node. 
 
-.. code:: python3
+.. code:: python
+
     plt.plot(frf_x, frf_y, linewidth=3.0, color="b")
 
     # Plot the natural frequency as vertical lines on the FRF graph

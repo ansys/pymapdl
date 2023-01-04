@@ -417,7 +417,7 @@ Create a square area using keypoints
     >>> mapdl.l(4, 1)
     >>> mapdl.al(1, 2, 3, 4)
 
-Open up the gui
+Open up the GUI
 
 .. code:: pycon
 
