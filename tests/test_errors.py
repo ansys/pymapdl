@@ -24,14 +24,14 @@ error_shape_error_limits = """
 error_highly_distorted = """
 
 *** ERROR *** CP = 2872.649 TIME= 16:29:51
-One or more elements have become highly distorted. Excessive
-distortion of elements is usually a symptom indicating the need for
-corrective action elsewhere. Try incrementing the load more slowly
-(increase the number of substeps or decrease the time step size). You
-may need to improve your mesh to obtain elements with better aspect
-ratios. Also consider the behavior of materials, contact pairs,
-and/or constraint equations. If this message appears in the first
-iteration of first substep, be sure to perform element shape checking.
+ One or more elements have become highly distorted. Excessive
+ distortion of elements is usually a symptom indicating the need for
+ corrective action elsewhere. Try incrementing the load more slowly
+ (increase the number of substeps or decrease the time step size). You
+ may need to improve your mesh to obtain elements with better aspect
+ ratios. Also consider the behavior of materials, contact pairs,
+ and/or constraint equations. If this message appears in the first
+ iteration of first substep, be sure to perform element shape checking.
 
 """  # the last empty line is important!
 

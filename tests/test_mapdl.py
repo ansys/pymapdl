@@ -1634,7 +1634,7 @@ def test_use_uploading(mapdl, cleared, tmpdir):
     out = mapdl.use(mymacrofile)
 
     # Raises an error.
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.use("myinexistentmacro.mac")
 
     # Raise an error
