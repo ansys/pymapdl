@@ -101,7 +101,7 @@ This example translates the verification example ``"vm1.dat"``.
 
 First, the MAPDL code:
 
-.. code:: apdl
+.. code:: ansys
 
     /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
     /VERIFY,VM1
@@ -261,7 +261,7 @@ VM7 - plastic compression of a pipe assembly
 --------------------------------------------
 Here is the input file from VM7:
 
-.. code:: apdl
+.. code:: ansys
 
     /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
     /VERIFY,VM7

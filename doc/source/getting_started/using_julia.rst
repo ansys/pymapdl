@@ -26,7 +26,7 @@ To install it, run Julia and switch to the package manager by pressing the ``"]"
 If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
 To create a virtual environment, use the ``activate`` command with the name of the new environment that you want to create or activate.
 
-.. code-block:: julia
+.. code:: julia
 
     (@1.7) pkg> activate julia_test
       Activating project at `C:/Users/USER/julia_test`
@@ -34,13 +34,13 @@ To create a virtual environment, use the ``activate`` command with the name of t
 
 A message should appear, indicating that the new package (``julia_test``) has been activated. This environment name now precedes the command line.
 
-.. code-block:: julia
+.. code:: julia
 
     (julia_test) pkg>
 
 Next install the PyCall package by typing:
 
-.. code-block:: julia
+.. code:: julia
 
     (julia_test) pkg> add PyCall
 
@@ -48,13 +48,13 @@ Next install the PyCall package by typing:
 To use PyCall, press the backspace key to go to the Julia command line.
 The command line is then preceded by the name ``Julia``. 
 
-.. code-block:: julia
+.. code:: julia
 
     julia>
 
 Next use the PyCall package with:
 
-.. code-block:: julia
+.. code:: julia
 
     julia> using PyCall
 
@@ -64,7 +64,7 @@ This should be enough to use packages included in a basic Python distribution.
 
 For example:
 
-.. code-block:: julia
+.. code:: julia
 
     julia> math = pyimport("math")
     math.sin(math.pi/4) # returns ≈ 1/√2 = 0.70710678..
@@ -79,14 +79,14 @@ However, because it is a fully working Python environment, you can still use it 
 
 To install PyMAPDL, first locate the Python executable with:
 
-.. code-block:: julia
+.. code:: julia
 
     julia> PyCall.python
     "C:\\Users\\USER\\.julia\\conda\\3\\python.exe"
 
 In Linux, the preceding code prints the following, where ``python3`` is the default Python3 installation for the operating system.
 
-.. code-block:: julia
+.. code:: julia
     
     julia> PyCall.python
     "python3"
@@ -114,7 +114,7 @@ In Linux:, you would install with:
 
 Finally, after restarting Julia, you can import PyMAPDL using the same procedure as described earlier:
 
-.. code-block:: julia
+.. code:: julia
     
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")
@@ -125,7 +125,7 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     MAPDL Version:       21.2
     ansys.mapdl Version: 0.60.6
     
-.. note:: 
+.. note::
     If you experience errors when using PyCall, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
     
     .. code:: julia
@@ -138,7 +138,7 @@ Use PyMAPDL in Julia
 
 Here is a simple example of how you use PyMAPDL in Julia:
 
-.. code-block:: julia
+.. code:: julia
 
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")

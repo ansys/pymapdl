@@ -25,7 +25,7 @@ Script initialization
 ~~~~~~~~~~~~~~~~~~~~~
 Here is the beginning of the MAPDL script:
 
-.. code:: apdl
+.. code:: ansys
 
     !----------------------------------------
     ! Input torque applied (moment)
@@ -67,7 +67,7 @@ Model creation
 ~~~~~~~~~~~~~~    
 Here is an APDL script for creating the model:
 
-.. code:: apdl
+.. code:: ansys
 
     !----------------------------------------
     ! Define higher-order SOLID186
@@ -171,7 +171,7 @@ Solution
 ~~~~~~~~
 Here is the APDL script for the solution:
 
-.. code:: apdl
+.. code:: ansys
 
     /solu
     antype,static,new
@@ -303,7 +303,7 @@ This MAPDL example demonstrates how to model spot welding on three
 thin sheets of metal. Here, the full input file is simply run using
 the PyMAPDL interface.
 
-.. code:: apdl
+.. code:: ansys
 
     !----------------------------------------
     ! Example problem for demonstrating 

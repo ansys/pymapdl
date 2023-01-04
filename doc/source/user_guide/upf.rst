@@ -151,7 +151,7 @@ customized banner. This file must be in the same directory as the input file.
 To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your
 input file (``my\_inp.dat``).
 
-.. code:: apdl
+.. code:: ansys
 
     /UPF,my_upf.py
 
