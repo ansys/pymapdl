@@ -1147,15 +1147,24 @@ def test_path_with_spaces(mapdl, path_tests):
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(RuntimeError):
-        resp = mapdl.cwd(path_tests.path_with_single_quote)
+        mapdl.cwd(path_tests.path_with_single_quote)
 
 
-@skip_in_cloud
 def test_cwd(mapdl, tmpdir):
     old_path = mapdl.directory
+    if mapdl._local:
+        tempdir_ = tmpdir
+    else:
+        if mapdl.platform == "linux":
+            mapdl.sys("mkdir -p /tmp")
+            tempdir_ = "/tmp"
+        elif mapdl.platform == "windows":
+            tempdir_ = "C:\\Windows\\Temp"
+        else:
+            raise ValueError("Unknown platform")
     try:
-        mapdl.directory = str(tmpdir)
-        assert mapdl.directory == str(tmpdir).replace("\\", "/")
+        mapdl.directory = str(tempdir_)
+        assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
 
         wrong_path = "wrong_path"
         with pytest.raises(IncorrectWorkingDirectory, match="working directory"):
