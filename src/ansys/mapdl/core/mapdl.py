@@ -31,6 +31,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -3402,7 +3403,9 @@ class _MapdlCore(Commands):
 
         if output is not None:
             if "*** WARNING ***" in output:
-                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
+                raise IncorrectWorkingDirectory(
+                    "\n" + "\n".join(output.splitlines()[1:])
+                )
 
         return output
 
