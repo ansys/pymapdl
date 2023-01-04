@@ -113,7 +113,7 @@ Examples
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 
-.. code:: ansys
+.. code:: output
 
      POST1:
      PRNSOL, U, X

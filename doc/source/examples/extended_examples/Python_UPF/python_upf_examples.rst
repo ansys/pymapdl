@@ -23,13 +23,13 @@ with the theoretical result.
 Input data
 ++++++++++
 
-.. code:: ansys
+.. code:: apdl
 
     /batch,list
-    /title,upf-py1s, test usermat.py with 3D elements
+    /title,upf-py1s, 'test usermat.py with 3D elements'
 
     /prep7
-    /upf,usermat.py
+    /upf,'usermat.py'
     tb,user,1,,2
     tbdata,1,1e5, 0.3    ! E, Poisson
 
@@ -233,17 +233,13 @@ Input data
 ++++++++++
 
 
-.. code:: ansys
+.. code:: apdl
 
     /batch,list
-    /title,upf-py10s, test usrshift.py 
-    /com 
-    /com 
-    /com 
-    /nopr 
+    /title,upf-py10s, 'test usrshift.py'
 
     /prep7 
-    /upf,usrshift.py 
+    /upf,'usrshift.py'
 
     n1=60 
     n2=n1*10 
@@ -398,15 +394,15 @@ the reference.
 Input data
 ++++++++++
 
-.. code:: ansys
+.. code:: apdl
 
     /BATCH,LIST 
-    /title, upf-py16s, test UserHyper.py with MAPDL 
-    /com    displacement-controlled uniaxial tension test for Boyce material model  
+    /title, upf-py16s, 'test UserHyper.py with MAPDL'
+    /com, displacement-controlled uniaxial tension test for Boyce material model  
 
     /prep7 
 
-    /upf,userhyper.py 
+    /upf,'userhyper.py'
     tb,hyper,1,,,user 
     tbdata,1,2/100,0.2,2.8284 
 
@@ -444,7 +440,7 @@ Input data
     set,1,last 
     presol,s,x 
 
-    /com, expected results from equivalent userhyper.F 
+    /com, 'expected results from equivalent userhyper.F'
     /com,    NODE     SX           SY           SZ           SXY          SYZ 
     /com,       2  0.20118      0.32054E-003 0.32054E-003 0.13752E-015 0.67903E-017 
     /com,       4  0.20118      0.32054E-003 0.32054E-003 0.13776E-015 0.40293E-017 

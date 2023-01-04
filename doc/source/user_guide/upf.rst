@@ -151,9 +151,9 @@ customized banner. This file must be in the same directory as the input file.
 To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your
 input file (``my\_inp.dat``).
 
-.. code:: ansys
+.. code:: apdl
 
-    /UPF,my_upf.py
+    /UPF,'my_upf.py'
 
     ! The UAnBeg UPF must be activated by using the USRCAL APDL command
 

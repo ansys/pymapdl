@@ -101,59 +101,59 @@ This example translates the verification example ``"vm1.dat"``.
 
 First, the MAPDL code:
 
-.. code:: ansys
+.. code:: apdl
 
-    /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
-    /VERIFY,VM1
+    /COM, 'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
+    /VERIFY, VM1
     /PREP7
-    /TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS
-    C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10
-    ANTYPE,STATIC                  ! STATIC ANALYSIS
-    ET,1,LINK180
-    SECTYPE,1,LINK
-    SECDATA,1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1
-    MP,EX,1,30E6
-    N,1
-    N,2,,4
-    N,3,,7
-    N,4,,10
-    E,1,2                          ! DEFINE ELEMENTS
-    EGEN,3,1,1
-    D,1,ALL,,,4,3                  ! BOUNDARY CONDITIONS AND LOADING
-    F,2,FY,-500
-    F,3,FY,-1000
+    /TITLE,'  VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS'
+    /COM,'      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10'
+    ANTYPE, STATIC                  ! STATIC ANALYSIS
+    ET, 1, LINK180
+    SECTYPE, 1, LINK
+    SECDATA, 1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1
+    MP, EX, 1, 30E6
+    N, 1
+    N, 2, , 4
+    N, 3, , 7
+    N, 4, , 10
+    E, 1, 2                          ! DEFINE ELEMENTS
+    EGEN, 3, 1, 1
+    D, 1, ALL, , , 4, 3                  ! BOUNDARY CONDITIONS AND LOADING
+    F, 2, FY, -500
+    F, 3, FY, -1000
     FINISH
-    /SOLU    
-    OUTPR,BASIC,1
-    OUTPR,NLOAD,1
+    /SOLU
+    OUTPR, BASIC, 1
+    OUTPR, NLOAD, 1
     SOLVE
     FINISH
     /POST1
-    NSEL,S,LOC,Y,10
+    NSEL, S, LOC, Y, 10
     FSUM
-    *GET,REAC_1,FSUM,,ITEM,FY
-    NSEL,S,LOC,Y,0
+    *GET, REAC_1, FSUM, , ITEM, FY
+    NSEL, S, LOC, Y, 0
     FSUM
-    *GET,REAC_2,FSUM,,ITEM,FY
-    
-    *DIM,LABEL,CHAR,2
-    *DIM,VALUE,,2,3
-    LABEL(1) = 'R1, lb','R2, lb '
-    *VFILL,VALUE(1,1),DATA,900.0,600.0
-    *VFILL,VALUE(1,2),DATA,ABS(REAC_1),ABS(REAC_2)
-    *VFILL,VALUE(1,3),DATA,ABS(REAC_1 / 900) ,ABS( REAC_2 / 600)
-    /OUT,vm1,vrt
+    *GET, REAC_2, FSUM, , ITEM, FY
+
+    *DIM, LABEL, CHAR, 2
+    *DIM, VALUE, , 2, 3
+    LABEL(1) = 'R1, lb', 'R2, lb '
+    *VFILL, VALUE(1, 1), DATA, 900.0, 600.0
+    *VFILL, VALUE(1, 2), DATA, ABS(REAC_1), ABS(REAC_2)
+    *VFILL, VALUE(1, 3), DATA, ABS(REAC_1 / 900) , ABS( REAC_2 / 600)
+    /OUT, vm1, vrt
     /COM
-    /COM,------------------- VM1 RESULTS COMPARISON ---------------------
+    /COM,' ------------------- VM1 RESULTS COMPARISON - --------------------'
     /COM,
-    /COM,         |   TARGET   |   Mechanical APDL   |   RATIO
+    /COM,'         |   TARGET   |   Mechanical APDL   |   RATIO'
     /COM,
-    *VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
-    (1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)
-    /COM,----------------------------------------------------------------
+    *VWRITE, LABEL(1), VALUE(1, 1), VALUE(1, 2), VALUE(1, 3)
+    (1X, A8, '   ', F10.1, '  ', F10.1, '   ', 1F5.3)
+    /COM, ----------------------------------------------------------------
     /OUT
     FINISH
-    *LIST,vm1,vrt
+    *LIST, vm1, vrt
 
 Translate the verification file with:
 
@@ -261,14 +261,14 @@ VM7 - plastic compression of a pipe assembly
 --------------------------------------------
 Here is the input file from VM7:
 
-.. code:: ansys
+.. code:: apdl
 
-    /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+    /COM,'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
     /VERIFY,VM7
     /PREP7
-    /TITLE, VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY
-    C***          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1
-    C***          USING PIPE288, SOLID185 AND SHELL181 ELEMENTS
+    /TITLE,' VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY'
+    /COM,'          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1'
+    /COM,'          USING PIPE288, SOLID185 AND SHELL181 ELEMENTS'
     THETA=6                              ! SUBTENDED ANGLE
     ET,1,PIPE288,,,,2
     ET,2,SOLID185
@@ -325,10 +325,10 @@ Here is the input file from VM7:
     E,203,201,205,207
     SECNUM,2                             ! OUTSIDE (ALUMINUM) TUBE
     E,204,202,206,208
-    C*** APPLY CONSTRAINTS TO PIPE288 MODEL
+    /COM,' APPLY CONSTRAINTS TO PIPE288 MODEL'
     D,1,ALL                              ! FIX ALL DOFS FOR BOTTOM END OF PIPE288
     D,2,UX,,,,,UY,ROTX,ROTY,ROTZ         ! ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
-    C*** APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS
+    /COM,' APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS'
     CP,1,UX,101,111,105,115              ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
     CPSGEN,4,,1
     CP,5,UX,201,205,203,20               ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
@@ -348,7 +348,7 @@ Here is the input file from VM7:
     FINISH
     /SOLU    
     OUTPR,BASIC,LAST                     ! PRINT BASIC SOLUTION AT END OF LOAD STEP
-    C*** APPLY DISPLACEMENT LOADS TO ALL MODELS
+    /COM,' APPLY DISPLACEMENT LOADS TO ALL MODELS'
     *CREATE,DISP
     NSEL,R,LOC,Z,10                      ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
     D,ALL,UZ,ARG1
@@ -362,7 +362,7 @@ Here is the input file from VM7:
     FINISH
     /OUT,
     /POST1
-    C*** CREATE MACRO TO GET RESULTS FOR EACH MODEL
+    /COM,' CREATE MACRO TO GET RESULTS FOR EACH MODEL'
     *CREATE,GETLOAD
     NSEL,S,NODE,,1,2                    ! SELECT NODES IN PIPE288 MODEL
     NSEL,R,LOC,Z,0
@@ -394,8 +394,8 @@ Here is the input file from VM7:
     *VFILL,VALUE_181(K,2),DATA,ABS(LOAD_181)
     *VFILL,VALUE_181(K,3),DATA,ABS(LOAD_181)/(VALUE_181(K,1))
     *END
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.032
-    C*** ---------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.032'
+    /COM,' ---------------------------------------'
     SET,1,1
     I = 1
     J = 1
@@ -405,15 +405,15 @@ Here is the input file from VM7:
     *DIM,VALUE_185,,3,3
     *DIM,VALUE_181,,3,3
     *USE,GETLOAD
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.05
-    C*** --------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.05'
+    /COM,' --------------------------------------'
     SET,2,1
     I = I + 1
     J = J + 1
     K = K + 1
     *USE,GETLOAD
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.1
-    C*** -------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.1'
+    /COM,' -------------------------------------'
     SET,3,1
     I = I +1
     J = J + 1
@@ -425,7 +425,7 @@ Here is the input file from VM7:
     /OUT,vm7,vrt
     /COM,------------------- VM7 RESULTS COMPARISON ---------------------
     /COM,
-    /COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+    /COM,'                 |   TARGET   |   Mechanical APDL   |   RATIO'
     /COM,
     /COM,RESULTS FOR PIPE288:
     /COM,

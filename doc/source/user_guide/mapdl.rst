@@ -69,7 +69,7 @@ Note that macros created within PyMAPDL (rather than loaded from
 a file) do not appear to run correctly. For example, here is the macro
 ``DISP`` created using the ``*CREATE`` command within APDL:
 
-.. code:: ansys
+.. code:: apdl
 
     ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
     *CREATE,DISP
@@ -230,7 +230,7 @@ APDL conditional statements such as ``*IF`` must be either implemented
 Pythonically or by using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
 attribute. For example:
 
-.. code:: ansys
+.. code:: apdl
 
     *IF,ARG1,EQ,0,THEN
       *GET,ARG4,NX,ARG2     ! RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
