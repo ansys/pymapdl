@@ -457,6 +457,7 @@ after running the MAPDL analysis.
 Open the result file and plot the displacement of time step 3
 
 .. code:: pycon
+
     >>> resultfile = os.path.join(mapdl.directory, "file.rst")
     >>> result = pymapdl_reader.read_binary(resultfile)
     >>> result.plot_nodal_solution(2)
