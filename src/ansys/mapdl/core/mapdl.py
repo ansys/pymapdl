@@ -2739,7 +2739,15 @@ class _MapdlCore(Commands):
 
         kwargs : dict, optional
             These keyword arguments are interface specific or for
-            development purposes. See Notes for more details.
+            development purposes.
+
+            avoid_non_interactive : :class:`bool`
+              Avoids the non-interactive mode for this specific command.
+              Defaults to ``False``.
+
+            verbose : :class:`bool`
+              Prints the command to the screen before running it.
+              Defaults to ``False``.
 
         Returns
         -------
@@ -2761,16 +2769,6 @@ class _MapdlCore(Commands):
         Alternatively, you can simply run a block of commands with:
 
         >>> mapdl.input_strings(cmd)
-
-        **Kwarg arguments**
-
-        The following keyword arguments are available:
-
-        * ``avoid_non_interactive`` : bool
-          Avoids the non-interactive mode for this specific command.
-
-        * ``verbose`` : bool
-          Prints the command to the screen before running it.
 
         Examples
         --------

@@ -1420,6 +1420,19 @@ def launch_mapdl(
         These keyword arguments are interface specific or for
         development purposes. See Notes for more details.
 
+        set_no_abort : :class:`bool`
+          Sets MAPDL to not abort at the first error within /BATCH mode.
+          Defaults to ``True``.
+
+        force_intel : :class:`bool`
+          Forces the use of Intel message pass interface (MPI) in versions between
+          Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is deactivated
+          by default. See :ref:`vpn_issues_troubleshooting` for more information.
+          Defaults to ``False``.
+
+        log_broadcast : :class:`bool`
+          (Only for CORBA mode) Enables a logger to record broadcasted commands.
+          Defaults to ``False``.
 
     Returns
     -------
@@ -1433,23 +1446,6 @@ def launch_mapdl(
 
     If an Ansys Student version is detected, PyMAPDL will launch MAPDL in
     shared-memory parallelism (SMP) mode unless another option is specified.
-
-    **Kwarg arguments**
-
-    The following keyword arguments are available:
-
-    * ``set_no_abort`` : bool.
-      Sets MAPDL to not abort at the first error within /BATCH mode.
-      Defaults to ``True``.
-
-    * ``force_intel`` : bool
-      Forces the use of Intel message pass interface (MPI) in versions between
-      Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is deactivated
-      by default. See :ref:`vpn_issues_troubleshooting` for more information. Defaults to ``False``.
-
-    * ``log_broadcast`` : bool.
-      (Only for CORBA mode) Enables a logger to record broadcasted commands.
-      Defaults to ``False``.
 
     **Additional switches**
 
