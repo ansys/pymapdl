@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pytest
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.parameters import interp_star_status
 
 parm_status = """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
@@ -111,7 +112,7 @@ def test__get_parameter_array(mapdl, number):
     assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
     # High number
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         shape = (100, 100)
         array = np.ones(shape) * number
         mapdl.load_array(name=name, array=array)

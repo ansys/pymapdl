@@ -59,7 +59,7 @@ tests = [
     "pytest-cov==4.0.0",
     "pyvista==0.37.0",
     "pyansys-tools-report==0.4.1",
-    "vtk==9.2.2",
+    "vtk==9.2.4",
     "pytest-rerunfailures==10.3",
 ]
 doc = [
@@ -87,7 +87,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
-    "vtk==9.2.2",
+    "vtk==9.2.4",
     "sphinxcontrib-googleanalytics @ git+https://github.com/sphinx-contrib/googleanalytics.git",
 ]
 

@@ -22,7 +22,7 @@ Line plotting
 ~~~~~~~~~~~~~
 You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Mapdl.lplot>` method:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -35,11 +35,12 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
     Create several circles in the middle in the rectangle
 
     >>> for x in np.linspace(0.1, 0.9, 8):
-    ...    mapdl.cyl4(x, 0.1, 0.025)
+    ...     mapdl.cyl4(x, 0.1, 0.025)
+    ...
 
     Generate a line plot
 
-    >>> mapdl.lplot(color_lines=True, cpos='xy')
+    >>> mapdl.lplot(color_lines=True, cpos="xy")
 
 
 .. figure:: ../images/lplot_vtk.png
@@ -55,9 +56,9 @@ visualize them using the :func:`Mapdl.vplot()
 <ansys.mapdl.core.Mapdl.vplot>` method. This example cuts the initial
 area with the eight circles and then extrudes it.
 
-.. code:: python
+.. code:: pycon
 
-    >>> plate_holes = mapdl.asba(rect_anum, 'all')
+    >>> plate_holes = mapdl.asba(rect_anum, "all")
 
     Extrude this area
 
@@ -77,10 +78,10 @@ You can plot nodes and elements directly from the instance of the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class. This code defines
 some element types, performs meshing, and then displays the mesh:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.et(1, 'SOLID186')
-    >>> mapdl.vsweep('ALL')
+    >>> mapdl.et(1, "SOLID186")
+    >>> mapdl.vsweep("ALL")
     >>> mapdl.esize(0.1)
     >>> mapdl.eplot()
 
@@ -102,20 +103,20 @@ generated within MAPDL and then shown using
 
 Start PyMAPDL
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
 Create a square area using key points
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.prep7()
     >>> mapdl.k(1, 0, 0, 0)
     >>> mapdl.k(2, 1, 0, 0)
     >>> mapdl.k(3, 1, 1, 0)
-    >>> mapdl.k(4, 0, 1, 0)    
+    >>> mapdl.k(4, 0, 1, 0)
     >>> mapdl.l(1, 2)
     >>> mapdl.l(2, 3)
     >>> mapdl.l(3, 4)
@@ -124,15 +125,15 @@ Create a square area using key points
 
 Set the view to "isometric"
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.view(1, 1, 1, 1)
-    >>> mapdl.pnum('kp', 1)  # enable keypoint numbering
-    >>> mapdl.pnum('line', 1)  # enable line numbering
+    >>> mapdl.pnum("kp", 1)  # enable keypoint numbering
+    >>> mapdl.pnum("line", 1)  # enable line numbering
 
 Each of these creates a Matplotlib figure and pause execution.
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.aplot(vtk=False)
     >>> mapdl.lplot(vtk=False)
@@ -156,18 +157,18 @@ methods allow you to enter in additional keyword arguments to better
 control the plot. For example, you can automatically generate a
 screenshot of an area plot or element plot with this code:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.aplot(savefig='aplot.png')
-    >>> mapdl.eplot(savefig='eplot.png')
+    >>> mapdl.aplot(savefig="aplot.png")
+    >>> mapdl.eplot(savefig="eplot.png")
 
 You can also control the camera position with ``cpos`` when you
 want to view from a standard viewing direction. This code shows how
 to view the XY plane with ``cpos='xy'``.
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.eplot(cpos='xy')
+    >>> mapdl.eplot(cpos="xy")
 
 For all general plotting options, see the
 :func:`ansys.mapdl.core.plotting.general_plotter` method.
@@ -186,13 +187,10 @@ specifying ``plot_bc=True`` in plotting functions. For example, this code
 specifies ``plot_bc=True`` for the :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`
 method:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.nplot(
-    ...     plot_bc=True,
-    ...     plot_labels=True,
-    ...     savefig=f'bc_plot.png',
-    ...     bc_labels="mechanical"
+    ...     plot_bc=True, plot_labels=True, savefig=f"bc_plot.png", bc_labels="mechanical"
     ... )
 
 

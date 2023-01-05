@@ -550,9 +550,7 @@ class MapdlMath:
                 "Reading the stiffness, mass or damping matrices to a complex array is not supported."
             )
 
-        self._mapdl.run(
-            f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}", mute=True
-        )
+        self._mapdl.run(f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}")
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
             return self._mapdl._mat_data(ans_sparse_mat.id).astype(dtype)

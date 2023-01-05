@@ -34,21 +34,21 @@ Python 3.10 on Windows, Mac OS, and Linux.
 Install the latest release from 
 `PyPi <pymapdl_pypi_>`_ with:
 
-.. code::
+.. code:: console
 
    pip install ansys-mapdl-core
 
 Alternatively, install the latest from 
 `PyMAPDL GitHub <pymapdl_issues_>`_ via:
 
-.. code::
+.. code:: console
 
    pip install git+https://github.com/pyansys/pymapdl.git
 
 
 For a local *development* version, install with:
 
-.. code::
+.. code:: console
 
    git clone https://github.com/pyansys/pymapdl.git
    cd pymapdl
@@ -72,7 +72,7 @@ this on an isolated system with a fresh Python or on a virtual environment.
 
 For example, on Linux with Python 3.7, unzip it and install it with the following:
 
-.. code::
+.. code:: console
 
    unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
@@ -101,7 +101,7 @@ Verify your installation
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Check that you can start MAPDL from Python by running:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()

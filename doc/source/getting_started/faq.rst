@@ -77,6 +77,7 @@ data such as the mesh, you can use this code:
 .. code:: python
 
     import sys
+
     sys.modules[__name__].__dict__.clear()
 
 
@@ -107,7 +108,7 @@ You can change the graphics configuration in PyMAPDL using this command:
 
 .. code:: python
 
-    mapdl.graphics('POWER')
+    mapdl.graphics("POWER")
 
 Or, you can change the graphics configuration in the MAPDL GUI using the 
 ``POWRGRPH`` button or this command:
