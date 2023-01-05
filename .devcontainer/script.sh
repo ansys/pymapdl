@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Checking if the ANSYSLMD_LICENSE_FILE variable is defined"
 
 if [[ -z "${ANSYSLMD_LICENSE_FILE}" ]]; then
