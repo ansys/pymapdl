@@ -1714,3 +1714,16 @@ def test_deprecation_allow_ignore_errors_mapping(mapdl):
 
     mapdl.ignore_errors = False
     assert mapdl.allow_ignore == mapdl.ignore_errors
+
+
+def test_avoid_non_interactive(mapdl):
+
+    with mapdl.non_interactive:
+        mapdl.com("comment A")
+        mapdl.com("comment B", avoid_non_interactive=True)
+        mapdl.com("comment C")
+
+        stored_commands = mapdl._stored_commands
+        assert any(["comment A" in cmd for cmd in stored_commands])
+        assert all(["comment B" not in cmd for cmd in stored_commands])
+        assert any(["comment C" in cmd for cmd in stored_commands])
