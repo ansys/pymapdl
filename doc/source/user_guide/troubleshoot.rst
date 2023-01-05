@@ -28,6 +28,7 @@ script:
 .. code:: python
 
     from ansys.mapdl.core import LOG
+
     LOG.setLevel("DEBUG")
     LOG.log_to_file("mylog.log")
 
@@ -69,7 +70,7 @@ On Windows
 
 Open up a command prompt and run the version-dependent command:
 
-.. code::
+.. code:: pwsh
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
@@ -82,7 +83,7 @@ On Linux
 
 Run the version-dependent command:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
@@ -187,10 +188,10 @@ This issue does not affect the Linux version of MAPDL.
 .. note:: In you are using Windows in any of the versions from ANSYS 2022 R2 to ANSYS 2021 R1,
    the default compiler is Microsoft MPI when the MAPDL instance is launched by PyMAPDL.
 
-.. code::
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl(additional_switches='-smp')
+    >>> mapdl = launch_mapdl(additional_switches="-smp")
 
 While this approach has the disadvantage of using the potentially slower shared
 memory parallel mode, you'll at least be able to run MAPDL.
@@ -226,7 +227,7 @@ CentOS 7
 
 On CentOS 7, you can install missing dependencies with:
 
-.. code::
+.. code:: bash
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
@@ -239,7 +240,7 @@ Ubuntu
 
 On Ubuntu 22.04, use this code to install the needed dependencies:
 
-.. code::
+.. code:: bash
 
     apt-get update
 
@@ -282,7 +283,7 @@ package configuration. The following code downloads and modifies the
 ``libxp6`` package to remove the ``multiarch-support`` dependency and
 then installs it via the ``dpkg`` package.
 
-.. code::
+.. code:: bash
 
     cd /tmp
     wget http://ftp.br.debian.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
@@ -393,18 +394,18 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
 
 **On Windows**
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe'
+    >>> exec_loc = "C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe"
     >>> mapdl = launch_mapdl(exec_loc)
 
 **On Linux**
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    >>> exec_loc = "/usr/ansys_inc/v211/ansys/bin/ansys211"
     >>> mapdl = launch_mapdl(exec_loc)
 
 
@@ -442,7 +443,7 @@ If PyMAPDL finds a valid Ansys installation, it caches its
 path in the configuration file, ``config.txt``. The path for this file
 is shown in this code:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core.launcher import CONFIG_FILE
     >>> print(CONFIG_FILE)
@@ -454,7 +455,7 @@ Ansys version is installed and an earlier installation is removed.
 
 To update this configuration file with the latest path, use:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import save_ansys_path
     >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
@@ -462,7 +463,7 @@ To update this configuration file with the latest path, use:
 
 If you want to see which Ansys installations PyMAPDL has detected, use:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core.launcher import get_available_ansys_installations
     >>> get_available_ansys_installations()
@@ -496,7 +497,7 @@ array where one or more dimensions are zero.
 This can happens in numpy arrays, where its first dimension can be
 set to zero. For example:
 
-.. code:: python
+.. code:: pycon
 
    >>> import numpy
    >>> from ansys.mapdl.core import launch_mapdl
@@ -510,36 +511,36 @@ These types of array dimensions are always converted to ``1``.
 
 For example:
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl.parameters['mapdlarray'] = my_array
-   >>> mapdl.parameters['mapdlarray']
+   >>> mapdl.parameters["mapdlarray"] = my_array
+   >>> mapdl.parameters["mapdlarray"]
    array([[1.],
       [2.],
       [3.],
       [4.]])
-   >>> mapdl.parameters['mapdlarray'].shape
+   >>> mapdl.parameters["mapdlarray"].shape
    (4, 1)
 
 This means that when you pass two arrays, one with the second axis equal
 to zero (for example, ``my_array``) and another one with the second axis equal
 to one, have the same shape if later retrieved.
 
-.. code:: python
+.. code:: pycon
 
-   >>> my_other_array = np.reshape([1, 2, 3, 4], (4,1))
+   >>> my_other_array = np.reshape([1, 2, 3, 4], (4, 1))
    >>> my_other_array
    array([[1],
       [2],
       [3],
       [4]])
-   >>> mapdl.parameters['mapdlarray_b'] = my_other_array
-   >>> mapdl.parameters['mapdlarray_b']
+   >>> mapdl.parameters["mapdlarray_b"] = my_other_array
+   >>> mapdl.parameters["mapdlarray_b"]
    array([[1.],
       [2.],
       [3.],
       [4.]])
-   >>> np.allclose(mapdl.parameters['mapdlarray'], mapdl.parameters['mapdlarray_b'])
+   >>> np.allclose(mapdl.parameters["mapdlarray"], mapdl.parameters["mapdlarray_b"])
    True
 
 

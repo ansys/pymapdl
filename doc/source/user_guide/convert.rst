@@ -15,16 +15,16 @@ parameters or arrays from ansys, use the :func:`Mapdl.get_value()
 MAPDL :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` 
 command shown here:
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl.get_value('NODE' , 2, 'U' ,'Y')
+   >>> mapdl.get_value("NODE", 2, "U", "Y")
    4.532094298033
 
 Alternatively, if a parameter is already defined, you can access it
 using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute
 with:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.parameters
     ARR                              : ARRAY DIM (3, 1, 1)
@@ -34,7 +34,7 @@ with:
     PARM_STR                         : "string"
     DEF_Y                            : 4.532094298033
 
-    >>> mapdl.parameters['DEF_Y']
+    >>> mapdl.parameters["DEF_Y"]
     4.532094298033
 
 
@@ -43,26 +43,26 @@ Script translation
 Existing Ansys scripts can be translated using the :func:`convert_script() <ansys.mapdl.core.convert_script>`
 function:
 
-.. code:: python
+.. code:: pycon
 
-    import ansys.mapdl.core as pymapdl
-    inputfile = 'ansys_inputfile.inp'
-    pyscript = 'pyscript.py'
-    pymapdl.convert_script(inputfile, pyscript)
+    >>> import ansys.mapdl.core as pymapdl
+    >>> inputfile = "ansys_inputfile.inp"
+    >>> pyscript = "pyscript.py"
+    >>> pymapdl.convert_script(inputfile, pyscript)
 
 Or, you can convert code in form of strings for later processing using the
 :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` function:
 
-.. code:: python
+.. code:: pycon
 
     from ansys.mapdl.core.convert import convert_apdl_block
-    
+
     apdl_string = """/com, This is a block of APDL commands.
     /PREP7
     N,,0,0,0
     N,,0,0,1
     FINISH"""
-    pycode = convert_apdl_block(apdl_string) # apdl_string can be also a list of strings.
+    pycode = convert_apdl_block(apdl_string)  # apdl_string can be also a list of strings.
 
 
 The script conversion functions allow some interesting arguments that can be seen in
@@ -91,77 +91,77 @@ validation and demonstration. These validation files are used here to
 demo the use of the PyMAPDL file translator :func:`convert_script()
 <ansys.mapdl.core.convert_script>` function and are available in:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import examples
-    >>> examples.vmfiles['vm1']
+    >>> examples.vmfiles["vm1"]
     '.../ansys/mapdl/core/examples/verif/vm1.dat'
 
 This example translates the verification example ``"vm1.dat"``.
 
 First, the MAPDL code:
 
-.. code::
+.. code:: apdl
 
-    /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
-    /VERIFY,VM1
+    /COM, 'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
+    /VERIFY, VM1
     /PREP7
-    /TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS
-    C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10
-    ANTYPE,STATIC                  ! STATIC ANALYSIS
-    ET,1,LINK180
-    SECTYPE,1,LINK
-    SECDATA,1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1
-    MP,EX,1,30E6
-    N,1
-    N,2,,4
-    N,3,,7
-    N,4,,10
-    E,1,2                          ! DEFINE ELEMENTS
-    EGEN,3,1,1
-    D,1,ALL,,,4,3                  ! BOUNDARY CONDITIONS AND LOADING
-    F,2,FY,-500
-    F,3,FY,-1000
+    /TITLE,'  VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS'
+    /COM,'      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10'
+    ANTYPE, STATIC                  ! STATIC ANALYSIS
+    ET, 1, LINK180
+    SECTYPE, 1, LINK
+    SECDATA, 1  			       ! CROSS SECTIONAL AREA (ARBITRARY) = 1
+    MP, EX, 1, 30E6
+    N, 1
+    N, 2, , 4
+    N, 3, , 7
+    N, 4, , 10
+    E, 1, 2                          ! DEFINE ELEMENTS
+    EGEN, 3, 1, 1
+    D, 1, ALL, , , 4, 3                  ! BOUNDARY CONDITIONS AND LOADING
+    F, 2, FY, -500
+    F, 3, FY, -1000
     FINISH
-    /SOLU    
-    OUTPR,BASIC,1
-    OUTPR,NLOAD,1
+    /SOLU
+    OUTPR, BASIC, 1
+    OUTPR, NLOAD, 1
     SOLVE
     FINISH
     /POST1
-    NSEL,S,LOC,Y,10
+    NSEL, S, LOC, Y, 10
     FSUM
-    *GET,REAC_1,FSUM,,ITEM,FY
-    NSEL,S,LOC,Y,0
+    *GET, REAC_1, FSUM, , ITEM, FY
+    NSEL, S, LOC, Y, 0
     FSUM
-    *GET,REAC_2,FSUM,,ITEM,FY
-    
-    *DIM,LABEL,CHAR,2
-    *DIM,VALUE,,2,3
-    LABEL(1) = 'R1, lb','R2, lb '
-    *VFILL,VALUE(1,1),DATA,900.0,600.0
-    *VFILL,VALUE(1,2),DATA,ABS(REAC_1),ABS(REAC_2)
-    *VFILL,VALUE(1,3),DATA,ABS(REAC_1 / 900) ,ABS( REAC_2 / 600)
-    /OUT,vm1,vrt
+    *GET, REAC_2, FSUM, , ITEM, FY
+
+    *DIM, LABEL, CHAR, 2
+    *DIM, VALUE, , 2, 3
+    LABEL(1) = 'R1, lb', 'R2, lb '
+    *VFILL, VALUE(1, 1), DATA, 900.0, 600.0
+    *VFILL, VALUE(1, 2), DATA, ABS(REAC_1), ABS(REAC_2)
+    *VFILL, VALUE(1, 3), DATA, ABS(REAC_1 / 900) , ABS( REAC_2 / 600)
+    /OUT, vm1, vrt
     /COM
-    /COM,------------------- VM1 RESULTS COMPARISON ---------------------
+    /COM,' ------------------- VM1 RESULTS COMPARISON - --------------------'
     /COM,
-    /COM,         |   TARGET   |   Mechanical APDL   |   RATIO
+    /COM,'         |   TARGET   |   Mechanical APDL   |   RATIO'
     /COM,
-    *VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
-    (1X,A8,'   ',F10.1,'  ',F10.1,'   ',1F5.3)
-    /COM,----------------------------------------------------------------
+    *VWRITE, LABEL(1), VALUE(1, 1), VALUE(1, 2), VALUE(1, 3)
+    (1X, A8, '   ', F10.1, '  ', F10.1, '   ', 1F5.3)
+    /COM, ----------------------------------------------------------------
     /OUT
     FINISH
-    *LIST,vm1,vrt
+    *LIST, vm1, vrt
 
 Translate the verification file with:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl import core as pymapdl
     >>> from ansys.mapdl.core import examples
-    >>> pymapdl.convert_script(examples.vmfiles['vm1'], 'vm1.py')
+    >>> pymapdl.convert_script(examples.vmfiles["vm1"], "vm1.py")
 
 Here is the translated code:
 
@@ -169,24 +169,25 @@ Here is the translated code:
 
     """ Script generated by ansys-mapdl-core version 0.57.0"""
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
     mapdl.run("/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150")
     mapdl.run("/VERIFY,VM1")
     mapdl.run("/PREP7")
     mapdl.run("/TITLE, VM1, STATICALLY INDETERMINATE REACTION FORCE ANALYSIS")
     mapdl.run("C***      STR. OF MATL., TIMOSHENKO, PART 1, 3RD ED., PAGE 26, PROB.10")
-    mapdl.antype("STATIC")  #STATIC ANALYSIS
+    mapdl.antype("STATIC")  # STATIC ANALYSIS
     mapdl.et(1, "LINK180")
     mapdl.sectype(1, "LINK")
-    mapdl.secdata(1)  #CROSS SECTIONAL AREA (ARBITRARY) = 1
-    mapdl.mp("EX", 1, 30E6)
+    mapdl.secdata(1)  # CROSS SECTIONAL AREA (ARBITRARY) = 1
+    mapdl.mp("EX", 1, 30e6)
     mapdl.n(1)
     mapdl.n(2, "", 4)
     mapdl.n(3, "", 7)
     mapdl.n(4, "", 10)
-    mapdl.e(1, 2)  #DEFINE ELEMENTS
+    mapdl.e(1, 2)  # DEFINE ELEMENTS
     mapdl.egen(3, 1, 1)
-    mapdl.d(1, "ALL", "", "", 4, 3)  #BOUNDARY CONDITIONS AND LOADING
+    mapdl.d(1, "ALL", "", "", 4, 3)  # BOUNDARY CONDITIONS AND LOADING
     mapdl.f(2, "FY", -500)
     mapdl.f(3, "FY", -1000)
     mapdl.finish()
@@ -226,7 +227,7 @@ Here is the translated code:
 
 Here are the results from running the converted file:
 
-.. code::
+.. code:: output
 
     ------------------- VM1 RESULTS COMPARISON ---------------------
     |   TARGET   |   Mechanical APDL   |   RATIO
@@ -237,7 +238,7 @@ Here are the results from running the converted file:
 
 You can verify the reaction forces with:
 
-.. code::
+.. code:: pycon
 
    >>> rst = mapdl.result
    >>> nnum, forces = rst.nodal_static_forces(0)
@@ -260,14 +261,14 @@ VM7 - plastic compression of a pipe assembly
 --------------------------------------------
 Here is the input file from VM7:
 
-.. code::
+.. code:: apdl
 
-    /COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+    /COM,'ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150'
     /VERIFY,VM7
     /PREP7
-    /TITLE, VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY
-    C***          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1
-    C***          USING PIPE288, SOLID185 AND SHELL181 ELEMENTS
+    /TITLE,' VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY'
+    /COM,'          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1'
+    /COM,'          USING PIPE288, SOLID185 AND SHELL181 ELEMENTS'
     THETA=6                              ! SUBTENDED ANGLE
     ET,1,PIPE288,,,,2
     ET,2,SOLID185
@@ -324,10 +325,10 @@ Here is the input file from VM7:
     E,203,201,205,207
     SECNUM,2                             ! OUTSIDE (ALUMINUM) TUBE
     E,204,202,206,208
-    C*** APPLY CONSTRAINTS TO PIPE288 MODEL
+    /COM,' APPLY CONSTRAINTS TO PIPE288 MODEL'
     D,1,ALL                              ! FIX ALL DOFS FOR BOTTOM END OF PIPE288
     D,2,UX,,,,,UY,ROTX,ROTY,ROTZ         ! ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
-    C*** APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS
+    /COM,' APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS'
     CP,1,UX,101,111,105,115              ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
     CPSGEN,4,,1
     CP,5,UX,201,205,203,20               ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
@@ -347,7 +348,7 @@ Here is the input file from VM7:
     FINISH
     /SOLU    
     OUTPR,BASIC,LAST                     ! PRINT BASIC SOLUTION AT END OF LOAD STEP
-    C*** APPLY DISPLACEMENT LOADS TO ALL MODELS
+    /COM,' APPLY DISPLACEMENT LOADS TO ALL MODELS'
     *CREATE,DISP
     NSEL,R,LOC,Z,10                      ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
     D,ALL,UZ,ARG1
@@ -361,7 +362,7 @@ Here is the input file from VM7:
     FINISH
     /OUT,
     /POST1
-    C*** CREATE MACRO TO GET RESULTS FOR EACH MODEL
+    /COM,' CREATE MACRO TO GET RESULTS FOR EACH MODEL'
     *CREATE,GETLOAD
     NSEL,S,NODE,,1,2                    ! SELECT NODES IN PIPE288 MODEL
     NSEL,R,LOC,Z,0
@@ -393,8 +394,8 @@ Here is the input file from VM7:
     *VFILL,VALUE_181(K,2),DATA,ABS(LOAD_181)
     *VFILL,VALUE_181(K,3),DATA,ABS(LOAD_181)/(VALUE_181(K,1))
     *END
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.032
-    C*** ---------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.032'
+    /COM,' ---------------------------------------'
     SET,1,1
     I = 1
     J = 1
@@ -404,15 +405,15 @@ Here is the input file from VM7:
     *DIM,VALUE_185,,3,3
     *DIM,VALUE_181,,3,3
     *USE,GETLOAD
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.05
-    C*** --------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.05'
+    /COM,' --------------------------------------'
     SET,2,1
     I = I + 1
     J = J + 1
     K = K + 1
     *USE,GETLOAD
-    C*** GET TOTAL LOAD FOR DISPLACEMENT = 0.1
-    C*** -------------------------------------
+    /COM,' GET TOTAL LOAD FOR DISPLACEMENT = 0.1'
+    /COM,' -------------------------------------'
     SET,3,1
     I = I +1
     J = J + 1
@@ -424,7 +425,7 @@ Here is the input file from VM7:
     /OUT,vm7,vrt
     /COM,------------------- VM7 RESULTS COMPARISON ---------------------
     /COM,
-    /COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+    /COM,'                 |   TARGET   |   Mechanical APDL   |   RATIO'
     /COM,
     /COM,RESULTS FOR PIPE288:
     /COM,
@@ -447,10 +448,10 @@ Here is the input file from VM7:
 
 Convert the verification file with:
 
-.. code:: python
+.. code:: pycon
 
-    from ansys.mapdl import core as pymapdl
-    pymapdl.convert_script('vm7.dat', 'vm7.py')
+    >>> from ansys.mapdl import core as pymapdl
+    >>> pymapdl.convert_script("vm7.dat", "vm7.py")
 
 Here is the translated Python script:
 
@@ -458,45 +459,52 @@ Here is the translated Python script:
 
     """ Script generated by ansys-mapdl-core version 0.57.0"""
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
     mapdl.run("/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150")
     mapdl.run("/VERIFY,VM7")
     mapdl.run("/PREP7")
     mapdl.run("/TITLE, VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY")
-    mapdl.run("C***          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1")
+    mapdl.run(
+        "C***          MECHANICS OF SOLIDS, CRANDALL AND DAHL, 1959, PAGE 180, EX. 5.1"
+    )
     mapdl.run("C***          USING PIPE288, SOLID185 AND SHELL181 ELEMENTS")
     mapdl.run("THETA=6                              ")  # SUBTENDED ANGLE
     mapdl.et(1, "PIPE288", "", "", "", 2)
     mapdl.et(2, "SOLID185")
-    mapdl.et(3, "SHELL181", "", "", 2)  #FULL INTEGRATION
+    mapdl.et(3, "SHELL181", "", "", 2)  # FULL INTEGRATION
     mapdl.sectype(1, "SHELL")
-    mapdl.secdata(0.5, 1, 0, 5)  #THICKNESS (SHELL181)
+    mapdl.secdata(0.5, 1, 0, 5)  # THICKNESS (SHELL181)
     mapdl.sectype(2, "SHELL")
-    mapdl.secdata(0.5, 2, 0, 5)  #THICKNESS (SHELL181)
+    mapdl.secdata(0.5, 2, 0, 5)  # THICKNESS (SHELL181)
     mapdl.sectype(3, "PIPE")
-    mapdl.secdata(4.9563384, 0.5)  #OUTSIDE DIA. AND WALL THICKNESS FOR INSIDE TUBE (PIPE288)
+    mapdl.secdata(
+        4.9563384, 0.5
+    )  # OUTSIDE DIA. AND WALL THICKNESS FOR INSIDE TUBE (PIPE288)
     mapdl.sectype(4, "PIPE")
-    mapdl.secdata(8.139437, 0.5)  #OUTSIDE DIA. AND WALL THICKNESS FOR OUTSIDE TUBE (PIPE288)
-    mapdl.mp("EX", 1, 26.875E6)  #STEEL
+    mapdl.secdata(
+        8.139437, 0.5
+    )  # OUTSIDE DIA. AND WALL THICKNESS FOR OUTSIDE TUBE (PIPE288)
+    mapdl.mp("EX", 1, 26.875e6)  # STEEL
     mapdl.mp("PRXY", 1, 0.3)
-    mapdl.mp("EX", 2, 11E6)  #ALUMINUM
+    mapdl.mp("EX", 2, 11e6)  # ALUMINUM
     mapdl.mp("PRXY", 2, 0.3)
-    mapdl.tb("BKIN", 1, 1)  #DEFINE NON-LINEAR MATERIAL PROPERTY FOR STEEL
+    mapdl.tb("BKIN", 1, 1)  # DEFINE NON-LINEAR MATERIAL PROPERTY FOR STEEL
     mapdl.tbtemp(0)
     mapdl.tbdata(1, 86000, 0)
-    mapdl.tb("BKIN", 2, 1)  #DEFINE NON-LINEAR MATERIAL PROPERTY FOR ALUMINUM
+    mapdl.tb("BKIN", 2, 1)  # DEFINE NON-LINEAR MATERIAL PROPERTY FOR ALUMINUM
     mapdl.tbtemp(0)
     mapdl.tbdata(1, 55000, 0)
-    mapdl.n(1)  #GENERATE NODES AND ELEMENTS FOR PIPE288
+    mapdl.n(1)  # GENERATE NODES AND ELEMENTS FOR PIPE288
     mapdl.n(2, "", "", 10)
     mapdl.mat(1)
-    mapdl.secnum(3)  #STEEL (INSIDE) TUBE
+    mapdl.secnum(3)  # STEEL (INSIDE) TUBE
     mapdl.e(1, 2)
     mapdl.mat(2)
-    mapdl.secnum(4)  #ALUMINUM (OUTSIDE) TUBE
+    mapdl.secnum(4)  # ALUMINUM (OUTSIDE) TUBE
     mapdl.e(1, 2)
     mapdl.csys(1)
-    mapdl.n(101, 1.9781692)  #GENERATE NODES AND ELEMENTS FOR SOLID185
+    mapdl.n(101, 1.9781692)  # GENERATE NODES AND ELEMENTS FOR SOLID185
     mapdl.n(102, 2.4781692)
     mapdl.n(103, 3.5697185)
     mapdl.n(104, 4.0697185)
@@ -504,89 +512,141 @@ Here is the translated Python script:
     mapdl.n(106, 2.4781692, "", 10)
     mapdl.n(107, 3.5697185, "", 10)
     mapdl.n(108, 4.0697185, "", 10)
-    mapdl.ngen(2, 10, 101, 108, "", "", "THETA")  #GENERATE 2ND SET OF NODES TO FORM A THETA DEGREE SLICE
+    mapdl.ngen(
+        2, 10, 101, 108, "", "", "THETA"
+    )  # GENERATE 2ND SET OF NODES TO FORM A THETA DEGREE SLICE
     mapdl.nrotat(101, 118, 1)
     mapdl.type(2)
-    mapdl.mat(1)  #INSIDE (STEEL) TUBE
+    mapdl.mat(1)  # INSIDE (STEEL) TUBE
     mapdl.e(101, 102, 112, 111, 105, 106, 116, 115)
-    mapdl.mat(2)  #OUTSIDE (ALUMINUM) TUBE
+    mapdl.mat(2)  # OUTSIDE (ALUMINUM) TUBE
     mapdl.e(103, 104, 114, 113, 107, 108, 118, 117)
-    mapdl.n(201, 2.2281692)  #GENERATE NODES AND ELEMENTS FOR SHELL181
+    mapdl.n(201, 2.2281692)  # GENERATE NODES AND ELEMENTS FOR SHELL181
     mapdl.n(203, 2.2281692, "", 10)
     mapdl.n(202, 3.8197185)
     mapdl.n(204, 3.8197185, "", 10)
-    mapdl.ngen(2, 4, 201, 204, "", "", "THETA")  #GENERATE NODES TO FORM A THETA DEGREE SLICE
+    mapdl.ngen(
+        2, 4, 201, 204, "", "", "THETA"
+    )  # GENERATE NODES TO FORM A THETA DEGREE SLICE
     mapdl.type(3)
-    mapdl.secnum(1)  #INSIDE (STEEL) TUBE
+    mapdl.secnum(1)  # INSIDE (STEEL) TUBE
     mapdl.e(203, 201, 205, 207)
-    mapdl.secnum(2)  #OUTSIDE (ALUMINUM) TUBE
+    mapdl.secnum(2)  # OUTSIDE (ALUMINUM) TUBE
     mapdl.e(204, 202, 206, 208)
     mapdl.run("C*** APPLY CONSTRAINTS TO PIPE288 MODEL")
-    mapdl.d(1, "ALL")  #FIX ALL DOFS FOR BOTTOM END OF PIPE288
-    mapdl.d(2, "UX", "", "", "", "", "UY", "ROTX", "ROTY", "ROTZ")  #ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
+    mapdl.d(1, "ALL")  # FIX ALL DOFS FOR BOTTOM END OF PIPE288
+    mapdl.d(
+        2, "UX", "", "", "", "", "UY", "ROTX", "ROTY", "ROTZ"
+    )  # ALLOW ONLY UZ DOF AT TOP END OF PIPE288 MODEL
     mapdl.run("C*** APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS")
-    mapdl.cp(1, "UX", 101, 111, 105, 115)  #COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
+    mapdl.cp(
+        1, "UX", 101, 111, 105, 115
+    )  # COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
     mapdl.cpsgen(4, "", 1)
-    mapdl.cp(5, "UX", 201, 205, 203, 20)  #COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
+    mapdl.cp(
+        5, "UX", 201, 205, 203, 20
+    )  # COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
     mapdl.cpsgen(2, "", 5)
-    mapdl.cp(7, "ROTY", 201, 205)  #COUPLE NODES AT BOUNDARY IN ROTY DIR FOR SHELL181
+    mapdl.cp(7, "ROTY", 201, 205)  # COUPLE NODES AT BOUNDARY IN ROTY DIR FOR SHELL181
     mapdl.cpsgen(4, "", 7)
-    mapdl.nsel("S", "NODE", "", 101, 212)  #SELECT ONLY NODES IN SOLID185 AND SHELL181 MODELS
-    mapdl.nsel("R", "LOC", "Y", 0)  #SELECT NODES AT THETA = 0 FROM THE SELECTED SET
-    mapdl.dsym("SYMM", "Y", 1)  #APPLY SYMMETRY BOUNDARY CONDITIONS
-    mapdl.nsel("S", "NODE", "", 101, 212)  #SELECT ONLY NODES IN SOLID185 AND SHELL181 MODELS
-    mapdl.nsel("R", "LOC", "Y", "THETA")  #SELECT NODES AT THETA FROM THE SELECTED SET
-    mapdl.dsym("SYMM", "Y", 1)  #APPLY SYMMETRY BOUNDARY CONDITIONS
+    mapdl.nsel(
+        "S", "NODE", "", 101, 212
+    )  # SELECT ONLY NODES IN SOLID185 AND SHELL181 MODELS
+    mapdl.nsel("R", "LOC", "Y", 0)  # SELECT NODES AT THETA = 0 FROM THE SELECTED SET
+    mapdl.dsym("SYMM", "Y", 1)  # APPLY SYMMETRY BOUNDARY CONDITIONS
+    mapdl.nsel(
+        "S", "NODE", "", 101, 212
+    )  # SELECT ONLY NODES IN SOLID185 AND SHELL181 MODELS
+    mapdl.nsel("R", "LOC", "Y", "THETA")  # SELECT NODES AT THETA FROM THE SELECTED SET
+    mapdl.dsym("SYMM", "Y", 1)  # APPLY SYMMETRY BOUNDARY CONDITIONS
     mapdl.nsel("ALL")
-    mapdl.nsel("R", "LOC", "Z", 0)  #SELECT ONLY NODES AT Z = 0
-    mapdl.d("ALL", "UZ", 0)  #CONSTRAIN BOTTOM NODES IN Z DIRECTION
+    mapdl.nsel("R", "LOC", "Z", 0)  # SELECT ONLY NODES AT Z = 0
+    mapdl.d("ALL", "UZ", 0)  # CONSTRAIN BOTTOM NODES IN Z DIRECTION
     mapdl.nsel("ALL")
     mapdl.finish()
     mapdl.run("/SOLU")
-    mapdl.outpr("BASIC", "LAST")  #PRINT BASIC SOLUTION AT END OF LOAD STEP
+    mapdl.outpr("BASIC", "LAST")  # PRINT BASIC SOLUTION AT END OF LOAD STEP
     mapdl.run("C*** APPLY DISPLACEMENT LOADS TO ALL MODELS")
 
 
-    def DISP(ARG1='', ARG2='', ARG3='', ARG4='', ARG5='', ARG6='',
-             ARG7='', ARG8='', ARG9='', ARG10='', ARG11='', ARG12='',
-             ARG13='', ARG14='', ARG15='', ARG16='', ARG17='', ARG18=''):
-        mapdl.nsel("R", "LOC", "Z", 10)  #SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
+    def DISP(
+        ARG1="",
+        ARG2="",
+        ARG3="",
+        ARG4="",
+        ARG5="",
+        ARG6="",
+        ARG7="",
+        ARG8="",
+        ARG9="",
+        ARG10="",
+        ARG11="",
+        ARG12="",
+        ARG13="",
+        ARG14="",
+        ARG15="",
+        ARG16="",
+        ARG17="",
+        ARG18="",
+    ):
+        mapdl.nsel("R", "LOC", "Z", 10)  # SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
         mapdl.d("ALL", "UZ", ARG1)
         mapdl.nsel("ALL")
         mapdl.run("/OUT,SCRATCH")
         mapdl.solve()
 
 
-    DISP(-.032)
-    DISP(-.05)
-    DISP(-.1)
+    DISP(-0.032)
+    DISP(-0.05)
+    DISP(-0.1)
     mapdl.finish()
     mapdl.run("/OUT,")
     mapdl.run("/POST1")
     mapdl.run("C*** CREATE MACRO TO GET RESULTS FOR EACH MODEL")
 
 
-    def GETLOAD(ARG1='', ARG2='', ARG3='', ARG4='', ARG5='', ARG6='',
-                ARG7='', ARG8='', ARG9='', ARG10='', ARG11='', ARG12='',
-                ARG13='', ARG14='', ARG15='', ARG16='', ARG17='', ARG18=''):
-        mapdl.nsel("S", "NODE", "", 1, 2)  #SELECT NODES IN PIPE288 MODEL
+    def GETLOAD(
+        ARG1="",
+        ARG2="",
+        ARG3="",
+        ARG4="",
+        ARG5="",
+        ARG6="",
+        ARG7="",
+        ARG8="",
+        ARG9="",
+        ARG10="",
+        ARG11="",
+        ARG12="",
+        ARG13="",
+        ARG14="",
+        ARG15="",
+        ARG16="",
+        ARG17="",
+        ARG18="",
+    ):
+        mapdl.nsel("S", "NODE", "", 1, 2)  # SELECT NODES IN PIPE288 MODEL
         mapdl.nsel("R", "LOC", "Z", 0)
         mapdl.run("/OUT,SCRATCH")
-        mapdl.fsum()  #FZ IS TOTAL LOAD FOR PIPE288 MODEL
+        mapdl.fsum()  # FZ IS TOTAL LOAD FOR PIPE288 MODEL
         mapdl.run("*GET,LOAD_288,FSUM,,ITEM,FZ")
-        mapdl.nsel("S", "NODE", "", 101, 118)  #SELECT NODES IN SOLID185 MODEL
+        mapdl.nsel("S", "NODE", "", 101, 118)  # SELECT NODES IN SOLID185 MODEL
         mapdl.nsel("R", "LOC", "Z", 0)
         mapdl.fsum()
         mapdl.run("*GET,ZFRC,FSUM,0,ITEM,FZ")
-        mapdl.run("LOAD=ZFRC*360/THETA                 ")  # MULTIPLY BY 360/THETA FOR FULL 360 DEGREE RESULTS
+        mapdl.run(
+            "LOAD=ZFRC*360/THETA                 "
+        )  # MULTIPLY BY 360/THETA FOR FULL 360 DEGREE RESULTS
         mapdl.run("*STATUS,LOAD")
         mapdl.run("LOAD_185 = LOAD")
-        mapdl.nsel("S", "NODE", "", 201, 212)  #SELECT NODES IN SHELL181 MODEL
+        mapdl.nsel("S", "NODE", "", 201, 212)  # SELECT NODES IN SHELL181 MODEL
         mapdl.nsel("R", "LOC", "Z", 0)
         mapdl.fsum()
         mapdl.run("/OUT,")
         mapdl.run("*GET,ZFRC,FSUM,0,ITEM,FZ")
-        mapdl.run("LOAD=ZFRC*360/THETA                 ")  # MULTIPLY BY 360/THETA FOR FULL 360 DEGREE RESULTS
+        mapdl.run(
+            "LOAD=ZFRC*360/THETA                 "
+        )  # MULTIPLY BY 360/THETA FOR FULL 360 DEGREE RESULTS
         mapdl.run("*STATUS,LOAD")
         mapdl.run("LOAD_181 = LOAD")
         mapdl.run("*VFILL,VALUE_288(1,1),DATA,1024400,1262000,1262000")
@@ -636,17 +696,23 @@ Here is the translated Python script:
     mapdl.run("/COM,RESULTS FOR PIPE288:")
     mapdl.run("/COM,")
     with mapdl.non_interactive:
-        mapdl.run("*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_288(1,1),VALUE_288(1,2),VALUE_288(1,3)")
+        mapdl.run(
+            "*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_288(1,1),VALUE_288(1,2),VALUE_288(1,3)"
+        )
         mapdl.run("(1X,A8,A8,'   ',F10.0,'  ',F14.0,'   ',1F15.3)")
         mapdl.run("/COM,")
         mapdl.run("/COM,RESULTS FOR SOLID185:")
         mapdl.run("/COM,")
-        mapdl.run("*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_185(1,1),VALUE_185(1,2),VALUE_185(1,3)")
+        mapdl.run(
+            "*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_185(1,1),VALUE_185(1,2),VALUE_185(1,3)"
+        )
         mapdl.run("(1X,A8,A8,'   ',F10.0,'  ',F14.0,'   ',1F15.3)")
         mapdl.run("/COM,")
         mapdl.run("/COM,RESULTS FOR SHELL181:")
         mapdl.run("/COM,")
-        mapdl.run("*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_181(1,1),VALUE_181(1,2),VALUE_181(1,3)")
+        mapdl.run(
+            "*VWRITE,LABEL(1,1),LABEL(1,2),VALUE_181(1,1),VALUE_181(1,2),VALUE_181(1,3)"
+        )
         mapdl.run("(1X,A8,A8,'   ',F10.0,'  ',F14.0,'   ',1F15.3)")
         mapdl.run("/COM,")
         mapdl.run("/COM,-----------------------------------------------------------------")

@@ -44,7 +44,7 @@ Launch MAPDL locally
 You can use the ``launch_mapdl`` method to have Python start MAPDL and
 automatically connect to it:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -66,19 +66,19 @@ You can start MAPDL from the command line and then connect to it.
 
 To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation), use:
 
-.. code::
+.. code:: pwsh
 
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
 To launch MAPDL on Linux (assuming a ``/usr/ansys_inc`` installation), use:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
 
 This starts up MAPDL in gRPC mode, and MAPDL should output:
 
-.. code::
+.. code:: output
 
      Start GRPC Server
 
@@ -93,7 +93,7 @@ You can configure the port that MAPDL starts on with the ``-port`` argument.
 For example, you can start the server to listen for connections at 
 port 50005 with:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
@@ -105,7 +105,7 @@ A MAPDL gRPC server can be connected to from either the same host or an
 external host. For example, you can connect to a MAPDL service
 running **locally** with:
 
-.. code::
+.. code:: pycon
 
     >>> from ansys.mapdl.core import Mapdl
     >>> mapdl = Mapdl()
@@ -119,15 +119,15 @@ address of that instance, you can connect to it.
 For example, if on your local network at IP address ``192.168.0.1`` there is a
 computer running MAPDL on the port 50052, you can connect to it with:
 
-.. code::
+.. code:: pycon
 
-    >>> mapdl = Mapdl('192.168.0.1', port=50052)
+    >>> mapdl = Mapdl("192.168.0.1", port=50052)
 
 Alternatively you can use a hostname:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl = Mapdl('myremotemachine', port=50052)
+    >>> mapdl = Mapdl("myremotemachine", port=50052)
 
 Note that you must have started MAPDL in gRPC mode on the computer with
 the mentioned IP address/hostname for this to work.

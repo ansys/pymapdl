@@ -45,15 +45,6 @@ defaults:
 
 jobs:
 
-  code-style:
-    name: "Code style"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "PyAnsys code style checks"
-        uses: pyansys/actions/code-style@v2
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
@@ -66,7 +57,6 @@ jobs:
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
-    needs: code-style
     strategy:
       fail-fast: false
       matrix:

@@ -27,13 +27,13 @@ MAPDL commands that normally have an empty space, such as
 
 .. code:: python
 
-    mapdl.esel('s', 'type', '', 1)
+    mapdl.esel("s", "type", "", 1)
 
 Or, these commands can be called using keyword arguments:
 
 .. code:: python
 
-    mapdl.esel('s', 'type', vmin=1)
+    mapdl.esel("s", "type", vmin=1)
 
 None of these restrictions apply to commands run with the :func:`Mapdl.run()
 <ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
@@ -41,7 +41,7 @@ these commands, such as ``"/SOLU"``:
 
 .. code:: python
 
-    mapdl.run('/SOLU')
+    mapdl.run("/SOLU")
     mapdl.solve()
 
 You can use the alternative:
@@ -69,7 +69,7 @@ Note that macros created within PyMAPDL (rather than loaded from
 a file) do not appear to run correctly. For example, here is the macro
 ``DISP`` created using the ``*CREATE`` command within APDL:
 
-.. code::
+.. code:: apdl
 
     ! SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
     *CREATE,DISP
@@ -89,25 +89,42 @@ It should be written as follows:
 
 .. code:: python
 
-    def DISP(ARG1='', ARG2='', ARG3='', ARG4='', ARG5='', ARG6='',
-             ARG7='', ARG8='', ARG9='', ARG10='', ARG11='', ARG12='',
-             ARG13='', ARG14='', ARG15='', ARG16='', ARG17='', ARG18=''):
-        mapdl.nsel("R", "LOC", "Z", 10)  #SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
+    def DISP(
+        ARG1="",
+        ARG2="",
+        ARG3="",
+        ARG4="",
+        ARG5="",
+        ARG6="",
+        ARG7="",
+        ARG8="",
+        ARG9="",
+        ARG10="",
+        ARG11="",
+        ARG12="",
+        ARG13="",
+        ARG14="",
+        ARG15="",
+        ARG16="",
+        ARG17="",
+        ARG18="",
+    ):
+        mapdl.nsel("R", "LOC", "Z", 10)  # SELECT NODES AT Z = 10 TO APPLY DISPLACEMENT
         mapdl.d("ALL", "UZ", ARG1)
         mapdl.nsel("ALL")
         mapdl.run("/OUT,SCRATCH")
         mapdl.solve()
 
-    
-    DISP(-.032)
-    DISP(-.05)
-    DISP(-.1)
+
+    DISP(-0.032)
+    DISP(-0.05)
+    DISP(-0.1)
 
 If you have an existing input file with a macro, you can convert it
 using the :func:`convert_script() <ansys.mapdl.core.convert_script>`
 method, setting``macros_as_functions=True``:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl import core as pymapdl
     >>> pymapdl.convert_script(apdl_inputfile, pyscript, macros_as_functions=True)
@@ -124,16 +141,16 @@ and when using the :func:`Mapdl.run() <ansys.mapdl.core.Mapdl.run>` method.
 
 Run a command and suppress its output:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('/PREP7', mute=True)
+    >>> mapdl.run("/PREP7", mute=True)
     >>> mapdl.prep7(mute=True)
 
 Run a command and stream its output while it is being run:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('SOLVE', mute=True)
+    >>> mapdl.run("SOLVE", mute=True)
     >>> mapdl.solve(verbose=True)
 
 .. note::
@@ -149,7 +166,7 @@ This is useful when using PyMAPDL with older MAPDL scripts. For example:
 
 .. code:: python
 
-    >>> cmd = '''/prep7
+    cmd = """/prep7
     ! Mat
     MP,EX,1,200000
     MP,NUXY,1,0.3
@@ -160,12 +177,12 @@ This is useful when using PyMAPDL with older MAPDL scripts. For example:
     BLC4,0,0,1000,100,10
     ! Mesh
     esize,5
-    vmesh,all
-    '''
+    vmesh,all"""
+
+.. code:: pycon
 
     >>> resp = mapdl.input_strings(cmd)
     >>> resp
-
     You have already entered the general preprocessor (PREP7).
 
     MATERIAL          1     EX   =   200000.0
@@ -202,7 +219,7 @@ run the file using the :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
 method. For example, if you have a ``"ds.dat"`` file generated from Ansys
 Mechanical, you can run that with:
 
-.. code:: python
+.. code:: pycon
 
     >>> resp = mapdl.input("ds.dat")
 
@@ -213,7 +230,7 @@ APDL conditional statements such as ``*IF`` must be either implemented
 Pythonically or by using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
 attribute. For example:
 
-.. code::
+.. code:: apdl
 
     *IF,ARG1,EQ,0,THEN
       *GET,ARG4,NX,ARG2     ! RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
@@ -244,7 +261,9 @@ This should be implemented as follows:
         mapdl.run("*GET,ARG8,NY,ARG3")
         mapdl.run("*GET,ARG9,NZ,ARG3")
         mapdl.run("*ELSE")
-        mapdl.run("*GET,ARG4,KX,ARG2     ")  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
+        mapdl.run(
+            "*GET,ARG4,KX,ARG2     "
+        )  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
         mapdl.run("*GET,ARG5,KY,ARG2")
         mapdl.run("*GET,ARG6,KZ,ARG2")
         mapdl.run("*GET,ARG7,KX,ARG3")
@@ -265,7 +284,9 @@ Or, implemented Pythonically as follows:
         mapdl.run("*GET,ARG8,NY,ARG3")
         mapdl.run("*GET,ARG9,NZ,ARG3")
     else:
-        mapdl.run("*GET,ARG4,KX,ARG2     ")  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
+        mapdl.run(
+            "*GET,ARG4,KX,ARG2     "
+        )  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
         mapdl.run("*GET,ARG5,KY,ARG2")
         mapdl.run("*GET,ARG6,KZ,ARG2")
         mapdl.run("*GET,ARG7,KX,ARG3")
@@ -287,13 +308,14 @@ Errors are handled Pythonically. For example:
         mapdl.solve()
     except:
         # do something else with MAPDL
+        pass
 
 Commands that are ignored within MAPDL are flagged as errors. This is
 different than MAPDL's default behavior where commands that are
 ignored are treated as warnings. For example, in ``ansys-mapdl-core``
 running a command in the wrong session raises an error:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.finish()
     >>> mapdl.k()
@@ -310,7 +332,7 @@ warnings and not raised as exceptions by using the
 :func:`Mapdl.ignore_errors() <ansys.mapdl.core.Mapdl.ignore_errors>` function. For
 example:
 
-.. code:: python
+.. code:: pycon
 
    >>> mapdl.ignore_errors = True
    >>> mapdl.k()  # warning silently ignored
@@ -336,20 +358,20 @@ command run into a log file named ``"apdl.log"`` in the active
 :attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`. 
 For example:
 
-.. code:: python
+.. code:: pycon
 
-    from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core import launch_mapdl
 
-    ansys = launch_mapdl(log_apdl='apdl.log')
-    ansys.prep7()
-    ansys.k(1, 0, 0, 0)
-    ansys.k(2, 1, 0, 0)
-    ansys.k(3, 1, 1, 0)
-    ansys.k(4, 0, 1, 0)    
+    >>> ansys = launch_mapdl(log_apdl="apdl.log")
+    >>> ansys.prep7()
+    >>> ansys.k(1, 0, 0, 0)
+    >>> ansys.k(2, 1, 0, 0)
+    >>> ansys.k(3, 1, 1, 0)
+    >>> ansys.k(4, 0, 1, 0)
 
 This code writes the following to the ``"apdl.log"`` file:
 
-.. code::
+.. code:: text
 
     /PREP7,
     K,1,0,0,0
@@ -375,33 +397,39 @@ has the :func:`Mapdl.open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method, which
 allows you to seamlessly open up the GUI without losing work or
 having to restart your session. For example:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
-    Create a square area using keypoints
+Create a square area using keypoints
+
+.. code:: pycon
 
     >>> mapdl.prep7()
     >>> mapdl.k(1, 0, 0, 0)
     >>> mapdl.k(2, 1, 0, 0)
     >>> mapdl.k(3, 1, 1, 0)
-    >>> mapdl.k(4, 0, 1, 0)    
+    >>> mapdl.k(4, 0, 1, 0)
     >>> mapdl.l(1, 2)
     >>> mapdl.l(2, 3)
     >>> mapdl.l(3, 4)
     >>> mapdl.l(4, 1)
     >>> mapdl.al(1, 2, 3, 4)
 
-    Open up the gui
+Open up the GUI
+
+.. code:: pycon
 
     >>> mapdl.open_gui()
 
-    Resume where you left off
+Resume where you left off
 
-    >>> mapdl.et(1, 'MESH200', 6)
-    >>> mapdl.amesh('all')
-    >>> mapdl.eplot()    
+.. code:: pycon
+
+    >>> mapdl.et(1, "MESH200", 6)
+    >>> mapdl.amesh("all")
+    >>> mapdl.eplot()
 
 This approach avoids the hassle of having to switch back and forth
 between an interactive session and a scripting session. Instead, you
@@ -423,8 +451,9 @@ with torsional loading.
     import numpy as np
     from ansys.mapdl.core import launch_mapdl
 
+
     def cylinder_batch(elemsize, plot=False):
-        """ Report the maximum von Mises stress of a Cantilever supported cylinder"""
+        """Report the maximum von Mises stress of a Cantilever supported cylinder"""
 
         # clear
         mapdl.finish()
@@ -434,8 +463,8 @@ with torsional loading.
         radius = 2
         h_tip = 2
         height = 20
-        force = 100/radius
-        pressure = force/(h_tip*2*np.pi*radius)
+        force = 100 / radius
+        pressure = force / (h_tip * 2 * np.pi * radius)
 
         mapdl.prep7()
         mapdl.et(1, 186)
@@ -444,34 +473,34 @@ with torsional loading.
         mapdl.r(2)
 
         # Aluminum properties (or something)
-        mapdl.mp('ex', 1, 10e6)
-        mapdl.mp('nuxy', 1, 0.3)
-        mapdl.mp('dens', 1, 0.1/386.1)
-        mapdl.mp('dens', 2, 0)
+        mapdl.mp("ex", 1, 10e6)
+        mapdl.mp("nuxy", 1, 0.3)
+        mapdl.mp("dens", 1, 0.1 / 386.1)
+        mapdl.mp("dens", 2, 0)
 
         # Simple cylinder
         for i in range(4):
-            mapdl.cylind(radius, '', '', height, 90*(i-1), 90*i)
+            mapdl.cylind(radius, "", "", height, 90 * (i - 1), 90 * i)
 
-        mapdl.nummrg('kp')            
+        mapdl.nummrg("kp")
 
         # mesh cylinder
-        mapdl.lsel('s', 'loc', 'x', 0)
-        mapdl.lsel('r', 'loc', 'y', 0)
-        mapdl.lsel('r', 'loc', 'z', 0, height - h_tip)
+        mapdl.lsel("s", "loc", "x", 0)
+        mapdl.lsel("r", "loc", "y", 0)
+        mapdl.lsel("r", "loc", "z", 0, height - h_tip)
         # mapdl.lesize('all', elemsize*2)
         mapdl.mshape(0)
         mapdl.mshkey(1)
         mapdl.esize(elemsize)
-        mapdl.allsel('all')
-        mapdl.vsweep('ALL')
+        mapdl.allsel("all")
+        mapdl.vsweep("ALL")
         mapdl.csys(1)
-        mapdl.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-        mapdl.asel('r', 'loc', 'x', radius)
+        mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
+        mapdl.asel("r", "loc", "x", radius)
         mapdl.local(11, 1)
         mapdl.csys(0)
         mapdl.aatt(2, 2, 2, 11)
-        mapdl.amesh('all')
+        mapdl.amesh("all")
         mapdl.finish()
 
         if plot:
@@ -480,21 +509,21 @@ with torsional loading.
 
         # new solution
         mapdl.slashsolu()
-        mapdl.antype('static', 'new')
-        mapdl.eqslv('pcg', 1e-8)
+        mapdl.antype("static", "new")
+        mapdl.eqslv("pcg", 1e-8)
 
         # Apply tangential pressure
-        mapdl.esel('s', 'type', '', 2)
-        mapdl.sfe('all', 2, 'pres', '', pressure)
+        mapdl.esel("s", "type", "", 2)
+        mapdl.sfe("all", 2, "pres", "", pressure)
 
         # Constrain bottom of cylinder/rod
-        mapdl.asel('s', 'loc', 'z', 0)
-        mapdl.nsla('s', 1)
+        mapdl.asel("s", "loc", "z", 0)
+        mapdl.nsla("s", 1)
 
-        mapdl.d('all', 'all')
+        mapdl.d("all", "all")
         mapdl.allsel()
-        mapdl.psf('pres', '', 2)
-        mapdl.pbc('u', 1)
+        mapdl.psf("pres", "", 2)
+        mapdl.pbc("u", 1)
         mapdl.solve()
         mapdl.finish()
 
@@ -519,7 +548,7 @@ with torsional loading.
 
 
     # initialize MAPDL
-    mapdl = launch_mapdl(override=True, loglevel='ERROR')
+    mapdl = launch_mapdl(override=True, loglevel="ERROR")
 
     # call MAPDL to solve repeatedly
     result_summ = []
@@ -527,15 +556,17 @@ with torsional loading.
         # run the batch and report the results
         nnode, maxstress = cylinder_batch(elemsize, plot=False)
         result_summ.append([nnode, maxstress])
-        print('Element size %f: %6d nodes and maximum vom Mises stress %f'
-              % (elemsize, nnode, maxstress))
+        print(
+            "Element size %f: %6d nodes and maximum vom Mises stress %f"
+            % (elemsize, nnode, maxstress)
+        )
 
     # Exit MAPDL
     mapdl.exit()
 
 Here is the output from the script:
 
-.. code::
+.. code:: output
 
     Element size 0.600000:   9657 nodes and maximum vom Mises stress 142.623505
     Element size 0.567857:  10213 nodes and maximum vom Mises stress 142.697800
@@ -610,17 +641,18 @@ MAPDL through Python with the :func:`Mapdl.run()
 
     from ansys.mapdl.core import launch_mapdl
     import numpy as np
+
     mapdl = launch_mapdl()
     arr = np.random.random((5, 3))
-    mapdl.parameters['MYARR'] = arr
+    mapdl.parameters["MYARR"] = arr
 
 Verify that the data has been properly loaded to MAPDL by indexing the
 :attr:`Mapdl.Parameters <ansys.mapdl.core.Mapdl.parameters>` attribute as if it
 was a Python dictionary:
 
-.. code:: python
+.. code:: pycon
 
-   >>> array_from_mapdl = mapdl.parameters['MYARR']
+   >>> array_from_mapdl = mapdl.parameters["MYARR"]
    >>> array_from_mapdl
    array([[0.65516567, 0.96977939, 0.3224993 ],
           [0.58634927, 0.84392263, 0.18152529],
@@ -641,10 +673,10 @@ function. For example, the following code lists the remote files and downloads o
     remote_files = mapdl.list_files()
 
     # ensure the result file is one of the remote files
-    assert 'file.rst' in remote_files
+    assert "file.rst" in remote_files
 
     # download the remote result file
-    mapdl.download('file.rst')
+    mapdl.download("file.rst")
 
 .. note::
 
@@ -657,10 +689,10 @@ method:
 .. code:: python
 
     # Using a list of file names
-    mapdl.download(['file0.log', 'file1.out'])
+    mapdl.download(["file0.log", "file1.out"])
 
     # Using glob pattern to match the list_files
-    mapdl.download('file*')
+    mapdl.download("file*")
 
 You can also download all files in the MAPDL working directory
 (:func:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`) using
@@ -674,7 +706,9 @@ Or, filter by extensions as shown in this example:
 
 .. code:: python
 
-    mapdl.download_project(['log', 'out'], target_dir='myfiles')  # Download the files to 'myfiles' directory
+    mapdl.download_project(
+        ["log", "out"], target_dir="myfiles"
+    )  # Download the files to 'myfiles' directory
 
 
 Upload a local MAPDL file
@@ -685,11 +719,11 @@ You can upload a local MAPDL file as the remote MAPDL instance with the
 .. code:: python
 
     # upload a local file
-    mapdl.upload('sample.db')
+    mapdl.upload("sample.db")
 
     # ensure the uploaded file is one of the remote files
     remote_files = mapdl.list_files()
-    assert 'sample.db' in remote_files
+    assert "sample.db" in remote_files
 
 .. note::
 
@@ -726,7 +760,7 @@ use them. For example, the ``/BATCH`` command can be run using the
 :func:`mapdl.run("/BATCH") <ansys.mapdl.core.Mapdl.run>` method,
 which returns the following warning:
 
-.. code::
+.. code:: output
 
     *** WARNING ***                         CP =       0.519   TIME= 12:04:16
     The /BATCH command must be the first line of input.  The /BATCH command

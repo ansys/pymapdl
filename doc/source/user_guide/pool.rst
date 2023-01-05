@@ -9,7 +9,7 @@ processes.
 
 This code creates a pool:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import LocalMapdlPool
     >>> pool = LocalMapdlPool(10)
@@ -19,7 +19,7 @@ You can supply additional keyword arguments when creating the
 pool. This code creates several instances with one CPU each running
 at the current directory within their own isolated directories:
 
-.. code:: python
+.. code:: pycon
 
     >>> import os
     >>> my_path = os.getcmd()
@@ -28,7 +28,7 @@ at the current directory within their own isolated directories:
 
 You can access each individual MAPDL instance with this code:
 
-.. code:: python
+.. code:: pycon
 
     >>> pool[0]
     <ansys.mapdl.core.mapdl.MapdlGrpc object at 0x7f66270cc8d0>
@@ -45,10 +45,10 @@ You can use the pool to run a set of pre-generated input files using the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` method. For
 example, this code would run the first set of 20 verification files:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import examples
-    >>> files = [examples.vmfiles['vm%d' % i] for i in range(1, 21)]
+    >>> files = [examples.vmfiles["vm%d" % i] for i in range(1, 21)]
     >>> outputs = pool.run_batch(files)
     >>> len(outputs)
     20
@@ -65,24 +65,30 @@ output from MAPDL.
 
 .. code:: python
 
-    >>> completed_indices = []
-    >>> def func(mapdl, input_file, index):
-            # input_file, index = args
-            mapdl.clear()
-            output = mapdl.input(input_file)
-            completed_indices.append(index)
-            return mapdl.parameters.routine
-    >>> inputs = [(examples.vmfiles['vm%d' % i], i) for i in range(1, 10)]
-    >>> output = pool.map(func, inputs, progress_bar=True, wait=True)
-    ['Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level',
-     'Begin level']
+    completed_indices = []
+
+
+    def func(mapdl, input_file, index):
+        # input_file, index = args
+        mapdl.clear()
+        output = mapdl.input(input_file)
+        completed_indices.append(index)
+        return mapdl.parameters.routine
+
+
+    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, 10)]
+    output = pool.map(func, inputs, progress_bar=True, wait=True)
+    [
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+        "Begin level",
+    ]
 
 
 API description
