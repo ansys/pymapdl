@@ -1856,6 +1856,7 @@ def test_custom_stds_error(mapdl):
 
     mapdl._mapdl_process = old_process
 
+
 def test_avoid_non_interactive(mapdl):
 
     with mapdl.non_interactive:
