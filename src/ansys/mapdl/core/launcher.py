@@ -1421,19 +1421,19 @@ def launch_mapdl(
         development purposes. See Notes for more details.
 
         set_no_abort : :class:`bool`
-          _(Development use only)_
+          *(Development use only)*
           Sets MAPDL to not abort at the first error within /BATCH mode.
           Defaults to ``True``.
 
         force_intel : :class:`bool`
-          _(Development use only)_
+          *(Development use only)*
           Forces the use of Intel message pass interface (MPI) in versions between
           Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is deactivated
           by default. See :ref:`vpn_issues_troubleshooting` for more information.
           Defaults to ``False``.
 
         log_broadcast : :class:`bool`
-          (Only for CORBA mode)
+          *(Only for CORBA mode)*
           Enables a logger to record broadcasted commands.
           Defaults to ``False``.
 

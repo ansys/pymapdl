@@ -2742,7 +2742,7 @@ class _MapdlCore(Commands):
             development purposes.
 
             avoid_non_interactive : :class:`bool`
-              _(Development use only)_
+              *(Development use only)*
               Avoids the non-interactive mode for this specific command.
               Defaults to ``False``.
 
