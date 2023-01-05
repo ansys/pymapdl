@@ -170,8 +170,7 @@ either Windows or Linux.
     printenv | grep ANSYSLMD_LICENSE_FILE
 
 
-.. _missing_dependencies_on_linux:
-
+.. _vpn_issues_troubleshooting:
 
 Virtual private network (VPN) issues
 ====================================
@@ -209,6 +208,8 @@ On Windows, you can find the license configuration file that points to the licen
     C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
 
 
+
+.. _missing_dependencies_on_linux:
 
 Missing dependencies on Linux
 =============================
