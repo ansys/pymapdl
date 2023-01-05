@@ -1855,3 +1855,15 @@ def test_custom_stds_error(mapdl):
         mapdl._post_mortem_checks()
 
     mapdl._mapdl_process = old_process
+
+def test_avoid_non_interactive(mapdl):
+
+    with mapdl.non_interactive:
+        mapdl.com("comment A")
+        mapdl.com("comment B", avoid_non_interactive=True)
+        mapdl.com("comment C")
+
+        stored_commands = mapdl._stored_commands
+        assert any(["comment A" in cmd for cmd in stored_commands])
+        assert all(["comment B" not in cmd for cmd in stored_commands])
+        assert any(["comment C" in cmd for cmd in stored_commands])

@@ -2741,8 +2741,18 @@ class _MapdlCore(Commands):
             to ``False``, will not write command to log, even if APDL
             command logging is enabled.
 
-        kwargs : Optional keyword arguments
-            These keyword arguments are interface specific.
+        kwargs : dict, optional
+            These keyword arguments are interface specific or for
+            development purposes.
+
+            avoid_non_interactive : :class:`bool`
+              *(Development use only)*
+              Avoids the non-interactive mode for this specific command.
+              Defaults to ``False``.
+
+            verbose : :class:`bool`
+              Prints the command to the screen before running it.
+              Defaults to ``False``.
 
         Returns
         -------
@@ -2751,6 +2761,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
+
+        **Running non-interactive commands**
+
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) use
 
@@ -2781,7 +2794,10 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        if self._store_commands:
+        # check if we want to avoid the current non-interactive context.
+        avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
+
+        if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
             self._stored_commands.append(command)
             return
