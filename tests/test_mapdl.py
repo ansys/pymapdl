@@ -11,7 +11,11 @@ from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -816,7 +820,10 @@ def test_cyclic_solve(mapdl, cleared):
 @pytest.mark.parametrize(
     "dim_cols",
     np.concatenate(
-        (np.ones(2, dtype=int) * 2, np.random.randint(2, 100, size=2, dtype=int))
+        (
+            np.ones(2, dtype=int) * 2,
+            np.random.randint(2, 100, size=2, dtype=int),
+        )
     ),
 )
 def test_load_table(mapdl, dim_rows, dim_cols):
@@ -1140,18 +1147,27 @@ def test_path_with_spaces(mapdl, path_tests):
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(RuntimeError):
-        resp = mapdl.cwd(path_tests.path_with_single_quote)
+        mapdl.cwd(path_tests.path_with_single_quote)
 
 
-@skip_in_cloud
 def test_cwd(mapdl, tmpdir):
     old_path = mapdl.directory
+    if mapdl._local:
+        tempdir_ = tmpdir
+    else:
+        if mapdl.platform == "linux":
+            mapdl.sys("mkdir -p /tmp")
+            tempdir_ = "/tmp"
+        elif mapdl.platform == "windows":
+            tempdir_ = "C:\\Windows\\Temp"
+        else:
+            raise ValueError("Unknown platform")
     try:
-        mapdl.directory = str(tmpdir)
-        assert mapdl.directory == str(tmpdir).replace("\\", "/")
+        mapdl.directory = str(tempdir_)
+        assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
 
         wrong_path = "wrong_path"
-        with pytest.raises(MapdlCommandIgnoredError, match="working directory"):
+        with pytest.raises(IncorrectWorkingDirectory, match="working directory"):
             mapdl.directory = wrong_path
 
     finally:
@@ -1189,8 +1205,9 @@ def test_inquire(mapdl):
 def test_ksel(mapdl, cleared):
     mapdl.k(1, 0, 0, 0)
     mapdl.prep7()
-    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1)
-    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1)
+    assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
+    assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
+    assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
 def test_get_file_path(mapdl, tmpdir):
@@ -1203,7 +1220,11 @@ def test_get_file_path(mapdl, tmpdir):
 
 @pytest.mark.parametrize(
     "option2,option3,option4",
-    [("expdata.dat", "", ""), ("expdata", ".dat", ""), ("expdata", "dat", "DIR")],
+    [
+        ("expdata.dat", "", ""),
+        ("expdata", ".dat", ""),
+        ("expdata", "dat", "DIR"),
+    ],
 )
 def test_tbft(mapdl, tmpdir, option2, option3, option4):
 
@@ -1312,7 +1333,8 @@ def test_print_com(mapdl, capfd):
 
 def test_extra_argument_in_get(mapdl, make_block):
     assert isinstance(
-        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"), float
+        mapdl.get("_MAXNODENUM_", "node", 0, "NUM", "MAX", "", "", "INTERNAL"),
+        float,
     )
 
 
@@ -1553,6 +1575,7 @@ def test_non_interactive(mapdl, cleared):
 
 
 def test_ignored_command(mapdl, cleared):
+    mapdl.ignore_errors = False
     mapdl.prep7(mute=True)
     mapdl.n(mute=True)
     with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
@@ -1611,7 +1634,7 @@ def test_use_uploading(mapdl, cleared, tmpdir):
     out = mapdl.use(mymacrofile)
 
     # Raises an error.
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.use("myinexistentmacro.mac")
 
     # Raise an error
@@ -1650,3 +1673,57 @@ def test_mode(mapdl):
     assert mapdl.is_console
 
     mapdl._mode = "grpc"  # Going back to default
+
+
+def test_remove_lock_file(mapdl, tmpdir):
+    tmpdir_ = tmpdir.mkdir("ansys")
+    lock_file = tmpdir_.join("file.lock")
+    with open(lock_file, "w") as fid:
+        fid.write("test")
+
+    mapdl._remove_lock_file(tmpdir_)
+    assert not os.path.exists(lock_file)
+
+
+def test_is_local(mapdl):
+    assert mapdl.is_local == mapdl._local
+
+
+def test_on_docker(mapdl):
+    assert mapdl.on_docker == mapdl._on_docker
+    if os.getenv("PYMAPDL_START_INSTANCE", "false") == "true":
+        assert mapdl.on_docker
+    else:
+        assert not mapdl.on_docker
+
+
+def test_deprecation_allow_ignore_warning(mapdl):
+    with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
+        mapdl.allow_ignore = True
+
+
+def test_deprecation_allow_ignore_errors_mapping(mapdl):
+    mapdl.allow_ignore = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.allow_ignore = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = True
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+    mapdl.ignore_errors = False
+    assert mapdl.allow_ignore == mapdl.ignore_errors
+
+
+def test_avoid_non_interactive(mapdl):
+
+    with mapdl.non_interactive:
+        mapdl.com("comment A")
+        mapdl.com("comment B", avoid_non_interactive=True)
+        mapdl.com("comment C")
+
+        stored_commands = mapdl._stored_commands
+        assert any(["comment A" in cmd for cmd in stored_commands])
+        assert all(["comment B" not in cmd for cmd in stored_commands])
+        assert any(["comment C" in cmd for cmd in stored_commands])

@@ -14,7 +14,6 @@
    :toctree: _autosummary
 
    Mapdl.add_file_handler
-   Mapdl.allow_ignore
    Mapdl.chain_commands
    Mapdl.directory
    Mapdl.get

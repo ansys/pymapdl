@@ -1,8 +1,8 @@
 .. _using_standard_install:
 
-******************************************
-Use PyMAPDL from the standard installation
-******************************************
+*********************
+Standard installation
+*********************
 
 The PyAnsys ``ansys-mapdl-core`` package requires either a local or
 remote instance of MAPDL to communicate with it. This section covers
@@ -26,7 +26,7 @@ installer options can change, see the following figure for reference.
 
 If you want to avoid having to install MAPDL locally, you can use Docker.
 This is especially convenient if you are using a non-supported platform such
-as MacOS. For more information, see :ref:`pymapdl_docker`.
+as MacOS.
 
 You can also download and try `Ansys Student Versions <ansys_student_version_>`_.
 A Student Version is valid during a calendar year with limited capabilities. For
@@ -44,7 +44,7 @@ Launch MAPDL locally
 You can use the ``launch_mapdl`` method to have Python start MAPDL and
 automatically connect to it:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -58,25 +58,27 @@ automatically connect to it:
 This is the easiest and fastest way to get PyMAPDL up and running. 
 But you need to have an ANSYS license server installed locally. 
 
+.. _launch_grpc_madpl_session:
+
 Launch a gRPC MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can start MAPDL from the command line and then connect to it.
 
 To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation), use:
 
-.. code::
+.. code:: pwsh
 
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
 To launch MAPDL on Linux (assuming a ``/usr/ansys_inc`` installation), use:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
 
 This starts up MAPDL in gRPC mode, and MAPDL should output:
 
-.. code::
+.. code:: output
 
      Start GRPC Server
 
@@ -91,7 +93,7 @@ You can configure the port that MAPDL starts on with the ``-port`` argument.
 For example, you can start the server to listen for connections at 
 port 50005 with:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
@@ -103,7 +105,7 @@ A MAPDL gRPC server can be connected to from either the same host or an
 external host. For example, you can connect to a MAPDL service
 running **locally** with:
 
-.. code::
+.. code:: pycon
 
     >>> from ansys.mapdl.core import Mapdl
     >>> mapdl = Mapdl()
@@ -117,15 +119,15 @@ address of that instance, you can connect to it.
 For example, if on your local network at IP address ``192.168.0.1`` there is a
 computer running MAPDL on the port 50052, you can connect to it with:
 
-.. code::
+.. code:: pycon
 
-    >>> mapdl = Mapdl('192.168.0.1', port=50052)
+    >>> mapdl = Mapdl("192.168.0.1", port=50052)
 
 Alternatively you can use a hostname:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl = Mapdl('myremotemachine', port=50052)
+    >>> mapdl = Mapdl("myremotemachine", port=50052)
 
 Note that you must have started MAPDL in gRPC mode on the computer with
 the mentioned IP address/hostname for this to work.
@@ -134,20 +136,3 @@ If you have MAPDL installed on your local host, you
 can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to both start and connect to MAPDL.
 
 If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`.
-
-Connect to a dockerized MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you work with Docker, for example you use the
-`docker-compose.yml <pymapdl_docker_compose_base_>`_ file provided in the
-directory `docker <pymapdl_docker_dir_>`_, then you must connect to the
-MAPDL instance running on the Docker container as if it was a remote MAPDL
-instance. However, because the ports are exposed to the host via the ``ports`` field
-in the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file, you can connect
-to this MAPDL instance without specifying the IP address of the Docker container.
-
-If you are using the local configuration specified in the
-`docker-compose.local.yml <pymapdl_docker_compose_local_>`_ file,
-after attaching your VSCode instance, you can work with MAPDL as if it were local.
-This means that you can launch MAPDL instances using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
-

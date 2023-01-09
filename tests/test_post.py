@@ -803,7 +803,8 @@ def test_general_plotter_returns(mapdl, static_solve):
 
 def test_time_frequency_values(mapdl, contact_solve):
     assert np.allclose(
-        mapdl.post_processing.time_values, mapdl.post_processing.frequency_values
+        mapdl.post_processing.time_values,
+        mapdl.post_processing.frequency_values,
     )
 
 
@@ -852,7 +853,8 @@ def test_meta_post_plot_docstrings():
             assert (
                 len(
                     re.findall(
-                        "<ansys.mapdl.core.plotting.general_plotter>`", docstring
+                        "<ansys.mapdl.core.plotting.general_plotter>`",
+                        docstring,
                     )
                 )
                 >= 3

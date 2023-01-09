@@ -22,6 +22,8 @@ from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
+    CMD_XSEL,
+    XSEL_DOCSTRING_INJECTION,
     BoundaryConditionsListingOutput,
     CommandListingOutput,
     Commands,
@@ -29,6 +31,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -161,7 +164,7 @@ class _MapdlCore(Commands):
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited = False
-        self._allow_ignore = False
+        self._ignore_errors = False
         self._apdl_log = None
         self._store_commands = False
         self._stored_commands = []
@@ -189,11 +192,12 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._start_parm = start_parm
         self._path = start_parm.get("run_location", None)
-        self._ignore_errors = False
         self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
         self._kylov = None
+        self._on_docker = None
+        self._platform = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -220,7 +224,12 @@ class _MapdlCore(Commands):
 
         self._post = PostProcessing(self)
 
+        # Wrapping listing functions for "to_array" methods
         self._wrap_listing_functions()
+
+        # Wrapping XSEL commands to return ids.
+        self._xsel_mapdl_output = False
+        self._wrap_xsel_commands()
 
         self._info = Information(self)
 
@@ -297,6 +306,71 @@ class _MapdlCore(Commands):
             if name[0:4].upper() in CMD_BC_LISTING and name in dir(Commands):
                 func = self.__getattribute__(name)
                 setattr(self, name, wrap_bc_listing_function(func))
+
+    def _wrap_xsel_commands(self):
+        # Wrapping XSEL commands.
+        def wrap_xsel_function(func):
+
+            if hasattr(func, "__func__"):
+                func.__func__.__doc__ = inject_docs(
+                    func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
+                )
+            else:  # pragma: no cover
+                func.__doc__ = inject_docs(func.__doc__, XSEL_DOCSTRING_INJECTION)
+
+            def wrap_xsel_function_output(method):
+                # Injecting doc string modification
+                name = method.__func__.__name__.upper()
+                if name == "NSEL":
+                    return self.mesh.nnum
+                elif name == "ESEL":
+                    return self.mesh.enum
+                elif name == "KSEL":
+                    return self.geometry.knum
+                elif name == "LSEL":
+                    return self.geometry.lnum
+                elif name == "ASEL":
+                    return self.geometry.anum
+                elif name == "VSEL":
+                    return self.geometry.vnum
+                else:
+                    return None
+
+            @wraps(func)
+            def inner_wrapper(*args, **kwargs):
+                # in interactive mode (item='p'), the output is not suppressed
+                is_interactive_arg = (
+                    True
+                    if len(args) >= 2
+                    and isinstance(args[1], str)
+                    and args[1].upper() == "P"
+                    else False
+                )
+                is_interactive_kwarg = (
+                    True
+                    if "item" in kwargs and kwargs["item"].upper() == "P"
+                    else False
+                )
+
+                return_mapdl_output = kwargs.pop(
+                    "return_mapdl_output", self._xsel_mapdl_output
+                )
+                if is_interactive_arg or is_interactive_kwarg:
+                    return_mapdl_output = True
+
+                output = func(*args, **kwargs)
+                if not return_mapdl_output:
+                    output = wrap_xsel_function_output(func)
+                return output
+
+            return inner_wrapper
+
+        for name in dir(self):
+            if name[0:4].upper() in CMD_XSEL and name in dir(
+                Commands
+            ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
+                method = self.__getattribute__(name)
+                setattr(self, name, wrap_xsel_function(method))
 
     @property
     def name(self):  # pragma: no cover
@@ -848,12 +922,22 @@ class _MapdlCore(Commands):
         This command will be ignored.
 
         """
-        return self._allow_ignore
+        warn(
+            "'allow_ignore' is being deprecated and will be removed in a future release. "
+            "Use ``mapdl.ignore_errors`` instead.",
+            DeprecationWarning,
+        )
+        return self._ignore_errors
 
     @allow_ignore.setter
     def allow_ignore(self, value):
         """Set allow ignore"""
-        self._allow_ignore = bool(value)
+        warn(
+            "'allow_ignore' is being deprecated and will be removed in a future release. "
+            "Use ``mapdl.ignore_errors`` instead.",
+            DeprecationWarning,
+        )
+        self._ignore_errors = bool(value)
 
     def open_apdl_log(self, filename, mode="w"):
         """Start writing all APDL commands to an MAPDL input file.
@@ -1566,9 +1650,10 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:
+            if color_areas:  # pragma: no cover
                 anum = surf["entity_num"]
-                rand = np.random.random(anum[-1] + 1)
+                size_ = max(anum) + 1
+                rand = np.random.random(size_)
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
@@ -1598,7 +1683,10 @@ class _MapdlCore(Commands):
                     )
                 if show_line_numbering:
                     labels.append(
-                        {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                        {
+                            "points": lines.points[50::101],
+                            "labels": lines["entity_num"],
+                        }
                     )
 
             return general_plotter(meshes, [], labels, **kwargs)
@@ -1762,12 +1850,18 @@ class _MapdlCore(Commands):
             labels = []
             if show_line_numbering:
                 labels.append(
-                    {"points": lines.points[50::101], "labels": lines["entity_num"]}
+                    {
+                        "points": lines.points[50::101],
+                        "labels": lines["entity_num"],
+                    }
                 )
 
             if show_keypoint_numbering:
                 labels.append(
-                    {"points": self.geometry.keypoints, "labels": self.geometry.knum}
+                    {
+                        "points": self.geometry.keypoints,
+                        "labels": self.geometry.knum,
+                    }
                 )
 
             return general_plotter(meshes, [], labels, **kwargs)
@@ -1901,9 +1995,12 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     result_path = self._result_file
-                else:
+                else:  # pragma: no cover
                     # return the file with the last access time
-                    filenames = [self._distributed_result_file, self._result_file]
+                    filenames = [
+                        self._distributed_result_file,
+                        self._result_file,
+                    ]
                     result_path = last_created(filenames)
                     if result_path is None:  # if same return result_file
                         result_path = self._result_file
@@ -2085,7 +2182,14 @@ class _MapdlCore(Commands):
             self._log.info(self._response)
 
     def get_value(
-        self, entity="", entnum="", item1="", it1num="", item2="", it2num="", **kwargs
+        self,
+        entity="",
+        entnum="",
+        item1="",
+        it1num="",
+        item2="",
+        it2num="",
+        **kwargs,
     ):
         """Runs the MAPDL GET command and returns a Python value.
 
@@ -2633,8 +2737,18 @@ class _MapdlCore(Commands):
             to ``False``, will not write command to log, even if APDL
             command logging is enabled.
 
-        kwargs : Optional keyword arguments
-            These keyword arguments are interface specific.
+        kwargs : dict, optional
+            These keyword arguments are interface specific or for
+            development purposes.
+
+            avoid_non_interactive : :class:`bool`
+              *(Development use only)*
+              Avoids the non-interactive mode for this specific command.
+              Defaults to ``False``.
+
+            verbose : :class:`bool`
+              Prints the command to the screen before running it.
+              Defaults to ``False``.
 
         Returns
         -------
@@ -2643,6 +2757,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
+
+        **Running non-interactive commands**
+
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) use
 
@@ -2673,7 +2790,10 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        if self._store_commands:
+        # check if we want to avoid the current non-interactive context.
+        avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
+
+        if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
             self._stored_commands.append(command)
             return
@@ -2743,20 +2863,19 @@ class _MapdlCore(Commands):
             self._response = None
             return self._response
 
-        if "is not a recognized" in text:
-            if not self.allow_ignore:
+        if not self.ignore_errors:
+            if "is not a recognized" in text:
                 text = text.replace("This command will be ignored.", "")
-                text += "\n\nIgnore these messages by setting allow_ignore=True"
+                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
                 raise MapdlInvalidRoutineError(text)
 
-        if "command is ignored" in text:
-            if not self.allow_ignore:
-                text += "\n\nIgnore these messages by setting allow_ignore=True"
+            if "command is ignored" in text:
+                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
                 raise MapdlCommandIgnoredError(text)
 
-        # flag errors
-        if "*** ERROR ***" in self._response and not self._ignore_errors:
-            self._raise_output_errors(self._response)
+            # flag errors
+            if "*** ERROR ***" in self._response:
+                self._raise_output_errors(self._response)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -2768,12 +2887,33 @@ class _MapdlCore(Commands):
 
     @property
     def ignore_errors(self) -> bool:
-        """
-        Flag to ignore MAPDL errors.
+        """Invalid commands will be ignored rather than exceptions
 
         Normally, any string containing "*** ERROR ***" from MAPDL
         will trigger a ``MapdlRuntimeError``.  Set this to ``True`` to
         ignore these errors.
+
+        For example, a command executed in the wrong processor will
+        raise an exception when ``ignore_errors=False``.
+        This is the default behavior.
+
+        Examples
+        --------
+        >>> mapdl.post1()
+        >>> mapdl.k(1, 0, 0, 0)
+        Exception:  K is not a recognized POST1 command, abbreviation, or macro.
+
+        Ignore these messages by setting ignore_errors=True
+
+        >>> mapdl.ignore_errors = True
+        2020-06-08 21:39:58,094 [INFO] : K is not a
+        recognized POST1 command, abbreviation, or macro.  This
+        command will be ignored.
+
+        *** WARNING *** CP = 0.372 TIME= 21:39:58
+        K is not a recognized POST1 command, abbreviation, or macro.
+        This command will be ignored.
+
         """
         return self._ignore_errors
 
@@ -3179,7 +3319,15 @@ class _MapdlCore(Commands):
             self._vget_arr_counter += 1
 
         out = self.starvget(
-            parm_name, entity, entnum, item1, it1num, item2, it2num, kloop, mute=False
+            parm_name,
+            entity,
+            entnum,
+            item1,
+            it1num,
+            item2,
+            it2num,
+            kloop,
+            mute=False,
         )
 
         # check if empty array
@@ -3268,7 +3416,9 @@ class _MapdlCore(Commands):
 
         if output is not None:
             if "*** WARNING ***" in output:
-                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
+                raise IncorrectWorkingDirectory(
+                    "\n" + "\n".join(output.splitlines()[1:])
+                )
 
         return output
 
@@ -3662,15 +3812,18 @@ class _MapdlCore(Commands):
 
                 # Extracting only the first 'lines_number' lines.
                 # This is important. Regex has problems parsing long messages.
-                lines_number = 10
-                partial_output = "\n".join(
-                    response.splitlines()[index : (index + lines_number)]
-                )
+                lines_number = 20
+                if len(response.splitlines()) <= lines_number:
+                    partial_output = response
+                else:
+                    partial_output = "\n".join(
+                        response.splitlines()[index : (index + lines_number)]
+                    )
 
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*\n)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",  # we might consider to use only one \n.
                     partial_output,
                     re.DOTALL,
                 )
@@ -3682,7 +3835,9 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.groups()[0]
+                    error_message = error_message.group(
+                        0
+                    )  # Catching only the first error.
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
@@ -3839,3 +3994,49 @@ class _MapdlCore(Commands):
             )
         else:
             return output
+
+    def _check_mapdl_os(self):
+        platform = self.get_value("active", 0, "platform").strip()
+        if "l" in platform.lower():
+            self._platform = "linux"
+        elif "w" in platform.lower():  # pragma: no cover
+            self._platform = "windows"
+        else:  # pragma: no cover
+            raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+
+    @property
+    def platform(self):
+        """Return the platform where MAPDL is running."""
+        if self._platform is None:
+            self._check_mapdl_os()
+        return self._platform
+
+    def _check_on_docker(self):
+        """Check if MAPDL is running on docker."""
+        # self.get_mapdl_envvar("ON_DOCKER") # for later
+
+        if self.platform == "linux":
+            self.sys(
+                "if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
+            )
+        elif self.platform == "windows":  # pragma: no cover
+            return False  # TODO: check if it is running a windows docker container. So far it is not supported.
+
+        if self.is_grpc and not self.is_local:
+            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        else:  # pragma: no cover
+            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            with open(file_, "r") as f:
+                return f.read().strip() == "true"
+
+    @property
+    def on_docker(self):
+        """Check if MAPDL is running on docker."""
+        if self._on_docker is None:
+            self._on_docker = self._check_on_docker()
+        return self._on_docker
+
+    @property
+    def is_local(self):
+        """Check if the instance is running locally or remotely."""
+        return self._local

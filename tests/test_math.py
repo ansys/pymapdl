@@ -24,9 +24,36 @@ directory creation.
 )
 
 
+PATH = os.path.dirname(os.path.abspath(__file__))
+lib_path = os.path.join(PATH, "test_files")
+
+
 @pytest.fixture(scope="module")
 def mm(mapdl):
     return mapdl.math
+
+
+@pytest.fixture()
+def cube_with_damping(mapdl, cleared):
+    mapdl.prep7()
+    db = os.path.join(lib_path, "model_damping.db")
+    mapdl.upload(db)
+    mapdl.resume("model_damping.db")
+    mapdl.mp("dens", 1, 7800 / 0.5)
+
+    mapdl.slashsolu()
+    mapdl.antype("modal")
+    mapdl.modopt("damp", 5)
+    mapdl.mxpand(5)
+    mapdl.mascale(0.15)
+
+    mapdl.alphad(10)
+    mapdl.solve()
+    mapdl.save()
+    mapdl.aux2()
+    if mapdl._distributed:
+        mapdl.combine("full")
+    mapdl.slashsolu()
 
 
 def test_ones(mm):
@@ -82,8 +109,8 @@ def test_set_vec_large(mm):
 
 
 def test_dot(mm):
-    a = np.arange(10000, dtype=np.float)
-    b = np.arange(10000, dtype=np.float)
+    a = np.arange(10000, dtype=np.float_)
+    b = np.arange(10000, dtype=np.float_)
     np_rst = a.dot(b)
 
     vec_a = mm.set_vec(a)
@@ -782,3 +809,40 @@ def test_vec2(mm, mapdl):
     parameter_ = mm._parm["ASDF"]
     assert parameter_["type"] == "VEC"
     assert parameter_["dimensions"] == vec_.size
+
+
+def test_damp_matrix(mm, cube_with_damping):
+    d = mm.damp()
+    m = mm.mass()
+
+    assert d.shape == m.shape
+    assert isinstance(d, apdl_math.AnsMat)
+
+
+def test_damp_matrix_as_array(mm, cube_with_damping):
+
+    d = mm.damp()
+    d = d.asarray()
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+
+    d = mm.damp(asarray=True)
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+
+
+@pytest.mark.parametrize("dtype_", [np.int64, np.double])
+def test_damp_matrix_dtype(mm, cube_with_damping, dtype_):
+    d = mm.stiff(asarray=True, dtype=dtype_)
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+    assert d.dtype == dtype_
+
+    d = mm.stiff(dtype=dtype_)
+    d = d.asarray(dtype=dtype_)
+
+    assert sparse.issparse(d)
+    assert all([each > 0 for each in d.shape])
+    assert d.dtype == dtype_

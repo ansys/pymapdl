@@ -555,7 +555,10 @@ def test_cyclic_solve(mapdl_corba, cleared):
 @pytest.mark.parametrize(
     "dim_cols",
     np.concatenate(
-        (np.ones(2, dtype=int) * 2, np.random.randint(2, 100, size=2, dtype=int))
+        (
+            np.ones(2, dtype=int) * 2,
+            np.random.randint(2, 100, size=2, dtype=int),
+        )
     ),
 )
 def test_load_table(mapdl, dim_rows, dim_cols):
@@ -568,7 +571,9 @@ def test_load_table(mapdl, dim_rows, dim_cols):
         dim_cols == 2
     ):  # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
         assert np.allclose(
-            mapdl.parameters["my_conv"], my_conv[1:, 1].reshape((dim_rows - 1, 1)), 1e-7
+            mapdl.parameters["my_conv"],
+            my_conv[1:, 1].reshape((dim_rows - 1, 1)),
+            1e-7,
         )
     else:
         assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1e-7)

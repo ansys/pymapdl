@@ -1,26 +1,76 @@
 
 
-.. _debugging_launch_mapdl:
+
+.. _ref_troubleshooting:
+
 
 =======================
 Troubleshooting PyMAPDL
 =======================
 
 
+To help you resolve any problems that you might have when using PyMAPDL,
+some of the most common problems and frequently asked questions are posted here.
+
+
 *****************
-Launching MAPDL
+Debug in PyMAPDL
 *****************
 
-For any number of reasons, Python may fail to launch MAPDL. Here are
-some approaches for debugging:
+If you are having trouble with PyMAPDL, you can record some internal
+logs into a file using a logger. 
+This file can be examined to help to identify any issue. 
+
+You can set the logger output file to be ``mylog.log`` by
+running the following commands in a Python terminal or at the beginning of your
+script:
+
+.. code:: python
+
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel("DEBUG")
+    LOG.log_to_file("mylog.log")
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(loglevel="DEBUG")
+
+You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
+If you are not able to identify the issue, you can open a discussion on the
+`PyMAPDL Discussions page <pymapdl_discussions_>`_.
+If you believe you have found a bug, open an issue on the
+`PyMAPDL Issues page <pymapdl_issues_>`_.
+
+
+.. _debugging_launch_mapdl:
+
+****************
+Launching issues
+****************
+
+There are several issues that can cause MAPDL not to launch, including:
+
+- `Licensing issues`_
+- `Virtual private network (VPN) issues`_
+- `Missing dependencies on Linux`_
+- `Conflicts with student version`_
+- `Incorrect environment variables`_
+- `Using a proxy server`_
+- `Firewall settings`_
+
+
+Testing MAPDL launching
+=======================
 
 In some cases, it may be necessary to run the launch command manually from the command line.
 
-**On Windows**
+On Windows
+----------
 
 Open up a command prompt and run the version-dependent command:
 
-.. code::
+.. code:: pwsh
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
@@ -28,11 +78,12 @@ Open up a command prompt and run the version-dependent command:
    PowerShell users can run the preceding command without quotes.
 
 
-**On Linux**
+On Linux
+--------
 
 Run the version-dependent command:
 
-.. code::
+.. code:: bash
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
@@ -67,14 +118,6 @@ If this command doesn't launch MAPDL, look at the command output:
     variable to OFF.
 
 
-There are many issues that can cause MAPDL not to launch, including:
-
-- License server setup
-- Running behind a VPN
-- Missing dependencies
-- Conflicts with a student version
-
-
 Licensing issues
 ================
 
@@ -106,45 +149,8 @@ for maintaining Ansys licensing or have a personal install of Ansys, see the onl
 
 For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
 
-
-Virtual private network (VPN) issues
-====================================
-
-From ANSYS 2022 R2 to ANSYS 2021 R1, MAPDL has issues launching when VPN software is running.
-One issue stems from MPI communication and can be solved by either passing
-the ``-smp`` option to set the execution mode to "Shared Memory
-Parallel" which disables the default "Distributed Memory Parallel".
-Or using a different MPI compilation, for example, if you are using Windows, you can pass
-``-mpi msmpi`` to use the Microsoft MPI library instead of the default Intel MPI library.
-This issue does not affect the Linux version of MAPDL.
-
-.. note:: In you are using Windows in any of the versions from ANSYS 2022 R2 to ANSYS 2021 R1,
-   the default compiler is Microsoft MPI when the MAPDL instance is launched by PyMAPDL.
-
-.. code::
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl(additional_switches='-smp')
-
-While this approach has the disadvantage of using the potentially slower shared
-memory parallel mode, you'll at least be able to run MAPDL.
-For more information on shared versus distributed memory, see
-`High-Performance Computing for Mechanical Simulations using ANSYS <ansys_parallel_computing_guide_>`_.
-
-
-In addition, if your device is inside a VPN, MAPDL might not be able to correctly
-resolve the IP of the license server. Verify that the hostname or IP address of the license server
-is correct.
-
-On Windows, you can find the license configuration file that points to the license server in:
-
-.. code:: text
-
-    C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
-
-
-Incorrect environment variables
-===============================
+Incorrect licensing environment variables
+-----------------------------------------
 
 The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
 The following code examples show how you can see the value of this environment variable on
@@ -165,6 +171,45 @@ either Windows or Linux.
     printenv | grep ANSYSLMD_LICENSE_FILE
 
 
+.. _vpn_issues_troubleshooting:
+
+Virtual private network (VPN) issues
+====================================
+
+From ANSYS 2022 R2 to ANSYS 2021 R1, MAPDL has issues launching when VPN software is running.
+One issue stems from MPI communication and can be solved by either passing
+the ``-smp`` option to set the execution mode to "Shared Memory
+Parallel" which disables the default "Distributed Memory Parallel".
+Or using a different MPI compilation, for example, if you are using Windows, you can pass
+``-mpi msmpi`` to use the Microsoft MPI library instead of the default Intel MPI library.
+This issue does not affect the Linux version of MAPDL.
+
+.. note:: In you are using Windows in any of the versions from ANSYS 2022 R2 to ANSYS 2021 R1,
+   the default compiler is Microsoft MPI when the MAPDL instance is launched by PyMAPDL.
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> mapdl = launch_mapdl(additional_switches="-smp")
+
+While this approach has the disadvantage of using the potentially slower shared
+memory parallel mode, you'll at least be able to run MAPDL.
+For more information on shared versus distributed memory, see
+`High-Performance Computing for Mechanical Simulations using ANSYS <ansys_parallel_computing_guide_>`_.
+
+
+In addition, if your device is inside a VPN, MAPDL might not be able to correctly
+resolve the IP of the license server. Verify that the hostname or IP address of the license server
+is correct.
+
+On Windows, you can find the license configuration file that points to the license server in:
+
+.. code:: text
+
+    C:\Program Files\ANSYS Inc\Shared Files\Licensing\ansyslmd.ini
+
+
+
 .. _missing_dependencies_on_linux:
 
 Missing dependencies on Linux
@@ -176,7 +221,6 @@ such file or directory``, you are likely missing some necessary
 dependencies.
 
 
-
 .. _installing_mapdl_on_centos7:
 
 CentOS 7
@@ -184,7 +228,7 @@ CentOS 7
 
 On CentOS 7, you can install missing dependencies with:
 
-.. code::
+.. code:: bash
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
@@ -197,7 +241,7 @@ Ubuntu
 
 On Ubuntu 22.04, use this code to install the needed dependencies:
 
-.. code::
+.. code:: bash
 
     apt-get update
 
@@ -240,7 +284,7 @@ package configuration. The following code downloads and modifies the
 ``libxp6`` package to remove the ``multiarch-support`` dependency and
 then installs it via the ``dpkg`` package.
 
-.. code::
+.. code:: bash
 
     cd /tmp
     wget http://ftp.br.debian.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
@@ -266,7 +310,20 @@ is fine.
 
 If you experience issues, you should edit these environment variables to remove any
 reference to the student version: ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
-``CADOE_LIBDIRXXX``. The three-digit MAPDL version appears where ``XXX`` is
+``CADOE_LIBDIRXXX``. 
+Visit `Incorrect environment variables`_ for information on how to set these environment variables
+to the correct location.
+
+.. note:: Launching MAPDL Student Version
+   By default if a student version is detected, PyMAPDL launches the MAPDL instance in
+   ``SMP`` mode, unless another MPI option is specified.
+
+Incorrect environment variables
+===============================
+If you are using a non-standard install, you might need to manually set the
+environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
+``CADOE_LIBDIRXXX`` to the correct location. 
+The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
 .. code:: pwsh
@@ -291,16 +348,43 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
     C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
 
 
-.. note:: Launching MAPDL Student Version
-   By default if a student version is detected, PyMAPDL launches the MAPDL instance in
-   ``SMP`` mode, unless another MPI option is specified.
+Using a proxy server
+====================
+In some rare cases, you might experience some problems to connect to the MAPDL instance if you are
+using a proxy.
+When `gRPC <grpc_>`_ is used in a proxy environment, if a local address is specified (that is ``127.0.0.1``)
+as the connection destination, the gRPC implementation refers automatically to the proxy address.
+In this case, the local address cannot be referred, resulting in a connection error.
+As a workaround, you can set the environment variable ``NO_PROXY`` to your local address ``127.0.0.1``,
+and then run :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
+to connect to MAPDL instance.
 
-*****************
-Launching PyMAPDL
-*****************
 
-Even if you are able to successfully launch MAPDL, PyMAPDL itself might not launch
-successfully.
+Firewall settings
+=================
+MAPDL and Python should have the correct firewall settings to allow communication between the two.
+If you are using a firewall, you should allow MAPDL to receive inbound connections to the following ports:
+
+* 50052 (TCP) for gRPC connection.
+* 50053+ (TCP) for extra gRPC connection.
+* 50055 (TCP) for gRPC connection to the MAPDL database.
+
+Python process must be allowed to connect to the mentioned ports (outbound connections).
+
+Normally most of the firewall rules focus on the inbound connections, so you should not need to
+configure the outbound connections. However, if you are experiencing problems, you should make sure
+that the firewall is not blocking the outbound connections on the following ports:
+
+* 5005X (TCP) for gRPC connections.
+* 50055 (TCP) for gRPC connection to the MAPDL database.
+* 1055 (TCP) for licensing connections.
+* 2325 (TCP) for licensing connections.
+
+For more information on how to **configure your firewall on Windows**, please refer to the following
+link in `Ansys forum-Licensing 2022 R2 Linux Ubuntu (and also Windows) <af_licensing_windows_ubuntu_>`_.
+
+For more information on how to **configure your firewall on Ubuntu Linux**, please refer to the following
+link `Security-Firewall | Ubuntu <ubuntu_firewall_>`_.
 
 
 Manually set the location of the executable file
@@ -311,24 +395,24 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
 
 **On Windows**
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = 'C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe'
+    >>> exec_loc = "C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe"
     >>> mapdl = launch_mapdl(exec_loc)
 
 **On Linux**
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = '/usr/ansys_inc/v211/ansys/bin/ansys211'
+    >>> exec_loc = "/usr/ansys_inc/v211/ansys/bin/ansys211"
     >>> mapdl = launch_mapdl(exec_loc)
 
 
 
-Default Location of the executable file
-=======================================
+Default location of the executable file
+---------------------------------------
 
 The first time that you run PyMAPDL, it detects the
 available Ansys installations.
@@ -360,7 +444,7 @@ If PyMAPDL finds a valid Ansys installation, it caches its
 path in the configuration file, ``config.txt``. The path for this file
 is shown in this code:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core.launcher import CONFIG_FILE
     >>> print(CONFIG_FILE)
@@ -372,7 +456,7 @@ Ansys version is installed and an earlier installation is removed.
 
 To update this configuration file with the latest path, use:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import save_ansys_path
     >>> save_ansys_path(r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe")
@@ -380,7 +464,7 @@ To update this configuration file with the latest path, use:
 
 If you want to see which Ansys installations PyMAPDL has detected, use:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core.launcher import get_available_ansys_installations
     >>> get_available_ansys_installations()
@@ -398,6 +482,69 @@ method lists higher versions first and student versions last.
     information, see :ref:`conflicts_student_version`.
 
 
+.. _ref_pymapdl_limitations:
+
+*********************
+PyMAPDL usage issues
+*********************
+
+.. _ref_numpy_arrays_in_mapdl:
+
+Issues when importing and exporting numpy arrays in MAPDL
+=========================================================
+
+Because of the way MAPDL is designed, there is no way to store an
+array where one or more dimensions are zero.
+This can happens in numpy arrays, where its first dimension can be
+set to zero. For example:
+
+.. code:: pycon
+
+   >>> import numpy
+   >>> from ansys.mapdl.core import launch_mapdl
+   >>> mapdl = launch_mapdl()
+   >>> my_array = np.reshape([1, 2, 3, 4], (4,))
+   >>> my_array
+   array([1, 2, 3, 4])
+
+
+These types of array dimensions are always converted to ``1``.
+
+For example:
+
+.. code:: pycon
+
+   >>> mapdl.parameters["mapdlarray"] = my_array
+   >>> mapdl.parameters["mapdlarray"]
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> mapdl.parameters["mapdlarray"].shape
+   (4, 1)
+
+This means that when you pass two arrays, one with the second axis equal
+to zero (for example, ``my_array``) and another one with the second axis equal
+to one, have the same shape if later retrieved.
+
+.. code:: pycon
+
+   >>> my_other_array = np.reshape([1, 2, 3, 4], (4, 1))
+   >>> my_other_array
+   array([[1],
+      [2],
+      [3],
+      [4]])
+   >>> mapdl.parameters["mapdlarray_b"] = my_other_array
+   >>> mapdl.parameters["mapdlarray_b"]
+   array([[1.],
+      [2.],
+      [3.],
+      [4.]])
+   >>> np.allclose(mapdl.parameters["mapdlarray"], mapdl.parameters["mapdlarray_b"])
+   True
+
+
 
 .. _ref_pymapdl_stability:
 
@@ -410,15 +557,18 @@ Recommendations
 
 When connecting to an instance of MAPDL using gRPC (default), there are some cases
 where the MAPDL server might exit unexpectedly. There
-are several ways to improve performance and stability of MADPL:
+are several ways to improve MADPL performance and stability:
 
-- When possible, pass ``mute=True`` to individual MAPDL commands or
-  set it globally with the :func:`Mapdl.mute
-  <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
-  back the response from MAPDL for each command and marginally
-  improves performance and stability. Consider having a debug flag in
-  your program or script so you can turn on or turn off logging and
-  verbosity when needed.
+Use ``mute`` to improve stability
+-----------------------------------
+
+When possible, pass ``mute=True`` to individual MAPDL commands or
+set it globally with the :func:`Mapdl.mute
+<ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
+back the response from MAPDL for each command and marginally
+improves performance and stability. Consider having a debug flag in
+your program or script so that you can turn on and off logging and
+verbosity as needed.
 
 
 Issues
@@ -434,67 +584,19 @@ Issues
 
 
 
+More help needed?
+-----------------
+
+  *"What do you do if a problem is not listed here?"*  
 
 
-.. _ref_pymapdl_limitations:
+Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
+issue is already listed. If not, you can do one of the following:
 
-*******************
-PyMAPDL limitations
-*******************
+* Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and 
+  create a discussion about your issue.
+* Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
+  or want to create a feature request.
 
+For more complex issues or queries, contact `PyAnsys Support <pyansys_support_>`_.
 
-.. _ref_numpy_arrays_in_mapdl:
-
-Issues when importing and exporting numpy arrays in MAPDL
-=========================================================
-
-Because of the way MAPDL is designed, there is no way to store an
-array where one or more dimensions are zero.
-This can happens in numpy arrays, where its first dimension can be
-set to zero. For example:
-
-.. code:: python
-
-   >>> import numpy
-   >>> from ansys.mapdl.core import launch_mapdl
-   >>> mapdl = launch_mapdl()
-   >>> my_array = np.reshape([1, 2, 3, 4], (4,))
-   >>> my_array
-   array([1, 2, 3, 4])
-
-
-These types of array dimensions are always converted to ``1``.
-
-For example:
-
-.. code:: python
-
-   >>> mapdl.parameters['mapdlarray'] = my_array
-   >>> mapdl.parameters['mapdlarray']
-   array([[1.],
-      [2.],
-      [3.],
-      [4.]])
-   >>> mapdl.parameters['mapdlarray'].shape
-   (4, 1)
-
-This means that when you pass two arrays, one with the second axis equal
-to zero (for example, ``my_array``) and another one with the second axis equal
-to one, have the same shape if later retrieved.
-
-.. code:: python
-
-   >>> my_other_array = np.reshape([1, 2, 3, 4], (4,1))
-   >>> my_other_array
-   array([[1],
-      [2],
-      [3],
-      [4]])
-   >>> mapdl.parameters['mapdlarray_b'] = my_other_array
-   >>> mapdl.parameters['mapdlarray_b']
-   array([[1.],
-      [2.],
-      [3.],
-      [4.]])
-   >>> np.allclose(mapdl.parameters['mapdlarray'], mapdl.parameters['mapdlarray_b'])
-   True

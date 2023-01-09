@@ -401,7 +401,11 @@ class ElementType:
         return self.run(command, **kwargs)
 
     def etlist(
-        self, ityp1: MapdlInt = "", ityp2: MapdlInt = "", inc: MapdlInt = "", **kwargs
+        self,
+        ityp1: MapdlInt = "",
+        ityp2: MapdlInt = "",
+        inc: MapdlInt = "",
+        **kwargs,
     ) -> Optional[str]:
         """Lists currently defined element types.
 

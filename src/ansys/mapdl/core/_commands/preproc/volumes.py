@@ -986,7 +986,15 @@ class Volumes:
         return self.run(command, **kwargs)
 
     def vsymm(
-        self, ncomp="", nv1="", nv2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        ncomp="",
+        nv1="",
+        nv2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ) -> str:
         """Generate volumes from a volume pattern by symmetry reflection.
 
@@ -1068,7 +1076,15 @@ class Volumes:
         return self.run(command, **kwargs)
 
     def vtran(
-        self, kcnto="", nv1="", nv2="", ninc="", kinc="", noelem="", imove="", **kwargs
+        self,
+        kcnto="",
+        nv1="",
+        nv2="",
+        ninc="",
+        kinc="",
+        noelem="",
+        imove="",
+        **kwargs,
     ):
         """Transfers a pattern of volumes to another coordinate system.
 

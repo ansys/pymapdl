@@ -1,8 +1,8 @@
 .. _ref_contributing:
 
-====================
-Contributing and API
-====================
+============
+Contributing
+============
 
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <dev_guide_contributing_>`_ topic
@@ -18,7 +18,7 @@ Cloning the PyMAPDL repository
 
 Run this code to clone and install the latest version of PyMAPDL in development mode:
 
-.. code::
+.. code:: console
 
     git clone https://github.com/pyansys/pymapdl
     cd pymapdl
@@ -59,7 +59,7 @@ unit testing, you must set up the following environment variables.
 
 In Windows, use:
 
-.. code::
+.. code:: pwsh
 
     SET PYMAPDL_START_INSTANCE=False
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -67,7 +67,7 @@ In Windows, use:
 
 In Linux, use:
 
-.. code::
+.. code:: bash
 
     export PYMAPDL_START_INSTANCE=False
     export PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -75,6 +75,10 @@ In Linux, use:
 
 This tells ``ansys.mapdl.core`` to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
+
+Additionally you can use the environment variables ``PYMAPDL_MAPDL_EXEC`` 
+and ``PYMAPDL_MAPDL_VERSION`` to specify MAPDL executable path and the
+version to launch (if multiple versions of MAPDL are installed).
 
 
 Code style
@@ -102,40 +106,3 @@ This way, it's not possible for you to push code that fails the style checks. Fo
   flake8...................................................................Passed
   codespell................................................................Passed
 
-
-.. _ref_index_api:
-
-API reference
-=============
-This page gives an overview of the API of several public PyMAPDL
-classes, functions, and attributes. You can find them
-on the left sidebar.
-
-While these methods might include some MAPDL commands, they are generally
-specific to PyMAPDL methods and classes. PyMAPDL methods extend existing
-MAPDL methods in a Pythonic manner. For a mapping of MAPDL commands to
-PyMAPDL, see :ref:`ref_mapdl_commands`.
-
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-
-   commands
-   database
-   geometry
-   helper
-   inline
-   krylov
-   logging
-   mapdl
-   math
-   mesh
-   parameters
-   plotting
-   pool
-   post
-   solution
-   xpl
-   building_example
-   unit_testing

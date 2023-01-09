@@ -7,12 +7,12 @@ use the built-in :func:`convert_script()
 `ansys-mapdl-core <pymapdl_main_>`_ to convert an existing
 input file.
 
-.. code:: python
+.. code:: pycon
 
-    >>> from ansys.mapdl import core as pymapdl
-    >>> inputfile = 'ansys_inputfile.inp'
-    >>> pyscript = 'pyscript.py'
-    >>> pymapdl.convert_script(inputfile, pyscript)
+    >>> from ansys.mapdl.core import convert_script
+    >>> inputfile = "ansys_inputfile.inp"
+    >>> pyscript = "pyscript.py"
+    >>> convert_script(inputfile, pyscript)
 
 
 Torsional load on a bar using SURF154 elements
@@ -25,7 +25,7 @@ Script initialization
 ~~~~~~~~~~~~~~~~~~~~~
 Here is the beginning of the MAPDL script:
 
-.. code::
+.. code:: apdl
 
     !----------------------------------------
     ! Input torque applied (moment)
@@ -48,10 +48,10 @@ instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class:
     import os
     import numpy as np
     from ansys.mapdl.core import launch_mapdl
-    
+
     # start Ansys in the current working directory with default jobname "file"
     mapdl = launch_mapdl(run_location=os.getcwd())
-        
+
     # define cylinder and mesh parameters
     torque = 100
     radius = 2
@@ -59,15 +59,15 @@ instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class:
     height = 20
     elemsize = 0.5
     pi = np.arccos(-1)
-    force = 100/radius
-    pressure = force/(h_tip*2*np.pi*radius)
+    force = 100 / radius
+    pressure = force / (h_tip * 2 * np.pi * radius)
 
 
 Model creation
 ~~~~~~~~~~~~~~    
 Here is an APDL script for creating the model:
 
-.. code::
+.. code:: apdl
 
     !----------------------------------------
     ! Define higher-order SOLID186
@@ -128,39 +128,39 @@ Here is the corresponding PyMAPDL script:
     mapdl.et(2, 154)
     mapdl.r(1)
     mapdl.r(2)
-    
+
     # Aluminum properties (or something)
-    mapdl.mp('ex', 1, 10e6)
-    mapdl.mp('nuxy', 1, 0.3)
-    mapdl.mp('dens', 1, 0.1/386.1)
-    mapdl.mp('dens', 2, 0)
-    
+    mapdl.mp("ex", 1, 10e6)
+    mapdl.mp("nuxy", 1, 0.3)
+    mapdl.mp("dens", 1, 0.1 / 386.1)
+    mapdl.mp("dens", 2, 0)
+
     # Simple cylinder
     for i in range(4):
-        mapdl.cylind(radius, '', '', height, 90*(i-1), 90*i)
-    
-    mapdl.nummrg('kp')
-    
+        mapdl.cylind(radius, "", "", height, 90 * (i - 1), 90 * i)
+
+    mapdl.nummrg("kp")
+
     # interactive volume plot (optional)
     mapdl.vplot()
-    
+
     # mesh cylinder
-    mapdl.lsel('s', 'loc', 'x', 0)
-    mapdl.lsel('r', 'loc', 'y', 0)
-    mapdl.lsel('r', 'loc', 'z', 0, height - h_tip)
-    mapdl.lesize('all', elemsize*2)
+    mapdl.lsel("s", "loc", "x", 0)
+    mapdl.lsel("r", "loc", "y", 0)
+    mapdl.lsel("r", "loc", "z", 0, height - h_tip)
+    mapdl.lesize("all", elemsize * 2)
     mapdl.mshape(0)
     mapdl.mshkey(1)
     mapdl.esize(elemsize)
-    mapdl.allsel('all')
-    mapdl.vsweep('ALL')
+    mapdl.allsel("all")
+    mapdl.vsweep("ALL")
     mapdl.csys(1)
-    mapdl.asel('s', 'loc', 'z', '', height - h_tip + 0.0001)
-    mapdl.asel('r', 'loc', 'x', radius)
+    mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
+    mapdl.asel("r", "loc", "x", radius)
     mapdl.local(11, 1)
     mapdl.csys(0)
     mapdl.aatt(2, 2, 2, 11)
-    mapdl.amesh('all')
+    mapdl.amesh("all")
     mapdl.finish()
 
     # plot elements
@@ -171,7 +171,7 @@ Solution
 ~~~~~~~~
 Here is the APDL script for the solution:
 
-.. code::
+.. code:: apdl
 
     /solu
     antype,static,new
@@ -209,21 +209,21 @@ Here is the corresponding PyMAPDL script:
     # new solution
     mapdl.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
     # ansys('/solu')  # could also use this line
-    mapdl.antype('static', 'new')
-    mapdl.eqslv('pcg', 1e-8)
+    mapdl.antype("static", "new")
+    mapdl.eqslv("pcg", 1e-8)
 
     # Apply tangential pressure
-    mapdl.esel('s', 'type', '', 2)
-    mapdl.sfe('all', 2, 'pres', '', pressure)
+    mapdl.esel("s", "type", "", 2)
+    mapdl.sfe("all", 2, "pres", "", pressure)
 
     # Constrain bottom of cylinder/rod
-    mapdl.asel('s', 'loc', 'z', 0)
-    mapdl.nsla('s', 1)
+    mapdl.asel("s", "loc", "z", 0)
+    mapdl.nsla("s", 1)
 
-    mapdl.d('all', 'all')
+    mapdl.d("all", "all")
     mapdl.allsel()
-    mapdl.psf('pres', '', 2)
-    mapdl.pbc('u', 1)
+    mapdl.psf("pres", "", 2)
+    mapdl.pbc("u", 1)
     mapdl.solve()
 
 Access and plot the results within Python using PyMAPDL:
@@ -244,18 +244,20 @@ Access and plot the results within Python using PyMAPDL:
     nodenum, stress = result.nodal_stress(0)
 
     # plot interactively
-    result.plot_nodal_solution(0, cmap='bwr')
-    result.plot_nodal_stress(0, 'Sx', cmap='bwr')
-    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr')
+    result.plot_nodal_solution(0, cmap="bwr")
+    result.plot_nodal_stress(0, "Sx", cmap="bwr")
+    result.plot_principal_nodal_stress(0, "SEQV", cmap="bwr")
 
     # plot and save non-interactively
     # (cpos was output from ``cpos = result.plot()`` and setting up
     # the correct camera angle)
-    cpos = [(20.992831318277517, 9.78629316586435, 31.905115108541928),
-            (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
-            (-0.10547549888485548, 0.9200673323892437, -0.377294345312956)]
+    cpos = [
+        (20.992831318277517, 9.78629316586435, 31.905115108541928),
+        (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
+        (-0.10547549888485548, 0.9200673323892437, -0.377294345312956),
+    ]
 
-    result.plot_nodal_displacement(0, cpos=cpos, savefig='cylinder_disp.png')
+    result.plot_nodal_displacement(0, cpos=cpos, savefig="cylinder_disp.png")
 
 .. figure:: ../images/cylinder_disp.png
     :width: 300pt
@@ -264,8 +266,7 @@ Access and plot the results within Python using PyMAPDL:
 
 .. code:: python
 
-    result.plot_nodal_stress(0, 'Sx', cmap='bwr', cpos=cpos,
-                             screenshot='cylinder_sx.png')
+    result.plot_nodal_stress(0, "Sx", cmap="bwr", cpos=cpos, screenshot="cylinder_sx.png")
 
 .. figure:: ../images/cylinder_sx.png
     :width: 300pt
@@ -274,8 +275,9 @@ Access and plot the results within Python using PyMAPDL:
 
 .. code:: python
 
-    result.plot_principal_nodal_stress(0, 'SEQV', cmap='bwr',
-                                       cpos=cpos, screenshot='cylinder_vonmises.png')
+    result.plot_principal_nodal_stress(
+        0, "SEQV", cmap="bwr", cpos=cpos, screenshot="cylinder_vonmises.png"
+    )
 
 .. figure:: ../images/cylinder_vonmises.png
     :width: 300pt
@@ -291,7 +293,7 @@ attribute:
 
     mapdl.set(1, 1)
     mapdl.post_processing.plot_nodal_displacement()
-    result.plot_nodal_component_stress(0, 'Sx')
+    result.plot_nodal_component_stress(0, "Sx")
     result.plot_nodal_eqv_stress()
 
 
@@ -301,7 +303,7 @@ This MAPDL example demonstrates how to model spot welding on three
 thin sheets of metal. Here, the full input file is simply run using
 the PyMAPDL interface.
 
-.. code::
+.. code:: apdl
 
     !----------------------------------------
     ! Example problem for demonstrating 
@@ -437,24 +439,26 @@ the PyMAPDL interface.
     solve
     FINISH
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> mapdl.input('spot_weld.inp')
+    >>> mapdl.input("spot_weld.inp")
 
 
 Here is the Python script using 
 `ansys-mapdl-reader <legacy_reader_docs_>`_ package to access the results
 after running the MAPDL analysis.
 
-.. code:: python
+.. code:: pycon
     
     >>> from ansys.mapdl import reader as pymapdl_reader
-    
-    Open the result file and plot the displacement of time step 3
 
-    >>> resultfile = os.path.join(mapdl.directory, 'file.rst')
+Open the result file and plot the displacement of time step 3
+
+.. code:: pycon
+
+    >>> resultfile = os.path.join(mapdl.directory, "file.rst")
     >>> result = pymapdl_reader.read_binary(resultfile)
     >>> result.plot_nodal_solution(2)
 
@@ -466,27 +470,27 @@ after running the MAPDL analysis.
 Get the nodal and element component stress at time step 0. Plot the
 stress in the Z direction.
 
-.. code:: python
+.. code:: pycon
 
     >>> nodenum, stress = result.nodal_stress(0)
     >>> element_stress, elemnum, enode = result.element_stress(0)
-    
+
     Plot the Z direction stress:
     The stress at the contact element simulating the spot weld
 
-    >>> result.plot_nodal_stress(0, 'Sz')
+    >>> result.plot_nodal_stress(0, "Sz")
 
 .. figure:: ../images/spot_sz.png
     :width: 300pt
 
     Spot weld: Z stress
 
-.. code:: python
+Get the principal nodal stress and plot the von Mises stress
 
-    Get the principal nodal stress and plot the von Mises stress
+.. code:: pycon
 
     >>> nnum, pstress = result.principal_nodal_stress(0)
-    >>> result.plot_principal_nodal_stress(0, 'SEQV')
+    >>> result.plot_principal_nodal_stress(0, "SEQV")
 
 .. figure:: ../images/spot_seqv.png
     :width: 300pt

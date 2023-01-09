@@ -8,10 +8,8 @@ PyMAPDL documentation |version|
    getting_started/index
    user_guide/index
    mapdl_commands/index
+   api/index
    examples/index
-   learning/index
-   troubleshoot/index
-   contribution_and_api/index
 
 
 
@@ -60,12 +58,18 @@ performance. Using gRPC, PyMAPDL can convert Python statements into APDL
 commands that can then be transmitted to an MAPDL instance running anywhere, 
 while producing network footprints that are compact and efficient.
 
+The following diagram presents a simplified architecture of PyMAPDL.
+
+.. figure:: ./images/architecture_diagram.png
+    :width: 400pt
+
+    PyMAPDL architecture diagram
 
 Quick code
 ----------
 Here's a brief example of how PyMAPDL works:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
@@ -81,16 +85,16 @@ key points, you could run:
 
 .. code:: python
 
-    mapdl.run('/PREP7')
-    mapdl.run('K, 1, 0, 0, 0')
-    mapdl.run('K, 2, 1, 0, 0')
-    mapdl.run('K, 3, 1, 1, 0')
-    mapdl.run('K, 4, 0, 1, 0')
-    mapdl.run('L, 1, 2')
-    mapdl.run('L, 2, 3')
-    mapdl.run('L, 3, 4')
-    mapdl.run('L, 4, 1')
-    mapdl.run('AL, 1, 2, 3, 4')
+    mapdl.run("/PREP7")
+    mapdl.run("K, 1, 0, 0, 0")
+    mapdl.run("K, 2, 1, 0, 0")
+    mapdl.run("K, 3, 1, 1, 0")
+    mapdl.run("K, 4, 0, 1, 0")
+    mapdl.run("L, 1, 2")
+    mapdl.run("L, 2, 3")
+    mapdl.run("L, 3, 4")
+    mapdl.run("L, 4, 1")
+    mapdl.run("AL, 1, 2, 3, 4")
 
 MAPDL interactively returns the result of each command, which is
 stored to the logging module. The ``print(mapdl.run)`` method can
@@ -107,7 +111,7 @@ Python. For example, the following two commands are equivalent:
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
-    mapdl.run('K, 1, 0, 0, 0')
+    mapdl.run("K, 1, 0, 0, 0")
 
 This approach takes care of the string formatting for you. For
 example, inputting points from a numpy array:
@@ -128,7 +132,7 @@ gRPC.
 
 For example, view the current mesh status with:
 
-.. code::
+.. code:: pycon
 
    >>> mapdl.mesh
     ANSYS Mesh
@@ -140,23 +144,23 @@ For example, view the current mesh status with:
 
 Or save it as a VTK file with:
 
-.. code::
+.. code:: pycon
 
-    >>> mapdl.mesh.save('mymesh.vtk')
+    >>> mapdl.mesh.save("mymesh.vtk")
 
 You can even plot directly from the Python environment with:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.et(1, 'SOLID186')
-    >>> mapdl.vsweep('ALL')
+    >>> mapdl.et(1, "SOLID186")
+    >>> mapdl.vsweep("ALL")
     >>> mapdl.esize(0.1)
     >>> mapdl.eplot()
 
 .. figure:: ./images/eplot_vtk.png
     :width: 400pt
 
-    Element pot from MAPDL using ``PyMAPDL`` and ``vtk``
+    Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
 For a full listing of PyMAPDL features, see the
 :ref:`ref_user_guide`.

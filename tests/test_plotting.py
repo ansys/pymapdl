@@ -178,7 +178,10 @@ def test_bc_plot_options(
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_labels=bc_labels
+        return_plotter=True,
+        plot_bc=True,
+        plot_bc_labels=True,
+        bc_labels=bc_labels,
     )
     assert isinstance(p, Plotter)
 
@@ -197,7 +200,10 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
     p = mapdl.nplot(
-        return_plotter=True, plot_bc=True, plot_bc_labels=True, bc_target=bc_target
+        return_plotter=True,
+        plot_bc=True,
+        plot_bc_labels=True,
+        bc_target=bc_target,
     )
     assert isinstance(p, Plotter)
 
@@ -272,11 +278,17 @@ def test_pick_nodes(mapdl, make_block, selection):
         point = (0.5, 0.5)
 
     selected = mapdl.nsel(
-        selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        selection,
+        "P",
+        _debug=lambda x: debug_orders(x, point=point),
+        tolerance=0.2,
     )  # Selects node 2
 
-    assert selected
-    assert isinstance(selected, list)
+    assert isinstance(selected, (list, np.ndarray))
+    if isinstance(selected, np.ndarray):
+        assert selected.all()
+    else:
+        assert selected
     assert len(selected) > 0
 
     if selection != "U":
@@ -327,11 +339,17 @@ def test_pick_kp(mapdl, make_block, selection):
         point = (0.5, 0.5)
 
     selected = mapdl.ksel(
-        selection, "P", _debug=lambda x: debug_orders(x, point=point), tolerance=0.2
+        selection,
+        "P",
+        _debug=lambda x: debug_orders(x, point=point),
+        tolerance=0.2,
     )
 
-    assert selected
-    assert isinstance(selected, list)
+    assert isinstance(selected, (list, np.ndarray))
+    if isinstance(selected, np.ndarray):
+        assert selected.all()
+    else:
+        assert selected
     assert len(selected) > 0
     if selection != "U":
         assert sorted(selected) == sorted(mapdl._get_selected_("kp"))
@@ -370,19 +388,37 @@ def test_pick_node_failure(mapdl, make_block):
 
 def test_nsel_ksel_iterable_input(mapdl, make_block):
     # Testing using iterable (list/tuple/array) as vmin
-    assert mapdl.nsel("S", "node", "", [1, 2, 3], "", "") is None
+    assert np.allclose(
+        mapdl.nsel("S", "node", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
+    )
 
     # Special cases where the iterable is empty
     # empty list
-    assert mapdl.nsel("S", "node", "", [])  # it should select nothing
+    output = mapdl.nsel("S", "node", "", [])
+    assert output is not None  # it should select nothing
+    if isinstance(output, np.ndarray):
+        assert output.size == 0
+    elif isinstance(output, list):
+        assert len(output) == 0
     assert len(mapdl._get_selected_("node")) == 0
 
     # empty tuple
-    assert mapdl.nsel("S", "node", "", ())  # it should select nothing
+    output = mapdl.nsel("S", "node", "", ())
+    assert output is not None  # it should select nothing
+    if isinstance(output, np.ndarray):
+        assert output.size == 0
+    elif isinstance(output, list):
+        assert len(output) == 0
+
     assert len(mapdl._get_selected_("node")) == 0
 
     # empty array
-    assert mapdl.nsel("S", "node", "", np.empty((0)))  # it should select nothing
+    output = mapdl.nsel("S", "node", "", np.empty((0)))
+    assert output is not None  # it should select nothing
+    if isinstance(output, np.ndarray):
+        assert output.size == 0
+    elif isinstance(output, list):
+        assert len(output) == 0
     assert len(mapdl._get_selected_("node")) == 0
 
 

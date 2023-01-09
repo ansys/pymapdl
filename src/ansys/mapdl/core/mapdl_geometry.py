@@ -888,7 +888,7 @@ class Geometry:
         items = np.asarray(items)
         if not np.issubdtype(items.dtype, np.number):
             raise TypeError("Item numbers must be a numeric type")
-        items = items.ravel().astype(np.int, copy=False)
+        items = items.ravel().astype(np.int_, copy=False)
 
         # consider logic for negative values to support ranges.  This
         # is the 'ORDER' option
@@ -904,17 +904,20 @@ class Geometry:
             for item in items:
                 self._mapdl.fitem(5, item)
 
+            # Using 'return_mapdl_output' avoid querying MAPDL in a non-interactive
+            # environment. Otherwise a *get command is issued to MAPDL which will return
+            # none in this non_interactive environment.
             if item_type == "NODE":
-                self._mapdl.nsel(sel_type, vmin="P51X")
+                self._mapdl.nsel(sel_type, vmin="P51X", return_mapdl_output=True)
             elif item_type == "ELEM":
-                self._mapdl.esel(sel_type, vmin="P51X")
+                self._mapdl.esel(sel_type, vmin="P51X", return_mapdl_output=True)
             elif item_type == "KP":
-                self._mapdl.ksel(sel_type, vmin="P51X")
+                self._mapdl.ksel(sel_type, vmin="P51X", return_mapdl_output=True)
             elif item_type == "LINE":
-                self._mapdl.lsel(sel_type, vmin="P51X")
+                self._mapdl.lsel(sel_type, vmin="P51X", return_mapdl_output=True)
             elif item_type == "AREA":
-                self._mapdl.asel(sel_type, vmin="P51X")
+                self._mapdl.asel(sel_type, vmin="P51X", return_mapdl_output=True)
             elif item_type == "VOLU":
-                self._mapdl.vsel(sel_type, vmin="P51X")
+                self._mapdl.vsel(sel_type, vmin="P51X", return_mapdl_output=True)
             else:
                 raise ValueError(f'Unable to select "{item_type}"')

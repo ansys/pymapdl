@@ -172,11 +172,12 @@ def convert_script(
     :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
     since you do not need to write the file.
 
+    >>> import os
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
     >>> from ansys.mapdl.core import convert_script
     >>> in_file = examples.vmfiles['vm10']
-    >>> filename = in_file.split('\\')[-1]
+    >>> filename = os.path.basename(in_file)
     >>> out_file = 'out_' + filename.replace('.dat', '.py')
     >>> output = convert_script(file, out_file, line_ending='\\n')
     >>> mapdl = launch_mapdl()
@@ -269,6 +270,7 @@ def convert_apdl_block(
         .. code:: python
 
            from ansys.mapdl.core import launch_mapdl
+
            mapdl = launch_mapdl(loglevel="WARNING")
 
         This option is useful if you are planning to use the output
@@ -634,7 +636,8 @@ class FileTranslator:
 
         if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
-                "com", ["The following line has been commented due to `comment_solve`:"]
+                "com",
+                ["The following line has been commented due to `comment_solve`:"],
             )
             self.store_command("com", [line])
             return
@@ -842,8 +845,14 @@ class FileTranslator:
             func_name,
             ", ".join(["ARG%d=''" % i for i in range(1, 7)]),
         )
-        line += "%s%s," % (spacing, ", ".join(["ARG%d=''" % i for i in range(7, 13)]))
-        line += "%s%s):" % (spacing, ", ".join(["ARG%d=''" % i for i in range(13, 19)]))
+        line += "%s%s," % (
+            spacing,
+            ", ".join(["ARG%d=''" % i for i in range(7, 13)]),
+        )
+        line += "%s%s):" % (
+            spacing,
+            ", ".join(["ARG%d=''" % i for i in range(13, 19)]),
+        )
         self.lines.append(line)
         self.indent = self.indent + "    "
 
@@ -930,7 +939,12 @@ class FileTranslator:
                 self.comment,
             )
         else:
-            line = "%s%s.%s(%s)" % (self.indent, self.obj_name, function, parameter_str)
+            line = "%s%s.%s(%s)" % (
+                self.indent,
+                self.obj_name,
+                function,
+                parameter_str,
+            )
 
         self.lines.append(line)
 

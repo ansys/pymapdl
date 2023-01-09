@@ -49,14 +49,26 @@ if _HAS_PYVISTA:
     TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
 
     UX = pv.Arrow(
-        start=(-1, 0, 0), direction=(1, 0, 0), tip_length=1, tip_radius=0.5, scale=1.0
+        start=(-1, 0, 0),
+        direction=(1, 0, 0),
+        tip_length=1,
+        tip_radius=0.5,
+        scale=1.0,
     )
     UY = pv.Arrow(
-        start=(0, -1, 0), direction=(0, 1, 0), tip_length=1, tip_radius=0.5, scale=1.0
+        start=(0, -1, 0),
+        direction=(0, 1, 0),
+        tip_length=1,
+        tip_radius=0.5,
+        scale=1.0,
     )
 
     UZ = pv.Arrow(
-        start=(0, 0, -1), direction=(0, 0, 1), tip_length=1, tip_radius=0.5, scale=1.0
+        start=(0, 0, -1),
+        direction=(0, 0, 1),
+        tip_length=1,
+        tip_radius=0.5,
+        scale=1.0,
     )
 
     FX = pv.Arrow(
@@ -778,7 +790,12 @@ def general_plotter(
 
     # permit user to save the figure as a screenshot
     if savefig:
-        pl.show(title=title, auto_close=False, window_size=window_size, screenshot=True)
+        pl.show(
+            title=title,
+            auto_close=False,
+            window_size=window_size,
+            screenshot=True,
+        )
         pl.screenshot(savefig)
 
         # return unclosed plotter

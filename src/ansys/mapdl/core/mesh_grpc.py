@@ -492,7 +492,7 @@ class MeshGrpc:
             keyopt = einfo[2:20]
             if keyopt.any():
                 # convert to fortran/ANSYS format
-                valid_keyopt = keyopt[keyopt.astype(np.bool)]
+                valid_keyopt = keyopt[keyopt.astype(np.bool_)]
                 ans_keyopt = np.vstack((np.nonzero(keyopt)[0] + 1, valid_keyopt))
                 key_opt[einfo[0]] = ans_keyopt.T.tolist()
 
@@ -543,7 +543,10 @@ class MeshGrpc:
     def _update_cache_elem(self):
         """Update the element and element offset cache"""
         if self._cache_elem is None:
-            self._cache_elem, self._cache_elem_off = self._load_elements_offset()
+            (
+                self._cache_elem,
+                self._cache_elem_off,
+            ) = self._load_elements_offset()
 
     @property
     def _elem(self):

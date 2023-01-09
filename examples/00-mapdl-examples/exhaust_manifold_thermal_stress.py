@@ -27,9 +27,9 @@ Procedure
 
 Additional Packages used
 ~~~~~~~~~~~~~~~~~~~~~~~~
-* `Numpy <https://numpy.org>`_ for using data as arrays
-* `Pandas <https://pandas.pydata.org>`_ to import csv file (to install use: **pip install pandas**)
-* `PyVista <https://docs.pyvista.org>`_ for performing Gauissian interpolation
+* `Numpy <numpy_org_>`_ for using data as arrays
+* `Pandas <pandas_org_>`_ to import csv file (to install use: **pip install pandas**)
+* `PyVista <pyvista_docs_>`_ for performing Gaussian interpolation
 
 Boundary Conditions
 ~~~~~~~~~~~~~~~~~~~
@@ -109,7 +109,11 @@ wrapped["temperature"] = nd_temp_data[
 
 # Perform data mapping
 inter_grid = grid.interpolate(
-    wrapped, sharpness=5, radius=0.0001, strategy="closest_point", progress_bar=True
+    wrapped,
+    sharpness=5,
+    radius=0.0001,
+    strategy="closest_point",
+    progress_bar=True,
 )  # Map the imported data to MAPDL grid
 inter_grid.plot(show_edges=False)  # Plot the interpolated data on MAPDL grid
 temperature_load_val = pv.convert_array(

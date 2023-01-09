@@ -216,7 +216,15 @@ class MapdlMath:
         else:
             return ans_vec
 
-    def mat(self, nrow=0, ncol=0, dtype=np.double, init=None, name=None, asarray=False):
+    def mat(
+        self,
+        nrow=0,
+        ncol=0,
+        dtype=np.double,
+        init=None,
+        name=None,
+        asarray=False,
+    ):
         """Create an APDLMath matrix.
 
         Parameters
@@ -543,9 +551,7 @@ class MapdlMath:
                 "Reading the stiffness, mass or damping matrices to a complex array is not supported."
             )
 
-        self._mapdl.run(
-            f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}", mute=True
-        )
+        self._mapdl.run(f"*SMAT,{name},{dtype_},IMPORT,FULL,{fname},{mat_id}")
         ans_sparse_mat = AnsSparseMat(name, self._mapdl)
         if asarray:
             return self._mapdl._mat_data(ans_sparse_mat.id).astype(dtype)
@@ -680,7 +686,12 @@ class MapdlMath:
         return self.load_matrix_from_file(dtype, name, fname, "DAMP", asarray)
 
     def get_vec(
-        self, dtype=None, name=None, fname="file.full", mat_id="RHS", asarray=False
+        self,
+        dtype=None,
+        name=None,
+        fname="file.full",
+        mat_id="RHS",
+        asarray=False,
     ):
         """Load a vector from a file.
 
@@ -724,7 +735,9 @@ class MapdlMath:
             raise TypeError("``name`` parameter must be a string")
 
         self._mapdl._log.info(
-            "Call MAPDL to extract the %s vector from the file %s", mat_id, fname
+            "Call MAPDL to extract the %s vector from the file %s",
+            mat_id,
+            fname,
         )
 
         if mat_id.upper() not in ["RHS", "GVEC", "BACK", "FORWARD"]:
@@ -740,7 +753,8 @@ class MapdlMath:
 
         fname = self._load_file(fname)
         self._mapdl.run(
-            f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}", mute=True
+            f"*VEC,{name},{MYCTYPE[dtype]},IMPORT,FULL,{fname},{mat_id}",
+            mute=True,
         )
         ans_vec = AnsVec(name, self._mapdl)
         if asarray:
@@ -1514,7 +1528,11 @@ class AnsMat(ApdlMathObj):
         info = self._mapdl._data_info(self.id)
 
         if meets_version(self._mapdl._server_version, (0, 5, 0)):  # pragma: no cover
-            return info.mattype in [0, 1, 2]  # [UPPER, LOWER, DIAG] respectively
+            return info.mattype in [
+                0,
+                1,
+                2,
+            ]  # [UPPER, LOWER, DIAG] respectively
 
         warn(
             "Call to ``sym`` cannot evaluate if this matrix "
@@ -1543,7 +1561,7 @@ class AnsMat(ApdlMathObj):
         >>> v = mm.ones(10)
         >>> v.asarray()
         [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
-        >>> v.asarray(dtype=np.int)
+        >>> v.asarray(dtype=np.int_)
         [1 1 1 1 1 1 1 1 1 1]
 
         """

@@ -1,3 +1,5 @@
+.. _user_guide_postprocessing:
+
 Postprocessing
 ==============
 In an active MAPDL session, you can postprocess using the
@@ -72,34 +74,34 @@ These commands are listed in Table-1_.
 
 Here's a simple example that demonstrates usage:
 
-.. code:: python
+.. code:: pycon
 
     
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
 
     >>> mapdl = launch_mapdl()
-    >>> example = examples.vmfiles['vm10']
+    >>> example = examples.vmfiles["vm10"]
     >>> mapdl.input(example)
 
     >>> mapdl.slashsolu()
     >>> mapdl.solve()
 
     >>> mapdl.post1()
-    >>> cmd = mapdl.prnsol('U', 'X')
+    >>> cmd = mapdl.prnsol("U", "X")
 
-    Output as a list.
+    # Output as a list.
 
     >>> cmd.to_list()
     [['1', '0.0000'], ['2', '0.0000']]
 
-    Output as array.
+    # Output as array.
 
     >>> cmd.to_array()
     array([[1., 0.],
            [2., 0.]])
 
-    Output as dataframe.
+    # Output as dataframe.
 
     >>> cmd.to_dataframe()
     NODE   UX
@@ -111,7 +113,7 @@ Examples
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 
-.. code::
+.. code:: output
 
      POST1:
      PRNSOL, U, X
@@ -141,16 +143,18 @@ You would typically request nodal results from MAPDL using the
 However, using an instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class, you can instead request the nodal displacement:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.set(1, 1)
-    >>> disp_x = mapdl.post_processing.nodal_displacement('X')
+    >>> disp_x = mapdl.post_processing.nodal_displacement("X")
     array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
            5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
 
 You could also plot the nodal displacement with this code:
 
-    >>> mapdl.post_processing.plot_nodal_displacement('X')
+.. code:: pycon
+
+    >>> mapdl.post_processing.plot_nodal_displacement("X")
 
 
 .. figure:: ../images/post_norm_disp.png
@@ -159,8 +163,34 @@ You could also plot the nodal displacement with this code:
     Normalized Displacement of a Cylinder from MAPDL
 
 
+Selecting entities
+------------------
+You can select entities such as nodes, or lines using the following methods:
+
+* :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+* :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`
+* :func:`Mapdl.ksel() <ansys.mapdl.core.Mapdl.ksel>`
+* :func:`Mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>`
+* :func:`Mapdl.asel() <ansys.mapdl.core.Mapdl.asel>`
+* :func:`Mapdl.vsel() <ansys.mapdl.core.Mapdl.vsel>`
+
+These methods returns the ids of the selected entities. For example:
+
+.. code:: pycon
+
+    >>> selected_nodes = mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
+    >>> print(selected_nodes)
+    array([   1    2    3 ... 1998 1999 2000])
+
+.. code:: pycon
+
+    >>> mapdl.ksel("all")
+    array([1, 2, 3, ..., 1998, 1999, 2000])
+
+
 Selected nodes
 ~~~~~~~~~~~~~~
+
 The MAPDL database processes some results independently if nodes or
 elements are selected. If you have subselected a certain component
 and want to also limit the result of a certain output
@@ -168,10 +198,10 @@ and want to also limit the result of a certain output
 use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes>` attribute to get
 a mask of the currently selected nodes:
 
-.. code::
+.. code:: pycon
 
-    >>> mapdl.nsel('S', 'NODE', vmin=1, vmax=2000)
-    >>> mapdl.esel('S', 'ELEM', vmin=500, vmax=2000)
+    >>> mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
+    >>> mapdl.esel("S", "ELEM", vmin=500, vmax=2000)
     >>> mask = mapdl.post_processing.selected_nodes
 
 

@@ -63,6 +63,8 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
+    "sphinx.ext.graphviz",
+    "sphinxcontrib.googleanalytics",
 ]
 
 # Intersphinx mapping
@@ -157,6 +159,10 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# Google analytics setup
+googleanalytics_id = "G-JQJKPV6ZVB"
+googleanalytics_enabled = True
+
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
@@ -205,6 +211,11 @@ html_theme_options = {
             "url": "https://github.com/pyansys/pymapdl/discussions",
             "icon": "fa fa-comment fa-fw",
         },
+        {
+            "name": "Contribute",
+            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "icon": "fa fa-wrench",
+        },
     ],
     "switcher": {
         "json_url": f"https://{cname}/release/versions.json",
@@ -248,7 +259,13 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "ansys.mapdl.core", "ansys.mapdl.core Documentation", [author], 1)
+    (
+        master_doc,
+        "ansys.mapdl.core",
+        "ansys.mapdl.core Documentation",
+        [author],
+        1,
+    )
 ]
 
 
@@ -286,3 +303,15 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
+# Adding apdl syntax highlighting
+def setup(app):
+    from pygments.lexers.apdlexer import apdlexer
+    from pygments.lexers.julia import JuliaLexer
+
+    # ANSYS lexer
+    app.add_lexer("apdl", apdlexer)
+    app.add_lexer("ansys", apdlexer)
+
+    # Julia lexer
+    app.add_lexer("julia", JuliaLexer)

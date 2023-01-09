@@ -1,6 +1,14 @@
 class HardPoints:
     def hptcreate(
-        self, type_="", entity="", nhp="", label="", val1="", val2="", val3="", **kwargs
+        self,
+        type_="",
+        entity="",
+        nhp="",
+        label="",
+        val1="",
+        val2="",
+        val3="",
+        **kwargs,
     ):
         """Defines a hard point.
 

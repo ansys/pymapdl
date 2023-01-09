@@ -35,16 +35,16 @@ To change this and output lower level messages you can use the next snippet:
 
 .. code:: python
 
-   LOG.logger.setLevel('DEBUG')
-   LOG.file_handler.setLevel('DEBUG')  # If present.
-   LOG.stdout_handler.setLevel('DEBUG')  # If present.
+   LOG.logger.setLevel("DEBUG")
+   LOG.file_handler.setLevel("DEBUG")  # If present.
+   LOG.stdout_handler.setLevel("DEBUG")  # If present.
 
 
 Alternatively:
 
 .. code:: python
 
-   LOG.setLevel('DEBUG')
+   LOG.setLevel("DEBUG")
 
 This way ensures all the handlers are set to the input log level.
 
@@ -54,7 +54,8 @@ you can add a file handler using:
 .. code:: python
 
    import os
-   file_path = os.path.join(os.getcwd(), 'pymapdl.log')
+
+   file_path = os.path.join(os.getcwd(), "pymapdl.log")
    LOG.log_to_file(file_path)
 
 This sets the logger to be redirected also to that file.  If you wish
@@ -64,12 +65,12 @@ of the execution, you must edit the file ``__init__`` in the directory
 
 To log using this logger, just call the desired method as a normal logger.
 
-.. code:: python
+.. code:: pycon
 
     >>> import logging
     >>> from ansys.mapdl.core.logging import Logger
     >>> LOG = Logger(level=logging.DEBUG, to_file=False, to_stdout=True)
-    >>> LOG.debug('This is LOG debug message.')
+    >>> LOG.debug("This is LOG debug message.")
 
     DEBUG -  -  <ipython-input-24-80df150fe31f> - <module> - This is LOG debug message.
 
@@ -91,10 +92,10 @@ using :func:`logger.Logging.setLevel`.
 
 You can use this logger like this:
 
-.. code:: python
+.. code:: pycon
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> mapdl._log.info('This is a useful message')
+    >>> mapdl._log.info("This is a useful message")
 
     INFO - GRPC_127.0.0.1:50056 -  <ipython-input-19-f09bb2d8785c> - <module> - This is a useful message
 
@@ -325,7 +326,11 @@ class Logger:
     _instances = {}
 
     def __init__(
-        self, level=logging.DEBUG, to_file=False, to_stdout=True, filename=FILE_NAME
+        self,
+        level=logging.DEBUG,
+        to_file=False,
+        to_stdout=True,
+        filename=FILE_NAME,
     ):
         """Customized logger class for Pymapdl.
 
@@ -549,7 +554,8 @@ class Logger:
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
             logger.critical(
-                "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
+                "Uncaught exception",
+                exc_info=(exc_type, exc_value, exc_traceback),
             )
 
         sys.excepthook = handle_exception

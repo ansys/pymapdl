@@ -160,7 +160,12 @@ class TestParseElementCommands:
 
     @pytest.mark.parametrize(
         "message",
-        ["Element Type 8", "eLEMENT TyPe 0", "other thing entirely", "ELEMENT TYPE  8"],
+        [
+            "Element Type 8",
+            "eLEMENT TyPe 0",
+            "other thing entirely",
+            "ELEMENT TYPE  8",
+        ],
     )
     def test_parse_et_invalid(self, message):
         response = parse_e(message[0])
