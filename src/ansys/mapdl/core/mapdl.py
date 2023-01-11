@@ -170,6 +170,7 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
+        self._use_dpf = start_parm.get("use_dpf", False)
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -1982,8 +1983,14 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.reader import read_binary
-        from ansys.mapdl.reader.rst import Result
+
+        if self._use_dpf:
+            from ansys.mapdl.core.reader import DPFResult
+
+            return DPFResult(None, self)
+        else:
+            from ansys.mapdl.reader import read_binary
+            from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
@@ -2845,8 +2852,9 @@ class _MapdlCore(Commands):
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
-            if "/COM" not in cmd_ and "/TITLE" not in cmd_:
+            if "/COM" not in cmd_ and "/TITLE" not in cmd_ and "/SYS" not in cmd_:
                 # Edge case. `\title, 'par=1234' `
+                # Same with running sys commands to export env vars
                 self._check_parameter_name(param_name)
 
         verbose = kwargs.get("verbose", False)
@@ -3995,13 +4003,34 @@ class _MapdlCore(Commands):
         else:
             return output
 
+    def get_mapdl_envvar(self, envvar):
+        """Get the value of an MAPDL environment variable.
+
+        This variable can be only in one line.
+
+        Parameters
+        ----------
+        envvar : str
+            The name of the environment variable.
+
+        Returns
+        -------
+        str
+            The value of the environment variable.
+
+        Examples
+        --------
+        >>> mapdl.get_mapdl_envvar('ANSYS_VER')"""
+        self.inquire("MYSTRARR", "ENV", envvar)
+        return self.parameters["MYSTRARR"]
+
     def _check_mapdl_os(self):
         platform = self.get_value("active", 0, "platform").strip()
         if "l" in platform.lower():
             self._platform = "linux"
-        elif "w" in platform.lower():  # pragma: no cover
+        elif "w" in platform.lower():
             self._platform = "windows"
-        else:  # pragma: no cover
+        else:
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
 
     @property
@@ -4022,9 +4051,9 @@ class _MapdlCore(Commands):
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
 
-        if self.is_grpc and not self.is_local:
+        if self.is_grpc and not self._local:
             return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
-        else:  # pragma: no cover
+        else:
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
                 return f.read().strip() == "true"

@@ -1648,6 +1648,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_dpf=True,
                 )
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
@@ -1660,6 +1661,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_dpf=True,
                 )
                 if clear_on_connect:
                     mapdl.clear()
@@ -1673,6 +1675,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_dpf=True,
                 )
             if clear_on_connect:
                 mapdl.clear()

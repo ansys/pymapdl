@@ -549,7 +549,7 @@ class Setup:
                 ``to_array`` on the object returning from ``mapdl.set("list")``.
 
         sbstep
-            Substep number (within Lstep). Defaults to the last substep of the
+            Substep number (within ``Lstep``). Defaults to the last substep of the
             load step (except in a buckling or modal analysis). For a buckling
             (``ANTYPE,BUCKLE``) or modal (``ANTYPE,MODAL``) analysis, ``Sbstep``
             corresponds to the mode number. Specify ``Sbstep = LAST`` to store the

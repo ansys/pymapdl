@@ -80,6 +80,17 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
 
+try:
+    from ansys.mapdl.core.reader import DPFResult
+
+    HAS_DPF = True
+
+except ModuleNotFoundError:
+    from ansys.mapdl.reader import read_binary
+    from ansys.mapdl.reader.rst import Result
+
+    HAS_DPF = False
+
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -2355,12 +2366,17 @@ class MapdlGrpc(_MapdlCore):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.reader import read_binary
-        from ansys.mapdl.reader.rst import Result
+
+        if HAS_DPF:
+            return DPFResult(None, self)
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
+            save_path = os.path.join(
+                tempfile.gettempdir(), f"ansys_tmp_{random_string()}"
+            )
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
