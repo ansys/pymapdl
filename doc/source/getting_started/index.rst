@@ -20,6 +20,7 @@ For more information on getting a licensed copy of Ansys, visit
    using_julia
    faq
    contribution
+   ../../../.devcontainer/README.rst
 
 
 ************
