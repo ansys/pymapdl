@@ -29,16 +29,16 @@
 	// "shutdownAction": "none",
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": ". ./.devcontainer/script.sh", //"'pkill -9 -f ansys_inc/v222/ansys'",
+	"postCreateCommand": "/bin/bash ./.devcontainer/script.sh", //"'pkill -9 -f ansys_inc/v222/ansys'",
 
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
-	// "remoteUser": "vscode"
-  "customizations": {
-    // Configure properties specific to Codespaces.
-    "codespaces": {
-      "openFiles": [
-        ".devcontainer/README.rst"
-      ]
-    }
-  }
+	"remoteUser": "mapdl",
+	"customizations": {
+		// Configure properties specific to Codespaces.
+		"codespaces": {
+			"openFiles": [
+				".devcontainer/README.rst"
+			]
+		}
+	}
 }
