@@ -40,5 +40,14 @@
 				".devcontainer/README.rst"
 			]
 		}
-	}
+	},
+	// Extensions
+	"extensions": [
+		"ms-python.python",
+		"ms-vscode.test-adapter-converter",
+		"donjayamanne.python-environment-manager",
+		"njpwerner.autodocstring",
+		"hbenl.vscode-test-explorer",
+		"littlefoxteam.vscode-python-test-adapter",
+	]
 }
