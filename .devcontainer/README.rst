@@ -28,7 +28,7 @@ To use remote containers locally, you need to install:
 Once you have everything installed you can open the current folder (or repository) using
 ``ctr/cmd`` + ``shift`` + ``p`` to open the VSCode *Command palette*.
 Then select ``Dev Containers: Open Folder in Container``.
-Because the configuration is available in ``.devcontainer`` folder, VS Code will automatically
+Because the configuration is available in ``.devcontainer`` directory, VS Code will automatically
 launch the MAPDL Ubuntu container with the desired configuration.
 
 Licensing
@@ -63,12 +63,12 @@ This is the easiest way to get started with PyMAPDL development.
 
 You can launch a Codespace by clicking on the ``Code`` button on the top right of the repository and then clicking on ``Open with Codespaces``.
 
-.. image:: .. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/open_codespaces.png
+.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/open_codespaces.png
    :alt: Open with Codespaces
 
-After some time allowed to load, you can see a fully functional Codespace with the latest MAPDL image and the latest PyMAPDL repository cloned.
+After a moment, you will see a fully functional Codespace with the latest MAPDL image and the latest PyMAPDL repository cloned.
 
-.. image:: .. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/codespaces_main.png
+.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/codespaces_main.png
    :alt: Codespaces main
 
 You can now start developing PyMAPDL!
