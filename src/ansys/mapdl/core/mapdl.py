@@ -3905,7 +3905,7 @@ class _MapdlCore(Commands):
 
         """
         fname = self._get_file_name(fname, ext, "rst")
-        fname = self._get_file_path(fname, kwargs["progress_bar"])
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
