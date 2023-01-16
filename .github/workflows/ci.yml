@@ -551,18 +551,47 @@ jobs:
     needs: [docs_build, build_test, smoke-tests]
     runs-on: ubuntu-latest
     steps:
+      - name: "Download artifacts"
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ inputs.token }}
+          path: artifacts
       
+      - name: "Sorting artifacts"
+        run: |
+          mkdir ${{ env.PACKAGE_NAME }}-artifacts
+          cp artifacts/**/*.whl  ${{ env.PACKAGE_NAME }}-artifacts/
+          cp artifacts/**/*.tar.gz  ${{ env.PACKAGE_NAME }}-artifacts/
+          mkdir other-artifacts
+          cp artifacts/**/*wheelhouse*.zip other-artifacts/
+
+      - name: "Download PDF artifacts"
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ inputs.token }}
+          name: documentation-pdf
+          skip_unpack: true
+
+      - name: "Download HTML artifacts"
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ inputs.token }}
+          name: documentation-html
+          skip_unpack: true
+
+      - name: "Release to GitHub"
+        uses: pyansys/actions/release-github@v2.0.9
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          download-artifacts: false
+
       - name: "Release to the public PyPI repository"
         uses: pyansys/actions/release-pypi-public@v2.0.9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           twine-username: "__token__"
           twine-token: ${{ secrets.PYPI_TOKEN }}
-
-      - name: "Release to GitHub"
-        uses: pyansys/actions/release-github@v2.0.9
-        with:
-          library-name: ${{ env.PACKAGE_NAME }}
+          download-artifacts: false
 
       - name: "Notify if fail"
         uses: skitionek/notify-microsoft-teams@master
