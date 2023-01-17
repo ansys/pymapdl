@@ -4053,7 +4053,7 @@ class _MapdlCore(Commands):
             File name (without extension or path)
 
         str
-            File extension
+            File extension (without dot)
         """
         fname = pathlib.Path(fname)
-        return fname.stem, fname.suffix
+        return fname.stem, fname.suffix.replace(".", "")
