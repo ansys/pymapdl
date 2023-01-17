@@ -10,11 +10,11 @@ Array access requires either cumbersome MAPDL GET commands or that the
 nodes be written to an archive file and then read in with other
 software:
 
-.. code::
+.. code:: output
 
     NLIST
 
- LIST ALL SELECTED NODES.   DSYS=      0
+    LIST ALL SELECTED NODES.   DSYS=      0
 
     NODE        X             Y             Z           THXY     THYZ     THZX
         1   0.0000        0.0000        0.0000          0.00     0.00     0.00
@@ -23,35 +23,34 @@ software:
 
 
 However, with the :class:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.Mesh>` class,
-you can interface with a current instance of the :class:`Mapdl
-<ansys.mapdl.core.Mapdl>` class and access the current nodes coordinates
+you can interface with a current instance of the 
+:class:`Mapdl <ansys.mapdl.core.Mapdl>` class and access the current nodes coordinates
 with this code:
 
-.. code:: python
+.. code:: pycon
 
    >>> mapdl.mesh.nodes
-   [[0.   0.   0.  ]
-    [1.   0.   0.  ]
-    [0.25 0.   0.  ]
-    ...,
-    [0.75 0.5  3.5 ]
-    [0.75 0.5  4.  ]
-    [0.75 0.5  4.5 ]]
+   [[0.0, 0.0, 0.0],
+     [1.0, 0.0, 0.0],
+     [0.25, 0.0, 0.0],
+     [0.75, 0.5, 3.5],
+     [0.75, 0.5, 4.0],
+     [0.75, 0.5, 4.5]]
 
 
-Both the :attr:`Mapdl.geometry <ansys.mapdl.core.Mapdl.geometry` and
-:attr:`Mapdl.mesh <ansys.mapdl.core.Mapdl.mesh` attributes support
+Both the :attr:`Mapdl.geometry <ansys.mapdl.core.Mapdl.geometry>` and
+:attr:`Mapdl.mesh <ansys.mapdl.core.Mapdl.mesh>` attributes support
 additional, lower-level access to MAPDL data. You can use this code
 to access them:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.mesh
     >>> mapdl.geometry
 
 To view the current mesh status, you can use this code:
 
-.. code::
+.. code:: pycon
 
    >>> mapdl.mesh
     ANSYS Mesh

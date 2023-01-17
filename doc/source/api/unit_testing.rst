@@ -41,13 +41,13 @@ this library:
 
     def get_report_colors(theme):
 
-        if theme == 'weather':
+        if theme == "weather":
             colors = ["blue", "lightblue", "grey"]
-        elif theme == 'traffic':
+        elif theme == "traffic":
             colors = ["red", "orange", "yellow"]
         else:
             colors = ["red", "blue", "green"]
-        
+
         return colors
 
 
@@ -59,9 +59,9 @@ You can opt to run the tests with this configuration:
 
    def test_get_report_colors():
 
-        assert get_report_colors('weather') == ["blue", "lightblue", "grey"]
-        assert get_report_colors('traffic') == ["red", "orange", "yellow"]
-        assert get_report_colors('other') == ["red", "blue", "green"]
+       assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
+       assert get_report_colors("traffic") == ["red", "orange", "yellow"]
+       assert get_report_colors("other") == ["red", "blue", "green"]
 
 
 Or, if a method is a bit more complex, you can split the case in different tests:
@@ -70,15 +70,17 @@ Or, if a method is a bit more complex, you can split the case in different tests
 
     def test_get_report_colors_weather():
 
-        assert get_report_colors('weather') == ["blue", "lightblue", "grey"]
+        assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
+
 
     def test_get_report_colors_traffic():
 
-        assert get_report_colors('traffic') == ["red", "orange", "yellow"]
+        assert get_report_colors("traffic") == ["red", "orange", "yellow"]
+
 
     def test_get_report_colors_other():
 
-        assert get_report_colors('other') == ["red", "blue", "green"]
+        assert get_report_colors("other") == ["red", "blue", "green"]
 
 
 While the code coverage in either case is 100% for the function, the second case is
@@ -131,7 +133,7 @@ It will be executed upstream of each test and not within all tests.
        mapdl.prep7()
        # .... more code
 
-       return True # if everything goes ok until here
+       return True  # if everything goes ok until here
 
 
 Example
@@ -147,22 +149,25 @@ Here are some examples of how you use ``pytest``:
     import numpy as np
     import ansys.mapdl.core.math as apdl_math
 
+
     @pytest.fixture(scope="module")
     def mm(mapdl):  # pass the 'mapdl' fixture as an argument.
 
         return mapdl.math
+
 
     def test_rand(mm):  # pass the 'mm' fixture as an argument.
 
         w = mm.rand(10)
         assert w.size == 10  # if it is False, AssertionError is raised
 
+
     def test_matrix_addition(mm):
 
         m1 = mm.rand(10, 10)
         m2 = mm.rand(10, 10)
         m3 = m1 + m2
-        assert np.allclose(m1.asarray() + m2.asarray(), m3.asarray())  
-                            # if it is False, AssertionError is raised
+        assert np.allclose(m1.asarray() + m2.asarray(), m3.asarray())
+        # if it is False, AssertionError is raised
 
 For further explanations, see the `pytest documentation <pytest_>`_.

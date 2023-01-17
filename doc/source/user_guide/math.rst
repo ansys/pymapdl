@@ -58,6 +58,7 @@ in MAPDL.
     import re
 
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
 
     # setup the full file
@@ -65,25 +66,25 @@ in MAPDL.
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.5)
-    mapdl.vmesh('all')
+    mapdl.vmesh("all")
 
     # Define a material (nominal steel in SI)
-    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
     # store the first 10 natural frequencies
     mapdl.post1()
-    resp = mapdl.set('LIST')
-    w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
     print(w_n)
 
 You now have solved for the first 10 modes of the cube:
 
-.. code:: 
+.. code:: output
 
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
@@ -108,7 +109,7 @@ in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlM
 After running the :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>` method,
 these matrices are stored solely within Python.
 
-.. code:: 
+.. code:: output
 
     (0, 0)	37019230769.223404
     (0, 1)	10283119658.117708
@@ -139,7 +140,7 @@ As expected, the natural frequencies obtained from the
 identical to the result from the :func:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
 method within MAPDL.
 
-.. code::
+.. code:: output
 
     [1475.1333421  1475.1333426  2018.83737064 2018.83737109 2018.83737237
      2024.78684466 2024.78684561 2024.7868466  2242.21532585 2274.82997741]
@@ -148,11 +149,11 @@ If you want to obtain the eigenvectors as well as the eigenvalues,
 initialize a matrix ``eigvec`` and send that to the
 :func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method:
 
-.. code::
+.. code:: pycon
 
-    nmode = 10
-    eigvec = mm.zeros(my_stiff.nrow, nmode)  # for eigenvectors
-    val = mm.eigs(nmode, my_stiff, my_mass, fmin=1)
+    >>> nmode = 10
+    >>> eigvec = mm.zeros(my_stiff.nrow, nmode)  # for eigenvectors
+    >>> val = mm.eigs(nmode, my_stiff, my_mass, fmin=1)
 
 The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
 solution.

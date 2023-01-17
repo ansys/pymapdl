@@ -44,6 +44,7 @@ Fortran
 FSW
 Getting Started with PyMAPDL
 Gmsh
+GUI
 hexahedral
 hostname
 hyperelasticity

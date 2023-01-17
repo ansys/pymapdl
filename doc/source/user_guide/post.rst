@@ -74,21 +74,21 @@ These commands are listed in Table-1_.
 
 Here's a simple example that demonstrates usage:
 
-.. code:: python
+.. code:: pycon
 
     
     >>> from ansys.mapdl.core import launch_mapdl
     >>> from ansys.mapdl.core import examples
 
     >>> mapdl = launch_mapdl()
-    >>> example = examples.vmfiles['vm10']
+    >>> example = examples.vmfiles["vm10"]
     >>> mapdl.input(example)
 
     >>> mapdl.slashsolu()
     >>> mapdl.solve()
 
     >>> mapdl.post1()
-    >>> cmd = mapdl.prnsol('U', 'X')
+    >>> cmd = mapdl.prnsol("U", "X")
 
     # Output as a list.
 
@@ -113,7 +113,7 @@ Examples
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 
-.. code::
+.. code:: output
 
      POST1:
      PRNSOL, U, X
@@ -143,16 +143,18 @@ You would typically request nodal results from MAPDL using the
 However, using an instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class, you can instead request the nodal displacement:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.set(1, 1)
-    >>> disp_x = mapdl.post_processing.nodal_displacement('X')
+    >>> disp_x = mapdl.post_processing.nodal_displacement("X")
     array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
            5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
 
 You could also plot the nodal displacement with this code:
 
-    >>> mapdl.post_processing.plot_nodal_displacement('X')
+.. code:: pycon
+
+    >>> mapdl.post_processing.plot_nodal_displacement("X")
 
 
 .. figure:: ../images/post_norm_disp.png
@@ -174,13 +176,13 @@ You can select entities such as nodes, or lines using the following methods:
 
 These methods returns the ids of the selected entities. For example:
 
-.. code:: python
+.. code:: pycon
 
-    >>> selected_nodes = mapdl.nsel('S', 'NODE', vmin=1, vmax=2000)
+    >>> selected_nodes = mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
     >>> print(selected_nodes)
     array([   1    2    3 ... 1998 1999 2000])
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.ksel("all")
     array([1, 2, 3, ..., 1998, 1999, 2000])
@@ -196,10 +198,10 @@ and want to also limit the result of a certain output
 use the :attr:`selected_nodes <ansys.mapdl.core.post.PostProcessing.selected_nodes>` attribute to get
 a mask of the currently selected nodes:
 
-.. code::
+.. code:: pycon
 
-    >>> mapdl.nsel('S', 'NODE', vmin=1, vmax=2000)
-    >>> mapdl.esel('S', 'ELEM', vmin=500, vmax=2000)
+    >>> mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
+    >>> mapdl.esel("S", "ELEM", vmin=500, vmax=2000)
     >>> mask = mapdl.post_processing.selected_nodes
 
 

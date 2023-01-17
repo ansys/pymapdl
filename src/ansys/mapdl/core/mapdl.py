@@ -31,6 +31,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -169,6 +170,10 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
+        self._mapdl_process = None
+        self._launched = False
+        self._stderr = None
+        self._stdout = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -2736,8 +2741,18 @@ class _MapdlCore(Commands):
             to ``False``, will not write command to log, even if APDL
             command logging is enabled.
 
-        kwargs : Optional keyword arguments
-            These keyword arguments are interface specific.
+        kwargs : dict, optional
+            These keyword arguments are interface specific or for
+            development purposes.
+
+            avoid_non_interactive : :class:`bool`
+              *(Development use only)*
+              Avoids the non-interactive mode for this specific command.
+              Defaults to ``False``.
+
+            verbose : :class:`bool`
+              Prints the command to the screen before running it.
+              Defaults to ``False``.
 
         Returns
         -------
@@ -2746,6 +2761,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
+
+        **Running non-interactive commands**
+
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) use
 
@@ -2776,7 +2794,10 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        if self._store_commands:
+        # check if we want to avoid the current non-interactive context.
+        avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
+
+        if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
             self._stored_commands.append(command)
             return
@@ -3153,16 +3174,26 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        try:
-            self._path = self.inquire("", "DIRECTORY")
-        except Exception:
-            pass
+        i = 0
+        while (not self._path and i > 5) or i == 0:
+            try:
+                self._path = self.inquire("", "DIRECTORY")
+            except Exception:  # pragma: no cover
+                pass
+            i += 1
+            if not self._path:  # pragma: no cover
+                time.sleep(0.1)
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
+        else:  # pragma: no cover
+            raise IOError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -3399,7 +3430,9 @@ class _MapdlCore(Commands):
 
         if output is not None:
             if "*** WARNING ***" in output:
-                raise FileNotFoundError("\n" + "\n".join(output.splitlines()[1:]))
+                raise IncorrectWorkingDirectory(
+                    "\n" + "\n".join(output.splitlines()[1:])
+                )
 
         return output
 
@@ -3793,15 +3826,18 @@ class _MapdlCore(Commands):
 
                 # Extracting only the first 'lines_number' lines.
                 # This is important. Regex has problems parsing long messages.
-                lines_number = 10
-                partial_output = "\n".join(
-                    response.splitlines()[index : (index + lines_number)]
-                )
+                lines_number = 20
+                if len(response.splitlines()) <= lines_number:
+                    partial_output = response
+                else:
+                    partial_output = "\n".join(
+                        response.splitlines()[index : (index + lines_number)]
+                    )
 
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*\n)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",  # we might consider to use only one \n.
                     partial_output,
                     re.DOTALL,
                 )
@@ -3813,7 +3849,9 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.groups()[0]
+                    error_message = error_message.group(
+                        0
+                    )  # Catching only the first error.
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
@@ -4016,3 +4054,8 @@ class _MapdlCore(Commands):
     def is_local(self):
         """Check if the instance is running locally or remotely."""
         return self._local
+
+    @property
+    def launched(self):
+        """Check if the MAPDL instance has been launched by PyMAPDL."""
+        return self._launched

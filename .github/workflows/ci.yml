@@ -29,10 +29,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 5
-  RESET_EXAMPLES_CACHE: 5
-  RESET_DOC_BUILD_CACHE: 5
-  RESET_AUTOSUMMARY_CACHE: 5
+  RESET_PIP_CACHE: 0
+  RESET_EXAMPLES_CACHE: 0
+  RESET_DOC_BUILD_CACHE: 0
+  RESET_AUTOSUMMARY_CACHE: 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,28 +45,18 @@ defaults:
 
 jobs:
 
-  code-style:
-    name: "Code style"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "PyAnsys code style checks"
-        uses: pyansys/actions/code-style@v2
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
       - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v2
+        uses: pyansys/actions/doc-style@v3.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
-    needs: code-style
     strategy:
       fail-fast: false
       matrix:
@@ -74,7 +64,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v2
+        uses: pyansys/actions/build-wheelhouse@v3.0.1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
@@ -558,19 +548,19 @@ jobs:
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, build_test_ubuntu, smoke-tests]
+    needs: [docs_build, build_test, smoke-tests]
     runs-on: ubuntu-latest
     steps:
       
       - name: "Release to the public PyPI repository"
-        uses: pyansys/actions/release-pypi-public@v2
+        uses: pyansys/actions/release-pypi-public@v3.0.1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           twine-username: "__token__"
           twine-token: ${{ secrets.PYPI_TOKEN }}
 
       - name: "Release to GitHub"
-        uses: pyansys/actions/release-github@v2
+        uses: pyansys/actions/release-github@v3.0.1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
 
@@ -593,7 +583,7 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v2
+        uses: pyansys/actions/doc-deploy-stable@v3.0.1
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}

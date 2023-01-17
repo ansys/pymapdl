@@ -1,16 +1,24 @@
+fail_fast: True
+
 repos:
 
 - repo: https://github.com/pycqa/isort
-  rev: 5.11.2
+  rev: 5.11.4
   hooks:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 22.12.0
+  rev: 22.12.0  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
   hooks:
   - id: black
     args:
       - --line-length=88
+
+- repo: https://github.com/adamchainz/blacken-docs
+  rev: 1.13.0
+  hooks:
+  - id: blacken-docs
+    additional_dependencies: [black==22.12.0]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.0.0
@@ -39,6 +47,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.19.2
+  rev: 0.20.0
   hooks:
     - id: check-github-workflows
