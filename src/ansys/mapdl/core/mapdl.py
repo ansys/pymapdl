@@ -3006,6 +3006,8 @@ class _MapdlCore(Commands):
 
         if self._local:
             os.remove(filename)
+        else:
+            self.slashdelete(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to into MAPDL.
@@ -3127,6 +3129,11 @@ class _MapdlCore(Commands):
             filename = base_name
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
+
+        if self._local:
+            os.remove(filename)
+        else:
+            self.slashdelete(filename)
 
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
