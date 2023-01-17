@@ -573,10 +573,7 @@ class MapdlGrpc(_MapdlCore):
         """Check if Python is local to the MAPDL instance."""
         # Verify if python has assess to the MAPDL directory.
         if self._local:
-            if self._path is None:
-                directory = self.directory
-            else:
-                directory = self._path
+            directory = self.directory
 
             if self._jobname is None:
                 jobname = self.jobname
