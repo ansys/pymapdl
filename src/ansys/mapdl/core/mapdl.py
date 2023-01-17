@@ -3174,16 +3174,25 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        try:
-            self._path = self.inquire("", "DIRECTORY")
-        except Exception:
-            pass
+        self._path = None
+        i = 0
+        while not self._path and i > 5:
+            try:
+                self._path = self.inquire("", "DIRECTORY")
+            except Exception:
+                pass
+            i += 1
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
+        else:
+            raise IOError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
