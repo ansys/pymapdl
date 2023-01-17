@@ -170,6 +170,10 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
+        self._mapdl_process = None
+        self._launched = False
+        self._stderr = None
+        self._stdout = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -3170,16 +3174,26 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        try:
-            self._path = self.inquire("", "DIRECTORY")
-        except Exception:
-            pass
+        i = 0
+        while (not self._path and i > 5) or i == 0:
+            try:
+                self._path = self.inquire("", "DIRECTORY")
+            except Exception:  # pragma: no cover
+                pass
+            i += 1
+            if not self._path:  # pragma: no cover
+                time.sleep(0.1)
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
+        else:  # pragma: no cover
+            raise IOError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -4040,3 +4054,8 @@ class _MapdlCore(Commands):
     def is_local(self):
         """Check if the instance is running locally or remotely."""
         return self._local
+
+    @property
+    def launched(self):
+        """Check if the MAPDL instance has been launched by PyMAPDL."""
+        return self._launched

@@ -14,6 +14,7 @@ from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -110,6 +111,27 @@ ERESX,DEFA
 /GO
 FINISH
 """
+
+
+def fake_mapdl_process(poll, stdout, stderr):
+    class FakeBuffer:
+        def __init__(self, message):
+            self.message = message
+
+        def read(self):
+            return self.message
+
+    # Fake process
+    class FakePopen:
+        def __init__(self, poll, stdout, stderr):
+            self._poll = poll
+            self.stdout = FakeBuffer(stdout)
+            self.stderr = FakeBuffer(stderr)
+
+        def poll(self):
+            return self._poll
+
+    return FakePopen(poll, stdout, stderr)
 
 
 def clearing_cdread_cdwrite_tests(mapdl):
@@ -1714,6 +1736,125 @@ def test_deprecation_allow_ignore_errors_mapping(mapdl):
 
     mapdl.ignore_errors = False
     assert mapdl.allow_ignore == mapdl.ignore_errors
+
+
+def test_check_stds(mapdl):
+    mapdl._stdout = "everything is going ok"
+    mapdl._check_stds()
+
+    mapdl._stdout = "one error"
+    with pytest.raises(MapdlConnectionError, match="one error"):
+        mapdl._check_stds()
+
+    mapdl._stderr = ""
+    mapdl._stdout = None  # resetting
+    mapdl._check_stds()
+
+    mapdl._stderr = "my error"
+    with pytest.raises(MapdlConnectionError, match="my error"):
+        mapdl._check_stds()
+
+    # priority goes to stderr
+    mapdl._stdout = "one error"
+    mapdl._stderr = "my error"
+    with pytest.raises(MapdlConnectionError, match="my error"):
+        mapdl._check_stds()
+
+
+def test_post_mortem_checks_no_process(mapdl):
+    # Early exit
+    old_process = mapdl._mapdl_process
+    old_mode = mapdl._mode
+
+    mapdl._mapdl_process = None
+    assert mapdl._post_mortem_checks() is None
+    assert mapdl._read_stds() is None
+
+    mapdl._mapdl_process = True
+    mapdl._mode = "console"
+    assert mapdl._post_mortem_checks() is None
+
+    # No process
+    mapdl._mapdl_process = None
+    mapdl._mode = "grpc"
+    assert mapdl._read_stds() is None
+
+    mapdl._mapdl_process = old_process
+    mapdl._mode = old_mode
+
+
+def test_post_mortem_ok(mapdl):
+    # Test with a process that is still running
+    myprocess = fake_mapdl_process(None, b"None", b"None")
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    assert mapdl._post_mortem_checks() is None
+
+    mapdl._mapdl_process = old_process
+
+
+def test_post_mortem_empty(mapdl):
+    myprocess = fake_mapdl_process(None, b"", b"")
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    assert mapdl._post_mortem_checks() is None
+
+    mapdl._mapdl_process = old_process
+
+
+def test_post_mortem_error_stdout(mapdl):
+    myprocess = fake_mapdl_process(None, b"error to connect", b"")
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    with pytest.raises(MapdlConnectionError, match="error to connect"):
+        mapdl._post_mortem_checks()
+
+    mapdl._mapdl_process = old_process
+
+
+def test_post_mortem_error_stderr(mapdl):
+    myprocess = fake_mapdl_process(None, b"", b"other error")
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    with pytest.raises(MapdlConnectionError, match="other error"):
+        mapdl._post_mortem_checks()
+
+    mapdl._mapdl_process = old_process
+
+
+def test_post_mortem_error_both(mapdl):
+    myprocess = fake_mapdl_process(None, b"std error", b"other warning")
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    with pytest.raises(MapdlConnectionError, match="other warning"):
+        mapdl._post_mortem_checks()
+
+    mapdl._mapdl_process = old_process
+
+
+def test_launched_property(mapdl):
+    if mapdl.is_local:
+        assert mapdl.launched
+    else:
+        assert not mapdl.launched
+
+
+def test_custom_stds_error(mapdl):
+    myprocess = fake_mapdl_process(
+        None, b"", b"Error. Only one usage of each socket address."
+    )
+    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+    assert mapdl._is_alive_subprocess()
+    with pytest.raises(MapdlConnectionError, match="Full error message"):
+        mapdl._post_mortem_checks()
+
+    mapdl._mapdl_process = old_process
 
 
 def test_avoid_non_interactive(mapdl):
