@@ -3178,10 +3178,10 @@ class _MapdlCore(Commands):
         while (not self._path and i > 5) or i == 0:
             try:
                 self._path = self.inquire("", "DIRECTORY")
-            except Exception:
+            except Exception:  # pragma: no cover
                 pass
             i += 1
-            if not self._path:
+            if not self._path:  # pragma: no cover
                 time.sleep(0.1)
 
         # os independent path format
@@ -3189,7 +3189,7 @@ class _MapdlCore(Commands):
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
-        else:
+        else:  # pragma: no cover
             raise IOError(
                 f"The directory returned by /INQUIRE is not valid ('{self._path}')."
             )
