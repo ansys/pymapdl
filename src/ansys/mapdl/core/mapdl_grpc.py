@@ -1563,9 +1563,12 @@ class MapdlGrpc(_MapdlCore):
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            delete_uploaded_files = False
+
         else:
             # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
@@ -1609,7 +1612,7 @@ class MapdlGrpc(_MapdlCore):
             # Deleting the previous files
             self.slashdelete(tmp_name)
             self.slashdelete(tmp_out)
-            if filename in self.list_files():
+            if filename in self.list_files() and delete_uploaded_files:
                 self.slashdelete(filename)
 
         return output
