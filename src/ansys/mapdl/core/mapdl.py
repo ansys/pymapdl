@@ -3174,14 +3174,15 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        self._path = None
         i = 0
-        while not self._path and i > 5:
+        while (not self._path and i > 5) or i == 0:
             try:
                 self._path = self.inquire("", "DIRECTORY")
             except Exception:
                 pass
             i += 1
+            if not self._path:
+                time.sleep(0.1)
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
