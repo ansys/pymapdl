@@ -5,6 +5,7 @@ from functools import wraps
 import glob
 import io
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -1392,22 +1393,14 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        # the old behaviour is to supplied the name and the extension separately.
-        # to make it easier let's going to allow names with extensions
-        basename = os.path.basename(fname)
-        if len(basename.split(".")) == 1:
-            # there is no extension in the main name.
-            if ext:
-                # if extension is an input as an option (old APDL style)
-                fname = fname + "." + ext
-            else:
-                # Using default .db
-                fname = fname + "." + "cdb"
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         kwargs.setdefault("orig_cmd", "CDREAD")
         kwargs.setdefault("cd_read_option", option.upper())
+
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs["progress_bar"])
 
         self.input(fname, **kwargs)
 
@@ -1633,9 +1626,11 @@ class MapdlGrpc(_MapdlCore):
                 f"`fname` should be a full file path or name, not the directory '{fname}'."
             )
 
+        fPath = pathlib.Path(fname)
+
         fpath = os.path.dirname(fname)
-        fname = os.path.basename(fname)
-        fext = fname.split(".")[-1]
+        fname = fPath.name
+        fext = fPath.suffix
 
         # if there is no dirname, we are assuming the file is
         # in the python working directory.
@@ -1672,6 +1667,34 @@ class MapdlGrpc(_MapdlCore):
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         return filename
+
+    def _get_file_name(self, fname, ext=None, default_extension=None):
+        """Get file name from fname and extension arguments.
+
+        fname can be the full path.
+
+        Parameters
+        ----------
+        fname : str
+            File name (with our with extension). It can be a full path.
+        ext : str, optional
+            File extension, by default None
+        """
+
+        # the old behaviour is to supplied the name and the extension separately.
+        # to make it easier let's going to allow names with extensions
+
+        if ext:
+            fname = fname + "." + ext
+        else:
+            basename = os.path.basename(fname)
+
+            if len(basename.split(".")) == 1:
+                # there is no extension in the main name.
+                if default_extension:
+                    fname = fname + "." + default_extension
+
+        return fname
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -2702,24 +2725,13 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.file)
     def file(self, fname="", ext="", **kwargs):
         """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
-        filename = fname + ext
-        if self._local:  # pragma: no cover
-            out = super().file(fname, ext, **kwargs)
-        elif filename in self.list_files():
-            # this file is already remote
-            out = self._file(filename)
-        else:
-            if not os.path.isfile(filename):
-                raise FileNotFoundError(
-                    f"Unable to find '{filename}'. You may need to "
-                    "input the full path to the file."
-                )
+        # always check if file is present as the grpc and MAPDL errors
+        # are unclear
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_ = self._decompose_fname(fname)
 
-            progress_bar = kwargs.pop("progress_bar", False)
-            basename = self.upload(filename, progress_bar=progress_bar)
-            out = self._file(basename, **kwargs)
-
-        return out
+        return self._file(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.vget)
     def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
