@@ -489,7 +489,7 @@ jobs:
 
       # Skipping because it is installed locally.
       # - name: Setup Python
-      #   uses: actions/setup-python@v4.3.2
+      #   uses: actions/setup-python@v4
       #   with:
       #     python-version: 3.9
 
@@ -551,18 +551,33 @@ jobs:
     needs: [docs_build, build_test, smoke-tests]
     runs-on: ubuntu-latest
     steps:
-      
-      - name: "Release to the public PyPI repository"
-        uses: pyansys/actions/release-pypi-public@v3.0.1
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          twine-username: "__token__"
-          twine-token: ${{ secrets.PYPI_TOKEN }}
+          python-version: 3.9
+
+      - uses: actions/download-artifact@v3
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: "Release to GitHub"
-        uses: pyansys/actions/release-github@v3.0.1
+        uses: softprops/action-gh-release@v1
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
+          files: |
+            ./**/*.whl
+            ./**/*.tar.gz
+            ./**/*.pdf
+            ./**/*.zip
+
+      - name: Upload to Public PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
 
       - name: "Notify if fail"
         uses: skitionek/notify-microsoft-teams@master
