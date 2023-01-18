@@ -89,7 +89,7 @@ doc = [
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
     "vtk==9.2.5",
-    "sphinxcontrib-googleanalytics @ git+https://github.com/sphinx-contrib/googleanalytics.git",
+    "sphinxcontrib-googleanalytics==0.4",
 ]
 
 [tool.flit.module]
