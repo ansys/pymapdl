@@ -1580,7 +1580,7 @@ def launch_mapdl(
     Run MAPDL with shared memory parallel and specify the location of
     the Ansys binary.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/winx64/ANSYS201.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v231/ansys/bin/winx64/ANSYS231.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     Connect to an existing instance of MAPDL at IP 192.168.1.30 and
