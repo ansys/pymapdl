@@ -1,10 +1,9 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 import os
 
+from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
-
-from ansys.mapdl.core.check_version import meets_version
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -85,7 +84,7 @@ def solu_krylov(mapdl, frq):
 
 
 def test_krylov_with_point_load(mapdl):
-    if not meets_version(mapdl._server_version, (0, 5, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # Case1 : Run Krylov Pymapdl
@@ -118,7 +117,7 @@ def test_krylov_with_point_load(mapdl):
     "residual_algorithm", ["L-inf", "Linf", "L-1", "L1", "L-2", "L2"]
 )
 def test_krylov_with_pressure_load(mapdl, residual_algorithm):
-    if not meets_version(mapdl._server_version, (0, 5, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # With ramped loading
@@ -188,7 +187,7 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
 def test_non_valid_inputs_gensubspace(
     mapdl, cleared, maxQ, freq, check_ortho, error_msg
 ):
-    if not meets_version(mapdl._server_version, (0, 5, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.cdread("db", os.path.join(lib_path, "krylov_pressure_load"), "cdb")
@@ -228,7 +227,7 @@ def test_non_valid_inputs_gensubspace(
 def test_non_valid_inputs_solve(
     mapdl, cleared, freq_start, freq_end, freq_steps, ramped_load, error_msg
 ):
-    if not meets_version(mapdl._server_version, (0, 5, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.clear()
@@ -274,7 +273,7 @@ def test_non_valid_inputs_solve(
 def test_non_valid_inputs_expand(
     mapdl, return_solution, residual_computation, residual_algorithm, error_msg
 ):
-    if not meets_version(mapdl._server_version, (0, 5, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     mapdl.clear()
