@@ -1,4 +1,5 @@
 """Test xpl functionality"""
+from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
 
@@ -8,7 +9,7 @@ pytestmark = pytest.mark.skip_grpc
 
 @pytest.fixture(scope="module")
 def check_supports_extract(mapdl):
-    if mapdl._server_version < (0, 5, 0):  # 2022R1
+    if server_meets_version(mapdl._server_version, (0, 5, 0)):  # 2022R1
         pytest.skip("command not supported")
 
 
