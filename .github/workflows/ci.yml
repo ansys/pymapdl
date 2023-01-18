@@ -558,10 +558,10 @@ jobs:
 
       - uses: actions/download-artifact@v3
 
-      - name: 'Download the previously generated coverage reports'
+      - name: 'Download the HTML as a zip'
         uses: dawidd6/action-download-artifact@v2
         with:
-          name: documentation-html.zip
+          name: documentation-html
           skip_unpack: true
           github_token: ${{secrets.GITHUB_TOKEN}}
 
@@ -576,7 +576,7 @@ jobs:
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
             ./**/*.zip
-            ./*documentation-html*.zip
+            ./**/*documentation-html*.zip
 
       - name: Upload to Public PyPi
         env:
