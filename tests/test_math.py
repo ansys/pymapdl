@@ -53,7 +53,7 @@ def cube_with_damping(mapdl, cleared):
     if mapdl._distributed:
         mapdl.aux2()
         mapdl.combine("full")
-    mapdl.slashsolu()
+        mapdl.slashsolu()
 
 
 def test_ones(mm):
