@@ -3006,6 +3006,8 @@ class _MapdlCore(Commands):
 
         if self._local:
             os.remove(filename)
+        else:
+            self.slashdelete(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to into MAPDL.
@@ -3128,6 +3130,11 @@ class _MapdlCore(Commands):
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
 
+        if self._local:
+            os.remove(filename)
+        else:
+            self.slashdelete(filename)
+
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
 
@@ -3174,16 +3181,26 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        try:
-            self._path = self.inquire("", "DIRECTORY")
-        except Exception:
-            pass
+        i = 0
+        while (not self._path and i > 5) or i == 0:
+            try:
+                self._path = self.inquire("", "DIRECTORY")
+            except Exception:  # pragma: no cover
+                pass
+            i += 1
+            if not self._path:  # pragma: no cover
+                time.sleep(0.1)
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
+        else:  # pragma: no cover
+            raise IOError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -3904,25 +3921,14 @@ class _MapdlCore(Commands):
         >>> mapdl.file('/tmp/file.rst')
 
         """
-        # MAPDL always adds the "rst" extension onto the name, even if already
-        # has one, so here we simply reconstruct it.
-        filename = pathlib.Path(fname + ext)
+        fname = self._get_file_name(fname, ext, "rst")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_ = self._decompose_fname(fname)
+        return self._file(file_, ext_, **kwargs)
 
-        if not filename.exists():
-            # potential that the user is relying on the default "rst"
-            filename_rst = filename.parent / (filename.name + ".rst")
-            if not filename_rst.exists():
-                raise FileNotFoundError(f"Unable to locate {filename}")
-
-        return self._file(filename, **kwargs)
-
-    def _file(self, filename, **kwargs):
+    def _file(self, filename, extension, **kwargs):
         """Run the MAPDL ``file`` command with a proper filename."""
-        filename = pathlib.Path(filename)
-        ext = filename.suffix
-        fname = str(filename).replace(ext, "")
-        ext = ext.replace(".", "")
-        return self.run(f"FILE,{fname},{ext}", **kwargs)
+        return self.run(f"FILE,{filename},{extension}", **kwargs)
 
     @wraps(Commands.lsread)
     def use(self, *args, **kwargs):
@@ -4049,3 +4055,22 @@ class _MapdlCore(Commands):
     def launched(self):
         """Check if the MAPDL instance has been launched by PyMAPDL."""
         return self._launched
+
+    def _decompose_fname(self, fname):
+        """Decompose a file name (with or without path) into filename and extension.
+
+        Parameters
+        ----------
+        fname : str
+            File name with or without path.
+
+        Returns
+        -------
+        str
+            File name (without extension or path)
+
+        str
+            File extension (without dot)
+        """
+        fname = pathlib.Path(fname)
+        return fname.stem, fname.suffix.replace(".", "")

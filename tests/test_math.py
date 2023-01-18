@@ -2,11 +2,12 @@
 import os
 import re
 
+from ansys.tools.versioning.exceptions import VersionError
+from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
 from scipy import sparse
 
-from ansys.mapdl.core.check_version import VersionError, meets_version
 from ansys.mapdl.core.errors import ANSYSDataTypeError
 from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
@@ -50,10 +51,10 @@ def cube_with_damping(mapdl, cleared):
     mapdl.alphad(10)
     mapdl.solve()
     mapdl.save()
-    mapdl.aux2()
     if mapdl._distributed:
+        mapdl.aux2()
         mapdl.combine("full")
-    mapdl.slashsolu()
+        mapdl.slashsolu()
 
 
 def test_ones(mm):
@@ -722,7 +723,7 @@ def test_mult(mapdl, mm):
 
     rand_ = np.random.rand(100, 100)
 
-    if not meets_version(mapdl._server_version, (0, 4, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 4, 0)):
         with pytest.raises(VersionError):
             AA = mm.matrix(rand_, name="AA")
 
@@ -743,7 +744,7 @@ def test__parm(mm, mapdl):
     mat = sparse.random(sz, sz, density=0.05, format="csr")
 
     rand_ = np.random.rand(100, 100)
-    if not meets_version(mapdl._server_version, (0, 4, 0)):
+    if not server_meets_version(mapdl._server_version, (0, 4, 0)):
 
         with pytest.raises(VersionError):
             AA = mm.matrix(rand_, name="AA")

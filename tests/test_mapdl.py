@@ -1237,7 +1237,19 @@ def test_get_file_path(mapdl, tmpdir):
     fobject = tmpdir.join(fname)
     fobject.write("Dummy file for testing")
 
-    assert fname in mapdl._get_file_path(fobject)
+    assert fobject not in mapdl.list_files()
+    assert fobject not in os.listdir()
+
+    mapdl._local = True
+    fname_ = mapdl._get_file_path(fobject)
+    assert fname in fname_
+    assert fobject not in mapdl.list_files()
+    assert os.path.exists(fname_)
+
+    mapdl._local = False
+    fname_ = mapdl._get_file_path(fobject)
+    # If we are not in local, now it should have been uploaded
+    assert fname in mapdl.list_files()
 
 
 @pytest.mark.parametrize(
@@ -1416,13 +1428,13 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
-    assert fname_ in mapdl.list_files()
     # check if materials are read into the db
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
     # Reding file in remote
     fname_ = f"{fname}.{ext}"
+    mapdl.upload(fname_)
     os.remove(fname_)
     assert not os.path.exists(fname_)
     assert f"{fname}.{ext}" in mapdl.list_files()
@@ -1868,3 +1880,14 @@ def test_avoid_non_interactive(mapdl):
         assert any(["comment A" in cmd for cmd in stored_commands])
         assert all(["comment B" not in cmd for cmd in stored_commands])
         assert any(["comment C" in cmd for cmd in stored_commands])
+
+
+def test_get_file_name(mapdl):
+    file_ = "asdf/qwert/zxcv.asd"
+    assert mapdl._get_file_name(file_) == file_
+    assert mapdl._get_file_name(file_, "asdf") == file_ + ".asdf"
+    assert mapdl._get_file_name(file_, default_extension="qwer") == file_
+    assert (
+        mapdl._get_file_name(file_.replace(".asd", ""), default_extension="qwer")
+        == file_.replace(".asd", "") + ".qwer"
+    )

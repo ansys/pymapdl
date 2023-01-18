@@ -5,6 +5,7 @@ from functools import wraps
 import glob
 import io
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -16,6 +17,7 @@ import warnings
 from warnings import warn
 import weakref
 
+from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
@@ -46,7 +48,7 @@ except ImportError:  # pragma: no cover
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__, check_version
+from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -573,10 +575,7 @@ class MapdlGrpc(_MapdlCore):
         """Check if Python is local to the MAPDL instance."""
         # Verify if python has assess to the MAPDL directory.
         if self._local:
-            if self._path is None:
-                directory = self.directory
-            else:
-                directory = self._path
+            directory = self.directory
 
             if self._jobname is None:
                 jobname = self.jobname
@@ -715,7 +714,7 @@ class MapdlGrpc(_MapdlCore):
         sver = (0, 0, 0)
         verstr = self._ctrl("VERSION")
         if verstr:
-            sver = check_version.version_tuple(verstr)
+            sver = version_string_as_tuple(verstr)
         return sver
 
     def _enable_health_check(self):
@@ -1221,8 +1220,12 @@ class MapdlGrpc(_MapdlCore):
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
-                return fobj.read()
-        return self._download_as_raw(tmp_file).decode()
+                obj = fobj.read()
+        else:
+            obj = self._download_as_raw(tmp_file).decode()
+
+        self.slashdelete(tmp_file)
+        return obj
 
     def download_result(self, path=None, progress_bar=False, preference=None):
         """Download remote result files to a local directory
@@ -1390,22 +1393,14 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        # the old behaviour is to supplied the name and the extension separately.
-        # to make it easier let's going to allow names with extensions
-        basename = os.path.basename(fname)
-        if len(basename.split(".")) == 1:
-            # there is no extension in the main name.
-            if ext:
-                # if extension is an input as an option (old APDL style)
-                fname = fname + "." + ext
-            else:
-                # Using default .db
-                fname = fname + "." + "cdb"
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         kwargs.setdefault("orig_cmd", "CDREAD")
         kwargs.setdefault("cd_read_option", option.upper())
+
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs["progress_bar"])
 
         self.input(fname, **kwargs)
 
@@ -1562,9 +1557,12 @@ class MapdlGrpc(_MapdlCore):
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            delete_uploaded_files = False
+
         else:
             # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
@@ -1608,6 +1606,8 @@ class MapdlGrpc(_MapdlCore):
             # Deleting the previous files
             self.slashdelete(tmp_name)
             self.slashdelete(tmp_out)
+            if filename in self.list_files() and delete_uploaded_files:
+                self.slashdelete(filename)
 
         return output
 
@@ -1626,9 +1626,11 @@ class MapdlGrpc(_MapdlCore):
                 f"`fname` should be a full file path or name, not the directory '{fname}'."
             )
 
+        fPath = pathlib.Path(fname)
+
         fpath = os.path.dirname(fname)
-        fname = os.path.basename(fname)
-        fext = fname.split(".")[-1]
+        fname = fPath.name
+        fext = fPath.suffix
 
         # if there is no dirname, we are assuming the file is
         # in the python working directory.
@@ -1665,6 +1667,34 @@ class MapdlGrpc(_MapdlCore):
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         return filename
+
+    def _get_file_name(self, fname, ext=None, default_extension=None):
+        """Get file name from fname and extension arguments.
+
+        fname can be the full path.
+
+        Parameters
+        ----------
+        fname : str
+            File name (with our with extension). It can be a full path.
+        ext : str, optional
+            File extension, by default None
+        """
+
+        # the old behaviour is to supplied the name and the extension separately.
+        # to make it easier let's going to allow names with extensions
+
+        if ext:
+            fname = fname + "." + ext
+        else:
+            basename = os.path.basename(fname)
+
+            if len(basename.split(".")) == 1:
+                # there is no extension in the main name.
+                if default_extension:
+                    fname = fname + "." + default_extension
+
+        return fname
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -2695,24 +2725,13 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.file)
     def file(self, fname="", ext="", **kwargs):
         """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
-        filename = fname + ext
-        if self._local:  # pragma: no cover
-            out = super().file(fname, ext, **kwargs)
-        elif filename in self.list_files():
-            # this file is already remote
-            out = self._file(filename)
-        else:
-            if not os.path.isfile(filename):
-                raise FileNotFoundError(
-                    f"Unable to find '{filename}'. You may need to "
-                    "input the full path to the file."
-                )
+        # always check if file is present as the grpc and MAPDL errors
+        # are unclear
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_ = self._decompose_fname(fname)
 
-            progress_bar = kwargs.pop("progress_bar", False)
-            basename = self.upload(filename, progress_bar=progress_bar)
-            out = self._file(basename, **kwargs)
-
-        return out
+        return self._file(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.vget)
     def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
