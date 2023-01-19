@@ -6,6 +6,86 @@ scripts into PyMAPDL scripts. Ideally, all math and variable setting
 would take place within Python because APDL commands
 are less transparent and more difficult to debug.
 
+
+Command-line interface (CLI)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+From v0.64.0, you use the converter from the command line.
+After you have activated and installed the package as detailed
+in :ref:`installation`, you can use the converter from your terminal
+by using the command ``pymapdl_convert_script``. For instance:
+
+.. code:: bash
+
+    $ pymapdl_convert_script mapdl.dat -o python.py
+
+    File mapdl.dat successfully converted to python.py.
+
+You can obtain help on its usage, options and examples by typing:
+
+.. code:: bash
+
+    $ pymapdl_convert_script --help
+
+    Usage: pymapdl_convert_script [OPTIONS] FILENAME_IN
+
+    PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
+
+    USAGE:
+
+    ...
+
+The command ``pymapdl_convert_script`` uses
+:func:`convert_script() <ansys.mapdl.core.convert_script>` function
+hence this command accepts most of this function arguments.
+
+Usage
+-----
+
+You can call this function from the command interface or terminal with different
+arguments. The basic use is:
+
+.. code:: bash
+    
+    $ pymapdl_convert_script mapdl.dat -o python.py
+
+    File mapdl.dat successfully converted to python.py.
+
+which convert the ``mapdl.dat`` file to a python file called ``python.py``.
+The output argument is completely optional. If you don't specify it, it will just
+change the extension to "py".
+
+.. code:: bash
+
+    $ pymapdl_convert_script mapdl.dat
+
+    File mapdl.dat successfully converted to mapdl.py.
+
+You can use any option from
+:func:`convert_script() <ansys.mapdl.core.convert_script>` function.
+
+For example you can use ``--auto-exit`` argument to avoid exiting MAPDL
+instance after running the script.
+
+.. code:: bash
+
+    $ pymapdl_convert_script mapdl.dat --auto-exit False
+
+    File mapdl.dat successfully converted to mapdl.py.
+
+You can skip the imports using ``--add_imports``:
+
+.. code:: bash
+
+    $ pymapdl_convert_script mapdl.dat --filename_out mapdl.out --add_imports
+    False
+
+    File mapdl.dat successfully converted to mapdl.out.
+
+You can check all the options of this function by checking its help
+(``pymapdl_convert_script --help``) or the function
+:func:`convert_script() <ansys.mapdl.core.convert_script>` help.
+
 Caveats
 ~~~~~~~
 These examples only show an automatic translation of a verification
