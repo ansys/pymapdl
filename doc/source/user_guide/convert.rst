@@ -7,8 +7,8 @@ would take place within Python because APDL commands
 are less transparent and more difficult to debug.
 
 
-Command-line interface (CLI)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Command-line interface
+~~~~~~~~~~~~~~~~~~~~~~
 
 From v0.64.0, you use the converter from the command line.
 After you have activated and installed the package as detailed
@@ -21,7 +21,7 @@ by using the command ``pymapdl_convert_script``. For instance:
 
     File mapdl.dat successfully converted to python.py.
 
-You can obtain help on its usage, options and examples by typing:
+You can obtain help on its usage, options, and examples by typing:
 
 .. code:: bash
 
@@ -42,7 +42,7 @@ hence this command accepts most of this function arguments.
 Usage
 -----
 
-You can call this function from the command interface or terminal with different
+You can call this command from the terminal with different
 arguments. The basic use is:
 
 .. code:: bash
@@ -51,9 +51,9 @@ arguments. The basic use is:
 
     File mapdl.dat successfully converted to python.py.
 
-which convert the ``mapdl.dat`` file to a python file called ``python.py``.
-The output argument is completely optional. If you don't specify it, it will just
-change the extension to "py".
+which convert the ``mapdl.dat`` file to a Python file called ``python.py``.
+The output argument is completely optional. If you don't specify it,
+the output name just change the extension to ``py``.
 
 .. code:: bash
 
@@ -82,9 +82,9 @@ You can skip the imports using ``--add_imports``:
 
     File mapdl.dat successfully converted to mapdl.out.
 
-You can check all the options of this function by checking its help
-(``pymapdl_convert_script --help``) or the function
-:func:`convert_script() <ansys.mapdl.core.convert_script>` help.
+You can find more information about the possible options by checking its help
+command (``pymapdl_convert_script --help``) or the function
+:func:`convert_script() <ansys.mapdl.core.convert_script>` documentation.
 
 Caveats
 ~~~~~~~
@@ -146,7 +146,7 @@ Or, you can convert code in form of strings for later processing using the
 
 
 The script conversion functions allow some interesting arguments that can be seen in
-their respective function documentation, :func:`convert_script() <ansys.mapdl.core.convert_script>`
+their respective function documentation, :func:`convert_script() <ansys.mapdl.core.convert_script>`,
 and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`.
 Especially interesting are the keyword arguments ``add_imports``, ``comment_solve``, and
 ``print_com``.
