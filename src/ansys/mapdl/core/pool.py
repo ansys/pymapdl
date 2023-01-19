@@ -99,7 +99,7 @@ class LocalMapdlPool:
 
     Create a pool while specifying the MAPDL executable in Windows.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/win64/ANSYS212.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/winx64/ANSYS212.exe'
     >>> pool = LocalMapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
