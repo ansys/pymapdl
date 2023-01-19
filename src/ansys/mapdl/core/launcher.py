@@ -114,7 +114,7 @@ def _version_from_path(path):
     """Extract ansys version from a path.  Generally, the version of
     ANSYS is contained in the path:
 
-    C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe
+    C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe
 
     /usr/ansys_inc/v211/ansys/bin/mapdl
 
@@ -395,7 +395,7 @@ def launch_grpc(
     Run MAPDL with shared memory parallel and specify the location of
     the ansys binary.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     """
@@ -968,7 +968,7 @@ def change_default_ansys_path(exe_loc):
 
     Change default Ansys location on Windows
 
-    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
+    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/winx64/ANSYS193.exe'
     >>> launcher.change_default_ansys_path(ans_pth)
     >>> launcher.check_valid_ansys()
     True
@@ -1580,7 +1580,7 @@ def launch_mapdl(
     Run MAPDL with shared memory parallel and specify the location of
     the Ansys binary.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v231/ansys/bin/winx64/ANSYS231.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     Connect to an existing instance of MAPDL at IP 192.168.1.30 and
