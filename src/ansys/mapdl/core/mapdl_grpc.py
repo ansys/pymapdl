@@ -961,6 +961,18 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
+
+        if self._exited is None:
+            return  # Some edge cases the class object is not completely initialized but the __del__ method
+                    # is called when exiting python. So, early exit here instead an error in the following
+                    # self.directory command.
+                    # See issue #1796
+        elif self._exited:
+            # Already exited.
+            return
+        else:
+            mapdl_path = self.directory
+
         if not force:
             # lazy import here to avoid circular import
             from ansys.mapdl.core.launcher import get_start_instance
@@ -976,9 +988,6 @@ class MapdlGrpc(_MapdlCore):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        if self._exited:
-            return
-
         if save:
             try:
                 self._log.debug("Saving MAPDL database")
@@ -993,7 +1002,7 @@ class MapdlGrpc(_MapdlCore):
             if os.name == "nt":
                 self._kill_server()
             self._close_process()
-            self._remove_lock_file()
+            self._remove_lock_file(mapdl_path)
         else:
             self._kill_server()
 
