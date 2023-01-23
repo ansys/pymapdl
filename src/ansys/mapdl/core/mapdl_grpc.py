@@ -964,9 +964,9 @@ class MapdlGrpc(_MapdlCore):
 
         if self._exited is None:
             return  # Some edge cases the class object is not completely initialized but the __del__ method
-                    # is called when exiting python. So, early exit here instead an error in the following
-                    # self.directory command.
-                    # See issue #1796
+            # is called when exiting python. So, early exit here instead an error in the following
+            # self.directory command.
+            # See issue #1796
         elif self._exited:
             # Already exited.
             return
