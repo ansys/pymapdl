@@ -1088,13 +1088,13 @@ def cli(
 
     USAGE:
 
-    The main usage is:
+    This example demonstrates the main use of this tool:
 
         $ pymapdl_convert_script mapdl.dat -o python.py
 
         File mapdl.dat successfully converted to python.py.
 
-    The output argument is completely optional, in that case, it will just change the extension to "py".
+    The output argument is optional, in which case the "py" extension is used:
 
         $ pymapdl_convert_script mapdl.dat
 
