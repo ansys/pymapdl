@@ -486,8 +486,23 @@ class MapdlGrpc(_MapdlCore):
         if self._mapdl_process is None:
             return
 
-        self._stdout = self._mapdl_process.stdout.read().decode()
-        self._stderr = self._mapdl_process.stderr.read().decode()
+        self._log.debug("Reading stdout")
+        self._stdout = self._read_std(std=self._mapdl_process.stdout)
+        self._log.debug(f"Read stdout: {self._stdout[:20]}")
+
+        self._log.debug("Reading stderr")
+        self._stderr = self._read_std(std=self._mapdl_process.stderr)
+        self._log.debug(f"Read stderr: {self._stderr[:20]}")
+
+    def _read_std(self, std, timeout=0.1):
+        start = time.time()
+        lines = []
+        while True:
+            # first iteration always produces empty byte string in non-blocking mode
+            lines.append(std.readline().decode())
+            if time.time() > start + timeout:
+                break
+        return "\n".join(lines)
 
     def _check_stds(self, stdout=None, stderr=None):
         """Check the stdout and stderr for any errors."""
