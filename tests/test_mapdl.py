@@ -1655,17 +1655,28 @@ def test_get_fallback(mapdl, cleared):
 
 def test_use_uploading(mapdl, cleared, tmpdir):
     mymacrofile_name = "mymacrofile.mac"
+    msg = "My macros is being executed"
+    # Checking does not exits in remote
+    assert mymacrofile_name not in mapdl.list_files()
+
+    # Creating macro
     mymacrofile = tmpdir.join(mymacrofile_name)
     with open(mymacrofile, "w") as fid:
-        fid.write("/prep7\n/eof")
+        fid.write(f"/prep7\n/com, {msg}\n/eof")
 
-    assert mymacrofile_name not in mapdl.list_files()
+    # Uploading from local
     out = mapdl.use(mymacrofile)
     assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
     assert mymacrofile_name in mapdl.list_files()
 
     os.remove(mymacrofile)
+    assert mymacrofile not in os.listdir()
     out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
+    assert mymacrofile_name in mapdl.list_files()
+    mapdl.slashdelete(mymacrofile_name)
 
     # Raises an error.
     with pytest.raises(MapdlRuntimeError):

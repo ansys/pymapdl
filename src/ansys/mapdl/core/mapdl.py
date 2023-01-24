@@ -3930,7 +3930,7 @@ class _MapdlCore(Commands):
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
-    @wraps(Commands.lsread)
+    @wraps(Commands.use)
     def use(self, *args, **kwargs):
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
