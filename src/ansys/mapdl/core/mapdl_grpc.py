@@ -444,18 +444,12 @@ class MapdlGrpc(_MapdlCore):
                 self._log.debug("Connected")
                 break
         else:
-            self._log.debug(
-                "Reached either maximum amount of connection attempts (%d) or timeout (%f s).",
-                n_attempts,
-                timeout,
+            raise MapdlConnectionError(
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
+                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-        if not connected:
-            raise MapdlConnectionError(
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
-            )
-        else:
-            self._exited = False
+        self._exited = False
 
     def _post_mortem_checks(self):
         """Check possible reasons for not having a successful connection."""
