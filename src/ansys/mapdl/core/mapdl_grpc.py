@@ -382,7 +382,7 @@ class MapdlGrpc(_MapdlCore):
         try:
             self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
         except MapdlConnectionError as err:
-            self._post_mortem_checks()
+            # self._post_mortem_checks()
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
