@@ -114,19 +114,33 @@ FINISH
 
 
 def fake_mapdl_process(poll, stdout, stderr):
+    class MsgGenerator:
+        def __init__(self, msg, max_iters=10):
+            self.message = msg
+            self.max_iters = max_iters
+            self.iter = 0
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if self.iter < self.max_iters:
+                yield bytes(str(self.message), encoding="utf")
+            raise StopIteration
+
+        def __next__(self):
+            return self.next()
+
     class FakeBuffer:
         def __init__(self, message):
             self.message = message
-            self.i = 0
+            self.generator = MsgGenerator(message)
 
         def read(self):
             return self.message
 
         def readline(self):
-            if self.i < 10:
-                yield self.message
-            else:
-                raise StopIteration()
+            return next(self.generator)
 
     # Fake process
     class FakePopen:
