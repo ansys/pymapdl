@@ -520,9 +520,6 @@ def launch_grpc(
         )
         LOG.debug("MAPDL started in background.")
 
-    os.set_blocking(process.stdout.fileno(), False)
-    os.set_blocking(process.stderr.fileno(), False)
-
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
