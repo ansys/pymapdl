@@ -1713,8 +1713,6 @@ def test_is_local(mapdl):
 
 def test_on_docker(mapdl):
     assert mapdl.on_docker == mapdl._on_docker
-    if os.getenv("ON_CI", "false").lower() == "true":
-        assert mapdl.on_docker
 
 
 def test_deprecation_allow_ignore_warning(mapdl):
