@@ -117,9 +117,16 @@ def fake_mapdl_process(poll, stdout, stderr):
     class FakeBuffer:
         def __init__(self, message):
             self.message = message
+            self.i = 0
 
         def read(self):
             return self.message
+
+        def readline(self):
+            if self.i < 10:
+                yield self.message
+            else:
+                raise StopIteration()
 
     # Fake process
     class FakePopen:
