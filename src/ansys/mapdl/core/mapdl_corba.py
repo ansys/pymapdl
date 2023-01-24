@@ -5,7 +5,6 @@ import re
 import subprocess
 import sys
 import time
-import warnings
 import weakref
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
@@ -59,7 +58,7 @@ def launch_corba(
     run_location=None,
     jobname=None,
     nproc=None,
-    verbose=None,
+    verbose=False,
     additional_switches="",
     start_timeout=60,
     **kwargs,  # ignore extra kwargs
@@ -75,13 +74,6 @@ def launch_corba(
     """
     # Using stored parameters so launch command can be run from a
     # cached state (when launching the GUI)
-
-    if verbose is not None:  # pragma: no cover
-        warnings.warn(
-            "The ``verbose`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
-        )
 
     # can't run /BATCH in windows, so we trick it using "-b" and
     # provide a dummy input file
@@ -106,14 +98,17 @@ def launch_corba(
     if os.path.isfile(broadcast_file):
         os.remove(broadcast_file)
 
-    process = subprocess.Popen(
-        command,
-        shell=True,
-        cwd=run_location,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
+    if verbose:
+        subprocess.Popen(command, shell=True, cwd=run_location)
+    else:
+        subprocess.Popen(
+            command,
+            shell=True,
+            cwd=run_location,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
 
     # listen for broadcast file
     telapsed = 0
@@ -143,7 +138,7 @@ def launch_corba(
 
     # return CORBA key
     keyfile = os.path.join(run_location, "aaS_MapdlId.txt")
-    return open(keyfile).read(), process
+    return open(keyfile).read()
 
 
 class MapdlCorba(_MapdlCore):
@@ -162,11 +157,7 @@ class MapdlCorba(_MapdlCore):
         additional_switches='', timeout
 
     verbose : bool
-        Print all output from MAPDL to Python.  Useful for debugging.
-
-        .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
+        Print all output from MAPDL to Python.  Useful for debugging
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
@@ -184,7 +175,7 @@ class MapdlCorba(_MapdlCore):
         use_vtk=True,
         log_file=True,
         log_broadcast=False,
-        verbose=None,
+        verbose=False,
         **start_parm,
     ):
         """Open a connection to MAPDL via a CORBA interface"""
@@ -196,15 +187,6 @@ class MapdlCorba(_MapdlCore):
             log_broadcast=False,
             **start_parm,
         )
-
-        if verbose is not None:
-            warnings.warn(
-                "The ``verbose`` argument is deprecated and will be removed in a future release. "
-                "Use a logger instead. See :ref:`api_logging` for more details.",
-                DeprecationWarning,
-            )
-        elif verbose is None:
-            verbose = False
 
         self._mode = "corba"
         self._broadcast_logger = None
@@ -222,9 +204,8 @@ class MapdlCorba(_MapdlCore):
 
     def _launch(self, start_parm, verbose):
         """Launch CORBA."""
-        corba_key, process = launch_corba(verbose=verbose, **start_parm)
+        corba_key = launch_corba(verbose=verbose, **start_parm)
         self._corba_key = corba_key
-        self._mapdl_process = process
 
         orb = CORBA.ORB_init()
         self._server = orb.string_to_object(corba_key)

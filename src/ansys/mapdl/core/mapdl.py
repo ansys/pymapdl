@@ -170,10 +170,6 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
-        self._mapdl_process = None
-        self._launched = False
-        self._stderr = None
-        self._stdout = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover

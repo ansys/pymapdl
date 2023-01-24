@@ -214,7 +214,7 @@ def launch_grpc(
     additional_switches="",
     override=True,
     timeout=20,
-    verbose=None,
+    verbose=False,
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
@@ -267,10 +267,6 @@ def launch_grpc(
         Print all output when launching and running MAPDL.  Not
         recommended unless debugging the MAPDL start.  Default
         ``False``.
-
-        .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
 
     kwargs : dict
         Not used. Added to keep compatibility between Mapdl_grpc and
@@ -403,15 +399,6 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
-    if verbose is not None:
-        warnings.warn(
-            "The ``verbose`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
-        )
-    elif verbose is None:
-        verbose = False
-
     # use temporary directory if run_location is unspecified
     if run_location is None:
         run_location = create_temp_dir()
@@ -518,19 +505,20 @@ def launch_grpc(
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
 
-    if verbose:
-        print(command)
+    if verbose:  # pragma: no cover
+        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
 
-    process = subprocess.Popen(
-        command,
-        shell=os.name != "nt",
-        cwd=run_location,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env_vars,
-    )
-    LOG.debug("MAPDL started in background.")
+    else:
+        subprocess.Popen(
+            command,
+            shell=os.name != "nt",
+            cwd=run_location,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            env=env_vars,
+        )
+        LOG.debug("MAPDL started in background.")
 
     os.set_blocking(process.stdout.fileno(), False)
     os.set_blocking(process.stderr.fileno(), False)
@@ -554,7 +542,7 @@ def launch_grpc(
             f"MAPDL failed to start (No err file generated in '{run_location}')"
         )
 
-    return port, run_location, process
+    return port, run_location
 
 
 def launch_remote_mapdl(
@@ -1240,7 +1228,7 @@ def launch_mapdl(
     log_apdl=None,
     remove_temp_files=None,
     remove_temp_dir_on_exit=False,
-    verbose_mapdl=None,
+    verbose_mapdl=False,
     license_server_check=True,
     license_type=None,
     print_com=False,
@@ -1387,10 +1375,6 @@ def launch_mapdl(
         Enable printing of all output when launching and running
         MAPDL.  This should be used for debugging only as output can
         be tracked within pymapdl.  Default ``False``.
-
-        .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
@@ -1613,14 +1597,6 @@ def launch_mapdl(
         remove_temp_dir_on_exit = remove_temp_files
         remove_temp_files = None
 
-    if verbose_mapdl is not None:
-        warnings.warn(
-            "The ``verbose_mapdl`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
-        )
-        verbose_mapdl = False
-
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
 
@@ -1815,7 +1791,7 @@ def launch_mapdl(
         # configure timeout to be 90% of the wait time of the startup
         # time for Ansys.
         LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=int(start_timeout * 0.9))
+        lic_check = LicenseChecker(timeout=start_timeout * 0.9)
         lic_check.start()
 
     try:
@@ -1843,12 +1819,12 @@ def launch_mapdl(
                 **start_parm,
             )
         elif mode == "grpc":
-            port, actual_run_location, process = launch_grpc(
+            port, actual_run_location = launch_grpc(
                 port=port,
+                verbose=verbose_mapdl,
                 ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
-                verbose=verbose_mapdl,
                 **start_parm,
             )
             mapdl = MapdlGrpc(
@@ -1859,12 +1835,10 @@ def launch_mapdl(
                 set_no_abort=set_no_abort,
                 remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
-                process=process,
                 **start_parm,
             )
             if run_location is None:
                 mapdl._path = actual_run_location
-
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
@@ -1878,9 +1852,6 @@ def launch_mapdl(
     if license_server_check:
         LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
-
-    # Setting launched property
-    mapdl._launched = True
 
     return mapdl
 

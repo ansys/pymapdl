@@ -308,18 +308,18 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 # Use PyDPF to visualize the crack opening throughout the simulation as
 # an animation.
 
-temp_directory = tempfile.gettempdir()
-rst_path = mapdl.download_result(temp_directory)
-
 try:
     # ONLY IF DPF SERVER DEPLOYED WITH gRPC COMMUNICATION
     # Upload file to DPF server
+    temp_directory = tempfile.gettempdir()
+    rst_path = mapdl.download_result(temp_directory)
     dpf.connect_to_server()
     server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
     data_src = dpf.DataSources(server_file_path)
 except:
     # Using DPF locally
-    data_src = dpf.DataSources(rst_path)
+    rst = mapdl.download_result()
+    data_src = dpf.DataSources(rst)
 
 # Generate the DPF model
 model = Model(data_src)

@@ -1,5 +1,3 @@
-.. _api_logging:
-
 Logging
 =======
 To make the logging of events consistent, PyMAPDL has a specific
