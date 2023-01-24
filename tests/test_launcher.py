@@ -253,6 +253,10 @@ def test_license_type_dummy():
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(remove_temp_files=True)
