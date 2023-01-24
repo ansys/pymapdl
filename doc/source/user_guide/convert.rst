@@ -53,7 +53,7 @@ file to a Python file named ``python.py``:
     File mapdl.dat successfully converted to python.py.
 
 The output argument is completely optional. If you don't specify it,
-the PY extension is used for the file that is outputted:
+the py extension is used for the file that is outputted:
 
 .. code:: bash
 
