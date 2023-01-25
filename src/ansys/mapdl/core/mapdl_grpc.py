@@ -21,6 +21,7 @@ from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
+import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -1047,7 +1048,49 @@ class MapdlGrpc(_MapdlCore):
         self._log.debug("Killing MAPDL server")
         self._ctrl("EXIT")
 
-    def _close_process(self):  # pragma: no cover
+    def _kill_process(self):
+        """Kill process stored in self._mapdl_process"""
+        if self._mapdl_process is not None:
+            self._log.debug("Killing process using subprocess.Popen.terminate")
+            process = self._mapdl_process
+            if process.poll() is not None:
+                # process hasn't terminated
+                process.kill()
+
+    def _kill_child_processes(self, timeout=2):
+        pids = self._pids.copy()
+        pids.reverse()  # First pid is the parent, therefore start by the children (end)
+
+        for pid in pids:
+            self._kill_child_process(pid, timeout=timeout)
+
+    def _kill_child_process(self, pid, timeout=2):
+        """Kill an individual child process, given a pid."""
+        try:
+            self._log.debug(f"Killing MAPDL process: {pid}")
+            t0 = time.time()
+            while time.time() < t0 + timeout:
+                if psutil.pid_exists(pid):
+                    os.kill(pid, 9)
+                    time.sleep(0.5)
+                else:
+                    self._log.debug(f"Process {pid} killed properly.")
+                    break
+            else:
+                self._log.debug(
+                    f"Process {pid} couldn't be killed in {timeout} seconds"
+                )
+
+        except OSError:
+            self._log.debug(
+                f"Failed attempt to kill process: The process with pid {pid} does not exist. Maybe it was already killed?"
+            )
+
+        finally:
+            if not psutil.pid_exists(pid):
+                self._pids.remove(pid)
+
+    def _close_process(self, timeout=2):  # pragma: no cover
         """Close all MAPDL processes.
 
         Notes
@@ -1058,13 +1101,14 @@ class MapdlGrpc(_MapdlCore):
 
         """
         if self._local:
-            for pid in self._pids:
-                try:
-                    self._log.debug(f"Killing MAPDL process: {pid}")
-                    os.kill(pid, 9)
-                    self._pids.remove(pid)
-                except OSError:
-                    pass
+            # killing server process
+            self._kill_server()
+
+            # killing main process (subprocess)
+            self._kill_process()
+
+            # Killing child processes
+            self._kill_child_processes(timeout=timeout)
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
@@ -1074,6 +1118,8 @@ class MapdlGrpc(_MapdlCore):
         processes.
 
         """
+        self._pids = []
+
         for filename in self.list_files():
             if "cleanup" in filename:  # Linux does not seem to generate this file?
                 script = os.path.join(self.directory, filename)
@@ -1085,6 +1131,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
+
+        if not self._pids:
+            # For the cases where the cleanup file is not generated,
+            # we relay on the process.
+            parent_pid = self._mapdl_process.pid
+            try:
+                parent = psutil.Process(parent_pid)
+            except psutil.NoSuchProcess:
+                return
+            children = parent.children(recursive=True)
+
+            self._pids = [parent_pid] + [each.pid for each in children]
 
     def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.

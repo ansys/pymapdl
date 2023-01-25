@@ -2,6 +2,7 @@ from collections import namedtuple
 import os
 from pathlib import Path
 import signal
+import time
 
 import pytest
 
@@ -340,6 +341,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
+        pids_ = mapdl._pids.copy()
         mapdl.exit()
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -359,9 +361,9 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
             # verify PIDs are closed
-            # time.sleep(1)  # takes a second for the processes to shutdown
-            # for pid in mapdl._pids:
-            #     assert not check_pid(pid)
+            time.sleep(1)  # takes a second for the processes to shutdown
+            for pid in pids_:
+                assert not check_pid(pid)
 
 
 @pytest.fixture

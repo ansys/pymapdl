@@ -5,6 +5,7 @@ import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
+import psutil
 import pytest
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
@@ -1919,3 +1920,12 @@ def test_get_file_name(mapdl):
         mapdl._get_file_name(file_.replace(".asd", ""), default_extension="qwer")
         == file_.replace(".asd", "") + ".qwer"
     )
+
+
+@skip_in_cloud
+def test_cache_pids(mapdl):
+    assert mapdl._pids
+    mapdl._cache_pids()  # Recache pids
+
+    for each in mapdl._pids:
+        assert "ansys" in "".join(psutil.Process(each).cmdline())
