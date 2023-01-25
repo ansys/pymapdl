@@ -1891,3 +1891,18 @@ def test_get_file_name(mapdl):
         mapdl._get_file_name(file_.replace(".asd", ""), default_extension="qwer")
         == file_.replace(".asd", "") + ".qwer"
     )
+
+
+def test_sequence_cm_eplot(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.et(1, "FLUID116", 1, 1)
+    mapdl.type(1)
+
+    mapdl.k(0, 0, 0, 1)
+    mapdl.k(0, 1, 0, 1)
+
+    mapdl.l(1, 2)
+    mapdl.lmesh(1)
+    mapdl.esll()
+    mapdl.cm("a", "ELEM")
+    mapdl.eplot()
