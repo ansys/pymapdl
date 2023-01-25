@@ -396,10 +396,6 @@ class MapdlGrpc(_MapdlCore):
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
-    def __del__(self):
-        """Delete the instance."""
-        self.exit()
-
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
         check_valid_ip(ip)
@@ -488,7 +484,7 @@ class MapdlGrpc(_MapdlCore):
         self._stderr = self._read_std(std=self._mapdl_process.stderr)
         self._log.debug(f"Read stderr: {self._stderr[:20]}")
 
-    def _read_std(self, std, timeout=0.1):
+    def _read_std(self, std, timeout=1):
         start = time.time()
         lines = []
         while True:
@@ -1079,7 +1075,7 @@ class MapdlGrpc(_MapdlCore):
 
         """
         for filename in self.list_files():
-            if "cleanup" in filename:
+            if "cleanup" in filename:  # Linux does not seem to generate this file?
                 script = os.path.join(self.directory, filename)
                 with open(script) as f:
                     raw = f.read()
