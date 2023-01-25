@@ -321,6 +321,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         additional_switches="-smp",
+        start_timeout=30,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
