@@ -185,8 +185,6 @@ def test_launch_corba(version):
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_keyword():
-    # This test might became a way to check available licenses, which is not the purpose.
-
     checks = []
     for license_name, license_description in LICENSES.items():
         mapdl = launch_mapdl(license_type=license_name)

@@ -377,13 +377,21 @@ class MapdlGrpc(_MapdlCore):
 
         # connect and validate to the channel
         process = start_parm.pop("process", None)
-        if process:
-            self._mapdl_process = process
+        self._mapdl_process = process
+
+        # Queueing the stds
+        if self._mapdl_process:
+            self._create_process_stds_queue()
 
         try:
             self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
         except MapdlConnectionError as err:
-            # self._post_mortem_checks()
+            self._post_mortem_checks()
+            self._log.debug(
+                f"The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
@@ -396,6 +404,17 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
+
+    def _create_process_stds_queue(self, process=None):
+        from ansys.mapdl.core.launcher import (
+            _create_queue_for_std,  # Avoid circular import error
+        )
+
+        if not process:
+            process = self._mapdl_process
+
+        self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
+        self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
@@ -427,7 +446,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # This prevents a single failed connection from blocking other attempts
         connected = False
-        attempt_timeout = timeout / n_attempts
+        attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
         i = 0
@@ -441,10 +460,23 @@ class MapdlGrpc(_MapdlCore):
                 self._log.debug("Connected")
                 break
         else:
-            raise MapdlConnectionError(
+            # Check if mapdl process is alive
+            msg = (
                 f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
                 f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
+
+            if psutil.pid_exists(self._mapdl_process.pid):
+                # Process is alive
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                )
+            else:
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
+                )
 
         self._exited = False
 
@@ -455,45 +487,27 @@ class MapdlGrpc(_MapdlCore):
         if process is None or not self.is_grpc:
             return
 
-        # let's check if the subprocess is still running
-        if self._is_alive_subprocess():  # pragma: no cover
-            self._log.debug("MAPDL subprocess is dead.")
-        else:
-            self._log.debug("MAPDL subprocess is alive.")
-
         # check the stdout for any errors
         self._read_stds()
 
         self._check_stds()
 
-    def _is_alive_subprocess(self, process=None):
-        """Check if subprocess is alive"""
-        if process is None:
-            process = self._mapdl_process
-        return process.poll() is None
-
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
+        from ansys.mapdl.core.launcher import (
+            _get_std_output,  # Avoid circular import error
+        )
+
         if self._mapdl_process is None:
             return
 
         self._log.debug("Reading stdout")
-        self._stdout = self._read_std(std=self._mapdl_process.stdout)
+        self._stdout = _get_std_output(self._stdout_queue)
         self._log.debug(f"Read stdout: {self._stdout[:20]}")
 
         self._log.debug("Reading stderr")
-        self._stderr = self._read_std(std=self._mapdl_process.stderr)
+        self._stderr = _get_std_output(self._stderr_queue)
         self._log.debug(f"Read stderr: {self._stderr[:20]}")
-
-    def _read_std(self, std, timeout=1):
-        start = time.time()
-        lines = []
-        while True:
-            # first iteration always produces empty byte string in non-blocking mode
-            lines.append(std.readline().decode())
-            if time.time() > start + timeout:
-                break
-        return "\n".join(lines)
 
     def _check_stds(self, stdout=None, stderr=None):
         """Check the stdout and stderr for any errors."""
@@ -521,8 +535,7 @@ class MapdlGrpc(_MapdlCore):
             self._log.debug("MAPDL exited with errors in stderr.")
 
             # Custom errors
-            self._custom_stds_errors(errs)
-            raise MapdlConnectionError(errs)
+            self._raise_custom_stds_errors(errs)
 
     def _parse_stdout(self, stdout=None):
         """Parse the stdout for any errors."""
@@ -533,8 +546,7 @@ class MapdlGrpc(_MapdlCore):
             self._log.debug("MAPDL exited with errors in stdout.")
 
             # Custom errors
-            self._custom_stds_errors(errs)
-            raise MapdlConnectionError(errs)
+            self._raise_custom_stds_errors(errs)
 
     def _parse_std(self, std):
         # check for errors in stderr
@@ -557,7 +569,7 @@ class MapdlGrpc(_MapdlCore):
             errs = ""
         return errs
 
-    def _custom_stds_errors(self, errs_message):
+    def _raise_custom_stds_errors(self, errs_message):
         """Custom errors for stdout and stderr."""
         if "Only one usage of each socket address" in errs_message:
             raise MapdlConnectionError(
@@ -565,6 +577,9 @@ class MapdlGrpc(_MapdlCore):
                 "Only one usage of each socket address (protocol/network address/port) is normally permitted.\n"
                 f"\nFull error message:\n{errs_message.split('########',1)[0]}"
             )
+
+        else:
+            raise MapdlConnectionError(errs_message)
 
     @property
     def _channel_str(self):

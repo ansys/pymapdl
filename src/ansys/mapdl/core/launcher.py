@@ -4,10 +4,12 @@ import atexit
 from glob import glob
 import os
 import platform
+from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import warnings
 
@@ -532,9 +534,6 @@ def launch_grpc(
     )
     LOG.debug("MAPDL started in background.")
 
-    os.set_blocking(process.stdout.fileno(), False)
-    os.set_blocking(process.stderr.fileno(), False)
-
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -554,7 +553,58 @@ def launch_grpc(
             f"MAPDL failed to start (No err file generated in '{run_location}')"
         )
 
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
+
+    t0 = time.time()
+    output = ""
+
+    while time.time() < (t0 + timeout):
+        output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+
+        if "START GRPC SERVER" in output and "Server listening on" in output:
+            listening_on = output.splitlines()[-1].split(":")
+            listening_on = ":".join(listening_on[1:]).strip()
+            LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
+            break
+
+    else:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}')"
+            f"The full output is:\n\n" + output
+        )
+
+    # Ending thread
+    # Todo: Ending thread
     return port, run_location, process
+
+
+def _get_std_output(std_queue, timeout=1):
+    lines = []
+    reach_empty = False
+    t0 = time.time()
+    while (not reach_empty) or (time.time() < (t0 + timeout)):
+        try:
+            lines.append(std_queue.get_nowait().decode())
+        except Empty:
+            reach_empty = True
+
+    return lines
+
+
+def _create_queue_for_std(std):
+    """Create a queue and thread objects for a given PIPE std"""
+
+    def enqueue_output(out, queue):
+        for line in iter(out.readline, b""):
+            queue.put(line)
+        out.close()
+
+    q = Queue()
+    t = threading.Thread(target=enqueue_output, args=(std, q))
+    t.daemon = True  # thread dies with the program
+    t.start()
+
+    return q, t
 
 
 def launch_remote_mapdl(
