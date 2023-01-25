@@ -396,10 +396,6 @@ class MapdlGrpc(_MapdlCore):
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
-    def __del__(self):
-        """Delete the instance."""
-        self.exit()
-
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
         check_valid_ip(ip)
