@@ -1893,8 +1893,9 @@ def test_get_file_name(mapdl):
     )
 
 
-def test_sequence_cm_eplot(mapdl, cleared):
+def test_sequence_cm_eplot(mapdl):
     with mapdl.non_interactive:
+        mapdl.clear()
         mapdl.prep7()
         mapdl.et(1, "FLUID116", 1, 1)
         mapdl.type(1)
@@ -1905,6 +1906,6 @@ def test_sequence_cm_eplot(mapdl, cleared):
         mapdl.l(1, 2)
         mapdl.lmesh(1)
         mapdl.esll()
-    mapdl.cm("a", "ELEM")
+        mapdl.cm("a", "ELEM")
     mapdl.eplot(vtk=True, show_node_numbering=True, background="w", color="b")
     assert mapdl._is_alive_subprocess()
