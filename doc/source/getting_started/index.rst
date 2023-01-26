@@ -22,6 +22,8 @@ For more information on getting a licensed copy of Ansys, visit
    contribution
 
 
+.. _installation:
+
 ************
 Installation
 ************
