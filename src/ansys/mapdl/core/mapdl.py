@@ -3930,7 +3930,7 @@ class _MapdlCore(Commands):
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
-    @wraps(Commands.lsread)
+    @wraps(Commands.use)
     def use(self, *args, **kwargs):
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
@@ -4024,6 +4024,8 @@ class _MapdlCore(Commands):
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
         # self.get_mapdl_envvar("ON_DOCKER") # for later
+        if not self.is_grpc:  # pragma: no cover
+            return False
 
         if self.platform == "linux":
             self.sys(
@@ -4032,12 +4034,17 @@ class _MapdlCore(Commands):
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
 
-        if self.is_grpc and not self.is_local:
-            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        if not self.is_local:
+            sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
+
         else:  # pragma: no cover
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
-                return f.read().strip() == "true"
+                sys_output = f.read().strip()
+
+        self._log.debug(f"The output of sys command is: '{sys_output}'.")
+        self.slashdelete("__outputcmd__.txt")  # cleaning
+        return sys_output == "true"
 
     @property
     def on_docker(self):

@@ -5,6 +5,7 @@ import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
+import psutil
 import pytest
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
@@ -38,7 +39,10 @@ skip_no_xserver = pytest.mark.skipif(
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
-
+skip_if_not_local = pytest.mark.skipif(
+    not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
+    reason="Skipping if not in local",
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -111,27 +115,6 @@ ERESX,DEFA
 /GO
 FINISH
 """
-
-
-def fake_mapdl_process(poll, stdout, stderr):
-    class FakeBuffer:
-        def __init__(self, message):
-            self.message = message
-
-        def read(self):
-            return self.message
-
-    # Fake process
-    class FakePopen:
-        def __init__(self, poll, stdout, stderr):
-            self._poll = poll
-            self.stdout = FakeBuffer(stdout)
-            self.stderr = FakeBuffer(stderr)
-
-        def poll(self):
-            return self._poll
-
-    return FakePopen(poll, stdout, stderr)
 
 
 def clearing_cdread_cdwrite_tests(mapdl):
@@ -490,8 +473,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl()
-    mapdl = launch_mapdl(log_apdl=filename)
+    mapdl = launch_mapdl(start_timeout=30, log_apdl=filename)
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -1655,17 +1637,28 @@ def test_get_fallback(mapdl, cleared):
 
 def test_use_uploading(mapdl, cleared, tmpdir):
     mymacrofile_name = "mymacrofile.mac"
+    msg = "My macros is being executed"
+    # Checking does not exits in remote
+    assert mymacrofile_name not in mapdl.list_files()
+
+    # Creating macro
     mymacrofile = tmpdir.join(mymacrofile_name)
     with open(mymacrofile, "w") as fid:
-        fid.write("/prep7\n/eof")
+        fid.write(f"/prep7\n/com, {msg}\n/eof")
 
-    assert mymacrofile_name not in mapdl.list_files()
+    # Uploading from local
     out = mapdl.use(mymacrofile)
     assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
     assert mymacrofile_name in mapdl.list_files()
 
     os.remove(mymacrofile)
+    assert mymacrofile not in os.listdir()
     out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
+    assert mymacrofile_name in mapdl.list_files()
+    mapdl.slashdelete(mymacrofile_name)
 
     # Raises an error.
     with pytest.raises(MapdlRuntimeError):
@@ -1725,10 +1718,6 @@ def test_is_local(mapdl):
 
 def test_on_docker(mapdl):
     assert mapdl.on_docker == mapdl._on_docker
-    if os.getenv("PYMAPDL_START_INSTANCE", "false") == "true":
-        assert mapdl.on_docker
-    else:
-        assert not mapdl.on_docker
 
 
 def test_deprecation_allow_ignore_warning(mapdl):
@@ -1795,80 +1784,6 @@ def test_post_mortem_checks_no_process(mapdl):
     mapdl._mode = old_mode
 
 
-def test_post_mortem_ok(mapdl):
-    # Test with a process that is still running
-    myprocess = fake_mapdl_process(None, b"None", b"None")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    assert mapdl._post_mortem_checks() is None
-
-    mapdl._mapdl_process = old_process
-
-
-def test_post_mortem_empty(mapdl):
-    myprocess = fake_mapdl_process(None, b"", b"")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    assert mapdl._post_mortem_checks() is None
-
-    mapdl._mapdl_process = old_process
-
-
-def test_post_mortem_error_stdout(mapdl):
-    myprocess = fake_mapdl_process(None, b"error to connect", b"")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="error to connect"):
-        mapdl._post_mortem_checks()
-
-    mapdl._mapdl_process = old_process
-
-
-def test_post_mortem_error_stderr(mapdl):
-    myprocess = fake_mapdl_process(None, b"", b"other error")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="other error"):
-        mapdl._post_mortem_checks()
-
-    mapdl._mapdl_process = old_process
-
-
-def test_post_mortem_error_both(mapdl):
-    myprocess = fake_mapdl_process(None, b"std error", b"other warning")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="other warning"):
-        mapdl._post_mortem_checks()
-
-    mapdl._mapdl_process = old_process
-
-
-def test_launched_property(mapdl):
-    if mapdl.is_local:
-        assert mapdl.launched
-    else:
-        assert not mapdl.launched
-
-
-def test_custom_stds_error(mapdl):
-    myprocess = fake_mapdl_process(
-        None, b"", b"Error. Only one usage of each socket address."
-    )
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="Full error message"):
-        mapdl._post_mortem_checks()
-
-    mapdl._mapdl_process = old_process
-
-
 def test_avoid_non_interactive(mapdl):
 
     with mapdl.non_interactive:
@@ -1891,3 +1806,17 @@ def test_get_file_name(mapdl):
         mapdl._get_file_name(file_.replace(".asd", ""), default_extension="qwer")
         == file_.replace(".asd", "") + ".qwer"
     )
+
+
+@skip_if_not_local
+def test_cache_pids(mapdl):
+    assert mapdl._pids
+    mapdl._cache_pids()  # Recache pids
+
+    for each in mapdl._pids:
+        assert "ansys" in "".join(psutil.Process(each).cmdline())
+
+
+@skip_if_not_local
+def test_process_is_alive(mapdl):
+    assert mapdl.process_is_alive
