@@ -561,7 +561,7 @@ def launch_grpc(
 
 
 def _check_process_is_alive(process, run_location):
-    if process.poll() is not None:
+    if process.poll() is not None:  # pragma: no cover
         raise MapdlDidNotStart(
             f"MAPDL process died.\nCheck the run location: '{run_location}')."
         )

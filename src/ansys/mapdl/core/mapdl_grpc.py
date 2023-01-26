@@ -385,7 +385,7 @@ class MapdlGrpc(_MapdlCore):
 
         try:
             self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
-        except MapdlConnectionError as err:
+        except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
             self._log.debug(
                 f"The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
@@ -459,7 +459,7 @@ class MapdlGrpc(_MapdlCore):
             if connected:
                 self._log.debug("Connected")
                 break
-        else:
+        else:  # pragma: no cover
             # Check if mapdl process is alive
             msg = (
                 f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
