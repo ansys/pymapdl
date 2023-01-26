@@ -588,7 +588,7 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
-            ./**/*.zip
+            ./**/ansys-mapdl-core*.zip
 
       - name: Upload to Public PyPi
         env:
