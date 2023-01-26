@@ -523,6 +523,7 @@ def launch_grpc(
     if verbose:
         print(command)
 
+    LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
         shell=os.name != "nt",
@@ -532,8 +533,41 @@ def launch_grpc(
         stderr=subprocess.PIPE,
         env=env_vars,
     )
-    LOG.debug("MAPDL started in background.")
 
+    LOG.debug("Generating queue object for stdout")
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
+
+    # Checking connection
+    try:
+        LOG.debug("Checking process is alive")
+        _check_process_is_alive(process, run_location)
+
+        LOG.debug("Checking file error is created")
+        _check_file_error_created(run_location, timeout)
+
+        if os.name == "posix":
+            LOG.debug("Checking if gRPC server is alive.")
+            _check_server_is_alive(stdout_queue, run_location, timeout)
+
+    except MapdlDidNotStart as e:
+        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        raise MapdlDidNotStart(
+            e.message + "\n\n" f"The full terminal output is:\n\n" + terminal_output
+        ) from e
+
+    # Ending thread
+    # Todo: Ending queue thread
+    return port, run_location, process
+
+
+def _check_process_is_alive(process, run_location):
+    if process.poll() is not None:
+        raise MapdlDidNotStart(
+            f"MAPDL process died.\nCheck the run location: '{run_location}')."
+        )
+
+
+def _check_file_error_created(run_location, timeout):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -550,40 +584,39 @@ def launch_grpc(
 
     if not has_ans:
         raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')"
+            f"MAPDL failed to start (No err file generated in '{run_location}')."
         )
 
-    stdout_queue, _ = _create_queue_for_std(process.stdout)
 
+def _check_server_is_alive(stdout_queue, run_location, timeout):
     t0 = time.time()
-    output = ""
     empty_attemps = 3
     empty_i = 0
+    terminal_output = ""
 
     while time.time() < (t0 + timeout):
-        output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
 
-        if not output and empty_i < empty_attemps:
+        if not terminal_output and empty_i < empty_attemps:
             # For stability reasons.
             empty_i += 1
             time.sleep(0.1)
             continue
 
-        if "START GRPC SERVER" in output and "Server listening on" in output:
-            listening_on = output.splitlines()[-1].split(":")
+        if (
+            "START GRPC SERVER" in terminal_output
+            and "Server listening on" in terminal_output
+        ):
+            listening_on = terminal_output.splitlines()[-1].split(":")
             listening_on = ":".join(listening_on[1:]).strip()
             LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
             break
 
     else:
         raise MapdlDidNotStart(
-            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}')"
-            f"The full output is:\n\n" + output
+            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
+            f"The full terminal output is:\n\n" + terminal_output
         )
-
-    # Ending thread
-    # Todo: Ending thread
-    return port, run_location, process
 
 
 def _get_std_output(std_queue, timeout=1):
