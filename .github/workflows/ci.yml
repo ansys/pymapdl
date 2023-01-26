@@ -429,6 +429,8 @@ jobs:
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      RUN_LOCAL: true
 
     steps:
       - name: "Install Git and checkout project"
@@ -480,7 +482,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -v -k "not test_database and not test_dpf" \
             --durations=10 \
-            --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
+            --maxfail=10 --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
             --cov=ansys.mapdl.core --cov-report=xml:ubuntu-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
