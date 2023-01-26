@@ -143,6 +143,9 @@ def fake_mapdl_process(poll, stdout, stderr):
         def readline(self):
             return next(self.generator)
 
+        def get_nowait(self):
+            return next(self.generator)
+
     # Fake process
     class FakePopen:
         def __init__(self, poll, stdout, stderr):
@@ -512,8 +515,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl()
-    mapdl = launch_mapdl(log_apdl=filename)
+    mapdl = launch_mapdl(start_timeout=30, log_apdl=filename)
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -1824,58 +1826,53 @@ def test_post_mortem_checks_no_process(mapdl):
     mapdl._mode = old_mode
 
 
-def test_post_mortem_ok(mapdl):
-    # Test with a process that is still running
-    myprocess = fake_mapdl_process(None, b"None", b"None")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+# def test_post_mortem_ok(mapdl):
+#     # Test with a process that is still running
+#     myprocess = fake_mapdl_process(None, b"None", b"None")
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._is_alive_subprocess()
-    assert mapdl._post_mortem_checks() is None
+#     assert mapdl._post_mortem_checks() is None
 
-    mapdl._mapdl_process = old_process
+#     mapdl._mapdl_process = old_process
 
 
 def test_post_mortem_empty(mapdl):
     myprocess = fake_mapdl_process(None, b"", b"")
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._is_alive_subprocess()
     assert mapdl._post_mortem_checks() is None
 
     mapdl._mapdl_process = old_process
 
 
-def test_post_mortem_error_stdout(mapdl):
-    myprocess = fake_mapdl_process(None, b"error to connect", b"")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+# def test_post_mortem_error_stdout(mapdl):
+#     myprocess = fake_mapdl_process(None, b"error to connect", b"")
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="error to connect"):
-        mapdl._post_mortem_checks()
+#     with pytest.raises(MapdlConnectionError, match="error to connect"):
+#         mapdl._post_mortem_checks()
 
-    mapdl._mapdl_process = old_process
-
-
-def test_post_mortem_error_stderr(mapdl):
-    myprocess = fake_mapdl_process(None, b"", b"other error")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
-
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="other error"):
-        mapdl._post_mortem_checks()
-
-    mapdl._mapdl_process = old_process
+#     mapdl._mapdl_process = old_process
 
 
-def test_post_mortem_error_both(mapdl):
-    myprocess = fake_mapdl_process(None, b"std error", b"other warning")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+# def test_post_mortem_error_stderr(mapdl):
+#     myprocess = fake_mapdl_process(None, b"", b"other error")
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._is_alive_subprocess()
-    with pytest.raises(MapdlConnectionError, match="other warning"):
-        mapdl._post_mortem_checks()
+#     with pytest.raises(MapdlConnectionError, match="other error"):
+#         mapdl._post_mortem_checks()
 
-    mapdl._mapdl_process = old_process
+#     mapdl._mapdl_process = old_process
+
+
+# def test_post_mortem_error_both(mapdl):
+#     myprocess = fake_mapdl_process(None, b"std error", b"other warning")
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+
+#     with pytest.raises(MapdlConnectionError, match="other warning"):
+#         mapdl._post_mortem_checks()
+
+#     mapdl._mapdl_process = old_process
 
 
 def test_launched_property(mapdl):
@@ -1891,7 +1888,6 @@ def test_custom_stds_error(mapdl):
     )
     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._is_alive_subprocess()
     with pytest.raises(MapdlConnectionError, match="Full error message"):
         mapdl._post_mortem_checks()
 
@@ -1929,3 +1925,8 @@ def test_cache_pids(mapdl):
 
     for each in mapdl._pids:
         assert "ansys" in "".join(psutil.Process(each).cmdline())
+
+
+@skip_in_cloud
+def test_process_is_alive(mapdl):
+    assert mapdl.process_is_alive

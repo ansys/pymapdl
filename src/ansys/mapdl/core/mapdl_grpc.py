@@ -480,6 +480,19 @@ class MapdlGrpc(_MapdlCore):
 
         self._exited = False
 
+    def _is_alive_subprocess(self):
+        """Returns:
+        * True if the PID is alive.
+        * False if it is not.
+        * None if there was no process
+        """
+        if self._mapdl_process:
+            return psutil.pid_exists(self._mapdl_process.pid)
+
+    @property
+    def process_is_alive(self):
+        return self._is_alive_subprocess()
+
     def _post_mortem_checks(self):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
@@ -551,6 +564,9 @@ class MapdlGrpc(_MapdlCore):
     def _parse_std(self, std):
         # check for errors in stderr
         # split the stderr into groups
+        if isinstance(std, list):
+            std = "\n".join(std)
+            std = std.replace("\n\n", "\n")
         groups = std.split("\r\n\r\n")
         errs = []
 

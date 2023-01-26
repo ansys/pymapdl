@@ -361,7 +361,7 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
             # verify PIDs are closed
-            time.sleep(1)  # takes a second for the processes to shutdown
+            time.sleep(2)  # takes a second for the processes to shutdown
             for pid in pids_:
                 assert not check_pid(pid)
 
