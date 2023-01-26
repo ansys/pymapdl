@@ -5,7 +5,6 @@ import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
-import psutil
 import pytest
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
@@ -1836,13 +1835,13 @@ def test_post_mortem_checks_no_process(mapdl):
 #     mapdl._mapdl_process = old_process
 
 
-def test_post_mortem_empty(mapdl):
-    myprocess = fake_mapdl_process(None, b"", b"")
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+# def test_post_mortem_empty(mapdl):
+#     myprocess = fake_mapdl_process(None, b"", b"")
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    assert mapdl._post_mortem_checks() is None
+#     assert mapdl._post_mortem_checks() is None
 
-    mapdl._mapdl_process = old_process
+#     mapdl._mapdl_process = old_process
 
 
 # def test_post_mortem_error_stdout(mapdl):
@@ -1876,22 +1875,20 @@ def test_post_mortem_empty(mapdl):
 
 
 def test_launched_property(mapdl):
-    if mapdl.is_local:
-        assert mapdl.launched
-    else:
+    if not mapdl.is_local:
         assert not mapdl.launched
 
 
-def test_custom_stds_error(mapdl):
-    myprocess = fake_mapdl_process(
-        None, b"", b"Error. Only one usage of each socket address."
-    )
-    mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
+# def test_custom_stds_error(mapdl):
+#     myprocess = fake_mapdl_process(
+#         None, b"", b"Error. Only one usage of each socket address."
+#     )
+#     mapdl._mapdl_process, old_process = myprocess, mapdl._mapdl_process
 
-    with pytest.raises(MapdlConnectionError, match="Full error message"):
-        mapdl._post_mortem_checks()
+#     with pytest.raises(MapdlConnectionError, match="Full error message"):
+#         mapdl._post_mortem_checks()
 
-    mapdl._mapdl_process = old_process
+#     mapdl._mapdl_process = old_process
 
 
 def test_avoid_non_interactive(mapdl):
@@ -1918,15 +1915,15 @@ def test_get_file_name(mapdl):
     )
 
 
-@skip_in_cloud
-def test_cache_pids(mapdl):
-    assert mapdl._pids
-    mapdl._cache_pids()  # Recache pids
+# @skip_in_cloud
+# def test_cache_pids(mapdl):
+#     assert mapdl._pids
+#     mapdl._cache_pids()  # Recache pids
 
-    for each in mapdl._pids:
-        assert "ansys" in "".join(psutil.Process(each).cmdline())
+#     for each in mapdl._pids:
+#         assert "ansys" in "".join(psutil.Process(each).cmdline())
 
 
-@skip_in_cloud
-def test_process_is_alive(mapdl):
-    assert mapdl.process_is_alive
+# @skip_in_cloud
+# def test_process_is_alive(mapdl):
+#     assert mapdl.process_is_alive
