@@ -4,10 +4,12 @@ import atexit
 from glob import glob
 import os
 import platform
+from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import warnings
 
@@ -94,7 +96,7 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default
+    # gcc is installed by default except when on docker.
     proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
@@ -521,6 +523,7 @@ def launch_grpc(
     if verbose:
         print(command)
 
+    LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
         shell=os.name != "nt",
@@ -530,8 +533,41 @@ def launch_grpc(
         stderr=subprocess.PIPE,
         env=env_vars,
     )
-    LOG.debug("MAPDL started in background.")
 
+    LOG.debug("Generating queue object for stdout")
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
+
+    # Checking connection
+    try:
+        LOG.debug("Checking process is alive")
+        _check_process_is_alive(process, run_location)
+
+        LOG.debug("Checking file error is created")
+        _check_file_error_created(run_location, timeout)
+
+        if os.name == "posix":
+            LOG.debug("Checking if gRPC server is alive.")
+            _check_server_is_alive(stdout_queue, run_location, timeout)
+
+    except MapdlDidNotStart as e:
+        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        raise MapdlDidNotStart(
+            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
+        ) from e
+
+    # Ending thread
+    # Todo: Ending queue thread
+    return port, run_location, process
+
+
+def _check_process_is_alive(process, run_location):
+    if process.poll() is not None:  # pragma: no cover
+        raise MapdlDidNotStart(
+            f"MAPDL process died.\nCheck the run location: '{run_location}')."
+        )
+
+
+def _check_file_error_created(run_location, timeout):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -548,10 +584,73 @@ def launch_grpc(
 
     if not has_ans:
         raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')"
+            f"MAPDL failed to start (No err file generated in '{run_location}')."
         )
 
-    return port, run_location, process
+
+def _check_server_is_alive(stdout_queue, run_location, timeout):
+    t0 = time.time()
+    empty_attemps = 3
+    empty_i = 0
+    terminal_output = ""
+
+    while time.time() < (t0 + timeout):
+        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+
+        if not terminal_output and empty_i < empty_attemps:
+            # For stability reasons.
+            empty_i += 1
+            time.sleep(0.1)
+            continue
+
+        if (
+            "START GRPC SERVER" in terminal_output
+            and "Server listening on" in terminal_output
+        ):
+            listening_on = terminal_output.splitlines()[-1].split(":")
+            listening_on = ":".join(listening_on[1:]).strip()
+            LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
+            break
+
+    else:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
+            f"The full terminal output is:\n\n" + terminal_output
+        )
+
+
+def _get_std_output(std_queue, timeout=1):
+    lines = []
+    reach_empty = False
+    t0 = time.time()
+    while (not reach_empty) or (time.time() < (t0 + timeout)):
+        try:
+            lines.append(std_queue.get_nowait().decode())
+        except Empty:
+            reach_empty = True
+
+    return lines
+
+
+def _create_queue_for_std(std):
+    """Create a queue and thread objects for a given PIPE std"""
+
+    def enqueue_output(out, queue):
+        try:
+            for line in iter(out.readline, b""):
+                queue.put(line)
+            out.close()
+        except ValueError:
+            # When killing main process, a ValueError is show:
+            # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
+            pass
+
+    q = Queue()
+    t = threading.Thread(target=enqueue_output, args=(std, q))
+    t.daemon = True  # thread dies with the program
+    t.start()
+
+    return q, t
 
 
 def launch_remote_mapdl(
@@ -1809,10 +1908,8 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check:
-        # configure timeout to be 90% of the wait time of the startup
-        # time for Ansys.
         LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=int(start_timeout * 0.9))
+        lic_check = LicenseChecker(timeout=start_timeout)
         lic_check.start()
 
     try:
