@@ -557,9 +557,17 @@ def launch_grpc(
 
     t0 = time.time()
     output = ""
+    empty_attemps = 3
+    empty_i = 0
 
     while time.time() < (t0 + timeout):
         output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+
+        if not output and empty_i < empty_attemps:
+            # For stability reasons.
+            empty_i += 1
+            time.sleep(0.1)
+            continue
 
         if "START GRPC SERVER" in output and "Server listening on" in output:
             listening_on = output.splitlines()[-1].split(":")
