@@ -337,13 +337,9 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        pids_ = mapdl._pids.copy()
         mapdl.exit()
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
-
-        # if mapdl._local:
-        #     assert not os.path.isfile(mapdl._lockfile)
 
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
@@ -355,11 +351,6 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
-
-            # verify PIDs are closed
-            # time.sleep(2)  # takes a second for the processes to shutdown
-            # for pid in pids_:
-            #     assert not check_pid(pid)
 
 
 @pytest.fixture

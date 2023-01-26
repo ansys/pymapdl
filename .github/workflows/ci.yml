@@ -411,6 +411,8 @@ jobs:
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      RUN_LOCAL: true
 
     steps:
       - name: "Install Git and checkout project"

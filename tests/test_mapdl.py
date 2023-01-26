@@ -5,6 +5,7 @@ import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
+import psutil
 import pytest
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
@@ -38,7 +39,10 @@ skip_no_xserver = pytest.mark.skipif(
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
-
+skip_if_not_local = pytest.mark.skipif(
+    not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
+    reason="Skipping if not in local",
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -1915,15 +1919,15 @@ def test_get_file_name(mapdl):
     )
 
 
-# @skip_in_cloud
-# def test_cache_pids(mapdl):
-#     assert mapdl._pids
-#     mapdl._cache_pids()  # Recache pids
+@skip_if_not_local
+def test_cache_pids(mapdl):
+    assert mapdl._pids
+    mapdl._cache_pids()  # Recache pids
 
-#     for each in mapdl._pids:
-#         assert "ansys" in "".join(psutil.Process(each).cmdline())
+    for each in mapdl._pids:
+        assert "ansys" in "".join(psutil.Process(each).cmdline())
 
 
-# @skip_in_cloud
-# def test_process_is_alive(mapdl):
-#     assert mapdl.process_is_alive
+@skip_if_not_local
+def test_process_is_alive(mapdl):
+    assert mapdl.process_is_alive

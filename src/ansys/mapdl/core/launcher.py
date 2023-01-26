@@ -96,7 +96,7 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default
+    # gcc is installed by default except when on docker.
     proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
@@ -550,9 +550,9 @@ def launch_grpc(
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
     except MapdlDidNotStart as e:
-        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
         raise MapdlDidNotStart(
-            e.message + "\n\n" f"The full terminal output is:\n\n" + terminal_output
+            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
         ) from e
 
     # Ending thread
