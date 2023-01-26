@@ -44,6 +44,7 @@ Fortran
 FSW
 Getting Started with PyMAPDL
 Gmsh
+GUI
 hexahedral
 hostname
 hyperelasticity
@@ -62,8 +63,8 @@ Linux
 MAPDL
 mater
 MATLAB
-Matplotlib
 matplotlib
+Matplotlib
 mesher
 midside
 Mises
@@ -93,6 +94,7 @@ prony
 Prony
 Pseudotime
 Puri
+py
 pyansys
 PyAnsys
 PyDPF-Core

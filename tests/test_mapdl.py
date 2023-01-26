@@ -5,6 +5,7 @@ import time
 
 from ansys.mapdl.reader import examples
 import numpy as np
+import psutil
 import pytest
 from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
@@ -14,6 +15,7 @@ from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -37,7 +39,10 @@ skip_no_xserver = pytest.mark.skipif(
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
-
+skip_if_not_local = pytest.mark.skipif(
+    not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
+    reason="Skipping if not in local",
+)
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -468,8 +473,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl()
-    mapdl = launch_mapdl(log_apdl=filename)
+    mapdl = launch_mapdl(start_timeout=30, log_apdl=filename)
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -1215,7 +1219,19 @@ def test_get_file_path(mapdl, tmpdir):
     fobject = tmpdir.join(fname)
     fobject.write("Dummy file for testing")
 
-    assert fname in mapdl._get_file_path(fobject)
+    assert fobject not in mapdl.list_files()
+    assert fobject not in os.listdir()
+
+    mapdl._local = True
+    fname_ = mapdl._get_file_path(fobject)
+    assert fname in fname_
+    assert fobject not in mapdl.list_files()
+    assert os.path.exists(fname_)
+
+    mapdl._local = False
+    fname_ = mapdl._get_file_path(fobject)
+    # If we are not in local, now it should have been uploaded
+    assert fname in mapdl.list_files()
 
 
 @pytest.mark.parametrize(
@@ -1394,13 +1410,13 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
-    assert fname_ in mapdl.list_files()
     # check if materials are read into the db
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
     # Reding file in remote
     fname_ = f"{fname}.{ext}"
+    mapdl.upload(fname_)
     os.remove(fname_)
     assert not os.path.exists(fname_)
     assert f"{fname}.{ext}" in mapdl.list_files()
@@ -1621,20 +1637,31 @@ def test_get_fallback(mapdl, cleared):
 
 def test_use_uploading(mapdl, cleared, tmpdir):
     mymacrofile_name = "mymacrofile.mac"
+    msg = "My macros is being executed"
+    # Checking does not exits in remote
+    assert mymacrofile_name not in mapdl.list_files()
+
+    # Creating macro
     mymacrofile = tmpdir.join(mymacrofile_name)
     with open(mymacrofile, "w") as fid:
-        fid.write("/prep7\n/eof")
+        fid.write(f"/prep7\n/com, {msg}\n/eof")
 
-    assert mymacrofile_name not in mapdl.list_files()
+    # Uploading from local
     out = mapdl.use(mymacrofile)
     assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
     assert mymacrofile_name in mapdl.list_files()
 
     os.remove(mymacrofile)
+    assert mymacrofile not in os.listdir()
     out = mapdl.use(mymacrofile)
+    assert f"USE MACRO FILE  {mymacrofile_name}" in out
+    assert msg in out
+    assert mymacrofile_name in mapdl.list_files()
+    mapdl.slashdelete(mymacrofile_name)
 
     # Raises an error.
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.use("myinexistentmacro.mac")
 
     # Raise an error
@@ -1691,10 +1718,6 @@ def test_is_local(mapdl):
 
 def test_on_docker(mapdl):
     assert mapdl.on_docker == mapdl._on_docker
-    if os.getenv("PYMAPDL_START_INSTANCE", "false") == "true":
-        assert mapdl.on_docker
-    else:
-        assert not mapdl.on_docker
 
 
 def test_deprecation_allow_ignore_warning(mapdl):
@@ -1714,3 +1737,86 @@ def test_deprecation_allow_ignore_errors_mapping(mapdl):
 
     mapdl.ignore_errors = False
     assert mapdl.allow_ignore == mapdl.ignore_errors
+
+
+def test_check_stds(mapdl):
+    mapdl._stdout = "everything is going ok"
+    mapdl._check_stds()
+
+    mapdl._stdout = "one error"
+    with pytest.raises(MapdlConnectionError, match="one error"):
+        mapdl._check_stds()
+
+    mapdl._stderr = ""
+    mapdl._stdout = None  # resetting
+    mapdl._check_stds()
+
+    mapdl._stderr = "my error"
+    with pytest.raises(MapdlConnectionError, match="my error"):
+        mapdl._check_stds()
+
+    # priority goes to stderr
+    mapdl._stdout = "one error"
+    mapdl._stderr = "my error"
+    with pytest.raises(MapdlConnectionError, match="my error"):
+        mapdl._check_stds()
+
+
+def test_post_mortem_checks_no_process(mapdl):
+    # Early exit
+    old_process = mapdl._mapdl_process
+    old_mode = mapdl._mode
+
+    mapdl._mapdl_process = None
+    assert mapdl._post_mortem_checks() is None
+    assert mapdl._read_stds() is None
+
+    mapdl._mapdl_process = True
+    mapdl._mode = "console"
+    assert mapdl._post_mortem_checks() is None
+
+    # No process
+    mapdl._mapdl_process = None
+    mapdl._mode = "grpc"
+    assert mapdl._read_stds() is None
+
+    mapdl._mapdl_process = old_process
+    mapdl._mode = old_mode
+
+
+def test_avoid_non_interactive(mapdl):
+
+    with mapdl.non_interactive:
+        mapdl.com("comment A")
+        mapdl.com("comment B", avoid_non_interactive=True)
+        mapdl.com("comment C")
+
+        stored_commands = mapdl._stored_commands
+        assert any(["comment A" in cmd for cmd in stored_commands])
+        assert all(["comment B" not in cmd for cmd in stored_commands])
+        assert any(["comment C" in cmd for cmd in stored_commands])
+
+
+def test_get_file_name(mapdl):
+    file_ = "asdf/qwert/zxcv.asd"
+    assert mapdl._get_file_name(file_) == file_
+    assert mapdl._get_file_name(file_, "asdf") == file_ + ".asdf"
+    assert mapdl._get_file_name(file_, default_extension="qwer") == file_
+    assert (
+        mapdl._get_file_name(file_.replace(".asd", ""), default_extension="qwer")
+        == file_.replace(".asd", "") + ".qwer"
+    )
+
+
+@skip_if_not_local
+def test_cache_pids(mapdl):
+    assert mapdl._pids
+    mapdl._cache_pids()  # Recache pids
+
+    for each in mapdl._pids:
+        assert "ansys" in "".join(psutil.Process(each).cmdline())
+
+
+@skip_if_not_local
+def test_process_is_alive(mapdl):
+    assert mapdl.process_is_alive

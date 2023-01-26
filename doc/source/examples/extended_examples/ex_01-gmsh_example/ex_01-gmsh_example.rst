@@ -27,7 +27,7 @@ Requirements
 ------------
 You must have Gmsh installed. You can install it using ``pip``:
 
-.. code-block:: 
+.. code-block:: console
 
     pip install gmsh
 

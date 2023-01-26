@@ -10,26 +10,26 @@ APDL parameters can be retrieved from and instance of :class:`Mapdl
 MAPDL's :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to
 populate a parameter, you can then access the parameter with code:
 
-.. code:: python
+.. code:: pycon
 
    >>> from ansys.mapdl.core import launch_mapdl
    >>> mapdl = launch_mapdl()
-   >>> mapdl.get('DEF_Y', 'NODE' , 2, 'U' ,'Y')
-   >>> mapdl.parameters['DEF_Y']
+   >>> mapdl.get("DEF_Y", "NODE", 2, "U", "Y")
+   >>> mapdl.parameters["DEF_Y"]
 
 You can also set both scalar and array parameters from Python objects
 using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`
 with:
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl.parameters['MY_ARRAY'] = np.arange(10000)
-   >>> mapdl.parameters['MY_ARRAY']
+   >>> mapdl.parameters["MY_ARRAY"] = np.arange(10000)
+   >>> mapdl.parameters["MY_ARRAY"]
    array([0.00000e+00, 1.00000e+00, 2.00000e+00, ..., 9.99997e+05,
           9.99998e+05, 9.99999e+05])
 
-   >>> mapdl.parameters['MY_STRING'] = "helloworld"
-   >>> mapdl.parameters['MY_STRING']
+   >>> mapdl.parameters["MY_STRING"] = "helloworld"
+   >>> mapdl.parameters["MY_STRING"]
    "helloworld"
 
 You can also access some built-in parameters normally accessed through
@@ -37,7 +37,7 @@ the :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method. For example,
 instead of getting the current routine with ``\*GET, ACTIVE, 0,
 ROUT``, you can access it with this code:
 
-.. code:: python
+.. code:: pycon
 
   >>> mapdl.parameters.routine
   'Begin level'
@@ -65,9 +65,9 @@ If you need to set one of these parameters, you can use the
 attribute to avoid PyMAPDL parameter name checks:
 
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl._run('_parameter=123')
+   >>> mapdl._run("_parameter=123")
    'PARAMETER _PARAMETER =     123.00000000'
 
 By default, this type of parameter cannot be seen when issuing the
@@ -77,9 +77,9 @@ However, you can change this by setting the
 <ansys.mapdl.core.Mapdl.parameters.show_leading_underscore_parameters>`
 to ``True``:
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl.parameters.show_leading_underscore_parameters=True
+   >>> mapdl.parameters.show_leading_underscore_parameters = True
    >>> mapdl.parameters
    MAPDL Parameters
    ----------------
@@ -101,13 +101,13 @@ the :attr:`Mapdl.parameters.show_trailing_underscore_parameters
 is set to ``True``:
 
 
-.. code:: python
+.. code:: pycon
 
-   >>> mapdl.parameters['param_'] = 1.0
+   >>> mapdl.parameters["param_"] = 1.0
    >>> mapdl.parameters
    MAPDL Parameters
    ----------------
-   >>> mapdl.parameters.show_trailing_underscore_parameters=True
+   >>> mapdl.parameters.show_trailing_underscore_parameters = True
    >>> mapdl.parameters
    MAPDL Parameters
    ----------------
@@ -125,12 +125,12 @@ You can still retrieve these special parameters using any of the normal methods
 for retrieving parameters. However, you must know the parameter name:
 
 
-.. code:: python
+.. code:: pycon
 
    >>> mapdl.parameters["_param_"] = 1.0
    >>> mapdl.parameters
    MAPDL Parameters
    ----------------
-   >>> print(mapdl.parameters['_param_'])
+   >>> print(mapdl.parameters["_param_"])
    1.0
 

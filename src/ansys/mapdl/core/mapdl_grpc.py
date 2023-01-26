@@ -5,6 +5,7 @@ from functools import wraps
 import glob
 import io
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -16,9 +17,11 @@ import warnings
 from warnings import warn
 import weakref
 
+from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
+import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -46,7 +49,7 @@ except ImportError:  # pragma: no cover
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__, check_version
+from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -373,7 +376,25 @@ class MapdlGrpc(_MapdlCore):
             self._channel = channel
 
         # connect and validate to the channel
-        self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
+        process = start_parm.pop("process", None)
+        self._mapdl_process = process
+
+        # Queueing the stds
+        if self._mapdl_process:
+            self._create_process_stds_queue()
+
+        try:
+            self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
+        except MapdlConnectionError as err:  # pragma: no cover
+            self._post_mortem_checks()
+            self._log.debug(
+                "The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
+            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
+        else:
+            self._log.debug("Connection established")
 
         # double check we have access to the local path if not
         # explicitly specified
@@ -384,9 +405,16 @@ class MapdlGrpc(_MapdlCore):
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
-    def __del__(self):
-        """Delete the instance."""
-        self.exit()
+    def _create_process_stds_queue(self, process=None):
+        from ansys.mapdl.core.launcher import (
+            _create_queue_for_std,  # Avoid circular import error
+        )
+
+        if not process:
+            process = self._mapdl_process
+
+        self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
+        self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
@@ -418,7 +446,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # This prevents a single failed connection from blocking other attempts
         connected = False
-        attempt_timeout = timeout / n_attempts
+        attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
         i = 0
@@ -431,19 +459,143 @@ class MapdlGrpc(_MapdlCore):
             if connected:
                 self._log.debug("Connected")
                 break
-        else:
-            self._log.debug(
-                "Reached either maximum amount of connection attempts (%d) or timeout (%f s).",
-                n_attempts,
-                timeout,
+        else:  # pragma: no cover
+            # Check if mapdl process is alive
+            msg = (
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
+                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-        if not connected:
-            raise MapdlConnectionError(
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
-            )
+            if psutil.pid_exists(self._mapdl_process.pid):
+                # Process is alive
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                )
+            else:
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
+                )
+
+        self._exited = False
+
+    def _is_alive_subprocess(self):
+        """Returns:
+        * True if the PID is alive.
+        * False if it is not.
+        * None if there was no process
+        """
+        if self._mapdl_process:
+            return psutil.pid_exists(self._mapdl_process.pid)
+
+    @property
+    def process_is_alive(self):
+        return self._is_alive_subprocess()
+
+    def _post_mortem_checks(self):
+        """Check possible reasons for not having a successful connection."""
+        # Check early exit
+        process = self._mapdl_process
+        if process is None or not self.is_grpc:
+            return
+
+        # check the stdout for any errors
+        self._read_stds()
+
+        self._check_stds()
+
+    def _read_stds(self):
+        """Read the stdout and stderr from the subprocess."""
+        from ansys.mapdl.core.launcher import (
+            _get_std_output,  # Avoid circular import error
+        )
+
+        if self._mapdl_process is None:
+            return
+
+        self._log.debug("Reading stdout")
+        self._stdout = _get_std_output(self._stdout_queue)
+        self._log.debug(f"Read stdout: {self._stdout[:20]}")
+
+        self._log.debug("Reading stderr")
+        self._stderr = _get_std_output(self._stderr_queue)
+        self._log.debug(f"Read stderr: {self._stderr[:20]}")
+
+    def _check_stds(self, stdout=None, stderr=None):
+        """Check the stdout and stderr for any errors."""
+        if stdout is None:
+            stdout = self._stdout
+        if stderr is None:
+            stderr = self._stderr
+
+        if not stderr:
+            self._log.debug("MAPDL exited without stderr.")
         else:
-            self._exited = False
+            self._parse_stderr()
+
+        if not stdout:
+            self._log.debug("MAPDL exited without stdout.")
+        else:
+            self._parse_stdout()
+
+    def _parse_stderr(self, stderr=None):
+        """Parse the stderr for any errors."""
+        if stderr is None:
+            stderr = self._stderr
+        errs = self._parse_std(stderr)
+        if errs:
+            self._log.debug("MAPDL exited with errors in stderr.")
+
+            # Custom errors
+            self._raise_custom_stds_errors(errs)
+
+    def _parse_stdout(self, stdout=None):
+        """Parse the stdout for any errors."""
+        if stdout is None:
+            stdout = self._stdout
+        errs = self._parse_std(stdout)
+        if errs:
+            self._log.debug("MAPDL exited with errors in stdout.")
+
+            # Custom errors
+            self._raise_custom_stds_errors(errs)
+
+    def _parse_std(self, std):
+        # check for errors in stderr
+        # split the stderr into groups
+        if isinstance(std, list):
+            std = "\n".join(std)
+            std = std.replace("\n\n", "\n")
+        groups = std.split("\r\n\r\n")
+        errs = []
+
+        for each in groups:
+            if (
+                "error" in each.lower()
+                or "fatal" in each.lower()
+                or "warning" in each.lower()
+            ):
+                errs.append(each)
+
+        if errs:
+            errs = "\r\n\r\n".join(errs)
+            errs = errs.replace("\r\n", "\n")
+        else:
+            errs = ""
+        return errs
+
+    def _raise_custom_stds_errors(self, errs_message):
+        """Custom errors for stdout and stderr."""
+        if "Only one usage of each socket address" in errs_message:
+            raise MapdlConnectionError(
+                f"A process is already running on the specified port ({self._port}).\n"
+                "Only one usage of each socket address (protocol/network address/port) is normally permitted.\n"
+                f"\nFull error message:\n{errs_message.split('########',1)[0]}"
+            )
+
+        else:
+            raise MapdlConnectionError(errs_message)
 
     @property
     def _channel_str(self):
@@ -460,10 +612,7 @@ class MapdlGrpc(_MapdlCore):
         """Check if Python is local to the MAPDL instance."""
         # Verify if python has assess to the MAPDL directory.
         if self._local:
-            if self._path is None:
-                directory = self.directory
-            else:
-                directory = self._path
+            directory = self.directory
 
             if self._jobname is None:
                 jobname = self.jobname
@@ -602,7 +751,7 @@ class MapdlGrpc(_MapdlCore):
         sver = (0, 0, 0)
         verstr = self._ctrl("VERSION")
         if verstr:
-            sver = check_version.version_tuple(verstr)
+            sver = version_string_as_tuple(verstr)
         return sver
 
     def _enable_health_check(self):
@@ -665,7 +814,7 @@ class MapdlGrpc(_MapdlCore):
         from ansys.mapdl.core.launcher import launch_grpc
 
         self._exited = False  # reset exit state
-        port, directory = launch_grpc(**start_parm)
+        port, directory, process = launch_grpc(**start_parm)
         self._connect(port)
 
         # may need to wait for viable connection in open_gui case
@@ -849,6 +998,18 @@ class MapdlGrpc(_MapdlCore):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
+
+        if self._exited is None:
+            return  # Some edge cases the class object is not completely initialized but the __del__ method
+            # is called when exiting python. So, early exit here instead an error in the following
+            # self.directory command.
+            # See issue #1796
+        elif self._exited:
+            # Already exited.
+            return
+        else:
+            mapdl_path = self.directory
+
         if not force:
             # lazy import here to avoid circular import
             from ansys.mapdl.core.launcher import get_start_instance
@@ -864,9 +1025,6 @@ class MapdlGrpc(_MapdlCore):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        if self._exited:
-            return
-
         if save:
             try:
                 self._log.debug("Saving MAPDL database")
@@ -881,7 +1039,7 @@ class MapdlGrpc(_MapdlCore):
             if os.name == "nt":
                 self._kill_server()
             self._close_process()
-            self._remove_lock_file()
+            self._remove_lock_file(mapdl_path)
         else:
             self._kill_server()
 
@@ -930,7 +1088,49 @@ class MapdlGrpc(_MapdlCore):
         self._log.debug("Killing MAPDL server")
         self._ctrl("EXIT")
 
-    def _close_process(self):  # pragma: no cover
+    def _kill_process(self):
+        """Kill process stored in self._mapdl_process"""
+        if self._mapdl_process is not None:
+            self._log.debug("Killing process using subprocess.Popen.terminate")
+            process = self._mapdl_process
+            if process.poll() is not None:
+                # process hasn't terminated
+                process.kill()
+
+    def _kill_child_processes(self, timeout=2):
+        pids = self._pids.copy()
+        pids.reverse()  # First pid is the parent, therefore start by the children (end)
+
+        for pid in pids:
+            self._kill_child_process(pid, timeout=timeout)
+
+    def _kill_child_process(self, pid, timeout=2):
+        """Kill an individual child process, given a pid."""
+        try:
+            self._log.debug(f"Killing MAPDL process: {pid}")
+            t0 = time.time()
+            while time.time() < t0 + timeout:
+                if psutil.pid_exists(pid):
+                    os.kill(pid, 9)
+                    time.sleep(0.5)
+                else:
+                    self._log.debug(f"Process {pid} killed properly.")
+                    break
+            else:
+                self._log.debug(
+                    f"Process {pid} couldn't be killed in {timeout} seconds"
+                )
+
+        except OSError:
+            self._log.debug(
+                f"Failed attempt to kill process: The process with pid {pid} does not exist. Maybe it was already killed?"
+            )
+
+        finally:
+            if not psutil.pid_exists(pid):
+                self._pids.remove(pid)
+
+    def _close_process(self, timeout=2):  # pragma: no cover
         """Close all MAPDL processes.
 
         Notes
@@ -941,13 +1141,14 @@ class MapdlGrpc(_MapdlCore):
 
         """
         if self._local:
-            for pid in self._pids:
-                try:
-                    self._log.debug(f"Killing MAPDL process: {pid}")
-                    os.kill(pid, 9)
-                    self._pids.remove(pid)
-                except OSError:
-                    pass
+            # killing server process
+            self._kill_server()
+
+            # killing main process (subprocess)
+            self._kill_process()
+
+            # Killing child processes
+            self._kill_child_processes(timeout=timeout)
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
@@ -957,8 +1158,10 @@ class MapdlGrpc(_MapdlCore):
         processes.
 
         """
+        self._pids = []
+
         for filename in self.list_files():
-            if "cleanup" in filename:
+            if "cleanup" in filename:  # Linux does not seem to generate this file?
                 script = os.path.join(self.directory, filename)
                 with open(script) as f:
                     raw = f.read()
@@ -968,6 +1171,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
+
+        if not self._pids:
+            # For the cases where the cleanup file is not generated,
+            # we relay on the process.
+            parent_pid = self._mapdl_process.pid
+            try:
+                parent = psutil.Process(parent_pid)
+            except psutil.NoSuchProcess:
+                return
+            children = parent.children(recursive=True)
+
+            self._pids = [parent_pid] + [each.pid for each in children]
 
     def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
@@ -1108,8 +1323,12 @@ class MapdlGrpc(_MapdlCore):
         super().sys(f"{cmd} > {tmp_file}")
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
-                return fobj.read()
-        return self._download_as_raw(tmp_file).decode()
+                obj = fobj.read()
+        else:
+            obj = self._download_as_raw(tmp_file).decode()
+
+        self.slashdelete(tmp_file)
+        return obj
 
     def download_result(self, path=None, progress_bar=False, preference=None):
         """Download remote result files to a local directory
@@ -1277,22 +1496,14 @@ class MapdlGrpc(_MapdlCore):
                 "Input the geometry and mesh files separately "
                 r'with "\INPUT" or ``mapdl.input``'
             )
-        # the old behaviour is to supplied the name and the extension separately.
-        # to make it easier let's going to allow names with extensions
-        basename = os.path.basename(fname)
-        if len(basename.split(".")) == 1:
-            # there is no extension in the main name.
-            if ext:
-                # if extension is an input as an option (old APDL style)
-                fname = fname + "." + ext
-            else:
-                # Using default .db
-                fname = fname + "." + "cdb"
 
         kwargs.setdefault("verbose", False)
         kwargs.setdefault("progress_bar", False)
         kwargs.setdefault("orig_cmd", "CDREAD")
         kwargs.setdefault("cd_read_option", option.upper())
+
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs["progress_bar"])
 
         self.input(fname, **kwargs)
 
@@ -1449,9 +1660,12 @@ class MapdlGrpc(_MapdlCore):
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            delete_uploaded_files = False
+
         else:
             # Using default INPUT
             tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
@@ -1495,6 +1709,8 @@ class MapdlGrpc(_MapdlCore):
             # Deleting the previous files
             self.slashdelete(tmp_name)
             self.slashdelete(tmp_out)
+            if filename in self.list_files() and delete_uploaded_files:
+                self.slashdelete(filename)
 
         return output
 
@@ -1513,9 +1729,11 @@ class MapdlGrpc(_MapdlCore):
                 f"`fname` should be a full file path or name, not the directory '{fname}'."
             )
 
+        fPath = pathlib.Path(fname)
+
         fpath = os.path.dirname(fname)
-        fname = os.path.basename(fname)
-        fext = fname.split(".")[-1]
+        fname = fPath.name
+        fext = fPath.suffix
 
         # if there is no dirname, we are assuming the file is
         # in the python working directory.
@@ -1552,6 +1770,34 @@ class MapdlGrpc(_MapdlCore):
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
 
         return filename
+
+    def _get_file_name(self, fname, ext=None, default_extension=None):
+        """Get file name from fname and extension arguments.
+
+        fname can be the full path.
+
+        Parameters
+        ----------
+        fname : str
+            File name (with our with extension). It can be a full path.
+        ext : str, optional
+            File extension, by default None
+        """
+
+        # the old behaviour is to supplied the name and the extension separately.
+        # to make it easier let's going to allow names with extensions
+
+        if ext:
+            fname = fname + "." + ext
+        else:
+            basename = os.path.basename(fname)
+
+            if len(basename.split(".")) == 1:
+                # there is no extension in the main name.
+                if default_extension:
+                    fname = fname + "." + default_extension
+
+        return fname
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -1595,10 +1841,8 @@ class MapdlGrpc(_MapdlCore):
         self._response = out[out.find("LINE=       0") + 13 :]
         self._log.info(self._response)
 
-        if "*** ERROR ***" in self._response:
-            raise RuntimeError(
-                self._response.split("*** ERROR ***")[1].splitlines()[1].strip()
-            )
+        if "*** ERROR ***" in self._response and not self._ignore_errors:
+            self._raise_output_errors(self._response)
 
         # try/except here because MAPDL might have not closed the temp file
         try:
@@ -2584,24 +2828,13 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.file)
     def file(self, fname="", ext="", **kwargs):
         """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
-        filename = fname + ext
-        if self._local:  # pragma: no cover
-            out = super().file(fname, ext, **kwargs)
-        elif filename in self.list_files():
-            # this file is already remote
-            out = self._file(filename)
-        else:
-            if not os.path.isfile(filename):
-                raise FileNotFoundError(
-                    f"Unable to find '{filename}'. You may need to "
-                    "input the full path to the file."
-                )
+        # always check if file is present as the grpc and MAPDL errors
+        # are unclear
+        fname = self._get_file_name(fname, ext, "cdb")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_ = self._decompose_fname(fname)
 
-            progress_bar = kwargs.pop("progress_bar", False)
-            basename = self.upload(filename, progress_bar=progress_bar)
-            out = self._file(basename, **kwargs)
-
-        return out
+        return self._file(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.vget)
     def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):

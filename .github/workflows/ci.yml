@@ -29,10 +29,10 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 5
-  RESET_EXAMPLES_CACHE: 5
-  RESET_DOC_BUILD_CACHE: 5
-  RESET_AUTOSUMMARY_CACHE: 5
+  RESET_PIP_CACHE: 0
+  RESET_EXAMPLES_CACHE: 0
+  RESET_DOC_BUILD_CACHE: 0
+  RESET_AUTOSUMMARY_CACHE: 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,28 +45,18 @@ defaults:
 
 jobs:
 
-  code-style:
-    name: "Code style"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "PyAnsys code style checks"
-        uses: pyansys/actions/code-style@v2
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
       - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v2
+        uses: pyansys/actions/doc-style@v3.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
-    needs: code-style
     strategy:
       fail-fast: false
       matrix:
@@ -74,11 +64,29 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v2
+        uses: pyansys/actions/build-wheelhouse@v3.0.1
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
           operating-system: ${{ matrix.os }}
+          python-version: ${{ matrix.python-version }}
+
+  macos-build:
+    name: Build and smoke tests (macOS)
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.7', '3.8', '3.9', '3.10']
+
+    steps:
+      - name: "Build wheelhouse and perform smoke test"
+        uses: pyansys/actions/build-wheelhouse@v3.0.1
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          library-namespace: ${{ env.PACKAGE_NAMESPACE }}
+          operating-system: ${{ runner.os }}
           python-version: ${{ matrix.python-version }}
 
   docs_build:
@@ -253,7 +261,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0']
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -421,6 +429,8 @@ jobs:
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      RUN_LOCAL: true
 
     steps:
       - name: "Install Git and checkout project"
@@ -472,7 +482,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -v -k "not test_database and not test_dpf" \
             --durations=10 \
-            --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
+            --maxfail=10 --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun EmptyRecordError \
             --cov=ansys.mapdl.core --cov-report=xml:ubuntu-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
@@ -499,7 +509,7 @@ jobs:
 
       # Skipping because it is installed locally.
       # - name: Setup Python
-      #   uses: actions/setup-python@v4.3.2
+      #   uses: actions/setup-python@v4
       #   with:
       #     python-version: 3.9
 
@@ -558,21 +568,36 @@ jobs:
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, build_test_ubuntu, smoke-tests]
+    needs: [docs_build, build_test, smoke-tests, macos-build]
     runs-on: ubuntu-latest
     steps:
-      
-      - name: "Release to the public PyPI repository"
-        uses: pyansys/actions/release-pypi-public@v2
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          twine-username: "__token__"
-          twine-token: ${{ secrets.PYPI_TOKEN }}
+          python-version: 3.9
+
+      - uses: actions/download-artifact@v3
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: "Release to GitHub"
-        uses: pyansys/actions/release-github@v2
+        uses: softprops/action-gh-release@v1
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
+          files: |
+            ./**/*.whl
+            ./**/*.tar.gz
+            ./**/*pymapdl-Documentation-*.pdf
+            ./**/*.zip
+
+      - name: Upload to Public PyPi
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --skip-existing ./**/*.whl
+          twine upload --skip-existing ./**/*.tar.gz
 
       - name: "Notify if fail"
         uses: skitionek/notify-microsoft-teams@master
@@ -593,7 +618,7 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v2
+        uses: pyansys/actions/doc-deploy-stable@v3.0.1
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}

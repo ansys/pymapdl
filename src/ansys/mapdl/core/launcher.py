@@ -4,10 +4,12 @@ import atexit
 from glob import glob
 import os
 import platform
+from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import warnings
 
@@ -94,7 +96,7 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default
+    # gcc is installed by default except when on docker.
     proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
@@ -114,7 +116,7 @@ def _version_from_path(path):
     """Extract ansys version from a path.  Generally, the version of
     ANSYS is contained in the path:
 
-    C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe
+    C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe
 
     /usr/ansys_inc/v211/ansys/bin/mapdl
 
@@ -214,7 +216,7 @@ def launch_grpc(
     additional_switches="",
     override=True,
     timeout=20,
-    verbose=False,
+    verbose=None,
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
@@ -267,6 +269,10 @@ def launch_grpc(
         Print all output when launching and running MAPDL.  Not
         recommended unless debugging the MAPDL start.  Default
         ``False``.
+
+        .. deprecated:: v0.65.0
+           The ``verbose`` argument is deprecated and will be removed in a future release.
+           Use a logger instead. See :ref:`api_logging` for more details.
 
     kwargs : dict
         Not used. Added to keep compatibility between Mapdl_grpc and
@@ -391,13 +397,22 @@ def launch_grpc(
     Run MAPDL with shared memory parallel and specify the location of
     the ansys binary.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     """
     LOG.debug("Starting 'launch_mapdl'.")
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
+
+    if verbose is not None:
+        warnings.warn(
+            "The ``verbose`` argument is deprecated and will be removed in a future release. "
+            "Use a logger instead. See :ref:`api_logging` for more details.",
+            DeprecationWarning,
+        )
+    elif verbose is None:
+        verbose = False
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -505,21 +520,54 @@ def launch_grpc(
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
 
-    if verbose:  # pragma: no cover
-        subprocess.Popen(command, shell=os.name != "nt", cwd=run_location, env=env_vars)
+    if verbose:
+        print(command)
 
-    else:
-        subprocess.Popen(
-            command,
-            shell=os.name != "nt",
-            cwd=run_location,
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            env=env_vars,
+    LOG.debug("MAPDL starting in background.")
+    process = subprocess.Popen(
+        command,
+        shell=os.name != "nt",
+        cwd=run_location,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env_vars,
+    )
+
+    LOG.debug("Generating queue object for stdout")
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
+
+    # Checking connection
+    try:
+        LOG.debug("Checking process is alive")
+        _check_process_is_alive(process, run_location)
+
+        LOG.debug("Checking file error is created")
+        _check_file_error_created(run_location, timeout)
+
+        if os.name == "posix":
+            LOG.debug("Checking if gRPC server is alive.")
+            _check_server_is_alive(stdout_queue, run_location, timeout)
+
+    except MapdlDidNotStart as e:
+        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        raise MapdlDidNotStart(
+            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
+        ) from e
+
+    # Ending thread
+    # Todo: Ending queue thread
+    return port, run_location, process
+
+
+def _check_process_is_alive(process, run_location):
+    if process.poll() is not None:  # pragma: no cover
+        raise MapdlDidNotStart(
+            f"MAPDL process died.\nCheck the run location: '{run_location}')."
         )
-        LOG.debug("MAPDL started in background.")
 
+
+def _check_file_error_created(run_location, timeout):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -536,10 +584,73 @@ def launch_grpc(
 
     if not has_ans:
         raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')"
+            f"MAPDL failed to start (No err file generated in '{run_location}')."
         )
 
-    return port, run_location
+
+def _check_server_is_alive(stdout_queue, run_location, timeout):
+    t0 = time.time()
+    empty_attemps = 3
+    empty_i = 0
+    terminal_output = ""
+
+    while time.time() < (t0 + timeout):
+        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+
+        if not terminal_output and empty_i < empty_attemps:
+            # For stability reasons.
+            empty_i += 1
+            time.sleep(0.1)
+            continue
+
+        if (
+            "START GRPC SERVER" in terminal_output
+            and "Server listening on" in terminal_output
+        ):
+            listening_on = terminal_output.splitlines()[-1].split(":")
+            listening_on = ":".join(listening_on[1:]).strip()
+            LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
+            break
+
+    else:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
+            f"The full terminal output is:\n\n" + terminal_output
+        )
+
+
+def _get_std_output(std_queue, timeout=1):
+    lines = []
+    reach_empty = False
+    t0 = time.time()
+    while (not reach_empty) or (time.time() < (t0 + timeout)):
+        try:
+            lines.append(std_queue.get_nowait().decode())
+        except Empty:
+            reach_empty = True
+
+    return lines
+
+
+def _create_queue_for_std(std):
+    """Create a queue and thread objects for a given PIPE std"""
+
+    def enqueue_output(out, queue):
+        try:
+            for line in iter(out.readline, b""):
+                queue.put(line)
+            out.close()
+        except ValueError:
+            # When killing main process, a ValueError is show:
+            # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
+            pass
+
+    q = Queue()
+    t = threading.Thread(target=enqueue_output, args=(std, q))
+    t.daemon = True  # thread dies with the program
+    t.start()
+
+    return q, t
 
 
 def launch_remote_mapdl(
@@ -956,7 +1067,7 @@ def change_default_ansys_path(exe_loc):
 
     Change default Ansys location on Windows
 
-    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/win64/ANSYS193.exe'
+    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/winx64/ANSYS193.exe'
     >>> launcher.change_default_ansys_path(ans_pth)
     >>> launcher.check_valid_ansys()
     True
@@ -997,7 +1108,7 @@ def save_ansys_path(exe_loc=None):  # pragma: no cover
     The configuration file location (``config.txt``) can be found in
     ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
 
-    .. code:: python
+    .. code:: pycon
 
         >>> import appdirs
         >>> import os
@@ -1225,7 +1336,7 @@ def launch_mapdl(
     log_apdl=None,
     remove_temp_files=None,
     remove_temp_dir_on_exit=False,
-    verbose_mapdl=False,
+    verbose_mapdl=None,
     license_server_check=True,
     license_type=None,
     print_com=False,
@@ -1373,6 +1484,10 @@ def launch_mapdl(
         MAPDL.  This should be used for debugging only as output can
         be tracked within pymapdl.  Default ``False``.
 
+        .. deprecated:: v0.65.0
+           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
+           Use a logger instead. See :ref:`api_logging` for more details.
+
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
         start.  Only available on ``mode='grpc'``. Defaults ``True``.
@@ -1416,6 +1531,27 @@ def launch_mapdl(
 
               export PYMAPDL_MAPDL_VERSION=22.2
 
+    kwargs : dict, optional
+        These keyword arguments are interface specific or for
+        development purposes. See Notes for more details.
+
+        set_no_abort : :class:`bool`
+          *(Development use only)*
+          Sets MAPDL to not abort at the first error within /BATCH mode.
+          Defaults to ``True``.
+
+        force_intel : :class:`bool`
+          *(Development use only)*
+          Forces the use of Intel message pass interface (MPI) in versions between
+          Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is deactivated
+          by default. See :ref:`vpn_issues_troubleshooting` for more information.
+          Defaults to ``False``.
+
+        log_broadcast : :class:`bool`
+          *(Only for CORBA mode)*
+          Enables a logger to record broadcasted commands.
+          Defaults to ``False``.
+
     Returns
     -------
     ansys.mapdl.core.mapdl._MapdlCore
@@ -1423,8 +1559,13 @@ def launch_mapdl(
 
     Notes
     -----
+
+    **Ansys Student Version**
+
     If an Ansys Student version is detected, PyMAPDL will launch MAPDL in
     shared-memory parallelism (SMP) mode unless another option is specified.
+
+    **Additional switches**
 
     These are the MAPDL switch options as of 2020R2 applicable for
     running MAPDL as a service via gRPC.  Excluded switches such as
@@ -1538,7 +1679,7 @@ def launch_mapdl(
     Run MAPDL with shared memory parallel and specify the location of
     the Ansys binary.
 
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v201/ansys/bin/win64/ANSYS201.exe'
+    >>> exec_file = 'C:/Program Files/ANSYS Inc/v231/ansys/bin/winx64/ANSYS231.exe'
     >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
 
     Connect to an existing instance of MAPDL at IP 192.168.1.30 and
@@ -1567,6 +1708,14 @@ def launch_mapdl(
         )
         remove_temp_dir_on_exit = remove_temp_files
         remove_temp_files = None
+
+    if verbose_mapdl is not None:
+        warnings.warn(
+            "The ``verbose_mapdl`` argument is deprecated and will be removed in a future release. "
+            "Use a logger instead. See :ref:`api_logging` for more details.",
+            DeprecationWarning,
+        )
+        verbose_mapdl = False
 
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.get("set_no_abort", True)
@@ -1759,10 +1908,8 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check:
-        # configure timeout to be 90% of the wait time of the startup
-        # time for Ansys.
         LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=start_timeout * 0.9)
+        lic_check = LicenseChecker(timeout=start_timeout)
         lic_check.start()
 
     try:
@@ -1790,12 +1937,12 @@ def launch_mapdl(
                 **start_parm,
             )
         elif mode == "grpc":
-            port, actual_run_location = launch_grpc(
+            port, actual_run_location, process = launch_grpc(
                 port=port,
-                verbose=verbose_mapdl,
                 ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
+                verbose=verbose_mapdl,
                 **start_parm,
             )
             mapdl = MapdlGrpc(
@@ -1806,10 +1953,12 @@ def launch_mapdl(
                 set_no_abort=set_no_abort,
                 remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
+                process=process,
                 **start_parm,
             )
             if run_location is None:
                 mapdl._path = actual_run_location
+
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
@@ -1823,6 +1972,9 @@ def launch_mapdl(
     if license_server_check:
         LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
+
+    # Setting launched property
+    mapdl._launched = True
 
     return mapdl
 

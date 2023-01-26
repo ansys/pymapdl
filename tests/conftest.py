@@ -7,9 +7,6 @@ import pytest
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
-# import time
-
-
 pytest_plugins = ["pytester"]
 
 import pyvista
@@ -319,6 +316,9 @@ def mapdl(request, tmpdir_factory):
         override=True,
         run_location=run_path,
         cleanup_on_exit=cleanup,
+        license_server_check=False,
+        additional_switches="-smp",
+        start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
@@ -341,9 +341,6 @@ def mapdl(request, tmpdir_factory):
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
-        # if mapdl._local:
-        #     assert not os.path.isfile(mapdl._lockfile)
-
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
@@ -354,11 +351,6 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
-
-            # verify PIDs are closed
-            # time.sleep(1)  # takes a second for the processes to shutdown
-            # for pid in mapdl._pids:
-            #     assert not check_pid(pid)
 
 
 @pytest.fixture

@@ -58,6 +58,8 @@ skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
 
+start_timeout = 30  # Seconds
+
 
 @pytest.mark.skipif(
     get_start_instance() is False,
@@ -119,7 +121,7 @@ def test_find_ansys_linux():
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = get_ansys_bin(valid_versions[0])
-        pymapdl.launch_mapdl(exec_file, mode="notamode")
+        pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
 @pytest.mark.skipif(
@@ -131,7 +133,7 @@ def test_invalid_mode():
 def test_old_version():
     exec_file = get_ansys_bin("150")
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="corba")
+        pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
 
 
 @pytest.mark.skipif(
@@ -144,7 +146,7 @@ def test_old_version():
 def test_failed_console():
     exec_file = get_ansys_bin(valid_versions[0])
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="console")
+        pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
 @pytest.mark.skipif(
@@ -157,7 +159,7 @@ def test_failed_console():
 @pytest.mark.skipif(os.name != "posix", reason="Only supported on Linux")
 def test_launch_console(version):
     exec_file = get_ansys_bin(version)
-    mapdl = pymapdl.launch_mapdl(exec_file, mode="console")
+    mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
 
@@ -169,7 +171,9 @@ def test_launch_console(version):
 @pytest.mark.corba
 @pytest.mark.parametrize("version", valid_versions)
 def test_launch_corba(version):
-    mapdl = pymapdl.launch_mapdl(get_ansys_bin(version), mode="corba")
+    mapdl = pymapdl.launch_mapdl(
+        get_ansys_bin(version), mode="corba", start_timeout=start_timeout
+    )
     assert mapdl.version == int(version) / 10
     # mapdl.exit() # exit is already tested for in test_mapdl.py.
     # Instead, test collection
@@ -185,11 +189,9 @@ def test_launch_corba(version):
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_license_type_keyword():
-    # This test might became a way to check available licenses, which is not the purpose.
-
     checks = []
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(license_type=license_name)
+        mapdl = launch_mapdl(license_type=license_name, start_timeout=start_timeout)
 
         # Using first line to ensure not picking up other stuff.
         checks.append(license_description in mapdl.__str__().split("\n")[0])
@@ -208,7 +210,7 @@ def test_license_type_keyword_names():
 
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(license_type=license_name)
+        mapdl = launch_mapdl(license_type=license_name, start_timeout=start_timeout)
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
@@ -230,7 +232,9 @@ def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(additional_switches=" -p" + license_name)
+        mapdl = launch_mapdl(
+            additional_switches=" -p " + license_name, start_timeout=start_timeout
+        )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
@@ -249,13 +253,19 @@ def test_license_type_additional_switch():
 def test_license_type_dummy():
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
-        launch_mapdl(additional_switches=f" -p {dummy_license_type}")
+        launch_mapdl(
+            additional_switches=f" -p {dummy_license_type}", start_timeout=start_timeout
+        )
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
-    mapdl = launch_mapdl(remove_temp_files=True)
+    mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
 
     # possible MAPDL is installed but running in "remote" mode
     path = mapdl.directory
@@ -274,7 +284,7 @@ def test_remove_temp_files():
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     try:
-        mapdl = launch_mapdl(remove_temp_files=True)
+        mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
         old_path = mapdl.directory
         assert os.path.isdir(str(tmpdir))
         mapdl.cwd(str(tmpdir))
@@ -504,7 +514,8 @@ def test_get_ansys():
 )
 def test_version(mapdl):
     version = int(10 * mapdl.version)
-    mapdl_ = launch_mapdl(version=version)
+    mapdl_ = launch_mapdl(version=version, start_timeout=start_timeout)
+    mapdl_.exit()
 
 
 @pytest.mark.skipif(
@@ -513,4 +524,4 @@ def test_version(mapdl):
 )
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
-        launch_mapdl(exec_file="asdf", version="asdf")
+        launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)

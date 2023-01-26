@@ -170,6 +170,10 @@ class _MapdlCore(Commands):
         self._stored_commands = []
         self._response = None
         self._mode = None
+        self._mapdl_process = None
+        self._launched = False
+        self._stderr = None
+        self._stdout = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -2737,8 +2741,18 @@ class _MapdlCore(Commands):
             to ``False``, will not write command to log, even if APDL
             command logging is enabled.
 
-        kwargs : Optional keyword arguments
-            These keyword arguments are interface specific.
+        kwargs : dict, optional
+            These keyword arguments are interface specific or for
+            development purposes.
+
+            avoid_non_interactive : :class:`bool`
+              *(Development use only)*
+              Avoids the non-interactive mode for this specific command.
+              Defaults to ``False``.
+
+            verbose : :class:`bool`
+              Prints the command to the screen before running it.
+              Defaults to ``False``.
 
         Returns
         -------
@@ -2747,6 +2761,9 @@ class _MapdlCore(Commands):
 
         Notes
         -----
+
+        **Running non-interactive commands**
+
         When two or more commands need to be run non-interactively
         (i.e. ``*VWRITE``) use
 
@@ -2777,7 +2794,10 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        if self._store_commands:
+        # check if we want to avoid the current non-interactive context.
+        avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
+
+        if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
             self._stored_commands.append(command)
             return
@@ -2986,6 +3006,8 @@ class _MapdlCore(Commands):
 
         if self._local:
             os.remove(filename)
+        else:
+            self.slashdelete(filename)
 
     def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
         """Load a table from Python to into MAPDL.
@@ -3108,6 +3130,11 @@ class _MapdlCore(Commands):
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
 
+        if self._local:
+            os.remove(filename)
+        else:
+            self.slashdelete(filename)
+
     def _display_plot(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
 
@@ -3154,16 +3181,26 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        try:
-            self._path = self.inquire("", "DIRECTORY")
-        except Exception:
-            pass
+        i = 0
+        while (not self._path and i > 5) or i == 0:
+            try:
+                self._path = self.inquire("", "DIRECTORY")
+            except Exception:  # pragma: no cover
+                pass
+            i += 1
+            if not self._path:  # pragma: no cover
+                time.sleep(0.1)
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
+        else:  # pragma: no cover
+            raise IOError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -3796,15 +3833,18 @@ class _MapdlCore(Commands):
 
                 # Extracting only the first 'lines_number' lines.
                 # This is important. Regex has problems parsing long messages.
-                lines_number = 10
-                partial_output = "\n".join(
-                    response.splitlines()[index : (index + lines_number)]
-                )
+                lines_number = 20
+                if len(response.splitlines()) <= lines_number:
+                    partial_output = response
+                else:
+                    partial_output = "\n".join(
+                        response.splitlines()[index : (index + lines_number)]
+                    )
 
                 # Find the error message.
                 # Either ends with the beginning of another error message or with double empty line.
                 error_message = re.search(
-                    r"(\*\*\* ERROR \*\*\*.*?)(?=\*\*\*|\s*\n\s*\n)",  # we might consider to use only one \n.
+                    r"(\*\*\* ERROR \*\*\*.*?).*(?=\*\*\*|.*\n\n)",  # we might consider to use only one \n.
                     partial_output,
                     re.DOTALL,
                 )
@@ -3816,7 +3856,9 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.groups()[0]
+                    error_message = error_message.group(
+                        0
+                    )  # Catching only the first error.
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
@@ -3879,27 +3921,16 @@ class _MapdlCore(Commands):
         >>> mapdl.file('/tmp/file.rst')
 
         """
-        # MAPDL always adds the "rst" extension onto the name, even if already
-        # has one, so here we simply reconstruct it.
-        filename = pathlib.Path(fname + ext)
+        fname = self._get_file_name(fname, ext, "rst")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_ = self._decompose_fname(fname)
+        return self._file(file_, ext_, **kwargs)
 
-        if not filename.exists():
-            # potential that the user is relying on the default "rst"
-            filename_rst = filename.parent / (filename.name + ".rst")
-            if not filename_rst.exists():
-                raise FileNotFoundError(f"Unable to locate {filename}")
-
-        return self._file(filename, **kwargs)
-
-    def _file(self, filename, **kwargs):
+    def _file(self, filename, extension, **kwargs):
         """Run the MAPDL ``file`` command with a proper filename."""
-        filename = pathlib.Path(filename)
-        ext = filename.suffix
-        fname = str(filename).replace(ext, "")
-        ext = ext.replace(".", "")
-        return self.run(f"FILE,{fname},{ext}", **kwargs)
+        return self.run(f"FILE,{filename},{extension}", **kwargs)
 
-    @wraps(Commands.lsread)
+    @wraps(Commands.use)
     def use(self, *args, **kwargs):
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
@@ -3993,6 +4024,8 @@ class _MapdlCore(Commands):
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
         # self.get_mapdl_envvar("ON_DOCKER") # for later
+        if not self.is_grpc:  # pragma: no cover
+            return False
 
         if self.platform == "linux":
             self.sys(
@@ -4001,12 +4034,17 @@ class _MapdlCore(Commands):
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
 
-        if self.is_grpc and not self.is_local:
-            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        if not self.is_local:
+            sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
+
         else:  # pragma: no cover
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
-                return f.read().strip() == "true"
+                sys_output = f.read().strip()
+
+        self._log.debug(f"The output of sys command is: '{sys_output}'.")
+        self.slashdelete("__outputcmd__.txt")  # cleaning
+        return sys_output == "true"
 
     @property
     def on_docker(self):
@@ -4019,3 +4057,27 @@ class _MapdlCore(Commands):
     def is_local(self):
         """Check if the instance is running locally or remotely."""
         return self._local
+
+    @property
+    def launched(self):
+        """Check if the MAPDL instance has been launched by PyMAPDL."""
+        return self._launched
+
+    def _decompose_fname(self, fname):
+        """Decompose a file name (with or without path) into filename and extension.
+
+        Parameters
+        ----------
+        fname : str
+            File name with or without path.
+
+        Returns
+        -------
+        str
+            File name (without extension or path)
+
+        str
+            File extension (without dot)
+        """
+        fname = pathlib.Path(fname)
+        return fname.stem, fname.suffix.replace(".", "")

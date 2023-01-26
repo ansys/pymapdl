@@ -299,3 +299,15 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
+# Adding apdl syntax highlighting
+def setup(app):
+    from pygments.lexers.apdlexer import apdlexer
+    from pygments.lexers.julia import JuliaLexer
+
+    # ANSYS lexer
+    app.add_lexer("apdl", apdlexer)
+    app.add_lexer("ansys", apdlexer)
+
+    # Julia lexer
+    app.add_lexer("julia", JuliaLexer)
