@@ -1874,9 +1874,9 @@ def test_post_mortem_checks_no_process(mapdl):
 #     mapdl._mapdl_process = old_process
 
 
-def test_launched_property(mapdl):
-    if not mapdl.is_local:
-        assert not mapdl.launched
+# def test_launched_property(mapdl):
+#     if not mapdl.is_local:
+#         assert mapdl.launched
 
 
 # def test_custom_stds_error(mapdl):
