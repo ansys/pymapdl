@@ -1807,6 +1807,7 @@ def test_get_file_name(mapdl):
         == file_.replace(".asd", "") + ".qwer"
     )
 
+
 def test_sequence_cm_eplot(mapdl):
     mapdl.clear()
     mapdl.prep7()
@@ -1821,6 +1822,7 @@ def test_sequence_cm_eplot(mapdl):
     mapdl.esll()
     mapdl.cm("a", "ELEM")
     mapdl.eplot(vtk=False)
+
 
 @skip_if_not_local
 def test_cache_pids(mapdl):
