@@ -21,6 +21,7 @@ from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
+import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -376,13 +377,21 @@ class MapdlGrpc(_MapdlCore):
 
         # connect and validate to the channel
         process = start_parm.pop("process", None)
-        if process:
-            self._mapdl_process = process
+        self._mapdl_process = process
+
+        # Queueing the stds
+        if self._mapdl_process:
+            self._create_process_stds_queue()
 
         try:
             self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
-        except MapdlConnectionError as err:
+        except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
+            self._log.debug(
+                "The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
             raise err  # Raise original error if we couldn't catch it in post-mortem analysis
         else:
             self._log.debug("Connection established")
@@ -396,9 +405,16 @@ class MapdlGrpc(_MapdlCore):
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
-    def __del__(self):
-        """Delete the instance."""
-        self.exit()
+    def _create_process_stds_queue(self, process=None):
+        from ansys.mapdl.core.launcher import (
+            _create_queue_for_std,  # Avoid circular import error
+        )
+
+        if not process:
+            process = self._mapdl_process
+
+        self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
+        self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
@@ -430,7 +446,7 @@ class MapdlGrpc(_MapdlCore):
         """
         # This prevents a single failed connection from blocking other attempts
         connected = False
-        attempt_timeout = timeout / n_attempts
+        attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
         i = 0
@@ -443,19 +459,39 @@ class MapdlGrpc(_MapdlCore):
             if connected:
                 self._log.debug("Connected")
                 break
-        else:
-            self._log.debug(
-                "Reached either maximum amount of connection attempts (%d) or timeout (%f s).",
-                n_attempts,
-                timeout,
+        else:  # pragma: no cover
+            # Check if mapdl process is alive
+            msg = (
+                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
+                f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-        if not connected:
-            raise MapdlConnectionError(
-                f"Unable to connect to MAPDL gRPC instance at {self._channel_str}."
-            )
-        else:
-            self._exited = False
+            if psutil.pid_exists(self._mapdl_process.pid):
+                # Process is alive
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                )
+            else:
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
+                )
+
+        self._exited = False
+
+    def _is_alive_subprocess(self):
+        """Returns:
+        * True if the PID is alive.
+        * False if it is not.
+        * None if there was no process
+        """
+        if self._mapdl_process:
+            return psutil.pid_exists(self._mapdl_process.pid)
+
+    @property
+    def process_is_alive(self):
+        return self._is_alive_subprocess()
 
     def _post_mortem_checks(self):
         """Check possible reasons for not having a successful connection."""
@@ -464,30 +500,27 @@ class MapdlGrpc(_MapdlCore):
         if process is None or not self.is_grpc:
             return
 
-        # let's check if the subprocess is still running
-        if self._is_alive_subprocess():  # pragma: no cover
-            self._log.debug("MAPDL subprocess is dead.")
-        else:
-            self._log.debug("MAPDL subprocess is alive.")
-
         # check the stdout for any errors
         self._read_stds()
 
         self._check_stds()
 
-    def _is_alive_subprocess(self, process=None):
-        """Check if subprocess is alive"""
-        if process is None:
-            process = self._mapdl_process
-        return process.poll() is None
-
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
+        from ansys.mapdl.core.launcher import (
+            _get_std_output,  # Avoid circular import error
+        )
+
         if self._mapdl_process is None:
             return
 
-        self._stdout = self._mapdl_process.stdout.read().decode()
-        self._stderr = self._mapdl_process.stderr.read().decode()
+        self._log.debug("Reading stdout")
+        self._stdout = _get_std_output(self._stdout_queue)
+        self._log.debug(f"Read stdout: {self._stdout[:20]}")
+
+        self._log.debug("Reading stderr")
+        self._stderr = _get_std_output(self._stderr_queue)
+        self._log.debug(f"Read stderr: {self._stderr[:20]}")
 
     def _check_stds(self, stdout=None, stderr=None):
         """Check the stdout and stderr for any errors."""
@@ -515,8 +548,7 @@ class MapdlGrpc(_MapdlCore):
             self._log.debug("MAPDL exited with errors in stderr.")
 
             # Custom errors
-            self._custom_stds_errors(errs)
-            raise MapdlConnectionError(errs)
+            self._raise_custom_stds_errors(errs)
 
     def _parse_stdout(self, stdout=None):
         """Parse the stdout for any errors."""
@@ -527,12 +559,14 @@ class MapdlGrpc(_MapdlCore):
             self._log.debug("MAPDL exited with errors in stdout.")
 
             # Custom errors
-            self._custom_stds_errors(errs)
-            raise MapdlConnectionError(errs)
+            self._raise_custom_stds_errors(errs)
 
     def _parse_std(self, std):
         # check for errors in stderr
         # split the stderr into groups
+        if isinstance(std, list):
+            std = "\n".join(std)
+            std = std.replace("\n\n", "\n")
         groups = std.split("\r\n\r\n")
         errs = []
 
@@ -551,7 +585,7 @@ class MapdlGrpc(_MapdlCore):
             errs = ""
         return errs
 
-    def _custom_stds_errors(self, errs_message):
+    def _raise_custom_stds_errors(self, errs_message):
         """Custom errors for stdout and stderr."""
         if "Only one usage of each socket address" in errs_message:
             raise MapdlConnectionError(
@@ -559,6 +593,9 @@ class MapdlGrpc(_MapdlCore):
                 "Only one usage of each socket address (protocol/network address/port) is normally permitted.\n"
                 f"\nFull error message:\n{errs_message.split('########',1)[0]}"
             )
+
+        else:
+            raise MapdlConnectionError(errs_message)
 
     @property
     def _channel_str(self):
@@ -1051,7 +1088,49 @@ class MapdlGrpc(_MapdlCore):
         self._log.debug("Killing MAPDL server")
         self._ctrl("EXIT")
 
-    def _close_process(self):  # pragma: no cover
+    def _kill_process(self):
+        """Kill process stored in self._mapdl_process"""
+        if self._mapdl_process is not None:
+            self._log.debug("Killing process using subprocess.Popen.terminate")
+            process = self._mapdl_process
+            if process.poll() is not None:
+                # process hasn't terminated
+                process.kill()
+
+    def _kill_child_processes(self, timeout=2):
+        pids = self._pids.copy()
+        pids.reverse()  # First pid is the parent, therefore start by the children (end)
+
+        for pid in pids:
+            self._kill_child_process(pid, timeout=timeout)
+
+    def _kill_child_process(self, pid, timeout=2):
+        """Kill an individual child process, given a pid."""
+        try:
+            self._log.debug(f"Killing MAPDL process: {pid}")
+            t0 = time.time()
+            while time.time() < t0 + timeout:
+                if psutil.pid_exists(pid):
+                    os.kill(pid, 9)
+                    time.sleep(0.5)
+                else:
+                    self._log.debug(f"Process {pid} killed properly.")
+                    break
+            else:
+                self._log.debug(
+                    f"Process {pid} couldn't be killed in {timeout} seconds"
+                )
+
+        except OSError:
+            self._log.debug(
+                f"Failed attempt to kill process: The process with pid {pid} does not exist. Maybe it was already killed?"
+            )
+
+        finally:
+            if not psutil.pid_exists(pid):
+                self._pids.remove(pid)
+
+    def _close_process(self, timeout=2):  # pragma: no cover
         """Close all MAPDL processes.
 
         Notes
@@ -1062,13 +1141,14 @@ class MapdlGrpc(_MapdlCore):
 
         """
         if self._local:
-            for pid in self._pids:
-                try:
-                    self._log.debug(f"Killing MAPDL process: {pid}")
-                    os.kill(pid, 9)
-                    self._pids.remove(pid)
-                except OSError:
-                    pass
+            # killing server process
+            self._kill_server()
+
+            # killing main process (subprocess)
+            self._kill_process()
+
+            # Killing child processes
+            self._kill_child_processes(timeout=timeout)
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
@@ -1078,8 +1158,10 @@ class MapdlGrpc(_MapdlCore):
         processes.
 
         """
+        self._pids = []
+
         for filename in self.list_files():
-            if "cleanup" in filename:
+            if "cleanup" in filename:  # Linux does not seem to generate this file?
                 script = os.path.join(self.directory, filename)
                 with open(script) as f:
                     raw = f.read()
@@ -1089,6 +1171,18 @@ class MapdlGrpc(_MapdlCore):
                 else:
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
+
+        if not self._pids:
+            # For the cases where the cleanup file is not generated,
+            # we relay on the process.
+            parent_pid = self._mapdl_process.pid
+            try:
+                parent = psutil.Process(parent_pid)
+            except psutil.NoSuchProcess:
+                return
+            children = parent.children(recursive=True)
+
+            self._pids = [parent_pid] + [each.pid for each in children]
 
     def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
