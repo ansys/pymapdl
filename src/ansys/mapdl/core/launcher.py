@@ -595,9 +595,14 @@ def _create_queue_for_std(std):
     """Create a queue and thread objects for a given PIPE std"""
 
     def enqueue_output(out, queue):
-        for line in iter(out.readline, b""):
-            queue.put(line)
-        out.close()
+        try:
+            for line in iter(out.readline, b""):
+                queue.put(line)
+            out.close()
+        except ValueError:
+            # When killing main process, a ValueError is show:
+            # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
+            pass
 
     q = Queue()
     t = threading.Thread(target=enqueue_output, args=(std, q))
