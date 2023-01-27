@@ -15,17 +15,22 @@ following instruction.
     pip install -r requirements/requirements_docs.txt
 
 
-The Sphinx configuration is in the file ``conf.py`` in ``doc/source``.
+The Sphinx configuration is in the file 
+`conf.py <https://github.com/pyansys/pymapdl/blob/main/doc/source/conf.py>`_ in ``doc/source``.
+
 
 To run the sphinx tool:
 
-.. code:: bash
+.. code:: pwsh
 
     doc\make.bat html
 
 
-
 There are three types of examples: dynamic, static, and semi-static.
+
+* `Dynamic examples`_
+* `Static examples`_
+* `Semi-dynamic examples`_
 
 
 Dynamic examples
@@ -66,7 +71,7 @@ Semi-dynamic examples
 
 Semi-dynamic examples are RST files that execute Python code using this RST directive:
 
-.. code:: bash
+.. code:: rst
 
     .. jupyter-execute::
     :hide-code:

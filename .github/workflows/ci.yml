@@ -50,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v3.0.1
+        uses: pyansys/actions/doc-style@v3.0.4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -64,7 +64,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10']
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v3.0.1
+        uses: pyansys/actions/build-wheelhouse@v3.0.4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v3.0.1
+        uses: pyansys/actions/build-wheelhouse@v3.0.4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
@@ -588,7 +588,7 @@ jobs:
             ./**/*.whl
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
-            ./**/*.zip
+            ./**/ansys-mapdl-core*.zip
 
       - name: Upload to Public PyPi
         env:
@@ -618,7 +618,7 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v3.0.1
+        uses: pyansys/actions/doc-deploy-stable@v3.0.4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
