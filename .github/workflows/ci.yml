@@ -57,11 +57,12 @@ jobs:
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
     steps:
       - name: "Build wheelhouse and perform smoke test"
         uses: pyansys/actions/build-wheelhouse@v3.0.4
@@ -78,7 +79,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
       - name: "Build wheelhouse and perform smoke test"
@@ -93,10 +94,12 @@ jobs:
     name: "Build documentation"
     runs-on: ubuntu-latest
     needs: doc-style
+    timeout-minutes: 35
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
+      ON_DOCUMENTATION: TRUE
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v3
@@ -259,6 +262,7 @@ jobs:
   build_test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0']
@@ -266,6 +270,7 @@ jobs:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
+      ON_REMOTE: TRUE
 
     steps:
       - name: "Install Git and checkout project"
@@ -422,7 +427,7 @@ jobs:
   build_test_ubuntu:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 20
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
@@ -430,7 +435,7 @@ jobs:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
-      RUN_LOCAL: true
+      ON_LOCAL: true
 
     steps:
       - name: "Install Git and checkout project"
@@ -503,6 +508,8 @@ jobs:
     name: "Local: Build and unit testing on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
+    env:
+      ON_LOCAL: TRUE
 
     steps:
       - uses: actions/checkout@v3
