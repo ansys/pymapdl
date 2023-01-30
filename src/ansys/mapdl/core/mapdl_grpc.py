@@ -1570,6 +1570,9 @@ class MapdlGrpc(_MapdlCore):
         """Stream a local input file to a remote mapdl instance.
         Stream the response back and deserialize the output.
 
+        **This method does not use the APDL command ``/INPUT``**, although
+        it offers a similar functionality to the APDL counterpart.
+
         Parameters
         ----------
         fname : str
@@ -1602,6 +1605,19 @@ class MapdlGrpc(_MapdlCore):
         str
             Response from MAPDL.
 
+        Notes
+        -----
+        This method does not use the APDL ``/INPUT`` command.
+        However its usage is very similar to it. See *Examples* section.
+
+        If you want to use ``/INPUT`` for some reason, although it is not
+        recommended, you can write the desired input file, upload it using
+        :func:`Mapdl.upload <ansys.mapdl.core.Mapdl.upload>`, and then use
+        run command :func:`Mapdl.run('/INPUT,<FILE>,<EXT>) <ansys.mapdl.core.Mapdl.run>`.
+        This does not avoid to use the gRPC input method, but it allows you to
+        use the APDL ``/INPUT`` command from the generated input file.
+        See *Examples* section for more information.
+
         Examples
         --------
         Load a simple ``"ds.dat"`` input file generated from Ansys
@@ -1612,6 +1628,21 @@ class MapdlGrpc(_MapdlCore):
         Load that same file while streaming the output in real-time.
 
         >>> output = mapdl.input('ds.dat', verbose=True)
+
+        Use the default APDL ``/INPUT`` command:
+
+        >>> with open('myinput.inp','w') as fid:
+        >>>     fid.write("/finish\n/prep7\n/com, my commands")
+        >>> with open('inputtrigger.inp','w') as fid:
+        >>>     fid.write("/input,myinput,inp")
+        >>> mapdl.upload("myinput.inp")
+        Uploading myinput.inp: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 5.86kB/s]
+        'myinput.inp'
+        >>> mapdl.upload("inputtrigger.inp")
+        Uploading inputtrigger.inp: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 32.0/32.0 [00:00<00:00, 8.92kB/s]
+        'inputtrigger.inp'
+        >>> with mapdl.non_interactive:
+            mapdl.run("/input,inputtrigger,inp") # This inputs 'myinput.inp'
 
         """
         # always check if file is present as the grpc and MAPDL errors
