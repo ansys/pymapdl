@@ -1,4 +1,16 @@
 #!/bin/bash
+echo "Activating local environment"
+FILE=./.venv/bin/activate
+if test -f "$FILE"; then
+    echo "Virtual environment ($FILE) exists."
+    echo "Activating..."
+    source $FILE
+    echo "Virtual environment activated"
+else
+    echo "Virtual environment was not found."
+fi
+
+source ./.venv/bin/activate
 
 echo "Checking if the ANSYSLMD_LICENSE_FILE variable is defined"
 
