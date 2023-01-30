@@ -1631,10 +1631,8 @@ class MapdlGrpc(_MapdlCore):
 
         Use the default APDL ``/INPUT`` command:
 
-        >>> with open('myinput.inp','w') as fid:
-        >>>     fid.write("/finish\n/prep7\n/com, my commands")
-        >>> with open('inputtrigger.inp','w') as fid:
-        >>>     fid.write("/input,myinput,inp")
+        >>> with open('myinput.inp','w').write("/finish\n/prep7\n/com, my commands")
+        >>> with open('inputtrigger.inp','w').write("/input,myinput,inp")
         >>> mapdl.upload("myinput.inp")
         Uploading myinput.inp: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 5.86kB/s]
         'myinput.inp'
