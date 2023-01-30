@@ -73,9 +73,19 @@ jobs:
       with:
         labels: BUG
 
+  label-syncer-two:
+    name: Re-sync labels
+    needs: [labeler]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: micnncim/action-label-syncer@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   commenter:
     runs-on: ubuntu-latest
-    needs: labeler
+    needs: [label-syncer-two]
     permissions:
       pull-requests: write
     steps:
