@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 
 # sphinx_gallery_thumbnail_number = 3
 import numpy as np
+import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -66,19 +67,41 @@ cut_area = mapdl.asba(rect_anum, "ALL")  # cut all areas except the plate
 
 # mapdl.aplot(vtk=True, show_line_numbering=True)
 mapdl.lsla("S")
-mapdl.lplot(vtk=True, show_keypoint_numbering=True)
+
+plotter = pv.Plotter(shape=(1, 3))
+
+plotter.subplot(0, 0)
+mapdl.lplot(
+    vtk=True, show_keypoint_numbering=True, plotter=plotter, return_plotter=True
+)
 mapdl.lsel("all")
 
 # plot the area using vtk/pyvista
-mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos="xy")
+plotter.subplot(0, 1)
+mapdl.aplot(
+    vtk=True,
+    show_area_numbering=True,
+    show_lines=True,
+    cpos="xy",
+    plotter=plotter,
+    return_plotter=True,
+)
 
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
 # Checking volume plot
-mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
-
+plotter.subplot(0, 2)
+mapdl.vplot(
+    vtk=True,
+    show_lines=True,
+    show_axes=True,
+    smooth_shading=True,
+    plotter=plotter,
+    return_plotter=True,
+)
+plotter.show()
 
 ###############################################################################
 # Meshing
