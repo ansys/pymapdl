@@ -387,8 +387,8 @@ def test_parameter_with_spaces(mapdl):
     mapdl.run(f"*SET,SIMULATION,'{string_}'")
     mapdl.parsav()
     mapdl.clear()
-    mapdl.parres('NEW',fname='file',ext='parm')
+    mapdl.parres("NEW", fname="file", ext="parm")
     assert mapdl.starstatus()
     assert mapdl.parameters
     assert "simulation" in mapdl.parameters
-    assert string_.strip() == mapdl.parameters['SIMULATION']
+    assert string_.strip() == mapdl.parameters["SIMULATION"]
