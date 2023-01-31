@@ -1036,6 +1036,8 @@ class MapdlGrpc(_MapdlCore):
         self._log.debug("Exiting MAPDL")
 
         if self._local:
+            self._cache_pids()  # Recache processes
+
             if os.name == "nt":
                 self._kill_server()
             self._close_process()
