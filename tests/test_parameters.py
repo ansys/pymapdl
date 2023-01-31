@@ -380,3 +380,15 @@ def test_3d_array(mapdl):
         mapdl.parameters["myarr"],
         np.array([[[100.0, 200.0], [0.0, 300.0]], [[0.0, 400.0], [0.0, 0.0]]]),
     )
+
+
+def test_parameter_with_spaces(mapdl):
+    string_ = "DEV:F10X, front weights     "
+    mapdl.run(f"*SET,SIMULATION,'{string_}'")
+    mapdl.parsav()
+    mapdl.clear()
+    mapdl.parres('NEW',fname='file',ext='parm')
+    assert mapdl.starstatus()
+    assert mapdl.parameters
+    assert "simulation" in mapdl.parameters
+    assert string_.strip() == mapdl.parameters['SIMULATION']

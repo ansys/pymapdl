@@ -699,11 +699,11 @@ def interp_star_status(status):
 
         # line will contain either a character, scalar, or array
         name = items[0]
-        if len(items) == 2:
-            if items[1][-9:] == "CHARACTER":
-                parameters[name] = {"type": "CHARACTER", "value": items[1][:-9]}
-            # else:
-            # log.warning(
+        if len(items) == 2 or "CHARACTER" in items[-1].upper():
+            name = line[:32].strip()
+            value = line.replace(items[-1], "")[33:].strip()
+            parameters[name] = {"type": "CHARACTER", "value": value}
+
         elif len(items) == 3:
             if items[2] == "SCALAR":
                 value = float(items[1])
@@ -713,7 +713,6 @@ def interp_star_status(status):
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
-                # Probably I could get rid of this loop
                 myarray[
                     int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
                 ] = float(items[3])
