@@ -1634,10 +1634,10 @@ class MapdlGrpc(_MapdlCore):
         >>> with open('myinput.inp','w').write("/finish\\n/prep7\\n/com, my commands")
         >>> with open('inputtrigger.inp','w').write("/input,myinput,inp")
         >>> mapdl.upload("myinput.inp")
-        Uploading myinput.inp: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 5.86kB/s]
+        Uploading myinput.inp: 100%|█████████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 5.86kB/s]
         'myinput.inp'
         >>> mapdl.upload("inputtrigger.inp")
-        Uploading inputtrigger.inp: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████| 32.0/32.0 [00:00<00:00, 8.92kB/s]
+        Uploading inputtrigger.inp: 100%|████████████████████████████████████████████| 32.0/32.0 [00:00<00:00, 8.92kB/s]
         'inputtrigger.inp'
         >>> with mapdl.non_interactive:
                 mapdl.run("/input,inputtrigger,inp") # This inputs 'myinput.inp'
