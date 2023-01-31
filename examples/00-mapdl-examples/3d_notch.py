@@ -68,12 +68,14 @@ cut_area = mapdl.asba(rect_anum, "ALL")  # cut all areas except the plate
 # mapdl.aplot(vtk=True, show_line_numbering=True)
 mapdl.lsla("S")
 
+pv.set_jupyter_backend("pythreejs")
 plotter = pv.Plotter(shape=(1, 3))
 
 plotter.subplot(0, 0)
 mapdl.lplot(
     vtk=True, show_keypoint_numbering=True, plotter=plotter, return_plotter=True
 )
+plotter.add_title("Line Plot", font_size=12)
 mapdl.lsel("all")
 
 # plot the area using vtk/pyvista
@@ -86,6 +88,7 @@ mapdl.aplot(
     plotter=plotter,
     return_plotter=True,
 )
+plotter.add_title("Area Plot", font_size=12)
 
 # Next, extrude the area to create volume
 thickness = 0.01
@@ -101,6 +104,7 @@ mapdl.vplot(
     plotter=plotter,
     return_plotter=True,
 )
+plotter.add_title("Volume Plot", font_size=12)
 plotter.show()
 
 ###############################################################################
