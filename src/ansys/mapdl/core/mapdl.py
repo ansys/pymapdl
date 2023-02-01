@@ -1,5 +1,6 @@
 """Module to control interaction with MAPDL through Python"""
 
+import atexit
 from functools import wraps
 import glob
 import logging
@@ -3220,6 +3221,7 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
+    @atexit.register
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
         if self._cleanup:
