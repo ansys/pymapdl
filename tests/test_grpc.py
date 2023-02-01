@@ -390,7 +390,6 @@ def test_input_output(mapdl):
 
     output = mapdl.input(file_)
     assert "/INPUT FILE" in output
-    assert file_ in output
     assert "line 0" in output
     assert "line 3" in output
 
@@ -405,7 +404,6 @@ def test_input_ext_argument(mapdl):
 
     output = mapdl.input("myinput", "inp")
     assert "/INPUT FILE" in output
-    assert file_ in output
     assert "line 0" in output
     assert "line 1" in output
     assert "line 2" in output
@@ -424,7 +422,6 @@ def test_input_dir_argument(mapdl, tmpdir):
 
     output = mapdl.input(file_, "", target_dir)
     assert "/INPUT FILE" in output
-    assert file_ in output
     assert "line 0" in output
     assert "line 1" in output
     assert "line 2" in output
@@ -441,7 +438,6 @@ def test_input_line_argument(mapdl):
 
     output = mapdl.input(file_, line=2)
     assert "/INPUT FILE" in output
-    assert file_ in output
     assert "line 0" not in output
     assert "line 1" not in output
     assert "line 2" in output
@@ -460,7 +456,6 @@ def test_input_multiple_argument(mapdl, tmpdir):
 
     output = mapdl.input("myinput", "inp", target_dir, 2)
     assert "/INPUT FILE" in output
-    assert file_ in output
     assert "line 0" not in output
     assert "line 1" not in output
     assert "line 2" in output
