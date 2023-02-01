@@ -468,8 +468,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
         assert os.path.isfile(filename)
 
 
-@skip_in_cloud
-@skip_on_ci
+@skip_if_not_local
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
