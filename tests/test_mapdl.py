@@ -39,6 +39,7 @@ skip_no_xserver = pytest.mark.skipif(
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
+
 skip_if_not_local = pytest.mark.skipif(
     not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
     reason="Skipping if not in local",
