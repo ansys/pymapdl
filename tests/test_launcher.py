@@ -11,6 +11,7 @@ from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
+    _is_ubuntu,
     _validate_MPI,
     _verify_version,
     _version_from_path,
@@ -53,6 +54,10 @@ paths = [
     ("C:/Program Files/ANSYS Inc/v202/ansys/bin/win64/ANSYS202.exe", 202),
     ("/usr/ansys_inc/v211/ansys/bin/mapdl", 211),
 ]
+
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
 
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
@@ -525,3 +530,10 @@ def test_version(mapdl):
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
+
+
+def test_is_ubuntu():
+    if os.environ.get("ON_UBUNTU", "false").lower() == "true":
+        assert _is_ubuntu()
+    else:
+        assert not _is_ubuntu()
