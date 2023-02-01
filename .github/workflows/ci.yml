@@ -316,12 +316,13 @@ jobs:
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
+        options: "-u=0:0 --entrypoint /bin/bash"
         run: |
           head -n 3 .ci/start_mapdl.sh
-          echo --entrypoint '/bin/bash'
+          echo -e "\t--entrypoint '/bin/bash' \\"
           head -n 14 .ci/start_mapdl.sh | tail -n 11
-          echo -w /jobs \ -u=0:0 
-          echo $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt &
+          echo -e "\t-w /jobs \\ \n \t-u=0:0 \\"
+          echo -e "\t$MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt & \\"
           tail -n 2 .ci/start_mapdl.sh
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
