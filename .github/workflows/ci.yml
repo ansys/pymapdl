@@ -316,7 +316,7 @@ jobs:
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
       - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
-        run: 
+        run: |
           head -n 3 .ci/start_mapdl.sh
           echo "--entrypoint '/bin/bash' \"
           head -n 14 .ci/start_mapdl.sh | tail -n 4
