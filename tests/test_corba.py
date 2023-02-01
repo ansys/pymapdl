@@ -561,22 +561,22 @@ def test_cyclic_solve(mapdl_corba, cleared):
         )
     ),
 )
-def test_load_table(mapdl, dim_rows, dim_cols):
+def test_load_table(mapdl_corba, dim_rows, dim_cols):
     my_conv = np.random.rand(dim_rows, dim_cols)
     my_conv[:, 0] = np.arange(dim_rows)
     my_conv[0, :] = np.arange(dim_cols)
 
-    mapdl.load_table("my_conv", my_conv)
+    mapdl_corba.load_table("my_conv", my_conv)
     if (
         dim_cols == 2
     ):  # because mapdl output arrays with shape (x,1) not (X,) See issue: #883
         assert np.allclose(
-            mapdl.parameters["my_conv"],
+            mapdl_corba.parameters["my_conv"],
             my_conv[1:, 1].reshape((dim_rows - 1, 1)),
             1e-7,
         )
     else:
-        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], 1e-7)
+        assert np.allclose(mapdl_corba.parameters["my_conv"], my_conv[1:, 1:], 1e-7)
 
 
 def test_mode_corba(mapdl_corba):
