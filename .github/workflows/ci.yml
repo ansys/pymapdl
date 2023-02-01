@@ -319,10 +319,10 @@ jobs:
         run: |
           head -n 3 .ci/start_mapdl.sh
           echo "--entrypoint '/bin/bash' \"
-          head -n 14 .ci/start_mapdl.sh | tail -n +4
+          head -n 14 .ci/start_mapdl.sh | tail -n 4 | sh
           echo "-w /jobs \ -u=0:0 \"
           echo "$MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt &"
-          tail -n 17 .ci/start_mapdl.sh
+          tail -n 17 .ci/start_mapdl.sh | sh
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
