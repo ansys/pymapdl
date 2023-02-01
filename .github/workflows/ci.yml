@@ -321,7 +321,8 @@ jobs:
           head -n 3 .ci/start_mapdl.sh > tmpfile.sh
           echo -e "    --entrypoint '/bin/bash' \\" >> tmpfile.sh
           head -n 14 .ci/start_mapdl.sh | tail -n 11 >> tmpfile.sh
-          echo -e "    -w /jobs \\ \n    -u=0:0 \\" >> tmpfile.sh
+          echo -e "    -w /jobs \\" >> tmpfile.sh
+          echo -e "    -u=0:0 \\" >> tmpfile.sh
           echo -e "    $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt & \\" >> tmpfile.sh
           tail -n 2 .ci/start_mapdl.sh >> tmpfile.sh
           bash tmpfile.sh
