@@ -97,7 +97,11 @@ def _is_ubuntu():
         return False
 
     # gcc is installed by default except when on docker.
-    proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        "awk -F= '/^NAME/{print $2}' /etc/os-release",
+        shell=True,
+        stdout=subprocess.PIPE,
+    )
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
