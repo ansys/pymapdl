@@ -161,6 +161,7 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
+        atexit.register(self.__del__)  # registering to exit properly
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -3221,7 +3222,6 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
-    @atexit.register
     def __del__(self):  # pragma: no cover
         """Clean up when complete"""
         if self._cleanup:
