@@ -233,7 +233,6 @@ def test_license_type_keyword_names():
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@skip_on_ci
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
