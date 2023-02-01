@@ -324,7 +324,7 @@ jobs:
           echo -e "    -w /jobs \\ \n    -u=0:0 \\" >> tmpfile.sh
           echo -e "    $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt & \\" >> tmpfile.sh
           tail -n 2 .ci/start_mapdl.sh >> tmpfile.sh
-          tmpfile.sh
+          bash tmpfile.sh
           rm tmpfile.sh
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
