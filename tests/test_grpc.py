@@ -380,3 +380,104 @@ def test_mode_corba(mapdl):
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
+
+
+def test_input_output(mapdl):
+    file_ = "myinput.inp"
+    with open(file_, "w") as fid:
+        for i in range(4):
+            fid.write(f"/com, line {i}\n")
+
+    output = mapdl.input(file_)
+    assert "/INPUT FILE" in output
+    assert "line 0" in output
+    assert "line 3" in output
+
+    os.remove(file_)
+
+
+def test_input_ext_argument(mapdl):
+    file_ = "myinput.inp"
+    with open(file_, "w") as fid:
+        for i in range(4):
+            fid.write(f"/com, line {i}\n")
+
+    output = mapdl.input("myinput", "inp")
+    assert "/INPUT FILE" in output
+    assert "line 0" in output
+    assert "line 1" in output
+    assert "line 2" in output
+    assert "line 3" in output
+
+    os.remove(file_)
+
+
+def test_input_dir_argument(mapdl, tmpdir):
+    file_ = "myinput.inp"
+    target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
+    file_path = os.path.join(target_dir, file_)
+    with open(file_path, "w") as fid:
+        for i in range(4):
+            fid.write(f"/com, line {i}\n")
+
+    output = mapdl.input(file_, "", target_dir)
+    assert "/INPUT FILE" in output
+    assert "line 0" in output
+    assert "line 1" in output
+    assert "line 2" in output
+    assert "line 3" in output
+
+    os.remove(file_path)
+
+
+def test_input_line_argument(mapdl):
+    file_ = "myinput.inp"
+    with open(file_, "w") as fid:
+        for i in range(4):
+            fid.write(f"/com, line {i}\n")
+
+    output = mapdl.input(file_, line=2)
+    assert "/INPUT FILE" in output
+    assert "line 0" not in output
+    assert "line 1" not in output
+    assert "line 2" in output
+    assert "line 3" in output
+
+    os.remove(file_)
+
+
+def test_input_multiple_argument(mapdl, tmpdir):
+    file_ = "myinput.inp"
+    target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
+    file_path = os.path.join(target_dir, file_)
+    with open(file_path, "w") as fid:
+        for i in range(4):
+            fid.write(f"/com, line {i}\n")
+
+    output = mapdl.input("myinput", "inp", target_dir, 2)
+    assert "/INPUT FILE" in output
+    assert "line 0" not in output
+    assert "line 1" not in output
+    assert "line 2" in output
+    assert "line 3" in output
+
+    os.remove(file_path)
+
+
+def test_input_log_argument(mapdl):
+    with pytest.raises(ValueError, match="'log' argument is not supported"):
+        mapdl.input(log="asdf")
+
+
+def test_input_compatibility_api_change(mapdl):
+    """This test is because the API change happened in 0.65 to homogenise the APDL command
+    with the gRPC method."""
+
+    with pytest.raises(ValueError, match="Only strings are allowed in 'ext'"):
+        mapdl.input(ext=1)
+
+    with pytest.raises(ValueError, match="Only strings are allowed in 'dir_'"):
+        mapdl.input(dir_=1)
+
+    with pytest.raises(ValueError, match="A file name must be supplied."):
+        mapdl.input()
