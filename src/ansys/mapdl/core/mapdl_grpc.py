@@ -312,11 +312,6 @@ class MapdlGrpc(_MapdlCore):
         self.__distributed = None
         self._remote_instance = remote_instance
 
-        if ip is None:
-            self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        else:
-            self._local = ip
-
         if channel is not None:
             if ip is not None or port is not None:
                 raise ValueError(
@@ -349,6 +344,7 @@ class MapdlGrpc(_MapdlCore):
         self._jobname = start_parm.get("jobname", "file")
         self._path = start_parm.get("run_location", None)
         self._busy = False  # used to check if running a command on the server
+        self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
             self._local = start_parm["local"]
         self._health_response_queue = None

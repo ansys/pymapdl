@@ -475,7 +475,7 @@ class ParameterDefinition:
             response = response.splitlines()[-1]
         if "=" in response:
             return response.split("=")[1].strip()
-        return ""
+        return response
 
     def parres(self, lab="", fname="", ext="", **kwargs):
         """Reads parameters from a file.
