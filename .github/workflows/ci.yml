@@ -310,27 +310,27 @@ jobs:
 
       - name: "Pull, launch, and validate MAPDL service"
         run: .ci/start_mapdl.sh
-        if: ${{ !contains( matrix.mapdl-version, 'ubuntu') }}
+        if:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
-      - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
-        run: |
-          touch tmpfile.sh
-          head -n 3 .ci/start_mapdl.sh > tmpfile.sh
-          echo -e "    --entrypoint '/bin/bash' \\" >> tmpfile.sh
-          head -n 14 .ci/start_mapdl.sh | tail -n 11 >> tmpfile.sh
-          echo -e "    -w /jobs \\" >> tmpfile.sh
-          echo -e "    -u=0:0 \\" >> tmpfile.sh
-          echo -e "    $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt & \\" >> tmpfile.sh
-          tail -n 2 .ci/start_mapdl.sh >> tmpfile.sh
-          bash tmpfile.sh
-          rm tmpfile.sh
-        if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
+      # - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
+      #   run: |
+      #     touch tmpfile.sh
+      #     head -n 3 .ci/start_mapdl.sh > tmpfile.sh
+      #     echo -e "    --entrypoint '/bin/bash' \\" >> tmpfile.sh
+      #     head -n 14 .ci/start_mapdl.sh | tail -n 11 >> tmpfile.sh
+      #     echo -e "    -w /jobs \\" >> tmpfile.sh
+      #     echo -e "    -u=0:0 \\" >> tmpfile.sh
+      #     echo -e "    $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2 > log.txt & \\" >> tmpfile.sh
+      #     tail -n 2 .ci/start_mapdl.sh >> tmpfile.sh
+      #     bash tmpfile.sh
+      #     rm tmpfile.sh
+      #   if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
+      #   env:
+      #     LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+      #     MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
 
 
       - name: "Unit testing requirements installation"
@@ -435,8 +435,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     container:
-      image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
+      image: ghcr.io/pyansys/mapdl:v22.2.0
+      options: "-u=0:0 --entrypoint /bin/bash -w /jobs"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
