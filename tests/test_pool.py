@@ -24,6 +24,12 @@ skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
 
+
+skip_if_not_local = pytest.mark.skipif(
+    not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
+    reason="Skipping if not in local",
+)
+
 MAPDL194PATH = "/usr/ansys_inc/v194/ansys/bin/mapdl"
 skip_requires_194 = pytest.mark.skipif(
     not os.path.isfile(MAPDL194PATH), reason="Requires MAPDL 194"
@@ -44,7 +50,9 @@ for rver in valid_rver:
 
 @pytest.fixture(scope="module")
 def pool():
-    mapdl_pool = LocalMapdlPool(4, exec_file=EXEC_FILE)
+    mapdl_pool = LocalMapdlPool(
+        4, license_server_check=False, start_timeout=30, exec_file=EXEC_FILE
+    )
     yield mapdl_pool
 
     ##########################################################################
@@ -73,8 +81,7 @@ def test_invalid_exec():
         mapdl_pool = LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
 
 
-@skip_on_ci
-@skip_launch_mapdl
+@skip_if_not_local
 def test_heal(pool):
     pool_sz = len(pool)
     pool[0].exit()
