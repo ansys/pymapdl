@@ -39,6 +39,7 @@ skip_no_xserver = pytest.mark.skipif(
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
+
 skip_if_not_local = pytest.mark.skipif(
     not (os.environ.get("ON_LOCAL", "").upper() == "TRUE"),
     reason="Skipping if not in local",
@@ -468,8 +469,7 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
         assert os.path.isfile(filename)
 
 
-@skip_in_cloud
-@skip_on_ci
+@skip_if_not_local
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
