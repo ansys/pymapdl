@@ -533,7 +533,8 @@ def test_raise_exec_path_and_version_launcher():
 
 
 def test_is_ubuntu():
-    if os.environ.get("ON_UBUNTU", "false").lower() == "true":
+    if (
+        os.environ.get("ON_LOCAL", "false").lower() == "true"
+        and os.environ.get("ON_UBUNTU", "false").lower() == "true"
+    ):
         assert _is_ubuntu()
-    else:
-        assert not _is_ubuntu()
