@@ -1478,6 +1478,8 @@ def launch_mapdl(
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
