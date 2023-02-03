@@ -11,6 +11,7 @@ from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
+    _is_ubuntu,
     _validate_MPI,
     _verify_version,
     _version_from_path,
@@ -58,11 +59,14 @@ skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
 )
 
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
 skip_on_not_local = pytest.mark.skipif(
     not os.environ.get("RUN_LOCAL", "").upper() == "TRUE",
     reason="Skipping because not on local",
 )
-
 
 start_timeout = 30  # Seconds
 
@@ -526,3 +530,11 @@ def test_version(mapdl):
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
+
+
+def test_is_ubuntu():
+    if (
+        os.environ.get("ON_LOCAL", "false").lower() == "true"
+        and os.environ.get("ON_UBUNTU", "false").lower() == "true"
+    ):
+        assert _is_ubuntu()
