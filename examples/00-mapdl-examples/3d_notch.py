@@ -68,44 +68,47 @@ cut_area = mapdl.asba(rect_anum, "ALL")  # cut all areas except the plate
 # mapdl.aplot(vtk=True, show_line_numbering=True)
 mapdl.lsla("S")
 
-pv.set_jupyter_backend("pythreejs")
-plotter = pv.Plotter(shape=(1, 3))
+pv.set_jupyter_backend("panel")
+plotter1 = pv.Plotter(shape=(1, 3), notebook=True)
 
-plotter.subplot(0, 0)
 mapdl.lplot(
-    vtk=True, show_keypoint_numbering=True, plotter=plotter, return_plotter=True
+    vtk=True,
+    show_keypoint_numbering=True,
+    title="Line Plot",
+    font_size=12,
+    plotter=plotter1,
 )
-plotter.add_title("Line Plot", font_size=12)
 mapdl.lsel("all")
 
 # plot the area using vtk/pyvista
-plotter.subplot(0, 1)
+plotter1.subplot(0, 1)
 mapdl.aplot(
     vtk=True,
-    show_area_numbering=True,
-    show_lines=True,
+    # show_area_numbering=True,
+    # show_lines=True,
     cpos="xy",
-    plotter=plotter,
-    return_plotter=True,
+    title="Area Plot",
+    font_size=12,
+    plotter=plotter1,
 )
-plotter.add_title("Area Plot", font_size=12)
 
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
 # Checking volume plot
-plotter.subplot(0, 2)
+plotter1.subplot(0, 2)
 mapdl.vplot(
     vtk=True,
     show_lines=True,
     show_axes=True,
     smooth_shading=True,
-    plotter=plotter,
-    return_plotter=True,
+    title="Volume Plot",
+    font_size=12,
+    plotter=plotter1,
 )
-plotter.add_title("Volume Plot", font_size=12)
-plotter.show()
+
+plotter1.show(return_viewer=True)
 
 ###############################################################################
 # Meshing
@@ -130,8 +133,10 @@ plate_esize = 0.01
 # line and area numbers identified using aplot
 
 mapdl.asel("S", "AREA", vmin=1, vmax=1)
-mapdl.aplot(vtk=True, show_line_numbering=True)
 
+plotter2 = pv.Plotter(shape=(1, 2), notebook=True)
+
+mapdl.aplot(vtk=True, show_line_numbering=True, plotter=plotter2)
 
 mapdl.lsel("NONE")
 for line in [7, 8, 20, 21]:
@@ -151,8 +156,11 @@ if esize > thickness / 2:
 mapdl.esize()  # this is tough to automate
 mapdl.et(1, "SOLID186")
 mapdl.vsweep("all")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
 
+plotter2.subplot(0, 1)
+mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, plotter=plotter2)
+
+plotter2.show()
 
 ###############################################################################
 # Material Properties and Boundary Conditions

@@ -301,7 +301,7 @@ def _general_plotter(
         .com/pyansys/pyansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
-        If a :class:`pyvista.Plotter` not is provided, then creates its
+        If a :class:`pyvista.Plotter` is not provided, then creates its
         own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
         ``notebook``, ``off_screen`` and ``theme`` are ignored, since
         they should be set when instantiated the provided plotter.
