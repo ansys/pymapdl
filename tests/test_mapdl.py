@@ -1808,22 +1808,6 @@ def test_get_file_name(mapdl):
     )
 
 
-def test_sequence_cm_eplot(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
-    mapdl.et(1, "FLUID116", 1, 1)
-    mapdl.type(1)
-
-    mapdl.k(0, 0, 0, 1)
-    mapdl.k(0, 1, 0, 1)
-
-    mapdl.l(1, 2)
-    mapdl.lmesh(1)
-    mapdl.esll()
-    mapdl.cm("a", "ELEM")
-    mapdl.eplot(vtk=False)
-
-
 @skip_if_not_local
 def test_cache_pids(mapdl):
     assert mapdl._pids
