@@ -25,7 +25,11 @@
 	"postCreateCommand": "/bin/bash ./.devcontainer/script.sh", //"'pkill -9 -f ansys_inc/v222/ansys'",
 
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "mapdl",
+	"remoteUser": "root",
+	"updateRemoteUserUID": true,
+	"containerUser": "mapdl",
+
+	// "containerUser": "root",
 	"customizations": {
 		// Configure properties specific to Codespaces.
 		"codespaces": {
