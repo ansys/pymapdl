@@ -36,6 +36,16 @@
 			"openFiles": [
 				".devcontainer/README.rst"
 			]
+		},
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"ms-python.python",
+				"LittleFoxTeam.vscode-python-test-adapter",
+				"hbenl.vscode-test-explorer",
+				"VisualStudioExptTeam.vscodeintellicode",
+				"njpwerner.autodocstring"
+			]
 		}
 	}
 }
