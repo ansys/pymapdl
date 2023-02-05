@@ -29,6 +29,7 @@ services:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - PYANSYS_OFF_SCREEN=true
     image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
+    user: "0:0"
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
       - ../:/local:cached

@@ -27,9 +27,6 @@
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "root",
 	"updateRemoteUserUID": true,
-	"containerUser": "mapdl",
-
-	// "containerUser": "root",
 	"customizations": {
 		// Configure properties specific to Codespaces.
 		"codespaces": {
@@ -39,12 +36,19 @@
 		},
 		"vscode": {
 			"extensions": [
+				"hbenl.vscode-test-explorer",
+				"LittleFoxTeam.vscode-python-test-adapter",
 				"ms-azuretools.vscode-docker",
 				"ms-python.python",
-				"LittleFoxTeam.vscode-python-test-adapter",
-				"hbenl.vscode-test-explorer",
+				"ms-vscode-remote.remote-containers",
+				"ms-vscode-remote.remote-ssh-edit",
+				"ms-vscode-remote.remote-ssh",
+				"ms-vscode-remote.remote-wsl"
+				"ms-vscode-remote.vscode-remote-extensionpack",
+				"ms-vscode.remote-explorer",
+				"njpwerner.autodocstring",
 				"VisualStudioExptTeam.vscodeintellicode",
-				"njpwerner.autodocstring"
+				"yzhang.markdown-all-in-one",
 			]
 		}
 	}
