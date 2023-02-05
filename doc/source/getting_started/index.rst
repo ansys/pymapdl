@@ -20,6 +20,7 @@ For more information on getting a licensed copy of Ansys, visit
    using_julia
    faq
    contribution
+   make_container
    decontainer_link
 
 

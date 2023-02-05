@@ -1,4 +1,5 @@
 
+
 ===========================================
 Ansys PyMAPDL Developing-on-Container Guide
 ===========================================
@@ -12,6 +13,16 @@ or `Codespaces <https://github.com/features/codespaces>`_.
 The files for setting up the container can be found in the 
 `.devcontainer directory <https://github.com/pyansys/pymapdl/tree/main/.devcontainer>`_.
 
+About the MAPDL container
+=========================
+
+Because MAPDL software is not open source, the GPL license does not allow us to
+distribute a docker container to users.
+Having a docker container with MAPDL installed in it a must use any of the development
+methods mentioned on this section.
+If you want to build your own docker image, visit the following link
+:ref:`ref_create_mapdl_docker_container`.
+
 
 Using a Remote Container
 ========================
@@ -23,7 +34,7 @@ To use remote containers locally, you need to install:
   It is recommended to use Windows Subsystem Linux (WSL) backend to run docker containers.
   See `https://code.visualstudio.com/docs/devcontainers/containers#_getting-started`_ for
   more information.
-* `Remove Development VS Code extension <https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack>`_
+* `Remove Development VS Code extension pack <https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack>`_
 
 Once you have everything installed you can open the current folder (or repository) using
 ``ctr/cmd`` + ``shift`` + ``p`` to open the VSCode *Command palette*.
