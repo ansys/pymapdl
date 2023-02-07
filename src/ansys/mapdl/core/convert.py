@@ -358,7 +358,6 @@ def _convert(
     print_com=True,
     only_commands=False,
 ):
-
     if only_commands:
         auto_exit = False
         add_imports = False
@@ -517,7 +516,6 @@ class FileTranslator:
 
         """
         if self.cleanup_output:
-
             try:
                 import autopep8
             except ModuleNotFoundError:  # pragma: no cover
