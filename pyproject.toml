@@ -67,7 +67,7 @@ tests = [
 doc = [
     "Sphinx==6.1.3",
     "ansys-dpf-core==0.7.2",
-    "git+https://github.com/pyansys/pymapdl-reader@main",
+    "ansys-mapdl-reader@git+https://github.com/pyansys/pymapdl-reader",
     "ansys-sphinx-theme==0.8.1",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
