@@ -220,7 +220,6 @@ class LicenseChecker:
         notification_time = time.time() + notify_at_second
         notification_bool = True
         while time.time() < max_time:
-
             if self.stop:  # pragma: no cover
                 LOG.debug("The license checker has received a stop signal.")
                 raise Exception("The license checker has been stopped.")
