@@ -96,12 +96,15 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default except when on docker.
-    proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        "awk -F= '/^NAME/{print $2}' /etc/os-release",
+        shell=True,
+        stdout=subprocess.PIPE,
+    )
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
-    # try lsb_release as this is more reliable
+    # try lsb_release as this is more reliable, but not always available.
     try:
         import lsb_release
 
