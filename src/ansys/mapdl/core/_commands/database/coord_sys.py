@@ -14,7 +14,7 @@ class CoordinateSystem:
         thzx="",
         par1="",
         par2="",
-        **kwargs
+        **kwargs,
     ):
         """Defines a local coordinate system relative to the active coordinate
 
@@ -449,7 +449,7 @@ class CoordinateSystem:
         thzx="",
         par1="",
         par2="",
-        **kwargs
+        **kwargs,
     ):
         """Defines a local coordinate system by a location and orientation.
 

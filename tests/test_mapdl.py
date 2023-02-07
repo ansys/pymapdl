@@ -168,7 +168,6 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
 
 @pytest.mark.skip_grpc
 def test_internal_name_grpc(mapdl):
-
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
     assert "GRPC" in mapdl.name
@@ -1243,7 +1242,6 @@ def test_get_file_path(mapdl, tmpdir):
     ],
 )
 def test_tbft(mapdl, tmpdir, option2, option3, option4):
-
     fname = "expdata.dat"
     dirpath = tmpdir.mkdir("tmpdir")
     fpath = dirpath.join(fname)
@@ -1785,7 +1783,6 @@ def test_post_mortem_checks_no_process(mapdl):
 
 
 def test_avoid_non_interactive(mapdl):
-
     with mapdl.non_interactive:
         mapdl.com("comment A")
         mapdl.com("comment B", avoid_non_interactive=True)
