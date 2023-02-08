@@ -271,7 +271,6 @@ RUN_BATCH = False
 
 
 def compute_stress_con(ratio):
-
     notch_depth = ratio * width / 2
 
     mapdl.clear()

@@ -544,7 +544,8 @@ class SpecialPurpose:
 
             Move the low-edge component nodes to precisely match the high-edge component nodes - MSUP
 
-            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m"""
+            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m
+        """
         command = f"CYCOPT,{option},{value1},{value2},{value3},{value4},{value5},{value6},{value7}"
         return self.run(command, **kwargs)
 
