@@ -2,6 +2,8 @@ name: Merge to main
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [dev-docs-publish]
   push:
     tags:
       - "*"
@@ -17,12 +19,17 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ github.event.client_payload.ref }}
+
       - name: Deploy the latest documentation
         uses: pyansys/actions/doc-deploy-dev@v3.0.7
         with:        
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           workflow: ci.yml
+          run: ${{ github.event.client_payload.run }}  # Not implemented yet.
           commit: ${{github.event.pull.before}}
 
   update_coverage:

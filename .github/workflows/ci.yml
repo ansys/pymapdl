@@ -576,9 +576,20 @@ jobs:
           path: ./windows_local.xml
 
 
+  dev_docs_dispatch:
+    needs: [smoke-tests, docs_build, build_test, build_test_ubuntu]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: dev-docs-publish
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}",  "run": "${{ github.run_id }}"}'
+
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, smoke-tests, macos-build]
+    needs: [smoke-tests, docs_build, build_test, build_test_ubuntu, macos-build]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
