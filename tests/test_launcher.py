@@ -376,7 +376,6 @@ def test_warn_uncommon_executable_path():
 
 
 def test_env_injection():
-
     assert update_env_vars(None, None) is None
 
     assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
@@ -397,7 +396,6 @@ def test_env_injection():
 
 @pytest.mark.requires_gui
 def test_open_gui(mapdl):
-
     mapdl.open_gui()
     mapdl.open_gui(include_result=True)
     mapdl.open_gui(inplace=True)
