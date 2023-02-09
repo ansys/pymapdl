@@ -65,10 +65,10 @@ tests = [
     "pytest-rerunfailures==11.0",
 ]
 doc = [
-    "Sphinx==6.1.3",
+    "Sphinx==5.3.0",
     "ansys-dpf-core==0.7.2",
     "ansys-mapdl-reader==0.52.9",
-    "ansys-sphinx-theme==0.8.1",
+    "ansys-sphinx-theme==0.8.2",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
     "imageio==2.25.0",

@@ -316,7 +316,6 @@ class _MapdlCore(Commands):
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
         def wrap_xsel_function(func):
-
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
                     func.__func__.__doc__, XSEL_DOCSTRING_INJECTION

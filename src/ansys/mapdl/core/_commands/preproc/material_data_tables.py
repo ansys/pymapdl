@@ -14,7 +14,7 @@ class MaterialDataTables:
         tbopt="",
         eosopt="",
         funcname="",
-        **kwargs
+        **kwargs,
     ):
         """APDL Command: TB
 
