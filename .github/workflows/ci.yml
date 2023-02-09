@@ -441,11 +441,11 @@ jobs:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       image: ghcr.io/pyansys/mapdl:v22.2.0
-      options: options: "-u=0:0 --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2' -w /jobs"
-      
+      options: "-u=0:0 -w /jobs --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2  > log.txt &'"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
