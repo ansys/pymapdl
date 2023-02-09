@@ -858,11 +858,8 @@ def test_load_array(mapdl, dimx, dimy):
     "array",
     [
         pytest.param([1, 3, 10], marks=pytest.mark.xfail),
-        pytest.param(
-            np.zeros(
-                3,
-            ),
-            marks=pytest.mark.xfail,
+        np.zeros(
+            3,
         ),
         np.zeros((3, 1)),
         np.zeros((3, 3)),
