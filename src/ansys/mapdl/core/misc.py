@@ -93,7 +93,6 @@ def get_linux_default_ansys_bin(rver):
     """
     for each_path in LINUX_DEFAULT_DIRS:
         for each_file in [f"ansys{rver}", "mapdl"]:
-
             ans_root = os.getenv(f"AWP_ROOT{rver}", each_path)
             mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", each_file)
 
@@ -1132,7 +1131,6 @@ def requires_package(package_name, softerror=False):
     def decorator(function):
         @wraps(function)
         def wrapper(self, *args, **kwargs):
-
             try:
                 importlib.import_module(package_name)
                 return function(self, *args, **kwargs)
@@ -1240,7 +1238,6 @@ def wrap_point_SEL(entity="node"):
             )
 
             if isinstance(vmin, (set, tuple, list, np.ndarray)):
-
                 if kwargs.get("Used_P", False) and (
                     (isinstance(vmin, np.ndarray) and vmin.size != 0) or len(vmin) == 0
                 ):

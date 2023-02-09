@@ -2092,7 +2092,6 @@ def update_env_vars(add_env_vars, replace_env_vars):
 
 
 def _check_license_argument(license_type, additional_switches):
-
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
