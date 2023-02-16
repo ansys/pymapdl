@@ -466,17 +466,15 @@ class MapdlGrpc(_MapdlCore):
                 f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-            if psutil.pid_exists(self._mapdl_process.pid):
-                # Process is alive
-                raise MapdlConnectionError(
-                    msg
-                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
-                )
-            else:
-                raise MapdlConnectionError(
-                    msg
-                    + f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
-                )
+            if self._mapdl_process is not None:
+                if psutil.pid_exists(self._mapdl_process.pid):
+                    # Process is alive
+                    msg += f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                else:
+                    msg += (
+                        f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
+                    )
+            raise MapdlConnectionError(msg)
 
         self._exited = False
 
@@ -604,9 +602,17 @@ class MapdlGrpc(_MapdlCore):
         Generally of the form of "ip:port", like "127.0.0.1:50052".
 
         """
-        if self._channel is not None:
-            return self._channel._channel.target().decode()
-        return ""
+        channel = self._channel
+        while channel is not None:
+            # When creating interceptors, channels have a nested "_channel" member
+            # containing the intercepted channel.
+            # Only the actual channel contains the "target" member describing the address
+            if hasattr(channel, "target"):
+                return channel.target().decode()
+            channel = getattr(channel, "_channel", None)
+        # This method is relying on grpc channel's private attributes, fallback in case
+        # it does not exist
+        return "unknown"  #  pragma: no cover Unreachable in the current gRPC version
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
