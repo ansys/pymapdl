@@ -466,15 +466,23 @@ class MapdlGrpc(_MapdlCore):
                 f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-            if self._mapdl_process is not None:
-                if psutil.pid_exists(self._mapdl_process.pid):
-                    # Process is alive
-                    msg += f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
-                else:
-                    msg += (
-                        f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
-                    )
-            raise MapdlConnectionError(msg)
+            if self._mapdl_process is not None and psutil.pid_exists(
+                self._mapdl_process.pid
+            ):
+                # Process is alive
+                raise MapdlConnectionError(
+                    msg
+                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                )
+            else:
+                pid_msg = (
+                    f" PID: {self._mapdl_process.pid}"
+                    if self._mapdl_process is not None
+                    else ""
+                )
+                raise MapdlConnectionError(
+                    msg + f"The MAPDL process has died{pid_msg}."
+                )
 
         self._exited = False
 
