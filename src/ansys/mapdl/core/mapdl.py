@@ -1597,8 +1597,11 @@ class _MapdlCore(Commands):
         show_line_numbering : bool, optional
             Display line numbers when ``vtk=True``.
 
-        color_areas : bool, optional
-            Randomly color areas when ``True`` and ``vtk=True``.
+        color_areas : np.array, optional
+            Only used when ``vtk=True``.
+            If ``color_areas`` is a bool, randomly color areas when ``True`` .
+            If ``color_areas`` is an array or list, it colors each area with
+            the RGB colors, specified in that array or list.
 
         show_lines : bool, optional
             Plot lines and areas.  Change the thickness of the lines
@@ -1656,22 +1659,28 @@ class _MapdlCore(Commands):
             # individual surface isolation is quite slow, so just
             # color individual areas
             if color_areas:  # pragma: no cover
-                anum = surf["entity_num"]
-                size_ = max(anum) + 1
-                # Because this is only going to be used for plotting purpuses, we don't need to allocate
-                # a huge vector with random numbers (colours).
-                # By default `pyvista.DataSetMapper.set_scalars` `n_colors` argument is set to 256, so let
-                # do here the same.
-                # We will limit the number of randoms values (colours) to 256
-                #
-                # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
-                size_ = min([256, size_])
-                # Generating a colour array,
-                # Size = number of areas.
-                # Values are random between 0 and min(256, number_areas)
-                rng = np.random.default_rng()
-                area_color = rng.integers(size_, size=len(anum), dtype=np.uint8)
-                meshes.append({"mesh": surf, "scalars": area_color})
+                if isinstance(color_areas, bool):
+                    anum = surf["entity_num"]
+                    size_ = max(anum) + 1
+                    # Because this is only going to be used for plotting purpuses, we don't need to allocate
+                    # a huge vector with random numbers (colours).
+                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors` argument is set to 256, so let
+                    # do here the same.
+                    # We will limit the number of randoms values (colours) to 256
+                    #
+                    # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+                    size_ = min([256, size_])
+                    # Generating a colour array,
+                    # Size = number of areas.
+                    # Values are random between 0 and min(256, number_areas)
+                    area_color = np.random.choice(range(size_), size=(len(anum), 3))
+                else:
+                    if len(surf["entity_num"]) != len(color_areas):
+                        raise ValueError(
+                            f"The length of the parameter array 'color_areas' should be the same as the number of areas."
+                        )
+                    area_color = color_areas
+                meshes.append({"mesh": surf, "color": area_color})
             else:
                 meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 
