@@ -1670,7 +1670,7 @@ class _MapdlCore(Commands):
                 # Size = number of areas.
                 # Values are random between 0 and min(256, number_areas)
                 rng = np.random.default_rng()
-                rand = rng.integers(size_, size=len(anum))
+                rand = rng.integers(size_, size=len(anum), dtype=np.uint8)
                 area_color = rand[anum]
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
