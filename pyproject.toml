@@ -62,7 +62,7 @@ tests = [
     "pyvista==0.38.2",
     "pyansys-tools-report==0.5.0",
     "vtk==9.2.5",
-    "pytest-rerunfailures==11.1",
+    "pytest-rerunfailures==11.1.1",
 ]
 doc = [
     "Sphinx==5.3.0",
