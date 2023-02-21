@@ -20,7 +20,7 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                              |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-| :ref:`executable_example`  | Create your own Python app with command line interface.                                         |
+| :ref:`executable_example`  | Create your own Python app with command line interface.                                                 |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
