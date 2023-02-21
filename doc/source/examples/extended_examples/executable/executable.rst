@@ -6,7 +6,7 @@ Create your own Python command line application
 ===============================================
 
 This example shows how to create your own command line interface (CLI)
-python application which uses PyMAPDL to perform some simulations.
+Python application which uses PyMAPDL to perform some simulations.
 This usage is quite convenient when aiming to automate workflows.
 One could build different PyMAPDL applications which can be called
 from the CLI with different arguments.
@@ -15,9 +15,11 @@ from the CLI with different arguments.
 Simulation configuration
 ========================
 
-Let's start from a given script called :download:`rotor.py <rotor.py>` which calculates the
-first natural frequency of a simplied rotor with a given number of
-blades and a specific material configuration.
+Using the following script called :download:`rotor.py <rotor.py>`
+which calculates the first natural frequency of a simplied rotor with
+a given number of blades and a specific material configuration, 
+a command line interface is implemented.
+
 
 .. literalinclude:: rotor.py
 
@@ -46,14 +48,14 @@ In our case, we want to specify the following arguments:
 The function is then defined as:
 
 .. literalinclude:: cli_rotor.py
-   :lines: 5-9, 19-31
+   :lines: 4-7, 17-22
 
 The value of these parameters are introduced by adding the following code
 right before the function definition:
 
 
 .. literalinclude:: cli_rotor.py
-   :lines: 1-3,9-25
+   :lines: 1-3,8-23
 
 .. warning:: Note that the package *Click* uses decorators (`@click.XXX`), hence
    it is necessary you specify the *Click* commands right before the function definition.
@@ -63,9 +65,9 @@ of the script in the following way:
 
 
 .. literalinclude:: cli_rotor.py
-   :lines: 149-
+   :lines: 109-
 
-This ensure the new function is called when we are executing the python script.
+This ensure the new function is called when we are executing the Python script.
 
 Now you can call your function from the command line using:
 
@@ -186,5 +188,5 @@ Additional files
 
 You can download the example files from the following links:
 
-* :download:`Original rotor.py script <rotor.py>`
-* :download:`Application cli_rotor.py <cli_rotor.py>`
+* Original :download:`rotor.py <rotor.py>` script
+* Application :download:`cli_rotor.py <cli_rotor.py>` script
