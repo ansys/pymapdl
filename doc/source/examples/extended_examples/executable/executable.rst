@@ -15,9 +15,9 @@ from the CLI with different arguments.
 Simulation configuration
 ========================
 
-Let's start from a given script called :download:`Original rotor.py script <rotor.py>` which calculates the
-first natural frequency of a rotor with a given number of
-blades and material specification.
+Let's start from a given script called :download:`rotor.py <rotor.py>` which calculates the
+first natural frequency of a simplied rotor with a given number of
+blades and a specific material configuration.
 
 .. literalinclude:: rotor.py
 
@@ -33,7 +33,7 @@ is used. Another suitable package is the builtin package
 `argparse <https://docs.python.org/3/library/argparse.html>`_.
 
 
-Firstly, we need to convert the whole script into a function.
+Firstly, we need to convert the script into a function.
 This can be easily accomplished by using the input arguments
 in a function signature. 
 In our case, we want to specify the following arguments:
@@ -46,23 +46,24 @@ In our case, we want to specify the following arguments:
 The function is then defined as:
 
 .. literalinclude:: cli_rotor.py
-   :linenos:
-   :lines: 5,6, 20-31
+   :lines: 5-9, 19-31
 
 The value of these parameters are introduced by adding the following code
-at the top of the script:
+right before the function definition:
 
 
 .. literalinclude:: cli_rotor.py
-   :linenos:
-   :lines: 1,2,9-20
+   :lines: 1-3,9-25
 
-In addition you need to add the call to the newly created function as the following way:
+.. warning:: Note that the package *Click* uses decorators (`@click.XXX`), hence
+   it is necessary you specify the *Click* commands right before the function definition.
+
+In addition you need to add the call to the newly created function at the end
+of the script in the following way:
 
 
 .. literalinclude:: cli_rotor.py
-   :linenos:
-   :lines: 144-
+   :lines: 149-
 
 This ensure the new function is called when we are executing the python script.
 
@@ -77,7 +78,7 @@ Now you can call your function from the command line using:
    Elastic modulus: 200.0 GPa
    Density: 7850 Kg/m3
    Solving...
-   The first natural frequency is 1146.2 Hz.
+   The first natural frequency is 728.57 Hz.
 
 Here ``4`` is the number of blades.
 You can also input other arguments such as:
@@ -91,14 +92,99 @@ You can also input other arguments such as:
    Elastic modulus: 200.0 GPa
    Density: 7000 Kg/m3
    Solving...
-   The first natural frequency is 1213.8 Hz.
+   The first natural frequency is 771.54 Hz.
 
+
+Advanced usage
+==============
+
+You can use these concepts to make Python create files with specific
+results that can be later used in other applications.
+
+Post-processing images using ImageMagick
+----------------------------------------
+
+For example, you could create an image with PyMAPDL by adding the following
+code to the ``rotor.py`` file:
+
+.. code:: python
+
+   mapdl.vplot(savefig="volumes.jpg")
+
+
+.. image:: volumes.jpg
+
+and use `ImageMagick <https://www.imagemagick.org>`_ to add a frame:
+
+.. code:: bash
+
+   mogrify -mattecolor white -frame 10x10 volumes.jpg
+
+
+and a watermark:
+
+.. code:: bash
+
+   COMPOSITE=/usr/bin/composite
+   $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
+
+where ``-gravity`` is the location of the watermark is case of the watermark is smaller
+than the image, ``COMPOSITE`` is the path to the ImageMagick ``composite`` function,
+``watermark.png`` is the watermark image, and ``volumes_with_watermark.jpg`` is
+the output file.
+
+The final results should look like:
+
+
+.. figure:: volumes_with_watermark.jpg
+
+   Volumes image with watermark
+
+
+Usage on the cloud
+------------------
+
+You can also use this concept to deploy your own apps to the cloud.
+
+For example, you can execute the previous example on a GitHub runner
+using the following approach (non-tested):
+
+.. code:: yaml
+  
+   my_job:
+      name: 'Generating watermarked images'
+      runs-on: ubuntu-latest
+
+      steps:
+         - name: "Install Git and checkout project"
+           uses: actions/checkout@v3
+
+         - name: "Setup Python"
+           uses: actions/setup-python@v4
+
+         - name: "Install ansys-mapdl-core"
+           run: |
+               python -m pip install ansys-mapdl-core
+         
+         - name: "Install ImageMagic"
+           run: |
+            sudo apt install imagemagick
+
+         - name: "Generating images with PyMAPDL"
+           run: |
+            python rotor.py 4 --density 7000
+
+         - name: "Post processing images"
+           run: |
+              COMPOSITE=/usr/bin/composite
+              mogrify -mattecolor white -frame 10x10 volume.jpg
+              $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
 
 
 Additional files
 ================
 
-You can download the following files:
+You can download the example files from the following links:
 
 * :download:`Original rotor.py script <rotor.py>`
 * :download:`Application cli_rotor.py <cli_rotor.py>`

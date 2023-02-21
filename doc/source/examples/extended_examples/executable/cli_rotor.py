@@ -31,9 +31,9 @@ def main(n_blades, blade_length, elastic_modulus, density):
     n_blades = float(n_blades)
 
     # Other properties
-    center_radious = 0.5
-    blade_thickness = 0.1
-    section_length = 0.5
+    center_radious = 0.1
+    blade_thickness = 0.05
+    section_length = 0.1
 
     ## Material definition
     # Material 1: Steel
@@ -114,9 +114,12 @@ def main(n_blades, blade_length, elastic_modulus, density):
     mapdl.vglue("all")
     center_vol = mapdl.geometry.vnum[-1]
 
+    mapdl.vplot(savefig="volumes.jpg")
+
     # Meshing
     mapdl.allsel()
     mapdl.et(1, "SOLID186")
+    mapdl.esize(0.01)
     mapdl.vsweep("all")
 
     # Applying loads
