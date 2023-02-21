@@ -1,4 +1,5 @@
-# Script to calculate the first natural frequecy of a rotor for a given set of properties
+# Script to calculate the first natural frequecy of
+# a rotor for a given set of properties
 
 # Importing packages
 import numpy as np
@@ -10,20 +11,24 @@ mapdl = launch_mapdl(port=50052)
 mapdl.clear()
 mapdl.prep7()
 
-# Input propertis
-n_sectors = 4
-
-center_radious = 0.5
+# Input properties
+n_blades = 4
 blade_length = 1
-blade_thickness = 0.1
 
+elastic_modulus = 200e9  # N/m2
+density = 7850  # kg/m3
+
+# Other properties
+center_radious = 0.5
+blade_thickness = 0.1
 section_length = 0.5
+
 
 ## Material definition
 # Material 1: Steel
 mapdl.mp("NUXY", 1, 0.31)
-mapdl.mp("DENS", 1, 4.1408e-04)
-mapdl.mp("EX", 1, 16900000)
+mapdl.mp("DENS", 1, density)
+mapdl.mp("EX", 1, elastic_modulus)
 
 ## Geometry
 # Plotting center
@@ -48,7 +53,7 @@ if complex:
     for i in range(precision + 1):
         if i != 0:
             k0 = mapdl.k("", x_, y_, z_)
-        angle_ = i * (360 / n_sectors) / precision
+        angle_ = i * (360 / n_blades) / precision
         x_ = section_length * np.cos(np.deg2rad(angle_))
         y_ = section_length * np.sin(np.deg2rad(angle_))
         z_ = 0.1 * i
@@ -92,7 +97,7 @@ blade_volu = 3
 
 # Symmetry
 mapdl.csys(1)  # switching to cylindrical
-mapdl.vgen(n_sectors, blade_volu, dy=360 / n_sectors, imove=0)
+mapdl.vgen(n_blades, blade_volu, dy=360 / n_blades, imove=0)
 
 # glueing
 mapdl.vglue("all")
@@ -117,8 +122,11 @@ mapdl.allsel()
 mapdl.slashsolu()
 nmodes = 10  # Get the first 10 modes
 output = mapdl.modal_analysis(nmode=nmodes)
+
+mapdl.post1()
 modes = mapdl.set("list").to_array()
 freqs = modes[:, 1]
 
 # Output values
 first_frequency = freqs[0]
+print(f"The first natural frequency is {first_frequency} Hz.")
