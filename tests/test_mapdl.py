@@ -4,6 +4,7 @@ from pathlib import Path
 import time
 
 from ansys.mapdl.reader import examples
+import grpc
 import numpy as np
 import psutil
 import pytest
@@ -858,11 +859,8 @@ def test_load_array(mapdl, dimx, dimy):
     "array",
     [
         pytest.param([1, 3, 10], marks=pytest.mark.xfail),
-        pytest.param(
-            np.zeros(
-                3,
-            ),
-            marks=pytest.mark.xfail,
+        np.zeros(
+            3,
         ),
         np.zeros((3, 1)),
         np.zeros((3, 3)),
@@ -1758,6 +1756,25 @@ def test_check_stds(mapdl):
     mapdl._stderr = "my error"
     with pytest.raises(MapdlConnectionError, match="my error"):
         mapdl._check_stds()
+
+
+def test_connection_by_channel_failure():
+    # Check error reporting during connection
+    bad_channel = grpc.insecure_channel("willnotwork")
+    with pytest.raises(MapdlConnectionError, match="willnotwork"):
+        pymapdl.Mapdl(channel=bad_channel, timeout=1)
+
+    class PassThru(grpc.UnaryUnaryClientInterceptor):
+        """GRPC interceptor doing nothing"""
+
+        def intercept_unary_unary(continuation, client_call_details, request):
+            return continuation(client_call_details, request)
+
+    bad_channel_with_interceptor = grpc.intercept_channel(
+        grpc.insecure_channel("willnotwork"), PassThru()
+    )
+    with pytest.raises(MapdlConnectionError, match="willnotwork"):
+        pymapdl.Mapdl(channel=bad_channel_with_interceptor, timeout=1)
 
 
 def test_post_mortem_checks_no_process(mapdl):
