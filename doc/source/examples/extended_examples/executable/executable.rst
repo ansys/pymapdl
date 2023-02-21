@@ -1,22 +1,22 @@
 .. _executable_example:
 
 
-===============================================
-Create your own Python command line application
-===============================================
+=======================================
+Create your own Python command line app
+=======================================
 
-This example shows how to create your own command line interface (CLI)
-Python application which uses PyMAPDL to perform some simulations.
+This example shows how to create your own command line interface
+Python app which uses PyMAPDL to perform some simulations.
 This usage is quite convenient when aiming to automate workflows.
-One could build different PyMAPDL applications which can be called
-from the CLI with different arguments.
+One could build different PyMAPDL apps which can be called
+from the command-line tool with different arguments.
 
 
 Simulation configuration
 ========================
 
 Using the following script called :download:`rotor.py <rotor.py>`
-which calculates the first natural frequency of a simplied rotor with
+which calculates the first natural frequency of a simplified rotor with
 a given number of blades and a specific material configuration, 
 a command line interface is implemented.
 
@@ -24,21 +24,21 @@ a command line interface is implemented.
 .. literalinclude:: rotor.py
 
 
-Converting a script to a Python application
-===========================================
+Converting a script to a Python app
+===================================
 
-The above script needs to be converted to a Python application in order
+The preceding script needs to be converted to a Python app in order
 to be used from the terminal.
-In this case, this application uses a CLI to provide the options to PyMAPDL.
+In this case, this app uses a command-line tool to provide the options to PyMAPDL.
 To specify the options, the package `Click <https://click.palletsprojects.com>`_
 is used. Another suitable package is the builtin package
 `argparse <https://docs.python.org/3/library/argparse.html>`_.
 
 
-Firstly, we need to convert the script into a function.
+Firstly, the script needs to be converted to a function.
 This can be easily accomplished by using the input arguments
 in a function signature. 
-In our case, we want to specify the following arguments:
+In this case, the following arguments need to be specified:
 
 * ``n_blades``: Number of blades.
 * ``blade_length``: Length of each blade.
@@ -57,7 +57,7 @@ right before the function definition:
 .. literalinclude:: cli_rotor.py
    :lines: 1-3,8-23
 
-.. warning:: Note that the package *Click* uses decorators (`@click.XXX`), hence
+.. warning:: Note that the package *Click* uses decorators (``@click.XXX``), hence
    it is necessary you specify the *Click* commands right before the function definition.
 
 In addition you need to add the call to the newly created function at the end
@@ -65,9 +65,9 @@ of the script in the following way:
 
 
 .. literalinclude:: cli_rotor.py
-   :lines: 109-
+   :lines: 110-
 
-This ensure the new function is called when we are executing the Python script.
+This ensure the new function is called when executing the Python script.
 
 Now you can call your function from the command line using:
 
@@ -101,7 +101,7 @@ Advanced usage
 ==============
 
 You can use these concepts to make Python create files with specific
-results that can be later used in other applications.
+results that can be later used in other apps.
 
 Post-processing images using ImageMagick
 ----------------------------------------
@@ -120,7 +120,7 @@ and use `ImageMagick <https://www.imagemagick.org>`_ to add a frame:
 
 .. code:: bash
 
-   mogrify -mattecolor white -frame 10x10 volumes.jpg
+   mogrify -mattecolor #f1ce80 -frame 10x10 volumes.jpg
 
 
 and a watermark:
@@ -179,7 +179,7 @@ using the following approach (non-tested):
          - name: "Post processing images"
            run: |
               COMPOSITE=/usr/bin/composite
-              mogrify -mattecolor white -frame 10x10 volume.jpg
+              mogrify -mattecolor #f1ce80 -frame 10x10 volume.jpg
               $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
 
 
@@ -189,4 +189,4 @@ Additional files
 You can download the example files from the following links:
 
 * Original :download:`rotor.py <rotor.py>` script
-* Application :download:`cli_rotor.py <cli_rotor.py>` script
+* App :download:`cli_rotor.py <cli_rotor.py>` script

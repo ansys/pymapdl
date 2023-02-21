@@ -49,6 +49,7 @@ hexahedral
 hostname
 hyperelasticity
 Hyperelasticity
+ImageMagick
 imagin
 Intro to Ansys Mechanical APDL Scripting
 ist
