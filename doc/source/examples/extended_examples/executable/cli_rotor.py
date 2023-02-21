@@ -2,8 +2,6 @@
 import click
 
 # Importing packages
-import numpy as np
-
 from ansys.mapdl.core import Mapdl
 
 
@@ -54,51 +52,13 @@ def main(n_blades, blade_length, elastic_modulus, density):
     mapdl.vdrag(area_cyl, nlp1=line_path)
     center_vol = mapdl.geometry.vnum[0]
 
-    complex = False
-    if complex:
-        # Creating pline
-        precision = 10
-        advance = 0.1
+    point_0 = mapdl.k("", center_radious * 0.95, -blade_thickness / 2, 0)
+    point_1 = mapdl.k("", center_radious + blade_length, -blade_thickness / 2, 0)
+    point_2 = mapdl.k("", center_radious + blade_length, blade_thickness / 2, 0)
+    point_3 = mapdl.k("", center_radious, blade_thickness / 2, 0)
+    blade_area = mapdl.a(point_0, point_1, point_2, point_3)
 
-        spline = []
-        for i in range(precision + 1):
-            if i != 0:
-                k0 = mapdl.k("", x_, y_, z_)
-            angle_ = i * (360 / n_blades) / precision
-            x_ = section_length * np.cos(np.deg2rad(angle_))
-            y_ = section_length * np.sin(np.deg2rad(angle_))
-            z_ = 0.1 * i
-
-            if i != 0:
-                k1 = mapdl.k("", x_, y_, z_)
-                spline.append(mapdl.l(k0, k1))
-
-        mapdl.spline(*spline)
-
-        # dragging
-        point_0 = mapdl.k("", center_radious * 0.95, -blade_thickness / 2, 0)
-        point_1 = mapdl.k("", center_radious + blade_length, -blade_thickness / 2, 0)
-        point_2 = mapdl.k("", center_radious + blade_length, blade_thickness / 2, 0)
-        point_3 = mapdl.k("", center_radious, blade_thickness / 2, 0)
-        blade_area = mapdl.a(point_0, point_1, point_2, point_3)
-
-        mapdl.vdrag(
-            blade_area,
-            nlp1=spline[0],
-            nlp2=spline[1],
-            nlp3=spline[2],
-            nlp4=spline[3],
-            nlp5=spline[4],
-        )
-
-    else:
-        point_0 = mapdl.k("", center_radious * 0.95, -blade_thickness / 2, 0)
-        point_1 = mapdl.k("", center_radious + blade_length, -blade_thickness / 2, 0)
-        point_2 = mapdl.k("", center_radious + blade_length, blade_thickness / 2, 0)
-        point_3 = mapdl.k("", center_radious, blade_thickness / 2, 0)
-        blade_area = mapdl.a(point_0, point_1, point_2, point_3)
-
-        mapdl.vdrag(blade_area, nlp1=line_path)
+    mapdl.vdrag(blade_area, nlp1=line_path)
 
     blade_volu = 2
 
