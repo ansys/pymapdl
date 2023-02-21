@@ -885,8 +885,13 @@ def find_ansys(version=None):
 
     Parameters
     ----------
-    version : float, optional
-        Version of ANSYS to search for.  If ``None``, use latest.
+    version : int, float, optional
+        Version of ANSYS to search for.
+        If using ``int``, it should follow the convention ``XXY``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If using ``float``, it should follow the convention ``XX.Y``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If ``None``, use latest available version on the machine.
 
     Returns
     -------
@@ -915,6 +920,10 @@ def find_ansys(version=None):
 
     if not version:
         version = max(versions.keys())
+
+    elif isinstance(version, float):
+        # Using floats, converting to int.
+        version = int(version * 10)
 
     try:
         ans_path = versions[version]
