@@ -13,6 +13,7 @@ updates:
       - "Dependencies"
     ignore:
       - dependency-name: "grpcio"
+      - dependency-name: "sphinx"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
