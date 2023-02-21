@@ -1680,7 +1680,7 @@ class _MapdlCore(Commands):
                             f"The length of the parameter array 'color_areas' should be the same as the number of areas."
                         )
                     area_color = color_areas
-                meshes.append({"mesh": surf, "color": area_color})
+                meshes.append({"mesh": surf, "scalars": area_color})
             else:
                 meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 

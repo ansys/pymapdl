@@ -610,9 +610,17 @@ class MapdlGrpc(_MapdlCore):
         Generally of the form of "ip:port", like "127.0.0.1:50052".
 
         """
-        if self._channel is not None:
-            return self._channel._channel.target().decode()
-        return ""
+        channel = self._channel
+        while channel is not None:
+            # When creating interceptors, channels have a nested "_channel" member
+            # containing the intercepted channel.
+            # Only the actual channel contains the "target" member describing the address
+            if hasattr(channel, "target"):
+                return channel.target().decode()
+            channel = getattr(channel, "_channel", None)
+        # This method is relying on grpc channel's private attributes, fallback in case
+        # it does not exist
+        return "unknown"  #  pragma: no cover Unreachable in the current gRPC version
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
