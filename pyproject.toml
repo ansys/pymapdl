@@ -61,7 +61,7 @@ tests = [
     "pytest-cov==4.0.0",
     "pyvista==0.38.2",
     "pyansys-tools-report==0.5.0",
-    "vtk==9.2.5",
+    "vtk==9.2.6",
     "pytest-rerunfailures==11.1.1",
 ]
 doc = [
@@ -89,7 +89,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
-    "vtk==9.2.5",
+    "vtk==9.2.6",
     "sphinxcontrib-googleanalytics==0.4",
 ]
 
