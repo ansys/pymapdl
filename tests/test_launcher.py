@@ -499,6 +499,7 @@ def test_find_ansys(mapdl):
     assert find_ansys(version=version) is not None
 
     # Checking floats
+    assert find_ansys(version=22.2) is not None
     assert find_ansys(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
