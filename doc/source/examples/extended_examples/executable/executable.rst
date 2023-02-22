@@ -2,79 +2,82 @@
 
 
 =======================================
-Create your own Python command line app
+Create your own Python command-line app
 =======================================
 
-This example shows how to create your own command line interface
-Python app which uses PyMAPDL to perform some simulations.
-This usage is quite convenient when aiming to automate workflows.
-One could build different PyMAPDL apps which can be called
-from the command-line tool with different arguments.
+This example shows how to create your own command-line app
+in Python that uses PyMAPDL to perform some simulations.
+This usage is quite convenient when automating workflows.
+You can build different PyMAPDL apps that can be called
+from the command line with different arguments.
 
 
 Simulation configuration
 ========================
 
-Using the following script called :download:`rotor.py <rotor.py>`
-which calculates the first natural frequency of a simplified rotor with
-a given number of blades and a specific material configuration, 
-a command line interface is implemented.
+The :download:`rotor.py <rotor.py>` script implements a
+command-line interface for calculating the first
+natural frequency of a simplified rotor with a given number of
+blades and a specific material configuration.
 
 
 .. literalinclude:: rotor.py
 
 
-Converting a script to a Python app
-===================================
+Convert a script to a Python app
+=====================
 
-The preceding script needs to be converted to a Python app in order
-to be used from the terminal.
-In this case, this app uses a command-line tool to provide the options to PyMAPDL.
+To use the preceding script from a terminal, you must convert it to
+a Python app. In this case, the app uses a command-line interface to
+provide the options to PyMAPDL.
+
 To specify the options, the package `Click <https://click.palletsprojects.com>`_
 is used. Another suitable package is the builtin package
 `argparse <https://docs.python.org/3/library/argparse.html>`_.
 
 
-Firstly, the script needs to be converted to a function.
-This can be easily accomplished by using the input arguments
+First, you must convert the script to a function. You can
+accomplish this by using the input arguments
 in a function signature. 
-In this case, the following arguments need to be specified:
+
+In this case, the following arguments must be specified:
 
 * ``n_blades``: Number of blades.
 * ``blade_length``: Length of each blade.
 * ``elastic_modulus``: Elastic modulus of the material.
 * ``density``: Density of the material.
 
-The function is then defined as:
+You can then define the function like this:
 
 .. literalinclude:: cli_rotor.py
    :lines: 4-7, 17-22
 
-The value of these parameters are introduced by adding the following code
-right before the function definition:
+You introduce the values of these parameters by adding this code
+immediately before the function definition:
 
 
 .. literalinclude:: cli_rotor.py
    :lines: 1-3,8-23
 
-.. warning:: Note that the package *Click* uses decorators (``@click.XXX``), hence
-   it is necessary you specify the *Click* commands right before the function definition.
+.. warning:: Because the *Click* package uses decorators (``@click.XXX``,
+   you must specify *Click* commands immediately before the function definition.
 
-In addition you need to add the call to the newly created function at the end
-of the script in the following way:
+In addition, you must add the call to the newly created function at the end
+of the script:
 
 
 .. literalinclude:: cli_rotor.py
    :lines: 110-
 
-This ensure the new function is called when executing the Python script.
+This ensure the new function is called when the script is executed.
 
-Now you can call your function from the command line using:
+Now you can call your function from the command line using
+this code:
 
 .. code:: bash
 
    $ python rotor.py 4
-   Initializing script with values:
+   Initialize script with values:
    Number of blades: 4
    Blade length: 0.2 m
    Elastic modulus: 200.0 GPa
@@ -82,8 +85,8 @@ Now you can call your function from the command line using:
    Solving...
    The first natural frequency is 728.57 Hz.
 
-Here ``4`` is the number of blades.
-You can also input other arguments such as:
+The preceding code sets the number of blades to ``4``.
+This code shows how you can input other arguments:
 
 .. code:: bash
 
@@ -101,13 +104,13 @@ Advanced usage
 ==============
 
 You can use these concepts to make Python create files with specific
-results that can be later used in other apps.
+results that you can later use in other apps.
 
-Post-processing images using ImageMagick
-----------------------------------------
+Postprocess images using ImageMagick
+------------------------------------
 
-For example, you could create an image with PyMAPDL by adding the following
-code to the ``rotor.py`` file:
+To create an image with PyMAPDL, you can add this code to the
+``rotor.py`` file:
 
 .. code:: python
 
@@ -116,26 +119,29 @@ code to the ``rotor.py`` file:
 
 .. image:: volumes.jpg
 
-and use `ImageMagick <https://www.imagemagick.org>`_ to add a frame:
+To add a frame, you can use `ImageMagick <https://www.imagemagick.org>`_:
 
 .. code:: bash
 
    mogrify -mattecolor #f1ce80 -frame 10x10 volumes.jpg
 
 
-and a watermark:
+You can also use Imagemagick to add a watermark:
 
 .. code:: bash
 
    COMPOSITE=/usr/bin/composite
    $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
 
-where ``-gravity`` is the location of the watermark is case of the watermark is smaller
-than the image, ``COMPOSITE`` is the path to the ImageMagick ``composite`` function,
-``watermark.png`` is the watermark image, and ``volumes_with_watermark.jpg`` is
-the output file.
+Here are descriptions for values used in the preceding code:
 
-The final results should look like:
+- ``-gravity``: Location of the watermark in case the watermark is
+   smaller than the image.
+ - ``COMPOSITE``: Path to the ImageMagick ``composite`` function. 
+- ``watermark.png``: Name of the PNG file with the watermark image.
+- ``volumes_with_watermark.jpg``: Name of the JPG file to save the output to.
+
+The final results should look like the ones in this image:
 
 
 .. figure:: volumes_with_watermark.jpg
@@ -146,22 +152,22 @@ The final results should look like:
 Usage on the cloud
 ------------------
 
-You can also use this concept to deploy your own apps to the cloud.
+Using these concepts, you can deploy your own apps to the cloud.
 
 For example, you can execute the previous example on a GitHub runner
-using the following approach (non-tested):
+using this approach (non-tested):
 
 .. code:: yaml
   
    my_job:
-      name: 'Generating watermarked images'
+      name: 'Generate watermarked images'
       runs-on: ubuntu-latest
 
       steps:
-         - name: "Install Git and checkout project"
+         - name: "Install Git and check out project"
            uses: actions/checkout@v3
 
-         - name: "Setup Python"
+         - name: "Set up Python"
            uses: actions/setup-python@v4
 
          - name: "Install ansys-mapdl-core"
@@ -172,11 +178,11 @@ using the following approach (non-tested):
            run: |
             sudo apt install imagemagick
 
-         - name: "Generating images with PyMAPDL"
+         - name: "Generate images with PyMAPDL"
            run: |
             python rotor.py 4 --density 7000
 
-         - name: "Post processing images"
+         - name: "Postprocess images"
            run: |
               COMPOSITE=/usr/bin/composite
               mogrify -mattecolor #f1ce80 -frame 10x10 volume.jpg
@@ -186,7 +192,7 @@ using the following approach (non-tested):
 Additional files
 ================
 
-You can download the example files from the following links:
+You can use these links to download the example files:
 
 * Original :download:`rotor.py <rotor.py>` script
 * App :download:`cli_rotor.py <cli_rotor.py>` script

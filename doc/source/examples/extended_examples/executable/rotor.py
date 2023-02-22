@@ -1,38 +1,38 @@
 # Script to calculate the first natural frequecy of
 # a rotor for a given set of properties
 
-# Importing packages
+# Import packages
 from ansys.mapdl.core import launch_mapdl
 
-# Launching MAPDL
+# Launch MAPDL
 mapdl = launch_mapdl(port=50052)
 mapdl.clear()
 mapdl.prep7()
 
-# Input properties
+# Define input properties
 n_blades = 4
 blade_length = 1
 
 elastic_modulus = 200e9  # N/m2
 density = 7850  # kg/m3
 
-# Other properties
+# Define other properties
 center_radious = 0.5
 blade_thickness = 0.1
 section_length = 0.5
 
 
-## Material definition
+## Define material
 # Material 1: Steel
 mapdl.mp("NUXY", 1, 0.31)
 mapdl.mp("DENS", 1, density)
 mapdl.mp("EX", 1, elastic_modulus)
 
 ## Geometry
-# Plotting center
+# Plot center
 area_cyl = mapdl.cyl4(0, 0, center_radious)
 
-# define path for dragging
+# Define path for dragging
 k0 = mapdl.k(x=0, y=0, z=0)
 k1 = mapdl.k(x=0, y=0, z=section_length)
 
@@ -51,24 +51,24 @@ mapdl.vdrag(blade_area, nlp1=line_path)
 
 blade_volu = 2
 
-# Cutting blade and circle.
+# Define cutting blade and circle
 mapdl.vsbv(blade_volu, center_vol, keep2="keep")
 blade_volu = 3
 
-# Symmetry
-mapdl.csys(1)  # switching to cylindrical
+# Define  symmetry
+mapdl.csys(1)  # switch to cylindrical
 mapdl.vgen(n_blades, blade_volu, dy=360 / n_blades, imove=0)
 
-# glueing
+# Glue
 mapdl.vglue("all")
 center_vol = mapdl.geometry.vnum[-1]
 
-# Meshing
+# Mesh
 mapdl.allsel()
 mapdl.et(1, "SOLID186")
 mapdl.vsweep("all")
 
-# Applying loads
+# Apply loads
 mapdl.vsel("s", vmin=center_vol)
 mapdl.eslv("S")
 mapdl.nsle("r")
@@ -77,7 +77,7 @@ mapdl.d("all", "ux", 0)
 mapdl.d("all", "uy", 0)
 mapdl.d("all", "uz", 0)
 
-# Solving
+# Solve
 mapdl.allsel()
 mapdl.slashsolu()
 nmodes = 10  # Get the first 10 modes
