@@ -91,44 +91,9 @@ And then open the folder in the container using the *Command palette*.
 Develop on Codespaces
 =====================
 
-.. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
-
 Codespaces is a virtual delopment environment provided by GitHub.
 You can launch a container which all the required tools and start to work in couple of minutes.
 This is an easy way to get started with PyMAPDL development.
 
-You can launch a Codespace by clicking on the ``Code`` button on the top right of the repository and then clicking on ``Open with Codespaces``.
-
-.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/open_codespaces.png
-   :alt: Open with Codespaces
-
-After a moment, you will see a fully functional Codespace with the latest MAPDL image and the latest PyMAPDL repository cloned.
-
-.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/source/images/devcontainer/codespaces_main.png
-   :alt: Codespaces main
-
-You can now start developing PyMAPDL!
-
-.. note:: If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
-
-License
--------
-
-Codespaces are free for public repositories. However, you must have a valid license to run MAPDL.
-You can set your license using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-For example, if you have a license server at the address ``123.45.67.89``, you can set the license
-from inside the running container using:
-
-.. code:: bash
-  
-   export ANSYSLMD_LICENSE_FILE="1055@123.45.65.89"
-
-For this case, your image entrypoint should not require launching MAPDL, otherwise it keeps failing
-because licensing.
-
-However a **better approach** is to use *Codespaces secrets* to store this env var.
-You can set it in your Github profile settings in
-``Developer settings`` -> ``Code, planning, and automation`` -> ``Codespaces`` -> ``Codespaces secrets``.
-You can add there a secret named ``ANSYSLMD_LICENSE_FILE`` with the value of your license server port and address.
-This secret is loaded as a environment variable in each codespace you start.
-
+.. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
+   If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
