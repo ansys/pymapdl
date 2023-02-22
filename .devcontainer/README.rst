@@ -1,12 +1,10 @@
 
 
-===============================
-Developing-on-a-Container Guide
-===============================
+======================
+Develop on a container
+======================
 
-Hello! Welcome to the Ansys PyMAPDL Developing-on-Container Guide! |:smile:|
-
-This guide should guide you on how to develop PyMAPDL features or fix bugs using
+This guide guides you on how to develop PyMAPDL features or fix bugs using
 a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_
 or `Codespaces <https://github.com/features/codespaces>`_.
 The files for setting up the container can be found in the 
@@ -25,6 +23,8 @@ If you want to build your own docker image, visit the following link
 
 Develop on a remote container
 =============================
+
+.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email pyansys.support@ansys.com.
 
 To use a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_, you must install:
 
@@ -56,14 +56,21 @@ with your custom image:
 .. warning:: Also you might need to change some environment variables or Docker options to adjust to your image configuration.
    Be careful to not commit those changes in your PRs.
 
-
 You can now open the current folder (or PyMAPDL repository) using
 ``ctr/cmd`` + ``shift`` + ``p`` to open the VSCode *Command palette*.
 Then select ``Dev Containers: Open Folder in Container``.
 Because the configuration is available in ``.devcontainer`` directory, VS Code will automatically
-launch the MAPDL Ubuntu container with the desired configuration.
+launch the MAPDL container with the desired configuration.
 
-.. note:: If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
+You can now work normally, but you will be, in fact, working from inside the container.
+Because VSCode mount the local directory into the docker container, you don't lose your changes if accidentally
+delete your container.
+However, this mounting process might have a significant impact on the container performance, especially noticeable
+if you are using MacOS.
+You can avoid that by cloning the repository inside the container.
+Visit `Quick start: Open a Git repository or GitHub PR in an isolated container volume <https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume>`_
+for more information.
+
 
 License
 -------
