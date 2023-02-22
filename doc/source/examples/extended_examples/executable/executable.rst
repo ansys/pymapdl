@@ -25,7 +25,7 @@ blades and a specific material configuration.
 
 
 Convert a script to a Python app
-=====================
+================================
 
 To use the preceding script from a terminal, you must convert it to
 a Python app. In this case, the app uses a command-line interface to
@@ -136,8 +136,8 @@ You can also use Imagemagick to add a watermark:
 Here are descriptions for values used in the preceding code:
 
 - ``-gravity``: Location of the watermark in case the watermark is
-   smaller than the image.
- - ``COMPOSITE``: Path to the ImageMagick ``composite`` function. 
+  smaller than the image.
+- ``COMPOSITE``: Path to the ImageMagick ``composite`` function. 
 - ``watermark.png``: Name of the PNG file with the watermark image.
 - ``volumes_with_watermark.jpg``: Name of the JPG file to save the output to.
 
