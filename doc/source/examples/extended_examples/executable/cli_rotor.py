@@ -2,7 +2,9 @@
 import click
 
 # Import packages
-from ansys.mapdl.core import Mapdl
+import numpy as np
+
+from ansys.mapdl.core import launch_mapdl
 
 
 @click.command()
@@ -21,7 +23,7 @@ def main(n_blades, blade_length, elastic_modulus, density):
         f"Elastic modulus: {elastic_modulus/1E9} GPa\nDensity: {density} Kg/m3"
     )
     # Launch MAPDL
-    mapdl = Mapdl(port=50052)
+    mapdl = launch_mapdl(port=50052)
     mapdl.clear()
     mapdl.prep7()
 
@@ -30,8 +32,8 @@ def main(n_blades, blade_length, elastic_modulus, density):
 
     # Define other properties
     center_radious = 0.1
-    blade_thickness = 0.05
-    section_length = 0.1
+    blade_thickness = 0.02
+    section_length = 0.06
 
     ## Define material
     # Material 1: Steel
@@ -52,44 +54,82 @@ def main(n_blades, blade_length, elastic_modulus, density):
     mapdl.vdrag(area_cyl, nlp1=line_path)
     center_vol = mapdl.geometry.vnum[0]
 
-    point_0 = mapdl.k("", center_radious * 0.95, -blade_thickness / 2, 0)
+    # Create spline
+    precision = 5
+    advance = section_length / precision
+
+    spline = []
+    for i in range(precision + 1):
+        if i != 0:
+            k0 = mapdl.k("", x_, y_, z_)
+        angle_ = i * (360 / n_blades) / precision
+        x_ = section_length * np.cos(np.deg2rad(angle_))
+        y_ = section_length * np.sin(np.deg2rad(angle_))
+        z_ = i * advance
+
+        if i != 0:
+            k1 = mapdl.k("", x_, y_, z_)
+            spline.append(mapdl.l(k0, k1))
+
+    # Merge lines
+    mapdl.nummrg("kp")
+
+    # Create area of the blade
+    point_0 = mapdl.k("", center_radious * 0.6, -blade_thickness / 2, 0)
     point_1 = mapdl.k("", center_radious + blade_length, -blade_thickness / 2, 0)
     point_2 = mapdl.k("", center_radious + blade_length, blade_thickness / 2, 0)
     point_3 = mapdl.k("", center_radious, blade_thickness / 2, 0)
     blade_area = mapdl.a(point_0, point_1, point_2, point_3)
 
-    mapdl.vdrag(blade_area, nlp1=line_path)
+    # Drag area to
+    mapdl.vdrag(
+        blade_area,
+        nlp1=spline[0],
+        nlp2=spline[1],
+        nlp3=spline[2],
+        nlp4=spline[3],
+        nlp5=spline[4],
+    )
 
-    blade_volu = 2
+    # Glue blades
+    mapdl.allsel()
+    mapdl.vsel("u", vmin=center_vol)
+    mapdl.vadd("all")
+    blade_volu = mapdl.geometry.vnum[0]
 
-    # Define cutting blade and circle.
+    # Define cutting blade and circle
+    mapdl.allsel()
     mapdl.vsbv(blade_volu, center_vol, keep2="keep")
-    blade_volu = 3
+    blade_volu = mapdl.geometry.vnum[-1]
 
     # Define symmetry
-    mapdl.csys(1)  # Switch to cylindrical
+    mapdl.csys(1)  # switch to cylindrical
     mapdl.vgen(n_blades, blade_volu, dy=360 / n_blades, imove=0)
-
-    # Glue
-    mapdl.vglue("all")
-    center_vol = mapdl.geometry.vnum[-1]
+    mapdl.csys(0)  # switch to global coordinate system
 
     mapdl.vplot(savefig="volumes.jpg")
+
+    # Glue/add volumes
+    mapdl.allsel()
+    mapdl.vadd("all")
+    center_vol = mapdl.geometry.vnum[-1]
 
     # Mesh
     mapdl.allsel()
     mapdl.et(1, "SOLID186")
-    mapdl.esize(0.01)
-    mapdl.vsweep("all")
+    mapdl.esize(blade_thickness / 2)
+    mapdl.mshape(1, "3D")
+    mapdl.vmesh("all")
 
     # Apply loads
-    mapdl.vsel("s", vmin=center_vol)
-    mapdl.eslv("S")
-    mapdl.nsle("r")
+    mapdl.nsel("all")
     mapdl.nsel("r", "loc", "z", 0)
+    mapdl.csys(1)
+    mapdl.nsel("r", "loc", "x", 0, center_radious)
     mapdl.d("all", "ux", 0)
     mapdl.d("all", "uy", 0)
     mapdl.d("all", "uz", 0)
+    mapdl.csys(0)
 
     # Solve
     mapdl.allsel()

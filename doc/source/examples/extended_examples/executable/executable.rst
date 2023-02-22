@@ -50,14 +50,14 @@ In this case, the following arguments must be specified:
 You can then define the function like this:
 
 .. literalinclude:: cli_rotor.py
-   :lines: 4-7, 17-22
+   :lines: 4-7, 19-24
 
 You introduce the values of these parameters by adding this code
 immediately before the function definition:
 
 
 .. literalinclude:: cli_rotor.py
-   :lines: 1-3,8-23
+   :lines: 2-3,10-25
 
 .. warning:: Because the *Click* package uses decorators (``@click.XXX``,
    you must specify *Click* commands immediately before the function definition.
@@ -67,7 +67,7 @@ of the script:
 
 
 .. literalinclude:: cli_rotor.py
-   :lines: 110-
+   :lines: 150-151
 
 This ensure the new function is called when the script is executed.
 
@@ -76,28 +76,28 @@ this code:
 
 .. code:: bash
 
-   $ python rotor.py 4
+   $ python rotor.py 8
    Initialize script with values:
-   Number of blades: 4
+   Number of blades: 8
    Blade length: 0.2 m
    Elastic modulus: 200.0 GPa
    Density: 7850 Kg/m3
    Solving...
-   The first natural frequency is 728.57 Hz.
+   The first natural frequency is 325.11 Hz.
 
-The preceding code sets the number of blades to ``4``.
+The preceding code sets the number of blades to ``8``.
 This code shows how you can input other arguments:
 
 .. code:: bash
 
-   $ python cli_rotor.py 4 --density 7000
-   Initializing script with values:
-   Number of blades: 4
+   $ python rotor.py 8 --density 7000
+   Initialize script with values:
+   Number of blades: 8
    Blade length: 0.2 m
    Elastic modulus: 200.0 GPa
    Density: 7000 Kg/m3
    Solving...
-   The first natural frequency is 771.54 Hz.
+   The first natural frequency is 344.28 Hz.
 
 
 Advanced usage
