@@ -1,76 +1,101 @@
 
 
-===========================================
-Ansys PyMAPDL Developing-on-Container Guide
-===========================================
+===============================
+Developing-on-a-Container Guide
+===============================
 
-Hello! Welcome to the Ansys PyMAPDL Developing-on-Container Guide! :smile:
+Hello! Welcome to the Ansys PyMAPDL Developing-on-Container Guide! |:smile:|
 
 This guide should guide you on how to develop PyMAPDL features or fix bugs using
 a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_
 or `Codespaces <https://github.com/features/codespaces>`_.
-
 The files for setting up the container can be found in the 
 `.devcontainer directory <https://github.com/pyansys/pymapdl/tree/main/.devcontainer>`_.
 
 About the MAPDL container
 =========================
 
-Because MAPDL software is not open source, the GPL license does not allow us to
+Because MAPDL software is not open source, the GPL license does not allow to
 distribute a docker container to users.
-Having a docker container with MAPDL installed in it a must use any of the development
-methods mentioned on this section.
+Having a docker container with MAPDL installed is a requirement to use
+any of the development methods mentioned on this section.
 If you want to build your own docker image, visit the following link
-:ref:`ref_create_mapdl_docker_container`.
+:ref:`ref_make_container`.
 
 
-Using a Remote Container
-========================
+Develop on a remote container
+=============================
 
-To use remote containers locally, you need to install:
+To use a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_, you must install:
 
 * `VS Code <https://code.visualstudio.com>`_
-* `Docker <https://www.docker.com>`_.
-  It is recommended to use Windows Subsystem Linux (WSL) backend to run docker containers.
-  See `https://code.visualstudio.com/docs/devcontainers/containers#_getting-started`_ for
-  more information.
+* `Docker software <https://www.docker.com>`_ or equivalent.
+  It is recommended to use Windows Subsystem Linux (WSL) backend to run Linux docker containers.
+  See `Developing inside a Container Getting started <https://code.visualstudio.com/docs/devcontainers/containers#_getting-started>`_
+  for more information.
 * `Remove Development VS Code extension pack <https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack>`_
 
-Once you have everything installed you can open the current folder (or repository) using
+As mentioned before, you must have your own Docker image with MAPDL installed locally available or hosted in an 
+online registry, i.e. GitHub `ghcr.io <https://github.com/features/packages>`_.
+For the purpose of this document, assume your image is hosted at ``ghcr.io/myaccount/mapdlimage:mytag``.
+
+You must then modify the file `docker-compose.yml <https://github.com/pyansys/pymapdl/tree/main/.devcontainer/docker-compose.yml>`_
+with your custom image:
+
+.. code-block:: yaml
+   :emphasize-lines: 4
+
+   ports:
+      - '50052:50052'
+      - '50055:50055'
+   image: 'ghcr.io/myaccount/mapdlimage:mytag'
+   user: "0:0"
+   volumes:
+
+
+.. warning:: Also you might need to change some environment variables or Docker options to adjust to your image configuration.
+   Be careful to not commit those changes in your PRs.
+
+
+You can now open the current folder (or PyMAPDL repository) using
 ``ctr/cmd`` + ``shift`` + ``p`` to open the VSCode *Command palette*.
 Then select ``Dev Containers: Open Folder in Container``.
 Because the configuration is available in ``.devcontainer`` directory, VS Code will automatically
 launch the MAPDL Ubuntu container with the desired configuration.
 
-Licensing
----------
+.. note:: If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
 
-You will need to have a valid license to run MAPDL.
+License
+-------
 
+As mentioned before, you must have a valid license to run MAPDL.
 When you launch the container, the file ``script.sh`` automatically checks if the environment
 variable ``ANSYSLMD_LICENSE_FILE`` exists.
 This environment variable sets the port and IP address of the license server.
 
-If you do not have set this env var before launching the container, you will be asked to enter
+If you do not have set this environment variable before launching the container, you are prompt to enter
 your license server port and address.
 
-You can set your license using the environment variable ``ANSYSLMD_LICENSE_FILE`` before launching
-VS Code.
+You can set your license using the environment variable ``ANSYSLMD_LICENSE_FILE`` from the terminal before launching
+VS Code. This is recommended if you are using Windows OS.
 For example, if you have a license server at the address ``123.45.67.89``, you can set the license using:
 
-.. code:: bash
+.. code:: pwsh
   
-   export ANSYSLMD_LICENSE_FILE="1055@123.45.65.89" # set license env var
+   $env:ANSYSLMD_LICENSE_FILE = '1055@123.45.65.89'
    code . # launch VS Code
 
 And then open the folder in the container using the *Command palette*.
 
 
-Using Codespaces
-================
+Develop on Codespaces
+=====================
 
-Codespaces launch a container which already contains the latest MAPDL image. 
-This is the easiest way to get started with PyMAPDL development.
+.. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
+
+Codespaces is a virtual delopment environment provided by GitHub.
+You can launch a container which all the required tools and start to work in couple of minutes.
+This is an easy way to get started with PyMAPDL development.
 
 You can launch a Codespace by clicking on the ``Code`` button on the top right of the repository and then clicking on ``Open with Codespaces``.
 
@@ -84,20 +109,26 @@ After a moment, you will see a fully functional Codespace with the latest MAPDL 
 
 You can now start developing PyMAPDL!
 
+.. note:: If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
 
-Licensing
----------
+License
+-------
 
-Codespaces are free for public repositories. However, you will need to have a valid license to run MAPDL.
+Codespaces are free for public repositories. However, you must have a valid license to run MAPDL.
 You can set your license using the environment variable ``ANSYSLMD_LICENSE_FILE``.
-For example, if you have a license server at the address ``123.45.67.89``, you can set the license using:
+For example, if you have a license server at the address ``123.45.67.89``, you can set the license
+from inside the running container using:
 
 .. code:: bash
   
    export ANSYSLMD_LICENSE_FILE="1055@123.45.65.89"
 
+For this case, your image entrypoint should not require launching MAPDL, otherwise it keeps failing
+because licensing.
+
 However a **better approach** is to use *Codespaces secrets* to store this env var.
 You can set it in your Github profile settings in
 ``Developer settings`` -> ``Code, planning, and automation`` -> ``Codespaces`` -> ``Codespaces secrets``.
 You can add there a secret named ``ANSYSLMD_LICENSE_FILE`` with the value of your license server port and address.
+This secret is loaded as a environment variable in each codespace you start.
 

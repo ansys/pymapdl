@@ -31,8 +31,8 @@ Requirements
 Procedure
 =========
 
-Downloading Ansys MAPDL installation files
-------------------------------------------
+Download Ansys MAPDL installation files
+---------------------------------------
 
 Download latest Ansys MAPDL version from the customer portal 
 (`Current Release <ansys_current_release_>`_).
@@ -49,7 +49,7 @@ Install Ansys MAPDL product
 To install Ansys MAPDL product on an Ubuntu machine you can follow 
 :ref:`install_mapdl` if you are using the graphical user interface
 or :ref:`installing_ansys_in_wsl` for the command line interface.
-The later approach can be reused with small differences in a
+The later approach can be reused with small changes in a
 continuous integration workflow.
 
 Build Docker image
@@ -79,7 +79,7 @@ modify to adapt your needs.
     sudo docker build  -t $TAG --build-arg VERSION=$VERSION --build-arg MAPDL_PATH=$MAPDL_PATH
 
 Not all the installation files are copied, in fact, the files ignored during the copying
-are detailed in the file `.dockerignore`.
+are detailed in the file `.dockerignore <https://github.com/pyansys/pymapdl/tree/main/docker/.dockerignore>`_.
 
 
 Summary
@@ -95,5 +95,3 @@ Summary
 
 * **Step 3:** Build the docker image with the provided Docker configuration files
   and script.
-
-
