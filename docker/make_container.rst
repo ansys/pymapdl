@@ -85,7 +85,7 @@ which you should modify to adapt it to your needs.
 Please notice that:
 
 * ``path-to-pymapdl`` is the path where PyMAPDL repository is located.
-* ``path_to_mapdl_installation``is the path to where you have locally installed ANSYS MAPDL.
+* ``path_to_mapdl_installation`` is the path to where you have locally installed ANSYS MAPDL.
 
 Not all the installation files are copied, in fact, the files ignored during the copying
 are detailed in the file `.dockerignore <https://github.com/pyansys/pymapdl/tree/main/docker/.dockerignore>`_.
