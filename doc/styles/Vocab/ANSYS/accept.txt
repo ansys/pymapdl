@@ -50,6 +50,7 @@ hexahedral
 hostname
 hyperelasticity
 Hyperelasticity
+Imagemagick
 ImageMagick
 imagin
 Intro to Ansys Mechanical APDL Scripting
@@ -83,6 +84,7 @@ parm
 performant
 PMLs
 postprocess
+Postprocess
 postprocessing
 Postprocessing
 postprocessor
