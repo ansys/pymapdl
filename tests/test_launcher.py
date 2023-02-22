@@ -11,6 +11,7 @@ from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
+    _is_ubuntu,
     _validate_MPI,
     _verify_version,
     _version_from_path,
@@ -56,6 +57,15 @@ paths = [
 
 skip_on_ci = pytest.mark.skipif(
     os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
+skip_on_ci = pytest.mark.skipif(
+    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
+)
+
+skip_on_not_local = pytest.mark.skipif(
+    not os.environ.get("RUN_LOCAL", "").upper() == "TRUE",
+    reason="Skipping because not on local",
 )
 
 start_timeout = 30  # Seconds
@@ -227,7 +237,6 @@ def test_license_type_keyword_names():
     reason="Skip when start instance is disabled",
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@skip_on_ci
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -259,10 +268,7 @@ def test_license_type_dummy():
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
+@skip_on_not_local
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
@@ -279,21 +285,20 @@ def test_remove_temp_files():
         assert os.path.isdir(path)
 
 
-@pytest.mark.flaky(reruns=3, reruns_delay=2)
-@pytest.mark.skipif(True, reason="Requires MAPDL installed.")
+@skip_on_not_local
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
-    try:
-        mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
-        old_path = mapdl.directory
-        assert os.path.isdir(str(tmpdir))
-        mapdl.cwd(str(tmpdir))
-        path = mapdl.directory
-        mapdl.exit()
-        assert os.path.isdir(path)
-    finally:
-        # ensure no state change
-        mapdl.cwd(old_path)
+    mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
+    old_path = mapdl.directory
+    assert os.path.isdir(str(tmpdir))
+    mapdl.cwd(str(tmpdir))
+    path = mapdl.directory
+    mapdl.exit()
+    assert os.path.isdir(path)
+
+    # Checking no changes in the old path
+    assert os.path.isdir(old_path)
+    assert os.listdir(old_path)
 
 
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
@@ -371,7 +376,6 @@ def test_warn_uncommon_executable_path():
 
 
 def test_env_injection():
-
     assert update_env_vars(None, None) is None
 
     assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
@@ -392,7 +396,6 @@ def test_env_injection():
 
 @pytest.mark.requires_gui
 def test_open_gui(mapdl):
-
     mapdl.open_gui()
     mapdl.open_gui(include_result=True)
     mapdl.open_gui(inplace=True)
@@ -525,3 +528,11 @@ def test_version(mapdl):
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
+
+
+def test_is_ubuntu():
+    if (
+        os.environ.get("ON_LOCAL", "false").lower() == "true"
+        and os.environ.get("ON_UBUNTU", "false").lower() == "true"
+    ):
+        assert _is_ubuntu()

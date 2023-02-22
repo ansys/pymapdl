@@ -96,12 +96,15 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default except when on docker.
-    proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        "awk -F= '/^NAME/{print $2}' /etc/os-release",
+        shell=True,
+        stdout=subprocess.PIPE,
+    )
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
-    # try lsb_release as this is more reliable
+    # try lsb_release as this is more reliable, but not always available.
     try:
         import lsb_release
 
@@ -1478,6 +1481,8 @@ def launch_mapdl(
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -2087,7 +2092,6 @@ def update_env_vars(add_env_vars, replace_env_vars):
 
 
 def _check_license_argument(license_type, additional_switches):
-
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:

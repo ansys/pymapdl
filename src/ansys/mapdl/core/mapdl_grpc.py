@@ -466,16 +466,22 @@ class MapdlGrpc(_MapdlCore):
                 f"Reached either maximum amount of connection attempts ({n_attempts}) or timeout ({timeout} s)."
             )
 
-            if psutil.pid_exists(self._mapdl_process.pid):
+            if self._mapdl_process is not None and psutil.pid_exists(
+                self._mapdl_process.pid
+            ):
                 # Process is alive
                 raise MapdlConnectionError(
                     msg
                     + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
                 )
             else:
+                pid_msg = (
+                    f" PID: {self._mapdl_process.pid}"
+                    if self._mapdl_process is not None
+                    else ""
+                )
                 raise MapdlConnectionError(
-                    msg
-                    + f"The MAPDL process has died (PID: {self._mapdl_process.pid})."
+                    msg + f"The MAPDL process has died{pid_msg}."
                 )
 
         self._exited = False
@@ -604,9 +610,17 @@ class MapdlGrpc(_MapdlCore):
         Generally of the form of "ip:port", like "127.0.0.1:50052".
 
         """
-        if self._channel is not None:
-            return self._channel._channel.target().decode()
-        return ""
+        channel = self._channel
+        while channel is not None:
+            # When creating interceptors, channels have a nested "_channel" member
+            # containing the intercepted channel.
+            # Only the actual channel contains the "target" member describing the address
+            if hasattr(channel, "target"):
+                return channel.target().decode()
+            channel = getattr(channel, "_channel", None)
+        # This method is relying on grpc channel's private attributes, fallback in case
+        # it does not exist
+        return "unknown"  #  pragma: no cover Unreachable in the current gRPC version
 
     def _verify_local(self):
         """Check if Python is local to the MAPDL instance."""
@@ -1036,6 +1050,8 @@ class MapdlGrpc(_MapdlCore):
         self._log.debug("Exiting MAPDL")
 
         if self._local:
+            self._cache_pids()  # Recache processes
+
             if os.name == "nt":
                 self._kill_server()
             self._close_process()
@@ -1558,7 +1574,12 @@ class MapdlGrpc(_MapdlCore):
     @protect_grpc
     def input(
         self,
-        fname,
+        fname="",
+        ext="",
+        dir_="",
+        line="",
+        log="",
+        *,
         verbose=False,
         progress_bar=False,
         time_step_stream=None,
@@ -1570,10 +1591,41 @@ class MapdlGrpc(_MapdlCore):
         """Stream a local input file to a remote mapdl instance.
         Stream the response back and deserialize the output.
 
+        .. versionchanged:: 0.65
+            From version 0.65 you can use the APDL commands arguments (``ext``, ``dir``, ``line``)
+            in within this command.
+            However, the gRPC implementation does *not* uses the APDL ``/INPUT`` command,
+            rather the gRPC input method with the appropriate configuration to replicate
+            ``/INPUT`` behaviour.
+
         Parameters
         ----------
         fname : str
             MAPDL input file to stream to the MAPDL grpc server.
+            File name and directory path.
+            An unspecified directory path defaults to the Python working
+            directory; in this case, you can use all 248 characters for the file name.
+            The file name defaults to the current ``Jobname`` if ``Ext`` is specified.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        dir : str
+            Directory path. Defaults to current directory.
+
+        line : int
+            A value indicating either a line number in the file from which to
+            begin reading the input file. The first line is the zero line (Python
+            convention).
+
+            (blank), or 0
+                Begins reading from the top of the file (default).
+
+            LINE_NUMBER
+                Begins reading from the specified line number in the file.
+
+        log
+            Not supported in the gRPC implementation.
 
         time_step_stream : int
             Time to wait between streaming updates to send back chunks
@@ -1602,6 +1654,19 @@ class MapdlGrpc(_MapdlCore):
         str
             Response from MAPDL.
 
+        Notes
+        -----
+        This method does not use the APDL ``/INPUT`` command.
+        However its usage is very similar to it. See *Examples* section.
+
+        If you want to use ``/INPUT`` for some reason, although it is not
+        recommended, you can write the desired input file, upload it using
+        :func:`Mapdl.upload <ansys.mapdl.core.Mapdl.upload>`, and then use
+        run command :func:`Mapdl.run('/INPUT,<FILE>,<EXT>) <ansys.mapdl.core.Mapdl.run>`.
+        This does not avoid to use the gRPC input method, but it allows you to
+        use the APDL ``/INPUT`` command from the generated input file.
+        See *Examples* section for more information.
+
         Examples
         --------
         Load a simple ``"ds.dat"`` input file generated from Ansys
@@ -1613,7 +1678,84 @@ class MapdlGrpc(_MapdlCore):
 
         >>> output = mapdl.input('ds.dat', verbose=True)
 
+        Use the default APDL ``/INPUT`` command:
+
+        >>> with open('myinput.inp','w').write("/finish\\n/prep7\\n/com, my commands")
+        >>> with open('inputtrigger.inp','w').write("/input,myinput,inp")
+        >>> mapdl.upload("myinput.inp")
+        Uploading myinput.inp: 100%|█████████████████████████████████████████████████| 26.0/26.0 [00:00<00:00, 5.86kB/s]
+        'myinput.inp'
+        >>> mapdl.upload("inputtrigger.inp")
+        Uploading inputtrigger.inp: 100%|████████████████████████████████████████████| 32.0/32.0 [00:00<00:00, 8.92kB/s]
+        'inputtrigger.inp'
+        >>> with mapdl.non_interactive:
+                mapdl.run("/input,inputtrigger,inp") # This inputs 'myinput.inp'
+
         """
+        # Checking compatibility
+        # Checking the user is not reusing old api:
+        #
+        # fname,
+        # verbose=False,
+        # progress_bar=False,
+        # time_step_stream=None,
+        # chunk_size=512,
+        # orig_cmd="/INP",
+        # write_to_log=True,
+
+        msg_compat = "\nThe 'mapdl.input' method API changed in v0.65. Please check the documentation for information about the new arguments."
+
+        if log:
+            raise ValueError(
+                "'log' argument is not supported in the gRPC implementation."
+            )
+
+        if not isinstance(ext, (str)) and ext is not None:
+            raise ValueError(
+                "Only strings are allowed in 'ext' argument.\n" + msg_compat
+            )
+
+        if not isinstance(dir_, (str)) and dir_ is not None:
+            raise ValueError(
+                "Only strings are allowed in 'dir_' argument.\n" + msg_compat
+            )
+
+        # Getting arguments rights
+        if not fname and ext:
+            fname = self.jobname
+
+        if not fname:
+            raise ValueError("A file name must be supplied.")
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+
+        if not dir_:
+            self._log.debug(f"Using python working directory as 'dir_' value.")
+            dir_ = os.getcwd()
+        else:
+            fname = os.path.join(dir_, fname)
+
+        if not line:
+            line = 0
+        else:
+            try:
+                line = int(line)
+            except ValueError:
+                raise ValueError(
+                    "Only integers are supported for 'line' argument. Labels are not supported on the gRPC implementation."
+                )
+
+        if line != 0:
+            # Trimming file
+            tmp_modified_file = os.path.join(
+                tempfile.gettempdir(), os.path.basename(fname)
+            )
+            with open(tmp_modified_file, "w") as fid, open(fname, "r") as fid2:
+                fid.writelines(fid2.readlines()[line:])
+
+            fname = tmp_modified_file
+
+        # Running method
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
         filename = self._get_file_path(fname, progress_bar)
@@ -1673,7 +1815,8 @@ class MapdlGrpc(_MapdlCore):
 
         if self._local:
             local_path = self.directory
-            with open(os.path.join(local_path, tmp_name), "w") as f:
+            tmp_name_path = os.path.join(local_path, tmp_name)
+            with open(tmp_name_path, "w") as f:
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
@@ -1688,17 +1831,18 @@ class MapdlGrpc(_MapdlCore):
 
         # all output (unless redirected) has been written to a temp output
         if self._local:  # pragma: no cover
-            with open(os.path.join(local_path, tmp_out)) as f:
+            tmp_out_path = os.path.join(local_path, tmp_out)
+            with open(tmp_out_path) as f:
                 output = f.read()
 
             # delete the files to avoid overwriting:
             try:
-                os.remove(tmp_name)
+                os.remove(tmp_name_path)
             except OSError:
                 pass
 
             try:
-                os.remove(tmp_out)
+                os.remove(tmp_out_path)
             except OSError:
                 pass
 
