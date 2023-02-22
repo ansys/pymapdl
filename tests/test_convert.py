@@ -204,7 +204,6 @@ def test_convert_block_commands(tmpdir, cmd):
 
 
 def test_logger(capsys):
-
     apdl_ = """FINISH
     /PREP7
     """.split(

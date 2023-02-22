@@ -93,7 +93,7 @@ gen_status = """ABBREVIATION STATUS-
         1e31,
         1e41,
         1e51,
-        pytest.param(1e61, marks=pytest.mark.xfail),
+        1e61,
     ],
 )
 def test__get_parameter_array(mapdl, number):
