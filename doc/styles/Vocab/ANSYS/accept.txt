@@ -14,6 +14,7 @@ APDL Math
 APDLMath
 APIs
 appen
+argparse
 Arruda-Boyce
 BCs
 Block Lanzos
@@ -49,6 +50,8 @@ hexahedral
 hostname
 hyperelasticity
 Hyperelasticity
+Imagemagick
+ImageMagick
 imagin
 Intro to Ansys Mechanical APDL Scripting
 ist
@@ -81,6 +84,7 @@ parm
 performant
 PMLs
 postprocess
+Postprocess
 postprocessing
 Postprocessing
 postprocessor
