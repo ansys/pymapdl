@@ -1,5 +1,6 @@
-.. _executable_example:
+:orphan:
 
+.. _executable_example:
 
 =======================================
 Create your own Python command-line app
