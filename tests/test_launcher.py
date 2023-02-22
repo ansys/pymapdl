@@ -492,9 +492,15 @@ def test__verify_version_pass():
     reason="Skip when start instance is disabled",
 )
 def test_find_ansys(mapdl):
-    version = int(mapdl.version * 10)
     assert find_ansys() is not None
+
+    # Checking ints
+    version = int(mapdl.version * 10)
     assert find_ansys(version=version) is not None
+
+    # Checking floats
+    assert find_ansys(version=22.2) is not None
+    assert find_ansys(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
         assert find_ansys(version="11")
