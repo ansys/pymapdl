@@ -13,9 +13,6 @@ ENV ANSYS_VERSION=$VERSION
 # This var needs to be updated when version changes.
 ENV AWP_ROOT222=/ansys_inc
 
-# Open MPI en vars
-ENV OMPI_ALLOW_RUN_AS_ROOT=1
-ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # LABELS
 LABEL description="MAPDL on Ubuntu"

@@ -52,13 +52,17 @@ or :ref:`installing_ansys_in_wsl` for the command line interface.
 The later approach can be reused with small changes in a
 continuous integration workflow.
 
+Please take note of where you are installing ANSYS because the
+directory path is need in the following section.
+
 Build Docker image
 ------------------
 
-To build the Docker image, in the working directory, all files
-included in the image should be added.
-The steps are detailed in the following script, which you should
-modify to adapt your needs.
+To build the Docker image, you need to create a directory and copy
+all the files you need in the image.
+
+The steps to copy those files and build the image are detailed in the following script,
+which you should modify to adapt it to your needs.
 
 .. code:: bash
 
@@ -67,19 +71,27 @@ modify to adapt your needs.
     cd docker_image
 
     # Copying the docker files
-    cp ./some-path/Dockerfile
-    cp ./some-path/.dockerignore
+    cp ./path-to-pymapdl/pymapdl/docker/Dockerfile
+    cp ./path-to-pymapdl/pymapdl/docker/.dockerignore
 
     # Creating env vars for the Dockerfile
     export VERSION=222
     export TAG="V222"
-    export MAPDL_PATH=/my_path_to_mapld_installation_/ansys_inc
+    export MAPDL_PATH=/path_to_mapdl_installation/ansys_inc
 
     # Build Docker image
     sudo docker build  -t $TAG --build-arg VERSION=$VERSION --build-arg MAPDL_PATH=$MAPDL_PATH
 
+Please notice that:
+
+* ``path-to-pymapdl`` is the path where PyMAPDL repository is located.
+* ``path_to_mapdl_installation``is the path to where you have locally installed ANSYS MAPDL.
+
 Not all the installation files are copied, in fact, the files ignored during the copying
 are detailed in the file `.dockerignore <https://github.com/pyansys/pymapdl/tree/main/docker/.dockerignore>`_.
+
+The Docker container configuration needed to build the container is detailed in the
+`Dockerfile <https://github.com/pyansys/pymapdl/tree/main/docker/Dockerfile>`_.
 
 
 Summary
