@@ -29,7 +29,9 @@ CORBA interface
 ---------------
 
 Ansys 17.0 supports the legacy CORBA interface, enabled with the
+.. vale off
 `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_ module.
+.. vale on
 This interface allows you to send only
 text to and from the MAPDL service, relying on file IO for all other
 operations. While not as performant as gRPC, this interface still
