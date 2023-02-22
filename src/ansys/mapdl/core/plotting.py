@@ -659,10 +659,11 @@ def general_plotter(
         By default it is 16.
 
     plotter : pyvista.Plotter, optional
-        If a :class:`pyvista.Plotter` not is provided, then creates its
-        own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
-        ``notebook``, ``off_screen`` and ``theme`` are ignored, since
-        they should be set when instantiated the provided plotter.
+        If a :class:`pyvista.Plotter` is not provided, then creates its
+        own plotter. If a :class:`pyvista.Plotter` is provided, the plotter
+        is not shown (you need to issue :meth:`pyvista.Plotter.show` manually)
+        and the arguments ``notebook``, ``off_screen`` and ``theme`` are ignored,
+        since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
     Returns
@@ -806,7 +807,7 @@ def general_plotter(
         pl.close()
 
     else:
-        if not return_plotter:
+        if not return_plotter and not plotter:
             pl.show()
 
     if return_plotter:
