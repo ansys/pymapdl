@@ -445,7 +445,7 @@ jobs:
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       image: 
-        nam: ghcr.io/pyansys/mapdl:v22.2.0
+        name: "ghcr.io/pyansys/mapdl:v22.2.0"
         entrypoint: ["/bin/bash", "/ansys_inc/v222/ansys/bin/mapdl", "-grpc", "-dir /jobs", "-smp", "-np 2", "> log.txt &"]
       options: "-u=0:0 -w /jobs" 
       credentials:
