@@ -1399,10 +1399,19 @@ class AnsVec(ApdlMathObj):
         return f"APDLMath Vector Size {self.size}"
 
     def __getitem__(self, num):
+        info = self._mapdl._data_info(self.id)
+        dtype = ANSYS_VALUE_TYPE[info.stype]
         if num < 0:
             raise ValueError("Negative indices not permitted")
+
         self._mapdl.run(f"pyval={self.id}({num+1})", mute=True)
-        return self._mapdl.scalar_param("pyval")
+        item_val = self._mapdl.scalar_param("pyval")
+
+        if MYCTYPE[dtype] == "C" or MYCTYPE[dtype] == "Z":
+            self._mapdl.run(f"pyval_img={self.id}({num+1},2)", mute=True)
+            img_val = self._mapdl.scalar_param("pyval_img")
+            item_val = item_val + img_val * 1j
+        return item_val
 
     def __mul__(self, vec):
         """Element-Wise product with another Ansys vector object.
