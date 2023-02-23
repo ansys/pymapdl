@@ -885,8 +885,13 @@ def find_ansys(version=None):
 
     Parameters
     ----------
-    version : float, optional
-        Version of ANSYS to search for.  If ``None``, use latest.
+    version : int, float, optional
+        Version of ANSYS to search for.
+        If using ``int``, it should follow the convention ``XXY``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If using ``float``, it should follow the convention ``XX.Y``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If ``None``, use latest available version on the machine.
 
     Returns
     -------
@@ -915,6 +920,10 @@ def find_ansys(version=None):
 
     if not version:
         version = max(versions.keys())
+
+    elif isinstance(version, float):
+        # Using floats, converting to int.
+        version = int(version * 10)
 
     try:
         ans_path = versions[version]
@@ -1330,7 +1339,7 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=15,
+    start_timeout=45,
     port=None,
     cleanup_on_exit=True,
     start_instance=None,
@@ -2092,7 +2101,6 @@ def update_env_vars(add_env_vars, replace_env_vars):
 
 
 def _check_license_argument(license_type, additional_switches):
-
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:

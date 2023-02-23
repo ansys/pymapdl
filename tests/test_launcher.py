@@ -376,7 +376,6 @@ def test_warn_uncommon_executable_path():
 
 
 def test_env_injection():
-
     assert update_env_vars(None, None) is None
 
     assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
@@ -397,7 +396,6 @@ def test_env_injection():
 
 @pytest.mark.requires_gui
 def test_open_gui(mapdl):
-
     mapdl.open_gui()
     mapdl.open_gui(include_result=True)
     mapdl.open_gui(inplace=True)
@@ -494,9 +492,15 @@ def test__verify_version_pass():
     reason="Skip when start instance is disabled",
 )
 def test_find_ansys(mapdl):
-    version = int(mapdl.version * 10)
     assert find_ansys() is not None
+
+    # Checking ints
+    version = int(mapdl.version * 10)
     assert find_ansys(version=version) is not None
+
+    # Checking floats
+    assert find_ansys(version=22.2) is not None
+    assert find_ansys(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
         assert find_ansys(version="11")

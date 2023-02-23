@@ -41,6 +41,7 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
     extended_examples/Python_UPF/python_upf_examples
     extended_examples/Krylov/krylov_example
     extended_examples/dash/dash_example
+    extended_examples/executable/executable
 
 .. include:: extended_examples/index.rst
    :start-line: 2
