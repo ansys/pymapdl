@@ -444,8 +444,10 @@ jobs:
     
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
-      image: ghcr.io/pyansys/mapdl:v22.2.0
-      options: "-u=0:0 -w /jobs --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2  > log.txt &'"
+      image: 
+        name: ghcr.io/pyansys/mapdl:v22.2.0
+        entrypoint: ["/bin/bash", "/ansys_inc/v222/ansys/bin/mapdl", "-grpc", "-dir /jobs", "-smp", "-np 2", "> log.txt &"]
+      options: "-u=0:0 -w /jobs --entrypoint 
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
