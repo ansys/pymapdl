@@ -1,18 +1,21 @@
 .. _versions_and_interfaces:
 
-***********************
+=======================
 Versions and interfaces
-***********************
+=======================
 
 The PyMAPDL project attempts to maintain compatibility with legacy
 versions of MAPDL while allowing for support of faster and better
 interfaces with the latest versions of MAPDL.
 
 There are three interfaces PyMAPDL can use to connect to MAPDL.
+You can see a table with the MAPDL version and the supported interfaces
+in `Table of supported versions <table_versions_>`_
 
 
 gRPC interface
-~~~~~~~~~~~~~~
+==============
+
 This is the default and preferred interface to connect to MAPDL.
 Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
@@ -20,13 +23,19 @@ and files from the MAPDL service.
 
 
 Legacy interfaces
-~~~~~~~~~~~~~~~~~
+=================
 
 CORBA interface
 ---------------
 
+.. vale off
+
 Ansys 17.0 supports the legacy CORBA interface, enabled with the
-``ansys.mapdl.corba`` module. This interface allows you to send only
+`ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_ module.
+
+.. vale on
+
+This interface allows you to send only
 text to and from the MAPDL service, relying on file IO for all other
 operations. While not as performant as gRPC, this interface still
 allows you to control a local instance of MAPDL. These versions of
@@ -42,7 +51,7 @@ both local and remote connection configurations.
 Console interface
 -----------------
 
-``PyMAPDL`` project supports Ansys versions as early as 13.0 on Linux using a
+PyMAPDL project supports Ansys versions as early as 13.0 on Linux using a
 console interface. Like CORBA, the console interface allows for the exchange of text to
 and from the Ansys instance.
 
@@ -51,9 +60,15 @@ shift to a modern version of Ansys to continue to use PyMAPDL.
 
 
 
-.. _table_versions:
+Compatibility between MAPDL and interfaces
+==========================================
+
+The following table shows the supported versions of Ansys and the recommended interface for each one of them in PyMAPDL.
+
 
 **Table of supported versions**
+
+.. _table_versions:
 
 +---------------------------+------------------------+-----------------------------------------------------------------------+
 | Ansys Version             | Recommended interface  | Support                                                               |
@@ -103,7 +118,7 @@ shift to a modern version of Ansys to continue to use PyMAPDL.
 | Older up to Ansys 13.0    | Console                | |:x:|                 | |:x:|                 | |:heavy_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
 
-The following table shows the supported versions of Ansys and the recommended interface for each one of them in PyMAPDL.
+Where:
 
 * |:heavy_check_mark:| means that the interface is supported and recommended.
 * |:heavy_minus_sign:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
