@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Check
         if: |
-          contains(github.event.comment.body, 'LGTM') && contains(github.event.comment.author)
+          contains(github.event.comment.body, 'LGTM') && contains(github.event.comment.author, 'germa89')
         run: |
           echo "Run action"
 
