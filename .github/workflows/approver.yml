@@ -19,3 +19,4 @@ jobs:
         with:
           review-message: ":white_check_mark: Approving this PR because ${{ github.event.comment.user.login }} said so :grimacing:"
           pull-request-number: ${{ github.event.issue.number }}
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
