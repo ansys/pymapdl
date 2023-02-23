@@ -27,7 +27,6 @@
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
 .. _scipy_docs: https://docs.scipy.org/doc/scipy/reference/
-.. _docker: https://www.docker.com/
 .. _plotly_express: https://plotly.com/python/plotly-express/
 .. _dash: https://plotly.com/dash/
 .. _dash_bootstrap_components: https://dash-bootstrap-components.opensource.faculty.ai/

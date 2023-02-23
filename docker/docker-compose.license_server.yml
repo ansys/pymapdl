@@ -52,3 +52,7 @@ services:
   mapdl:
     environment:
       - ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER_HOSTNAME}
+
+  dpf:
+    environment:
+      - ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER_HOSTNAME}
