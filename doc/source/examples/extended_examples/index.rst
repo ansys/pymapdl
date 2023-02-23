@@ -20,6 +20,8 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                              |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
+| :ref:`executable_example`  | Create your own Python app with a command-line interface.                                               |
++----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
 .. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html

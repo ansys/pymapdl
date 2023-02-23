@@ -42,7 +42,6 @@ ALLOWED_TARGETS = ["NODES"]
 
 
 if _HAS_PYVISTA:
-
     import pyvista as pv
 
     # Symbols for constrains
@@ -134,6 +133,7 @@ if _HAS_PYVISTA:
         "AMPS": {"color": "grey", "glyph": VOLT},
         "CHRGS": {"color": "grey", "glyph": VOLT},
     }
+
 
 # Using * to force all the following arguments to be keyword only.
 def _general_plotter(
@@ -659,10 +659,11 @@ def general_plotter(
         By default it is 16.
 
     plotter : pyvista.Plotter, optional
-        If a :class:`pyvista.Plotter` not is provided, then creates its
-        own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
-        ``notebook``, ``off_screen`` and ``theme`` are ignored, since
-        they should be set when instantiated the provided plotter.
+        If a :class:`pyvista.Plotter` is not provided, then creates its
+        own plotter. If a :class:`pyvista.Plotter` is provided, the plotter
+        is not shown (you need to issue :meth:`pyvista.Plotter.show` manually)
+        and the arguments ``notebook``, ``off_screen`` and ``theme`` are ignored,
+        since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
     Returns
@@ -806,7 +807,7 @@ def general_plotter(
         pl.close()
 
     else:
-        if not return_plotter:
+        if not return_plotter and not plotter:
             pl.show()
 
     if return_plotter:
@@ -827,7 +828,6 @@ def bc_plotter(
     bc_glyph_size=None,
     bc_labels_font_size=16,
 ):
-
     if bc_labels:
         bc_labels = _bc_labels_checker(bc_labels)
     else:

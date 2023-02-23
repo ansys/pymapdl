@@ -14,7 +14,6 @@ skip_no_xserver = pytest.mark.skipif(
 
 @pytest.fixture
 def bc_example(mapdl, make_block):
-
     mapdl.prep7()
 
     mapdl.nsel("s", "node", "", 1)

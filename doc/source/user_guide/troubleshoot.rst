@@ -51,6 +51,8 @@ Launching issues
 
 There are several issues that can cause MAPDL not to launch, including:
 
+- `Connection timeout`_
+- `Testing MAPDL launching`_
 - `Licensing issues`_
 - `Virtual private network (VPN) issues`_
 - `Missing dependencies on Linux`_
@@ -58,6 +60,34 @@ There are several issues that can cause MAPDL not to launch, including:
 - `Incorrect environment variables`_
 - `Using a proxy server`_
 - `Firewall settings`_
+
+
+Connection timeout
+==================
+
+In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
+In those cases, you might see the following message:
+
+.. rubric::
+    PyMAPDL is taking longer than expected to connect to an MAPDL session.
+    Checking if there are any available licenses...
+
+You might consider to increase the starting timeout before trying other options.
+The start timeout can be increased using:
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(start_timeout=60)
+
+Or if you are connecting to a remote instance you can use:
+
+.. code:: python
+
+    from ansys.mapdl.core import Mapdl
+
+    mapdl = Mapdl(timeout=60)
 
 
 Testing MAPDL launching
