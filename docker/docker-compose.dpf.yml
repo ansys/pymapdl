@@ -1,0 +1,9 @@
+## To be executed after license server
+services:
+  dpf:
+    image: 'ghcr.io/pyansys/dpf-core:22.2dev'
+    ports:
+      - '50056:50052'
+    restart: always
+    environment:
+      - ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER_HOSTNAME}

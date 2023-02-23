@@ -65,6 +65,8 @@ required libraries:
 If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <pymapdl_run_ubuntu_>`_ .
 
 
+.. _installing_ansys_in_wsl:
+
 Install Ansys products
 ----------------------
 
