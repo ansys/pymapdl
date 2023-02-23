@@ -64,7 +64,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "sphinxcontrib.googleanalytics",
 ]
 
 # Intersphinx mapping
@@ -159,10 +158,6 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-# Google analytics setup
-googleanalytics_id = "G-JQJKPV6ZVB"
-googleanalytics_enabled = True
-
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
@@ -197,6 +192,7 @@ html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
+    "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
