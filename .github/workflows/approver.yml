@@ -1,0 +1,18 @@
+name: Approve PRs
+on:
+  issue_comment:                                     
+    types: [created, edited]
+
+jobs:
+  autoapprove:
+    # This job only runs for pull request comments
+    name: PR comment
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check
+        if: |
+          contains(github.event.comment.body, 'LGTM') && contains(github.event.comment.author)
+        run: |
+          echo "Run action"
+
