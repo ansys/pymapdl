@@ -1493,6 +1493,11 @@ class _MapdlCore(Commands):
         show_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
 
+        **kwargs
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicable when visualizing with
+            ``vtk=True``.
+
         Examples
         --------
         Plot while displaying area numbers.
@@ -1606,6 +1611,11 @@ class _MapdlCore(Commands):
         show_lines : bool, optional
             Plot lines and areas.  Change the thickness of the lines
             with ``line_width=``
+
+        **kwargs
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicable when visualizing with
+            ``vtk=True``.
 
         Examples
         --------
@@ -1835,7 +1845,7 @@ class _MapdlCore(Commands):
 
         **kwargs
             See :meth:`ansys.mapdl.core.plotting.general_plotter` for
-            more keyword arguments applicatle when visualizing with
+            more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
         Notes

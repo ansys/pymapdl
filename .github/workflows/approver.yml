@@ -1,0 +1,22 @@
+name: Approve PRs
+on:
+  workflow_dispatch:
+  issue_comment:                                     
+    types: [created, edited]
+
+jobs:
+  autoapprove:
+    # This job only runs for pull request comments
+    name: PR comment
+    if: ${{ github.event.issue.pull_request }}
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hmarr/auto-approve-action@v3
+        if: |
+          contains(github.event.comment.body, 'LGTM') && contains(github.event.comment.user.login, 'germa89')
+        with:
+          review-message: ":white_check_mark: Approving this PR because ${{ github.event.comment.user.login }} said so :grimacing:"
+          pull-request-number: ${{ github.event.issue.number }}
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
