@@ -448,8 +448,8 @@ jobs:
       options: "-u=0:0 --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2' -w '/jobs'"
       # entrypoint: ["/bin/bash", "/ansys_inc/v222/ansys/bin/mapdl", "-grpc", "-dir /jobs", "-smp", "-np 2"]
       credentials:
-        username: ${{ secrets.GH_USERNAME }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        username: ${{ github.actor  }}
+        password: ${{ secrets.github_token }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
