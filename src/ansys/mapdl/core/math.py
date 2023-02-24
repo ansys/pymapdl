@@ -1404,14 +1404,18 @@ class AnsVec(ApdlMathObj):
         if num < 0:
             raise ValueError("Negative indices not permitted")
 
-        self._mapdl.run(f"pyval={self.id}({num+1})", mute=True)
-        item_val = self._mapdl.scalar_param("pyval")
+        self._mapdl.run(f"pyval_={self.id}({num+1})", mute=True)
+        item_val = self._mapdl.scalar_param("pyval_")
 
-        if MYCTYPE[dtype] == "C" or MYCTYPE[dtype] == "Z":
-            self._mapdl.run(f"pyval_img={self.id}({num+1},2)", mute=True)
-            img_val = self._mapdl.scalar_param("pyval_img")
-            item_val = item_val + img_val * 1j
-        return item_val
+        if MYCTYPE[dtype].upper() in ["C", "Z"]:
+            self._mapdl.run(f"pyval_img_={self.id}({num+1},2)", mute=True)
+            img_val = self._mapdl.scalar_param("pyval_img_")
+            
+            # Clean parameters
+            self._mapdl.run("item_val =")
+            self._mapdl.run("pyval_img_=")
+
+        return item_val + img_val * 1j
 
     def __mul__(self, vec):
         """Element-Wise product with another Ansys vector object.
