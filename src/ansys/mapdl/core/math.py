@@ -1410,12 +1410,13 @@ class AnsVec(ApdlMathObj):
         if MYCTYPE[dtype].upper() in ["C", "Z"]:
             self._mapdl.run(f"pyval_img_={self.id}({num+1},2)", mute=True)
             img_val = self._mapdl.scalar_param("pyval_img_")
+            item_val = item_val + img_val * 1j
 
             # Clean parameters
             self._mapdl.run("item_val =")
             self._mapdl.run("pyval_img_=")
 
-        return item_val + img_val * 1j
+        return item_val
 
     def __mul__(self, vec):
         """Element-Wise product with another Ansys vector object.
