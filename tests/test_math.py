@@ -252,7 +252,9 @@ def test_getitem_AnsMat(mm):
 def test_getitem_AnsVec(mm, dtype_):
     size_i = 3
     vec = mm.rand(size_i, dtype=dtype_)
-    assert np.allclose(vec, vec.asarray())
+    np_vec = np.asarray()
+    for i in range(size_i):
+        assert vec[i] == np_vec[i]
 
 
 def test_load_stiff_mass(mm, cube_solve, tmpdir):
