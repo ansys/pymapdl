@@ -442,8 +442,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
+      ON_LOCAL: true
+      ON_UBUNTU: true
       MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
-    
+
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
       image: MAPDL_IMAGE
@@ -452,9 +454,6 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.github_token }}
-    env:
-      ON_LOCAL: true
-      ON_UBUNTU: true
 
     steps:
       - name: "Install Git and checkout project"
