@@ -111,7 +111,7 @@ jobs:
 
       - name: "Install OS packages"
         run: |
-          sudo apt update 
+          sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
 
       - name: "Cache pip"
@@ -443,7 +443,8 @@ jobs:
     timeout-minutes: 20
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
-      image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+      image: 'ghcr.io/pyansys/pymapdl/mapdl:v22.2.0'
+      # ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
       options: "-u=0:0 --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2' -w '/jobs'"
       # entrypoint: ["/bin/bash", "/ansys_inc/v222/ansys/bin/mapdl", "-grpc", "-dir /jobs", "-smp", "-np 2"]
       credentials:
@@ -468,7 +469,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv ./.venv
           source ./.venv/bin/activate
- 
+
       - name: "Install OS packages"
         run: |
           apt update
@@ -540,7 +541,7 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --upgrade pip
-      
+
       - name: "Creating python venv"
         shell: powershell
         run: |
