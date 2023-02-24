@@ -1410,7 +1410,7 @@ class AnsVec(ApdlMathObj):
         if MYCTYPE[dtype].upper() in ["C", "Z"]:
             self._mapdl.run(f"pyval_img_={self.id}({num+1},2)", mute=True)
             img_val = self._mapdl.scalar_param("pyval_img_")
-            
+
             # Clean parameters
             self._mapdl.run("item_val =")
             self._mapdl.run("pyval_img_=")
