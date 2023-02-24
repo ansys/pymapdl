@@ -70,9 +70,9 @@ extensions = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/dev", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "numpy": ("https://numpy.org/doc/stable/index.html", None),
-    "matplotlib": ("https://matplotlib.org/stable", None),
-    "pandas": ("https://pandas.pydata.org/docs/index.html", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
