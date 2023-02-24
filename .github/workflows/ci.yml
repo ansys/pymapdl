@@ -443,7 +443,7 @@ jobs:
     timeout-minutes: 20
     container:
       # image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
-      image: ${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}
+      image: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
       options: "-u=0:0 --entrypoint '/bin/bash /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -smp -np 2' -w '/jobs'"
       # entrypoint: ["/bin/bash", "/ansys_inc/v222/ansys/bin/mapdl", "-grpc", "-dir /jobs", "-smp", "-np 2"]
       credentials:
