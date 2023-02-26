@@ -236,7 +236,7 @@ def test_matrix_matmult(mm):
     assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
 
 
-def test_getitem(mm):
+def test_getitem_AnsMat(mm):
     size_i, size_j = (3, 3)
     mat = mm.rand(size_i, size_j)
     np_mat = mat.asarray()
@@ -246,6 +246,15 @@ def test_getitem(mm):
         for j in range(size_j):
             # recall that MAPDL uses fortran order
             assert vec[j] == np_mat[j, i]
+
+
+@pytest.mark.parametrize("dtype_", [np.int64, np.double, np.complex128])
+def test_getitem_AnsVec(mm, dtype_):
+    size_i = 3
+    vec = mm.rand(size_i, dtype=dtype_)
+    np_vec = vec.asarray()
+    for i in range(size_i):
+        assert vec[i] == np_vec[i]
 
 
 def test_load_stiff_mass(mm, cube_solve, tmpdir):
