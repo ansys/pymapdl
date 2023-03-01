@@ -68,9 +68,13 @@ Connection timeout
 In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
 In those cases, you might see the following message:
 
+.. vale off
+
 .. rubric::
     PyMAPDL is taking longer than expected to connect to an MAPDL session.
     Checking if there are any available licenses...
+
+.. vale on
 
 You might consider to increase the starting timeout before trying other options.
 The start timeout can be increased using:
