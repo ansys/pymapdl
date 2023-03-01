@@ -209,7 +209,7 @@ html_theme_options = {
         },
         {
             "name": "Contribute",
-            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "url": "https://mapdl.docs.pyansys.com/dev/getting_started/contribution.html",
             "icon": "fa fa-wrench",
         },
     ],
