@@ -1,20 +1,19 @@
 .. #Pyansys
-.. _pyansys: https://docs.pyansys.com
+.. _pyansys: https://docs.pyansys.com/dev/
 .. _pyansys_support: pyansys.support@ansys.com
 
 .. #Other projects
 .. _dpf_core_gh: https://github.com/pyansys/DPF-Core
 .. _dpf_post_gh: https://github.com/pyansys/DPF-Post
-.. _dpf_core_docs: https://dpf.docs.pyansys.com/
-.. _dpf_post_docs: https://post.docs.pyansys.com/
+.. _dpf_core_docs: https://dpf.docs.pyansys.com/dev/
+.. _dpf_post_docs: https://post.docs.pyansys.com/dev/
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 
 .. #PyAnsys Developer Guide
-.. _dev_guide_pyansys: https://dev.docs.pyansys.com/
-.. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
-.. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
-
+.. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/
+.. _dev_guide_contributing: https://dev.docs.pyansys.com/dev/how-to/contributing.html
+.. _dev_guide_coding_style: https://dev.docs.pyansys.com/dev/coding-style/index.html
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org
 .. _jupyter: https://jupyter.org/
@@ -84,22 +83,22 @@
 .. _pymapdl_main: pymapdl_docs_
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/pyansys/pymapdl/releases
-.. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/troubleshoot/troubleshoot.html?#ubuntu
+.. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/dev/user_guide/troubleshoot.html#ubuntu
 .. _pymapdl_issues: https://github.com/pyansys/pymapdl/issues
 .. _pymapdl_repo: https://github.com/pyansys/pymapdl
-.. _pymapdl_docs: https://mapdl.docs.pyansys.com/
-.. _pymapdl_dev_docs: https://dev.mapdl.docs.pyansys.com/
+.. _pymapdl_docs: https://mapdl.docs.pyansys.com/dev/
+.. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/dev/
 .. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
 .. _pymapdl_cheatsheet: ./_assets/Cheat_Sheet_PyMAPDL.pdf
 .. _pymapdl_tests: https://github.com/pyansys/pymapdl/tree/main/tests
 .. _pymapdl_test_math: https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py
-.. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/user_guide/math.html
+.. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/dev/user_guide/math.html
 .. _licensing_guide_pdf: ./_assets/lic_guide.pdf
 .. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 .. _pymapdl_examples: https://github.com/pyansys/pymapdl/tree/main/examples
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
-.. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
-.. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/examples/extended_examples/Krylov/krylov_example.html
+.. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/dev/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
+.. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/dev/examples/extended_examples/Krylov/krylov_example.html
 .. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
