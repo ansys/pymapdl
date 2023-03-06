@@ -11,10 +11,10 @@ readme = "README.rst"
 requires-python = ">=3.7"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Ansys, Inc.", email = "pyansys.support@ansys.com"},
+    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
 ]
 maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.support@ansys.com"},
+    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
 ]
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
@@ -48,6 +48,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 
 [project.optional-dependencies]
