@@ -1643,7 +1643,7 @@ def test_use_uploading(mapdl, cleared, tmpdir):
         fid.write(f"/prep7\n/com, {msg}\n/eof")
 
     # Uploading from local
-    out = mapdl.use(mymacrofile)
+    out = mapdl.use(name=mymacrofile)
     assert f"USE MACRO FILE  {mymacrofile_name}" in out
     assert msg in out
     assert mymacrofile_name in mapdl.list_files()
