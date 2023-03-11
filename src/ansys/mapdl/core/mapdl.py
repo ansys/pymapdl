@@ -3968,11 +3968,11 @@ class _MapdlCore(Commands):
         # file, we are going to test if the file exists locally first, then remote,
         # and if not, silently assume that it is a macro in a macro library.
         # I do not think there is a way to check if the macro exists before use it.
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
+        if "name" in kwargs:
+            name = kwargs.pop("name")
         else:
             if len(args) < 1:
-                raise ValueError('Missing `name` argument')
+                raise ValueError("Missing `name` argument")
             name = args[0]
 
         base_name = os.path.basename(name)
