@@ -403,6 +403,9 @@ class MapdlGrpc(_MapdlCore):
         else:
             self._log.debug("Connection established")
 
+        # Avoiding muting
+        self._run("/gopr")
+
         # double check we have access to the local path if not
         # explicitly specified
         if "local" not in start_parm:
