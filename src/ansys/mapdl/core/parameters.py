@@ -280,14 +280,16 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        params = interp_star_status(self._mapdl.starstatus(avoid_non_interactive=True))
+        params = interp_star_status(
+            self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
+        )
 
         if self.show_leading_underscore_parameters:
-            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            _params = interp_star_status(self._mapdl.starstatus("_PRM", mute=False))
             params.update(_params)
 
         if self.show_trailing_underscore_parameters:
-            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_", mute=False))
             params.update(params_)
 
         return params
