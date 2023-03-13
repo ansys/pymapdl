@@ -1,0 +1,75 @@
+name: 🎓 Adding an example
+description: Proposing a new example for the library
+title: "Example proposal: ..."
+labels: ["example"]
+assignees: [""]
+
+body:
+
+  - type: textarea
+    id: example-description
+    attributes:
+      label: '📝 Description of the example'
+      placeholder: Describe what example you devised and why it is useful for the project.
+
+    validations:
+      required: true
+
+  - type: textarea
+    id: example-files
+    attributes:
+      label: '📁 Files needed for running the example'
+      placeholder: >
+        Drag and drop the files used in your example, together with the script employed.
+        Make sure that it runs on your machine, at the very least.
+        Add any additional comments/explanations that maintainers may need for running the example.
+        If you have issues uploading your files because of the file extension/type, upload them
+        as a .zip file.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os-name
+    attributes:
+      label: '💻 Which operating system are you using?'
+      multiple: false
+      options:
+       - 'Windows'
+       - 'MacOS'
+       - 'Linux'
+    validations:
+      required: true
+
+  - type: textarea
+    id: ansys-version
+    attributes:
+      label: '📀 Which ANSYS version are you using?'
+      placeholder: Indicate the ANSYS version of the products you are using.
+
+    validations:
+      required: false
+
+  - type: dropdown
+    id: python-version
+    attributes:
+      label: '🐍 Which Python version are you using?'
+      description: Run `python --version` to verify your Python version
+      multiple: false
+      options:
+       - '3.7'
+       - '3.8'
+       - '3.9'
+       - '3.10'
+       - '3.11'
+    validations:
+      required: true
+
+  - type: textarea
+    id: installed-packages
+    attributes:
+      label: '📦 Installed packages'
+      description: Run `python -m pip freeze` to list installed packages
+      placeholder: Paste the output of `python -m pip freeze` here.
+      render: shell
+    validations:
+      required: true
