@@ -3278,11 +3278,12 @@ class MapdlGrpc(_MapdlCore):
         else:
             return pymapdl_session_id == mapdl_session_id
 
-    @supress_logging
     def _get_mapdl_session_id(self):
         # return self.parameters.__getitem__(SESSION_ID_NAME)
         try:
-            parameter = interp_star_status(self._run(f"*STATUS,{SESSION_ID_NAME}"))
+            parameter = interp_star_status(
+                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
+            )
         except AttributeError:
             return None
 

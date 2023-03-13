@@ -647,7 +647,7 @@ def interp_star_status(status):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
-    # parameters that we don't want to include in the analysis.
+    # text that we don't want to include in the output.
     ind = find_parameter_listing_line(status)
     status = "\n".join(status.splitlines()[ind:])
 
