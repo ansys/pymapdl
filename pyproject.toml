@@ -11,10 +11,10 @@ readme = "README.rst"
 requires-python = ">=3.7"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Ansys, Inc.", email = "pyansys.support@ansys.com"},
+    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
 ]
 maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.support@ansys.com"},
+    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
 ]
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
@@ -48,37 +48,38 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 
 [project.optional-dependencies]
 tests = [
-    "ansys-dpf-core==0.7.3",
-    "autopep8==2.0.1",
-    "matplotlib==3.7.0",
+    "ansys-dpf-core==0.7.4",
+    "autopep8==2.0.2",
+    "matplotlib==3.7.1",
     "scipy==1.10.1",
     "pandas==1.5.3",
-    "pytest==7.2.1",
+    "pytest==7.2.2",
     "pytest-cov==4.0.0",
     "pyvista==0.38.3",
     "pyansys-tools-report==0.5.0",
     "vtk==9.2.6",
-    "pytest-rerunfailures==11.1.1",
+    "pytest-rerunfailures==11.1.2",
 ]
 doc = [
     "sphinx==5.3.0",
-    "ansys-dpf-core==0.7.3",
-    "ansys-mapdl-reader==0.52.9",
+    "ansys-dpf-core==0.7.4",
+    "ansys-mapdl-reader==0.52.10",
     "ansys-sphinx-theme==0.9.5",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
     "imageio==2.26.0",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.7.0",
+    "matplotlib==3.7.1",
     "numpydoc==1.5.0",
     "pandas==1.5.3",
     "plotly==5.13.1",
-    "pypandoc==1.10",
+    "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
     "pyvista==0.38.3",

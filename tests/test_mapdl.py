@@ -1642,8 +1642,11 @@ def test_use_uploading(mapdl, cleared, tmpdir):
     with open(mymacrofile, "w") as fid:
         fid.write(f"/prep7\n/com, {msg}\n/eof")
 
+    with pytest.raises(ValueError, match="Missing `name` argument"):
+        mapdl.use()
+
     # Uploading from local
-    out = mapdl.use(mymacrofile)
+    out = mapdl.use(name=mymacrofile)
     assert f"USE MACRO FILE  {mymacrofile_name}" in out
     assert msg in out
     assert mymacrofile_name in mapdl.list_files()
