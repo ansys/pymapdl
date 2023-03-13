@@ -9,6 +9,11 @@ from ansys.mapdl.core.logging import Logger
 LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
+_RUNNING_ON_PYTEST = False
+
+if _RUNNING_ON_PYTEST:
+    LOG.debug("Running tests on Pytest")
+
 _LOCAL_PORTS = []
 
 LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"]]

@@ -24,8 +24,6 @@ from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
 import psutil
 
-from ansys.mapdl.core.mapdl import SESSION_ID_NAME
-
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
 
@@ -52,7 +50,7 @@ except ImportError:  # pragma: no cover
 except ModuleNotFoundError:  # pragma: no cover
     raise ImportError(MSG_MODULE)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__
+from ansys.mapdl.core import _LOCAL_PORTS, _RUNNING_ON_PYTEST, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -60,6 +58,7 @@ from ansys.mapdl.core.common_grpc import (
     parse_chunks,
 )
 from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -75,6 +74,7 @@ from ansys.mapdl.core.misc import (
     run_as_prep7,
     supress_logging,
 )
+from ansys.mapdl.core.parameters import interp_star_status
 from ansys.mapdl.core.post import PostProcessing
 
 # Checking if tqdm is installed.
@@ -93,6 +93,9 @@ VOID_REQUEST = anskernel.EmptyRequest()
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
+
+
+SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 
 def chunk_raw(raw, save_as):
@@ -356,6 +359,7 @@ class MapdlGrpc(_MapdlCore):
         self._mute = False
         self._db = None
         self.__server_version = None
+        self.__session_id = None
 
         # saving for later use (for example open_gui)
         start_parm["ip"] = ip
@@ -408,7 +412,7 @@ class MapdlGrpc(_MapdlCore):
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
 
-        self.create_session()
+        self._create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -3244,7 +3248,45 @@ class MapdlGrpc(_MapdlCore):
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
 
-    def create_session(self):
-        id = uuid4()
-        self.__session_id = id
-        self._run(f"{SESSION_ID_NAME}={id}")
+    def _create_session(self):
+        id_ = uuid4()
+        id_ = str(id_)[:31].replace("-", "")
+        self.__session_id = id_
+        self._run(f"{SESSION_ID_NAME}='{id_}'")
+
+    @property
+    def _session_id(self):
+        return self.__session_id
+
+    def _check_session_id(self):
+        pymapdl_session_id = self._session_id
+        if (
+            not pymapdl_session_id
+        ):  # We return early if pymapdl_session is not fixed yet.
+            return
+        mapdl_session_id = self._get_mapdl_session_id()
+
+        if pymapdl_session_id is None:
+            return
+        elif _RUNNING_ON_PYTEST:
+            if pymapdl_session_id != mapdl_session_id:
+                raise DifferentSessionConnectionError(
+                    "You are connecting to a different MAPDL session."
+                )
+            else:
+                self._log.debug("The session ids match")
+        else:
+            return pymapdl_session_id == mapdl_session_id
+
+    @supress_logging
+    def _get_mapdl_session_id(self):
+        # return self.parameters.__getitem__(SESSION_ID_NAME)
+        try:
+            parameter = interp_star_status(self._run(f"*STATUS,{SESSION_ID_NAME}"))
+        except AttributeError:
+            return None
+
+        if parameter:
+            return parameter[SESSION_ID_NAME]["value"]
+        else:
+            return None

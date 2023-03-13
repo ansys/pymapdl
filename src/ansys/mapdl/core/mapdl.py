@@ -32,7 +32,6 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
@@ -115,9 +114,6 @@ INVAL_COMMANDS_SILENT = {
 
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
-
-_RUNNING_ON_PYTESTS = False
-SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 
 def parse_to_short_cmd(command):
@@ -208,7 +204,6 @@ class _MapdlCore(Commands):
         self._kylov = None
         self._on_docker = None
         self._platform = None
-        self.__session_id = None
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -2820,7 +2815,8 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
-        self._check_session_id()
+        if self._session_id is not None:
+            self._check_session_id()
 
         if mute is None:
             if hasattr(self, "mute"):
@@ -2893,6 +2889,10 @@ class _MapdlCore(Commands):
 
         verbose = kwargs.get("verbose", False)
         text = self._run(command, verbose=verbose, mute=mute)
+
+        if command[:4].upper() == "/CLE" and self.is_grpc:
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
 
         if mute:
             return
@@ -4126,27 +4126,3 @@ class _MapdlCore(Commands):
         """
         fname = pathlib.Path(fname)
         return fname.stem, fname.suffix.replace(".", "")
-
-    @property
-    def _session_id(self):
-        return self.__session_id
-
-    def _check_session_id(self):
-        pymapdl_session_id = self._session_id
-        mapdl_session_id = self._get_mapdl_session_id()
-
-        if pymapdl_session_id is None:
-            return
-        elif _RUNNING_ON_PYTESTS:
-            if pymapdl_session_id != mapdl_session_id:
-                raise DifferentSessionConnectionError(
-                    "You are connecting to a different MAPDL session."
-                )
-            else:
-                self._log.debug("The session ids match")
-        else:
-            return pymapdl_session_id == mapdl_session_id
-
-    @supress_logging
-    def _get_mapdl_session_id(self):
-        return self.parameters.__getitem__(SESSION_ID_NAME)
