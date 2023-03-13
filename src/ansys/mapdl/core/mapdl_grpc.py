@@ -13,6 +13,7 @@ import tempfile
 import threading
 import time
 from typing import Optional
+from uuid import uuid4
 import warnings
 from warnings import warn
 import weakref
@@ -22,6 +23,8 @@ import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
 import psutil
+
+from ansys.mapdl.core.mapdl import SESSION_ID_NAME
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -404,6 +407,8 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
+
+        self.create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -3238,3 +3243,8 @@ class MapdlGrpc(_MapdlCore):
         )
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
+
+    def create_session(self):
+        id = uuid4()
+        self.__session_id = id
+        self._run(f"{SESSION_ID_NAME}={id}")
