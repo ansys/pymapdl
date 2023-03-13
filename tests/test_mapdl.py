@@ -1849,3 +1849,8 @@ def test_cache_pids(mapdl):
 @skip_if_not_local
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
+
+
+def test_session_id(mapdl):
+    assert mapdl._session_id
+    assert mapdl._check_session_id()

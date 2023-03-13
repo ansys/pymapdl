@@ -323,11 +323,8 @@ class Parameters:
             try:
                 val_ = interp_star_status(self._mapdl.starstatus(key))
                 val_ = val_[list(val_.keys())[0]]["value"]
-                if len(val_) == 1:
-                    return val_[0]
-                else:
-                    return val_
-                return
+                return val_[0] if len(val_) == 1 else val_
+
             except MapdlRuntimeError:
                 raise IndexError("%s not a valid parameter_name" % key)
 
