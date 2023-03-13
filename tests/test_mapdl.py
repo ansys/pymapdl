@@ -728,6 +728,18 @@ def test_set_parameters_string_spaces(mapdl):
         mapdl.parameters["PARM"] = "string with spaces"
 
 
+def test_set_parameters_too_long(mapdl):
+    with pytest.raises(
+        ValueError, match="Length of ``name`` must be 32 characters or less"
+    ):
+        mapdl.parameters["a" * 32] = 2
+
+    with pytest.raises(
+        ValueError, match="Length of ``name`` must be 32 characters or less"
+    ):
+        mapdl.parameters["asdf"] = "a" * 32
+
+
 def test_builtin_parameters(mapdl, cleared):
     mapdl.prep7()
     assert mapdl.parameters.routine == "PREP7"
