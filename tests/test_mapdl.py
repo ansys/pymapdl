@@ -735,7 +735,7 @@ def test_set_parameters_too_long(mapdl):
         mapdl.parameters["a" * 32] = 2
 
     with pytest.raises(
-        ValueError, match="Length of ``name`` must be 32 characters or less"
+        ValueError, match="Length of ``value`` must be 32 characters or less"
     ):
         mapdl.parameters["asdf"] = "a" * 32
 
