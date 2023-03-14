@@ -58,8 +58,8 @@ install the minimal files by using:
 .. code:: bash
 
     sh /path-to-mapdl-installer \
-          -install_dir /path-to-install-mapdl/ \
-          -nochecks -mechapdl -ansyscust -silent
+        -install_dir /path-to-install-mapdl/ \
+        -nochecks -mechapdl -ansyscust -silent
 
 This command install Mechanical MAPDL (``-mechapdl``) and the
 custom routines (``-ansyscust``) such as UPF.
