@@ -586,10 +586,6 @@ class Parameters:
                 self._parent().show_trailing_underscore_parameters
             )
 
-            # Making sure we are not muted
-            # self._previous_mute = self._parent()._mapdl._mute
-            # self._parent()._mapdl._mute = False
-
             # Getting full output.
             self._parent().show_leading_underscore_parameters = True
             self._parent().show_trailing_underscore_parameters = True
@@ -602,7 +598,6 @@ class Parameters:
             self._parent().show_trailing_underscore_parameters = (
                 self.show_trailing_underscore_parameters
             )
-            # self._parent()._mapdl._mute = self._previous_mute
 
 
 def find_parameter_listing_line(status):
