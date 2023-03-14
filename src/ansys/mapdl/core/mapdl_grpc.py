@@ -317,6 +317,8 @@ class MapdlGrpc(_MapdlCore):
 
         self.__distributed = None
         self._remote_instance = remote_instance
+        self._session_id_ = None
+        self._checking_session_id_ = False
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -359,8 +361,6 @@ class MapdlGrpc(_MapdlCore):
         self._mute = False
         self._db = None
         self.__server_version = None
-        self.__session_id = None
-        self.__checking_session_id = False
 
         # saving for later use (for example open_gui)
         start_parm["ip"] = ip
@@ -3256,31 +3256,31 @@ class MapdlGrpc(_MapdlCore):
     def _create_session(self):
         id_ = uuid4()
         id_ = str(id_)[:31].replace("-", "")
-        self.__session_id = id_
+        self._session_id_ = id_
         self._run(f"{SESSION_ID_NAME}='{id_}'")
 
     @property
     def _session_id(self):
-        return self.__session_id
+        return self._session_id_
 
     def _check_session_id(self):
-        if self.__checking_session_id:
+        if self._checking_session_id_:
             # To avoid recursion error
             return
 
-        self.__checking_session_id = True
         pymapdl_session_id = self._session_id
         if not pymapdl_session_id:
             # We return early if pymapdl_session is not fixed yet.
             return
 
-        mapdl_session_id = self._get_mapdl_session_id()
-        self.__checking_session_id = False
+        self._checking_session_id_ = True
+        self._mapdl_session_id = self._get_mapdl_session_id()
+        self._checking_session_id_ = False
 
         if pymapdl_session_id is None:
             return
         elif _RUNNING_ON_PYTEST:
-            if pymapdl_session_id != mapdl_session_id:
+            if pymapdl_session_id != self._mapdl_session_id:
                 self._log.debug("The session ids DO NOT match")
                 raise DifferentSessionConnectionError(
                     "You are connecting to a different MAPDL session."
@@ -3288,8 +3288,9 @@ class MapdlGrpc(_MapdlCore):
 
             else:
                 self._log.debug("The session ids match")
+                return True
         else:
-            return pymapdl_session_id == mapdl_session_id
+            return pymapdl_session_id == self._mapdl_session_id
 
     def _get_mapdl_session_id(self):
         # return self.parameters.__getitem__(SESSION_ID_NAME)

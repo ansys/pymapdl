@@ -20,6 +20,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
 
 skip_in_cloud = pytest.mark.skipif(
@@ -1874,5 +1875,30 @@ def test_force_output(mapdl):
 
 
 def test_session_id(mapdl):
-    assert mapdl._session_id
+    assert mapdl._session_id is not None
+
+    # already checking version
+    mapdl._checking_session_id_ = True
+    assert mapdl._check_session_id() is None
+
+    # Not having pymapdl session id
+    mapdl._checking_session_id_ = False
+    copy_ = mapdl._session_id_
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    # Checking real case
+    mapdl._session_id_ = copy_
+    pymapdl._RUNNING_ON_PYTEST = False
+    assert isinstance(mapdl._check_session_id(), bool)
+    pymapdl._RUNNING_ON_PYTEST = True
+
+    id_ = "123412341234"
+    mapdl._session_id_ = id_
+    mapdl._run(f"{SESSION_ID_NAME}='{id_}'")
     assert mapdl._check_session_id()
+
+    mapdl._session_id_ = "qwerqwerqwer"
+    assert not mapdl._check_session_id()
+
+    mapdl._session_id_ = id_
