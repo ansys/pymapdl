@@ -2016,6 +2016,9 @@ class MapdlGrpc(_MapdlCore):
            Not thread safe.  Uses ``_get_lock`` to ensure multiple
            request are not evaluated simultaneously.
         """
+        if self._session_id is not None:
+            self._check_session_id()
+
         if self._store_commands:
             raise MapdlRuntimeError(
                 "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
