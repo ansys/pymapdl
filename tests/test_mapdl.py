@@ -1837,3 +1837,25 @@ def test_cache_pids(mapdl):
 @skip_if_not_local
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
+
+
+def test_force_output(mapdl):
+    mapdl.mute = True
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl._run("nopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl.mute = False
+    mapdl._run("gopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()
+
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()
