@@ -94,10 +94,8 @@ Input data
 
 
     class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-
         #   #################################################################
         def UserMat(self, request, context):
-
             ncomp = request.ncomp
             nDirect = request.nDirect
 
@@ -129,7 +127,6 @@ Input data
 
 
     def usermat3d(request, context, response):
-
         ZERO = 0.0
         HALF = 0.5
         THIRD = 1.0 / 3.0
@@ -342,11 +339,9 @@ Input data
 
 
     class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-
         #   #################################################################
 
         def UsrShift(self, request, context):
-
             response = MapdlUser_pb2.UsrShiftResponse()
             one = 1.0
             half = 0.5
@@ -472,10 +467,8 @@ Input data
 
 
     class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-
         #   #################################################################
         def UserHyper(self, request, context):
-
             global firstcall
             if firstcall == 1:
                 print(">> Using Python UserHyper function\n")

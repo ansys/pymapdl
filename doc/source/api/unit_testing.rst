@@ -40,7 +40,6 @@ this library:
 .. code:: python
 
     def get_report_colors(theme):
-
         if theme == "weather":
             colors = ["blue", "lightblue", "grey"]
         elif theme == "traffic":
@@ -58,7 +57,6 @@ You can opt to run the tests with this configuration:
 .. code:: python
 
    def test_get_report_colors():
-
        assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
        assert get_report_colors("traffic") == ["red", "orange", "yellow"]
        assert get_report_colors("other") == ["red", "blue", "green"]
@@ -69,17 +67,14 @@ Or, if a method is a bit more complex, you can split the case in different tests
 .. code:: python
 
     def test_get_report_colors_weather():
-
         assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
 
 
     def test_get_report_colors_traffic():
-
         assert get_report_colors("traffic") == ["red", "orange", "yellow"]
 
 
     def test_get_report_colors_other():
-
         assert get_report_colors("other") == ["red", "blue", "green"]
 
 
@@ -129,7 +124,6 @@ It will be executed upstream of each test and not within all tests.
 .. code:: python
 
    def test_my_new_feature(mapdl):  # pass the 'mapdl' fixture as an argument.
-
        mapdl.prep7()
        # .... more code
 
@@ -152,18 +146,15 @@ Here are some examples of how you use ``pytest``:
 
     @pytest.fixture(scope="module")
     def mm(mapdl):  # pass the 'mapdl' fixture as an argument.
-
         return mapdl.math
 
 
     def test_rand(mm):  # pass the 'mm' fixture as an argument.
-
         w = mm.rand(10)
         assert w.size == 10  # if it is False, AssertionError is raised
 
 
     def test_matrix_addition(mm):
-
         m1 = mm.rand(10, 10)
         m2 = mm.rand(10, 10)
         m3 = m1 + m2
