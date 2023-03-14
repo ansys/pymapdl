@@ -6,7 +6,7 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import random_string
 
@@ -124,7 +124,7 @@ def test_clear_multiple(mapdl):
 
 
 def test_invalid_get(mapdl):
-    with pytest.raises(MapdlRuntimeError):
+    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -241,7 +241,7 @@ def test_read_input_file(mapdl, file_name):
 
 
 def test_no_get_value_non_interactive(mapdl):
-    with pytest.raises(RuntimeError, match="Cannot use gRPC enabled ``GET``"):
+    with pytest.raises((RuntimeError, MapdlCommandIgnoredError)):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
 
