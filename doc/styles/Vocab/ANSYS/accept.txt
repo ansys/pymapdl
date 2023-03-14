@@ -5,6 +5,7 @@
 [Ss]uperelements
 3-D
 aadd
+alis
 ALIS
 AMLs
 ans
