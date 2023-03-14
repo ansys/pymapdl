@@ -1422,7 +1422,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
-    # Reding file in remote
+    # Reading file in remote
     fname_ = f"{fname}.{ext}"
     mapdl.upload(fname_)
     os.remove(fname_)
@@ -1849,6 +1849,28 @@ def test_cache_pids(mapdl):
 @skip_if_not_local
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
+
+
+def test_force_output(mapdl):
+    mapdl.mute = True
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl._run("nopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl.mute = False
+    mapdl._run("gopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()
+
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()
 
 
 def test_session_id(mapdl):

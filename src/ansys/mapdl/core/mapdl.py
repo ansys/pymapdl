@@ -479,6 +479,16 @@ class _MapdlCore(Commands):
         return self._non_interactive(self)
 
     @property
+    def force_output(self):
+        """Force text output globally by turning the ``Mapdl.mute`` attribute to False
+        and activating text output (``/GOPR``)
+
+        You can still do changes to those inside this context.
+
+        """
+        return self._force_output(self)
+
+    @property
     def solution(self):
         """Solution parameters of MAPDL.
 
@@ -2414,13 +2424,8 @@ class _MapdlCore(Commands):
         kwargs["mute"] = False
 
         # Checking printout is not suppressed by checking "wrinqr" flag.
-        flag = 0
-        if self.wrinqr(1) != 1:  # using wrinqr is more reliable than *get
-            flag = 1
-            self._run("/gopr")
-        response = self.run(command, **kwargs)
-        if flag == 1:
-            self._run("/nopr")
+        with self.force_output:
+            response = self.run(command, **kwargs)
 
         value = response.split("=")[-1].strip()
         if item3:
@@ -4126,3 +4131,26 @@ class _MapdlCore(Commands):
         """
         fname = pathlib.Path(fname)
         return fname.stem, fname.suffix.replace(".", "")
+
+    class _force_output:
+        """Allows user to enter commands that need to run with forced text output."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering force-output mode")
+
+            if self._parent().wrinqr(1) != 1:  # using wrinqr is more reliable than *get
+                self._in_nopr = True
+                self._parent()._run("/gopr")  # Going to PR mode
+            else:
+                self._in_nopr = False
+
+            self._previous_mute, self._parent()._mute = self._parent()._mute, False
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting force-output mode")
+            if self._in_nopr:
+                self._parent()._run("/nopr")
+            self._parent()._mute = self._previous_mute

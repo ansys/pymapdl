@@ -1248,7 +1248,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
     Parameters
     ----------
     add_sw : str
-        Additional swtiches.
+        Additional switches.
     exec_path : str
         Path to the MAPDL executable.
     force_intel : bool, optional
@@ -1307,7 +1307,7 @@ def _force_smp_student_version(add_sw, exec_path):
     Parameters
     ----------
     add_sw : str
-        Additional swtiches.
+        Additional switches.
     exec_path : str
         Path to the MAPDL executable.
 
