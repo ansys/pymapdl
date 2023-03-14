@@ -1410,7 +1410,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
-    # Reding file in remote
+    # Reading file in remote
     fname_ = f"{fname}.{ext}"
     mapdl.upload(fname_)
     os.remove(fname_)
