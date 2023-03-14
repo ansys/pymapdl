@@ -320,13 +320,6 @@ jobs:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
 
-      # - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
-      #   run: .ci/start_mapdl.sh
-      #   if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
-      #   env:
-      #     LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-      #     MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
-
       - name: "Unit testing requirements installation"
         run: |
           python -m pip install .[tests]
