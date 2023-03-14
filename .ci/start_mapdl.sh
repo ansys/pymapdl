@@ -15,6 +15,6 @@ docker run \
     -w /jobs \
     -u=0:0 \
     $MAPDL_IMAGE \
-    -grpc -dir /jobs -smp -np 2> log.txt &
+    -grpc -dir /jobs -smp -np 2 > log.txt &
 grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
 # python -c "from ansys.mapdl.core import launch_mapdl; print(launch_mapdl())"
