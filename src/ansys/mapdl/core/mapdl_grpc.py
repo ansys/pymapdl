@@ -2017,7 +2017,7 @@ class MapdlGrpc(_MapdlCore):
            request are not evaluated simultaneously.
         """
         if self._store_commands:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
                 "Exit non_interactive mode before using this method."
             )

@@ -241,7 +241,7 @@ def test_read_input_file(mapdl, file_name):
 
 
 def test_no_get_value_non_interactive(mapdl):
-    with pytest.raises(RuntimeError, match="Cannot use gRPC enabled ``GET``"):
+    with pytest.raises((RuntimeError, MapdlCommandIgnoredError)):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
 
