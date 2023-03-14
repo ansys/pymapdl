@@ -579,6 +579,8 @@ def test_cmd_class_dlist_vm(mapdl, cleared):
     # Run only the first 100 lines of VM223
     with open(verif_files.vmfiles["vm223"]) as fid:
         cmds = fid.readlines()
+
+    mapdl.finish()
     mapdl.input_strings("\n".join(cmds[:100]))
 
     mapdl.allsel("all")
