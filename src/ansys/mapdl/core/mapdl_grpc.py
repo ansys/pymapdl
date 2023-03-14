@@ -360,6 +360,7 @@ class MapdlGrpc(_MapdlCore):
         self._db = None
         self.__server_version = None
         self.__session_id = None
+        self.__checking_session_id = False
 
         # saving for later use (for example open_gui)
         start_parm["ip"] = ip
@@ -3263,12 +3264,18 @@ class MapdlGrpc(_MapdlCore):
         return self.__session_id
 
     def _check_session_id(self):
-        pymapdl_session_id = self._session_id
-        if (
-            not pymapdl_session_id
-        ):  # We return early if pymapdl_session is not fixed yet.
+        if self.__checking_session_id:
+            # To avoid recursion error
             return
+
+        self.__checking_session_id = True
+        pymapdl_session_id = self._session_id
+        if not pymapdl_session_id:
+            # We return early if pymapdl_session is not fixed yet.
+            return
+
         mapdl_session_id = self._get_mapdl_session_id()
+        self.__checking_session_id = False
 
         if pymapdl_session_id is None:
             return
