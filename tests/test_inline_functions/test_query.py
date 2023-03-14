@@ -1,5 +1,7 @@
 import pytest
 
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+
 
 class TestParseParameter:
     @pytest.mark.parametrize(
@@ -70,8 +72,8 @@ class TestRunQuery:
 
     def test_interactive_mode_error(self, mapdl, line_geometry):
         q, kps, l0 = line_geometry
-        with mapdl.non_interactive:
-            with pytest.raises(RuntimeError):
+        with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+            with mapdl.non_interactive:
                 v = q.kx(1)
 
     @pytest.mark.skip_grpc  # only works in gRPC mode
