@@ -3294,10 +3294,9 @@ class MapdlGrpc(_MapdlCore):
     def _get_mapdl_session_id(self):
         # return self.parameters.__getitem__(SESSION_ID_NAME)
         try:
-            with self.force_output:
-                parameter = interp_star_status(
-                    self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
-                )
+            parameter = interp_star_status(
+                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
+            )
         except AttributeError:
             return None
 
