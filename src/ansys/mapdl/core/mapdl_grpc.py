@@ -1999,8 +1999,8 @@ class MapdlGrpc(_MapdlCore):
         self._response = out[out.find("LINE=       0") + 13 :]
         self._log.info(self._response)
 
-        if "*** ERROR ***" in self._response and not self._ignore_errors:
-            self._raise_output_errors(self._response)
+        if not self._ignore_errors:
+            self._raise_errors(self._response)
 
         # try/except here because MAPDL might have not closed the temp file
         try:
