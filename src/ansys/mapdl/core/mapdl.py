@@ -3902,9 +3902,13 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.group(
-                        0
-                    )  # Catching only the first error.
+                    # Catching only the first error.
+                    error_message = error_message.group(0)
+
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
 
                 # Trimming empty lines
                 error_message = "\n".join(
