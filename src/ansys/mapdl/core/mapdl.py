@@ -2904,18 +2904,7 @@ class _MapdlCore(Commands):
             return self._response
 
         if not self.ignore_errors:
-            if "is not a recognized" in text:
-                text = text.replace("This command will be ignored.", "")
-                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
-                raise MapdlInvalidRoutineError(text)
-
-            if "command is ignored" in text:
-                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
-                raise MapdlCommandIgnoredError(text)
-
-            # flag errors
-            if "*** ERROR ***" in self._response:
-                self._raise_output_errors(self._response)
+            self._raise_errors(text)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -3847,6 +3836,20 @@ class _MapdlCore(Commands):
 
         return wrapped(self, *args, **kwargs)
 
+    def _raise_errors(self, text):
+        if "is not a recognized" in text:
+            text = text.replace("This command will be ignored.", "")
+            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            raise MapdlInvalidRoutineError(text)
+
+        if "command is ignored" in text:
+            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            raise MapdlCommandIgnoredError(text)
+
+        # flag errors
+        if "*** ERROR ***" in text:
+            self._raise_output_errors(text)
+
     def _raise_output_errors(self, response):
         """Raise errors in the MAPDL response.
 
@@ -3892,9 +3895,13 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.group(
-                        0
-                    )  # Catching only the first error.
+                    # Catching only the first error.
+                    error_message = error_message.group(0)
+
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
