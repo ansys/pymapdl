@@ -103,6 +103,8 @@ def test_raise_output_errors(mapdl, response, expected_error):
         MapdlInfo,
         MapdlVersionError,
         MapdlInvalidRoutineError,
+        MapdlCommandIgnoredError,
+        MapdlRuntimeError,
     ],
 )
 def test_exception_classes(error_class):
