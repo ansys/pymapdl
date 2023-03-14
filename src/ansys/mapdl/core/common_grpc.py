@@ -1,7 +1,7 @@
 """Common gRPC functions"""
 import numpy as np
 
-from ansys.mapdl.core.errors import EmptyRecordError
+from ansys.mapdl.core.errors import MapdlConnectionError
 
 # chunk sizes for streaming and file streaming
 DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
@@ -159,7 +159,7 @@ def parse_chunks(chunks, dtype=None):
 
     """
     if not chunks.is_active():
-        raise EmptyRecordError("Empty Record")
+        raise MapdlConnectionError("The channel is not alive.")
 
     try:
         chunk = chunks.next()
