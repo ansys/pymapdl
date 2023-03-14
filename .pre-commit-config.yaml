@@ -26,7 +26,7 @@ repos:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.2
+  rev: v2.2.4
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -47,6 +47,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.21.0
+  rev: 0.22.0
   hooks:
     - id: check-github-workflows
