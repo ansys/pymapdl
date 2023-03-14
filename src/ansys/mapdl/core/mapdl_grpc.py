@@ -403,7 +403,8 @@ class MapdlGrpc(_MapdlCore):
         else:
             self._log.debug("Connection established")
 
-        # Avoiding muting
+        # Avoiding muting when connecting to the session
+        # It might trigger some errors later on if not.
         self._run("/gopr")
 
         # double check we have access to the local path if not
@@ -3286,10 +3287,10 @@ class MapdlGrpc(_MapdlCore):
     def _get_mapdl_session_id(self):
         # return self.parameters.__getitem__(SESSION_ID_NAME)
         try:
-            self._run("/gopr")
-            parameter = interp_star_status(
-                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
-            )
+            with self.force_output:
+                parameter = interp_star_status(
+                    self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
+                )
         except AttributeError:
             return None
 
