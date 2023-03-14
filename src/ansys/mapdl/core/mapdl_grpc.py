@@ -3273,9 +3273,11 @@ class MapdlGrpc(_MapdlCore):
             return
         elif _RUNNING_ON_PYTEST:
             if pymapdl_session_id != mapdl_session_id:
+                self._log.debug("The session ids DO NOT match")
                 raise DifferentSessionConnectionError(
                     "You are connecting to a different MAPDL session."
                 )
+
             else:
                 self._log.debug("The session ids match")
         else:
@@ -3284,6 +3286,7 @@ class MapdlGrpc(_MapdlCore):
     def _get_mapdl_session_id(self):
         # return self.parameters.__getitem__(SESSION_ID_NAME)
         try:
+            self._run("/gopr")
             parameter = interp_star_status(
                 self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
             )
