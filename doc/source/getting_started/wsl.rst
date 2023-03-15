@@ -159,6 +159,8 @@ The IP address for the Windows host is given in the WSL ``/etc/hosts`` file befo
 
 Here is an example of the WSL ``/etc/hosts`` file:
 
+.. vale off
+
 .. code-block:: bash
    :emphasize-lines: 8
 
@@ -180,6 +182,8 @@ Here is an example of the WSL ``/etc/hosts`` file:
    ff02::1 ip6-allnodes
    ff02::2 ip6-allrouters
 
+
+.. vale on
 
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
 environment variable with this IP address:
