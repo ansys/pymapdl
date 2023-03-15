@@ -19,11 +19,7 @@ LABEL description="MAPDL on Ubuntu"
 LABEL email="pyansys.support@ansys.com"
 
 # OCI LABELS
-LABEL org.opencontainers.image.url="https://github.com/orgs/pyansys/packages?repo_name=pymapdl"
 LABEL org.opencontainers.image.documentation="https://mapdl.docs.pyansys.com"
-
-# Update packages before packing
-RUN apt-get update
 
 # Update packages before packing and
 # installing dependencies
@@ -37,7 +33,6 @@ RUN apt-get update && \
       libglu1 \
       libxm4 \
       libxi6
-
 
 # libxp.so missing. This is a workaround
 #https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
@@ -88,7 +83,6 @@ ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # Adding alias to ansys executable
-RUN echo 'alias ansys="/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl"' >> ~/.bashrc
 RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl "$@"' > /usr/bin/ansys && \
     chmod +x /usr/bin/ansys
 RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl -grpc "$@"' > /usr/bin/ansysgrpc && \
