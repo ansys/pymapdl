@@ -1750,11 +1750,22 @@ def launch_mapdl(
         check_valid_port(port)
         LOG.debug(f"Using default port {port}")
 
+    # verify version
+    if exec_file and version:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
+    if version is None:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
+
+    version = _verify_version(version)  # return a int version or none
+
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
-    if _HAS_PIM and exec_file is None and pypim.is_configured():
+    if _HAS_PIM and exec_file is None and pypim.is_configured():  # pragma: no cover
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+        return launch_remote_mapdl(
+            cleanup_on_exit=cleanup_on_exit, version=str(version)
+        )
 
     # connect to an existing instance if enabled
     if start_instance is None:
@@ -1830,15 +1841,6 @@ def launch_mapdl(
         if clear_on_connect:
             mapdl.clear()
         return mapdl
-
-    # verify version
-    if exec_file and version:
-        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
-
-    if version is None:
-        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
-
-    version = _verify_version(version)  # return a int version or none
 
     # verify executable
     if exec_file is None:
