@@ -138,7 +138,7 @@ Docker image with these ports open. For more information, see `Run an MAPDL imag
 If you want to run MAPDL in the CentOS 7 image and use the Windows license
 server, opening the ports might not work properly because the Windows firewall
 seems to block all traffic coming from WSL. For security purposes, you should
-still try to open ports ``1055`` and ``2325`` in the firewall and check if your
+still try to open ports ``1055`` and ``2325`` in the firewall and verify that your
 MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
