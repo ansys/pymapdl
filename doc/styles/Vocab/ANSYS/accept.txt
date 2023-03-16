@@ -1,14 +1,26 @@
+[aA]nsys
 [Bb]ooleans
+[Cc]ommand [Pp]rompt
+[Ee]igensolver
+[Hh]yperelasticity
 [Kk]eypoints
+[Mm]atplotlib
+[Nn]umpy
+[Pp]ostprocess
+[Pp]ostprocessing
+[Pp]owerShell
+[Pp]restressed
+[Pp]rony
+[Pp]yansys
 [Pp]ythonic
 [Pp]ythonically
 [Ss]uperelements
 3-D
 aadd
+alis
+ALIS
 AMLs
 ans
-ansys
-Ansys
 ANSYS
 APDL Math
 APDLMath
@@ -22,18 +34,16 @@ Boyce
 breakpoint
 centerline
 CentOS
+CentOS7
 Chao
-command prompt
-Command Prompt
 delet
 Docker
+docker
 dof
 ect
 eigenfrequency
 eigenproblems
 eigensolution
-eigensolver
-Eigensolver
 eigensolvers
 elastoplastic
 emiss
@@ -48,8 +58,6 @@ Gmsh
 GUI
 hexahedral
 hostname
-hyperelasticity
-Hyperelasticity
 Imagemagick
 ImageMagick
 imagin
@@ -66,8 +74,6 @@ Linux
 MAPDL
 mater
 MATLAB
-matplotlib
-Matplotlib
 mesher
 midside
 Mises
@@ -77,29 +83,17 @@ nce
 Newton-Raphson
 nin
 nonlinearities
-numpy
 NumPy
 optiSLang
 parm
 performant
 PMLs
-postprocess
-Postprocess
-postprocessing
-Postprocessing
 postprocessor
-powershell
-PowerShell
 Prasanna
 pres
-prestressed
-Prestressed
-prony
-Prony
 Pseudotime
 Puri
 py
-pyansys
 PyAnsys
 PyDPF-Core
 PyDPF-Post
@@ -142,4 +136,5 @@ Windows
 Windows Subsystem
 Windows Subsystem for Linux
 WSL
+wsl
 Zhu

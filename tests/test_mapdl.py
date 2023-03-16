@@ -728,6 +728,18 @@ def test_set_parameters_string_spaces(mapdl):
         mapdl.parameters["PARM"] = "string with spaces"
 
 
+def test_set_parameters_too_long(mapdl):
+    with pytest.raises(
+        ValueError, match="Length of ``name`` must be 32 characters or less"
+    ):
+        mapdl.parameters["a" * 32] = 2
+
+    with pytest.raises(
+        ValueError, match="Length of ``value`` must be 32 characters or less"
+    ):
+        mapdl.parameters["asdf"] = "a" * 32
+
+
 def test_builtin_parameters(mapdl, cleared):
     mapdl.prep7()
     assert mapdl.parameters.routine == "PREP7"
@@ -1410,7 +1422,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     assert mapdl.get_value("NUXY", "1", "TEMP", 0) == nuxy
     assert np.allclose(mapdl.get_value("EX", 1, "TEMP", 0), ex)
 
-    # Reding file in remote
+    # Reading file in remote
     fname_ = f"{fname}.{ext}"
     mapdl.upload(fname_)
     os.remove(fname_)
@@ -1837,3 +1849,25 @@ def test_cache_pids(mapdl):
 @skip_if_not_local
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
+
+
+def test_force_output(mapdl):
+    mapdl.mute = True
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl._run("nopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert not mapdl.prep7()
+
+    mapdl.mute = False
+    mapdl._run("gopr")
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()
+
+    with mapdl.force_output:
+        assert mapdl.prep7()
+    assert mapdl.prep7()

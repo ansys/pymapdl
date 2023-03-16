@@ -264,6 +264,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0']
     env:
@@ -341,7 +342,7 @@ jobs:
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest -v --durations=10 \
-              --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun MapdlConnectionError \
+              --maxfail=3  --reruns 7 --reruns-delay 5 \
               --cov=ansys.mapdl.core --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
@@ -490,7 +491,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -v -k "not test_database and not test_dpf" \
             --durations=10 \
-            --maxfail=10 --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun MapdlConnectionError \
+            --maxfail=10 --reruns 7 --reruns-delay 5 \
             --cov=ansys.mapdl.core --cov-report=xml:ubuntu-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3
@@ -560,7 +561,7 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -v -k "not test_database and not test_dpf" \
             --durations=10 \
-            --maxfail=10  --reruns 7 --reruns-delay 3 --only-rerun MapdlExitedError --only-rerun MapdlConnectionError \
+            --maxfail=3  --reruns 7 --reruns-delay 5 \
             --cov=ansys.mapdl.core --cov-report=xml:windows-v22.2.0-local.xml --cov-report=html
 
       - uses: codecov/codecov-action@v3

@@ -119,10 +119,8 @@ First, create a Python file starting from this template:
 
 
     class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-
         #   #################################################################
         def UAnBeg(self, request, context):
-
             print(" ======================================= ")
             print(" >> Inside the PYTHON UAnBeg routine  << ")
             print(" ======================================= \n")
@@ -232,10 +230,8 @@ variable:
 
 
     class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-
         #   ###############################################################
         def UserMat(self, request, context):
-
             global firstcall
 
             if firstcall == 1:
