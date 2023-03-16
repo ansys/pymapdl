@@ -388,6 +388,7 @@ Reset Windows network adapters
 ==============================
 
 You can reset Windows network adapters with this code:
+
 .. code:: pwsh
 
     netsh int ip reset all

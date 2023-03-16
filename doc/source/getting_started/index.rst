@@ -11,7 +11,7 @@ For more information on getting a licensed copy of Ansys, visit
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
 
    learning
    versioning
