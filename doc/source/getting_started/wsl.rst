@@ -1,6 +1,6 @@
-  .. _ref_guide_wsl:
+.. _ref_guide_wsl:
 
-
+###########################
 Windows Subsystem for Linux
 ###########################
 
@@ -22,12 +22,12 @@ show how to use it together with MAPDL, PyMAPDL, and `Docker <https://www.docker
 
 
 Run PyMAPDL on WSL 
-******************
+##################
 There are two versions of WSL: WSL1 and WSL2. Because WSL2 provides many improvements
 over WSL1, you should upgrade to and use WSL2.
 
 Install WSL
-===========
+============
 
 Install WSL by following Microsoft's directions at 
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
@@ -48,7 +48,7 @@ Install Ansys products in WSL CentOS 7
 ======================================
 
 Prerequisites
--------------
+~~~~~~~~~~~~~
 If you are using CentOS 7, before installing MAPDL, you must install some
 required libraries:
 
@@ -63,7 +63,7 @@ If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <pymapdl_
 .. _installing_ansys_in_wsl:
 
 Install Ansys products
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 To install Ansys products in WSL Linux, perform these steps:
 
@@ -90,20 +90,20 @@ To install Ansys products in WSL Linux, perform these steps:
    where: 
 
   - ``-silent`` : Initiates a silent installation, which means no GUI is shown.
-   - ``-install_dir /path/`` : Specifies the directory to install the product or
-     license manager to. If you want to install to the default location, you can
-     omit the ``-install_dir`` argument. The default location is ``/ansys_inc``
-     if the symbolic link is set. Otherwise, it defaults to ``/usr/ansys_inc``.
-   - ``-<product_flag>`` : Specifies the one or more products to install.
-     If you omit this argument, all products are installed. The *Ansys, Inc.
-     Installation Guides* in the Ansys Help provides a list of valid
-     values for the ``product_flags`` argument in `Chapter 6
-     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/unix_silent.html>`_
-     of the *Linux Installation Guide* and `Chapter 7
-     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/win_silent.html>`_
-     of the *Windows Installation Guide*.
+  - ``-install_dir /path/`` : Specifies the directory to install the product or
+    license manager to. If you want to install to the default location, you can
+    omit the ``-install_dir`` argument. The default location is ``/ansys_inc``
+    if the symbolic link is set. Otherwise, it defaults to ``/usr/ansys_inc``.
+  - ``-<product_flag>`` : Specifies the one or more products to install.
+    If you omit this argument, all products are installed. The *Ansys, Inc.
+    Installation Guides* in the Ansys Help provides a list of valid
+    values for the ``product_flags`` argument in `Chapter 6
+    <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/unix_silent.html>`_
+    of the *Linux Installation Guide* and `Chapter 7
+    <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/win_silent.html>`_
+    of the *Windows Installation Guide*.
 
-     In the preceding example for MAPDL, you only need to specify the ``-mechapdl`` flag.
+    In the preceding example for MAPDL, you only need to specify the ``-mechapdl`` flag.
 
 After installing MAPDL directly in ``/ansys_inc`` or in ``/usr/ansys_inc``,
 you create a symbolic link with this command:
@@ -122,7 +122,7 @@ Post-installation setup
 =======================
 
 Open ports for license server communication
--------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Theory:** You should open the ports ``1055`` and ``2325`` for license server
 communication in the **Windows Control Panel**. For the steps to set advanced
@@ -132,7 +132,8 @@ Windows firewall options, see Microsoft's
 **Reality:** This works if you want to run a Docker image using WSL Linux image
 to host that Docker image. The Docker image successfully communicates with the Windows
 license server using these ports if you use the ``'-p'`` flag when running the
-Docker image with these ports open. For more information, see `Run an MAPDL image <run_an_mapdl_image_>`.
+Docker image with these ports open. For more information, see
+`Run an MAPDL image <run_an_mapdl_image_>`_.
 
 
 If you want to run MAPDL in the CentOS 7 image and use the Windows license
@@ -147,7 +148,7 @@ side effects and security risk so use it with caution. For more information, see
 
 
 Set up an environmental variable in WSL that points to Windows host license server
-----------------------------------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The IP address for the Windows host is given in the WSL ``/etc/hosts`` file before the name
 ``host.docker.internal``.
@@ -188,6 +189,8 @@ Here is an example of the WSL ``/etc/hosts`` file:
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
 environment variable with this IP address:
 
+.. _ref_bash_win_ip:
+
 .. code:: bash
 
     winhostIP=$(grep -m 1 host.docker.internal /etc/hosts | awk '{print $1}')
@@ -198,7 +201,7 @@ Launch MAPDL in WSL
 ===================
 
 To launch MAPDL in WSL, you must follow the procedure in 
-`Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`.
+`Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`_.
 An example follows.
 
 .. code:: bash
@@ -218,7 +221,7 @@ Connect to an MAPDL instance running in WSL
 
 To connect to the WSL instance that is running the MAPDL instance, follow the
 procedure in 
-`Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`
+`Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`_
 but specify the IP address of the WSL instance:
 
 .. code:: python 
@@ -229,12 +232,22 @@ but specify the IP address of the WSL instance:
 
 
 Additional information
-**********************
+######################
 
-IP addresses
-============
+IP addresses in WSL and the Windows host
+========================================
 
-The IP address ``127.0.0.1`` in `Run an MAPDL image <run_an_mapdl_image_>` is
+**Theory:** You should be able to access the Windows host using the IP address
+specified in the WSL ``/etc/hosts`` file. This IP address is typically ``127.0.1.1``.
+This means that the local WSL IP address is ``127.0.0.1``.
+
+**Reality:** It is almost impossible to use the IP address ``127.0.1.1`` to
+connect to the Windows host. However, it is possible to use the ``host.docker.internal``
+hostname in the same WSL ``/etc/hosts`` file. This is an IP address that is
+randomly allocated, which is an issue when you define the license server. However,
+updating the ``.bashrc`` file as mentioned `in here <ref_bash_win_ip_>`_ resolves this issue.
+
+The IP address ``127.0.0.1`` in `Run an MAPDL image <run_an_mapdl_image_>`_ is
 the IP address of WSL CentOS from the WSL perspective, whereas the IP address
 for the Windows host is typically ``127.0.1.1``.
 
@@ -247,16 +260,21 @@ distribution.
 Ansys installation flags
 ========================
 
+Obtain help
+~~~~~~~~~~~
+
 To obtain license server information, use one of the following methods to access the ``INSTALL`` file
 and then inspect the last few lines.
 
-**Method 1**
+Method 1
+--------
 
 .. code:: bash
 
     ./INSTALL --help
 
-**Method 2**
+Method 2
+--------
 
 .. code:: bash
 
@@ -264,12 +282,13 @@ and then inspect the last few lines.
 
 
 License server information for the client
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``-licserverinfo`` argument specifies information that the client for the license server uses.
 This argument is valid only in conjunction with a silent installation (INSTALL).
 
-**Single license server**
+Single license server
+---------------------
 
 The format for a single license server is:
 
@@ -283,7 +302,8 @@ Here is an example:
 
    ./INSTALL -silent -install_dir /ansys_inc/ -mechapdl -licserverinfo 2325:1055:winhostIP
 
-**Three license servers**
+Three license servers
+---------------------
 
 The format for three license servers is:
 
@@ -299,36 +319,25 @@ Here is an example:
 
 
 Language for the installation
------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``-lang`` argument specifies the language that the installation uses.
 
 
 File specifying the products to install
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can specify an ``options`` file that lists the products that you want to
 install. When you do so, you must use the ``-productfile`` argument to specify the
 full path to the ``options`` file.
 
-IP addresses in WSL and the Windows host
-========================================
-
-**Theory:** You should be able to access the Windows host using the IP address
-specified in the WSL ``/etc/hosts`` file. This IP address is typically ``127.0.1.1``.
-This means that the local WSL IP address is ``127.0.0.1``.
-
-**Reality:** It is almost impossible to use the IP address ``127.0.1.1`` to
-connect to the Windows host. However, it is possible to use the ``host.docker.internal``
-hostname in the same WSL ``/etc/hosts`` file. This is an IP address that is
-randomly allocated, which is an issue when you define the license server. However,
-updating the ``.bashrc`` file as mentioned earlier resolves this issue.
 
 
 Disable firewall on WSL ethernet
 ================================
 There are two methods for disabling the firewall on the WSL ethernet.
 
-**Method 1**
+Method 1
+~~~~~~~~
 
 This method shows a notification:
 
@@ -336,7 +345,8 @@ This method shows a notification:
 
     Set-NetFirewallProfile -DisabledInterfaceAliases "vEthernet (WSL)"
 
-**Method 2**
+Method 2
+~~~~~~~~
 
 This method does not show a notification:
 
@@ -353,7 +363,7 @@ Port forwarding on Windows 10
 You can use Windows PowerShell commands for port forwarding on Windows 10.
 
 Link ports between WSL and Windows
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This command links ports between WSL and Windows:
 
 .. code:: pwsh
@@ -362,7 +372,7 @@ This command links ports between WSL and Windows:
 
 
 View all forwards
------------------
+~~~~~~~~~~~~~~~~~
 
 This command allows you to view all forwards:
 
@@ -372,7 +382,7 @@ This command allows you to view all forwards:
 
 
 Delete port forwarding
-----------------------
+~~~~~~~~~~~~~~~~~~~~~~
 
 This command allows you to delete port forwarding:
 
@@ -424,7 +434,7 @@ as shown in the following command. For more information, see the ``.ci`` folder.
 
 
 Notes
-*****
+=====
 
 - PyMAPDL only works for shared-memory parallel (SMP) when running on WSL. This
   is why the flag ``-smp`` should be included.
