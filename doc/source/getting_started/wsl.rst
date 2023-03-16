@@ -132,9 +132,7 @@ Windows firewall options, see Microsoft's
 **Reality:** This works if you want to run a Docker image using WSL Linux image
 to host that Docker image. The Docker image successfully communicates with the Windows
 license server using these ports if you use the ``'-p'`` flag when running the
-Docker image with these ports open. For more information, see
-`Run an MAPDL image <run_an_mapdl_image_>`_.
-
+Docker image with these ports open.
 
 If you want to run MAPDL in the CentOS 7 image and use the Windows license
 server, opening the ports might not work properly because the Windows firewall
@@ -200,8 +198,7 @@ environment variable with this IP address:
 Launch MAPDL in WSL
 ===================
 
-To launch MAPDL in WSL, you must follow the procedure in 
-`Launch a gRPC MAPDL session <launch_grpc_madpl_session_>`_.
+To launch MAPDL in WSL, you must launch MAPDL process.
 An example follows.
 
 .. code:: bash
@@ -219,10 +216,8 @@ If you want to change the working directory, you can use the ``-dir`` flag.
 Connect to an MAPDL instance running in WSL
 ===========================================
 
-To connect to the WSL instance that is running the MAPDL instance, follow the
-procedure in 
-`Connect to the MAPDL container from Python <pymapdl_connect_to_MAPDL_container_>`_
-but specify the IP address of the WSL instance:
+To connect to the WSL instance that is running the MAPDL instance,
+you need to specify the IP address of the WSL instance:
 
 .. code:: python 
 
@@ -247,8 +242,7 @@ hostname in the same WSL ``/etc/hosts`` file. This is an IP address that is
 randomly allocated, which is an issue when you define the license server. However,
 updating the ``.bashrc`` file as mentioned `in here <ref_bash_win_ip_>`_ resolves this issue.
 
-The IP address ``127.0.0.1`` in `Run an MAPDL image <run_an_mapdl_image_>`_ is
-the IP address of WSL CentOS from the WSL perspective, whereas the IP address
+The IP address ``127.0.0.1`` is the IP address of WSL CentOS from the WSL perspective, whereas the IP address
 for the Windows host is typically ``127.0.1.1``.
 
 Docker builds the PyMAPDL images using the WSL distribution as the base. Hence, PyMAPDL
@@ -355,7 +349,7 @@ This method does not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `Disable firewall on WSL ethernet <disable_firewall_on_wsl_>`_
+Link: `Disable firewall on WSL ethernet <disabling_firewall_on_wsl_>`_
 
 Port forwarding on Windows 10
 =============================
