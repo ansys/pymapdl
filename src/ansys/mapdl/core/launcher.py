@@ -1761,7 +1761,7 @@ def launch_mapdl(
 
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
-    if _HAS_PIM and exec_file is None and pypim.is_configured():  # pragma: no cover
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
         if version:
             version = str(version)
