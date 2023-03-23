@@ -1,8 +1,49 @@
 .. _python_upf_examples:
 
-
+==============
 UPF in PyMAPDL
-^^^^^^^^^^^^^^
+==============
+
+Getting started
+===============
+
+You can use Python UPFs in a gRPC remote session.
+For this purpuse you need to have a compatible compiler
+installed in your machine.
+
+
+The procedure is the following:
+
+Start MAPDL instance
+--------------------
+
+Use any of the procedures specified in :ref:`launch_mapdl_`,
+for instance:
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl()
+
+
+Create your Python UPF
+----------------------
+
+To do that, please follow the indications given in *9.1. User-Programmable Features (UPFs)*
+from the *Mechanical MAPDL Advanced Analysis Guide*.
+
+For illustration purposes, an example is detailed here:
+
+.. code:: python
+
+    # to fill later
+
+
+
+
+UPF examples
+============
 
 The following Python UPF examples are available:
 

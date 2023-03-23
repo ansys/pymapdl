@@ -35,6 +35,8 @@ example, there is a limit on the number of nodes and elements.
 If you experience problems installing MAPDL on Linux, see
 :ref:`missing_dependencies_on_linux`.
 
+.. _launch_mapdl:
+
 Launch MAPDL
 ------------
 
