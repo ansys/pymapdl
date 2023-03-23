@@ -3837,17 +3837,20 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     def _raise_errors(self, text):
-        if "is not a recognized" in text:
+        # to make sure the following error messages are caught even if a breakline is in between.
+        flat_text = " ".join([each.strip() for each in text.splitlines()])
+
+        if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
             text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
             raise MapdlInvalidRoutineError(text)
 
-        if "command is ignored" in text:
+        if "command is ignored" in flat_text:
             text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
             raise MapdlCommandIgnoredError(text)
 
         # flag errors
-        if "*** ERROR ***" in text:
+        if "*** ERROR ***" in flat_text:
             self._raise_output_errors(text)
 
     def _raise_output_errors(self, response):
