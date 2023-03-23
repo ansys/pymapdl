@@ -76,7 +76,7 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/dev/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
