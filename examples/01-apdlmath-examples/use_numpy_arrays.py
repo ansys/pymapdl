@@ -1,6 +1,7 @@
 """
 Manipulate APDLMath vectors or dense matrices as NumPy Arrays
 -------------------------------------------------------------
+
 This example demonstrates how to exchange data between MAPDL and
 Python via numpy arrays.
 

@@ -6,8 +6,6 @@
 ====================
 
 This example shows how to perform an acoustic analysis using PyMAPDL and ``FLUID`` elements.
-
-
 """
 
 ###############################################################################

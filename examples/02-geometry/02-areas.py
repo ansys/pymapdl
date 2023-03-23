@@ -4,8 +4,8 @@
 Areas
 -----
 
-This example shows how you can use PyMAPDL to create basic geometry
-using Pythonic PREP7 area commands.
+This example shows how to create basic geometry
+using area commands.
 
 """
 

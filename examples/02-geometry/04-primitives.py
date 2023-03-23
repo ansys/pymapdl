@@ -4,8 +4,8 @@
 Primitives
 ----------
 
-This example shows how you can use PyMAPDL to create basic geometry
-using Pythonic PREP7 volume commands.
+This example shows the different commands for volume
+creation, such as blocks, cylinders, etc.
 
 """
 
