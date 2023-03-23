@@ -53,7 +53,6 @@ mapdl.title(
 # Upload files to the instance
 # ============================
 #
-
 # Uploading files
 mapdl.upload(db_file_path)
 mapdl.upload(pressure_file_path)
@@ -78,23 +77,17 @@ start_time = datetime.now()
 mapdl.slashmap()  # mapdl.slashmap(**kwargs); Enters the mapping processor.
 print("Enter the Mapping Processor")
 
-# Specify target nodes and file type for pressure mapping
-mapdl.run(
-    "target,pressure_faces"
-)  # Specifies the target nodes for mapping pressures onto surface effect elements.
-mapdl.ftype(
-    filetype="cfxtbr", prestype="1"
-)  # Specifies the file type and pressure type for the subsequent import of source points and pressures.
+# Specifies the target nodes for mapping pressures onto surface effect elements.
+mapdl.run("target,pressure_faces")
 
-# Read the CFX exported file containing pressure data
-mapdl.read(
-    fname="11_blades_mode_1_ND_0.csv"
-)  # Read CFX exported file (*.csv file) Blade 2, Export Surface 1
+# Specifies the file type and pressure type for the subsequent import of source points and pressures.
+mapdl.ftype(filetype="cfxtbr", prestype="1")
+# Read the CFX exported file containing pressure data Blade 2, Export Surface 1
+mapdl.read(fname="11_blades_mode_1_ND_0.csv")
 
-# Perform the pressure mapping
-print(
-    mapdl.map(kdim="2", kout="1")
-)  # Maps pressures from source points to target surface elements. Interpolation is done on a surface (default).
+# Perform the pressure mapping from source points to target surface elements.
+# Interpolation is done on a surface (default).
+print(mapdl.map(kdim="2", kout="1"))
 
 ###############################################################################
 # Plot mapping
