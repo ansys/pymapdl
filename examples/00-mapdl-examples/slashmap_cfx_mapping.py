@@ -112,7 +112,7 @@ print("Mapping Completed")
 end_time = datetime.now()
 c = end_time - start_time
 seconds = c.total_seconds()
-print("\n" + "Duration in seconds for Mapping is  : ", seconds)
+print("\nDuration in seconds for Mapping is  : ", seconds)
 
 mapdl.eplot()
 

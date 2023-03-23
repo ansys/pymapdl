@@ -147,8 +147,8 @@ def download_cfx_mapping_example_data() -> dict:
     >>> from ansys.mapdl.core.examples import download_cfx_mapping_example_data
     >>> paths = download_cfx_mapping_example_data()
     >>> paths
-    {geometry: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\11_blades_mode_1_ND_0.csv',
-     mapping_data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\ExampleMapping.db'}
+    {data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\11_blades_mode_1_ND_0.csv',
+     model: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\ExampleMapping.db'}
     """
 
     files_dir = "pymapdl/cfx_mapping"
