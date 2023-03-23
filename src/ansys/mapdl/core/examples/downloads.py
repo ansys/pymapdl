@@ -5,7 +5,11 @@ import shutil
 import urllib.request
 import zipfile
 
+import requests
+
 from ansys.mapdl import core as pymapdl
+
+RUN_TEST = False
 
 
 def get_ext(filename):
@@ -35,18 +39,27 @@ def _get_file_url(filename, directory=None):
     return f"https://github.com/pyansys/example-data/raw/master/{filename}"
 
 
-def _retrieve_file(url, filename):
+def _check_url_exist(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return True
+    else:
+        return False
+
+
+def _retrieve_file(url, filename, _test=False):
     # First check if file has already been downloaded
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip, None
 
-    # grab the correct url retriever
-    urlretrieve = urllib.request.urlretrieve
+    # scape test
+    if RUN_TEST:
+        return _check_url_exist(url)
 
     # Perform download
-    saved_file, resp = urlretrieve(url)
+    saved_file, resp = urllib.request.urlretrieve(url)
     shutil.move(saved_file, local_path)
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
@@ -54,10 +67,10 @@ def _retrieve_file(url, filename):
     return local_path, resp
 
 
-def _download_file(filename, directory=None):
+def _download_file(filename, directory=None, _test=False):
     url = _get_file_url(filename, directory)
     try:
-        return _retrieve_file(url, filename)
+        return _retrieve_file(url, filename, _test)
     except Exception as e:  # Genering exception
         raise RuntimeError(
             "For the reason mentioned below, retrieving the file from internet failed.\n"
