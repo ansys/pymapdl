@@ -39,5 +39,5 @@ def test_failed_download():
         _download_file(filename, directory=None)
 
 
-def download_cfx_mapping_example_data():
+def test_download_cfx_mapping_example_data():
     assert download_cfx_mapping_example_data() is not None
