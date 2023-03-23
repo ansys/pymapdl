@@ -415,6 +415,7 @@ def box_with_fields(cleared, mapdl):
     mapdl.mp("murx", 1, 1)
     mapdl.et(1, "SOLID70")
     mapdl.et(2, "CPT215")
+    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
     mapdl.et(3, "SOLID122")
     mapdl.et(4, "SOLID96")
     mapdl.block(0, 1, 0, 1, 0, 1)
