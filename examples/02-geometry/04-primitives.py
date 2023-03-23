@@ -3,6 +3,7 @@
 
 Primitives
 ----------
+
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 volume commands.
 
@@ -268,5 +269,7 @@ mapdl.vplot(show_lines=False, show_bounds=True, smooth_shading=False)
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

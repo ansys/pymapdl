@@ -4,6 +4,8 @@
 Using Inline Functions (Query)
 ------------------------------
 
+This example shows you how to use the inline functions in PyMAPDL.
+
 Inline functions like ``UX`` have been implemented in PyMAPDL as methods
 on the ``mapdl.inline_functions.Query`` object. In this example we set
 up a simple simulation and use ``Query`` to demonstrate some of its
@@ -114,5 +116,7 @@ for node in [node1, node2]:
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

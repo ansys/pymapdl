@@ -3,17 +3,20 @@
 
 2D Pressure Vessel
 ------------------
+
 This example demonstrates how to create a basic pressure vessel and
 apply a pressure to it.
 
 Objective
 ~~~~~~~~~
+
 In this example we will perform stress analysis of pipe due to internal
 pressure. Due to the symmetry in geometry and loading, the strain along its axis
 is negligible and therefore we model this system as 2D plane strain.
 
 Procedure
 ~~~~~~~~~
+
 * Launch MAPDL instance
 * Setup the model as Python function using PyMAPDL
 * Automate mesh convergence study
@@ -21,12 +24,14 @@ Procedure
 
 Additional Packages Used
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
 * `Numpy <https://numpy.org>`_ is used for using Numpy arrays.
 
 
 Problem Figure
 ~~~~~~~~~~~~~~
+
 .. image:: ../../../images/2d_pressure.png
    :width: 400
    :alt: Basic Pressure Vessel
@@ -175,7 +180,8 @@ mapdl.eplot(
 
 ###############################################################################
 # Plot nodal displacement
-
+# ~~~~~~~~~~~~~~~~~~~~~~~
+#
 # Enter post-processing (/POST1) and select the first load step
 mapdl.post1()
 mapdl.set(1, 1)
@@ -188,8 +194,12 @@ mapdl.post_processing.plot_nodal_displacement(
 
 ###############################################################################
 # Plot nodal equivalent stress
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 mapdl.post_processing.plot_nodal_eqv_stress(cpos="xy", cmap="magma")
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

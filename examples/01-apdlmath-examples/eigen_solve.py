@@ -174,5 +174,7 @@ ax.bar(x, mapdl_acc, label="MAPDL Results")
 plt.show()
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

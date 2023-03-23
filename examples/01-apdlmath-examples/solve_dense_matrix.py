@@ -64,5 +64,7 @@ print(f"Elapsed time to solve the linear system using numpy: {t2 - t1} seconds")
 np.linalg.norm(x_py)
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

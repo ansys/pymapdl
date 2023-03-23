@@ -103,5 +103,7 @@ print(np.allclose(from_ans, np_rand))
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

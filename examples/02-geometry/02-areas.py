@@ -3,6 +3,7 @@
 
 Areas
 -----
+
 This example shows how you can use PyMAPDL to create basic geometry
 using Pythonic PREP7 area commands.
 
@@ -186,5 +187,7 @@ print(items)
 mapdl.aplot(quality=1, show_bounds=True, cpos="iso", show_lines=True)
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

@@ -894,5 +894,7 @@ if np.allclose(stiffnes_mapdl_scaled, stiffness_scaled):
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()
