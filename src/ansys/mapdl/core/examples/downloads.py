@@ -9,8 +9,6 @@ import requests
 
 from ansys.mapdl import core as pymapdl
 
-RUN_TEST = False
-
 
 def get_ext(filename):
     """Extract the extension of the filename"""
@@ -42,21 +40,21 @@ def _get_file_url(filename, directory=None):
 def _check_url_exist(url):
     response = requests.get(url)
     if response.status_code == 200:
-        return True
+        return [True]
     else:
-        return False
+        return [False]
 
 
 def _retrieve_file(url, filename, _test=False):
+    # scape test
+    if pymapdl.RUNNING_TESTS:
+        return _check_url_exist(url)
+
     # First check if file has already been downloaded
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
         return local_path_no_zip, None
-
-    # scape test
-    if RUN_TEST:
-        return _check_url_exist(url)
 
     # Perform download
     saved_file, resp = urllib.request.urlretrieve(url)

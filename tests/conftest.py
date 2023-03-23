@@ -11,13 +11,14 @@ pytest_plugins = ["pytester"]
 
 import pyvista
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
     get_start_instance,
+    launch_mapdl,
 )
 from ansys.mapdl.core.misc import get_ansys_bin
 
@@ -28,6 +29,23 @@ SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+class Running_test:
+    def __init__(self) -> None:
+        pass
+
+    def __enter__(self):
+        pymapdl.RUNNING_TESTS = True
+
+    def __exit__(self, *args):
+        pymapdl.RUNNING_TESTS = False
+
+
+@pytest.fixture(scope="session")
+def running_test():
+    return Running_test()
+
 
 from _pytest.terminal import TerminalReporter
 
