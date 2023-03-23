@@ -314,7 +314,7 @@ class PostProcessing:
         mask = self.selected_nodes
         try:
             return values[mask]
-        except IndexError:
+        except IndexError:  # pragma: no cover
             raise IndexError(
                 "The number of selected nodes does not match the number of nodal results returned by MAPDL."
             )
@@ -766,7 +766,7 @@ class PostProcessing:
 
         """
         values = self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
-        if values.size == 0:
+        if values.size == 0:  # pragma: no cover
             raise ValueError(
                 f"The results obtained with '{item},{it1num},{item2}' are empty.\n"
                 "You can check the MAPDL output by issuing:\n\n"
