@@ -131,3 +131,30 @@ def download_manifold_example_data() -> dict:
             filename="manifold_cht-final_temp.csv", directory=files_dir
         )[0],
     }
+
+
+def download_cfx_mapping_example_data() -> dict:  # pragma: no cover
+    """Download the CFX mapping data and return the
+    download paths into a dictionary domain id->path.
+    Examples files are downloaded to a persistent cache to avoid
+    re-downloading the same file twice.
+    Returns
+    -------
+    dict[str:str]
+        Path to the example files.
+    Examples
+    --------
+    >>> from ansys.mapdl.core.examples import download_cfx_mapping_example_data
+    >>> paths = download_cfx_mapping_example_data()
+    >>> paths
+    {data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\11_blades_mode_1_ND_0.csv',
+     model: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\ExampleMapping.db'}
+    """
+
+    files_dir = "pymapdl/cfx_mapping"
+    return {
+        "data": _download_file(
+            filename="11_blades_mode_1_ND_0.csv", directory=files_dir
+        )[0],
+        "model": _download_file(filename="ExampleMapping.db", directory=files_dir)[0],
+    }
