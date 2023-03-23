@@ -4,7 +4,11 @@ import re
 import pytest
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.examples.downloads import _download_file, download_example_data
+from ansys.mapdl.core.examples.downloads import (
+    _download_file,
+    download_cfx_mapping_example_data,
+    download_example_data,
+)
 
 
 def test_load_verif():
@@ -33,3 +37,7 @@ def test_failed_download():
     filename = "non_existing_file"
     with pytest.raises(RuntimeError):
         _download_file(filename, directory=None)
+
+
+def download_cfx_mapping_example_data():
+    assert download_cfx_mapping_example_data() is not None
