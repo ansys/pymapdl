@@ -33,7 +33,7 @@ def test_bracket(mapdl, cleared):
     assert int(n_ent[0]) > 0
 
 
-def test_download_example_data():
+def test_download_example_data_true_download():
     path = download_example_data("LatheCutter.anf", "geometry")
     assert os.path.exists(path)
 
