@@ -133,7 +133,7 @@ def download_manifold_example_data() -> dict:
     }
 
 
-def download_cfx_mapping_example_data() -> dict:
+def download_cfx_mapping_example_data() -> dict:  # pragma: no cover
     """Download the CFX mapping data and return the
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
