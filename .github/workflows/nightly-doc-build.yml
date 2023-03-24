@@ -14,7 +14,7 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
-      MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v21.2.1'
+      MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v23.1.0'
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
