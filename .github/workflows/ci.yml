@@ -3,14 +3,11 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
-    inputs:
-      test_dev_docs:
-        description: 'Publish the documentation before merging'
-        type: boolean
-        required: false
   push:
     tags:
-      - "*"
+      - "*"     
+    branches:
+       - main
 
 env:
   PROJECT_NAME: 'PyMAPDL'
