@@ -57,6 +57,7 @@ jobs:
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -262,6 +263,7 @@ jobs:
   build_test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -430,6 +432,7 @@ jobs:
   build_test_ubuntu:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
@@ -634,3 +637,15 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+  upload_dev_docs:
+    name: Upload dev documentation
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [docs_build]
+    steps:
+      - name: Deploy the latest documentation
+        uses: pyansys/actions/doc-deploy-dev@v4
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
