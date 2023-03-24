@@ -5,7 +5,7 @@ Build a Finite Element
 ----------------------
 
 A finite element machinery built for a quadrilateral element using an
-isoparametric formulation and validate it with PyMAPDL.
+isoparametric formulation and validated with PyMAPDL.
 
 To illustrate it with a concrete example, we take a 2D element described by the
 following (x, y) node locations, an isotropic material (Young's modulus of 30e6

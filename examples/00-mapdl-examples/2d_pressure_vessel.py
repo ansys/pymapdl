@@ -26,7 +26,7 @@ Additional Packages Used
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 * `Matplotlib <https://matplotlib.org>`_ is used for plotting purposes.
-* `Numpy <https://numpy.org>`_ is used for using Numpy arrays.
+* `NumPy <https://numpy.org>`_ is used for using NumPy arrays.
 
 
 Problem Figure

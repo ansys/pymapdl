@@ -3,7 +3,7 @@ Manipulate APDLMath vectors or dense matrices as NumPy Arrays
 -------------------------------------------------------------
 
 This example demonstrates how to exchange data between MAPDL and
-Python via numpy arrays.
+Python via NumPy arrays.
 
 .. note::
     This example requires Ansys 2021R2.

@@ -5,7 +5,7 @@ Example Thermal Transient Analysis
 ----------------------------------
 
 This example shows how you can use PyMAPDL to input a time dependent
-temperature table to vary the temperature at a beam.  This uses
+temperature table to vary the temperature at a beam. This uses
 convection loads with independently varying convection coefficient and
 bulk temperature.
 

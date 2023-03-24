@@ -3,7 +3,7 @@ APDLMath Sparse Matrices and SciPy Sparse Matrices
 -------------------------------------------------------------------
 
 This tutorial will show how to get APDLMath sparse matrices from FULL
-files to Scipy Sparse Matrices.
+files to SciPy Sparse Matrices.
 
 
 """
