@@ -4,7 +4,10 @@
 Compute Eigenvalues using MAPDL or SciPy
 ----------------------------------------
 
-This example shows:
+This example shows a comparison between MAPDL and Scipy eigenvalues
+computation power.
+
+More specificatly, this example shows:
 
 - How to extract the stiffness and mass matrices from a MAPDL model.
 - How to use the ``Math`` module of PyMapdl to compute the first
@@ -17,6 +20,9 @@ This example shows:
 import math
 
 ###############################################################################
+# Model setup
+# ~~~~~~~~~~~
+#
 # First load python packages we need for this example
 import time
 
@@ -64,6 +70,9 @@ output = mapdl.solve()
 
 
 ###############################################################################
+# Matrices manipulation using PyMAPDL
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 # Read the sparse matrices using PyMapdl.
 #
 mapdl.finish()
@@ -127,6 +136,7 @@ ax1.spy(pk, markersize=0.01)
 ax1.set_title("K Matrix")
 ax2.spy(pm, markersize=0.01)
 ax2.set_title("M Matrix")
+plt.tight_layout()
 plt.show(block=True)
 
 
@@ -151,6 +161,7 @@ ax1.spy(pk, markersize=0.01)
 ax1.set_title("K Matrix")
 ax2.spy(pm, markersize=0.01)
 ax2.set_title("M Matrix")
+plt.tight_layout()
 plt.show(block=True)
 
 
@@ -195,6 +206,9 @@ for i in range(nev):
 
 
 ###############################################################################
+# MAPDL vs Scipy comparison
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 # MAPDL is more accurate than SciPy.
 #
 fig = plt.figure(figsize=(12, 10))
@@ -207,6 +221,7 @@ plt.ylabel("% Error")
 ax.bar(x, scipy_acc, label="SciPy Results")
 ax.bar(x, mapdl_acc, label="MAPDL Results")
 plt.legend(loc="lower right")
+plt.tight_layout()
 plt.show()
 
 ###############################################################################
@@ -216,5 +231,7 @@ ratio = scipy_elapsed_time / mapdl_elapsed_time
 print(f"Mapdl is {ratio:.3} times faster")
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

@@ -382,5 +382,7 @@ plt.ylabel("Stress Concentration")
 plt.show()
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

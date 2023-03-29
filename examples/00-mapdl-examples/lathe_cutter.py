@@ -5,7 +5,7 @@
 Structural Analysis of a Lathe Cutter
 =====================================
 
-**Summary**: Basic walk through PyMAPDL capabilities.
+Basic walk through PyMAPDL capabilities.
 
 Objective
 =========
