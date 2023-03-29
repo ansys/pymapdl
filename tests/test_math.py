@@ -259,6 +259,10 @@ def test_getitem_AnsVec(mm, dtype_):
 
 @pytest.mark.parametrize("dtype_", [np.double, np.complex128])
 def test_kron_product(mm, dtype_):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version >= 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
     m1 = mm.rand(3, 3, dtype=dtype_)
     m2 = mm.rand(2, 2, dtype=dtype_)
     # *kron product between matrix and another matrix
