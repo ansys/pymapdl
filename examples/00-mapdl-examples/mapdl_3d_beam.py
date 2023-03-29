@@ -74,5 +74,7 @@ result.plot_nodal_displacement(0, show_edges=True)
 # movie_filename='demo.gif')
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()
