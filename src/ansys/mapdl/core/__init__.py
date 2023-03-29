@@ -11,7 +11,7 @@ LOG.debug("Loaded logging module as LOG")
 
 _LOCAL_PORTS = []
 
-LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"]]
+LINUX_DEFAULT_DIRS = [["/", "usr", "ansys_inc"], ["/", "ansys_inc"], ["/", "opt", "ansys_inc"]]
 LINUX_DEFAULT_DIRS = [os.path.join(*each) for each in LINUX_DEFAULT_DIRS]
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
