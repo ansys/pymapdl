@@ -2,9 +2,9 @@
 APDLMath Sparse Matrices and SciPy Sparse Matrices
 -------------------------------------------------------------------
 
-This tutorial will show how to get APDLMath sparse matrices (typically
-stiffness or mass matrices extracted from APDL .Full Files) into SciPy
-Sparse Matrices.
+This tutorial will show how to get APDLMath sparse matrices from FULL
+files to SciPy Sparse Matrices.
+
 
 """
 import matplotlib.pylab as plt
@@ -91,5 +91,7 @@ print("name(msub)=" + msub.id)
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

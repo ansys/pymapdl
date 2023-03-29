@@ -6,8 +6,13 @@ import pytest
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.examples.downloads import (
     _download_file,
+    _download_rotor_tech_demo_plot,
+    download_bracket,
     download_cfx_mapping_example_data,
     download_example_data,
+    download_manifold_example_data,
+    download_tech_demo_data,
+    download_vtk_rotor,
 )
 
 
@@ -28,7 +33,7 @@ def test_bracket(mapdl, cleared):
     assert int(n_ent[0]) > 0
 
 
-def test_download_example_data():
+def test_download_example_data_true_download():
     path = download_example_data("LatheCutter.anf", "geometry")
     assert os.path.exists(path)
 
@@ -39,5 +44,39 @@ def test_failed_download():
         _download_file(filename, directory=None)
 
 
-def test_download_cfx_mapping_example_data():
-    assert download_cfx_mapping_example_data() is not None
+def test_download_cfx_mapping_example_data(running_test):
+    with running_test:
+        assert all(download_cfx_mapping_example_data().values())
+
+
+def test_download_manifold_example_data(running_test):
+    with running_test:
+        assert all(download_manifold_example_data().values())
+
+
+def test_download_bracket(running_test):
+    with running_test:
+        assert download_bracket() is True
+
+
+def test_download_vtk_rotor(running_test):
+    with running_test:
+        assert download_vtk_rotor() is True
+
+
+def test__download_rotor_tech_demo_plot(running_test):
+    with running_test:
+        assert _download_rotor_tech_demo_plot() is True
+
+
+def test_download_example_data(running_test):
+    with running_test:
+        assert download_example_data("LatheCutter.anf", "geometry") is True
+
+
+def test_download_tech_demo_data(running_test):
+    with running_test:
+        assert (
+            download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
+            is True
+        )

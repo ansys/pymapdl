@@ -69,6 +69,7 @@ except:  # pragma: no cover
     pass
 
 BUILDING_GALLERY = False
+RUNNING_TESTS = False
 
 VERSION_MAP = {
     (0, 0, 0): "2020R2",
