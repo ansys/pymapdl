@@ -4,7 +4,9 @@
 MAPDL 2D Beam Example
 ---------------------
 
-This is an example from FINITE ELEMENT ANALYSIS USING ANSYS 11.0
+This is an example from the book *"Finite element analysis using ansys 11.0"*
+by Paletikrishna Chaitanya, Sambanarajesh Kumar, and Datti Srinivas.
+PHI Learning Pvt. Ltd., 1 Jan 2010.
 
 """
 
@@ -86,5 +88,7 @@ mapdl.antype("static")
 print(mapdl.solve())
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

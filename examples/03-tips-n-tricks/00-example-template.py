@@ -3,6 +3,7 @@
 
 Adding a New Gallery Example
 ----------------------------
+
 This example demonstrates how to add new examples as well as being a template that can
 be used in their creation.
 

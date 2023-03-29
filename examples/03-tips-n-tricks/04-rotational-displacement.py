@@ -4,6 +4,8 @@
 Generating and Extracting Rotational Displacement
 -------------------------------------------------
 
+In this example we show how to work with shells and rotation displacements.
+
 Not all element types have rotational degrees of freedom, but generally,
 "shell" ones do. In this example we create a square shell with thickness
 of 0.1 and bend it, creating rotational displacement.
@@ -120,5 +122,7 @@ print(message)
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

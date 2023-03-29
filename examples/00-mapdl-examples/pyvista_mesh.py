@@ -89,5 +89,7 @@ result.animate_nodal_displacement(
 )
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()
