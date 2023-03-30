@@ -14,6 +14,7 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 
 from ansys.mapdl.core import VERSION_MAP
+from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.misc import load_file
 
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
@@ -1349,20 +1350,19 @@ class ApdlMathObj:
         if mapdl_version < 23.2:  # pragma: no cover
             raise VersionError("``kron`` requires MAPDL version 2023R2")
 
-        if not hasattr(obj, "id"):
+        if not isinstance(obj, ApdlMathObj):
             raise TypeError("Must be an ApdlMathObj")
 
-        dtype_list = [ObjType.VEC, ObjType.DMAT, ObjType.SMAT]
-        if self.type not in dtype_list:
+        if not isinstance(self, (AnsMat, AnsVec)):
             raise TypeError(f"Kron product aborted: Unknown obj type ({self.type})")
-        if obj.type not in dtype_list:
+        if not isinstance(obj, (AnsMat, AnsVec)):
             raise TypeError(f"Kron product aborted: Unknown obj type ({obj.type})")
 
         name = id_generator()  # internal name of the new vector/matrix
         # perform the Kronecker product
         self._mapdl.run(f"*KRON,{self.id},{obj.id},{name}")
 
-        if self.type == ObjType.VEC and obj.type == ObjType.VEC:
+        if isinstance(self, AnsVec) and isinstance(obj, AnsVec):
             objout = AnsVec(name, self._mapdl)
         else:
             objout = AnsMat(name, self._mapdl)
