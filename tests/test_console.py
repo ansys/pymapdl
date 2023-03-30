@@ -314,7 +314,7 @@ def test_logging(mapdl_console, tmpdir):
     mapdl_console.open_apdl_log(filename, mode="a")
 
     # don't allow to double log
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl_console.open_apdl_log(filename, mode="w")
 
     mapdl_console.prep7()
@@ -362,7 +362,7 @@ def test_enum(mapdl_console, make_block):
 @pytest.mark.parametrize("knum", [True, False])
 @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl_console, knum):
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl_console.nplot()
 
     mapdl_console.n(1, 0, 0, 0)
@@ -486,7 +486,7 @@ def test_builtin_parameters(mapdl_console, cleared):
 
 def test_eplot_fail(mapdl_console):
     # must fail with empty mesh
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl_console.eplot()
 
 

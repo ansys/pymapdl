@@ -428,7 +428,7 @@ class Parameters:
                 break
 
         if not escaped:  # pragma: no cover
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
                 "that could not be read using '{format_str}'."
             )

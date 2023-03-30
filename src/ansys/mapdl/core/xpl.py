@@ -196,7 +196,7 @@ class ansXpl:
         """
         response = self._mapdl.run(f"*XPL,STEP,{where}")
         if "Not Found" in response:
-            raise RuntimeError(response.strip())
+            raise MapdlRuntimeError(response.strip())
         return response
 
     def info(self, recname, option=""):
@@ -437,7 +437,7 @@ class ansXpl:
         dtype = np.double
         file_extension = pathlib.Path(self._filename).suffix[1:]
         if file_extension.lower() != "rst":
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "This method only supports extracting records from result files"
             )
 

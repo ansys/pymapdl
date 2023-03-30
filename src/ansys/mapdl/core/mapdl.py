@@ -503,7 +503,7 @@ class _MapdlCore(Commands):
         >>> mapdl.solution.converged
         """
         if self._exited:
-            raise RuntimeError("MAPDL exited.")
+            raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
     @property
@@ -526,7 +526,7 @@ class _MapdlCore(Commands):
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
         if self._exited:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
         return self._post
@@ -560,7 +560,7 @@ class _MapdlCore(Commands):
 
         """
         if self._distributed:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
@@ -972,7 +972,7 @@ class _MapdlCore(Commands):
         >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
-            raise RuntimeError("APDL command logging already enabled")
+            raise MapdlRuntimeError("APDL command logging already enabled")
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1041,7 +1041,7 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.launcher import get_ansys_path
 
         if not self._local:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "``open_gui`` can only be called from a local MAPDL instance."
             )
 
@@ -2055,7 +2055,9 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError("Distributed Cyclic result not supported")
+                        raise MapdlRuntimeError(
+                            "Distributed Cyclic result not supported"
+                        )
                     result_path = self._result_file
             else:
                 result_path = self._result_file
@@ -2862,13 +2864,13 @@ class _MapdlCore(Commands):
             )
 
         if command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
             )
@@ -3341,7 +3343,7 @@ class _MapdlCore(Commands):
         while arr.size == 1 and arr[0] == -1:
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
-                raise RuntimeError("Unable to get array for %s" % entity)
+                raise MapdlRuntimeError("Unable to get array for %s" % entity)
             ntry += 1
         return arr
 

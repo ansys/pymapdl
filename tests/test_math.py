@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from scipy import sparse
 
-from ansys.mapdl.core.errors import ANSYSDataTypeError
+from ansys.mapdl.core.errors import ANSYSDataTypeError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
 from ansys.mapdl.core.misc import random_string
@@ -662,7 +662,7 @@ def test_invalid_init():
 def test_free(mm):
     my_mat = mm.ones(10)
     mm.free()
-    with pytest.raises(RuntimeError, match="This vector has been deleted"):
+    with pytest.raises(MapdlRuntimeError, match="This vector has been deleted"):
         my_mat.size
 
 

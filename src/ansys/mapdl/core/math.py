@@ -1392,7 +1392,7 @@ class AnsVec(ApdlMathObj):
         """Number of items in this vector."""
         sz = self._mapdl.scalar_param(f"{self.id}_DIM")
         if sz is None:
-            raise RuntimeError("This vector has been deleted within MAPDL.")
+            raise MapdlRuntimeError("This vector has been deleted within MAPDL.")
         return int(sz)
 
     def __repr__(self):

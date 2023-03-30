@@ -3,6 +3,8 @@ from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
 
@@ -23,7 +25,7 @@ def xpl(mapdl, cube_solve):
 
 def test_close(xpl):
     xpl.close()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         xpl.list()
 
 
@@ -53,7 +55,7 @@ def test_read_asarray(xpl):
 
 def test_save(xpl):
     xpl.save()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         xpl.list()
 
 
@@ -75,7 +77,7 @@ def test_step_where(xpl):
     xpl.step("MASS")
     assert "FULL::MASS" in xpl.where()
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         xpl.step("notarecord")
 
 
@@ -111,7 +113,7 @@ def test_goto(xpl):
 def test_extract(xpl):
     # expecting fixture to already have a non-result file open
     assert xpl._filename[-3:] != "rst"
-    with pytest.raises(RuntimeError, match="result files"):
+    with pytest.raises(MapdlRuntimeError, match="result files"):
         mat = xpl.extract("NSL")
 
     xpl.open("file.rst")
