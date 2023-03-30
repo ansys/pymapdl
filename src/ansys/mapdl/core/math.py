@@ -1354,13 +1354,9 @@ class ApdlMathObj:
 
         dtype_list = [ObjType.VEC, ObjType.DMAT, ObjType.SMAT]
         if self.type not in dtype_list:
-            raise TypeError(
-                f"Kron product aborted: Unknown obj type ({self.type})"
-            )
+            raise TypeError(f"Kron product aborted: Unknown obj type ({self.type})")
         if obj.type not in dtype_list:
-            raise TypeError(
-                f"Kron product aborted: Unknown obj type ({obj.type})"
-            )
+            raise TypeError(f"Kron product aborted: Unknown obj type ({obj.type})")
 
         name = id_generator()  # internal name of the new vector/matrix
         # perform the Kronecker product
