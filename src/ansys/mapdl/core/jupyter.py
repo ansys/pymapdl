@@ -128,9 +128,13 @@ def launch_mapdl_on_cluster(
         verbose=verbose,
         cpu=1000 * nproc,
         memory=memory,
+        start_timeout=start_timeout,
     )
 
     # connect to the pod instance
     from ansys.mapdl.core import Mapdl
 
-    return Mapdl(ip, loglevel=loglevel)
+    mapdl = Mapdl(ip, loglevel=loglevel)
+    mapdl._name = name
+
+    return mapdl
