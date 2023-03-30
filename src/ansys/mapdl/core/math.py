@@ -1347,15 +1347,19 @@ class ApdlMathObj:
 
         mapdl_version = self._mapdl.version
         if mapdl_version < 23.2:  # pragma: no cover
-            raise AttributeError("``kron`` requires MAPDL version 2023R2")
+            raise VersionError("``kron`` requires MAPDL version 2023R2")
 
         if not hasattr(obj, "id"):
             raise TypeError("Must be an ApdlMathObj")
 
         dtype_list = [ObjType.VEC, ObjType.DMAT, ObjType.SMAT]
-        if self.type not in dtype_list or obj.type not in dtype_list:
+        if self.type not in dtype_list:
             raise TypeError(
-                f"Kron product aborted: Unknown obj type {self.type}/{obj.type}"
+                f"Kron product aborted: Unknown obj type ({self.type})"
+            )
+        if obj.type not in dtype_list:
+            raise TypeError(
+                f"Kron product aborted: Unknown obj type ({obj.type})"
             )
 
         name = id_generator()  # internal name of the new vector/matrix
