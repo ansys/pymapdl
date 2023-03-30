@@ -3,7 +3,7 @@ from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -25,7 +25,7 @@ def xpl(mapdl, cube_solve):
 
 def test_close(xpl):
     xpl.close()
-    with pytest.raises(MapdlRuntimeError):
+    with pytest.raises(MapdlCommandIgnoredError):
         xpl.list()
 
 
@@ -55,7 +55,7 @@ def test_read_asarray(xpl):
 
 def test_save(xpl):
     xpl.save()
-    with pytest.raises(MapdlRuntimeError):
+    with pytest.raises(MapdlCommandIgnoredError):
         xpl.list()
 
 
