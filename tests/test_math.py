@@ -265,9 +265,26 @@ def test_kron_product(mm, dtype_):
 
     m1 = mm.rand(3, 3, dtype=dtype_)
     m2 = mm.rand(2, 2, dtype=dtype_)
+    v1 = mm.rand(2, dtype=dtype_)
+    v2 = mm.rand(4, dtype=dtype_)
     # *kron product between matrix and another matrix
-    res = m1.kron(m2)
-    assert np.allclose(res.asarray(), np.kron(m1, m2))
+    res1 = m1.kron(m2)
+
+    # *kron product between Vector and a matrix
+    res2 = v1.kron(m2)
+
+    # *kron product between Vector and another Vector
+    res3 = v1.kron(v2)
+
+    assert np.allclose(res1.asarray(), np.kron(m1, m2))
+    assert np.allclose(res2.asarray(), np.kron(v1.asarray().reshape(2, 1), m2))
+    assert np.allclose(res3.asarray(), np.kron(v1, v2))
+
+
+def test_kron_product_unsupported_dtype(mm):
+    with pytest.raises(TypeError, match=r"Must be an ApdlMathObj"):
+        m1 = mm.rand(3, 3)
+        m1.kron(2)
 
 
 def test_load_stiff_mass(mm, cube_solve, tmpdir):
