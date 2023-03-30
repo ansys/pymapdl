@@ -3,14 +3,11 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
-    inputs:
-      test_dev_docs:
-        description: 'Publish the documentation before merging'
-        type: boolean
-        required: false
   push:
     tags:
-      - "*"
+      - "*"     
+    branches:
+       - main
 
 env:
   PROJECT_NAME: 'PyMAPDL'
@@ -59,6 +56,7 @@ jobs:
   smoke-tests:
     name: "Build and smoke tests"
     runs-on: ${{ matrix.os }}
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -80,7 +78,7 @@ jobs:
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
 
-  docs_build:
+  docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
     needs: doc-style
@@ -249,9 +247,10 @@ jobs:
           if compgen -G './logs-build-docs/*.log' > /dev/null ;then for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Log files"
           if compgen -G './logs-build-docs/*.out' > /dev/null ;then for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Output files"
 
-  build_test:
+  build-test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -382,7 +381,6 @@ jobs:
           docker exec mapdl /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
           docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
 
-
       - name: "Collect MAPDL logs on failure for ubuntu image"
         if: ${{ always() && contains( matrix.mapdl-version,'ubuntu') }}
         run: |
@@ -417,9 +415,10 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'err' files."
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
-  build_test_ubuntu:
+  build-test-ubuntu:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     container:
       image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
@@ -496,7 +495,7 @@ jobs:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
 
-  test_windows:
+  test-windows:
     if: github.repository == ''
     name: "Local: Build and unit testing on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
@@ -567,7 +566,7 @@ jobs:
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [docs_build, build_test, build_test_ubuntu, smoke-tests]
+    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
@@ -610,7 +609,7 @@ jobs:
             title: `Release FAILED!`,
             }"
 
-  upload_docs_release:
+  upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
@@ -622,3 +621,15 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+  upload-dev-docs:
+    name: Upload dev documentation
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: [docs-build]
+    steps:
+      - name: Deploy the latest documentation
+        uses: pyansys/actions/doc-deploy-dev@v4
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}

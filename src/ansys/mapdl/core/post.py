@@ -573,7 +573,7 @@ class PostProcessing:
         --------
         Plot the contact status for the selected elements.
 
-        >>> mapdl.post_processing.plot_element_results(
+        >>> mapdl.post_processing.plot_element_values(
         ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
         ... )
 
