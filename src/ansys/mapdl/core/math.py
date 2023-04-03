@@ -1355,7 +1355,9 @@ class ApdlMathObj:
 
         if isinstance(val, AnsVec):
             if mapdl_version < 23.2:  # pragma: no cover
-                raise VersionError("Scaling by a vector requires MAPDL version 2023R2 or superior.")
+                raise VersionError(
+                    "Scaling by a vector requires MAPDL version 2023R2 or superior."
+                )
             else:
                 self._mapdl._log.info(f"Scaling ({self.type}) by a vector")
                 self._mapdl.run(f"*SCAL,{self.id},{val.id}", mute=False)
