@@ -14,6 +14,7 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 
 from ansys.mapdl.core import VERSION_MAP
+from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.misc import load_file
 
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
@@ -1349,8 +1350,18 @@ class ApdlMathObj:
         return self.axpy(op, -1, 1)
 
     def __imul__(self, val):
+        mapdl_version = self._mapdl.version
         self._mapdl._log.info("Call Mapdl to scale the object")
-        self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+
+        if isinstance(val, AnsVec):
+            if mapdl_version < 23.2:  # pragma: no cover
+                raise VersionError("scaling by a vector requires MAPDL version 2023R2")
+            else:
+                self._mapdl._log.info(f"Scaling ({self.type}) by a vector")
+                self._mapdl.run(f"*SCAL,{self.id},{val.id}", mute=False)
+        else:
+            self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+
         return self
 
     def __itruediv__(self, val):
