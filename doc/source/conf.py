@@ -187,7 +187,7 @@ html_theme_options = {
     "show_prev_next": False,
     "show_breadcrumbs": True,
     "switcher": {
-        "json_url": f"https://{cname}/release/versions.json",
+        "json_url": f"https://{cname}/versions.json",
         "version_match": get_version_match(__version__),
     },
     "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
