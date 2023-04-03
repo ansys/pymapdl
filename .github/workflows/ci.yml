@@ -439,7 +439,7 @@ jobs:
     needs: [Release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v2
+        uses: pyansys/actions/doc-deploy-stable@v4.0.15
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
