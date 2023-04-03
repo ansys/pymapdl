@@ -99,6 +99,19 @@ def test_inplace_mult(mm):
     assert v[0] == 2
 
 
+def test_inplace_mult_with_vec(mm):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    m1 = mm.rand(3, 3)
+    m2 = m1.copy()
+    v1 = mm.ones(3)
+    v1.const(2)
+    m2 *= v1
+    assert np.allclose(m2, np.multiply(m1, v1) * v1)
+
+
 def test_set_vec_large(mm):
     # send a vector larger than the gRPC size limit of 4 MB
     sz = 1000000

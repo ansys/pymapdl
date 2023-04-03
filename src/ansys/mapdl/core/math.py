@@ -1396,8 +1396,18 @@ class ApdlMathObj:
         return self.axpy(op, -1, 1)
 
     def __imul__(self, val):
+        mapdl_version = self._mapdl.version
         self._mapdl._log.info("Call Mapdl to scale the object")
-        self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+
+        if isinstance(val, AnsVec):
+            if mapdl_version < 23.2:  # pragma: no cover
+                raise VersionError("scaling by a vector requires MAPDL version 2023R2")
+            else:
+                self._mapdl._log.info(f"Scaling ({self.type}) by a vector")
+                self._mapdl.run(f"*SCAL,{self.id},{val.id}", mute=False)
+        else:
+            self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+
         return self
 
     def __itruediv__(self, val):
