@@ -2,6 +2,7 @@
 session, including the jobname, Graphical User Interface behavior, and
 file switching.
 """
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 class RunControls:
