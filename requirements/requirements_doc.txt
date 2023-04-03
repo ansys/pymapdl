@@ -8,7 +8,7 @@ matplotlib==3.5.1
 numpydoc==1.2
 pandas==1.4.1
 plotly==5.6.0
-ansys_sphinx_theme==0.8.0
+ansys_sphinx_theme==0.9.5
 pypandoc==1.7.4
 pytest-sphinx==0.3.1
 pythreejs==2.3.0
