@@ -14,7 +14,7 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 
 from ansys.mapdl.core import VERSION_MAP
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import VersionError, MapdlRuntimeError
 from ansys.mapdl.core.misc import load_file
 
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
@@ -1322,6 +1322,52 @@ class ApdlMathObj:
         self._mapdl.run(f"*AXPY,{val1},0,{op.id},{val2},0,{self.id}", mute=True)
         return self
 
+    def kron(self, obj):
+        """Calculates the Kronecker product of two matrices/vectors
+
+        Parameters
+        ----------
+        obj : ``AnsVec`` or ``AnsMat``
+            AnsMath object.
+
+        Returns
+        -------
+        ``AnsMat`` or ``AnsVec``
+            Kronecker product between the two matrices/vectors.
+
+        .. note::
+            Requires at least MAPDL version 2023R2.
+
+        Examples
+        --------
+        >>> mm = mapdl.math
+        >>> m1 = mm.rand(3, 3)
+        >>> m2 = mm.rand(4,2)
+        >>> res = m1.kron(m2)
+        """
+
+        mapdl_version = self._mapdl.version
+        if mapdl_version < 23.2:  # pragma: no cover
+            raise VersionError("``kron`` requires MAPDL version 2023R2")
+
+        if not isinstance(obj, ApdlMathObj):
+            raise TypeError("Must be an ApdlMathObj")
+
+        if not isinstance(self, (AnsMat, AnsVec)):
+            raise TypeError(f"Kron product aborted: Unknown obj type ({self.type})")
+        if not isinstance(obj, (AnsMat, AnsVec)):
+            raise TypeError(f"Kron product aborted: Unknown obj type ({obj.type})")
+
+        name = id_generator()  # internal name of the new vector/matrix
+        # perform the Kronecker product
+        self._mapdl.run(f"*KRON,{self.id},{obj.id},{name}")
+
+        if isinstance(self, AnsVec) and isinstance(obj, AnsVec):
+            objout = AnsVec(name, self._mapdl)
+        else:
+            objout = AnsMat(name, self._mapdl)
+        return objout
+
     def __add__(self, op2):
         if not hasattr(op2, "id"):
             raise TypeError("Must be an ApdlMathObj")
@@ -1350,8 +1396,22 @@ class ApdlMathObj:
         return self.axpy(op, -1, 1)
 
     def __imul__(self, val):
+        mapdl_version = self._mapdl.version
         self._mapdl._log.info("Call Mapdl to scale the object")
-        self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+
+        if isinstance(val, AnsVec):
+            if mapdl_version < 23.2:  # pragma: no cover
+                raise VersionError(
+                    "Scaling by a vector requires MAPDL version 2023R2 or superior."
+                )
+            else:
+                self._mapdl._log.info(f"Scaling ({self.type}) by a vector")
+                self._mapdl.run(f"*SCAL,{self.id},{val.id}", mute=False)
+        elif isinstance(val, (int, float)):
+            self._mapdl.run(f"*SCAL,{self.id},{val}", mute=True)
+        else:
+            raise TypeError(f"The provided type {type(val)} is not supported.")
+
         return self
 
     def __itruediv__(self, val):

@@ -99,6 +99,19 @@ def test_inplace_mult(mm):
     assert v[0] == 2
 
 
+def test_inplace_mult_with_vec(mm):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    m1 = mm.rand(3, 3)
+    m2 = m1.copy()
+    v1 = mm.ones(3)
+    v1.const(2)
+    m2 *= v1
+    assert np.allclose(m2, np.multiply(m1, v1) * v1)
+
+
 def test_set_vec_large(mm):
     # send a vector larger than the gRPC size limit of 4 MB
     sz = 1000000
@@ -255,6 +268,40 @@ def test_getitem_AnsVec(mm, dtype_):
     np_vec = vec.asarray()
     for i in range(size_i):
         assert vec[i] == np_vec[i]
+
+
+@pytest.mark.parametrize("dtype_", [np.double, np.complex128])
+def test_kron_product(mm, dtype_):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    m1 = mm.rand(3, 3, dtype=dtype_)
+    m2 = mm.rand(2, 2, dtype=dtype_)
+    v1 = mm.rand(2, dtype=dtype_)
+    v2 = mm.rand(4, dtype=dtype_)
+    # *kron product between matrix and another matrix
+    res1 = m1.kron(m2)
+
+    # *kron product between Vector and a matrix
+    res2 = v1.kron(m2)
+
+    # *kron product between Vector and another Vector
+    res3 = v1.kron(v2)
+
+    assert np.allclose(res1.asarray(), np.kron(m1, m2))
+    assert np.allclose(res2.asarray(), np.kron(v1.asarray().reshape(2, 1), m2))
+    assert np.allclose(res3.asarray(), np.kron(v1, v2))
+
+
+def test_kron_product_unsupported_dtype(mm):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    with pytest.raises(TypeError, match=r"Must be an ApdlMathObj"):
+        m1 = mm.rand(3, 3)
+        m1.kron(2)
 
 
 def test_load_stiff_mass(mm, cube_solve, tmpdir):
