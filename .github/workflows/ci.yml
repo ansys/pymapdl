@@ -162,7 +162,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
+          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: Retrieve PyMAPDL version
