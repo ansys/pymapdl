@@ -6,3 +6,4 @@ pytest-cov==3.0.0
 pyvista==0.33.3
 scipy==1.8.0
 vtk==9.0.3
+numpy==1.19  # added to pin numpy during docs building

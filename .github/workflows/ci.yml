@@ -14,7 +14,7 @@ env:
   PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
   PYMAPDL_START_INSTANCE: FALSE
   PYANSYS_OFF_SCREEN: True
-  DOCKER_PACKAGE: docker.pkg.github.com/pyansys/pymapdl/mapdl
+  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v21.2.1
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -157,12 +157,17 @@ jobs:
           pip install dist/ansys*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
+      - name: "Login in Github container registry"
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: Retrieve PyMAPDL version
@@ -262,13 +267,18 @@ jobs:
           pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
+      - name: "Login in Github container registry"
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pull, launch, and validate MAPDL service
         run: .ci/start_mapdl.sh
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT: ${{ secrets.REPO_DOWNLOAD_PAT }}
-          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: Unit Testing
         run: |
@@ -342,12 +352,12 @@ jobs:
 
   upload_docs_release:
     name: "Upload release documentation"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    if: github.event_name == 'push' #&& contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
-    needs: [release]
+    needs: [docs_build, build_test]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v2
+        uses: pyansys/actions/doc-deploy-stable@v4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
