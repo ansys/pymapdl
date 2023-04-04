@@ -8,6 +8,7 @@ on:
       - "*"
     branches:
       - main
+      - release/0.63
 
 env:
   PYMAPDL_PORT: 21000  # default won't work on GitHub runners
