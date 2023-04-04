@@ -22,3 +22,4 @@ sphinxcontrib-websupport==1.2.4
 sphinxemoji==0.2.0
 vtk==9.0.3
 grpcio==1.43.0
+numpy==1.19  # added to pin numpy during docs building
