@@ -1481,7 +1481,7 @@ class ArrayParam:
         """
         # cannot be in interactive mode
         if not self._store_commands:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "VWRTIE cannot run interactively.  \n\nPlease use "
                 "``with mapdl.non_interactive:``"
             )

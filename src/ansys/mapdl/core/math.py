@@ -14,7 +14,7 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 
 from ansys.mapdl.core import VERSION_MAP
-from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.misc import load_file
 
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
@@ -1453,7 +1453,7 @@ class AnsVec(ApdlMathObj):
         """Number of items in this vector."""
         sz = self._mapdl.scalar_param(f"{self.id}_DIM")
         if sz is None:
-            raise RuntimeError("This vector has been deleted within MAPDL.")
+            raise MapdlRuntimeError("This vector has been deleted within MAPDL.")
         return int(sz)
 
     def __repr__(self):

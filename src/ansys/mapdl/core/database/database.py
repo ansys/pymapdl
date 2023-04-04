@@ -9,6 +9,8 @@ import weakref
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
 import grpc
 
+from ansys.mapdl.core.errors import MapdlConnectionError
+
 from ..mapdl_grpc import MapdlGrpc
 
 VALID_MAPDL_VERSIONS = [21.1, 21.2, 22.1, 22.2]
@@ -264,7 +266,7 @@ class MapdlDb:
             time.sleep(0.01)
 
         if not self._state._matured:  # pragma: no cover
-            raise RuntimeError(
+            raise MapdlConnectionError(
                 "Unable to establish connection to MAPDL database server"
             )
         self._mapdl._log.debug("Established connection to MAPDL database server")

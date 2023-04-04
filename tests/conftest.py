@@ -129,7 +129,7 @@ alexander.kaszynski@ansys.com
 """
 
 if START_INSTANCE and EXEC_FILE is None:
-    raise RuntimeError(ERRMSG)
+    raise MapdlRuntimeError(ERRMSG)
 
 
 def is_exited(mapdl):
@@ -244,7 +244,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.  ' "Only Linux is supported."
         )
     ansys_base_paths = _get_available_base_ansys()
@@ -257,7 +257,7 @@ def mapdl_console(request):
             console_path = get_ansys_bin(str(version))
 
     if console_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.'
             "No local console compatible MAPDL installation found. "
             "Valid versions are up to 2020R2."
@@ -292,7 +292,7 @@ def mapdl_corba(request):
             corba_path = get_ansys_bin(str(version))
 
     if corba_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"-corba" testing option unavailable.'
             "No local CORBA compatible MAPDL installation found.  "
             "Valid versions are ANSYS 17.0 up to 2020R2."

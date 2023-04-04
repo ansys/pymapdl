@@ -396,6 +396,10 @@ class MapdlGrpc(_MapdlCore):
         else:
             self._log.debug("Connection established")
 
+        # Avoiding muting when connecting to the session
+        # It might trigger some errors later on if not.
+        self._run("/gopr")
+
         # double check we have access to the local path if not
         # explicitly specified
         if "local" not in start_parm:
@@ -822,8 +826,8 @@ class MapdlGrpc(_MapdlCore):
         This should only need to be used for legacy ``open_gui``
         """
         if not self._local:
-            raise RuntimeError(
-                "Can only launch the GUI with a local instance of " "MAPDL"
+            raise MapdlRuntimeError(
+                "Can only launch the GUI with a local instance of MAPDL"
             )
         from ansys.mapdl.core.launcher import launch_grpc
 
@@ -843,7 +847,7 @@ class MapdlGrpc(_MapdlCore):
                 pass
 
         if not success:
-            raise RuntimeError("Unable to reconnect to MAPDL")
+            raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
     @property
     def post_processing(self):
@@ -1289,7 +1293,7 @@ class MapdlGrpc(_MapdlCore):
             return []
 
         elif self._exited:
-            raise RuntimeError("Cannot list remote files since MAPDL has exited")
+            raise MapdlExitedError("Cannot list remote files since MAPDL has exited")
 
         # this will sometimes return 'LINUX x6', 'LIN', or 'L'
         if "L" in self.parameters.platform[:1]:
@@ -2003,7 +2007,7 @@ class MapdlGrpc(_MapdlCore):
            request are not evaluated simultaneously.
         """
         if self._store_commands:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
                 "Exit non_interactive mode before using this method."
             )
@@ -2038,7 +2042,9 @@ class MapdlGrpc(_MapdlCore):
         elif getresponse.type == 2:
             return getresponse.sval
 
-        raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
+        raise MapdlRuntimeError(
+            f"Unsupported type {getresponse.type} response from MAPDL"
+        )
 
     def download_project(self, extensions=None, target_dir=None, progress_bar=False):
         """Download all the project files located in the MAPDL working directory.
@@ -2773,7 +2779,9 @@ class MapdlGrpc(_MapdlCore):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError("Distributed Cyclic result not supported")
+                        raise MapdlRuntimeError(
+                            "Distributed Cyclic result not supported"
+                        )
                     result_path = self._result_file
             else:
                 result_path = self._result_file

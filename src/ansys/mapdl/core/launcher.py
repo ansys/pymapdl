@@ -25,7 +25,12 @@ import appdirs
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
+from ansys.mapdl.core.errors import (
+    LockFileException,
+    MapdlDidNotStart,
+    MapdlRuntimeError,
+    VersionError,
+)
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -141,7 +146,7 @@ def _version_from_path(path):
     # replace \\ with / to account for possible windows path
     matches = re.findall(r"v(\d\d\d).ansys", path.replace("\\", "/"), re.IGNORECASE)
     if not matches:
-        raise RuntimeError(f"Unable to extract Ansys version from {path}")
+        raise MapdlRuntimeError(f"Unable to extract Ansys version from {path}")
     return int(matches[-1])
 
 
@@ -1876,7 +1881,7 @@ def launch_mapdl(
                 os.mkdir(run_location)
                 LOG.debug("Created run location at %s", run_location)
             except:
-                raise RuntimeError(
+                raise MapdlRuntimeError(
                     "Unable to create the temporary working "
                     f'directory "{run_location}"\n'
                     "Please specify run_location="

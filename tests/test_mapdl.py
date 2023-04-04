@@ -321,7 +321,7 @@ def test_allow_ignore(mapdl):
 def test_chaining(mapdl, cleared):
     # test chaining with distributed only
     if mapdl._distributed:
-        with pytest.raises(RuntimeError):
+        with pytest.raises(MapdlRuntimeError):
             with mapdl.chain_commands:
                 mapdl.prep7()
     else:
@@ -539,7 +539,7 @@ def test_apdl_logging(mapdl, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
     # don't allow double logger:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.open_apdl_log(file_name, mode="w")
 
     # Testing
@@ -1122,7 +1122,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.run(each_cmd)
 
 
@@ -1159,7 +1159,7 @@ def test_path_with_spaces(mapdl, path_tests):
 
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
 
 

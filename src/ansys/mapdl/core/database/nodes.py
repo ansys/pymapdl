@@ -11,6 +11,8 @@ from ansys.api.mapdl.v0 import mapdl_db_pb2
 import numpy as np
 from numpy.lib import recfunctions
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 from ..common_grpc import DEFAULT_CHUNKSIZE
 from .database import DBDef, MapdlDb, check_mapdl_db_is_alive
 
@@ -157,7 +159,9 @@ class DbNodes:
 
         """
         if self._itnod == -1:
-            raise RuntimeError("You first have to call the `DbNodes.first` method.")
+            raise MapdlRuntimeError(
+                "You first have to call the `DbNodes.first` method."
+            )
 
         request = mapdl_db_pb2.NodRequest(next=self._itnod)
         result = self._db._stub.NodNext(request)
