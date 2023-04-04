@@ -14,7 +14,7 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 
 from ansys.mapdl.core import VERSION_MAP
-from ansys.mapdl.core.errors import VersionError, MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.misc import load_file
 
 from .common_grpc import ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE, DEFAULT_FILE_CHUNK_SIZE
