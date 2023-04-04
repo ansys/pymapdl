@@ -122,7 +122,6 @@ def plastic_solve(mapdl):
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_disp(mapdl, static_solve, comp):
-
     disp_from_grpc = mapdl.post_processing.nodal_displacement(comp)
 
     mapdl.post1(mute=True)
@@ -147,7 +146,6 @@ def test_enum_all(mapdl, static_solve):
 
 
 def test_disp_norm_all(mapdl, static_solve):
-
     # test norm
     disp_norm = mapdl.post_processing.nodal_displacement("NORM")
 
@@ -561,7 +559,6 @@ def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
 def test_elem_disp(mapdl, static_solve, comp):
-
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
     mapdl.allsel()
@@ -640,7 +637,6 @@ def test_plot_element_values(mapdl, static_solve):
 
 @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
 def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
-
     index = COMPONENT_STRESS_TYPE.index(comp)
     mapdl.prnsol("EPPL", "COMP", mute=True)  # run twice to clear out warning
 

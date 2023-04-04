@@ -6,6 +6,7 @@ import pytest
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS, DBDef, MapdlDb
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
 ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
@@ -130,7 +131,7 @@ def test_nodes_next(nodes):
     nodes._itnod = -1  # resets nodes state
 
     with pytest.raises(
-        RuntimeError, match="You first have to call the `DbNodes.first` method"
+        MapdlRuntimeError, match="You first have to call the `DbNodes.first` method"
     ):
         nodes.next()
 
@@ -195,7 +196,7 @@ def test_elems_next(elems):
     elems._itelm = -1  # resets elems state
 
     with pytest.raises(
-        RuntimeError, match="You first have to call the `DbElems.first` method"
+        MapdlRuntimeError, match="You first have to call the `DbElems.first` method"
     ):
         elems.next()
 

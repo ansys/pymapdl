@@ -42,7 +42,6 @@ ALLOWED_TARGETS = ["NODES"]
 
 
 if _HAS_PYVISTA:
-
     import pyvista as pv
 
     # Symbols for constrains
@@ -135,6 +134,7 @@ if _HAS_PYVISTA:
         "CHRGS": {"color": "grey", "glyph": VOLT},
     }
 
+
 # Using * to force all the following arguments to be keyword only.
 def _general_plotter(
     meshes,
@@ -173,6 +173,10 @@ def _general_plotter(
     text_color=None,
     theme=None,
     plotter=None,
+    add_points_kwargs={},
+    add_mesh_kwargs={},
+    add_point_labels_kwargs={},
+    plotter_kwargs={},
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -307,6 +311,33 @@ def _general_plotter(
         they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
+    add_points_kwargs : dict
+        This is a dict which is passed to all calls to
+        :meth:`pyvista.Plotter.add_points` in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot nodes for example.
+        See examples section to learn more about its usage.
+
+    add_mesh_kwargs : dict
+        This is a dict which is passed to all calls to
+        :meth:`pyvista.Plotter.add_mesh` in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot elements for example.
+        See examples section to learn more about its usage.
+
+    add_point_labels_kwargs : dict
+        This is a dict which is passed to all calls to
+        :meth:`pyvista.Plotter.add_point_labels` in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot node labels for example.
+        See examples section to learn more about its usage.
+
+    plotter_kwargs : dict
+        This is a dict which is passed to the :class:`pyvista.Plotter`
+        initializer in :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista class is used in all PyMAPDL plots.
+        See examples section to learn more about its usage.
+
     Returns
     -------
     pyvista.Plotter
@@ -336,6 +367,14 @@ def _general_plotter(
                     window_size=[1920, 1080], savefig='screenshot.png',
                     off_screen=True)
 
+    Using ``add_mesh_kwargs`` to pass other arguments to ``add_mesh`` pyvista method.
+
+    >>> mapdl.eplot(background='w', show_edges=True, add_mesh_kwargs = {"use_transparency": False})
+
+    Using ``plotter_kwargs`` to pass other arguments to ``Plotter`` constructor.
+
+    >>> mapdl.eplot(background='w', show_edges=True, plotter_kwargs = {"polygon_smoothing": False})
+
     """
     # Lazy import
     import pyvista as pv
@@ -347,7 +386,9 @@ def _general_plotter(
         raise TypeError("The kwarg 'plotter' can only accept pv.Plotter objects.")
 
     if not plotter:
-        plotter = pv.Plotter(off_screen=off_screen, notebook=notebook, theme=theme)
+        plotter = pv.Plotter(
+            off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs
+        )
     else:
         if off_screen or notebook or theme:
             warn(
@@ -375,6 +416,7 @@ def _general_plotter(
             cmap=cmap,
             render_points_as_spheres=render_points_as_spheres,
             render_lines_as_tubes=render_lines_as_tubes,
+            **add_points_kwargs,
         )
 
     for mesh in meshes:
@@ -400,6 +442,7 @@ def _general_plotter(
             cmap=cmap,
             render_points_as_spheres=render_points_as_spheres,
             render_lines_as_tubes=render_lines_as_tubes,
+            **add_mesh_kwargs,
         )
 
     for label in labels:
@@ -415,6 +458,7 @@ def _general_plotter(
             font_size=font_size,
             font_family=font_family,
             text_color=text_color,
+            **add_point_labels_kwargs,
         )
 
     if cpos:
@@ -479,6 +523,10 @@ def general_plotter(
     bc_glyph_size=None,
     bc_labels_font_size=16,
     plotter=None,
+    add_points_kwargs={},
+    add_mesh_kwargs={},
+    add_point_labels_kwargs={},
+    plotter_kwargs={},
 ):
     """General pymapdl plotter for APDL geometry and meshes.
 
@@ -659,11 +707,39 @@ def general_plotter(
         By default it is 16.
 
     plotter : pyvista.Plotter, optional
-        If a :class:`pyvista.Plotter` not is provided, then creates its
-        own plotter. If a :class:`pyvista.Plotter` is provided, the arguments
-        ``notebook``, ``off_screen`` and ``theme`` are ignored, since
-        they should be set when instantiated the provided plotter.
+        If a :class:`pyvista.Plotter` is not provided, then creates its
+        own plotter. If a :class:`pyvista.Plotter` is provided, the plotter
+        is not shown (you need to issue :meth:`pyvista.Plotter.show` manually)
+        and the arguments ``notebook``, ``off_screen`` and ``theme`` are ignored,
+        since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
+
+    add_points_kwargs : list[dict]
+        This is a dict or list of dicts to be passed to all or just the
+        correspondent :class:`pyvista.Plotter.add_points` call in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot nodes for example.
+        See examples section to learn more about its usage.
+
+    add_mesh_kwargs : list[dict]
+        This is a dict or list of dicts to be passed to all or just the
+        correspondent :class:`pyvista.Plotter.add_mesh` call in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot elements for example.
+        See examples section to learn more about its usage.
+
+    add_point_labels_kwargs : list[dict]
+        This is a dict or list of dicts to be passed to all or just the
+        correspondent :class:`pyvista.Plotter.add_point_labels` call in
+        :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista method is used to plot node labels for example.
+        See examples section to learn more about its usage.
+
+    plotter_kwargs : dict
+        This is a dict which is passed to the :class:`pyvista.Plotter`
+        initializer in :func:`ansys.mapdl.core.plotting.general_plotter`.
+        This pyvista class is used in all PyMAPDL plots.
+        See examples section to learn more about its usage.
 
     Returns
     -------
@@ -716,6 +792,13 @@ def general_plotter(
                     window_size=[1920, 1080], savefig='screenshot.png',
                     off_screen=True)
 
+    Using ``add_mesh_kwargs`` to pass other arguments to ``add_mesh`` pyvista method.
+
+    >>> mapdl.eplot(background='w', show_edges=True, add_mesh_kwargs = {"use_transparency": False})
+
+    Using ``plotter_kwargs`` to pass other arguments to ``Plotter`` constructor.
+
+    >>> mapdl.eplot(background='w', show_edges=True, plotter_kwargs = {"polygon_smoothing": False})
     """
     if notebook:
         off_screen = True  # pragma: no cover
@@ -760,6 +843,10 @@ def general_plotter(
         text_color=text_color,
         theme=theme,
         plotter=plotter,
+        add_points_kwargs=add_points_kwargs,
+        add_mesh_kwargs=add_mesh_kwargs,
+        add_point_labels_kwargs=add_point_labels_kwargs,
+        plotter_kwargs=plotter_kwargs,
     )
 
     if plot_bc:
@@ -806,7 +893,7 @@ def general_plotter(
         pl.close()
 
     else:
-        if not return_plotter:
+        if not return_plotter and not plotter:
             pl.show()
 
     if return_plotter:
@@ -827,7 +914,6 @@ def bc_plotter(
     bc_glyph_size=None,
     bc_labels_font_size=16,
 ):
-
     if bc_labels:
         bc_labels = _bc_labels_checker(bc_labels)
     else:

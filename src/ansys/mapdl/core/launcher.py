@@ -4,10 +4,12 @@ import atexit
 from glob import glob
 import os
 import platform
+from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 import warnings
 
@@ -23,7 +25,12 @@ import appdirs
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
+from ansys.mapdl.core.errors import (
+    LockFileException,
+    MapdlDidNotStart,
+    MapdlRuntimeError,
+    VersionError,
+)
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -94,12 +101,15 @@ def _is_ubuntu():
     if os.name != "posix":
         return False
 
-    # gcc is installed by default
-    proc = subprocess.Popen("gcc --version", shell=True, stdout=subprocess.PIPE)
+    proc = subprocess.Popen(
+        "awk -F= '/^NAME/{print $2}' /etc/os-release",
+        shell=True,
+        stdout=subprocess.PIPE,
+    )
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
-    # try lsb_release as this is more reliable
+    # try lsb_release as this is more reliable, but not always available.
     try:
         import lsb_release
 
@@ -136,7 +146,7 @@ def _version_from_path(path):
     # replace \\ with / to account for possible windows path
     matches = re.findall(r"v(\d\d\d).ansys", path.replace("\\", "/"), re.IGNORECASE)
     if not matches:
-        raise RuntimeError(f"Unable to extract Ansys version from {path}")
+        raise MapdlRuntimeError(f"Unable to extract Ansys version from {path}")
     return int(matches[-1])
 
 
@@ -521,6 +531,7 @@ def launch_grpc(
     if verbose:
         print(command)
 
+    LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
         shell=os.name != "nt",
@@ -530,8 +541,41 @@ def launch_grpc(
         stderr=subprocess.PIPE,
         env=env_vars,
     )
-    LOG.debug("MAPDL started in background.")
 
+    LOG.debug("Generating queue object for stdout")
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
+
+    # Checking connection
+    try:
+        LOG.debug("Checking process is alive")
+        _check_process_is_alive(process, run_location)
+
+        LOG.debug("Checking file error is created")
+        _check_file_error_created(run_location, timeout)
+
+        if os.name == "posix":
+            LOG.debug("Checking if gRPC server is alive.")
+            _check_server_is_alive(stdout_queue, run_location, timeout)
+
+    except MapdlDidNotStart as e:
+        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        raise MapdlDidNotStart(
+            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
+        ) from e
+
+    # Ending thread
+    # Todo: Ending queue thread
+    return port, run_location, process
+
+
+def _check_process_is_alive(process, run_location):
+    if process.poll() is not None:  # pragma: no cover
+        raise MapdlDidNotStart(
+            f"MAPDL process died.\nCheck the run location: '{run_location}')."
+        )
+
+
+def _check_file_error_created(run_location, timeout):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -548,10 +592,73 @@ def launch_grpc(
 
     if not has_ans:
         raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')"
+            f"MAPDL failed to start (No err file generated in '{run_location}')."
         )
 
-    return port, run_location, process
+
+def _check_server_is_alive(stdout_queue, run_location, timeout):
+    t0 = time.time()
+    empty_attemps = 3
+    empty_i = 0
+    terminal_output = ""
+
+    while time.time() < (t0 + timeout):
+        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+
+        if not terminal_output and empty_i < empty_attemps:
+            # For stability reasons.
+            empty_i += 1
+            time.sleep(0.1)
+            continue
+
+        if (
+            "START GRPC SERVER" in terminal_output
+            and "Server listening on" in terminal_output
+        ):
+            listening_on = terminal_output.splitlines()[-1].split(":")
+            listening_on = ":".join(listening_on[1:]).strip()
+            LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
+            break
+
+    else:
+        raise MapdlDidNotStart(
+            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
+            f"The full terminal output is:\n\n" + terminal_output
+        )
+
+
+def _get_std_output(std_queue, timeout=1):
+    lines = []
+    reach_empty = False
+    t0 = time.time()
+    while (not reach_empty) or (time.time() < (t0 + timeout)):
+        try:
+            lines.append(std_queue.get_nowait().decode())
+        except Empty:
+            reach_empty = True
+
+    return lines
+
+
+def _create_queue_for_std(std):
+    """Create a queue and thread objects for a given PIPE std"""
+
+    def enqueue_output(out, queue):
+        try:
+            for line in iter(out.readline, b""):
+                queue.put(line)
+            out.close()
+        except ValueError:
+            # When killing main process, a ValueError is show:
+            # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
+            pass
+
+    q = Queue()
+    t = threading.Thread(target=enqueue_output, args=(std, q))
+    t.daemon = True  # thread dies with the program
+    t.start()
+
+    return q, t
 
 
 def launch_remote_mapdl(
@@ -783,8 +890,13 @@ def find_ansys(version=None):
 
     Parameters
     ----------
-    version : float, optional
-        Version of ANSYS to search for.  If ``None``, use latest.
+    version : int, float, optional
+        Version of ANSYS to search for.
+        If using ``int``, it should follow the convention ``XXY``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If using ``float``, it should follow the convention ``XX.Y``, where ``XX`` is the major version,
+        and ``Y`` is the minor.
+        If ``None``, use latest available version on the machine.
 
     Returns
     -------
@@ -813,6 +925,10 @@ def find_ansys(version=None):
 
     if not version:
         version = max(versions.keys())
+
+    elif isinstance(version, float):
+        # Using floats, converting to int.
+        version = int(version * 10)
 
     try:
         ans_path = versions[version]
@@ -1137,7 +1253,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
     Parameters
     ----------
     add_sw : str
-        Additional swtiches.
+        Additional switches.
     exec_path : str
         Path to the MAPDL executable.
     force_intel : bool, optional
@@ -1196,7 +1312,7 @@ def _force_smp_student_version(add_sw, exec_path):
     Parameters
     ----------
     add_sw : str
-        Additional swtiches.
+        Additional switches.
     exec_path : str
         Path to the MAPDL executable.
 
@@ -1228,7 +1344,7 @@ def launch_mapdl(
     override=False,
     loglevel="ERROR",
     additional_switches="",
-    start_timeout=15,
+    start_timeout=45,
     port=None,
     cleanup_on_exit=True,
     start_instance=None,
@@ -1379,6 +1495,8 @@ def launch_mapdl(
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
 
     verbose_mapdl : bool, optional
         Enable printing of all output when launching and running
@@ -1637,11 +1755,25 @@ def launch_mapdl(
         check_valid_port(port)
         LOG.debug(f"Using default port {port}")
 
+    # verify version
+    if exec_file and version:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
+    if version is None:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
+
+    version = _verify_version(version)  # return a int version or none
+
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
     if _HAS_PIM and exec_file is None and pypim.is_configured():
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+        if version:
+            version = str(version)
+        else:
+            version = None
+
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
 
     # connect to an existing instance if enabled
     if start_instance is None:
@@ -1718,15 +1850,6 @@ def launch_mapdl(
             mapdl.clear()
         return mapdl
 
-    # verify version
-    if exec_file and version:
-        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
-
-    if version is None:
-        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
-
-    version = _verify_version(version)  # return a int version or none
-
     # verify executable
     if exec_file is None:
         exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
@@ -1758,7 +1881,7 @@ def launch_mapdl(
                 os.mkdir(run_location)
                 LOG.debug("Created run location at %s", run_location)
             except:
-                raise RuntimeError(
+                raise MapdlRuntimeError(
                     "Unable to create the temporary working "
                     f'directory "{run_location}"\n'
                     "Please specify run_location="
@@ -1809,10 +1932,8 @@ def launch_mapdl(
 
     # Check the license server
     if license_server_check:
-        # configure timeout to be 90% of the wait time of the startup
-        # time for Ansys.
         LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=int(start_timeout * 0.9))
+        lic_check = LicenseChecker(timeout=start_timeout)
         lic_check.start()
 
     try:
@@ -1990,7 +2111,6 @@ def update_env_vars(add_env_vars, replace_env_vars):
 
 
 def _check_license_argument(license_type, additional_switches):
-
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:

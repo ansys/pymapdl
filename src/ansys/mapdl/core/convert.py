@@ -358,7 +358,6 @@ def _convert(
     print_com=True,
     only_commands=False,
 ):
-
     if only_commands:
         auto_exit = False
         add_imports = False
@@ -517,7 +516,6 @@ class FileTranslator:
 
         """
         if self.cleanup_output:
-
             try:
                 import autopep8
             except ModuleNotFoundError:  # pragma: no cover
@@ -1088,25 +1086,25 @@ def cli(
 
     USAGE:
 
-    The main usage is:
+    This example demonstrates the main use of this tool:
 
-        $ convertscript mapdl.dat -o python.py
+        $ pymapdl_convert_script mapdl.dat -o python.py
 
         File mapdl.dat successfully converted to python.py.
 
-    The output argument is completely optional, in that case, it will just change the extension to "py".
+    The output argument is optional, in which case the "py" extension is used:
 
-        $ convertscript mapdl.dat
+        $ pymapdl_convert_script mapdl.dat
 
         File mapdl.dat successfully converted to mapdl.py.
 
     You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
 
-        $ convertscript mapdl.dat --auto-exit False
+        $ pymapdl_convert_script mapdl.dat --auto-exit False
 
         File mapdl.dat successfully converted to mapdl.py.
 
-        $ convertscript.exe mapdl.dat --filename_out mapdl.out --add_imports False
+        $ pymapdl_convert_script.exe mapdl.dat --filename_out mapdl.out --add_imports False
 
         File mapdl.dat successfully converted to mapdl.out.
 

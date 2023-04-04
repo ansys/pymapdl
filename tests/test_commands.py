@@ -576,10 +576,11 @@ def test_cmd_class_prnsol_short():
 
 
 def test_cmd_class_dlist_vm(mapdl, cleared):
-
     # Run only the first 100 lines of VM223
     with open(verif_files.vmfiles["vm223"]) as fid:
         cmds = fid.readlines()
+
+    mapdl.finish()
     mapdl.input_strings("\n".join(cmds[:100]))
 
     mapdl.allsel("all")
@@ -659,7 +660,6 @@ def test_docstring_injector(mapdl, method):
         if name[0:4].upper() == method and name in dir(
             Commands
         ):  # avoid matching Mapdl properties which starts with same letters as MAPDL commands.
-
             func = mapdl.__getattribute__(name)
             # If '__func__' not present (AttributeError) very likely it has not
             # been wrapped.

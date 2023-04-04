@@ -3,8 +3,9 @@
 
 Keypoints
 ---------
-This example shows how you can use PyMAPDL to create basic geometry
-using Pythonic PREP7 commands.
+
+This example shows how to create basic geometry
+using keypoints commands.
 
 This section is focused on creating keypoints.
 
@@ -145,7 +146,7 @@ mapdl.kplot(
 )
 
 ###############################################################################
-#
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
 #
 mapdl.exit()

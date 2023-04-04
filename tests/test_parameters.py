@@ -93,7 +93,7 @@ gen_status = """ABBREVIATION STATUS-
         1e31,
         1e41,
         1e51,
-        pytest.param(1e61, marks=pytest.mark.xfail),
+        1e61,
     ],
 )
 def test__get_parameter_array(mapdl, number):
@@ -380,3 +380,15 @@ def test_3d_array(mapdl):
         mapdl.parameters["myarr"],
         np.array([[[100.0, 200.0], [0.0, 300.0]], [[0.0, 400.0], [0.0, 0.0]]]),
     )
+
+
+def test_parameter_with_spaces(mapdl):
+    string_ = "DEV:F10X, front weights     "
+    mapdl.run(f"*SET,SIMULATION,'{string_}'")
+    mapdl.parsav()
+    mapdl.clear()
+    mapdl.parres("NEW", fname="file", ext="parm")
+    assert mapdl.starstatus()
+    assert mapdl.parameters
+    assert "SIMULATION" in mapdl.parameters
+    assert string_.strip() == mapdl.parameters["SIMULATION"]

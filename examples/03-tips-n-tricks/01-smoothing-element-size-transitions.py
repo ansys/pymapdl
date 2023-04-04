@@ -4,9 +4,11 @@
 MAPDL Element Size Transition Example
 -------------------------------------
 
+This example shows you how to control the mesh density using PyMAPDL.
+
 There are many cases in which you will want to control the density of the mesh nearby
-a region of local high stresses (e.g. simulated crack, filleted bracket, etc.)  This
-usually introduces a sharp element size transition
+a region of local high stresses (e.g. simulated crack, filleted bracket, etc.).
+This usually introduces a sharp element size transition
 in the mesh. This example demonstrates one way to
 reduce this effect using a simple geometry.
 
@@ -106,5 +108,7 @@ mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

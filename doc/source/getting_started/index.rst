@@ -11,7 +11,7 @@ For more information on getting a licensed copy of Ansys, visit
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 3
 
    learning
    versioning
@@ -20,7 +20,11 @@ For more information on getting a licensed copy of Ansys, visit
    using_julia
    faq
    contribution
+   make_container_link
+   devcontainer_link
 
+
+.. _installation:
 
 ************
 Installation

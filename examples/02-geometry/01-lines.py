@@ -3,8 +3,9 @@
 
 Lines
 -----
-This example shows how you can use PyMAPDL to create basic geometry
-using Pythonic PREP7 line commands.
+
+This example shows how to create basic geometry
+using lines commands.
 
 """
 
@@ -311,5 +312,7 @@ mapdl.lplot(
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

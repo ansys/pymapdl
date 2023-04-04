@@ -1,5 +1,19 @@
 version: 2
 updates:
+  - package-ecosystem: "pip" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    insecure-external-code-execution: allow
+    schedule:
+      interval: "weekly"      
+      day: "friday"
+      time: "00:00"
+
+    labels:
+      - "Maintenance"
+      - "Dependencies"
+    ignore:
+      - dependency-name: "grpcio"
+      - dependency-name: "sphinx"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

@@ -3,7 +3,6 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 from ansys.mapdl.core.plotting import general_plotter
 
@@ -33,17 +32,7 @@ def check_result_loaded(func):
     """Verify a result has been loaded within MAPDL"""
 
     def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except:
-            raise MapdlRuntimeError(
-                "Either this is an invalid result type for "
-                "this solution, or "
-                "no results set has been loaded within MAPDL.\n"
-                "Load a result set with:\n\n"
-                "\tmapdl.post1()\n"
-                "\tmapdl.set(1, 1)"
-            ) from None
+        return func(*args, **kwargs)
 
     return wrapper
 
@@ -323,7 +312,12 @@ class PostProcessing:
         # using _ndof_rst instead of get_array because it is wrapped to check the rst.
         values = self._ndof_rst(item=item, it1num=comp)
         mask = self.selected_nodes
-        return values[mask]
+        try:
+            return values[mask]
+        except IndexError:  # pragma: no cover
+            raise IndexError(
+                "The number of selected nodes does not match the number of nodal results returned by MAPDL."
+            )
 
     def element_values(self, item, comp="", option="AVG") -> np.ndarray:
         """Compute the element-wise values for a given item and component.
@@ -579,7 +573,7 @@ class PostProcessing:
         --------
         Plot the contact status for the selected elements.
 
-        >>> mapdl.post_processing.plot_element_results(
+        >>> mapdl.post_processing.plot_element_values(
         ...     "CONT", "STAT", scalar_bar_args={"title": "Contact status"}
         ... )
 
@@ -596,7 +590,7 @@ class PostProcessing:
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
         """Plot point scalars"""
         if not scalars.size:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
@@ -629,7 +623,7 @@ class PostProcessing:
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
         if not scalars.size:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
@@ -771,7 +765,15 @@ class PostProcessing:
         * ``NAR`` - Use nodal-averaged results only.
 
         """
-        return self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
+        values = self._mapdl.get_array("NODE", item1=item, it1num=it1num, item2=item2)
+        if values.size == 0:  # pragma: no cover
+            raise ValueError(
+                f"The results obtained with '{item},{it1num},{item2}' are empty.\n"
+                "You can check the MAPDL output by issuing:\n\n"
+                f"mapdl.run('*vget,temp_array, node, , {item}, {it1num}, {item2}')"
+            )
+        else:
+            return values
 
     @check_result_loaded
     def _edof_rst(self, item, it1num=""):

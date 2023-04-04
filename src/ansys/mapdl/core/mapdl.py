@@ -1,5 +1,6 @@
 """Module to control interaction with MAPDL through Python"""
 
+import atexit
 from functools import wraps
 import glob
 import logging
@@ -160,6 +161,7 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
+        atexit.register(self.__del__)  # registering to exit properly
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
@@ -314,7 +316,6 @@ class _MapdlCore(Commands):
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
         def wrap_xsel_function(func):
-
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
                     func.__func__.__doc__, XSEL_DOCSTRING_INJECTION
@@ -478,6 +479,16 @@ class _MapdlCore(Commands):
         return self._non_interactive(self)
 
     @property
+    def force_output(self):
+        """Force text output globally by turning the ``Mapdl.mute`` attribute to False
+        and activating text output (``/GOPR``)
+
+        You can still do changes to those inside this context.
+
+        """
+        return self._force_output(self)
+
+    @property
     def solution(self):
         """Solution parameters of MAPDL.
 
@@ -492,7 +503,7 @@ class _MapdlCore(Commands):
         >>> mapdl.solution.converged
         """
         if self._exited:
-            raise RuntimeError("MAPDL exited.")
+            raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
     @property
@@ -515,7 +526,7 @@ class _MapdlCore(Commands):
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
         if self._exited:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
         return self._post
@@ -549,7 +560,7 @@ class _MapdlCore(Commands):
 
         """
         if self._distributed:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
@@ -961,7 +972,7 @@ class _MapdlCore(Commands):
         >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
-            raise RuntimeError("APDL command logging already enabled")
+            raise MapdlRuntimeError("APDL command logging already enabled")
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1030,7 +1041,7 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.launcher import get_ansys_path
 
         if not self._local:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "``open_gui`` can only be called from a local MAPDL instance."
             )
 
@@ -1492,6 +1503,11 @@ class _MapdlCore(Commands):
         show_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
 
+        **kwargs
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicable when visualizing with
+            ``vtk=True``.
+
         Examples
         --------
         Plot while displaying area numbers.
@@ -1596,12 +1612,20 @@ class _MapdlCore(Commands):
         show_line_numbering : bool, optional
             Display line numbers when ``vtk=True``.
 
-        color_areas : bool, optional
-            Randomly color areas when ``True`` and ``vtk=True``.
+        color_areas : np.array, optional
+            Only used when ``vtk=True``.
+            If ``color_areas`` is a bool, randomly color areas when ``True`` .
+            If ``color_areas`` is an array or list, it colors each area with
+            the RGB colors, specified in that array or list.
 
         show_lines : bool, optional
             Plot lines and areas.  Change the thickness of the lines
             with ``line_width=``
+
+        **kwargs
+            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            more keyword arguments applicable when visualizing with
+            ``vtk=True``.
 
         Examples
         --------
@@ -1655,10 +1679,27 @@ class _MapdlCore(Commands):
             # individual surface isolation is quite slow, so just
             # color individual areas
             if color_areas:  # pragma: no cover
-                anum = surf["entity_num"]
-                size_ = max(anum) + 1
-                rand = np.random.random(size_)
-                area_color = rand[anum]
+                if isinstance(color_areas, bool):
+                    anum = surf["entity_num"]
+                    size_ = max(anum) + 1
+                    # Because this is only going to be used for plotting purpuses, we don't need to allocate
+                    # a huge vector with random numbers (colours).
+                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors` argument is set to 256, so let
+                    # do here the same.
+                    # We will limit the number of randoms values (colours) to 256
+                    #
+                    # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+                    size_ = min([256, size_])
+                    # Generating a colour array,
+                    # Size = number of areas.
+                    # Values are random between 0 and min(256, number_areas)
+                    area_color = np.random.choice(range(size_), size=(len(anum), 3))
+                else:
+                    if len(surf["entity_num"]) != len(color_areas):
+                        raise ValueError(
+                            f"The length of the parameter array 'color_areas' should be the same as the number of areas."
+                        )
+                    area_color = color_areas
                 meshes.append({"mesh": surf, "scalars": area_color})
             else:
                 meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
@@ -1814,7 +1855,7 @@ class _MapdlCore(Commands):
 
         **kwargs
             See :meth:`ansys.mapdl.core.plotting.general_plotter` for
-            more keyword arguments applicatle when visualizing with
+            more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
         Notes
@@ -2014,7 +2055,9 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError("Distributed Cyclic result not supported")
+                        raise MapdlRuntimeError(
+                            "Distributed Cyclic result not supported"
+                        )
                     result_path = self._result_file
             else:
                 result_path = self._result_file
@@ -2383,13 +2426,8 @@ class _MapdlCore(Commands):
         kwargs["mute"] = False
 
         # Checking printout is not suppressed by checking "wrinqr" flag.
-        flag = 0
-        if self.wrinqr(1) != 1:  # using wrinqr is more reliable than *get
-            flag = 1
-            self._run("/gopr")
-        response = self.run(command, **kwargs)
-        if flag == 1:
-            self._run("/nopr")
+        with self.force_output:
+            response = self.run(command, **kwargs)
 
         value = response.split("=")[-1].strip()
         if item3:
@@ -2826,13 +2864,13 @@ class _MapdlCore(Commands):
             )
 
         if command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
             )
@@ -2868,18 +2906,7 @@ class _MapdlCore(Commands):
             return self._response
 
         if not self.ignore_errors:
-            if "is not a recognized" in text:
-                text = text.replace("This command will be ignored.", "")
-                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
-                raise MapdlInvalidRoutineError(text)
-
-            if "command is ignored" in text:
-                text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
-                raise MapdlCommandIgnoredError(text)
-
-            # flag errors
-            if "*** ERROR ***" in self._response:
-                self._raise_output_errors(self._response)
+            self._raise_errors(text)
 
         # special returns for certain geometry commands
         short_cmd = parse_to_short_cmd(command)
@@ -3316,7 +3343,7 @@ class _MapdlCore(Commands):
         while arr.size == 1 and arr[0] == -1:
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
-                raise RuntimeError("Unable to get array for %s" % entity)
+                raise MapdlRuntimeError("Unable to get array for %s" % entity)
             ntry += 1
         return arr
 
@@ -3811,6 +3838,23 @@ class _MapdlCore(Commands):
 
         return wrapped(self, *args, **kwargs)
 
+    def _raise_errors(self, text):
+        # to make sure the following error messages are caught even if a breakline is in between.
+        flat_text = " ".join([each.strip() for each in text.splitlines()])
+
+        if "is not a recognized" in flat_text:
+            text = text.replace("This command will be ignored.", "")
+            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            raise MapdlInvalidRoutineError(text)
+
+        if "command is ignored" in flat_text:
+            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            raise MapdlCommandIgnoredError(text)
+
+        # flag errors
+        if "*** ERROR ***" in flat_text:
+            self._raise_output_errors(text)
+
     def _raise_output_errors(self, response):
         """Raise errors in the MAPDL response.
 
@@ -3856,9 +3900,13 @@ class _MapdlCore(Commands):
                     )
                     error_message = partial_output
                 else:
-                    error_message = error_message.group(
-                        0
-                    )  # Catching only the first error.
+                    # Catching only the first error.
+                    error_message = error_message.group(0)
+
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
 
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
@@ -3930,13 +3978,20 @@ class _MapdlCore(Commands):
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
-    @wraps(Commands.lsread)
+    @wraps(Commands.use)
     def use(self, *args, **kwargs):
+        """Wrap the use command."""
         # Because of `name` can be a macro file or a macro block on a macro library
         # file, we are going to test if the file exists locally first, then remote,
         # and if not, silently assume that it is a macro in a macro library.
         # I do not think there is a way to check if the macro exists before use it.
-        name = kwargs.get("name", args[0])
+        if "name" in kwargs:
+            name = kwargs.pop("name")
+        else:
+            if len(args) < 1:
+                raise ValueError("Missing `name` argument")
+            name = args[0]
+
         base_name = os.path.basename(name)
 
         # Check if it is a file local
@@ -4024,6 +4079,8 @@ class _MapdlCore(Commands):
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
         # self.get_mapdl_envvar("ON_DOCKER") # for later
+        if not self.is_grpc:  # pragma: no cover
+            return False
 
         if self.platform == "linux":
             self.sys(
@@ -4032,12 +4089,17 @@ class _MapdlCore(Commands):
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
 
-        if self.is_grpc and not self.is_local:
-            return self._download_as_raw("__outputcmd__.txt").decode().strip() == "true"
+        if not self.is_local:
+            sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
+
         else:  # pragma: no cover
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
-                return f.read().strip() == "true"
+                sys_output = f.read().strip()
+
+        self._log.debug(f"The output of sys command is: '{sys_output}'.")
+        self.slashdelete("__outputcmd__.txt")  # cleaning
+        return sys_output == "true"
 
     @property
     def on_docker(self):
@@ -4074,3 +4136,26 @@ class _MapdlCore(Commands):
         """
         fname = pathlib.Path(fname)
         return fname.stem, fname.suffix.replace(".", "")
+
+    class _force_output:
+        """Allows user to enter commands that need to run with forced text output."""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering force-output mode")
+
+            if self._parent().wrinqr(1) != 1:  # using wrinqr is more reliable than *get
+                self._in_nopr = True
+                self._parent()._run("/gopr")  # Going to PR mode
+            else:
+                self._in_nopr = False
+
+            self._previous_mute, self._parent()._mute = self._parent()._mute, False
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting force-output mode")
+            if self._in_nopr:
+                self._parent()._run("/nopr")
+            self._parent()._mute = self._previous_mute

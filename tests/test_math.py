@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from scipy import sparse
 
-from ansys.mapdl.core.errors import ANSYSDataTypeError
+from ansys.mapdl.core.errors import ANSYSDataTypeError, MapdlRuntimeError
 from ansys.mapdl.core.launcher import get_start_instance
 import ansys.mapdl.core.math as apdl_math
 from ansys.mapdl.core.misc import random_string
@@ -97,6 +97,19 @@ def test_inplace_mult(mm):
     v = mm.ones(10)
     v *= 2
     assert v[0] == 2
+
+
+def test_inplace_mult_with_vec(mm):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    m1 = mm.rand(3, 3)
+    m2 = m1.copy()
+    v1 = mm.ones(3)
+    v1.const(2)
+    m2 *= v1
+    assert np.allclose(m2, np.multiply(m1, v1) * v1)
 
 
 def test_set_vec_large(mm):
@@ -236,7 +249,7 @@ def test_matrix_matmult(mm):
     assert np.allclose(m1.asarray() @ m2.asarray(), m3.asarray())
 
 
-def test_getitem(mm):
+def test_getitem_AnsMat(mm):
     size_i, size_j = (3, 3)
     mat = mm.rand(size_i, size_j)
     np_mat = mat.asarray()
@@ -246,6 +259,49 @@ def test_getitem(mm):
         for j in range(size_j):
             # recall that MAPDL uses fortran order
             assert vec[j] == np_mat[j, i]
+
+
+@pytest.mark.parametrize("dtype_", [np.int64, np.double, np.complex128])
+def test_getitem_AnsVec(mm, dtype_):
+    size_i = 3
+    vec = mm.rand(size_i, dtype=dtype_)
+    np_vec = vec.asarray()
+    for i in range(size_i):
+        assert vec[i] == np_vec[i]
+
+
+@pytest.mark.parametrize("dtype_", [np.double, np.complex128])
+def test_kron_product(mm, dtype_):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    m1 = mm.rand(3, 3, dtype=dtype_)
+    m2 = mm.rand(2, 2, dtype=dtype_)
+    v1 = mm.rand(2, dtype=dtype_)
+    v2 = mm.rand(4, dtype=dtype_)
+    # *kron product between matrix and another matrix
+    res1 = m1.kron(m2)
+
+    # *kron product between Vector and a matrix
+    res2 = v1.kron(m2)
+
+    # *kron product between Vector and another Vector
+    res3 = v1.kron(v2)
+
+    assert np.allclose(res1.asarray(), np.kron(m1, m2))
+    assert np.allclose(res2.asarray(), np.kron(v1.asarray().reshape(2, 1), m2))
+    assert np.allclose(res3.asarray(), np.kron(v1, v2))
+
+
+def test_kron_product_unsupported_dtype(mm):
+    mapdl_version = mm._mapdl.version
+    if mapdl_version < 23.2:
+        pytest.skip("Requires MAPDL 2023 R2 or later.")
+
+    with pytest.raises(TypeError, match=r"Must be an ApdlMathObj"):
+        m1 = mm.rand(3, 3)
+        m1.kron(2)
 
 
 def test_load_stiff_mass(mm, cube_solve, tmpdir):
@@ -544,7 +600,6 @@ def test_set_vector(mm, vec, pname):
 
 
 def test_set_vector_catch(mm):
-
     with pytest.raises(ValueError, match='":" is not permitted'):
         mm.set_vec(np.ones(10), "my:vec")
 
@@ -654,7 +709,7 @@ def test_invalid_init():
 def test_free(mm):
     my_mat = mm.ones(10)
     mm.free()
-    with pytest.raises(RuntimeError, match="This vector has been deleted"):
+    with pytest.raises(MapdlRuntimeError, match="This vector has been deleted"):
         my_mat.size
 
 
@@ -720,7 +775,6 @@ def test_factorize_inplace_arg(mm):
 
 
 def test_mult(mapdl, mm):
-
     rand_ = np.random.rand(100, 100)
 
     if not server_meets_version(mapdl._server_version, (0, 4, 0)):
@@ -745,7 +799,6 @@ def test__parm(mm, mapdl):
 
     rand_ = np.random.rand(100, 100)
     if not server_meets_version(mapdl._server_version, (0, 4, 0)):
-
         with pytest.raises(VersionError):
             AA = mm.matrix(rand_, name="AA")
 
@@ -821,7 +874,6 @@ def test_damp_matrix(mm, cube_with_damping):
 
 
 def test_damp_matrix_as_array(mm, cube_with_damping):
-
     d = mm.damp()
     d = d.asarray()
 

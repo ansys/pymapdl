@@ -329,7 +329,6 @@ def test_instance_log_to_file(mapdl, tmpdir):
 def test_lowercases():
     # test that all loggers are lowercase
     for each_loglevel in LOG_LEVELS.keys():
-
         LOG.setLevel(each_loglevel.lower())
 
         for each_logger in LOG._instances.values():

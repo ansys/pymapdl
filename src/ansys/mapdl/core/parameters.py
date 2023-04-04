@@ -376,10 +376,13 @@ class Parameters:
         if not isinstance(value, (str, int, float)):
             raise TypeError("``Parameter`` must be either a float, int, or string")
 
+        if isinstance(value, str) and len(value) >= 32:
+            raise ValueError("Length of ``value`` must be 32 characters or less")
+
         if not isinstance(name, str):
             raise TypeError("``name`` must be a string")
 
-        if len(name) > 32:
+        if len(name) >= 32:
             raise ValueError("Length of ``name`` must be 32 characters or less")
 
         # delete the parameter if it exists as an array
@@ -425,7 +428,7 @@ class Parameters:
                 break
 
         if not escaped:  # pragma: no cover
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
                 "that could not be read using '{format_str}'."
             )
@@ -699,11 +702,11 @@ def interp_star_status(status):
 
         # line will contain either a character, scalar, or array
         name = items[0]
-        if len(items) == 2:
-            if items[1][-9:] == "CHARACTER":
-                parameters[name] = {"type": "CHARACTER", "value": items[1][:-9]}
-            # else:
-            # log.warning(
+        if len(items) == 2 or "CHARACTER" in items[-1].upper():
+            name = line[:32].strip()
+            value = line.replace(items[-1], "")[33:].strip()
+            parameters[name] = {"type": "CHARACTER", "value": value}
+
         elif len(items) == 3:
             if items[2] == "SCALAR":
                 value = float(items[1])
@@ -713,7 +716,6 @@ def interp_star_status(status):
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
-                # Probably I could get rid of this loop
                 myarray[
                     int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
                 ] = float(items[3])

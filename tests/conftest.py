@@ -7,20 +7,18 @@ import pytest
 
 from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
-# import time
-
-
 pytest_plugins = ["pytester"]
 
 import pyvista
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
     get_start_instance,
+    launch_mapdl,
 )
 from ansys.mapdl.core.misc import get_ansys_bin
 
@@ -31,6 +29,23 @@ SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+class Running_test:
+    def __init__(self) -> None:
+        pass
+
+    def __enter__(self):
+        pymapdl.RUNNING_TESTS = True
+
+    def __exit__(self, *args):
+        pymapdl.RUNNING_TESTS = False
+
+
+@pytest.fixture(scope="session")
+def running_test():
+    return Running_test()
+
 
 from _pytest.terminal import TerminalReporter
 
@@ -114,7 +129,7 @@ alexander.kaszynski@ansys.com
 """
 
 if START_INSTANCE and EXEC_FILE is None:
-    raise RuntimeError(ERRMSG)
+    raise MapdlRuntimeError(ERRMSG)
 
 
 def is_exited(mapdl):
@@ -229,7 +244,7 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.  ' "Only Linux is supported."
         )
     ansys_base_paths = _get_available_base_ansys()
@@ -242,7 +257,7 @@ def mapdl_console(request):
             console_path = get_ansys_bin(str(version))
 
     if console_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.'
             "No local console compatible MAPDL installation found. "
             "Valid versions are up to 2020R2."
@@ -277,7 +292,7 @@ def mapdl_corba(request):
             corba_path = get_ansys_bin(str(version))
 
     if corba_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"-corba" testing option unavailable.'
             "No local CORBA compatible MAPDL installation found.  "
             "Valid versions are ANSYS 17.0 up to 2020R2."
@@ -321,6 +336,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         additional_switches="-smp",
+        start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
@@ -343,9 +359,6 @@ def mapdl(request, tmpdir_factory):
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
-        # if mapdl._local:
-        #     assert not os.path.isfile(mapdl._lockfile)
-
         # should test if _exited protects from execution
         with pytest.raises(MapdlExitedError):
             mapdl.prep7()
@@ -356,11 +369,6 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
-
-            # verify PIDs are closed
-            # time.sleep(1)  # takes a second for the processes to shutdown
-            # for pid in mapdl._pids:
-            #     assert not check_pid(pid)
 
 
 @pytest.fixture
@@ -407,6 +415,7 @@ def box_with_fields(cleared, mapdl):
     mapdl.mp("murx", 1, 1)
     mapdl.et(1, "SOLID70")
     mapdl.et(2, "CPT215")
+    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
     mapdl.et(3, "SOLID122")
     mapdl.et(4, "SOLID96")
     mapdl.block(0, 1, 0, 1, 0, 1)

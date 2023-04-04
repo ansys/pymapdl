@@ -64,20 +64,19 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "sphinxcontrib.googleanalytics",
 ]
 
 # Intersphinx mapping
 intersphinx_mapping = {
     "python": ("https://docs.python.org/dev", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-    "numpy": ("https://numpy.org/devdocs", None),
-    "matplotlib": ("https://matplotlib.org/stable", None),
-    "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
@@ -159,10 +158,6 @@ pygments_style = "sphinx"
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
-# Google analytics setup
-googleanalytics_id = "G-JQJKPV6ZVB"
-googleanalytics_enabled = True
-
 # Copy button customization ---------------------------------------------------
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
@@ -197,6 +192,7 @@ html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
+    "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": "https://github.com/pyansys/pymapdl",
     "show_prev_next": False,
     "show_breadcrumbs": True,
@@ -213,7 +209,7 @@ html_theme_options = {
         },
         {
             "name": "Contribute",
-            "url": "https://mapdl.docs.pyansys.com/release/dev/getting_started/contribution.html",
+            "url": "https://mapdl.docs.pyansys.com/dev/getting_started/contribution.html",
             "icon": "fa fa-wrench",
         },
     ],
@@ -303,6 +299,7 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
 
 # Adding apdl syntax highlighting
 def setup(app):
