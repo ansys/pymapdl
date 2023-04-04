@@ -72,5 +72,7 @@ nnum, temp = result.nodal_temperature(0)
 print(nnum, temp)
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

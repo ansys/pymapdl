@@ -34,9 +34,11 @@ Boyce
 breakpoint
 centerline
 CentOS
+CentOS7
 Chao
 delet
 Docker
+docker
 dof
 ect
 eigenfrequency
@@ -134,4 +136,5 @@ Windows
 Windows Subsystem
 Windows Subsystem for Linux
 WSL
+wsl
 Zhu

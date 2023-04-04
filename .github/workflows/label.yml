@@ -14,6 +14,7 @@ concurrency:
 jobs:
 
   label-syncer:
+    # Sync the labels name, colours with the file ``labels.yml``
     name: Syncer
     runs-on: ubuntu-latest
     steps:
@@ -73,19 +74,9 @@ jobs:
       with:
         labels: BUG
 
-  label-syncer-two:
-    name: Re-sync labels
-    needs: [labeler]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: micnncim/action-label-syncer@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   commenter:
     runs-on: ubuntu-latest
-    needs: [label-syncer-two]
+    needs: [labeler]
     permissions:
       pull-requests: write
     steps:
@@ -93,7 +84,7 @@ jobs:
       uses: peter-evans/create-or-update-comment@v2
       # Execute only when no labels have been applied to the pull request
       # if: toJSON(github.event.pull_request.labels.*.name) == '[]'
-      if: github.event.pull_request.labels[0] == null # Empty labels
+      if: toJSON(github.event.pull_request.labels.*.name) == '{}' # Empty labels
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         issue-number: ${{ github.event.pull_request.number }}

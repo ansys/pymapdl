@@ -1,5 +1,7 @@
 import pytest
 
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+
 
 class TestParseParameter:
     @pytest.mark.parametrize(
@@ -69,10 +71,10 @@ class TestRunQuery:
         assert isinstance(v, type_)
 
     def test_interactive_mode_error(self, mapdl, line_geometry):
-        q, kps, l0 = line_geometry
-        with mapdl.non_interactive:
-            with pytest.raises(RuntimeError):
-                v = q.kx(1)
+        q, _, _ = line_geometry
+        with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+            with mapdl.non_interactive:
+                q.kx(1)
 
     @pytest.mark.skip_grpc  # only works in gRPC mode
     def test_nopr_mode(self, mapdl, line_geometry):

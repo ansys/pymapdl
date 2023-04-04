@@ -52,6 +52,18 @@ or :ref:`installing_ansys_in_wsl` for the command line interface.
 The later approach can be reused with small changes in a
 continuous integration workflow.
 
+To reduce the size of the final image, you might want to
+install the minimal files by using:
+
+.. code:: bash
+
+    sh /path-to-mapdl-installer \
+        -install_dir /path-to-install-mapdl/ \
+        -nochecks -mechapdl -ansyscust -silent
+
+This command install Mechanical MAPDL (``-mechapdl``) and the
+custom routines (``-ansyscust``) such as UPF.
+
 Please take note of where you are installing ANSYS because the
 directory path is need in the following section.
 

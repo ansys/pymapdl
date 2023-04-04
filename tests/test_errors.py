@@ -1,10 +1,12 @@
 import pytest
 
 from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
     MapdlDidNotStart,
     MapdlError,
     MapdlException,
     MapdlInfo,
+    MapdlInvalidRoutineError,
     MapdlNote,
     MapdlRuntimeError,
     MapdlVersionError,
@@ -100,9 +102,26 @@ def test_raise_output_errors(mapdl, response, expected_error):
         MapdlNote,
         MapdlInfo,
         MapdlVersionError,
+        MapdlInvalidRoutineError,
+        MapdlCommandIgnoredError,
+        MapdlRuntimeError,
     ],
 )
 def test_exception_classes(error_class):
     message = "Exception message"
     with pytest.raises(error_class):
         raise error_class(message)
+
+
+def test_error_handler(mapdl):
+    text = "is not a recognized"
+    with pytest.raises(MapdlInvalidRoutineError, match="recognized"):
+        mapdl._raise_errors(text)
+
+    text = "command is ignored"
+    with pytest.raises(MapdlCommandIgnoredError, match="ignored"):
+        mapdl._raise_errors(text)
+
+    text = "*** ERROR ***\n This is my own errorrrr"
+    with pytest.raises(MapdlRuntimeError, match="errorrrr"):
+        mapdl._raise_errors(text)

@@ -5,7 +5,7 @@
 Thermal-structural analysis of exhaust manifold
 ===============================================
 
-**Summary**: This example illustrates how to map results from a CFD analysis and perform a Finite Element (FE) analysis.
+This example illustrates how to map results from a CFD analysis and perform a Finite Element (FE) analysis.
 
 Objective
 ~~~~~~~~~

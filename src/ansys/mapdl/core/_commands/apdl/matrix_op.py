@@ -752,7 +752,7 @@ class MatrixOP:
         return self.run(f"REMOVE,{name},{val1},{val2},{val3}", **kwargs)
 
     def scal(self, name="", val1="", val2="", **kwargs):
-        """Scales a vector or matrix by a constant.
+        """Scales a vector or matrix by a constant or a vector.
 
         APDL Command: ``*SCAL``
 
@@ -763,17 +763,34 @@ class MatrixOP:
             be specified.
 
         val1
-            The real part of the constant to use (default = 1).
+            When scaling a matrix or a vector by a scalar value, Val1 is
+            the real part of the constant to use (default = 1).
+
+            When scaling a matrix or a vector by a vector, Val1 is the
+            name of the vector used for the scaling operation.
 
         val2
-            The imaginary part of the constant to use (default = 0). This
-            value is used only if the vector or matrix specified by Name
-            is complex.
+            The imaginary part of the constant to use (default = 0).
+            This value is used only if the vector or matrix specified by
+            Name is complex.
+
+            val2 is only valid for scaling by a constant. It is not
+            used when scaling by a vector.
 
         Notes
         -----
         This command can be applied to vectors and matrices created by the
         ``*VEC``, ``*DMAT`` and ``*SMAT`` commands.
+
+        Data types must be consistent between the vectors and matrices
+        being scaled and the scaling vector (or constant value).
+
+        When scaling a matrix with a vector, the matrix must be square
+        and the scaling vector must be the same size.
+
+        Scaling a matrix with a vector, is available only on
+        MAPDL V23.2 and greater.
+
         """
         return self.run(f"*SCAL,{name},{val1},{val2}", **kwargs)
 

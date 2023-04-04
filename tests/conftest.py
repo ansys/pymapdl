@@ -11,13 +11,14 @@ pytest_plugins = ["pytester"]
 
 import pyvista
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
     _get_available_base_ansys,
     get_start_instance,
+    launch_mapdl,
 )
 from ansys.mapdl.core.misc import get_ansys_bin
 
@@ -28,6 +29,23 @@ SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+class Running_test:
+    def __init__(self) -> None:
+        pass
+
+    def __enter__(self):
+        pymapdl.RUNNING_TESTS = True
+
+    def __exit__(self, *args):
+        pymapdl.RUNNING_TESTS = False
+
+
+@pytest.fixture(scope="session")
+def running_test():
+    return Running_test()
+
 
 from _pytest.terminal import TerminalReporter
 
@@ -397,6 +415,7 @@ def box_with_fields(cleared, mapdl):
     mapdl.mp("murx", 1, 1)
     mapdl.et(1, "SOLID70")
     mapdl.et(2, "CPT215")
+    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
     mapdl.et(3, "SOLID122")
     mapdl.et(4, "SOLID96")
     mapdl.block(0, 1, 0, 1, 0, 1)
