@@ -1,6 +1,6 @@
 Sphinx==5.1.1
 ansys-mapdl-reader==0.52.0
-ansys-sphinx-theme==0.8.0
+ansys-sphinx-theme==0.9.5
 grpcio==1.43.0
 imageio-ffmpeg==0.4.7
 imageio==2.21.2
@@ -22,3 +22,4 @@ sphinx-notfound-page==0.8.3
 sphinxcontrib-websupport==1.2.4
 sphinxemoji==0.2.0
 vtk==9.0.3
+numpy==1.19  # added to pin numpy during docs building
