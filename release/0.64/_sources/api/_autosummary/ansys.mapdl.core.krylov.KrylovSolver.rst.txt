@@ -1,0 +1,43 @@
+﻿ansys.mapdl.core.krylov.KrylovSolver
+====================================
+
+.. currentmodule:: ansys.mapdl.core.krylov
+
+.. autoclass:: KrylovSolver
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      KrylovSolver.compute_residuals
+      
+      
+      KrylovSolver.expand
+      
+      
+      KrylovSolver.gensubspace
+      
+      
+      KrylovSolver.solve
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      
+      KrylovSolver.is_orthogonal
+      
+   
+   

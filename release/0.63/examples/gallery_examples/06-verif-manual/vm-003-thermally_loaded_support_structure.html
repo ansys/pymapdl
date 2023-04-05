@@ -1,0 +1,1049 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Thermally Loaded Support Structure &#8212; PyMAPDL</title>
+    
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/ansys_sphinx_theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    
+        <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet">
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js"></script>
+    <script src="../../../_static/copybutton.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Deflection of a Hinged Support" href="vm-004-deflection_of_a_hinged_support.html" />
+    <link rel="prev" title="Beam Stresses and Deflections" href="vm-002-beam_stresses_and_deflections.html" />
+<link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+
+
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+    <img src="../../../_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../../_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../mapdl_commands/index.html">
+  MAPDL Commands
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../../index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../learning/index.html">
+  Learning PyMAPDL
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../troubleshoot/index.html">
+  Troubleshooting
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contribution_and_api/index.html">
+  Contributing and API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        0.63  <!-- this text may get changed later by javascript -->
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+</div>
+
+<!-- NOTE: this JS must live here (not in our global JS file) because it relies
+     on being processed by Jinja before it is run (specifically for replacing
+     variables examples/gallery_examples/06-verif-manual/vm-003-thermally_loaded_support_structure and {'json_url': 'https://mapdl.docs.pyansys.com/release/versions.json', 'version_match': '0.63'}.
+-->
+
+<script type="text/javascript">
+// Check if corresponding page path exists in other version of docs
+// and, if so, go there instead of the homepage of the other docs version
+function checkPageExistsAndRedirect(event) {
+    const currentFilePath = "examples/gallery_examples/06-verif-manual/vm-003-thermally_loaded_support_structure.html",
+          tryUrl = event.target.getAttribute("href");
+    let otherDocsHomepage = tryUrl.replace(currentFilePath, "");
+    $.ajax({
+        type: 'HEAD',
+        url: tryUrl,
+        // if the page exists, go there
+        success: function() {
+            location.href = tryUrl;
+        }
+    }).fail(function() {
+        location.href = otherDocsHomepage;
+    });
+    // this prevents the browser from following the href of the clicked node
+    // (which is fine because this function takes care of redirecting)
+    return false;
+}
+
+// Populate the version switcher from the JSON config file
+(function () {
+    $.getJSON("https://mapdl.docs.pyansys.com/release/versions.json", function(data, textStatus, jqXHR) {
+        const currentFilePath = "examples/gallery_examples/06-verif-manual/vm-003-thermally_loaded_support_structure.html";
+        let btn = document.getElementById("version_switcher_button");
+        // Set empty strings by default so that these attributes exist and can be used in CSS selectors
+        btn.dataset["activeVersionName"] = "";
+        btn.dataset["activeVersion"] = "";
+        // create links to the corresponding page in the other docs versions
+        $.each(data, function(index, entry) {
+            // if no custom name specified (e.g., "latest"), use version string
+            if (!("name" in entry)) {
+                entry.name = entry.version;
+            }
+            // create the node
+            const node = document.createElement("a");
+            node.setAttribute("class", "list-group-item list-group-item-action py-1");
+            node.textContent = `${entry.name}`;
+            node.setAttribute("href", `${entry.url}${currentFilePath}`);
+            // on click, AJAX calls will check if the linked page exists before
+            // trying to redirect, and if not, will redirect to the homepage
+            // for that version of the docs.
+            node.onclick = checkPageExistsAndRedirect;
+            // Add dataset values for the version and name in case people want
+            // to apply CSS styling based on this information.
+            node.dataset["versionName"] = entry.name;
+            node.dataset["version"] = entry.version;
+
+            $("#version_switcher_menu").append(node);
+            // replace dropdown button text with the preferred display name of
+            // this version, rather than using sphinx's 0.63.4 variable.
+            // also highlight the dropdown entry for the currently-viewed
+            // version's entry
+            if (entry.version == "0.63") {
+                node.classList.add("active");
+                btn.innerText = btn.dataset["activeVersionName"] = entry.name;
+                btn.dataset["activeVersion"] = entry.version;
+            }
+        });
+    });
+})();
+</script>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl/discussions" rel="noopener" target="_blank" title="Support"><span><i class="fa fa-comment fa-fw"></i></span>
+            <label class="sr-only">Support</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+     
+<div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(text => document.getElementById("announcement_msg").innerHTML = text)
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+
+    
+        <div class="container-xl">
+    <div class="row">
+        <div class="col-12 col-md-3" id="breadcrumbs-spacer"></div>
+        <div class="col-12 col-md-11 col-xl-9" id="breadcrumbs">
+          
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+    
+        <li class="nav-item nav-item-additional-breadcrumb"><a href="https://docs.pyansys.com/">PyAnsys</a> » </li>
+    
+    
+        <li class="nav-item nav-item-0"><a href="../../../index.html">PyMAPDL</a> » </li>
+    
+
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Examples</a> » </li>
+          <li class="nav-item nav-item-2"><a href="index.html" accesskey="U">Verification Manual Examples</a> » </li>
+        <li class="nav-item nav-item-this"><a href="">Thermally Loaded Support Structure</a></li> 
+      </ul>
+    </div>
+        </div>
+  </div>
+</div>
+    
+
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../00-mapdl-examples/index.html">
+   Full Examples Using PyMAPDL
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/2d_plate_with_a_hole.html">
+     MAPDL 2D Plane Stress Concentration Analysis
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/2d_pressure_vessel.html">
+     2D Pressure Vessel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/3d_notch.html">
+     3D Stress Concentration Analysis for a Notched Plate
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/3d_plate_thermal.html">
+     Basic Thermal Analysis with pyMAPDL
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/contact_elements.html">
+     Contact Element Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/cyclic_analysis.html">
+     Cyclic Analysis
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/exhaust_manifold_thermal_stress.html">
+     Thermal-structural analysis of exhaust manifold
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/geometry.html">
+     Plotting and Mesh Access
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/lathe_cutter.html">
+     Structural Analysis of a Lathe Cutter
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/mapdl_3d_beam.html">
+     MAPDL 3D Beam Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/mapdl_beam.html">
+     MAPDL 2D Beam Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/path_operations.html">
+     Path Operations within pyMAPDL and MAPDL
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/pressure_vessel.html">
+     Pressure Vessel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/pyvista_mesh.html">
+     PyVista Mesh Integration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../00-mapdl-examples/transient_thermal.html">
+     Example Thermal Transient Analysis
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../01-apdlmath-examples/index.html">
+   PyMAPDL Math Examples
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+  <label for="toctree-checkbox-2">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/basic_operations.html">
+     PyMAPDL APDLMath Basic Operations
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/eigen_solve.html">
+     Using APDLMath to solve Eigenproblems
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/explore_mapdl_files.html">
+     Binary MAPDL File Explorer
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/mapdl_vs_scipy.html">
+     Compute Eigenvalues using MAPDL or SciPy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/scipy_sparse_matrix.html">
+     APDLMath Sparse Matrices and SciPy Sparse Matrices
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/solve_dense_matrix.html">
+     Use APDLMath to Solve a Dense Matrix Linear System
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/solve_sparse_matrix.html">
+     Performing Sparse Factorization and Solve Operations
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../01-apdlmath-examples/use_numpy_arrays.html">
+     Manipulate APDLMath vectors or dense matrices as NumPy Arrays
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../02-geometry/index.html">
+   Geometry Examples
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+  <label for="toctree-checkbox-3">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../02-geometry/00-keypoints.html">
+     Keypoints
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../02-geometry/01-lines.html">
+     Lines
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../02-geometry/02-areas.html">
+     Areas
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../02-geometry/03-volumes.html">
+     Volumes
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../02-geometry/04-primitives.html">
+     Primitives
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../03-tips-n-tricks/index.html">
+   Miscellaneous Examples
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../03-tips-n-tricks/00-example-template.html">
+     Adding a New Gallery Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../03-tips-n-tricks/01-smoothing-element-size-transitions.html">
+     MAPDL Element Size Transition Example
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../03-tips-n-tricks/03-using_inline_functions_and_Query.html">
+     Using Inline Functions (Query)
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../03-tips-n-tricks/04-rotational-displacement.html">
+     Generating and Extracting Rotational Displacement
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../04-general-fea/index.html">
+   Academic Finite Element Examples
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+  <label for="toctree-checkbox-5">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="../04-general-fea/00-how_finite_element_works.html">
+     Build a Finite Element
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="index.html">
+   Verification Manual Examples
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <label for="toctree-checkbox-6">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-001-statically_indeterminate_reaction_force_analysis.html">
+     Statically Indeterminate Reaction Force Analysis
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-002-beam_stresses_and_deflections.html">
+     Beam Stresses and Deflections
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     Thermally Loaded Support Structure
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-004-deflection_of_a_hinged_support.html">
+     Deflection of a Hinged Support
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-005-laterally_loaded_tapered_support_structure.html">
+     Statically Indeterminate Reaction Force Analysis
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-006-pinched_cylinder.html">
+     Pinched Cylinder
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-007-plastic_compression_of_a_pipe_assembly.html">
+     Plastic Compression of a Pipe Assembly
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-008-parametric_calculation.html">
+     Parametric Calculation
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-009-large_lateral_deflection_of_unequal_stiffness_springs.html">
+     Large Lateral Deflection of Unequal Stiffness Springs
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="vm-010-bending_of_a_t-shaped_beam.html">
+     Bending of a Tee-Shaped Beam
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../technology_showcase_examples/techdemo-1/ex_0-tecbrakesqueal.html">
+   Brake Squeal Analysis
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../technology_showcase_examples/techdemo-20/20-example-technology-showcase-dynamic-simulation-PCB.html">
+   Dynamic simulation of a printed circuit board assembly
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html">
+   Friction Stir Welding (FSW) Simulation
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference external" href="https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html">
+   Cart-Pole Simulation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../extended_examples/ex_01-gmsh_example/ex_01-gmsh_example.html">
+   Gmsh Example
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../extended_examples/Python_UPF/python_upf_examples.html">
+   UPF in PyMAPDL
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#define-material">
+   Define Material
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#define-geometry-nodes">
+   Define Geometry: Nodes
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#define-geometry-elements">
+   Define Geometry: Elements
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#define-boundary-conditions">
+   Define Boundary Conditions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#solve">
+   Solve
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#post-processing">
+   Post-processing
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#check-results">
+   Check Results
+  </a>
+ </li>
+</ul>
+
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-gallery-examples-06-verif-manual-vm-003-thermally-loaded-support-structure-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="thermally-loaded-support-structure">
+<span id="ref-thermally-loaded-support-structure"></span><span id="sphx-glr-examples-gallery-examples-06-verif-manual-vm-003-thermally-loaded-support-structure-py"></span><h1>Thermally Loaded Support Structure<a class="headerlink" href="#thermally-loaded-support-structure" title="Permalink to this heading">#</a></h1>
+<dl class="simple">
+<dt>Problem Description:</dt><dd><ul class="simple">
+<li><p>Find the stresses in the copper and steel wire structure shown below.
+The wires have a cross-sectional area of math:<cite>A</cite>. The structure is
+subjected to a load math:<cite>Q</cite> and a temperature rise of math:<cite>Delta T</cite> after
+assembly.</p></li>
+</ul>
+</dd>
+<dt>Reference:</dt><dd><ul class="simple">
+<li><p>S. Timoshenko, Strength of Materials, Part I, Elementary Theory and
+Problems, 3rd Edition, D. Van Nostrand Co., Inc., New York, NY, 1955,
+pg. 30, problem 9.</p></li>
+</ul>
+</dd>
+<dt>Analysis Type(s):</dt><dd><ul class="simple">
+<li><p>Static Analysis <code class="docutils literal notranslate"><span class="pre">ANTYPE=0</span></code></p></li>
+</ul>
+</dd>
+<dt>Element Type(s):</dt><dd><ul class="simple">
+<li><p>3-D Spar (or Truss) Elements (LINK180)</p></li>
+</ul>
+</dd>
+</dl>
+<a class="reference internal image-reference" href="../../../_images/vm3_setup.png"><img alt="VM3 Problem Sketch" src="../../../_images/vm3_setup.png" style="width: 400px;" /></a>
+<dl class="simple">
+<dt>Material Properties</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(E_c = 16 \cdot 10^6 psi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(E_s = 30 \cdot 10^6 psi\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha_c = 70 \cdot 10^{-7} in/in-^\circ F\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha_s = 92 \cdot 10^{-7} in/in-^\circ F\)</span></p></li>
+</ul>
+</dd>
+<dt>Geometric Properties:</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(A = 0.1 in^2\)</span></p></li>
+</ul>
+</dd>
+<dt>Loading:</dt><dd><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(Q = 4000 lb\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\Delta T = 10 ^\circ F\)</span></p></li>
+</ul>
+</dd>
+<dt>Analytical Equations:</dt><dd><ul class="simple">
+<li><p>The compressive force <span class="math notranslate nohighlight">\(X\)</span> is given by the following equation</p></li>
+<li><p><span class="math notranslate nohighlight">\(X = \frac{\Delta T (\alpha_c - \alpha_s) (A_s - E_s) }{1 + \frac{1 E_s A_s}{2 E_c A_c}} + \frac{Q}{1 + \frac{2 E_c A_c}{E_s A_s}}\)</span></p></li>
+</ul>
+</dd>
+<dt>Notes:</dt><dd><ul class="simple">
+<li><p>Length of wires (20 in.), spacing between wires (10 in.), and the reference
+temperature (70°F) are arbitrarily selected. The rigid lower beam is modeled
+by nodal coupling.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_path = &#39;_static/vm3_setup.png&#39;</span>
+
+<span class="kn">from</span> <span class="nn">ansys.mapdl.core</span> <span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="c1"># start mapdl and clear it</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>  <span class="c1"># optional as MAPDL just started</span>
+
+<span class="c1"># enter verification example mode and the pre-processing routine</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>*****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+
+          ***** MAPDL ANALYSIS DEFINITION (PREP7) *****
+</pre></div>
+</div>
+<section id="define-material">
+<h2>Define Material<a class="headerlink" href="#define-material" title="Permalink to this heading">#</a></h2>
+<p>Set up the materials and their properties. We are using copper and
+steel here.
+- <cite>EX</cite> - X-direction elastic modulus
+- <cite>ALPX</cite> - Secant x - coefficient of thermal expansion</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">antype</span><span class="p">(</span><span class="s2">&quot;STATIC&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">et</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;LINK180&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">sectype</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;LINK&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">secdata</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;EX&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">16e6</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;ALPX&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">92e-7</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;EX&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">30e6</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;ALPX&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">70e-7</span><span class="p">)</span>
+<span class="c1"># Define the reference temperature for the thermal strain calculations.</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">tref</span><span class="p">(</span><span class="mi">70</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>REFERENCE TEMPERATURE=  70.000  (TUNIF=  70.000)
+</pre></div>
+</div>
+</section>
+<section id="define-geometry-nodes">
+<h2>Define Geometry: Nodes<a class="headerlink" href="#define-geometry-nodes" title="Permalink to this heading">#</a></h2>
+<p>Set up the nodes and elements.  This creates a mesh just like in the
+problem setup. We create a square of nodes and use <cite>fill</cite> to add
+mid-point nodes to two opposite sides.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">fill</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">n</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">fill</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nplot</span><span class="p">(</span><span class="n">nnum</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cpos</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_vm-003-thermally_loaded_support_structure_001.png" srcset="../../../_images/sphx_glr_vm-003-thermally_loaded_support_structure_001.png" alt="vm 003 thermally loaded support structure" class = "sphx-glr-single-img"/></section>
+<section id="define-geometry-elements">
+<h2>Define Geometry: Elements<a class="headerlink" href="#define-geometry-elements" title="Permalink to this heading">#</a></h2>
+<p>Create two elements (using material #1) that are two sides of our
+square, as links. Then create a single element using material #2
+between the first 2 that is parallel to them.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mat</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">e</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">eplot</span><span class="p">(</span><span class="n">show_node_numbering</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cpos</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_vm-003-thermally_loaded_support_structure_002.png" srcset="../../../_images/sphx_glr_vm-003-thermally_loaded_support_structure_002.png" alt="vm 003 thermally loaded support structure" class = "sphx-glr-single-img"/></section>
+<section id="define-boundary-conditions">
+<h2>Define Boundary Conditions<a class="headerlink" href="#define-boundary-conditions" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Couple the degrees of freedom in y-displacement across nodes 5, 4,
+and 6.</p></li>
+<li><p>Fix nodes 1, 2, and 3 in place.</p></li>
+<li><p>Apply a force of -4000 in the y-direction to node 5</p></li>
+<li><p>Apply a uniform temperature of 80 to the whole body</p></li>
+<li><p>Finally, exit the post-processor.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">cp</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;UY&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">d</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;FY&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">4000</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">bfunif</span><span class="p">(</span><span class="s2">&quot;TEMP&quot;</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>***** ROUTINE COMPLETED *****  CP =         0.000
+</pre></div>
+</div>
+</section>
+<section id="solve">
+<h2>Solve<a class="headerlink" href="#solve" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Enter solution mode</p></li>
+<li><p>Specify a timestep of 1 to be used for this load step</p></li>
+<li><p>Solve the system.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="s2">&quot;/SOLU&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nsubst</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>*****  MAPDL SOLVE    COMMAND  *****
+
+ *** NOTE ***                            CP =       0.000   TIME= 00:00:00
+ There is no title defined for this analysis.
+   *****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+
+                       S O L U T I O N   O P T I O N S
+
+   PROBLEM DIMENSIONALITY. . . . . . . . . . . . .3-D
+   DEGREES OF FREEDOM. . . . . . UX   UY   UZ
+   ANALYSIS TYPE . . . . . . . . . . . . . . . . .STATIC (STEADY-STATE)
+   GLOBALLY ASSEMBLED MATRIX . . . . . . . . . . .SYMMETRIC
+
+ *** NOTE ***                            CP =       0.000   TIME= 00:00:00
+ Present time 0 is less than or equal to the previous time.  Time will
+ default to 1.
+
+ *** NOTE ***                            CP =       0.000   TIME= 00:00:00
+ The conditions for direct assembly have been met.  No .emat or .erot
+ files will be produced.
+
+                      L O A D   S T E P   O P T I O N S
+
+   LOAD STEP NUMBER. . . . . . . . . . . . . . . .     1
+   TIME AT END OF THE LOAD STEP. . . . . . . . . .  1.0000
+   NUMBER OF SUBSTEPS. . . . . . . . . . . . . . .     1
+   STEP CHANGE BOUNDARY CONDITIONS . . . . . . . .    NO
+   PRINT OUTPUT CONTROLS . . . . . . . . . . . . .NO PRINTOUT
+   DATABASE OUTPUT CONTROLS. . . . . . . . . . . .ALL DATA WRITTEN
+                                                  FOR THE LAST SUBSTEP
+
+
+
+ Range of element maximum matrix coefficients in global coordinates
+ Maximum = 150000 at element 0.
+ Minimum = 80000 at element 0.
+
+   *** ELEMENT MATRIX FORMULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1         3  LINK180       0.000   0.000000
+ Time at end of element matrix formulation CP = 0.
+
+ SPARSE MATRIX DIRECT SOLVER.
+  Number of equations =           1,    Maximum wavefront =      0
+  Memory available (MB) =    0.0    ,  Memory required (MB) =    0.0
+
+ Sparse solver maximum pivot= 0 at node 0 .
+ Sparse solver minimum pivot= 0 at node 0 .
+ Sparse solver minimum pivot in absolute value= 0 at node 0 .
+
+   *** ELEMENT RESULT CALCULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1         3  LINK180       0.000   0.000000
+
+   *** NODAL LOAD CALCULATION TIMES
+     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP
+
+        1         3  LINK180       0.000   0.000000
+ *** LOAD STEP     1   SUBSTEP     1  COMPLETED.    CUM ITER =      1
+ *** TIME =   1.00000         TIME INC =   1.00000      NEW TRIANG MATRIX
+</pre></div>
+</div>
+</section>
+<section id="post-processing">
+<h2>Post-processing<a class="headerlink" href="#post-processing" title="Permalink to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Access the queries functions</p></li>
+<li><p>Find a steel node and a copper node</p></li>
+<li><p>Then use these to get the steel and copper elements</p></li>
+<li><p>Finally extract the stress experienced by each element</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">post1</span><span class="p">()</span>
+<span class="n">q</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">queries</span>
+<a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_n</span></a> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_n</span></a> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_e</span></a> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">enearn</span><span class="p">(</span><a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_n</span></a><span class="p">)</span>
+<a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_e</span></a> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">enearn</span><span class="p">(</span><a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_n</span></a><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;STRS_ST&quot;</span><span class="p">,</span> <span class="s2">&quot;LS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">etable</span><span class="p">(</span><span class="s2">&quot;STRS_CO&quot;</span><span class="p">,</span> <span class="s2">&quot;LS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_steel</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_e</span></a><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;STRS_ST&quot;</span><span class="p">)</span>
+<a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_copper</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;ELEM&quot;</span><span class="p">,</span> <a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_e</span></a><span class="p">,</span> <span class="s2">&quot;ETAB&quot;</span><span class="p">,</span> <span class="s2">&quot;STRS_CO&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="check-results">
+<h2>Check Results<a class="headerlink" href="#check-results" title="Permalink to this heading">#</a></h2>
+<p>Now that we have the response we can compare the values to the
+expected stresses of 19695 and 10152 respectively.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_target</span></a> <span class="o">=</span> <span class="mi">19695</span>
+<a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_ratio</span></a> <span class="o">=</span> <a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_steel</span></a> <span class="o">/</span> <a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_target</span></a>
+<a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_target</span></a> <span class="o">=</span> <span class="mi">10152</span>
+<a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_ratio</span></a> <span class="o">=</span> <a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_copper</span></a> <span class="o">/</span> <a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_target</span></a>
+
+<a href="https://docs.python.org/dev/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">message</span></a> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">------------------- VM3 RESULTS COMPARISON ---------------------</span>
+
+<span class="s2">             |   TARGET   |   Mechanical APDL   |   RATIO</span>
+<span class="s2">----------------------------------------------------------------</span>
+<span class="s2">    Steel        </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_target</span></a><span class="si">}</span><span class="s2">        </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_steel</span></a><span class="si">}</span><span class="s2">            </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">steel_ratio</span></a><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"></span>
+<span class="s2">    Copper       </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_target</span></a><span class="si">}</span><span class="s2">        </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">stress_copper</span></a><span class="si">}</span><span class="s2">            </span><span class="si">{</span><a href="https://docs.python.org/dev/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">copper_ratio</span></a><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2"></span>
+
+<span class="s2">----------------------------------------------------------------</span>
+
+<span class="s2">&quot;&quot;&quot;</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/dev/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">message</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>------------------- VM3 RESULTS COMPARISON ---------------------
+
+             |   TARGET   |   Mechanical APDL   |   RATIO
+----------------------------------------------------------------
+    Steel        19695        19695.4839            1.000025
+    Copper       10152        10152.2581            1.000025
+
+----------------------------------------------------------------
+</pre></div>
+</div>
+<p>stop mapdl</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  0.959 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-gallery-examples-06-verif-manual-vm-003-thermally-loaded-support-structure-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/4baec37914ec2b6505563c17ed8ec6e5/vm-003-thermally_loaded_support_structure.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">vm-003-thermally_loaded_support_structure.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/9342d0bccbeefaa5ba744173a2286d4a/vm-003-thermally_loaded_support_structure.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">vm-003-thermally_loaded_support_structure.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+              </article>
+              
+
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright (c) 2022 ANSYS, Inc. All rights reserved.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

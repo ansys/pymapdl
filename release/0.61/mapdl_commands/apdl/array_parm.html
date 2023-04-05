@@ -1,0 +1,1164 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Array Parameters &#8212; PyMAPDL</title>
+    
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/ansys_sphinx_theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    
+        <link href="../../_static/css/breadcrumbs.css" rel="stylesheet">
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="mfouri" href="_autosummary/ansys.mapdl.core.Mapdl.mfouri.html" />
+    <link rel="prev" title="ucmd" href="_autosummary/ansys.mapdl.core.Mapdl.ucmd.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index.html">
+  API Reference
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  MAPDL Commands
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../examples/index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        0.61  <!-- this text may get changed later by javascript -->
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+</div>
+
+<!-- NOTE: this JS must live here (not in our global JS file) because it relies
+     on being processed by Jinja before it is run (specifically for replacing
+     variables mapdl_commands/apdl/array_parm and {'json_url': 'https://mapdl.docs.pyansys.com/release/versions.json', 'version_match': '0.61'}.
+-->
+
+<script type="text/javascript">
+// Check if corresponding page path exists in other version of docs
+// and, if so, go there instead of the homepage of the other docs version
+function checkPageExistsAndRedirect(event) {
+    const currentFilePath = "mapdl_commands/apdl/array_parm.html",
+          tryUrl = event.target.getAttribute("href");
+    let otherDocsHomepage = tryUrl.replace(currentFilePath, "");
+    $.ajax({
+        type: 'HEAD',
+        url: tryUrl,
+        // if the page exists, go there
+        success: function() {
+            location.href = tryUrl;
+        }
+    }).fail(function() {
+        location.href = otherDocsHomepage;
+    });
+    // this prevents the browser from following the href of the clicked node
+    // (which is fine because this function takes care of redirecting)
+    return false;
+}
+
+// Populate the version switcher from the JSON config file
+(function () {
+    $.getJSON("https://mapdl.docs.pyansys.com/release/versions.json", function(data, textStatus, jqXHR) {
+        const currentFilePath = "mapdl_commands/apdl/array_parm.html";
+        let btn = document.getElementById("version_switcher_button");
+        // Set empty strings by default so that these attributes exist and can be used in CSS selectors
+        btn.dataset["activeVersionName"] = "";
+        btn.dataset["activeVersion"] = "";
+        // create links to the corresponding page in the other docs versions
+        $.each(data, function(index, entry) {
+            // if no custom name specified (e.g., "latest"), use version string
+            if (!("name" in entry)) {
+                entry.name = entry.version;
+            }
+            // create the node
+            const node = document.createElement("a");
+            node.setAttribute("class", "list-group-item list-group-item-action py-1");
+            node.textContent = `${entry.name}`;
+            node.setAttribute("href", `${entry.url}${currentFilePath}`);
+            // on click, AJAX calls will check if the linked page exists before
+            // trying to redirect, and if not, will redirect to the homepage
+            // for that version of the docs.
+            node.onclick = checkPageExistsAndRedirect;
+            // Add dataset values for the version and name in case people want
+            // to apply CSS styling based on this information.
+            node.dataset["versionName"] = entry.name;
+            node.dataset["version"] = entry.version;
+
+            $("#version_switcher_menu").append(node);
+            // replace dropdown button text with the preferred display name of
+            // this version, rather than using sphinx's 0.61.7 variable.
+            // also highlight the dropdown entry for the currently-viewed
+            // version's entry
+            if (entry.version == "0.61") {
+                node.classList.add("active");
+                btn.innerText = btn.dataset["activeVersionName"] = entry.name;
+                btn.dataset["activeVersion"] = entry.version;
+            }
+        });
+    });
+})();
+</script>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+     
+<div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(text => document.getElementById("announcement_msg").innerHTML = text)
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+
+    
+        <div class="container-xl">
+    <div class="row">
+        <div class="col-12 col-md-3" id="breadcrumbs-spacer"></div>
+        <div class="col-12 col-md-11 col-xl-9" id="breadcrumbs">
+          
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+    
+        <li class="nav-item nav-item-additional-breadcrumb"><a href="https://docs.pyansys.com/">PyAnsys</a> » </li>
+    
+    
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyMAPDL</a> » </li>
+    
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">MAPDL Commands</a> » </li>
+        <li class="nav-item nav-item-this"><a href="">Array Parameters</a></li> 
+      </ul>
+    </div>
+        </div>
+  </div>
+</div>
+    
+
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../session/run_controls.html">
+   Run Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../session/processor_entry.html">
+   Processor Entry
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../session/files.html">
+   Files
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../session/list_controls.html">
+   List Controls
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/setup.html">
+   Setup
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/selecting.html">
+   Selecting
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/components.html">
+   Components
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/working_plane.html">
+   Working Plane
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/coord_sys.html">
+   Coordinate System
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../database/picking.html">
+   Picking
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/setup.html">
+   Setup
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/views.html">
+   Views
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/scaling.html">
+   Scaling
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/style.html">
+   Style
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/labeling.html">
+   Labeling
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/graphs.html">
+   Graphs
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../graphics/annotation.html">
+   Annotation
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="parameter_definition.html">
+   Parameter Definition
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="macro_files.html">
+   Macro Files
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="abbreviations.html">
+   Abbreviations
+  </a>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="current reference internal" href="#">
+   Array Parameters
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mfouri.html">
+     mfouri
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mfun.html">
+     mfun
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.moper.html">
+     moper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mwrite.html">
+     mwrite
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.sread.html">
+     sread
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.toper.html">
+     toper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vabs.html">
+     vabs
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vcol.html">
+     vcol
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vcum.html">
+     vcum
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vfact.html">
+     vfact
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vfun.html">
+     vfun
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vitrp.html">
+     vitrp
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vlen.html">
+     vlen
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vmask.html">
+     vmask
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.voper.html">
+     voper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.starvput.html">
+     starvput
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vscfun.html">
+     vscfun
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vstat.html">
+     vstat
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vwrite.html">
+     vwrite
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="matrix_op.html">
+   Matrix Operations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="process_controls.html">
+   Process Controls
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/database.html">
+   Database
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/element_type.html">
+   Element Type
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/real_constants.html">
+   Real Constants
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/materials.html">
+   Materials
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/material_data_tables.html">
+   Material Data Tables
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/primitives.html">
+   Primitives
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/keypoints.html">
+   Keypoints
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/hard_points.html">
+   Hard Points
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/lines.html">
+   Lines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/areas.html">
+   Areas
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/volumes.html">
+   Volumes
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/booleans.html">
+   Booleans
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/meshing.html">
+   Meshing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/nodes.html">
+   Nodes
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/elements.html">
+   Elements
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/superelements.html">
+   Superelements
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/digitizing.html">
+   Digitizing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/coupled_dof.html">
+   Coupled Degrees of Freedom
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/constraint_equations.html">
+   Constraint Equations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/status.html">
+   Status
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/explicit_dynamics.html">
+   Explicit Dynamics
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/sections.html">
+   Sections
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/morphing.html">
+   Morphing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/artificially_matched_layers.html">
+   Artificially Matched Layers
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../prep7/special_purpose.html">
+   Special Purpose
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/analysis_options.html">
+   Analysis Options
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/nonlinear_options.html">
+   Nonlinear Options
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/dynamic_options.html">
+   Dynamic Options
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/spectrum_options.html">
+   Spectrum Options
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/load_step_options.html">
+   Load Step Options
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/solid_constraints.html">
+   Solid Constraints
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/solid_forces.html">
+   Solid Forces
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/solid_surface_loads.html">
+   Solid Surface Loads
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/solid_body_loads.html">
+   Solid Body Loads
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/inertia.html">
+   Inertia
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/miscellaneous_loads.html">
+   Miscellaneous Loads
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/load_step_operations.html">
+   Load Step Operations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/master_dof.html">
+   Master Degrees of Freedom
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/gap_conditions.html">
+   Gap Conditions
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/rezoning.html">
+   Rezoning
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/2d_to_3d_analysis.html">
+   2D to 3D Analysis
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/birth_and_death.html">
+   Birth and Death
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/fe_constraints.html">
+   FE Constraints
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/fe_forces.html">
+   FE Forces
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/fe_surface_loads.html">
+   FE Surface Loads
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/fe_body_loads.html">
+   FE Body Loads
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/ocean.html">
+   Ocean
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/solution_status.html">
+   Solution Status
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/radiosity.html">
+   Radiosity
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_definition_commands.html">
+   Multi-Field Solver Definition Commands
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_global_controls.html">
+   Multi-Field Solver Global Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_time_controls.html">
+   Multi-Field Solver Time Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_load_transfer.html">
+   Multi-Field Solver Load Transfer
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_convergence_controls.html">
+   Multi-Field Solver Convergence Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../solution/multi_field_solver_interface_mapping.html">
+   Multi-Field Solver Interface Mapping
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/setup.html">
+   Setup
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/controls.html">
+   Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/results.html">
+   Results
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/element_table.html">
+   Element Table
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/listing.html">
+   Listing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/animation.html">
+   Animation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/path_operations.html">
+   Path Operations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/surface_operations.html">
+   Surface Operations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/load_case.html">
+   Load Case Calculations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/magnetics_calc.html">
+   Magnetics Calculations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/trace_points.html">
+   Trace Points
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/special.html">
+   Special Purpose
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/status.html">
+   Status
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post1/failure_criteria.html">
+   Failure Criteria
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/setup.html">
+   Setup
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/controls.html">
+   Controls
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/operations.html">
+   Operations
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/display.html">
+   Display
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/listing.html">
+   Listing
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/special.html">
+   Special Purpose
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../post26/status.html">
+   Status
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux2/bin_dump.html">
+   Binary File Dump
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux2/bin_manip.html">
+   Binary File Manipulation
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux3.html">
+   Results Files
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux12/general_radiation.html">
+   General Radiation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux12/radiation_mat.html">
+   Radiation Matrix Method
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux12/radiosity_solver.html">
+   Radiosity Solver
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../aux15.html">
+   IGES
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../map.html">
+   Pressure Mapping
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../display/setup.html">
+   Setup
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../reduced/setup.html">
+   Setup
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../reduced/preparation.html">
+   Preparation
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../reduced/generation.html">
+   Generation Pass
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../reduced/use_pass.html">
+   Use Pass
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../conn.html">
+   Connection Commands
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../misc.html">
+   Miscellaneous
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../inqfun.html">
+   Undocumented Inquire Commands
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="array-parameters">
+<span id="ref-array-parameters-commands-api"></span><h1>Array Parameters<a class="headerlink" href="#array-parameters" title="Permalink to this headline">#</a></h1>
+<p>These APDL commands are used to operate on parameter arrays (i.e.,
+vectors and matrices).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Many of these commands here have been kept for legacy
+compatibility.</p>
+<p>See the parameters class <a class="reference internal" href="../../api/parameters.html#ref-parameters-api"><span class="std std-ref">Parameters</span></a> for a more
+pythonic manner for interacting with arrays.</p>
+<p>Consider using <code class="docutils literal notranslate"><span class="pre">numpy</span></code> for working with arrays outside of MAPDL.</p>
+</div>
+<table class="longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mfouri.html#ansys.mapdl.core.Mapdl.mfouri" title="ansys.mapdl.core.Mapdl.mfouri"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.mfouri</span></code></a>([oper, coeff, mode, isym, ...])</p></td>
+<td><p>Calculates the coefficients for, or evaluates, a Fourier series.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mfun.html#ansys.mapdl.core.Mapdl.mfun" title="ansys.mapdl.core.Mapdl.mfun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.mfun</span></code></a>([parr, func, par1])</p></td>
+<td><p>Copies or transposes an array parameter matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.moper.html#ansys.mapdl.core.Mapdl.moper" title="ansys.mapdl.core.Mapdl.moper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.moper</span></code></a>([parr, par1, oper, val1, val2, ...])</p></td>
+<td><p>Performs matrix operations on array parameter matrices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.mwrite.html#ansys.mapdl.core.Mapdl.mwrite" title="ansys.mapdl.core.Mapdl.mwrite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.mwrite</span></code></a>([parr, fname, ext, label, n1, ...])</p></td>
+<td><p>Writes a matrix to a file in a formatted sequence.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.sread.html#ansys.mapdl.core.Mapdl.sread" title="ansys.mapdl.core.Mapdl.sread"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.sread</span></code></a>([strarray, fname, ext, nchar, ...])</p></td>
+<td><p>Reads a file into a string array parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.toper.html#ansys.mapdl.core.Mapdl.toper" title="ansys.mapdl.core.Mapdl.toper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.toper</span></code></a>([parr, par1, oper, par2, fact1, ...])</p></td>
+<td><p>Operates on table parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vabs.html#ansys.mapdl.core.Mapdl.vabs" title="ansys.mapdl.core.Mapdl.vabs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vabs</span></code></a>([kabsr, kabs1, kabs2, kabs3])</p></td>
+<td><p>Applies the absolute value function to array parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vcol.html#ansys.mapdl.core.Mapdl.vcol" title="ansys.mapdl.core.Mapdl.vcol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vcol</span></code></a>([ncol1, ncol2])</p></td>
+<td><p>Specifies the number of columns in matrix operations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vcum.html#ansys.mapdl.core.Mapdl.vcum" title="ansys.mapdl.core.Mapdl.vcum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vcum</span></code></a>([key])</p></td>
+<td><p>Allows array parameter results to add to existing results.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vfact.html#ansys.mapdl.core.Mapdl.vfact" title="ansys.mapdl.core.Mapdl.vfact"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vfact</span></code></a>([factr, fact1, fact2, fact3])</p></td>
+<td><p>Applies a scale factor to array parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vfun.html#ansys.mapdl.core.Mapdl.vfun" title="ansys.mapdl.core.Mapdl.vfun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vfun</span></code></a>([parr, func, par1, con1, con2, con3])</p></td>
+<td><p>Performs a function on a single array parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vitrp.html#ansys.mapdl.core.Mapdl.vitrp" title="ansys.mapdl.core.Mapdl.vitrp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vitrp</span></code></a>([parr, part, pari, parj, park])</p></td>
+<td><p>Forms an array parameter by interpolation of a table.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vlen.html#ansys.mapdl.core.Mapdl.vlen" title="ansys.mapdl.core.Mapdl.vlen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vlen</span></code></a>([nrow, ninc])</p></td>
+<td><p>Specifies the number of rows to be used in array parameter operations.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vmask.html#ansys.mapdl.core.Mapdl.vmask" title="ansys.mapdl.core.Mapdl.vmask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vmask</span></code></a>([par])</p></td>
+<td><p>Specifies an array parameter as a masking vector.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.voper.html#ansys.mapdl.core.Mapdl.voper" title="ansys.mapdl.core.Mapdl.voper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.voper</span></code></a>([parr, par1, oper, par2, con1, con2])</p></td>
+<td><p>Operates on two array parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.starvput.html#ansys.mapdl.core.Mapdl.starvput" title="ansys.mapdl.core.Mapdl.starvput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.starvput</span></code></a>([parr, entity, entnum, ...])</p></td>
+<td><p>Restores array parameter values into the ANSYS database.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vscfun.html#ansys.mapdl.core.Mapdl.vscfun" title="ansys.mapdl.core.Mapdl.vscfun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vscfun</span></code></a>([parr, func, par1])</p></td>
+<td><p>Determines properties of an array parameter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vstat.html#ansys.mapdl.core.Mapdl.vstat" title="ansys.mapdl.core.Mapdl.vstat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vstat</span></code></a>(**kwargs)</p></td>
+<td><p>Lists the current specifications for the array parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/ansys.mapdl.core.Mapdl.vwrite.html#ansys.mapdl.core.Mapdl.vwrite" title="ansys.mapdl.core.Mapdl.vwrite"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mapdl.vwrite</span></code></a>([par1, par2, par3, par4, par5, ...])</p></td>
+<td><p>Writes data to a file in a formatted sequence.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+              </article>
+              
+
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright (c) 2022 ANSYS, Inc. All rights reserved.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

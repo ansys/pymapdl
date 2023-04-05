@@ -1,0 +1,2753 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>plot_nodal_plastic_component_strain &#8212; PyMAPDL</title>
+    
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/ansys_sphinx_theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    
+        <link href="../../_static/css/breadcrumbs.css" rel="stylesheet">
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="shortcut icon" href="../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="plot_nodal_plastic_eqv_strain" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_eqv_strain.html" />
+    <link rel="prev" title="plot_nodal_eqv_stress" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_eqv_stress.html" />
+<link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
+
+
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../mapdl_commands/index.html">
+  MAPDL Commands
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../examples/index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../learning/index.html">
+  Learning PyMAPDL
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../troubleshoot/index.html">
+  Troubleshooting
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  Contributing and API
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        0.63  <!-- this text may get changed later by javascript -->
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+</div>
+
+<!-- NOTE: this JS must live here (not in our global JS file) because it relies
+     on being processed by Jinja before it is run (specifically for replacing
+     variables contribution_and_api/_autosummary/ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_component_strain and {'json_url': 'https://mapdl.docs.pyansys.com/release/versions.json', 'version_match': '0.63'}.
+-->
+
+<script type="text/javascript">
+// Check if corresponding page path exists in other version of docs
+// and, if so, go there instead of the homepage of the other docs version
+function checkPageExistsAndRedirect(event) {
+    const currentFilePath = "contribution_and_api/_autosummary/ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_component_strain.html",
+          tryUrl = event.target.getAttribute("href");
+    let otherDocsHomepage = tryUrl.replace(currentFilePath, "");
+    $.ajax({
+        type: 'HEAD',
+        url: tryUrl,
+        // if the page exists, go there
+        success: function() {
+            location.href = tryUrl;
+        }
+    }).fail(function() {
+        location.href = otherDocsHomepage;
+    });
+    // this prevents the browser from following the href of the clicked node
+    // (which is fine because this function takes care of redirecting)
+    return false;
+}
+
+// Populate the version switcher from the JSON config file
+(function () {
+    $.getJSON("https://mapdl.docs.pyansys.com/release/versions.json", function(data, textStatus, jqXHR) {
+        const currentFilePath = "contribution_and_api/_autosummary/ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_component_strain.html";
+        let btn = document.getElementById("version_switcher_button");
+        // Set empty strings by default so that these attributes exist and can be used in CSS selectors
+        btn.dataset["activeVersionName"] = "";
+        btn.dataset["activeVersion"] = "";
+        // create links to the corresponding page in the other docs versions
+        $.each(data, function(index, entry) {
+            // if no custom name specified (e.g., "latest"), use version string
+            if (!("name" in entry)) {
+                entry.name = entry.version;
+            }
+            // create the node
+            const node = document.createElement("a");
+            node.setAttribute("class", "list-group-item list-group-item-action py-1");
+            node.textContent = `${entry.name}`;
+            node.setAttribute("href", `${entry.url}${currentFilePath}`);
+            // on click, AJAX calls will check if the linked page exists before
+            // trying to redirect, and if not, will redirect to the homepage
+            // for that version of the docs.
+            node.onclick = checkPageExistsAndRedirect;
+            // Add dataset values for the version and name in case people want
+            // to apply CSS styling based on this information.
+            node.dataset["versionName"] = entry.name;
+            node.dataset["version"] = entry.version;
+
+            $("#version_switcher_menu").append(node);
+            // replace dropdown button text with the preferred display name of
+            // this version, rather than using sphinx's 0.63.4 variable.
+            // also highlight the dropdown entry for the currently-viewed
+            // version's entry
+            if (entry.version == "0.63") {
+                node.classList.add("active");
+                btn.innerText = btn.dataset["activeVersionName"] = entry.name;
+                btn.dataset["activeVersion"] = entry.version;
+            }
+        });
+    });
+})();
+</script>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl/discussions" rel="noopener" target="_blank" title="Support"><span><i class="fa fa-comment fa-fw"></i></span>
+            <label class="sr-only">Support</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+     
+<div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(text => document.getElementById("announcement_msg").innerHTML = text)
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+
+    
+        <div class="container-xl">
+    <div class="row">
+        <div class="col-12 col-md-3" id="breadcrumbs-spacer"></div>
+        <div class="col-12 col-md-11 col-xl-9" id="breadcrumbs">
+          
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+    
+        <li class="nav-item nav-item-additional-breadcrumb"><a href="https://docs.pyansys.com/">PyAnsys</a> » </li>
+    
+    
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyMAPDL</a> » </li>
+    
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Contributing and API</a> » </li>
+          <li class="nav-item nav-item-2"><a href="../post.html" >Post-Processing</a> » </li>
+          <li class="nav-item nav-item-3"><a href="ansys.mapdl.core.post.PostProcessing.html" accesskey="U">ansys.mapdl.core.post.PostProcessing</a> » </li>
+        <li class="nav-item nav-item-this"><a href="">plot_nodal_plastic_component_strain</a></li> 
+      </ul>
+    </div>
+        </div>
+  </div>
+</div>
+    
+
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../commands.html">
+   Commands Output
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../database.html">
+   Database
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.html">
+     ansys.mapdl.core.database.MapdlDb
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.clear.html">
+       clear
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.load.html">
+       load
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.save.html">
+       save
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.start.html">
+       start
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.stop.html">
+       stop
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.active.html">
+       active
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.elems.html">
+       elems
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.MapdlDb.nodes.html">
+       nodes
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.html">
+     ansys.mapdl.core.database.elems.DbElems
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+    <label for="toctree-checkbox-3">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.first.html">
+       first
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.get.html">
+       get
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.info.html">
+       info
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.next.html">
+       next
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.num.html">
+       num
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.push.html">
+       push
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.elems.DbElems.max_num.html">
+       max_num
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.html">
+     ansys.mapdl.core.database.nodes.DbNodes
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+    <label for="toctree-checkbox-4">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.all_asarray.html">
+       all_asarray
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.coord.html">
+       coord
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.first.html">
+       first
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.info.html">
+       info
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.next.html">
+       next
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.num.html">
+       num
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.push.html">
+       push
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.database.nodes.DbNodes.max_num.html">
+       max_num
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../geometry.html">
+   Geometry
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+  <label for="toctree-checkbox-5">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.html">
+     ansys.mapdl.core.mapdl_geometry.Geometry
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+    <label for="toctree-checkbox-6">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.area_select.html">
+       area_select
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.areas.html">
+       areas
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.generate_surface.html">
+       generate_surface
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.keypoint_select.html">
+       keypoint_select
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.line_select.html">
+       line_select
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.volume_select.html">
+       volume_select
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.anum.html">
+       anum
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.keypoints.html">
+       keypoints
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.knum.html">
+       knum
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.lines.html">
+       lines
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.lnum.html">
+       lnum
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.n_area.html">
+       n_area
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.n_keypoint.html">
+       n_keypoint
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.n_line.html">
+       n_line
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.n_volu.html">
+       n_volu
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mapdl_geometry.Geometry.vnum.html">
+       vnum
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../helper.html">
+   Helper Functions
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.launch_mapdl.html">
+     launch_mapdl
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.convert_apdl_block.html">
+     convert_apdl_block
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.convert_script.html">
+     convert_script
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.Information.html">
+     ansys.mapdl.core.Information
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.aux_capabilities.html">
+       aux_capabilities
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.boundary_condition_information.html">
+       boundary_condition_information
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.config_values.html">
+       config_values
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.database_status.html">
+       database_status
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.global_status.html">
+       global_status
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.job_information.html">
+       job_information
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.load_step_options.html">
+       load_step_options
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.mapdl_version.html">
+       mapdl_version
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.mapdl_version_build.html">
+       mapdl_version_build
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.mapdl_version_release.html">
+       mapdl_version_release
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.mapdl_version_update.html">
+       mapdl_version_update
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.model_information.html">
+       model_information
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.post_capabilities.html">
+       post_capabilities
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.preprocessing_capabilities.html">
+       preprocessing_capabilities
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.product.html">
+       product
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.products.html">
+       products
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.pymapdl_version.html">
+       pymapdl_version
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.routine_information.html">
+       routine_information
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.scratch_memory_status.html">
+       scratch_memory_status
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.solution_options.html">
+       solution_options
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.solution_options_configuration.html">
+       solution_options_configuration
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.stitles.html">
+       stitles
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.title.html">
+       title
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.titles.html">
+       titles
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.Information.units.html">
+       units
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.change_default_ansys_path.html">
+     change_default_ansys_path
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.find_ansys.html">
+     find_ansys
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.close_all_local_instances.html">
+     close_all_local_instances
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.save_ansys_path.html">
+     save_ansys_path
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../inline.html">
+   Inline Functions
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+  <label for="toctree-checkbox-9">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.node.html">
+     node
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.kp.html">
+     kp
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.centrx.html">
+     centrx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.centry.html">
+     centry
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.centrz.html">
+     centrz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.kx.html">
+     kx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.ky.html">
+     ky
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.kz.html">
+     kz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.nx.html">
+     nx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.ny.html">
+     ny
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.nz.html">
+     nz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.ux.html">
+     ux
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.uy.html">
+     uy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.uz.html">
+     uz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.rotx.html">
+     rotx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.roty.html">
+     roty
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.rotz.html">
+     rotz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lx.html">
+     lx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.ly.html">
+     ly
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lz.html">
+     lz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lsx.html">
+     lsx
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lsy.html">
+     lsy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lsz.html">
+     lsz
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.nsel.html">
+     nsel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.ksel.html">
+     ksel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.lsel.html">
+     lsel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.asel.html">
+     asel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.esel.html">
+     esel
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.inline_functions.Query.vsel.html">
+     vsel
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../logging.html">
+   Logging
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <label for="toctree-checkbox-10">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.logging.Logger.html">
+     ansys.mapdl.core.logging.Logger
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+    <label for="toctree-checkbox-11">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.add_child_logger.html">
+       add_child_logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.add_handling_uncaught_expections.html">
+       add_handling_uncaught_expections
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.add_instance_logger.html">
+       add_instance_logger
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.log_to_file.html">
+       log_to_file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.log_to_stdout.html">
+       log_to_stdout
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.setLevel.html">
+       setLevel
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.file_handler.html">
+       file_handler
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.logging.Logger.std_out_handler.html">
+       std_out_handler
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../mapdl.html">
+   Mapdl
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+  <label for="toctree-checkbox-12">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.add_file_handler.html">
+     add_file_handler
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.allow_ignore.html">
+     allow_ignore
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.chain_commands.html">
+     chain_commands
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.directory.html">
+     directory
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.get.html">
+     get
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.get_array.html">
+     get_array
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.get_value.html">
+     get_value
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.ignore_errors.html">
+     ignore_errors
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.jobname.html">
+     jobname
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.last_response.html">
+     last_response
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.load_table.html">
+     load_table
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.mesh.html">
+     mesh
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.modal_analysis.html">
+     modal_analysis
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.non_interactive.html">
+     non_interactive
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.open_apdl_log.html">
+     open_apdl_log
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.open_gui.html">
+     open_gui
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.parameters.html">
+     parameters
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.result.html">
+     result
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.run.html">
+     run
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.run_multiline.html">
+     run_multiline
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.input_strings.html">
+     input_strings
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.set_log_level.html">
+     set_log_level
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.version.html">
+     version
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.plotting.ALLOWED_TARGETS.html">
+     ALLOWED_TARGETS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.plotting.BCS.html">
+     BCS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download.html">
+     download
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.list_error_file.html">
+     list_error_file
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.list_files.html">
+     list_files
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.math.html">
+     math
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.mute.html">
+     mute
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload.html">
+     upload
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.product.html">
+     product
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.mapdl_version.html">
+     mapdl_version
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.pymapdl_version.html">
+     pymapdl_version
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.products.html">
+     products
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.preprocessing_capabilities.html">
+     preprocessing_capabilities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.aux_capabilities.html">
+     aux_capabilities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.solution_options.html">
+     solution_options
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.post_capabilities.html">
+     post_capabilities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.title.html">
+     title
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.titles.html">
+     titles
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.stitles.html">
+     stitles
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.units.html">
+     units
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.scratch_memory_status.html">
+     scratch_memory_status
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.database_status.html">
+     database_status
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.config_values.html">
+     config_values
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.global_status.html">
+     global_status
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.job_information.html">
+     job_information
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.model_information.html">
+     model_information
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.boundary_condition_information.html">
+     boundary_condition_information
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.routine_information.html">
+     routine_information
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.solution_options_configuration.html">
+     solution_options_configuration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.misc.Information.load_step_options.html">
+     load_step_options
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../math.html">
+   MapdlMath
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+  <label for="toctree-checkbox-13">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.html">
+     ansys.mapdl.core.math.MapdlMath
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+    <label for="toctree-checkbox-14">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.add.html">
+       add
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.damp.html">
+       damp
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.dot.html">
+       dot
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.eigs.html">
+       eigs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.factorize.html">
+       factorize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.free.html">
+       free
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.get_vec.html">
+       get_vec
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.load_matrix_from_file.html">
+       load_matrix_from_file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.mass.html">
+       mass
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.mat.html">
+       mat
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.matrix.html">
+       matrix
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.mgs.html">
+       mgs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.norm.html">
+       norm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.ones.html">
+       ones
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.rand.html">
+       rand
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.rhs.html">
+       rhs
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.set_vec.html">
+       set_vec
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.sparse.html">
+       sparse
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.status.html">
+       status
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.stiff.html">
+       stiff
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.subtract.html">
+       subtract
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.svd.html">
+       svd
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.vec.html">
+       vec
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.MapdlMath.zeros.html">
+       zeros
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.html">
+     ansys.mapdl.core.math.ApdlMathObj
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+    <label for="toctree-checkbox-15">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.axpy.html">
+       axpy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.const.html">
+       const
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.copy.html">
+       copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.norm.html">
+       norm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.ones.html">
+       ones
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.rand.html">
+       rand
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.ApdlMathObj.zeros.html">
+       zeros
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.html">
+     ansys.mapdl.core.math.AnsVec
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" type="checkbox"/>
+    <label for="toctree-checkbox-16">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.asarray.html">
+       asarray
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.axpy.html">
+       axpy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.const.html">
+       const
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.copy.html">
+       copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.dot.html">
+       dot
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.norm.html">
+       norm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.ones.html">
+       ones
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.rand.html">
+       rand
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.zeros.html">
+       zeros
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsVec.size.html">
+       size
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.html">
+     ansys.mapdl.core.math.AnsMat
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" type="checkbox"/>
+    <label for="toctree-checkbox-17">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.asarray.html">
+       asarray
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.axpy.html">
+       axpy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.const.html">
+       const
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.copy.html">
+       copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.dot.html">
+       dot
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.norm.html">
+       norm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.ones.html">
+       ones
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.rand.html">
+       rand
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.sym.html">
+       sym
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.zeros.html">
+       zeros
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.ncol.html">
+       ncol
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.nrow.html">
+       nrow
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.shape.html">
+       shape
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsMat.size.html">
+       size
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.html">
+     ansys.mapdl.core.math.AnsSolver
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" type="checkbox"/>
+    <label for="toctree-checkbox-18">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.axpy.html">
+       axpy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.const.html">
+       const
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.copy.html">
+       copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.factorize.html">
+       factorize
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.norm.html">
+       norm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.ones.html">
+       ones
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.rand.html">
+       rand
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.solve.html">
+       solve
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.math.AnsSolver.zeros.html">
+       zeros
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../mesh.html">
+   Mesh
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" type="checkbox"/>
+  <label for="toctree-checkbox-19">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.html">
+     ansys.mapdl.core.mesh_grpc.MeshGrpc
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" type="checkbox"/>
+    <label for="toctree-checkbox-20">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.save.html">
+       save
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.ekey.html">
+       ekey
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.elem.html">
+       elem
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.elem_real_constant.html">
+       elem_real_constant
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.element_components.html">
+       element_components
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.element_coord_system.html">
+       element_coord_system
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.enum.html">
+       enum
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.enum_all.html">
+       enum_all
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.et_id.html">
+       et_id
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.etype.html">
+       etype
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.grid.html">
+       grid
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.key_option.html">
+       key_option
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.local.html">
+       local
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.material_type.html">
+       material_type
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.n_elem.html">
+       n_elem
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.n_node.html">
+       n_node
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.nnum.html">
+       nnum
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.nnum_all.html">
+       nnum_all
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.node_angles.html">
+       node_angles
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.node_components.html">
+       node_components
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.nodes.html">
+       nodes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.rlblock.html">
+       rlblock
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.rlblock_num.html">
+       rlblock_num
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.section.html">
+       section
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.tshape.html">
+       tshape
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.mesh_grpc.MeshGrpc.tshape_key.html">
+       tshape_key
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../parameters.html">
+   Parameters
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" type="checkbox"/>
+  <label for="toctree-checkbox-21">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.html">
+     ansys.mapdl.core.parameters.Parameters
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" type="checkbox"/>
+    <label for="toctree-checkbox-22">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.csys.html">
+       csys
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.dsys.html">
+       dsys
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.esys.html">
+       esys
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.material.html">
+       material
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.numcpu.html">
+       numcpu
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.platform.html">
+       platform
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.real.html">
+       real
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.revision.html">
+       revision
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.routine.html">
+       routine
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.rsys.html">
+       rsys
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.section.html">
+       section
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.type.html">
+       type
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.parameters.Parameters.units.html">
+       units
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plotting.html">
+   Plotting
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" type="checkbox"/>
+  <label for="toctree-checkbox-23">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.plotting.general_plotter.html">
+     general_plotter
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.aplot.html">
+     aplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.eplot.html">
+     eplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.kplot.html">
+     kplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.lplot.html">
+     lplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.nplot.html">
+     nplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="ansys.mapdl.core.Mapdl.vplot.html">
+     vplot
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../pool.html">
+   Local MAPDL Pool
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" type="checkbox"/>
+  <label for="toctree-checkbox-24">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.pool.LocalMapdlPool.html">
+     ansys.mapdl.core.pool.LocalMapdlPool
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" type="checkbox"/>
+    <label for="toctree-checkbox-25">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.pool.LocalMapdlPool.exit.html">
+       exit
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.pool.LocalMapdlPool.map.html">
+       map
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.pool.LocalMapdlPool.next_available.html">
+       next_available
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.pool.LocalMapdlPool.run_batch.html">
+       run_batch
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../post.html">
+   Post-Processing
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" type="checkbox"/>
+  <label for="toctree-checkbox-26">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active has-children">
+    <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.html">
+     ansys.mapdl.core.post.PostProcessing
+    </a>
+    <input checked="" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" type="checkbox"/>
+    <label for="toctree-checkbox-27">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul class="current">
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.element_displacement.html">
+       element_displacement
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.element_stress.html">
+       element_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.element_temperature.html">
+       element_temperature
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.element_values.html">
+       element_values
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_component_stress.html">
+       nodal_component_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_contact_friction_stress.html">
+       nodal_contact_friction_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_displacement.html">
+       nodal_displacement
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_elastic_component_strain.html">
+       nodal_elastic_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_elastic_eqv_strain.html">
+       nodal_elastic_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_elastic_principal_strain.html">
+       nodal_elastic_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_elastic_strain_intensity.html">
+       nodal_elastic_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_eqv_stress.html">
+       nodal_eqv_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_plastic_component_strain.html">
+       nodal_plastic_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_plastic_eqv_strain.html">
+       nodal_plastic_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_plastic_principal_strain.html">
+       nodal_plastic_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_plastic_strain_intensity.html">
+       nodal_plastic_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_pressure.html">
+       nodal_pressure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_principal_stress.html">
+       nodal_principal_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_rotation.html">
+       nodal_rotation
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_stress_intensity.html">
+       nodal_stress_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_temperature.html">
+       nodal_temperature
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_thermal_component_strain.html">
+       nodal_thermal_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_thermal_eqv_strain.html">
+       nodal_thermal_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_thermal_principal_strain.html">
+       nodal_thermal_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_thermal_strain_intensity.html">
+       nodal_thermal_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_total_component_strain.html">
+       nodal_total_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_total_eqv_strain.html">
+       nodal_total_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_total_principal_strain.html">
+       nodal_total_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_total_strain_intensity.html">
+       nodal_total_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_values.html">
+       nodal_values
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nodal_voltage.html">
+       nodal_voltage
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_element_displacement.html">
+       plot_element_displacement
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_element_stress.html">
+       plot_element_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_element_temperature.html">
+       plot_element_temperature
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_element_values.html">
+       plot_element_values
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_component_stress.html">
+       plot_nodal_component_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_contact_friction_stress.html">
+       plot_nodal_contact_friction_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_displacement.html">
+       plot_nodal_displacement
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_elastic_component_strain.html">
+       plot_nodal_elastic_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_elastic_eqv_strain.html">
+       plot_nodal_elastic_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_elastic_principal_strain.html">
+       plot_nodal_elastic_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_elastic_strain_intensity.html">
+       plot_nodal_elastic_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_eqv_stress.html">
+       plot_nodal_eqv_stress
+      </a>
+     </li>
+     <li class="toctree-l3 current active">
+      <a class="current reference internal" href="#">
+       plot_nodal_plastic_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_eqv_strain.html">
+       plot_nodal_plastic_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_principal_strain.html">
+       plot_nodal_plastic_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_strain_intensity.html">
+       plot_nodal_plastic_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_pressure.html">
+       plot_nodal_pressure
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_principal_stress.html">
+       plot_nodal_principal_stress
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_rotation.html">
+       plot_nodal_rotation
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_stress_intensity.html">
+       plot_nodal_stress_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_temperature.html">
+       plot_nodal_temperature
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_thermal_component_strain.html">
+       plot_nodal_thermal_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_thermal_eqv_strain.html">
+       plot_nodal_thermal_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_thermal_principal_strain.html">
+       plot_nodal_thermal_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_thermal_strain_intensity.html">
+       plot_nodal_thermal_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_total_component_strain.html">
+       plot_nodal_total_component_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_total_eqv_strain.html">
+       plot_nodal_total_eqv_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_total_principal_strain.html">
+       plot_nodal_total_principal_strain
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_total_strain_intensity.html">
+       plot_nodal_total_strain_intensity
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_values.html">
+       plot_nodal_values
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.plot_nodal_voltage.html">
+       plot_nodal_voltage
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.filename.html">
+       filename
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.freq.html">
+       freq
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.load_step.html">
+       load_step
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.nsets.html">
+       nsets
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.selected_elements.html">
+       selected_elements
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.selected_nodes.html">
+       selected_nodes
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.sub_step.html">
+       sub_step
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.time.html">
+       time
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.post.PostProcessing.time_values.html">
+       time_values
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../solution.html">
+   Solution
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" type="checkbox"/>
+  <label for="toctree-checkbox-28">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.solution.Solution.html">
+     ansys.mapdl.core.solution.Solution
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" type="checkbox"/>
+    <label for="toctree-checkbox-29">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.converged.html">
+       converged
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.current_cnv.html">
+       current_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.current_segment_cnv.html">
+       current_segment_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.decent_parm.html">
+       decent_parm
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.displacement_cnv.html">
+       displacement_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.fluid_flow_cnv.html">
+       fluid_flow_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.force_cnv.html">
+       force_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.heat_flow_cnv.html">
+       heat_flow_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.magnetic_flux_cnv.html">
+       magnetic_flux_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.moment_cnv.html">
+       moment_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.mx_creep_rat.html">
+       mx_creep_rat
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.mx_dof.html">
+       mx_dof
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.mx_plastic_inc.html">
+       mx_plastic_inc
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.n_cg_iter.html">
+       n_cg_iter
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.n_cmit.html">
+       n_cmit
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.n_cmls.html">
+       n_cmls
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.n_cmss.html">
+       n_cmss
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.n_eqit.html">
+       n_eqit
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.pressure_conv.html">
+       pressure_conv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.res_eig.html">
+       res_eig
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.res_frq.html">
+       res_frq
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.rotation_cnv.html">
+       rotation_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.smcv.html">
+       smcv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.temperature_cnv.html">
+       temperature_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.time_step_size.html">
+       time_step_size
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.vector_cnv.html">
+       vector_cnv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.velocity_conv.html">
+       velocity_conv
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.solution.Solution.voltage_conv.html">
+       voltage_conv
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../xpl.html">
+   Database Explorer
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" type="checkbox"/>
+  <label for="toctree-checkbox-30">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.html">
+     ansys.mapdl.core.xpl.ansXpl
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" type="checkbox"/>
+    <label for="toctree-checkbox-31">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.close.html">
+       close
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.copy.html">
+       copy
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.extract.html">
+       extract
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.goto.html">
+       goto
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.help.html">
+       help
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.info.html">
+       info
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.json.html">
+       json
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.list.html">
+       list
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.open.html">
+       open
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.print.html">
+       print
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.read.html">
+       read
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.save.html">
+       save
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.step.html">
+       step
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.up.html">
+       up
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.where.html">
+       where
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="ansys.mapdl.core.xpl.ansXpl.write.html">
+       write
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <section id="plot-nodal-plastic-component-strain">
+<h1>plot_nodal_plastic_component_strain<a class="headerlink" href="#plot-nodal-plastic-component-strain" title="Permalink to this heading">#</a></h1>
+<dl class="py method">
+<dt class="sig sig-object py" id="ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_component_strain">
+<span class="sig-prename descclassname"><span class="pre">PostProcessing.</span></span><span class="sig-name descname"><span class="pre">plot_nodal_plastic_component_strain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">component</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_node_numbering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#ansys.mapdl.core.post.PostProcessing.plot_nodal_plastic_component_strain" title="Permalink to this definition">#</a></dt>
+<dd><p>Plot nodal plastic component strain.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>component</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/dev/library/stdtypes.html#str" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>Nodal plastic component to plot.  Must be <code class="docutils literal notranslate"><span class="pre">'X'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'Y'</span></code>, <code class="docutils literal notranslate"><span class="pre">'Z'</span></code>, <code class="docutils literal notranslate"><span class="pre">'XY'</span></code>, <code class="docutils literal notranslate"><span class="pre">'YZ'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'XZ'</span></code>.</p>
+</dd>
+<dt><strong>show_node_numbering</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/dev/library/stdtypes.html#bltin-boolean-values" title="(in Python v3.12)"><span class="xref std std-ref">bool</span></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>Plot the node numbers of surface nodes.</p>
+</dd>
+<dt><strong>**kwargs</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/dev/library/stdtypes.html#dict" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">dict</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">optional</span></code></span></dt><dd><p>Keyword arguments passed to <a class="reference internal" href="ansys.mapdl.core.plotting.general_plotter.html#ansys.mapdl.core.plotting.general_plotter" title="ansys.mapdl.core.plotting.general_plotter"><code class="xref py py-func docutils literal notranslate"><span class="pre">general_plotter</span></code></a>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/dev/library/stdtypes.html#list" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></dt><dd><p>Camera position from plotter.  Can be reused as an input
+parameter to use the same camera position for future
+plots.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Plot the nodal plastic principal strain “1” for the second result set.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">post1</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">plot_nodal_plastic_component_strain</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+              </article>
+              
+
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright (c) 2022 ANSYS, Inc. All rights reserved.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.1.1.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

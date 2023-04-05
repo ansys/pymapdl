@@ -1,0 +1,22 @@
+[
+  {
+    "name": "dev",
+    "version": "dev",
+    "url": "https://mapdl.docs.pyansys.com/version/dev/"
+  },
+  {
+    "name": "0.64 (stable)",
+    "version": "0.64",
+    "url": "https://mapdl.docs.pyansys.com/version/stable/"
+  },
+  {
+    "name": "0.63",
+    "version": "0.63",
+    "url": "https://mapdl.docs.pyansys.com/version/0.63/"
+  },
+  {
+    "name": "0.62",
+    "version": "0.62",
+    "url": "https://mapdl.docs.pyansys.com/version/0.62/"
+  }
+]

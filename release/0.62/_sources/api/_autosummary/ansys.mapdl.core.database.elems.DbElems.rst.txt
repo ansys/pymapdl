@@ -1,0 +1,49 @@
+﻿ansys.mapdl.core.database.elems.DbElems
+=======================================
+
+.. currentmodule:: ansys.mapdl.core.database.elems
+
+.. autoclass:: DbElems
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      DbElems.first
+      
+      
+      DbElems.get
+      
+      
+      DbElems.info
+      
+      
+      DbElems.next
+      
+      
+      DbElems.num
+      
+      
+      DbElems.push
+      
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+   
+      
+      DbElems.max_num
+      
+   
+   

@@ -1,0 +1,26 @@
+
+:orphan:
+
+.. _sphx_glr_examples_01-apdlmath-examples_sg_execution_times:
+
+Computation times
+=================
+**00:23.151** total execution time for **examples_01-apdlmath-examples** files:
+
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_solve_dense_matrix.py` (``solve_dense_matrix.py``)   | 00:14.544 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_mapdl_vs_scipy.py` (``mapdl_vs_scipy.py``)           | 00:05.401 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_eigen_solve.py` (``eigen_solve.py``)                 | 00:01.045 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_solve_sparse_matrix.py` (``solve_sparse_matrix.py``) | 00:00.760 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_scipy_sparse_matrix.py` (``scipy_sparse_matrix.py``) | 00:00.700 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_explore_mapdl_files.py` (``explore_mapdl_files.py``) | 00:00.280 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_basic_operations.py` (``basic_operations.py``)       | 00:00.215 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_examples_01-apdlmath-examples_use_numpy_arrays.py` (``use_numpy_arrays.py``)       | 00:00.207 | 0.0 MB |
++---------------------------------------------------------------------------------------------------+-----------+--------+

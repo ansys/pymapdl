@@ -1,0 +1,844 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>PyVista Mesh Integration &#8212; PyMAPDL</title>
+    
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/ansys_sphinx_theme.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    
+        <link href="../../_static/css/breadcrumbs.css" rel="stylesheet">
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Example Thermal Transient Analysis" href="transient_thermal.html" />
+    <link rel="prev" title="Pressure Vessel" href="pressure_vessel.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-light" alt="Logo image">
+    <img src="../../_static/pyansys-logo-black-cropped.png" class="logo__image only-dark" alt="Logo image">
+  
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../getting_started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../user_guide/index.html">
+  User Guide
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../api/index.html">
+  API Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../mapdl_commands/index.html">
+  MAPDL Commands
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../index.html">
+  Examples
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contributing.html">
+  Contributing
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <div class="dropdown" id="version_switcher">
+    <button type="button" class="btn btn-sm navbar-btn dropdown-toggle" id="version_switcher_button" data-toggle="dropdown">
+        0.61  <!-- this text may get changed later by javascript -->
+        <span class="caret"></span>
+    </button>
+    <div id="version_switcher_menu" class="dropdown-menu list-group-flush py-0" aria-labelledby="version_switcher_button">
+    <!-- dropdown will be populated by javascript on page load -->
+    </div>
+</div>
+
+<!-- NOTE: this JS must live here (not in our global JS file) because it relies
+     on being processed by Jinja before it is run (specifically for replacing
+     variables examples/00-mapdl-examples/pyvista_mesh and {'json_url': 'https://mapdl.docs.pyansys.com/release/versions.json', 'version_match': '0.61'}.
+-->
+
+<script type="text/javascript">
+// Check if corresponding page path exists in other version of docs
+// and, if so, go there instead of the homepage of the other docs version
+function checkPageExistsAndRedirect(event) {
+    const currentFilePath = "examples/00-mapdl-examples/pyvista_mesh.html",
+          tryUrl = event.target.getAttribute("href");
+    let otherDocsHomepage = tryUrl.replace(currentFilePath, "");
+    $.ajax({
+        type: 'HEAD',
+        url: tryUrl,
+        // if the page exists, go there
+        success: function() {
+            location.href = tryUrl;
+        }
+    }).fail(function() {
+        location.href = otherDocsHomepage;
+    });
+    // this prevents the browser from following the href of the clicked node
+    // (which is fine because this function takes care of redirecting)
+    return false;
+}
+
+// Populate the version switcher from the JSON config file
+(function () {
+    $.getJSON("https://mapdl.docs.pyansys.com/release/versions.json", function(data, textStatus, jqXHR) {
+        const currentFilePath = "examples/00-mapdl-examples/pyvista_mesh.html";
+        let btn = document.getElementById("version_switcher_button");
+        // Set empty strings by default so that these attributes exist and can be used in CSS selectors
+        btn.dataset["activeVersionName"] = "";
+        btn.dataset["activeVersion"] = "";
+        // create links to the corresponding page in the other docs versions
+        $.each(data, function(index, entry) {
+            // if no custom name specified (e.g., "latest"), use version string
+            if (!("name" in entry)) {
+                entry.name = entry.version;
+            }
+            // create the node
+            const node = document.createElement("a");
+            node.setAttribute("class", "list-group-item list-group-item-action py-1");
+            node.textContent = `${entry.name}`;
+            node.setAttribute("href", `${entry.url}${currentFilePath}`);
+            // on click, AJAX calls will check if the linked page exists before
+            // trying to redirect, and if not, will redirect to the homepage
+            // for that version of the docs.
+            node.onclick = checkPageExistsAndRedirect;
+            // Add dataset values for the version and name in case people want
+            // to apply CSS styling based on this information.
+            node.dataset["versionName"] = entry.name;
+            node.dataset["version"] = entry.version;
+
+            $("#version_switcher_menu").append(node);
+            // replace dropdown button text with the preferred display name of
+            // this version, rather than using sphinx's 0.61.7 variable.
+            // also highlight the dropdown entry for the currently-viewed
+            // version's entry
+            if (entry.version == "0.61") {
+                node.classList.add("active");
+                btn.innerText = btn.dataset["activeVersionName"] = entry.name;
+                btn.dataset["activeVersion"] = entry.version;
+            }
+        });
+    });
+})();
+</script>
+      </div>
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pyansys/pymapdl" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+     
+<div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(text => document.getElementById("announcement_msg").innerHTML = text)
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+
+    
+        <div class="container-xl">
+    <div class="row">
+        <div class="col-12 col-md-3" id="breadcrumbs-spacer"></div>
+        <div class="col-12 col-md-11 col-xl-9" id="breadcrumbs">
+          
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+    
+        <li class="nav-item nav-item-additional-breadcrumb"><a href="https://docs.pyansys.com/">PyAnsys</a> » </li>
+    
+    
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyMAPDL</a> » </li>
+    
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Examples</a> » </li>
+        <li class="nav-item nav-item-this"><a href="">PyVista Mesh Integration</a></li> 
+      </ul>
+    </div>
+        </div>
+  </div>
+</div>
+    
+
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+    <ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="2d_plate_with_a_hole.html">
+   MAPDL 2D Plane Stress Concentration Analysis
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="2d_pressure_vessel.html">
+   2D Pressure Vessel
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="3d_notch.html">
+   3D Stress Concentration Analysis for a Notched Plate
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="3d_plate_thermal.html">
+   Basic Thermal Analysis with pyMAPDL
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="contact_elements.html">
+   Contact Element Example
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="geometry.html">
+   Plotting and Mesh Access
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mapdl_3d_beam.html">
+   MAPDL 3D Beam Example
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="mapdl_beam.html">
+   MAPDL 2D Beam Example
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="path_operations.html">
+   Path Operations within pyMAPDL and MAPDL
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="pressure_vessel.html">
+   Pressure Vessel
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   PyVista Mesh Integration
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="transient_thermal.html">
+   Example Thermal Transient Analysis
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/basic_operations.html">
+   PyMAPDL APDLMath Basic Operations
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/eigen_solve.html">
+   Using APDLMath to solve Eigenproblems
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/explore_mapdl_files.html">
+   Binary MAPDL File Explorer
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/mapdl_vs_scipy.html">
+   Compute Eigenvalues using MAPDL or SciPy
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/scipy_sparse_matrix.html">
+   Transfer APDLMath Sparse Matrices to and from SciPy Sparse Matrices
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/solve_dense_matrix.html">
+   Use APDLMath to Solve a Dense Matrix Linear System
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/solve_sparse_matrix.html">
+   Use APDLMath To Perform Sparse Factorization and Solve Operations
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../01-apdlmath-examples/use_numpy_arrays.html">
+   Manipulate APDLMath vectors or dense matrices as NumPy Arrays
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../02-geometry/00-keypoints.html">
+   Keypoints
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../02-geometry/01-lines.html">
+   Lines
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../02-geometry/02-areas.html">
+   Areas
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../02-geometry/03-volumes.html">
+   Volumes
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../02-geometry/04-primitives.html">
+   Primitives
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../03-tips-n-tricks/00-example-template.html">
+   Adding a New Gallery Example
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../03-tips-n-tricks/01-smoothing-element-size-transitions.html">
+   MAPDL Element Size Transition Example
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../03-tips-n-tricks/03-using_inline_functions_and_Query.html">
+   Using Inline Functions (Query)
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../03-tips-n-tricks/04-rotational-displacement.html">
+   Generating and Extracting Rotational Displacement
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../04-general-fea/00-how_finite_element_works.html">
+   Build a Finite Element
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-001-statically_indeterminate_reaction_force_analysis.html">
+   Statically Indeterminate Reaction Force Analysis
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-002-beam_stresses_and_deflections.html">
+   Beam Stresses and Deflections
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-003-thermally_loaded_support_structure.html">
+   Thermally Loaded Support Structure
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-004-deflection_of_a_hinged_support.html">
+   Deflection of a Hinged Support
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-005-laterally_loaded_tapered_support_structure.html">
+   Statically Indeterminate Reaction Force Analysis
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-006-pinched_cylinder.html">
+   Pinched Cylinder
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-007-plastic_compression_of_a_pipe_assembly.html">
+   Plastic Compression of a Pipe Assembly
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-008-parametric_calculation.html">
+   Parametric Calculation
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-009-large_lateral_deflection_of_unequal_stiffness_springs.html">
+   Large Lateral Deflection of Unequal Stiffness Springs
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../06-verif-manual/vm-010-bending_of_a_t-shaped_beam.html">
+   Bending of a Tee-Shaped Beam
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../07-technology-showcase-examples/20-example-technology-showcase-dynamic-simulation-PCB.html">
+   Dynamic simulation of a printed circuit board assembly
+  </a>
+ </li>
+</ul>
+
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-examples-00-mapdl-examples-pyvista-mesh-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="pyvista-mesh-integration">
+<span id="ref-pyvista-mesh"></span><span id="sphx-glr-examples-00-mapdl-examples-pyvista-mesh-py"></span><h1>PyVista Mesh Integration<a class="headerlink" href="#pyvista-mesh-integration" title="Permalink to this headline">#</a></h1>
+<p>Run a modal analysis on a mesh generated from pyvista within MAPDL.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># sphinx_gallery_thumbnail_number = 2</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">ansys.mapdl.reader</span> <span class="kn">import</span> <span class="n">save_as_archive</span>
+<span class="kn">import</span> <span class="nn">pyvista</span> <span class="k">as</span> <span class="nn">pv</span>
+
+<span class="kn">from</span> <span class="nn">ansys.mapdl.core</span> <span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="c1"># launch MAPDL as a service</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">loglevel</span><span class="o">=</span><span class="s2">&quot;ERROR&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a simple plane mesh centered at (0, 0, 0) on the XY plane</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mesh</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/api/utilities/_autosummary/pyvista.Plane.html#pyvista.Plane" title="pyvista.Plane" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-function"><span class="n">pv</span><span class="o">.</span><span class="n">Plane</span></a><span class="p">(</span><span class="n">i_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">j_resolution</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.plot.html#pyvista.PolyData.plot" title="pyvista.PolyData.plot" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">mesh</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_pyvista_mesh_001.png" srcset="../../_images/sphx_glr_pyvista_mesh_001.png" alt="pyvista mesh" class = "sphx-glr-single-img"/><p>Write the mesh to a temporary file</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/dev/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">archive_filename</span></a> <span class="o">=</span> <a href="https://docs.python.org/dev/library/os.path.html#os.path.join" title="os.path.join" class="sphx-glr-backref-module-os-path sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span></a><span class="p">(</span><a href="https://docs.python.org/dev/library/tempfile.html#tempfile.gettempdir" title="tempfile.gettempdir" class="sphx-glr-backref-module-tempfile sphx-glr-backref-type-py-function"><span class="n">tempfile</span><span class="o">.</span><span class="n">gettempdir</span></a><span class="p">(),</span> <span class="s2">&quot;tmp.cdb&quot;</span><span class="p">)</span>
+<span class="n">save_as_archive</span><span class="p">(</span><a href="https://docs.python.org/dev/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">archive_filename</span></a><span class="p">,</span> <a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mesh</span></a><span class="p">)</span>
+
+<span class="c1"># Read in the archive file</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">cdread</span><span class="p">(</span><span class="s2">&quot;db&quot;</span><span class="p">,</span> <a href="https://docs.python.org/dev/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">archive_filename</span></a><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">shpp</span><span class="p">(</span><span class="s2">&quot;SUMM&quot;</span><span class="p">))</span>
+
+<span class="c1"># specify shell thickness</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">sectype</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;shell&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">secdata</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">emodif</span><span class="p">(</span><span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;SECNUM&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># specify material properties</span>
+<span class="c1"># using aprox values for AISI 5000 Series Steel</span>
+<span class="c1"># http://www.matweb.com/search/datasheet.aspx?matguid=89d4b891eece40fbbe6b71f028b64e9e</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">units</span><span class="p">(</span><span class="s2">&quot;SI&quot;</span><span class="p">)</span>  <span class="c1"># not necessary, but helpful for book keeping</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;EX&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">200e9</span><span class="p">)</span>  <span class="c1"># Elastic moduli in Pa (kg/(m*s**2))</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;DENS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">7800</span><span class="p">)</span>  <span class="c1"># Density in kg/m3</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;NUXY&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># Poissons Ratio</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">emodif</span><span class="p">(</span><span class="s2">&quot;ALL&quot;</span><span class="p">,</span> <span class="s2">&quot;MAT&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Run an unconstrained modal analysis</span>
+<span class="c1"># for the first 20 modes above 1 Hz</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">modal_analysis</span><span class="p">(</span><span class="n">nmode</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">freqb</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># you could have also run:</span>
+<span class="c1"># mapdl.run(&#39;/SOLU&#39;)</span>
+<span class="c1"># mapdl.antype(&#39;MODAL&#39;)  # default NEW</span>
+<span class="c1"># mapdl.modopt(&#39;LANB&#39;, 20, 1)</span>
+<span class="c1"># mapdl.solve()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>SUMMARIZE SHAPE TESTING FOR ALL SELECTED ELEMENTS
+
+ ------------------------------------------------------------------------------
+            &lt;&lt;&lt;&lt;&lt;&lt;          SHAPE TESTING SUMMARY           &gt;&gt;&gt;&gt;&gt;&gt;
+            &lt;&lt;&lt;&lt;&lt;&lt;        FOR ALL SELECTED ELEMENTS         &gt;&gt;&gt;&gt;&gt;&gt;
+ ------------------------------------------------------------------------------
+                    --------------------------------------
+                    |  Element count     10000 SHELL181  |
+                    --------------------------------------
+
+  Test                Number tested  Warning count  Error count    Warn+Err %
+  ----                -------------  -------------  -----------    ----------
+  Aspect Ratio              10000              0             0         0.00 %
+  Parallel Deviation        10000              0             0         0.00 %
+  Maximum Angle             10000              0             0         0.00 %
+  Jacobian Ratio            10000              0             0         0.00 %
+  Warping Factor            10000              0             0         0.00 %
+
+  Any                       10000              0             0         0.00 %
+ ------------------------------------------------------------------------------
+
+&#39;*****  ANSYS SOLVE    COMMAND  *****\n\n *** NOTE ***                            CP =      98.059   TIME= 15:50:41\n There is no title defined for this analysis.                            \n\n *** NOTE ***                            CP =      98.140   TIME= 15:50:41\n No modes are being expanded (MXPAND command) and therefore the element  \n results will not be written to the mode file.  If you do not intend to  \n use mode selection and for more efficient calculation of element        \n results in the expansion pass of any downstream mode superposition      \n analyses, expand all modes during the modal analysis.                   \n\n *** SELECTION OF ELEMENT TECHNOLOGIES FOR APPLICABLE ELEMENTS ***\n                ---GIVE SUGGESTIONS ONLY---\n\n ELEMENT TYPE         4 IS SHELL181. IT IS ASSOCIATED WITH ELASTOPLASTIC \n MATERIALS ONLY. KEYOPT(8)=2 IS SUGGESTED AND KEYOPT(3)=2 IS SUGGESTED FOR\n HIGHER ACCURACY OF MEMBRANE STRESSES; OTHERWISE, KEYOPT(3)=0 IS SUGGESTED.\n\n\n\n *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2BETA ***\n Ansys Mechanical Enterprise                       \n 00000000  VERSION=LINUX x64     15:50:41  DEC 07, 2022 CP=     98.162\n\n                                                                               \n\n\n\n ** WARNING: PRE-RELEASE VERSION OF ANSYS 21.2BETA\n  ANSYS,INC TESTING IS NOT COMPLETE - CHECK RESULTS CAREFULLY **\n\n                       S O L U T I O N   O P T I O N S\n\n   PROBLEM DIMENSIONALITY. . . . . . . . . . . . .3-D                  \n   DEGREES OF FREEDOM. . . . . . UX   UY   UZ   ROTX ROTY ROTZ\n   ANALYSIS TYPE . . . . . . . . . . . . . . . . .MODAL                \n      EXTRACTION METHOD. . . . . . . . . . . . . .BLOCK LANCZOS\n   NUMBER OF MODES TO EXTRACT. . . . . . . . . . .    20\n   SHIFT POINT . . . . . . . . . . . . . . . . . .  1.0000    \n   GLOBALLY ASSEMBLED MATRIX . . . . . . . . . . .SYMMETRIC  \n\n *** WARNING ***                         CP =      98.182   TIME= 15:50:41\n No constraints have been defined using the D command.                   \n\n *** NOTE ***                            CP =      98.182   TIME= 15:50:41\n The step data was checked and warning messages were found.              \n  Please review output or errors file ( /file.err ) for these warning    \n messages.                                                               \n\n *** NOTE ***                            CP =      98.182   TIME= 15:50:41\n The conditions for direct assembly have been met.  No .emat or .erot    \n files will be produced.                                                 \n\n                      L O A D   S T E P   O P T I O N S\n\n   LOAD STEP NUMBER. . . . . . . . . . . . . . . .     1\n   THERMAL STRAINS INCLUDED IN THE LOAD VECTOR . .   YES\n\n\n\n                         ***********  PRECISE MASS SUMMARY  ***********\n\n   TOTAL RIGID BODY MASS MATRIX ABOUT ORIGIN\n               Translational mass               |   Coupled translational/rotational mass\n         78.000        0.0000      -0.48842E-30 |   -0.17755E-33  -0.17959E-31   0.20817E-16\n         0.0000        78.000        0.0000     |    0.13915E-31    0.0000       0.70300E-15\n       -0.48238E-30    0.0000        78.000     |    0.53776E-15  -0.68391E-15  -0.54477E-33\n     ------------------------------------------ | ------------------------------------------\n                                                |         Rotational mass (inertia)\n                                                |     6.5006       0.22335E-16   0.72143E-15\n                                                |   -0.27105E-16    6.5006       0.61389E-32\n                                                |    0.72143E-15  -0.12037E-32    12.999    \n\n   TOTAL MASS =  78.000    \n     The mass principal axes coincide with the global Cartesian axes\n\n   CENTER OF MASS (X,Y,Z)=   0.90128E-17  -0.26688E-18  -0.23025E-33\n\n   TOTAL INERTIA ABOUT CENTER OF MASS\n         6.5006       0.22335E-16   0.72143E-15\n        0.22335E-16    6.5006       0.61389E-32\n        0.72143E-15   0.61389E-32    12.999    \n     The inertia principal axes coincide with the global Cartesian axes\n\n\n  *** MASS SUMMARY BY ELEMENT TYPE ***\n\n  TYPE      MASS\n     4   78.0000    \n\n Range of element maximum matrix coefficients in global coordinates\n Maximum = 749504998 at element 9504.                                    \n Minimum = 749503915 at element 9505.                                    \n\n   *** ELEMENT MATRIX FORMULATION TIMES\n     TYPE    NUMBER   ENAME      TOTAL CP  AVE CP\n\n        4     10000  SHELL181      0.621   0.000062\n Time at end of element matrix formulation CP = 99.0146942.              \n\n  BLOCK LANCZOS CALCULATION OF UP TO    20 EIGENVECTORS.\n  NUMBER OF EQUATIONS              =        61206\n  MAXIMUM WAVEFRONT                =           36\n  MAXIMUM MODES STORED             =           20\n  MINIMUM EIGENVALUE               =  0.10000E+01\n  MAXIMUM EIGENVALUE               =  0.10000E+31\n\n  Memory allocated for solver              =   187.192 MB\n  Memory required for in-core solution     =   178.612 MB\n  Memory required for out-of-core solution =    60.617 MB\n\n *** NOTE ***                            CP =     100.875   TIME= 15:50:43\n The Sparse Matrix Solver used by the Block Lanczos eigensolver is       \n currently running in the in-core memory mode.  This memory mode uses    \n the most amount of memory in order to avoid using the hard drive as     \n much as possible, which most often results in the fastest solution      \n time.  This mode is recommended if enough physical memory is present    \n to accommodate all of the solver data.                                  \n\n *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2BETA ***\n Ansys Mechanical Enterprise                       \n 00000000  VERSION=LINUX x64     15:50:44  DEC 07, 2022 CP=    103.369\n\n                                                                               \n\n\n\n ** WARNING: PRE-RELEASE VERSION OF ANSYS 21.2BETA\n  ANSYS,INC TESTING IS NOT COMPLETE - CHECK RESULTS CAREFULLY **\n\n *** FREQUENCIES FROM BLOCK LANCZOS ITERATION ***\n\n  MODE    FREQUENCY (HERTZ)      \n\n\n   FREQUENCY RANGE REQUESTED=   20 MODES ABOVE   1.00000     HERTZ\n\n    1     32.74664192985    \n    2     47.77804288731    \n    3     59.17108298360    \n    4     84.60790505173    \n    5     84.60790505208    \n    6     148.8927748650    \n    7     148.8927748652    \n    8     154.6519861747    \n    9     168.3840411461    \n   10     187.7790667343    \n   11     255.9751634915    \n   12     255.9751634916    \n   13     285.2444050788    \n   14     298.2943388367    \n   15     319.8023401634    \n   16     319.8023401640    \n   17     370.6023621796    \n   18     391.8457651345    \n   19     409.1039880842    \n   20     482.6516135505    \n\n *** ANSYS - ENGINEERING ANALYSIS SYSTEM  RELEASE 2021 R2          21.2BETA ***\n Ansys Mechanical Enterprise                       \n 00000000  VERSION=LINUX x64     15:50:44  DEC 07, 2022 CP=    103.608\n\n                                                                               \n\n\n\n ** WARNING: PRE-RELEASE VERSION OF ANSYS 21.2BETA\n  ANSYS,INC TESTING IS NOT COMPLETE - CHECK RESULTS CAREFULLY **\n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****  X  DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****  Y  DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****  Z  DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****ROTX DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****ROTY DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n\n          ***** PARTICIPATION FACTOR CALCULATION *****ROTZ DIRECTION\n                                                                                  CUMULATIVE     RATIO EFF.MASS\n  MODE   FREQUENCY       PERIOD      PARTIC.FACTOR     RATIO    EFFECTIVE MASS   MASS FRACTION   TO TOTAL MASS\n     1     32.7466       0.30537E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     2     47.7780       0.20930E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     3     59.1711       0.16900E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     4     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     5     84.6079       0.11819E-01    0.0000        0.000000     0.00000         0.00000         0.00000    \n     6     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     7     148.893       0.67162E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     8     154.652       0.64661E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n     9     168.384       0.59388E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    10     187.779       0.53254E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    11     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    12     255.975       0.39066E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    13     285.244       0.35058E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    14     298.294       0.33524E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    15     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    16     319.802       0.31269E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    17     370.602       0.26983E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    18     391.846       0.25520E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    19     409.104       0.24444E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n    20     482.652       0.20719E-02    0.0000        0.000000     0.00000         0.00000         0.00000    \n\n\n *** ANSYS BINARY FILE STATISTICS\n  BUFFER SIZE USED= 16384\n       19.250 MB WRITTEN ON ASSEMBLED MATRIX FILE: file.full\n       26.938 MB WRITTEN ON MODAL MATRIX FILE: file.mode&#39;
+</pre></div>
+</div>
+<p>Load the result file within <code class="docutils literal notranslate"><span class="pre">pyansys</span></code> and plot the 8th mode.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">result</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="n">result</span><span class="o">.</span><span class="n">plot_nodal_displacement</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">show_displacement</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displacement_factor</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_pyvista_mesh_002.png" srcset="../../_images/sphx_glr_pyvista_mesh_002.png" alt="pyvista mesh" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>PyMAPDL Result
+Units       : User Defined
+Version     : 21.2
+Cyclic      : False
+Result Sets : 20
+Nodes       : 10201
+Elements    : 10000
+
+
+Available Results:
+NSL : Nodal displacements
+</pre></div>
+</div>
+<p>plot the 1st mode using contours</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">plot_nodal_displacement</span><span class="p">(</span>
+    <span class="mi">0</span><span class="p">,</span> <span class="n">show_displacement</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">displacement_factor</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">n_colors</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_pyvista_mesh_003.png" srcset="../../_images/sphx_glr_pyvista_mesh_003.png" alt="pyvista mesh" class = "sphx-glr-single-img"/><p>Animate a high frequency mode</p>
+<p>Get a smoother plot by disabling movie_filename and increasing <code class="docutils literal notranslate"><span class="pre">nangles</span></code>.
+Enable a continuous plot looping with <code class="docutils literal notranslate"><span class="pre">`loop=True`</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">result</span><span class="o">.</span><span class="n">animate_nodal_displacement</span><span class="p">(</span>
+    <span class="mi">18</span><span class="p">,</span>
+    <span class="n">loop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">add_text</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">nangles</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+    <span class="n">displacement_factor</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">show_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span>
+    <span class="n">movie_filename</span><span class="o">=</span><span class="s2">&quot;plane_vib.gif&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_pyvista_mesh_004.png" srcset="../../_images/sphx_glr_pyvista_mesh_004.png" alt="pyvista mesh" class = "sphx-glr-single-img"/><p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>/opt/hostedtoolcache/Python/3.8.15/x64/lib/python3.8/site-packages/ansys/mapdl/reader/rst.py:994: UserWarning: The ``nangles`` kwarg is depreciated and ``n_frames`` should be used instead.
+  warnings.warn(&#39;The ``nangles`` kwarg is depreciated and ``n_frames`` &#39;
+
+Rendering animation:   0%|          | 0/30 [00:00&lt;?, ?it/s]
+Rendering animation:   3%|3         | 1/30 [00:00&lt;00:07,  4.11it/s]
+Rendering animation:   7%|6         | 2/30 [00:00&lt;00:05,  5.43it/s]
+Rendering animation:  10%|#         | 3/30 [00:00&lt;00:04,  5.58it/s]
+Rendering animation:  13%|#3        | 4/30 [00:00&lt;00:04,  5.95it/s]
+Rendering animation:  17%|#6        | 5/30 [00:00&lt;00:04,  6.11it/s]
+Rendering animation:  20%|##        | 6/30 [00:01&lt;00:03,  6.02it/s]
+Rendering animation:  23%|##3       | 7/30 [00:01&lt;00:03,  6.00it/s]
+Rendering animation:  27%|##6       | 8/30 [00:01&lt;00:03,  5.93it/s]
+Rendering animation:  30%|###       | 9/30 [00:01&lt;00:03,  5.80it/s]
+Rendering animation:  33%|###3      | 10/30 [00:01&lt;00:03,  5.71it/s]
+Rendering animation:  37%|###6      | 11/30 [00:01&lt;00:03,  5.74it/s]
+Rendering animation:  40%|####      | 12/30 [00:02&lt;00:03,  5.82it/s]
+Rendering animation:  43%|####3     | 13/30 [00:02&lt;00:02,  5.83it/s]
+Rendering animation:  47%|####6     | 14/30 [00:02&lt;00:02,  6.00it/s]
+Rendering animation:  50%|#####     | 15/30 [00:02&lt;00:02,  6.18it/s]
+Rendering animation:  53%|#####3    | 16/30 [00:02&lt;00:02,  6.09it/s]
+Rendering animation:  57%|#####6    | 17/30 [00:02&lt;00:02,  6.40it/s]
+Rendering animation:  60%|######    | 18/30 [00:03&lt;00:01,  6.45it/s]
+Rendering animation:  63%|######3   | 19/30 [00:03&lt;00:01,  6.45it/s]
+Rendering animation:  67%|######6   | 20/30 [00:03&lt;00:01,  6.32it/s]
+Rendering animation:  70%|#######   | 21/30 [00:03&lt;00:01,  6.32it/s]
+Rendering animation:  73%|#######3  | 22/30 [00:03&lt;00:01,  6.26it/s]
+Rendering animation:  77%|#######6  | 23/30 [00:03&lt;00:01,  6.09it/s]
+Rendering animation:  80%|########  | 24/30 [00:04&lt;00:01,  5.94it/s]
+Rendering animation:  83%|########3 | 25/30 [00:04&lt;00:00,  5.85it/s]
+Rendering animation:  87%|########6 | 26/30 [00:04&lt;00:00,  5.82it/s]
+Rendering animation:  90%|######### | 27/30 [00:04&lt;00:00,  5.94it/s]
+Rendering animation:  93%|#########3| 28/30 [00:04&lt;00:00,  6.05it/s]
+Rendering animation:  97%|#########6| 29/30 [00:04&lt;00:00,  6.04it/s]
+Rendering animation: 100%|##########| 30/30 [00:04&lt;00:00,  6.16it/s]
+Rendering animation: 100%|##########| 30/30 [00:05&lt;00:00,  5.86it/s]
+
+[(1.5773502691896262, 1.5773502691896262, 1.5773502691896262),
+ (0.0, 0.0, 0.0),
+ (0.0, 0.0, 1.0)]
+</pre></div>
+</div>
+<p>stop mapdl</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  10.204 seconds)</p>
+<div class="sphx-glr-footer class sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-00-mapdl-examples-pyvista-mesh-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/828b545ae4ff247e8e05d3d672265cbf/pyvista_mesh.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">pyvista_mesh.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/9712ef245263a637023ecb7924cb758c/pyvista_mesh.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">pyvista_mesh.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+              </article>
+              
+
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright (c) 2022 ANSYS, Inc. All rights reserved.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.4.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>
