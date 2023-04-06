@@ -535,9 +535,45 @@ class MeshGrpc:
         if self._chunk_size:
             chunk_size = self._chunk_size
 
-        request = anskernel.StreamRequest(chunk_size=chunk_size)
-        chunks = self._mapdl._stub.Nodes(request)
-        nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
+        if "BEAM" in self._mapdl.etlist().upper():
+            # There are beam elements, we are going to avoid the gRPC method.
+
+            max_node_num = np.max(self._mapdl.mesh.nnum_all)
+            nnodes = self._mapdl.mesh.n_node
+
+            with self._mapdl.non_interactive:
+                # mapdl.dim("node_loc", "array", nnodes, 3)
+                self._mapdl.dim("node_loc", "array", max_node_num, 3)
+                self._mapdl.starvget("mask", "node", "", "NSEL")
+                self._mapdl.vmask("mask")
+                self._mapdl.starvget("node_loc(1,1)", "node", 1, "loc", "x")
+                self._mapdl.vmask("mask")
+                self._mapdl.starvget("node_loc(1,2)", "node", 1, "loc", "y")
+                self._mapdl.vmask("mask")
+                self._mapdl.starvget("node_loc(1,3)", "node", 1, "loc", "z")
+
+                # compress node location array removing nodes that do not exist with the mask array
+                self._mapdl.dim(
+                    "node_loc_compress",
+                    "array",
+                    nnodes,
+                    3,
+                    0,
+                )
+                self._mapdl.vmask("mask")
+                self._mapdl.vfun("node_loc_compress(1,1)", "comp", "node_loc(1,1)")
+                self._mapdl.vmask("mask")
+                self._mapdl.vfun("node_loc_compress(1,2)", "comp", "node_loc(1,2)")
+                self._mapdl.vmask("mask")
+                self._mapdl.vfun("node_loc_compress(1,3)", "comp", "node_loc(1,3)")
+
+            nodes = self._mapdl.parameters["node_loc_compress"]
+
+        else:
+            request = anskernel.StreamRequest(chunk_size=chunk_size)
+            chunks = self._mapdl._stub.Nodes(request)
+            nodes = parse_chunks(chunks, np.double).reshape(-1, 3)
+
         return nodes
 
     def _update_cache_elem(self):

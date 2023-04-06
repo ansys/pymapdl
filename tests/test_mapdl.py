@@ -1871,3 +1871,13 @@ def test_force_output(mapdl):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_no_middle_sides_nodes_in_mesh_nodes(mapdl, cleared):
+    mapdl.input(pymapdl.examples.verif_files.vmfiles["vm10"])
+
+    mapdl.post1()
+    text = "\n".join(mapdl.nlist().splitlines()[5:])
+    nlist = np.array([np.fromstring(each, sep=" ") for each in text.splitlines()])
+
+    assert np.allclose(nlist[:, 1:4], mapdl.mesh.nodes, rtol=1e-3)
