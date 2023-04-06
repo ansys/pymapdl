@@ -1,6 +1,8 @@
 """Test MAPDL interface"""
 import os
 from pathlib import Path
+import re
+import shutil
 import time
 
 from ansys.mapdl.reader import examples
@@ -12,6 +14,7 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import examples
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
@@ -1871,3 +1874,20 @@ def test_force_output(mapdl):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_igesin_whitespace(mapdl, cleared, tmpdir):
+    bracket_file = examples.download_bracket()
+    assert os.path.isfile(bracket_file)
+
+    # moving to another location
+    tmpdir_ = tmpdir.mkdir("directory with white spaces")
+    fname = os.path.basename(bracket_file)
+    dest = os.path.join(tmpdir_, fname)
+    shutil.copy(bracket_file, dest)
+
+    # Reading file
+    mapdl.aux15()
+    out = mapdl.igesin(dest)
+    n_ent = re.findall(r"TOTAL NUMBER OF ENTITIES \s*=\s*(\d*)", out)
+    assert int(n_ent[0]) > 0
