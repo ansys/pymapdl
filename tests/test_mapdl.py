@@ -14,7 +14,6 @@ from pyvista import PolyData
 from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import examples
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
@@ -1877,7 +1876,7 @@ def test_force_output(mapdl):
 
 
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
-    bracket_file = examples.download_bracket()
+    bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
 
     # moving to another location
