@@ -535,7 +535,10 @@ class MeshGrpc:
         if self._chunk_size:
             chunk_size = self._chunk_size
 
-        if "BEAM" in self._mapdl.etlist().upper():
+        with self._mapdl.force_output:
+            etlist = self._mapdl.etlist()
+
+        if etlist and "BEAM" in etlist.upper():
             # There are beam elements, we are going to avoid the gRPC method.
 
             max_node_num = np.max(self._mapdl.mesh.nnum_all)
