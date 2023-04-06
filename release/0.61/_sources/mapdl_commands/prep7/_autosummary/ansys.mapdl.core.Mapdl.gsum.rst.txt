@@ -1,6 +1,0 @@
-﻿gsum
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gsum

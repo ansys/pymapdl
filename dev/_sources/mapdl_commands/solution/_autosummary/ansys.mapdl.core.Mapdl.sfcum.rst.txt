@@ -1,6 +1,0 @@
-﻿sfcum
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sfcum

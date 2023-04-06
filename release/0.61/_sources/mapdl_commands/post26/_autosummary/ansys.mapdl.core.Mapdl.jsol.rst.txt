@@ -1,6 +1,0 @@
-﻿jsol
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.jsol

@@ -1,6 +1,0 @@
-﻿source
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.source

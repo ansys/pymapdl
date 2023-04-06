@@ -1,6 +1,0 @@
-﻿large
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.large

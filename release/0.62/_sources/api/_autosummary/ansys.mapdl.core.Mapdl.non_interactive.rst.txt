@@ -1,6 +1,0 @@
-﻿non\_interactive
-================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Mapdl.non_interactive

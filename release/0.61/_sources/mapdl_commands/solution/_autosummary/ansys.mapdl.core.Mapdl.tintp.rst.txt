@@ -1,6 +1,0 @@
-﻿tintp
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tintp

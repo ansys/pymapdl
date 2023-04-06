@@ -1,6 +1,0 @@
-﻿rmroptions
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rmroptions

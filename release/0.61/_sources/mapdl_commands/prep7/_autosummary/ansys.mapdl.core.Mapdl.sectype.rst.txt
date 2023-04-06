@@ -1,6 +1,0 @@
-﻿sectype
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sectype

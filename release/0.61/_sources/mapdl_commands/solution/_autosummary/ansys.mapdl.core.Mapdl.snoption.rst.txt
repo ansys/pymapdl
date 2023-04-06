@@ -1,6 +1,0 @@
-﻿snoption
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.snoption

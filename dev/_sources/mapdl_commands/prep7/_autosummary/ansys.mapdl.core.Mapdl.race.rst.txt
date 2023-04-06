@@ -1,6 +1,0 @@
-﻿race
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.race

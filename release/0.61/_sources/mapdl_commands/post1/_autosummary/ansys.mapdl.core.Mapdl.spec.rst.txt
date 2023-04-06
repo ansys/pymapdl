@@ -1,6 +1,0 @@
-﻿spec
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.spec

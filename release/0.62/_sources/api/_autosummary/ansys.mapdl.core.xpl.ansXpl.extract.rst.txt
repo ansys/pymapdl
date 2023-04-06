@@ -1,6 +1,0 @@
-extract
-=======
-
-.. currentmodule:: ansys.mapdl.core.xpl
-
-.. automethod:: ansXpl.extract

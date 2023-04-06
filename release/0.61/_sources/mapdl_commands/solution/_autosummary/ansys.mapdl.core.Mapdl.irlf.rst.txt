@@ -1,6 +1,0 @@
-﻿irlf
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.irlf

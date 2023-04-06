@@ -1,6 +1,0 @@
-﻿cfwrite
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cfwrite

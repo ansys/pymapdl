@@ -1,6 +1,0 @@
-temperature\_cnv
-================
-
-.. currentmodule:: ansys.mapdl.core.solution
-
-.. autoproperty:: Solution.temperature_cnv

@@ -1,6 +1,0 @@
-﻿edvel
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edvel

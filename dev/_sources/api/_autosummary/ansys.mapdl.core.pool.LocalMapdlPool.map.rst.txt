@@ -1,6 +1,0 @@
-map
-===
-
-.. currentmodule:: ansys.mapdl.core.pool
-
-.. automethod:: LocalMapdlPool.map

@@ -1,6 +1,0 @@
-﻿vsum
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vsum

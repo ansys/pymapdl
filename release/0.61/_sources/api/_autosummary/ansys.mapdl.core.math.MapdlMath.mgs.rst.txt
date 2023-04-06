@@ -1,6 +1,0 @@
-mgs
-===
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: MapdlMath.mgs

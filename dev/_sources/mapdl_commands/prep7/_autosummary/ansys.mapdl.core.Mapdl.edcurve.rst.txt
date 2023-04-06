@@ -1,6 +1,0 @@
-﻿edcurve
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edcurve

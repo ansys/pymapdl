@@ -1,6 +1,0 @@
-﻿bsplin
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bsplin

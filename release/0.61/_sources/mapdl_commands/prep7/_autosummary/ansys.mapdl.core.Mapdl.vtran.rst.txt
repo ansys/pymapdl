@@ -1,6 +1,0 @@
-﻿vtran
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vtran

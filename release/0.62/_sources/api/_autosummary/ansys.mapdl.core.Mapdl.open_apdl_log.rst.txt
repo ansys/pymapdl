@@ -1,6 +1,0 @@
-﻿open\_apdl\_log
-===============
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.open_apdl_log

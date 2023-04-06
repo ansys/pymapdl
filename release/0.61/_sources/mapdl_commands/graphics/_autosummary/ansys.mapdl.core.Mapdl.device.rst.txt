@@ -1,6 +1,0 @@
-﻿device
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.device

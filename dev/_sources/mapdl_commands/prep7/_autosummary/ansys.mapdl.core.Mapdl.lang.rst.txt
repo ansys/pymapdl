@@ -1,6 +1,0 @@
-﻿lang
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lang

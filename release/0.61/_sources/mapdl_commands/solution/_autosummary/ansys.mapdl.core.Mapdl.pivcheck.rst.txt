@@ -1,6 +1,0 @@
-﻿pivcheck
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pivcheck

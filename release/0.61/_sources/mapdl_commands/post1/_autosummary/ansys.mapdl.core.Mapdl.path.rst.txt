@@ -1,6 +1,0 @@
-﻿path
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.path

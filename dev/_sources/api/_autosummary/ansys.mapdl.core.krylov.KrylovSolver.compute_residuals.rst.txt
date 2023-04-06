@@ -1,6 +1,0 @@
-compute\_residuals
-==================
-
-.. currentmodule:: ansys.mapdl.core.krylov
-
-.. automethod:: KrylovSolver.compute_residuals

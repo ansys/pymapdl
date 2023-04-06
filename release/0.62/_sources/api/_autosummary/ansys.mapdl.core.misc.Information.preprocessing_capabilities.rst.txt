@@ -1,6 +1,0 @@
-﻿preprocessing\_capabilities
-===========================
-
-.. currentmodule:: ansys.mapdl.core.misc
-
-.. autoproperty:: Information.preprocessing_capabilities

@@ -1,6 +1,0 @@
-﻿BCS
-===
-
-.. currentmodule:: ansys.mapdl.core.plotting
-
-.. autodata:: BCS

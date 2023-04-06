@@ -1,6 +1,0 @@
-std\_out\_handler
-=================
-
-.. currentmodule:: ansys.mapdl.core.logging
-
-.. autoattribute:: Logger.std_out_handler

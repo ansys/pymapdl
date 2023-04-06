@@ -1,6 +1,0 @@
-ekey
-====
-
-.. currentmodule:: ansys.mapdl.core.mesh_grpc
-
-.. autoproperty:: MeshGrpc.ekey

@@ -1,6 +1,0 @@
-﻿cmplot
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cmplot

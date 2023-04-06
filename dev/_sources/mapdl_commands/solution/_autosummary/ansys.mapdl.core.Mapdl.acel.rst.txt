@@ -1,6 +1,0 @@
-﻿acel
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.acel

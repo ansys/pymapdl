@@ -1,6 +1,0 @@
-﻿triad
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.triad

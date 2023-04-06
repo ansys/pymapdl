@@ -1,6 +1,0 @@
-load\_step\_options
-===================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Information.load_step_options

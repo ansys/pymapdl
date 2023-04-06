@@ -1,6 +1,0 @@
-﻿rmrstatus
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rmrstatus

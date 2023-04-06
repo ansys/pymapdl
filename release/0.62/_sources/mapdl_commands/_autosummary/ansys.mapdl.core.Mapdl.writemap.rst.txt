@@ -1,6 +1,0 @@
-﻿writemap
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.writemap

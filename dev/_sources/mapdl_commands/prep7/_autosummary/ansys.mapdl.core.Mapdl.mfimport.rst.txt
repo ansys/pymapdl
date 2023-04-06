@@ -1,6 +1,0 @@
-﻿mfimport
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfimport

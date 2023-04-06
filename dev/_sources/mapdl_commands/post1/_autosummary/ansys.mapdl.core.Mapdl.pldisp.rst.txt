@@ -1,6 +1,0 @@
-﻿pldisp
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pldisp

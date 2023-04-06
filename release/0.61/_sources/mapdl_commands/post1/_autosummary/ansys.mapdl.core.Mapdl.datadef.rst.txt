@@ -1,6 +1,0 @@
-﻿datadef
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.datadef

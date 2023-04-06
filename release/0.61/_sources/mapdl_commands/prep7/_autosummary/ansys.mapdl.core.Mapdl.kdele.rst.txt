@@ -1,6 +1,0 @@
-﻿kdele
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.kdele

@@ -1,6 +1,0 @@
-element\_displacement
-=====================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. automethod:: PostProcessing.element_displacement

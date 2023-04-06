@@ -1,6 +1,0 @@
-﻿hptcreate
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.hptcreate

@@ -1,6 +1,0 @@
-﻿cbtmp
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cbtmp

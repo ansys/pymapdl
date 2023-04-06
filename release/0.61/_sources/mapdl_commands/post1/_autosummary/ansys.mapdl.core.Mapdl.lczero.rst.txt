@@ -1,6 +1,0 @@
-﻿lczero
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lczero

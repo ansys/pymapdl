@@ -1,6 +1,0 @@
-titles
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Information.titles

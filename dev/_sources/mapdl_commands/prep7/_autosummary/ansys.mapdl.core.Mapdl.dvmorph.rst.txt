@@ -1,6 +1,0 @@
-﻿dvmorph
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dvmorph

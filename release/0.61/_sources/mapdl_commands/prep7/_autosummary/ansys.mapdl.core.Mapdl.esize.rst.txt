@@ -1,6 +1,0 @@
-﻿esize
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.esize

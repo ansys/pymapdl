@@ -1,6 +1,0 @@
-﻿latt
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.latt

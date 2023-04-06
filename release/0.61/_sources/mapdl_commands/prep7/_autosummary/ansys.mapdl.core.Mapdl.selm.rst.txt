@@ -1,6 +1,0 @@
-﻿selm
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.selm

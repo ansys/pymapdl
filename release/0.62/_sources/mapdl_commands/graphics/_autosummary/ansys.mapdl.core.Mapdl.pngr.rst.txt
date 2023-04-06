@@ -1,6 +1,0 @@
-﻿pngr
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pngr

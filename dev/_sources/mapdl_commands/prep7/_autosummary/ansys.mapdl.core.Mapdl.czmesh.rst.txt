@@ -1,6 +1,0 @@
-﻿czmesh
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.czmesh

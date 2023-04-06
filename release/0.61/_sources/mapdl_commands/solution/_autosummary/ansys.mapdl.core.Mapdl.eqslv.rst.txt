@@ -1,6 +1,0 @@
-﻿eqslv
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.eqslv

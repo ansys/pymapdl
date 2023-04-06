@@ -1,6 +1,0 @@
-﻿secoffset
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.secoffset

@@ -1,6 +1,0 @@
-﻿lccat
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lccat

@@ -1,6 +1,0 @@
-﻿force
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.force

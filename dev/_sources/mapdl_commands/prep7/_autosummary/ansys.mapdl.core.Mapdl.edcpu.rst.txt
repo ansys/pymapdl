@@ -1,6 +1,0 @@
-﻿edcpu
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edcpu

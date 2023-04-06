@@ -1,6 +1,0 @@
-﻿syp
-===
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.syp

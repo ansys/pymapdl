@@ -1,6 +1,0 @@
-﻿mesh
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Mapdl.mesh

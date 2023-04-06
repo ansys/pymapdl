@@ -1,6 +1,0 @@
-﻿anmode
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.anmode

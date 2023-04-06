@@ -1,6 +1,0 @@
-﻿gropt
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gropt

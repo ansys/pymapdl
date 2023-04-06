@@ -1,6 +1,0 @@
-﻿lovlap
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lovlap

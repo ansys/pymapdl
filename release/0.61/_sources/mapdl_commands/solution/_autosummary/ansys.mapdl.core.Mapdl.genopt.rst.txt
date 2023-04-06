@@ -1,6 +1,0 @@
-﻿genopt
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.genopt

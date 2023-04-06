@@ -1,6 +1,0 @@
-﻿eddc
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.eddc

@@ -1,6 +1,0 @@
-﻿sfdele
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sfdele

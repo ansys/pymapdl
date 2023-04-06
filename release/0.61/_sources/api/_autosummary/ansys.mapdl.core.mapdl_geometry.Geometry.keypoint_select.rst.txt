@@ -1,6 +1,0 @@
-keypoint\_select
-================
-
-.. currentmodule:: ansys.mapdl.core.mapdl_geometry
-
-.. automethod:: Geometry.keypoint_select

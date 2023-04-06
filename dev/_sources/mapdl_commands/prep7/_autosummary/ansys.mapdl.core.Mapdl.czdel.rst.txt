@@ -1,6 +1,0 @@
-﻿czdel
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.czdel

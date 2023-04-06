@@ -1,6 +1,0 @@
-plot\_nodal\_plastic\_eqv\_strain
-=================================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. automethod:: PostProcessing.plot_nodal_plastic_eqv_strain

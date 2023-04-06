@@ -1,6 +1,0 @@
-﻿knode
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.knode

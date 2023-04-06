@@ -1,6 +1,0 @@
-﻿kmodif
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.kmodif

@@ -1,6 +1,0 @@
-﻿cbmd
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cbmd

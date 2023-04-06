@@ -1,6 +1,0 @@
-﻿mfmap
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfmap

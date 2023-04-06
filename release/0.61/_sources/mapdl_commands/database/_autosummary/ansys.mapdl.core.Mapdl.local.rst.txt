@@ -1,6 +1,0 @@
-﻿local
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.local

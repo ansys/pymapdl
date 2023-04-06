@@ -1,6 +1,0 @@
-﻿download
-========
-
-.. currentmodule:: ansys.mapdl.core.mapdl_grpc
-
-.. automethod:: MapdlGrpc.download

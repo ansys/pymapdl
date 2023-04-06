@@ -1,6 +1,0 @@
-﻿cycopt
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cycopt

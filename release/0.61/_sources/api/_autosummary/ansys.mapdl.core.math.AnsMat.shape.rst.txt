@@ -1,6 +1,0 @@
-shape
-=====
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. autoproperty:: AnsMat.shape

@@ -1,6 +1,0 @@
-numcpu
-======
-
-.. currentmodule:: ansys.mapdl.core.parameters
-
-.. autoproperty:: Parameters.numcpu

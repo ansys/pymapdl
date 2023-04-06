@@ -1,6 +1,0 @@
-﻿sffun
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sffun

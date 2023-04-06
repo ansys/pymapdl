@@ -1,6 +1,0 @@
-﻿eextrude
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.eextrude

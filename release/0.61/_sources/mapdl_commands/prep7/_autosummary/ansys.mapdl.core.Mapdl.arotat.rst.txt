@@ -1,6 +1,0 @@
-﻿arotat
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.arotat

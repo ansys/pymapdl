@@ -1,6 +1,0 @@
-n\_area
-=======
-
-.. currentmodule:: ansys.mapdl.core.mapdl_geometry
-
-.. autoproperty:: Geometry.n_area

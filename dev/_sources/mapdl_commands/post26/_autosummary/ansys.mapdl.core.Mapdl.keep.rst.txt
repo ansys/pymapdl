@@ -1,6 +1,0 @@
-﻿keep
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.keep

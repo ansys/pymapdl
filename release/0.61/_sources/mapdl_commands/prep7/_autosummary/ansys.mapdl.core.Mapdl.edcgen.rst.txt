@@ -1,6 +1,0 @@
-﻿edcgen
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edcgen

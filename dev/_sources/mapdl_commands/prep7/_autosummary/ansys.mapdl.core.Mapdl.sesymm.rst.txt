@@ -1,6 +1,0 @@
-﻿sesymm
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sesymm

@@ -1,6 +1,0 @@
-﻿fccheck
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fccheck

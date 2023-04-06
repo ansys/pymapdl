@@ -1,6 +1,0 @@
-﻿light
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.light

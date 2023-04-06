@@ -1,6 +1,0 @@
-﻿mdplot
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mdplot

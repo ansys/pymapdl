@@ -1,6 +1,0 @@
-﻿get\_value
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.get_value

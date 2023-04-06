@@ -1,6 +1,0 @@
-plot\_nodal\_rotation
-=====================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. automethod:: PostProcessing.plot_nodal_rotation

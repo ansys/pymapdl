@@ -1,6 +1,0 @@
-solve
-=====
-
-.. currentmodule:: ansys.mapdl.core.krylov
-
-.. automethod:: KrylovSolver.solve

@@ -1,6 +1,0 @@
-﻿solution\_options
-=================
-
-.. currentmodule:: ansys.mapdl.core.misc
-
-.. autoproperty:: Information.solution_options

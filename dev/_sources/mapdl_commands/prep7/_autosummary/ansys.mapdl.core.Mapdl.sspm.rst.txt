@@ -1,6 +1,0 @@
-﻿sspm
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sspm

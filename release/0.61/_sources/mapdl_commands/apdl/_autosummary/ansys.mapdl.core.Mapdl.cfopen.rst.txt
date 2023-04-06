@@ -1,6 +1,0 @@
-﻿cfopen
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cfopen

@@ -1,6 +1,0 @@
-﻿dist
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dist

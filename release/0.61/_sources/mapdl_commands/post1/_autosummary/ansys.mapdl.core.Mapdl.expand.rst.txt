@@ -1,6 +1,0 @@
-﻿expand
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.expand

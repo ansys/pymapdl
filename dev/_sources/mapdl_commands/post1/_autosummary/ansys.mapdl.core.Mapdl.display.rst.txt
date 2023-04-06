@@ -1,6 +1,0 @@
-﻿display
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.display

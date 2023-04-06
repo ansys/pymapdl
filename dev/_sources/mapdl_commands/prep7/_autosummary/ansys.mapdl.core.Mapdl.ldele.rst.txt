@@ -1,6 +1,0 @@
-﻿ldele
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ldele

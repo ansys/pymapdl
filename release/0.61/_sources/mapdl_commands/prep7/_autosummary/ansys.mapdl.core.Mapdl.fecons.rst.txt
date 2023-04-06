@@ -1,6 +1,0 @@
-﻿fecons
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fecons

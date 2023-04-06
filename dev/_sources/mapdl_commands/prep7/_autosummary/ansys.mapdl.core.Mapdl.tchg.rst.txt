@@ -1,6 +1,0 @@
-﻿tchg
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tchg

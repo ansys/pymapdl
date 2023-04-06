@@ -1,6 +1,0 @@
-﻿selist
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.selist

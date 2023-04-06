@@ -1,6 +1,0 @@
-﻿dig
-===
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dig

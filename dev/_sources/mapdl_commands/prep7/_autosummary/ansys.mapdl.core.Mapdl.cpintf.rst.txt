@@ -1,6 +1,0 @@
-﻿cpintf
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cpintf

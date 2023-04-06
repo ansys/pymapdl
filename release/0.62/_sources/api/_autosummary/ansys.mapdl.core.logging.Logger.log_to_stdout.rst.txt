@@ -1,6 +1,0 @@
-log\_to\_stdout
-===============
-
-.. currentmodule:: ansys.mapdl.core.logging
-
-.. automethod:: Logger.log_to_stdout

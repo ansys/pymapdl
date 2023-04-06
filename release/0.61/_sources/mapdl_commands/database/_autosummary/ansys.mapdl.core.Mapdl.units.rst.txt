@@ -1,6 +1,0 @@
-﻿units
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.units

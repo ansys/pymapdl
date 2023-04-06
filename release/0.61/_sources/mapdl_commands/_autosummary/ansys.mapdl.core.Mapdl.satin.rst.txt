@@ -1,6 +1,0 @@
-﻿satin
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.satin

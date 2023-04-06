@@ -1,6 +1,0 @@
-﻿pcopy
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pcopy

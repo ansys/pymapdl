@@ -1,6 +1,0 @@
-﻿vfact
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vfact

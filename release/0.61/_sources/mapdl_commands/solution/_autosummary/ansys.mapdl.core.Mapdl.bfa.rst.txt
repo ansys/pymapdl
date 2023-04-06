@@ -1,6 +1,0 @@
-﻿bfa
-===
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bfa

@@ -1,6 +1,0 @@
-﻿general\_plotter
-================
-
-.. currentmodule:: ansys.mapdl.core.plotting
-
-.. autofunction:: general_plotter

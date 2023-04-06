@@ -1,6 +1,0 @@
-﻿nocolor
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nocolor

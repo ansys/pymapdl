@@ -1,6 +1,0 @@
-gensubspace
-===========
-
-.. currentmodule:: ansys.mapdl.core.krylov
-
-.. automethod:: KrylovSolver.gensubspace

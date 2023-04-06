@@ -1,6 +1,0 @@
-﻿lstr
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lstr

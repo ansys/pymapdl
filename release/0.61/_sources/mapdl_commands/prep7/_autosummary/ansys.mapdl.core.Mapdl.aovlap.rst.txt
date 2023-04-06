@@ -1,6 +1,0 @@
-﻿aovlap
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.aovlap

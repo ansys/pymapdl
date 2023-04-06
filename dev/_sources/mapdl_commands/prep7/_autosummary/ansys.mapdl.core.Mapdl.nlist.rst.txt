@@ -1,6 +1,0 @@
-﻿nlist
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nlist

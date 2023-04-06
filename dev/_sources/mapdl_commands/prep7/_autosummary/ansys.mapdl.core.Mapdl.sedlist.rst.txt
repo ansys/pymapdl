@@ -1,6 +1,0 @@
-﻿sedlist
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sedlist

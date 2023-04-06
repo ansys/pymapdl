@@ -1,6 +1,0 @@
-﻿mfem
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfem

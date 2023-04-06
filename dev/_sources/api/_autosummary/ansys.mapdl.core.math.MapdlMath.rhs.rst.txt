@@ -1,6 +1,0 @@
-rhs
-===
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: MapdlMath.rhs

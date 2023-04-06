@@ -1,6 +1,0 @@
-﻿mshmid
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mshmid

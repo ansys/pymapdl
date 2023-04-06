@@ -1,6 +1,0 @@
-﻿fill
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fill

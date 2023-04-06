@@ -1,6 +1,0 @@
-﻿gsbdata
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gsbdata

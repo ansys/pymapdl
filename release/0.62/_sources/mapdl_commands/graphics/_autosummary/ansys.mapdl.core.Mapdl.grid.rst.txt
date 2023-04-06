@@ -1,6 +1,0 @@
-﻿grid
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.grid

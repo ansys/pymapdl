@@ -1,6 +1,0 @@
-﻿dump
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dump

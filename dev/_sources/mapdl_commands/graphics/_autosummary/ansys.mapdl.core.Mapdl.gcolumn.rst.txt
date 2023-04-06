@@ -1,6 +1,0 @@
-﻿gcolumn
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gcolumn

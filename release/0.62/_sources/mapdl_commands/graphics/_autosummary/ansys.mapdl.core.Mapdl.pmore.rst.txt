@@ -1,6 +1,0 @@
-﻿pmore
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pmore

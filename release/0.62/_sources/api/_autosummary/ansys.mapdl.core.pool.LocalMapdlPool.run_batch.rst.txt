@@ -1,6 +1,0 @@
-run\_batch
-==========
-
-.. currentmodule:: ansys.mapdl.core.pool
-
-.. automethod:: LocalMapdlPool.run_batch

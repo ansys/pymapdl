@@ -1,6 +1,0 @@
-﻿ptxy
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ptxy

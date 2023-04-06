@@ -1,6 +1,0 @@
-﻿nrlsum
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nrlsum

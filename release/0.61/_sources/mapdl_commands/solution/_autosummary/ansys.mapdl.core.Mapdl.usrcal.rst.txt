@@ -1,6 +1,0 @@
-﻿usrcal
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.usrcal

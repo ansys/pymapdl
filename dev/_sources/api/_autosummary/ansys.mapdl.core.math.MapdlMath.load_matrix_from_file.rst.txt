@@ -1,6 +1,0 @@
-load\_matrix\_from\_file
-========================
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: MapdlMath.load_matrix_from_file

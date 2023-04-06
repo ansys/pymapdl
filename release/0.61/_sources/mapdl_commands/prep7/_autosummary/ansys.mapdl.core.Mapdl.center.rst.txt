@@ -1,6 +1,0 @@
-﻿center
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.center

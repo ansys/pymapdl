@@ -1,6 +1,0 @@
-﻿mascale
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mascale

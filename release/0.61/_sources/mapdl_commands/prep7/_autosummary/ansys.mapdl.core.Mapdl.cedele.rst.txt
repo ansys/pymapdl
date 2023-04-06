@@ -1,6 +1,0 @@
-﻿cedele
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cedele

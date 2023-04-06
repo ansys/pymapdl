@@ -1,6 +1,0 @@
-plot\_element\_stress
-=====================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. automethod:: PostProcessing.plot_element_stress

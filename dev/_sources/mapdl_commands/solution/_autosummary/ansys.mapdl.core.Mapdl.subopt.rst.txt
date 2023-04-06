@@ -1,6 +1,0 @@
-﻿subopt
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.subopt

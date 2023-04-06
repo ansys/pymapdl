@@ -1,6 +1,0 @@
-﻿prenergy
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.prenergy

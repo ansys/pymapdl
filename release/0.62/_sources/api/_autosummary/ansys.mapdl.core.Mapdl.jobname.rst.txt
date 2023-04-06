@@ -1,6 +1,0 @@
-﻿jobname
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Mapdl.jobname

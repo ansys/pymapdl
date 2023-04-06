@@ -1,6 +1,0 @@
-﻿edipart
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edipart

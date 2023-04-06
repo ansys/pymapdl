@@ -1,6 +1,0 @@
-﻿dset
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dset

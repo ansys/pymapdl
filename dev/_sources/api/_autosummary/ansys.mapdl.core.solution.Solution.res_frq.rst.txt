@@ -1,6 +1,0 @@
-res\_frq
-========
-
-.. currentmodule:: ansys.mapdl.core.solution
-
-.. autoproperty:: Solution.res_frq
