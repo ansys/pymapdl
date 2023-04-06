@@ -1,6 +1,0 @@
-﻿seopt
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.seopt

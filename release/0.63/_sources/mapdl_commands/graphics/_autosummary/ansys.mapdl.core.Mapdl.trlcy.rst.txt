@@ -1,6 +1,0 @@
-﻿trlcy
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.trlcy

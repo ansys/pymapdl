@@ -1,6 +1,0 @@
-﻿etdele
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.etdele

@@ -1,6 +1,0 @@
-﻿trpdel
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.trpdel

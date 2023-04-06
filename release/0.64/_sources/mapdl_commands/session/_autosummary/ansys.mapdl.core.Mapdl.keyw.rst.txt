@@ -1,6 +1,0 @@
-﻿keyw
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.keyw

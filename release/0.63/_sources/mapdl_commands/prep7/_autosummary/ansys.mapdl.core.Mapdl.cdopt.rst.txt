@@ -1,6 +1,0 @@
-﻿cdopt
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cdopt

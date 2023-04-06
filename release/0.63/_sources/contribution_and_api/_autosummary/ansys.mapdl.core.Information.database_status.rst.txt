@@ -1,6 +1,0 @@
-database\_status
-================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Information.database_status

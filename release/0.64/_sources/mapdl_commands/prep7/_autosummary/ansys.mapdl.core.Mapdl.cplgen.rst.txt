@@ -1,6 +1,0 @@
-﻿cplgen
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cplgen

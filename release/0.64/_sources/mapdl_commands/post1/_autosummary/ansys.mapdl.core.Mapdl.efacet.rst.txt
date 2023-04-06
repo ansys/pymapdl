@@ -1,6 +1,0 @@
-﻿efacet
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.efacet

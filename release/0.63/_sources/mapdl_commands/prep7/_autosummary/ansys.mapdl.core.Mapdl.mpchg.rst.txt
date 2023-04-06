@@ -1,6 +1,0 @@
-﻿mpchg
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mpchg

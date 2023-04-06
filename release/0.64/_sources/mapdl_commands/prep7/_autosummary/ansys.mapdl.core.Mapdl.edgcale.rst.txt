@@ -1,6 +1,0 @@
-﻿edgcale
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edgcale

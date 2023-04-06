@@ -1,6 +1,0 @@
-﻿rmrplot
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rmrplot

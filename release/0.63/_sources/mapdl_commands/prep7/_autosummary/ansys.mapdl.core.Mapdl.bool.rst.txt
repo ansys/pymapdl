@@ -1,6 +1,0 @@
-﻿bool
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bool

@@ -1,6 +1,0 @@
-﻿grtyp
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.grtyp

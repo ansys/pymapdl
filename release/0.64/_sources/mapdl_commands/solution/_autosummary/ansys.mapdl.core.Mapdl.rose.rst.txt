@@ -1,6 +1,0 @@
-﻿rose
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rose

@@ -1,6 +1,0 @@
-﻿lgwrite
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lgwrite

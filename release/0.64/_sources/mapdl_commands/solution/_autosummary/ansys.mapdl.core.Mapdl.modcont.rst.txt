@@ -1,6 +1,0 @@
-﻿modcont
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.modcont

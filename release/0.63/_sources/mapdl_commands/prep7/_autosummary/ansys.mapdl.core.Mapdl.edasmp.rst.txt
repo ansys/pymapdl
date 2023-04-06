@@ -1,6 +1,0 @@
-﻿edasmp
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edasmp

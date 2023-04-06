@@ -1,6 +1,0 @@
-﻿edpvel
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edpvel

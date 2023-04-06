@@ -1,6 +1,0 @@
-﻿rescontrol
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rescontrol

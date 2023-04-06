@@ -1,6 +1,0 @@
-﻿etlist
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.etlist

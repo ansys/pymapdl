@@ -1,6 +1,0 @@
-﻿plchist
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plchist

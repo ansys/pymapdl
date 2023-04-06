@@ -1,6 +1,0 @@
-﻿fcum
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fcum

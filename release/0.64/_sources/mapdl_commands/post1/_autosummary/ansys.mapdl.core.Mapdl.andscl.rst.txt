@@ -1,6 +1,0 @@
-﻿andscl
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.andscl

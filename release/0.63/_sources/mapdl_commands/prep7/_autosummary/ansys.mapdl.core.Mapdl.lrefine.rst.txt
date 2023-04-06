@@ -1,6 +1,0 @@
-﻿lrefine
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lrefine

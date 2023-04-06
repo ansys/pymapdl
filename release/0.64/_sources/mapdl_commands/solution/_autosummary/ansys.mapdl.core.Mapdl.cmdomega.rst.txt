@@ -1,6 +1,0 @@
-﻿cmdomega
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cmdomega

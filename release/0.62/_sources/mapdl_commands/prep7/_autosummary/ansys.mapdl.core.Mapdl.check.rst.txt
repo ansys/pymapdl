@@ -1,6 +1,0 @@
-﻿check
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.check

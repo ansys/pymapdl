@@ -1,6 +1,0 @@
-﻿vitrp
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vitrp

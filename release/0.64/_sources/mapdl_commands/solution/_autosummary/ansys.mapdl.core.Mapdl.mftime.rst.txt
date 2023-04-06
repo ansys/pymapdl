@@ -1,6 +1,0 @@
-﻿mftime
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mftime

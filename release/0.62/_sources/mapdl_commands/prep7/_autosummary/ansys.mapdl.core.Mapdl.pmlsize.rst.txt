@@ -1,6 +1,0 @@
-﻿pmlsize
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pmlsize

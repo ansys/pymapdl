@@ -1,6 +1,0 @@
-﻿lswrite
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lswrite

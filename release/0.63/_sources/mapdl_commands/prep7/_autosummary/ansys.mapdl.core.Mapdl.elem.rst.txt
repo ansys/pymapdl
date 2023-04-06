@@ -1,6 +1,0 @@
-﻿elem
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.elem

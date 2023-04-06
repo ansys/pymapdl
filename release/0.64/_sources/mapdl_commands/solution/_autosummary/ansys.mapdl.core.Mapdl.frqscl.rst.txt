@@ -1,6 +1,0 @@
-﻿frqscl
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.frqscl

@@ -1,6 +1,0 @@
-﻿asol
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.asol

@@ -1,6 +1,0 @@
-﻿gthk
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gthk

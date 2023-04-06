@@ -1,6 +1,0 @@
-﻿lclear
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lclear

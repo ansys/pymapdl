@@ -1,6 +1,0 @@
-﻿autots
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.autots

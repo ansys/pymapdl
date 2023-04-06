@@ -1,6 +1,0 @@
-﻿com
-===
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.com

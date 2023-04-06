@@ -1,6 +1,0 @@
-﻿dnsol
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dnsol

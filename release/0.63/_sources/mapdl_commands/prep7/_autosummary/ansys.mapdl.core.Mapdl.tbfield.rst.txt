@@ -1,6 +1,0 @@
-﻿tbfield
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tbfield

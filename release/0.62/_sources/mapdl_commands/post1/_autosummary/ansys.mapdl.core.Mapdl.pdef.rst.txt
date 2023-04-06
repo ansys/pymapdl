@@ -1,6 +1,0 @@
-﻿pdef
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.pdef

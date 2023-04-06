@@ -1,6 +1,0 @@
-﻿window
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.window

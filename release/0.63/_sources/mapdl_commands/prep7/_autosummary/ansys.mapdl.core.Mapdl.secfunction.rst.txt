@@ -1,6 +1,0 @@
-﻿secfunction
-===========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.secfunction

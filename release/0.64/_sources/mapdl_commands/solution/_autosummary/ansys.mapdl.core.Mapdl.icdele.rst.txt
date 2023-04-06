@@ -1,6 +1,0 @@
-﻿icdele
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.icdele

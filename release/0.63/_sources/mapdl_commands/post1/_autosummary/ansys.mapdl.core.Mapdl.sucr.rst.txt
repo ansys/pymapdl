@@ -1,6 +1,0 @@
-﻿sucr
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sucr

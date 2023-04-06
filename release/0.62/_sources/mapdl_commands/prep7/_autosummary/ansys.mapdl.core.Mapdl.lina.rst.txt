@@ -1,6 +1,0 @@
-﻿lina
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lina

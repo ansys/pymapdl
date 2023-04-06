@@ -1,6 +1,0 @@
-﻿starlist
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.starlist

@@ -1,6 +1,0 @@
-plot\_nodal\_principal\_stress
-==============================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. automethod:: PostProcessing.plot_nodal_principal_stress

@@ -1,6 +1,0 @@
-﻿page
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.page

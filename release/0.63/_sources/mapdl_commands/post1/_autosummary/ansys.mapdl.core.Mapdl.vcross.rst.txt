@@ -1,6 +1,0 @@
-﻿vcross
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vcross

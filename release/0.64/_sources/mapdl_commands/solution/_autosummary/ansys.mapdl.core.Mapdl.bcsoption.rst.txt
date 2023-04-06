@@ -1,6 +1,0 @@
-﻿bcsoption
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bcsoption

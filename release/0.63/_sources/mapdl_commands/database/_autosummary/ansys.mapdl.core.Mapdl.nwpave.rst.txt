@@ -1,6 +1,0 @@
-﻿nwpave
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nwpave

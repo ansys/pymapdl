@@ -1,6 +1,0 @@
-first
-=====
-
-.. currentmodule:: ansys.mapdl.core.database.nodes
-
-.. automethod:: DbNodes.first

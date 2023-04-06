@@ -1,6 +1,0 @@
-﻿kesize
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.kesize

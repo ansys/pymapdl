@@ -1,6 +1,0 @@
-﻿fklist
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fklist

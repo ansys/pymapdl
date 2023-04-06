@@ -1,6 +1,0 @@
-﻿mfexter
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfexter

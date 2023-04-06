@@ -1,6 +1,0 @@
-﻿bss2
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bss2

@@ -1,6 +1,0 @@
-﻿cecmod
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cecmod

@@ -1,6 +1,0 @@
-frequency\_values
-=================
-
-.. currentmodule:: ansys.mapdl.core.post
-
-.. autoproperty:: PostProcessing.frequency_values

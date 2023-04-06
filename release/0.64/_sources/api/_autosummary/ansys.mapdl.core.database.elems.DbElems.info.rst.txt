@@ -1,6 +1,0 @@
-info
-====
-
-.. currentmodule:: ansys.mapdl.core.database.elems
-
-.. automethod:: DbElems.info

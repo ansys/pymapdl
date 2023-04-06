@@ -1,6 +1,0 @@
-﻿mgen
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mgen

@@ -1,6 +1,0 @@
-﻿mpdata
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mpdata

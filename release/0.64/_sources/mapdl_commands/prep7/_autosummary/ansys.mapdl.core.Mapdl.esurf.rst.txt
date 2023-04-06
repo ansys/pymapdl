@@ -1,6 +1,0 @@
-﻿esurf
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.esurf

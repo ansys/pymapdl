@@ -1,6 +1,0 @@
-﻿etcontrol
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.etcontrol

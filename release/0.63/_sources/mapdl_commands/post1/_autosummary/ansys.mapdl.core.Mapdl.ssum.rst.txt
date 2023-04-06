@@ -1,6 +1,0 @@
-﻿ssum
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ssum

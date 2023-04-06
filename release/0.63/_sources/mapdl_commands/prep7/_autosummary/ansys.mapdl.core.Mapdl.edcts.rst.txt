@@ -1,6 +1,0 @@
-﻿edcts
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edcts

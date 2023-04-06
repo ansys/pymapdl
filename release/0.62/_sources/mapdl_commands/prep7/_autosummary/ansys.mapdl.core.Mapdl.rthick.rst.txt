@@ -1,6 +1,0 @@
-﻿rthick
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rthick

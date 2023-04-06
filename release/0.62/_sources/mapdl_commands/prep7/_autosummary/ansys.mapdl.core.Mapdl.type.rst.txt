@@ -1,6 +1,0 @@
-﻿type
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.type

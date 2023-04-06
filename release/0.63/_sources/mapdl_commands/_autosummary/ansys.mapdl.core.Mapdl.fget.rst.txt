@@ -1,6 +1,0 @@
-﻿fget
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.fget

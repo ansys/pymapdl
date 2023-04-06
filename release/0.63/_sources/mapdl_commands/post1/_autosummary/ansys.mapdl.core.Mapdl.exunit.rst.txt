@@ -1,6 +1,0 @@
-﻿exunit
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.exunit

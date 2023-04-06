@@ -1,6 +1,0 @@
-﻿tbpt
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tbpt

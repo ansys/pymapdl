@@ -1,6 +1,0 @@
-﻿adele
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.adele

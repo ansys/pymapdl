@@ -1,6 +1,0 @@
-norm
-====
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: MapdlMath.norm

@@ -1,6 +1,0 @@
-﻿perbc2d
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.perbc2d

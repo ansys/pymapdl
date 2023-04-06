@@ -1,6 +1,0 @@
-﻿tread
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tread

@@ -1,6 +1,0 @@
-﻿iclist
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.iclist

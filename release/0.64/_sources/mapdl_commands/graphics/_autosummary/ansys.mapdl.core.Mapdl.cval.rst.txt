@@ -1,6 +1,0 @@
-﻿cval
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cval

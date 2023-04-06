@@ -1,6 +1,0 @@
-﻿eddrelax
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.eddrelax

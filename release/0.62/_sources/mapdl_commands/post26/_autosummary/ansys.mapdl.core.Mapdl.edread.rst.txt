@@ -1,6 +1,0 @@
-﻿edread
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edread

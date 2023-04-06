@@ -1,6 +1,0 @@
-﻿nrrang
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nrrang

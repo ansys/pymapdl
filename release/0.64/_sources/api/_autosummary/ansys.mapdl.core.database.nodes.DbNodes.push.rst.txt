@@ -1,6 +1,0 @@
-push
-====
-
-.. currentmodule:: ansys.mapdl.core.database.nodes
-
-.. automethod:: DbNodes.push

@@ -1,6 +1,0 @@
-﻿prscontrol
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.prscontrol

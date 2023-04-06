@@ -1,6 +1,0 @@
-﻿ALLOWED\_TARGETS
-================
-
-.. currentmodule:: ansys.mapdl.core.plotting
-
-.. autodata:: ALLOWED_TARGETS

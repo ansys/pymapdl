@@ -1,6 +1,0 @@
-﻿gopr
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gopr

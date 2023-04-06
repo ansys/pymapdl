@@ -1,6 +1,0 @@
-﻿psdcom
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.psdcom

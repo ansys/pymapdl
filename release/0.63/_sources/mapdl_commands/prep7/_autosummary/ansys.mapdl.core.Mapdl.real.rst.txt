@@ -1,6 +1,0 @@
-﻿real
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.real

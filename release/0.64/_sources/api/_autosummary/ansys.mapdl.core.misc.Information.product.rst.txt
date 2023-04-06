@@ -1,6 +1,0 @@
-﻿product
-=======
-
-.. currentmodule:: ansys.mapdl.core.misc
-
-.. autoproperty:: Information.product

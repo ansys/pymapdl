@@ -1,6 +1,0 @@
-zeros
-=====
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: AnsMat.zeros

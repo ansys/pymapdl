@@ -1,6 +1,0 @@
-﻿blc5
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.blc5

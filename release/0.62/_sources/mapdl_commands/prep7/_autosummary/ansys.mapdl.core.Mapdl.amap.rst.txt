@@ -1,6 +1,0 @@
-﻿amap
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.amap

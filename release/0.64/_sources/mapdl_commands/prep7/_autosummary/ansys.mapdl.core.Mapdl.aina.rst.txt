@@ -1,6 +1,0 @@
-﻿aina
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.aina

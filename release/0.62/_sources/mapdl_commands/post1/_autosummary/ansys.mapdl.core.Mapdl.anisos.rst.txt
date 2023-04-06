@@ -1,6 +1,0 @@
-﻿anisos
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.anisos

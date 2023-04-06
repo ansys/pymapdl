@@ -1,6 +1,0 @@
-﻿prerr
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.prerr

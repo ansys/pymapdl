@@ -1,6 +1,0 @@
-﻿rmuse
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rmuse

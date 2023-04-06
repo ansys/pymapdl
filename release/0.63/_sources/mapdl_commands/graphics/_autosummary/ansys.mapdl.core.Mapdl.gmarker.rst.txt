@@ -1,6 +1,0 @@
-﻿gmarker
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gmarker

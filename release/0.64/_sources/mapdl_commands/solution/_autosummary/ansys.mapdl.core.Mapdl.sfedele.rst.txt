@@ -1,6 +1,0 @@
-﻿sfedele
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sfedele

@@ -1,6 +1,0 @@
-﻿sfalist
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sfalist

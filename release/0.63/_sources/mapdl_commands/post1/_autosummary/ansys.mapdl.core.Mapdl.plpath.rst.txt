@@ -1,6 +1,0 @@
-﻿plpath
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plpath

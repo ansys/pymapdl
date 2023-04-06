@@ -1,6 +1,0 @@
-﻿spdamp
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.spdamp

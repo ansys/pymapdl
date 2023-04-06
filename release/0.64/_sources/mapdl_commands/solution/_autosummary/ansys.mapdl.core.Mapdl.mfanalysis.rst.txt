@@ -1,6 +1,0 @@
-﻿mfanalysis
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfanalysis

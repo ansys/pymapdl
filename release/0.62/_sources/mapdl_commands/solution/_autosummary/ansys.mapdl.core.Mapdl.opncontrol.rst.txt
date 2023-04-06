@@ -1,6 +1,0 @@
-﻿opncontrol
-==========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.opncontrol

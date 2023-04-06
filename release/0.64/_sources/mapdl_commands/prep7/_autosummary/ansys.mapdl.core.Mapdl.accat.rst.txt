@@ -1,6 +1,0 @@
-﻿accat
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.accat

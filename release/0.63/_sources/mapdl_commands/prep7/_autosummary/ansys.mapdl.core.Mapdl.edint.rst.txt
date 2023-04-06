@@ -1,6 +1,0 @@
-﻿edint
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edint

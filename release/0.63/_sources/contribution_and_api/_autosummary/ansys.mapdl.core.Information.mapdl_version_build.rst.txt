@@ -1,6 +1,0 @@
-mapdl\_version\_build
-=====================
-
-.. currentmodule:: ansys.mapdl.core
-
-.. autoproperty:: Information.mapdl_version_build

@@ -1,6 +1,0 @@
-﻿veorient
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.veorient

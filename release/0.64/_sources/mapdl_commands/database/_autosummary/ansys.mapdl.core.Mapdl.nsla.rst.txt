@@ -1,6 +1,0 @@
-﻿nsla
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.nsla

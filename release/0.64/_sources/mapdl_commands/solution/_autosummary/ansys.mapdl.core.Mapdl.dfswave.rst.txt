@@ -1,6 +1,0 @@
-﻿dfswave
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dfswave

@@ -1,6 +1,0 @@
-﻿inquire
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.inquire

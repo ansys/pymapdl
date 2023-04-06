@@ -1,6 +1,0 @@
-﻿lptn
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lptn

@@ -1,6 +1,0 @@
-﻿mfinter
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfinter

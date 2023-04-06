@@ -1,6 +1,0 @@
-﻿mpamod
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mpamod

@@ -1,6 +1,0 @@
-﻿lsbl
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lsbl

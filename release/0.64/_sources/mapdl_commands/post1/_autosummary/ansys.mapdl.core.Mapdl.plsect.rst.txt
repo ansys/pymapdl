@@ -1,6 +1,0 @@
-﻿plsect
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plsect

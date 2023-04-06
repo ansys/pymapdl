@@ -1,6 +1,0 @@
-﻿imesh
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.imesh

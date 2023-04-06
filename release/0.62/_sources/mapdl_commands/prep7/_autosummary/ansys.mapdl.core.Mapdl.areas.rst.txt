@@ -1,6 +1,0 @@
-﻿areas
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.areas

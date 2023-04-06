@@ -1,6 +1,0 @@
-﻿eresx
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.eresx

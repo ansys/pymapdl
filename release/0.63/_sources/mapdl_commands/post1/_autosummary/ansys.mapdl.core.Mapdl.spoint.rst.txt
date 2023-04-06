@@ -1,6 +1,0 @@
-﻿spoint
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.spoint

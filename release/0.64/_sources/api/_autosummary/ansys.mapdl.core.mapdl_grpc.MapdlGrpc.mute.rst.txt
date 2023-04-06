@@ -1,6 +1,0 @@
-﻿mute
-====
-
-.. currentmodule:: ansys.mapdl.core.mapdl_grpc
-
-.. autoproperty:: MapdlGrpc.mute

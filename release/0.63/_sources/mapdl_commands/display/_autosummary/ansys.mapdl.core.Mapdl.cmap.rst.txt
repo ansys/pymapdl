@@ -1,6 +1,0 @@
-﻿cmap
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cmap

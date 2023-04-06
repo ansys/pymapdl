@@ -1,6 +1,0 @@
-﻿plcplx
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plcplx

@@ -1,6 +1,0 @@
-﻿seclib
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.seclib

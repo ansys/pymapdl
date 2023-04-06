@@ -1,6 +1,0 @@
-﻿edcmore
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edcmore

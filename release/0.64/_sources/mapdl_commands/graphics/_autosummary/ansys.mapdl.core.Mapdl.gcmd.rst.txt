@@ -1,6 +1,0 @@
-﻿gcmd
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.gcmd

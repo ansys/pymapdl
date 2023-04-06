@@ -1,6 +1,0 @@
-﻿rigid
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rigid

@@ -1,6 +1,0 @@
-﻿plotting
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plotting

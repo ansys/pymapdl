@@ -1,6 +1,0 @@
-﻿adgl
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.adgl

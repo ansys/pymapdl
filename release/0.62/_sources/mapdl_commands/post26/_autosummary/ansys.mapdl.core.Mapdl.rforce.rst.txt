@@ -1,6 +1,0 @@
-﻿rforce
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rforce

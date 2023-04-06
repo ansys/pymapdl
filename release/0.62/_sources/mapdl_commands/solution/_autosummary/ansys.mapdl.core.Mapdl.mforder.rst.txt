@@ -1,6 +1,0 @@
-﻿mforder
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mforder

@@ -1,6 +1,0 @@
-﻿ascres
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ascres

@@ -1,6 +1,0 @@
-﻿ednrot
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ednrot

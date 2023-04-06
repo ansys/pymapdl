@@ -1,6 +1,0 @@
-﻿lcfact
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.lcfact

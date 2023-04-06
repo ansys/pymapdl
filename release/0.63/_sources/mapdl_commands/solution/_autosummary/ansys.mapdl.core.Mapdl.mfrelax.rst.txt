@@ -1,6 +1,0 @@
-﻿mfrelax
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.mfrelax

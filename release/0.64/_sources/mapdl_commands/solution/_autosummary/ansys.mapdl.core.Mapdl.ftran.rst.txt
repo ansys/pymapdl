@@ -1,6 +1,0 @@
-﻿ftran
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.ftran

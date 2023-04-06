@@ -1,6 +1,0 @@
-﻿nsel
-====
-
-.. currentmodule:: ansys.mapdl.core.inline_functions
-
-.. automethod:: Query.nsel

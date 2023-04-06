@@ -1,6 +1,0 @@
-﻿wpoffs
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.wpoffs

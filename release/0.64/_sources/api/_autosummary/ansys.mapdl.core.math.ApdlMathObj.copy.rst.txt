@@ -1,6 +1,0 @@
-copy
-====
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: ApdlMathObj.copy

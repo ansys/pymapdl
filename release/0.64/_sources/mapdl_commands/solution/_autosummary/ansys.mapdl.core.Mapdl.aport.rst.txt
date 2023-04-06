@@ -1,6 +1,0 @@
-﻿aport
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.aport

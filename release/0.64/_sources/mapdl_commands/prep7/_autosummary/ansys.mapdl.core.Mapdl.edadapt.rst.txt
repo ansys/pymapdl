@@ -1,6 +1,0 @@
-﻿edadapt
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.edadapt

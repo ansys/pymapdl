@@ -1,6 +1,0 @@
-﻿remove
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.remove

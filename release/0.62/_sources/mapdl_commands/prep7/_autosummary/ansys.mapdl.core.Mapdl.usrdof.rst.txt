@@ -1,6 +1,0 @@
-﻿usrdof
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.usrdof

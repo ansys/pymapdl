@@ -1,6 +1,0 @@
-add
-===
-
-.. currentmodule:: ansys.mapdl.core.math
-
-.. automethod:: MapdlMath.add

@@ -1,6 +1,0 @@
-﻿tbcopy
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tbcopy

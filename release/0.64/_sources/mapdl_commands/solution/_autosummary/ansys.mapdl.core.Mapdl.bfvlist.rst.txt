@@ -1,6 +1,0 @@
-﻿bfvlist
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bfvlist

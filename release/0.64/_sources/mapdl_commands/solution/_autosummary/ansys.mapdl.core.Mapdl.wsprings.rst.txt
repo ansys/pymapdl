@@ -1,6 +1,0 @@
-﻿wsprings
-========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.wsprings

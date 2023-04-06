@@ -1,6 +1,0 @@
-﻿secdata
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.secdata

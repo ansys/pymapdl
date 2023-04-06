@@ -1,6 +1,0 @@
-﻿deltim
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.deltim

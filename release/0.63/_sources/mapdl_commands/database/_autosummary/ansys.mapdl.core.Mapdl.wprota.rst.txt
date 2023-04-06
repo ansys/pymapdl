@@ -1,6 +1,0 @@
-﻿wprota
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.wprota

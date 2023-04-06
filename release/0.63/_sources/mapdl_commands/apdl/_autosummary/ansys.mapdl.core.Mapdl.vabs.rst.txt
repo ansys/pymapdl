@@ -1,6 +1,0 @@
-﻿vabs
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vabs

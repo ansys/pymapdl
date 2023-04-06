@@ -1,6 +1,0 @@
-﻿aoffst
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.aoffst

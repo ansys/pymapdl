@@ -1,6 +1,0 @@
-﻿msolve
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.msolve

@@ -1,6 +1,0 @@
-﻿bf
-==
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bf

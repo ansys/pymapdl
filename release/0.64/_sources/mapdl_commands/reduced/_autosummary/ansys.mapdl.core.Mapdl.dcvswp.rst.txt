@@ -1,6 +1,0 @@
-﻿dcvswp
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.dcvswp

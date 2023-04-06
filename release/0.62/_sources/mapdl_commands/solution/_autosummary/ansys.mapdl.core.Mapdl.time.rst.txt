@@ -1,6 +1,0 @@
-﻿time
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.time

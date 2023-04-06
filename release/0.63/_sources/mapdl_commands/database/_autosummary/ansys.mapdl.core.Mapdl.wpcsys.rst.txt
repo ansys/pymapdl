@@ -1,6 +1,0 @@
-﻿wpcsys
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.wpcsys

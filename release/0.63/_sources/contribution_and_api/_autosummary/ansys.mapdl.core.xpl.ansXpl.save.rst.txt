@@ -1,6 +1,0 @@
-save
-====
-
-.. currentmodule:: ansys.mapdl.core.xpl
-
-.. automethod:: ansXpl.save

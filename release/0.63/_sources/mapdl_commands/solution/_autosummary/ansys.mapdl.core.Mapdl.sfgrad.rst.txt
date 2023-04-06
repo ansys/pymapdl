@@ -1,6 +1,0 @@
-﻿sfgrad
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.sfgrad

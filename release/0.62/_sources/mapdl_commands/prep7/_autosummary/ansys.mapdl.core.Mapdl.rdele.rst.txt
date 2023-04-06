@@ -1,6 +1,0 @@
-﻿rdele
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.rdele

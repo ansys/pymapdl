@@ -1,6 +1,0 @@
-﻿synchro
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.synchro

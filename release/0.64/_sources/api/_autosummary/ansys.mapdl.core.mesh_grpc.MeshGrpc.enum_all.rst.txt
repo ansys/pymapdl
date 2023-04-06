@@ -1,6 +1,0 @@
-enum\_all
-=========
-
-.. currentmodule:: ansys.mapdl.core.mesh_grpc
-
-.. autoproperty:: MeshGrpc.enum_all

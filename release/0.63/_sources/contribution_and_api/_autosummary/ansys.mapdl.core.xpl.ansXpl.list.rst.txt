@@ -1,6 +1,0 @@
-list
-====
-
-.. currentmodule:: ansys.mapdl.core.xpl
-
-.. automethod:: ansXpl.list

@@ -1,6 +1,0 @@
-﻿post26
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.post26

@@ -1,6 +1,0 @@
-﻿tble
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.tble

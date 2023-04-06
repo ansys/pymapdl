@@ -1,6 +1,0 @@
-﻿aux12
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.aux12

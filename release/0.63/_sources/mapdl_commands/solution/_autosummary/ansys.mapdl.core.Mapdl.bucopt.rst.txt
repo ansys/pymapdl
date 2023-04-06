@@ -1,6 +1,0 @@
-﻿bucopt
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bucopt

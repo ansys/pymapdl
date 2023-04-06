@@ -1,6 +1,0 @@
-﻿plvar
-=====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.plvar

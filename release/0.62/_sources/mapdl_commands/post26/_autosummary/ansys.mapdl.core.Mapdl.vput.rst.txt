@@ -1,6 +1,0 @@
-﻿vput
-====
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.vput

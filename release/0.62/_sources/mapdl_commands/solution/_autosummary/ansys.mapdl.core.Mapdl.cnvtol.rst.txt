@@ -1,6 +1,0 @@
-﻿cnvtol
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cnvtol

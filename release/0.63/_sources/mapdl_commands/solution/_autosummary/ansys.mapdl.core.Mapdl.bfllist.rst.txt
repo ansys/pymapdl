@@ -1,6 +1,0 @@
-﻿bfllist
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.bfllist

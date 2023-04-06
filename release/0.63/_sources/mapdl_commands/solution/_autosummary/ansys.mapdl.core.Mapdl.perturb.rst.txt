@@ -1,6 +1,0 @@
-﻿perturb
-=======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.perturb

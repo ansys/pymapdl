@@ -1,6 +1,0 @@
-﻿numexp
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.numexp

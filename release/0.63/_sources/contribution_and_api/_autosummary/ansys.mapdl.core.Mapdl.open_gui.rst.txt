@@ -1,6 +1,0 @@
-﻿open\_gui
-=========
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.open_gui

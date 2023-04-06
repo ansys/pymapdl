@@ -1,6 +1,0 @@
-﻿cylind
-======
-
-.. currentmodule:: ansys.mapdl.core
-
-.. automethod:: Mapdl.cylind
