@@ -73,6 +73,9 @@ These commands are listed in Table-1_.
 | **Listing**    |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
 
+.. warning:: If you use these methods, you might obtain a lower
+   precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
+
 Here's a simple example that demonstrates usage:
 
 .. code:: pycon
