@@ -1999,7 +1999,9 @@ class MapdlGrpc(_MapdlCore):
             self._log.warning("Unable to remove temporary file %s", tmp_filename)
 
     @protect_grpc
-    def _get(self, entity, entnum, item1, it1num, item2, it2num):
+    def _get(
+        self, entity, entnum, item1, it1num, item2, it2num, item3, it3num, item4, it4num
+    ):
         """Sends gRPC *Get request.
 
         .. warning::
@@ -2012,7 +2014,7 @@ class MapdlGrpc(_MapdlCore):
                 "Exit non_interactive mode before using this method."
             )
 
-        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
         while self._get_lock:
