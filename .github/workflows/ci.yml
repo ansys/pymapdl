@@ -138,7 +138,7 @@ jobs:
       - name: "Retrieve PyMAPDL version"
         id: version
         run: |
-          echo "PYMAPDL_VERSION={$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')}" >> $GITHUB_OUTPUT
+          echo "PYMAPDL_VERSION=$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
       - name: "Cache examples"
