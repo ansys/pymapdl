@@ -526,9 +526,12 @@ class MeshGrpc:
 
     def nodes_in_coordinate_system(self, CS_id):
         """Return nodes in the desired coordinate system."""
-        self._mapdl.parameters["__node_loc__"] = self.nodes
-        self._mapdl.vfun("__node_loc_cs__", "local", "__node_loc__", CS_id)
-        return self._mapdl.parameters["__node_loc_cs__"]
+        if CS_id == 0:
+            return self.nodes
+        else:
+            self._mapdl.parameters["__node_loc__"] = self.nodes
+            self._mapdl.vfun("__node_loc_cs__", "local", "__node_loc__", CS_id)
+            return self._mapdl.parameters["__node_loc_cs__"]
 
     @property
     def nodes_rotation(self):
