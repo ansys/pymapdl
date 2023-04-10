@@ -83,6 +83,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: doc-style
     timeout-minutes: 35
+    outputs:
+      PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -134,10 +136,10 @@ jobs:
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: "Retrieve PyMAPDL version"
+        id: version
         run: |
           echo "{PYMAPDL_VERSION}={$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')}" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
-        id: version
 
       - name: "Cache examples"
         uses: actions/cache@v3
