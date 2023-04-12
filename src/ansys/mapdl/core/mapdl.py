@@ -2236,6 +2236,10 @@ class _MapdlCore(Commands):
         it1num="",
         item2="",
         it2num="",
+        item3="",
+        it3num="",
+        item4="",
+        it4num="",
         **kwargs,
     ):
         """Runs the MAPDL GET command and returns a Python value.
@@ -2279,6 +2283,25 @@ class _MapdlCore(Commands):
             any). Some ``item2`` labels do not require an ``it2num``
             value.
 
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
+
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
+
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
+
         Returns
         -------
         float
@@ -2305,6 +2328,10 @@ class _MapdlCore(Commands):
             it1num=it1num,
             item2=item2,
             it2num=it2num,
+            item3=item3,
+            it3num=it3num,
+            item4=item4,
+            it4num=it4num,
             **kwargs,
         )
 
@@ -2318,6 +2345,9 @@ class _MapdlCore(Commands):
         item2="",
         it2num="",
         item3="",
+        it3num="",
+        item4="",
+        it4num="",
         **kwargs,
     ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
@@ -2396,6 +2426,25 @@ class _MapdlCore(Commands):
             the item for which data are to be retrieved. Almost all items do
             not require this level of information.
 
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
+
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
+
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
+
         Returns
         -------
         float
@@ -2420,9 +2469,7 @@ class _MapdlCore(Commands):
 
         self._check_parameter_name(par)
 
-        command = (
-            f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
-        )
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
         kwargs["mute"] = False
 
         # Checking printout is not suppressed by checking "wrinqr" flag.

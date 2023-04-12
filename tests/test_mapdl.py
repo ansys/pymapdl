@@ -1,6 +1,8 @@
 """Test MAPDL interface"""
 import os
 from pathlib import Path
+import re
+import shutil
 import time
 
 from ansys.mapdl.reader import examples
@@ -1881,3 +1883,20 @@ def test_no_middle_sides_nodes_in_mesh_nodes(mapdl, cleared):
     nlist = np.array([np.fromstring(each, sep=" ") for each in text.splitlines()])
 
     assert np.allclose(nlist[:, 1:4], mapdl.mesh.nodes, rtol=1e-3)
+
+
+def test_igesin_whitespace(mapdl, cleared, tmpdir):
+    bracket_file = pymapdl.examples.download_bracket()
+    assert os.path.isfile(bracket_file)
+
+    # moving to another location
+    tmpdir_ = tmpdir.mkdir("directory with white spaces")
+    fname = os.path.basename(bracket_file)
+    dest = os.path.join(tmpdir_, fname)
+    shutil.copy(bracket_file, dest)
+
+    # Reading file
+    mapdl.aux15()
+    out = mapdl.igesin(dest)
+    n_ent = re.findall(r"TOTAL NUMBER OF ENTITIES \s*=\s*(\d*)", out)
+    assert int(n_ent[0]) > 0

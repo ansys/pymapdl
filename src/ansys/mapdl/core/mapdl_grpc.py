@@ -1999,7 +1999,9 @@ class MapdlGrpc(_MapdlCore):
             self._log.warning("Unable to remove temporary file %s", tmp_filename)
 
     @protect_grpc
-    def _get(self, entity, entnum, item1, it1num, item2, it2num):
+    def _get(
+        self, entity, entnum, item1, it1num, item2, it2num, item3, it3num, item4, it4num
+    ):
         """Sends gRPC *Get request.
 
         .. warning::
@@ -2012,7 +2014,7 @@ class MapdlGrpc(_MapdlCore):
                 "Exit non_interactive mode before using this method."
             )
 
-        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
         while self._get_lock:
@@ -2796,24 +2798,27 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
         """Wrap the IGESIN command to handle the remote case."""
-        if self._local:
-            out = super().igesin(fname, ext, **kwargs)
-        elif not fname:
-            out = super().igesin(**kwargs)
-        elif fname in self.list_files():
-            # check if this file is already remote
-            out = super().igesin(fname, ext, **kwargs)
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        if " " in fname:
+            # Bug in reading file paths with whitespaces.
+            # https://github.com/pyansys/pymapdl/issues/1601
+
+            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+            self._log.debug(msg_)
+
+            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+            self.input_strings(cmd)
+
+            out = super().igesin(fname="__iges_file__(1)", **kwargs)
+            self.run("__iges_file__ =")  # cleaning array.
+            self.run("! Ending \\IGESIN whitespace patch.")
+            return out
         else:
-            if not os.path.isfile(fname):
-                raise FileNotFoundError(
-                    f"Unable to find {fname}.  You may need to "
-                    "input the full path to the file."
-                )
-
-            basename = self.upload(fname, progress_bar=False)
-            out = super().igesin(basename, **kwargs)
-
-        return out
+            return super().igesin(fname=filename, **kwargs)
 
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(
