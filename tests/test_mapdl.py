@@ -1879,10 +1879,9 @@ def test_no_middle_sides_nodes_in_mesh_nodes(mapdl, cleared):
     mapdl.input(pymapdl.examples.verif_files.vmfiles["vm10"])
 
     mapdl.post1()
-    text = "\n".join(mapdl.nlist().splitlines()[5:])
-    nlist = np.array([np.fromstring(each, sep=" ") for each in text.splitlines()])
+    nlist = mapdl.nlist().to_array()[:, 1:4]
 
-    assert np.allclose(nlist[:, 1:4], mapdl.mesh.nodes, rtol=1e-3)
+    assert np.allclose(nlist, mapdl.mesh.nodes, rtol=1e-3)
 
 
 def test_igesin_whitespace(mapdl, cleared, tmpdir):

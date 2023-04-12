@@ -215,7 +215,7 @@ def test_rlblock_num(mapdl, cube_solve):
         out = mapdl.mesh.rlblock_num
 
 
-def test_nodes_in_current_CS(mapdl, cleared, cube_solve):
+def test_nodes_in_current_CS(mapdl, cube_solve):
     for icoord in range(6):
         mapdl.csys(icoord)
         mapdl.dsys(icoord)
