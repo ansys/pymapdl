@@ -58,7 +58,7 @@ tests = [
     "matplotlib==3.7.1",
     "scipy==1.10.1",
     "pandas==2.0.0",
-    "pytest==7.2.2",
+    "pytest==7.3.0",
     "pytest-cov==4.0.0",
     "pyvista==0.38.5",
     "pyansys-tools-report==0.5.0",
