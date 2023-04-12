@@ -705,7 +705,7 @@ def test_magicwords(output, last_element):
 def test_nlist_to_array(mapdl, beam_solve):
     # This kinternal include the internal points, so it matches the
     # number of nodes with midside nodes.
-    nlist = mapdl.nlist(kinternal="internal")
+    nlist = mapdl.nlist()
     assert isinstance(nlist.to_list(), list)
     assert isinstance(nlist.to_array(), np.ndarray)
 
