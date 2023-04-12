@@ -5,6 +5,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from ansys.mapdl.core import examples
+
 
 def test_empty_model(mapdl):
     mapdl.clear()
@@ -211,3 +213,34 @@ def test_rlblock(mapdl, cube_solve):
 def test_rlblock_num(mapdl, cube_solve):
     with pytest.raises(NotImplementedError):
         out = mapdl.mesh.rlblock_num
+
+
+def test_nodes_in_current_CS(mapdl, cleared, cube_solve):
+    for icoord in range(6):
+        mapdl.csys(icoord)
+        mapdl.dsys(icoord)
+        assert np.allclose(
+            mapdl.mesh.nodes_in_current_CS, mapdl.nlist().to_array()[:, 1:4], atol=1e-3
+        )  # nlist is not as accurate as 'nodes_in_current_CS'
+
+
+def test_nodal_rotation(mapdl, cleared):
+    with open(examples.verif_files.vmfiles["vm275"], "r") as fid:
+        vm = fid.read()
+
+    vm = vm.lower().replace("nrotate,all", "nrotate,all\n/eof")
+    mapdl.finish()
+    mapdl.input_strings(vm)
+    nrotations = mapdl.mesh.nodes_rotation
+    nrotation_ref = np.array(
+        [
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+            [0.00, 0.00, 4.00],
+        ]
+    )
+    assert np.allclose(nrotation_ref, nrotations[:7, :])
