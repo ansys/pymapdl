@@ -2804,11 +2804,11 @@ class MapdlGrpc(_MapdlCore):
             # Bug in reading file paths with whitespaces.
             # https://github.com/pyansys/pymapdl/issues/1601
 
-            msg_ = "Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
             self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
             self._log.debug(msg_)
 
-            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), {filename}"
+            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
             self.input_strings(cmd)
 
             out = super().igesin(fname="__iges_file__(1)", **kwargs)
