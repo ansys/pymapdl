@@ -2800,11 +2800,11 @@ class MapdlGrpc(_MapdlCore):
         fname = self._get_file_name(fname=fname, ext=ext)
         filename = self._get_file_path(fname, progress_bar=False)
 
-        if " " in filename:
+        if " " in fname:
             # Bug in reading file paths with whitespaces.
             # https://github.com/pyansys/pymapdl/issues/1601
 
-            msg_ = "Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository."
+            msg_ = "Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
             self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
             self._log.debug(msg_)
 
