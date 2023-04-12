@@ -538,7 +538,7 @@ class MeshGrpc:
         with self._mapdl.force_output:
             etlist = self._mapdl.etlist()
 
-        if True or (etlist and "BEAM" in etlist.upper()):
+        if etlist and "BEAM" in etlist.upper():
             # There are beam elements, we are going to avoid the gRPC method.
 
             max_node_num = np.max(self._mapdl.mesh.nnum_all)
@@ -571,13 +571,6 @@ class MeshGrpc:
                 self._mapdl.vfun("node_loc_compress(1,3)", "comp", "node_loc(1,3)")
 
             nodes = self._mapdl.parameters["node_loc_compress"]
-
-            # testing
-            request = anskernel.StreamRequest(chunk_size=chunk_size)
-            chunks = self._mapdl._stub.Nodes(request)
-            nodes_grpc = parse_chunks(chunks, np.double).reshape(-1, 3)
-
-            assert np.allclose(nodes, nodes_grpc)
 
         else:
             request = anskernel.StreamRequest(chunk_size=chunk_size)
