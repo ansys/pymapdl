@@ -262,7 +262,7 @@ jobs:
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0']
         extended_testing:
-          - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
             mapdl-version: 'v21.1.1'
