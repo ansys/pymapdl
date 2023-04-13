@@ -137,7 +137,8 @@ def _parse_vtk(
         mesh._elem, mesh._elem_off, type_ref, mesh.nnum, True
     )  # for reset_midside
 
-    nodes, angles, nnum = mesh.nodes, mesh.node_angles, mesh.nnum
+    nodes, angles = mesh.nodes, mesh.node_angles
+    nnum = mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(int)
 
     # fix missing midside
     if np.any(cells == -1):
