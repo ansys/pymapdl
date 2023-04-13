@@ -869,3 +869,82 @@ def contact_solve(mapdl):
     mapdl.allsel()
     mapdl.set("last")
     mapdl.mute = False
+
+
+@pytest.fixture(scope="function")
+def cuadratic_beam_problem(mapdl):
+    mapdl.clear()
+
+    # Enter verification example mode and the pre-processing routine.
+    mapdl.prep7()
+
+    # Type of analysis: static.
+    mapdl.antype("STATIC")
+
+    # Element type: BEAM188.
+    mapdl.et(1, "BEAM188")
+
+    # Special Features are defined by keyoptions of beam element:
+
+    # KEYOPT(3)
+    # Shape functions along the length:
+    # Cubic
+    mapdl.keyopt(1, 3, 3)  # Cubic shape function
+
+    # KEYOPT(9)
+    # Output control for values extrapolated to the element
+    # and section nodes:
+    # Same as KEYOPT(9) = 1 plus stresses and strains at all section nodes
+    mapdl.keyopt(1, 9, 3, mute=True)
+
+    mapdl.mp("EX", 1, 30e6)
+    mapdl.mp("PRXY", 1, 0.3)
+    print(mapdl.mplist())
+
+    w_f = 1.048394965
+    w_w = 0.6856481
+    sec_num = 1
+    mapdl.sectype(sec_num, "BEAM", "I", "ISection")
+    mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
+
+    # Define nodes
+    for node_num in range(1, 6):
+        mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
+
+    # Define one node for the orientation of the beam cross-section.
+    orient_node = mapdl.n(6, 60, 1)
+
+    # Print the list of the created nodes.
+    print(mapdl.nlist())
+
+    for elem_num in range(1, 5):
+        mapdl.e(elem_num, elem_num + 1, orient_node)
+
+    # Print the list of the created elements.
+    print(mapdl.elist())
+
+    # Display elements with their nodes numbers.
+    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+
+    # BC for the beams seats
+    mapdl.d(2, "UX", lab2="UY")
+    mapdl.d(4, "UY")
+
+    # BC for all nodes of the beam
+    mapdl.nsel("S", "LOC", "Y", 0)
+    mapdl.d("ALL", "UZ")
+    mapdl.d("ALL", "ROTX")
+    mapdl.d("ALL", "ROTY")
+    mapdl.nsel("ALL")
+
+    # Parametrization of the distributed load.
+    w = 10000 / 12
+
+    # Application of the surface load to the beam element.
+    mapdl.sfbeam(1, 1, "PRES", w)
+    mapdl.sfbeam(4, 1, "PRES", w)
+    mapdl.finish()
+
+    mapdl.run("/SOLU")
+    mapdl.solve()
+    mapdl.finish()
