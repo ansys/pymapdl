@@ -545,7 +545,7 @@ def test_partial_mesh_nnum(mapdl_console, make_block):
     assert np.allclose(allsel_nnum_old, mapdl_console.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl_console, make_block):
+def test_partial_mesh_nnum2(mapdl_console, make_block):
     mapdl_console.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl_console.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl_console.mesh._grid.n_cells == 11
