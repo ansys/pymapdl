@@ -136,10 +136,10 @@ def _parse_vtk(
     nodes, angles = mesh.nodes, mesh.node_angles
     # mesh.nodes include midside nodes whereas mesh.nnum does not.
     # So let's use mapdl.nlist()
-    nnum = mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(int)
+    nnum = mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
 
     offset, celltypes, cells = _reader.ans_vtk_convert(
-        mesh._elem, mesh._elem_off, type_ref, mesh.nnum, True
+        mesh._elem, mesh._elem_off, type_ref, nnum, True
     )  # for reset_midside
 
     # fix missing midside
