@@ -138,6 +138,8 @@ def _parse_vtk(
     )  # for reset_midside
 
     nodes, angles = mesh.nodes, mesh.node_angles
+    # mesh.nodes include midside nodes whereas mesh.nnum does not.
+    # So let's use mapdl.nlist()
     nnum = mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(int)
 
     # fix missing midside
