@@ -22,7 +22,7 @@ env:
   DPF_START_SERVER: False
   DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/pyansys/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
