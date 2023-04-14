@@ -53,7 +53,7 @@ classifiers = [
 
 [project.optional-dependencies]
 tests = [
-    "ansys-dpf-core==0.8.0",
+    "ansys-dpf-core==0.8.1",
     "autopep8==2.0.2",
     "matplotlib==3.7.1",
     "scipy==1.10.1",
@@ -67,7 +67,7 @@ tests = [
 ]
 doc = [
     "sphinx==5.3.0",
-    "ansys-dpf-core==0.8.0",
+    "ansys-dpf-core==0.8.1",
     "ansys-mapdl-reader==0.52.11",
     "ansys-sphinx-theme==0.9.7",
     "grpcio==1.51.1",

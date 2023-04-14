@@ -133,11 +133,11 @@ def _parse_vtk(
                 tshape_label = SHAPE_MAP[tshape_num]
                 type_ref[etype_ind] = TARGE170_MAP.get(tshape_label, 0)
 
-    offset, celltypes, cells = _reader.ans_vtk_convert(
-        mesh._elem, mesh._elem_off, type_ref, mesh.nnum, True
-    )  # for reset_midside
-
     nodes, angles, nnum = mesh.nodes, mesh.node_angles, mesh.nnum
+
+    offset, celltypes, cells = _reader.ans_vtk_convert(
+        mesh._elem, mesh._elem_off, type_ref, nnum, True
+    )  # for reset_midside
 
     # fix missing midside
     if np.any(cells == -1):
@@ -158,7 +158,13 @@ def _parse_vtk(
         grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes, deep=True)
 
     # Store original ANSYS element and node information
-    grid.point_data["ansys_node_num"] = nnum
+    try:
+        grid.point_data["ansys_node_num"] = nnum
+    except ValueError:
+        grid.point_data["ansys_node_num"] = (
+            mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
+        )
+
     grid.cell_data["ansys_elem_num"] = mesh.enum
     grid.cell_data["ansys_real_constant"] = mesh.elem_real_constant
     grid.cell_data["ansys_material_type"] = mesh.material_type
