@@ -21,7 +21,7 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
-  DOCKER_PACKAGE: ghcr.io/pyansys/pymapdl/mapdl
+  DOCKER_PACKAGE: ghcr.io/pyansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v22.2.0
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
@@ -260,7 +260,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0']
         extended_testing:
           - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
