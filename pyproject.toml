@@ -84,7 +84,7 @@ doc = [
     "pythreejs==2.4.2",
     "pyvista==0.38.5",
     "sphinx-autobuild==2021.3.14",
-    "sphinx-autodoc-typehints==1.22",
+    "sphinx-autodoc-typehints==1.23.0",
     "sphinx-copybutton==0.5.1",
     
     "sphinx-gallery==0.12.2",
