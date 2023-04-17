@@ -38,7 +38,7 @@ use these issue templates:
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email `PyAnsys Core team <pyansys_core_>`_.
+To reach the project support team, email |pyansys_contact|.
 
 Viewing PyMAPDL documentation
 =============================
