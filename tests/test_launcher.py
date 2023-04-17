@@ -16,17 +16,9 @@ from ansys.mapdl.core.launcher import (
     _verify_version,
     _version_from_path,
     find_ansys,
-    get_ansys_path,
-    get_default_ansys,
-    get_default_ansys_path,
-    get_default_ansys_version,
     get_start_instance,
-    is_common_executable_path,
-    is_valid_executable_path,
     launch_mapdl,
-    save_ansys_path,
     update_env_vars,
-    warn_uncommon_executable_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
 from ansys.mapdl.core.misc import get_ansys_bin
@@ -301,72 +293,6 @@ def test_remove_temp_files_fail(tmpdir):
     assert os.listdir(old_path)
 
 
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.parametrize(
-    "exe_loc",
-    [
-        pytest.param(None, id="Normal execution. Return path"),
-    ],
-)
-def test_save_ansys_path(exe_loc):
-    path_ = save_ansys_path(exe_loc)
-
-    assert isinstance(path_, str)
-    assert os.path.exists(path_)
-
-
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.parametrize(
-    "file,result",
-    [
-        ("ansys221", True),
-        ("ansy212", False),
-        ("ansys22", False),
-        ("ansys", False),
-        ("ger123", False),
-    ],
-)
-def test_is_valid_executable_path(tmpdir, file, result):
-    filename = str(tmpdir.mkdir("tmpdir").join(file))
-
-    with open(filename, "w") as fid:
-        fid.write("")
-
-    assert is_valid_executable_path(filename) == result
-
-
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.parametrize(
-    "file_path,result",
-    [
-        pytest.param(
-            "random/v221/ansys/bin/ansys221", True, id="Normal successful case."
-        ),
-        pytest.param("random/random/ansys/bin/ans221", False, id="No vXXX directory"),
-        pytest.param("random/v221/random/bin/ans221", False, id="No ansys directory"),
-        pytest.param("random/v221/ansys/random/ans221", False, id="No bin directory"),
-        pytest.param(
-            "random/v221/ansys/bin/ansys22",
-            False,
-            id="version number incomplete",
-        ),
-        pytest.param("random/v221/ansys/bin/ansys222", False, id="Different version"),
-    ],
-)
-def test_is_common_executable_path(tmpdir, file_path, result):
-    path = os.path.normpath(file_path)
-    path = path.split(os.sep)
-
-    filename = str(
-        tmpdir.mkdir(path[0]).mkdir(path[1]).mkdir(path[2]).mkdir(path[3]).join(path[4])
-    )
-
-    with open(filename, "w") as fid:
-        fid.write("")
-
-    assert is_common_executable_path(filename) == result
-
-
 def test_warn_uncommon_executable_path():
     with pytest.warns(
         UserWarning,
@@ -473,18 +399,19 @@ def test_license_product_argument_p_arg_warning():
         assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
 
 
-def test__verify_version_pass():
-    valid_versions = []
-    valid_versions.extend(list(versions.keys()))
-    valid_versions.extend([each / 10 for each in versions.keys()])
-    valid_versions.extend([str(each) for each in list(versions.keys())])
-    valid_versions.extend([str(each / 10) for each in versions.keys()])
-    valid_versions.extend(list(versions.values()))
+valid_versions = []
+valid_versions.extend(list(versions.keys()))
+valid_versions.extend([each / 10 for each in versions.keys()])
+valid_versions.extend([str(each) for each in list(versions.keys())])
+valid_versions.extend([str(each / 10) for each in versions.keys()])
+valid_versions.extend(list(versions.values()))
 
-    for version in valid_versions:
-        ver = _verify_version(version)
-        assert isinstance(ver, int)
-        assert min(versions.keys()) <= ver <= max(versions.keys())
+
+@pytest.mark.parametrize("version", valid_versions)
+def test__verify_version_pass(version):
+    ver = _verify_version(version)
+    assert isinstance(ver, int)
+    assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
 @pytest.mark.skipif(
@@ -510,17 +437,6 @@ def test_find_ansys(mapdl):
     get_start_instance() is False,
     reason="Skip when start instance is disabled",
 )
-def test_get_ansys():
-    assert get_default_ansys is not None
-    assert get_default_ansys_path is not None
-    assert get_default_ansys_version is not None
-    assert get_ansys_path is not None
-
-
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(version=version, start_timeout=start_timeout)
@@ -536,9 +452,12 @@ def test_raise_exec_path_and_version_launcher():
         launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
 
 
-def test_is_ubuntu():
-    if (
+@pytest.mark.skipif(
+    (
         os.environ.get("ON_LOCAL", "false").lower() == "true"
         and os.environ.get("ON_UBUNTU", "false").lower() == "true"
-    ):
-        assert _is_ubuntu()
+    ),
+    reason="Skip when start instance is disabled",
+)
+def test_is_ubuntu():
+    assert _is_ubuntu()
