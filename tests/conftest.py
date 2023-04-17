@@ -9,7 +9,7 @@ from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
 pytest_plugins = ["pytester"]
 
-from ansys.tools.path import find_ansys
+from ansys.tools.path import find_ansys, get_available_ansys_installations
 import pyvista
 
 from ansys.mapdl import core as pymapdl
@@ -17,7 +17,6 @@ from ansys.mapdl.core.errors import MapdlExitedError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
-    _get_available_base_ansys,
     get_start_instance,
     launch_mapdl,
 )
@@ -247,7 +246,7 @@ def mapdl_console(request):
         raise MapdlRuntimeError(
             '"--console" testing option unavailable.  ' "Only Linux is supported."
         )
-    ansys_base_paths = _get_available_base_ansys()
+    ansys_base_paths = get_available_ansys_installations()
 
     # find a valid version of corba
     console_path = None
@@ -282,7 +281,7 @@ def mapdl_console(request):
 
 @pytest.fixture(scope="session")
 def mapdl_corba(request):
-    ansys_base_paths = _get_available_base_ansys()
+    ansys_base_paths = get_available_ansys_installations()
 
     # find a valid version of corba
     corba_path = None
