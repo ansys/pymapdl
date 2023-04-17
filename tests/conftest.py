@@ -85,11 +85,7 @@ from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 
 valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
 
-EXEC_FILE = None
-for rver in valid_rver:
-    if os.path.isfile(find_ansys(rver)[0]):
-        EXEC_FILE = find_ansys(rver)[0]
-        break
+EXEC_FILE = find_ansys()[0]
 
 # Cache if gRPC MAPDL is installed.
 #
