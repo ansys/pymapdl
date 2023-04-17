@@ -1,7 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
 import atexit
-from glob import glob
 import os
 import platform
 from queue import Empty, Queue
@@ -25,7 +24,7 @@ from ansys.tools.path.path import _version_from_path
 import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
     LockFileException,
@@ -41,7 +40,6 @@ from ansys.mapdl.core.misc import (
     check_valid_port,
     check_valid_start_instance,
     create_temp_dir,
-    is_float,
     random_string,
     threaded,
 )
@@ -721,105 +719,6 @@ def get_start_instance(start_instance_default=True):
         f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance_default}"
     )
     return start_instance_default
-
-
-def _get_available_base_ansys():
-    """Return a dictionary of available Ansys versions with their base paths.
-
-    Returns
-    -------
-    dict[int: str]
-        Return all installed Ansys paths in Windows.
-
-    Notes
-    -----
-
-    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
-
-    The student versions are returned at the end of the dict and with negative value for the version.
-
-    Examples
-    --------
-
-    >>> from ansys.mapdl.core import _get_available_base_ansys
-    >>> _get_available_base_ansys()
-    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
-     212: 'C:\\Program Files\\ANSYS Inc\\v212',
-     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
-
-    Return all installed Ansys paths in Linux.
-
-    >>> _get_available_base_ansys()
-    {194: '/usr/ansys_inc/v194',
-     202: '/usr/ansys_inc/v202',
-     211: '/usr/ansys_inc/v211'}
-    """
-    base_path = None
-    if os.name == "nt":  # pragma: no cover
-        supported_versions = SUPPORTED_ANSYS_VERSIONS
-        # The student version overwrites the AWP_ROOT env var (if it is installed later)
-        # However the priority should be given to the non-student version.
-        awp_roots = []
-        awp_roots_student = []
-
-        for ver in supported_versions:
-            path_ = os.environ.get(f"AWP_ROOT{ver}", "")
-            path_non_student = path_.replace("\\ANSYS Student", "")
-
-            if "student" in path_.lower() and os.path.exists(path_non_student):
-                # Check if also exist a non-student version
-                awp_roots.append([ver, path_non_student])
-                awp_roots_student.insert(0, [-1 * ver, path_])
-
-            else:
-                awp_roots.append([ver, path_])
-
-        awp_roots.extend(awp_roots_student)
-        installed_versions = {
-            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
-        }
-
-        if installed_versions:
-            LOG.debug(
-                f"Found the following installed Ansys versions: {installed_versions}"
-            )
-            return installed_versions
-        else:  # pragma: no cover
-            LOG.debug(
-                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
-            )
-            base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
-            if not os.path.exists(base_path):
-                LOG.debug(
-                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
-                )
-                return {}
-    elif os.name == "posix":
-        for path in LINUX_DEFAULT_DIRS:
-            if os.path.isdir(path):
-                base_path = path
-    else:  # pragma: no cover
-        raise OSError(f"Unsupported OS {os.name}")
-
-    if base_path is None:
-        return {}
-
-    paths = glob(os.path.join(base_path, "v*"))
-
-    # Testing for ANSYS STUDENT version
-    if not paths:  # pragma: no cover
-        paths = glob(os.path.join(base_path, "ANSYS*"))
-
-    if not paths:
-        return {}
-
-    ansys_paths = {}
-    for path in paths:
-        ver_str = path[-3:]
-        if is_float(ver_str):
-            ansys_paths[int(ver_str)] = path
-
-    return ansys_paths
 
 
 def get_default_ansys():

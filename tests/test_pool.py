@@ -2,13 +2,13 @@ import os
 from pathlib import Path
 import time
 
+from ansys.tools.path import find_ansys
 import numpy as np
 import pytest
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import get_start_instance
-from ansys.mapdl.core.misc import get_ansys_bin
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -43,8 +43,8 @@ valid_rver = [str(each) for each in SUPPORTED_ANSYS_VERSIONS]
 
 EXEC_FILE = None
 for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
+    if os.path.isfile(find_ansys(rver)[0]):
+        EXEC_FILE = find_ansys(rver)[0]
         break
 
 
