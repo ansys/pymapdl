@@ -144,6 +144,7 @@ exclude_patterns = [
     # because we include this in examples/index.rst
     "examples/gallery_examples/index.rst",
     "links.rst",
+    "substitutions.rst",
 ]
 
 # make rst_epilog a variable, so you can add other epilog parts to it
