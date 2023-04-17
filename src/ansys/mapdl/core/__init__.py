@@ -30,16 +30,20 @@ except ModuleNotFoundError:  # pragma: no cover
 
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
+from ansys.tools.path.path import (
+    _version_from_path,
+    change_default_ansys_path,
+    get_available_ansys_installations,
+    save_ansys_path,
+)
+
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import (
-    change_default_ansys_path,
     close_all_local_instances,
     find_ansys,
     get_ansys_path,
-    get_available_ansys_installations,
-    save_ansys_path,
 )
 
 # override default launcher when on pyansys.com
