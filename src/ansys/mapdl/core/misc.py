@@ -15,6 +15,7 @@ from threading import Thread
 from warnings import warn
 import weakref
 
+from ansys.tools.path import get_available_ansys_installations
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -184,12 +185,11 @@ class Plain_Report:
     def mapdl_info(self):
         """Return information regarding the ansys environment and installation."""
         # this is here to avoid circular imports
-        from ansys.mapdl.core.launcher import _get_available_base_ansys
 
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = _get_available_base_ansys()
+        mapdl_install = get_available_ansys_installations()
         if not mapdl_install:
             lines.append("Unable to locate any Ansys installations")
         else:  # pragma: no cover
