@@ -186,7 +186,7 @@ For more comprehensive information, download the `ANSYS Licensing Guide <licensi
 Incorrect licensing environment variables
 -----------------------------------------
 
-The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
+The license server can be also specified using the environment variable :envvar:`ANSYSLMD_LICENSE_FILE`.
 The following code examples show how you can see the value of this environment variable on
 either Windows or Linux.
 
