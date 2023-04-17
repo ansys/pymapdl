@@ -30,14 +30,16 @@ except:
     HAS_CORBA = False
 
 # CORBA and console available versions
+from ansys.tools.path import get_available_ansys_installations
+
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
-valid_versions = []
-for version in versions:
-    if os.path.isfile(find_ansys(version)[0]):
-        valid_versions.append(version)
+valid_versions = list(get_available_ansys_installations().keys())
 
-V150_EXEC = find_ansys("150")[0]
+try:
+    V150_EXEC = find_ansys("150")[0]
+except ValueError:
+    V150_EXEC = ""
 
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
