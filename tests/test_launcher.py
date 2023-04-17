@@ -443,7 +443,7 @@ def test_raise_exec_path_and_version_launcher():
 
 
 @pytest.mark.skipif(
-    (
+    not (
         os.environ.get("ON_LOCAL", "false").lower() == "true"
         and os.environ.get("ON_UBUNTU", "false").lower() == "true"
     ),
