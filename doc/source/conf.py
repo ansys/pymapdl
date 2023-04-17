@@ -152,6 +152,10 @@ rst_epilog = ""
 with open("links.rst") as f:
     rst_epilog += f.read()
 
+# Read link all substitutions from file
+with open("substitutions.rst") as f:
+    rst_epilog += f.read()
+
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 

@@ -632,5 +632,5 @@ issue is already listed. If not, you can do one of the following:
 * Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
   or want to create a feature request.
 
-For more complex issues or queries, contact `PyAnsys Support <pyansys_support_>`_.
+For more complex issues or queries, contact |pyansys_contact|.
 
