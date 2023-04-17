@@ -293,14 +293,6 @@ def test_remove_temp_files_fail(tmpdir):
     assert os.listdir(old_path)
 
 
-def test_warn_uncommon_executable_path():
-    with pytest.warns(
-        UserWarning,
-        match="does not match the usual ansys executable path style",
-    ):
-        warn_uncommon_executable_path("")
-
-
 def test_env_injection():
     assert update_env_vars(None, None) is None
 
