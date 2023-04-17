@@ -21,7 +21,6 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import get_ansys_bin
 
 try:
     import ansys_corba  # noqa: F401
@@ -35,10 +34,10 @@ from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
 valid_versions = []
 for version in versions:
-    if os.path.isfile(get_ansys_bin(version)):
+    if os.path.isfile(find_ansys(version)[0]):
         valid_versions.append(version)
 
-V150_EXEC = get_ansys_bin("150")
+V150_EXEC = find_ansys("150")[0]
 
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
@@ -121,7 +120,7 @@ def test_find_ansys_linux():
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_invalid_mode():
     with pytest.raises(ValueError):
-        exec_file = get_ansys_bin(valid_versions[0])
+        exec_file = find_ansys(valid_versions[0])[0]
         pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
@@ -132,7 +131,7 @@ def test_invalid_mode():
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
-    exec_file = get_ansys_bin("150")
+    exec_file = find_ansys("150")[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
 
@@ -145,7 +144,7 @@ def test_old_version():
 @pytest.mark.skipif(not os.name == "nt", reason="Requires windows")
 @pytest.mark.console
 def test_failed_console():
-    exec_file = get_ansys_bin(valid_versions[0])
+    exec_file = find_ansys(valid_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -159,7 +158,7 @@ def test_failed_console():
 @pytest.mark.console
 @pytest.mark.skipif(os.name != "posix", reason="Only supported on Linux")
 def test_launch_console(version):
-    exec_file = get_ansys_bin(version)
+    exec_file = find_ansys(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
@@ -173,7 +172,7 @@ def test_launch_console(version):
 @pytest.mark.parametrize("version", valid_versions)
 def test_launch_corba(version):
     mapdl = pymapdl.launch_mapdl(
-        get_ansys_bin(version), mode="corba", start_timeout=start_timeout
+        find_ansys(version)[0], mode="corba", start_timeout=start_timeout
     )
     assert mapdl.version == int(version) / 10
     # mapdl.exit() # exit is already tested for in test_mapdl.py.

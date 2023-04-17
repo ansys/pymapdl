@@ -9,6 +9,7 @@ from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
 pytest_plugins = ["pytester"]
 
+from ansys.tools.path import find_ansys
 import pyvista
 
 from ansys.mapdl import core as pymapdl
@@ -20,7 +21,6 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     launch_mapdl,
 )
-from ansys.mapdl.core.misc import get_ansys_bin
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -84,12 +84,12 @@ def pytest_configure(config):
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 
-valid_rver = [str(each) for each in SUPPORTED_ANSYS_VERSIONS]
+valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
 
 EXEC_FILE = None
 for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
+    if os.path.isfile(find_ansys(rver)[0]):
+        EXEC_FILE = find_ansys(rver)[0]
         break
 
 # Cache if gRPC MAPDL is installed.
@@ -254,7 +254,7 @@ def mapdl_console(request):
     for version in ansys_base_paths:
         version = abs(version)
         if version < 211:
-            console_path = get_ansys_bin(str(version))
+            console_path = find_ansys(str(version))[0]
 
     if console_path is None:
         raise MapdlRuntimeError(
@@ -289,7 +289,7 @@ def mapdl_corba(request):
     for version in ansys_base_paths:
         version = abs(version)
         if version >= 170 and version < 202:
-            corba_path = get_ansys_bin(str(version))
+            corba_path = find_ansys(str(version))[0]
 
     if corba_path is None:
         raise MapdlRuntimeError(
