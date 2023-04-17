@@ -7,7 +7,7 @@ import weakref
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import LicenseServerConnectionError, MapdlRuntimeError
+from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
@@ -35,7 +35,6 @@ from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
 valid_versions = []
 for version in versions:
-    exec_file = get_ansys_bin(version)
     if os.path.isfile(get_ansys_bin(version)):
         valid_versions.append(version)
 
@@ -97,7 +96,7 @@ def test_version_from_path(path_data):
 )
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_catch_version_from_path():
-    with pytest.raises(MapdlRuntimeError):
+    with pytest.raises(RuntimeError):
         _version_from_path("abc")
 
 
