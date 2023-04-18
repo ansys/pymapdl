@@ -19,6 +19,7 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     launch_mapdl,
     update_env_vars,
+    get_default_ansys
 )
 from ansys.mapdl.core.licensing import LICENSES
 
@@ -449,3 +450,11 @@ def test_raise_exec_path_and_version_launcher():
 )
 def test_is_ubuntu():
     assert _is_ubuntu()
+
+
+@pytest.mark.skipif(
+    get_start_instance() is False,
+    reason="Skip when start instance is disabled",
+)
+def test_get_default_ansys():
+    assert get_default_ansys() is not None
