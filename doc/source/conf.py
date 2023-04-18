@@ -45,7 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
-cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
+cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
 
 # -- General configuration ---------------------------------------------------
