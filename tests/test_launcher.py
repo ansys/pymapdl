@@ -16,10 +16,10 @@ from ansys.mapdl.core.launcher import (
     _verify_version,
     _version_from_path,
     find_ansys,
+    get_default_ansys,
     get_start_instance,
     launch_mapdl,
     update_env_vars,
-    get_default_ansys
 )
 from ansys.mapdl.core.licensing import LICENSES
 
