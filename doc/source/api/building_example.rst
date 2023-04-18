@@ -16,7 +16,7 @@ following instruction.
 
 
 The Sphinx configuration is in the file 
-`conf.py <https://github.com/pyansys/pymapdl/blob/main/doc/source/conf.py>`_ in ``doc/source``.
+`conf.py <https://github.com/pyansys/pymapdl/blob/main/doc/source/conf.py>`_ in :file:`doc/source`.
 
 
 To run the sphinx tool:
