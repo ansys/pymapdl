@@ -545,3 +545,9 @@ def test_background(mapdl, make_block):
     pl = mapdl.eplot(background="red", return_plotter=True)
     assert pl.background_color != default_color
     assert pl.background_color == "red"
+
+
+def test_plot_nodal_values(mapdl, make_block):
+    assert mapdl.post_processing.plot_nodal_values("U", "X") is None
+    assert mapdl.post_processing.plot_nodal_values("U", "Y") is None
+    assert mapdl.post_processing.plot_nodal_values("U", "Z") is None

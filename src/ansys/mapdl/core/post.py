@@ -506,7 +506,7 @@ class PostProcessing:
         ... )
         """
 
-        values = self.nodal_values(self, item=item, comp=comp)
+        values = self.nodal_values(item=item, comp=comp)
         kwargs.setdefault(
             "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
         )
