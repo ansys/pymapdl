@@ -30,6 +30,7 @@ dependencies = [
     "pexpect>=4.8.0 ; platform_system=='Linux'",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
+    "pyiges>=0.1.4",
     "pyansys-tools-versioning>=0.3.3",
     "pyiges>=0.1.4",
     "pyvista>=0.33.0",
