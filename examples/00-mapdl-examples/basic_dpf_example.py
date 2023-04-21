@@ -58,27 +58,8 @@ rst_path = mapdl.download_result(temp_directory)
 # - Size of the mesh
 # - Number of results
 #
-# Also, note that the first time you create a DPF object, Python
-# automatically attempts to start the server in the background.  If you
-# want to connect to an existing server (either local or remote), use
-# :func:`dpf.connect_to_server <ansys.dpf.core.server.connect_to_server>`.
-# In this case, DPF will attempt to connect to a local server at the port 50052
-# unless another port is specified.
 
-dpf.connect_to_server()
-
-
-###############################################################################
-# If you are working with a remote server, you might need to upload the ``RST``
-# file before working with it.
-server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
-
-
-###############################################################################
-# Then you can create the :class:`DPF Model <ansys.dpf.core.model.Model>`.
-#
-
-model = dpf.Model(server_file_path)
+model = dpf.Model(rst_path)
 print(model)
 
 ###############################################################################
