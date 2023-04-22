@@ -70,7 +70,7 @@ doc = [
     "sphinx==5.3.0",
     "ansys-dpf-core==0.8.1",
     "ansys-mapdl-reader==0.52.12",
-    "ansys-sphinx-theme==0.9.7",
+    "ansys-sphinx-theme==0.9.8",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
     "imageio==2.27.0",
