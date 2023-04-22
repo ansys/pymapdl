@@ -44,23 +44,15 @@ temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
 ###############################################################################
-# Next, open the generated RST file and print out the
+# Next, open the generated RST file and create the
 # :class:`Model <ansys.dpf.core.model.Model>` object.
 # The :class:`Model <ansys.dpf.core.model.Model>` class helps to
 # organize access methods for the result by
 # keeping track of the operators and data sources used by the result
 # file.
 #
-# Printing the model displays:
-#
-# - Analysis type
-# - Available results
-# - Size of the mesh
-# - Number of results
-#
 
 model = dpf.Model(rst_path)
-print(model)
 
 ###############################################################################
 # Model Metadata
