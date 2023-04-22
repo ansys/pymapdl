@@ -68,7 +68,7 @@ tests = [
 ]
 doc = [
     "sphinx==5.3.0",
-    "ansys-dpf-core==0.8.1",
+    "ansys-dpf-core==0.8.0",
     "ansys-mapdl-reader==0.52.11",
     "ansys-sphinx-theme==0.9.7",
     "grpcio==1.51.1",
@@ -87,7 +87,6 @@ doc = [
     "sphinx-autobuild==2021.3.14",
     "sphinx-autodoc-typehints==1.23.0",
     "sphinx-copybutton==0.5.2",
-    
     "sphinx-gallery==0.13.0",
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
