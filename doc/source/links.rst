@@ -10,6 +10,7 @@
 .. _dpf_post_docs: https://post.docs.pyansys.com/dev/
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
+.. _ansys_tools_path: http://path.tools.docs.pyansys.com/
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/
