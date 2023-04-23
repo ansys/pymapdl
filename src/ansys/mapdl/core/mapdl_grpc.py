@@ -376,8 +376,7 @@ class MapdlGrpc(_MapdlCore):
             self._channel = channel
 
         # connect and validate to the channel
-        process = start_parm.pop("process", None)
-        self._mapdl_process = process
+        self._mapdl_process = start_parm.pop("process", None)
 
         # Queueing the stds
         if self._mapdl_process:
@@ -2514,12 +2513,12 @@ class MapdlGrpc(_MapdlCore):
         :class:`Krylov class <ansys.mapdl.core.krylov.KrylovSolver>`
 
         """
-        if self._kylov is None:
+        if self._krylov is None:
             from ansys.mapdl.core.krylov import KrylovSolver
 
-            self._kylov = KrylovSolver(self)
+            self._krylov = KrylovSolver(self)
 
-        return self._kylov
+        return self._krylov
 
     @property
     def db(self):
