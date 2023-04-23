@@ -898,7 +898,7 @@ These are described in the following table:
 |                                       | instances of PyMAPDL. Generally used                                |
 |                                       | in combination with ``PYMAPDL_PORT``.                               |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
@@ -907,7 +907,7 @@ These are described in the following table:
 +---------------------------------------+---------------------------------------------------------------------+
 | :envvar:`PYMAPDL_PORT`                | Default port for PyMAPDL to connect to.                             |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
@@ -916,7 +916,7 @@ These are described in the following table:
 +---------------------------------------+---------------------------------------------------------------------+
 | :envvar:`PYMAPDL_IP`                  | Default IP for PyMAPDL to connect to.                               |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
@@ -931,7 +931,7 @@ These are described in the following table:
 |                                       | This is helpful for supplying licensing for                         |
 |                                       | Docker.                                                             |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
@@ -941,7 +941,7 @@ These are described in the following table:
 | :envvar:`PYMAPDL_MAPDL_EXEC`          | Executable path from where to launch MAPDL                          |
 |                                       | instances.                                                          |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
@@ -951,7 +951,7 @@ These are described in the following table:
 | :envvar:`PYMAPDL_MAPDL_VERSION`       | Default MAPDL version to launch in case there                       |
 |                                       | are several versions availables.                                    |
 |                                       |                                                                     |
-|                                       | Example:                                                            |
+|                                       | **Example:**                                                        |
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
