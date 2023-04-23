@@ -926,8 +926,8 @@ These are described in the following table:
 | :envvar:`ANSYSLMD_LICENSE_FILE`       | License file or IP address with port in the format                  |
 |                                       | ``PORT@IP``. Do not confuse with the ``IP`` and                     |
 |                                       | ``PORT`` where the MAPDL instance is running, which                 |
-|                                       |  are specified using :envvar:`PYMAPDL_IP` and                       |
-|                                       | :envvar:`PYMAPDL_PORT`                                              |
+|                                       | are specified using :envvar:`PYMAPDL_IP` and                       |
+|                                       | :envvar:`PYMAPDL_PORT`.                                             |
 |                                       | This is helpful for supplying licensing for                         |
 |                                       | Docker.                                                             |
 |                                       |                                                                     |
