@@ -885,27 +885,83 @@ are unsupported.
 
 
 Environment variables
-~~~~~~~~~~~~~~~~~~~~~
-There are several PyMAPDL-specific environment variables that can be
-used to control the behavior or launching of PyMAPDL and MAPDL, including those
-described in the following table.
+---------------------
 
-+---------------------------------+-------------------------------------------------+
-| :envvar:`ANSYSLMD_LICENSE_FILE` | License file or IP address (192.168.0.16).      |
-|                                 | This is helpful for supplying licensing for     |
-|                                 | Docker.                                         |
-+---------------------------------+-------------------------------------------------+
-| ``PYMAPDL_MAX_MESSAGE_LENGTH``  | Maximum gRPC message length. If your            |
-|                                 | connection terminates when running              |
-|                                 | PRNSOL or NLIST, raise this. In bytes,          |
-|                                 | defaults to 256 MB.                             |
-+---------------------------------+-------------------------------------------------+
-| ``PYMAPDL_PORT``                | Default port to look for when connecting        |
-|                                 | PyMAPDL. Normally used for unit testing.        |
-+---------------------------------+-------------------------------------------------+
-| ``PYMAPDL_START_INSTANCE``      | Override the behavior of the                    |
-|                                 | :func:`ansys.mapdl.core.launch_mapdl` function  |
-|                                 | to only attempt to connect to existing          |
-|                                 | instances of PyMAPDL. Generally used            |
-|                                 | in combination with ``PYMAPDL_PORT``.           |
-+---------------------------------+-------------------------------------------------+
+There are several PyMAPDL-specific environment variables that can be
+used to control the behavior or launching of PyMAPDL and MAPDL.
+These are described in the following table:
+
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_START_INSTANCE`      | Override the behavior of the                                        |
+|                                       | :func:`ansys.mapdl.core.launch_mapdl` function                      |
+|                                       | to only attempt to connect to existing                              |
+|                                       | instances of PyMAPDL. Generally used                                |
+|                                       | in combination with ``PYMAPDL_PORT``.                               |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export PYMAPDL_START_INSTANCE=True                               |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_PORT`                | Default port for PyMAPDL to connect to.                             |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export PYMAPDL_PORT=50052                                        |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_IP`                  | Default IP for PyMAPDL to connect to.                               |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export PYMAPDL_IP=123.45.67.89                                   |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`ANSYSLMD_LICENSE_FILE`       | License file or IP address with port in the format                  |
+|                                       | ``PORT@IP``. Do not confuse with the ``IP`` and                     |
+|                                       | ``PORT`` where the MAPDL instance is running, which                 |
+|                                       |  are specified using :envvar:`PYMAPDL_IP` and                       |
+|                                       | :envvar:`PYMAPDL_PORT`                                              |
+|                                       | This is helpful for supplying licensing for                         |
+|                                       | Docker.                                                             |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export ANSYSLMD_LICENSE_FILE=1055@123.45.67.89                   |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAPDL_EXEC`          | Executable path from where to launch MAPDL                          |
+|                                       | instances.                                                          |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export PYMAPDL_MAPDL_EXEC=/ansys_inc/v222/ansys/bin/mapdl        |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAPDL_VERSION`       | Default MAPDL version to launch in case there                       |
+|                                       | are several versions availables.                                    |
+|                                       |                                                                     |
+|                                       | Example:                                                            |
+|                                       |                                                                     |
+|                                       | .. code:: console                                                   |
+|                                       |                                                                     |
+|                                       |    export PYMAPDL_MAPDL_VERSION=22.2                                |
+|                                       |                                                                     |
++---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                |
+|                                       | connection terminates when running                                  |
+|                                       | PRNSOL or NLIST, raise this. In bytes,                              |
+|                                       | defaults to 256 MB.                                                 |
+|                                       |                                                                     |
+|                                       | Only for developing purposes.                                       |
++---------------------------------------+---------------------------------------------------------------------+
