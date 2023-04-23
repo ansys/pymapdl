@@ -190,6 +190,30 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
 }
+# ---
+
+
+def _custom_edit_url(
+    github_user,
+    github_repo,
+    github_version,
+    doc_path,
+    file_name,
+    default_edit_page_url_template,
+):
+    """Create custom 'edit' URLs for API modules since they are dynamically generated."""
+    if "examples/gallery_examples/" in doc_path:
+        # We are in a python example
+        doc_path = doc_path.replace("doc/source/examples/gallery_examples", "examples")
+        file_name = os.path.basename(file_name) + ".py"
+
+    return default_edit_page_url_template.format(
+        github_user=github_user,
+        github_repo=github_repo,
+        github_version=github_version,
+        doc_path=doc_path,
+        file_name=file_name,
+    )
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -214,7 +238,7 @@ html_theme_options = {
         },
         {
             "name": "Contribute",
-            "url": "https://mapdl.docs.pyansys.com/dev/getting_started/contribution.html",
+            "url": "https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html",
             "icon": "fa fa-wrench",
         },
     ],
@@ -230,6 +254,10 @@ html_context = {
     "github_repo": "pymapdl",
     "github_version": "main",
     "doc_path": "doc/source",
+    # Edit "edit_button" to match examples location.
+    "edit_page_url_template": "{{ custom_edit_url(github_user, github_repo, github_version, doc_path, file_name, default_edit_page_url_template) }}",
+    "default_edit_page_url_template": "https://github.com/{github_user}/{github_repo}/edit/{github_version}/{doc_path}{file_name}",
+    "custom_edit_url": _custom_edit_url,
 }
 # -- Options for HTMLHelp output ---------------------------------------------
 
