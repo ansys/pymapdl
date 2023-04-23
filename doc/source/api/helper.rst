@@ -5,16 +5,20 @@ Helper functions
 These methods simplify launching MAPDL, converting existing scripts,
 or automating other tasks.
 
-.. currentmodule:: ansys.mapdl.core
+
+.. currentmodule:: ansys.mapdl.core.convert
 
 .. autosummary::
    :toctree: _autosummary
-   
-   launch_mapdl
+
    convert_apdl_block
    convert_script
+
+
+.. currentmodule:: ansys.mapdl.core.misc
+
+.. autosummary::
+   :toctree: _autosummary
+
    Information
-   change_default_ansys_path
-   find_ansys
-   close_all_local_instances
-   save_ansys_path
+

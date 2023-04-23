@@ -335,7 +335,7 @@ def setup_to_py(
         Returns:
             the link to the tip of the main branch for the same file
         """
-        """Create custom 'edit' URLs for API modules since they are dynamically generated."""
+        # Create custom 'edit' URLs for API modules since they are dynamically generated.
         doc_path = "/".join(link.split("/")[:-1])
         file_name = link.split("/")[-1]
 
