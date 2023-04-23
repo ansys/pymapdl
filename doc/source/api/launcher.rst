@@ -11,6 +11,7 @@ library `ansys-tools-path <ansys_tools_path_>`_.
 .. autosummary::
    :toctree: _autosummary
 
+   get_default_ansys
    get_default_ansys_path
    get_default_ansys_version
    launch_mapdl
@@ -28,5 +29,4 @@ library `ansys-tools-path <ansys_tools_path_>`_.
    change_default_ansys_path
    find_ansys
    save_ansys_path
-   get_default_ansys
    get_available_ansys_installations
