@@ -500,7 +500,7 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
 .. code:: pycon
 
-    >>> from ansys.mapdl.core.launcher import get_available_ansys_installations
+    >>> from ansys.mapdl.core import get_available_ansys_installations
     >>> get_available_ansys_installations()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
     212: 'C:\\Program Files\\ANSYS Inc\\v212',
