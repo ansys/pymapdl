@@ -625,7 +625,7 @@ the chained commands with the :attr:`Mapdl.last_response
    Command chaining is not supported in distributed MAPDL.  To improve
    performances, use the ``mute=True`` or 
    :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
-   attribute.
+   context manager.
 
 
 Sending arrays to MAPDL
@@ -845,7 +845,7 @@ Table-1_ Comprehensive information on commands that are unavailable
 
 Note that running these commands with the
 :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` method does
-not cause MAPDL to exit. However, it might raise runtime exceptions.
+not cause MAPDL to exit. However, it might raise exceptions.
 
 These MAPDL commands can also be executed using the
 :func:`mapdl.input() <ansys.mapdl.core.Mapdl.input>` method
