@@ -1,11 +1,13 @@
 """Sphinx documentation configuration file."""
 from datetime import datetime
 import os
+from typing import Any, Dict
 import warnings
 
 from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
 import pyvista
+from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
@@ -47,6 +49,17 @@ author = "ANSYS Inc."
 release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
+REPOSITORY_NAME = "pymapdl"
+USERNAME = "pyansys"
+BRANCH = "main"
+
+
+DEFAULT_EXAMPLE_EXTENSION = "py"
+GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
+EXAMPLES_ROOT = "examples"
+EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
+DOC_PATH = "doc/source"
+SEARCH_HINTS = ["def", "class"]
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -142,7 +155,7 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     # because we include this in examples/index.rst
-    "examples/gallery_examples/index.rst",
+    f"{GALLERY_EXAMPLES_PATH}/index.rst",
     "links.rst",
     "substitutions.rst",
 ]
@@ -173,11 +186,11 @@ sphinx_gallery_conf = {
     # convert rst to md for ipynb
     "pypandoc": True,
     # path to your examples scripts
-    "examples_dirs": ["../../examples/"],
+    "examples_dirs": [EXAMPLES_ROOT],
     # path where to save gallery generated examples
-    "gallery_dirs": ["examples/gallery_examples"],
+    "gallery_dirs": [GALLERY_EXAMPLES_PATH],
     # Pattern to search for example files
-    "filename_pattern": r"\.py",
+    "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
     # Remove the "Download all examples" button from the top level gallery
     "download_all_examples": False,
     # Sort gallery example by file name instead of number of lines (default)
@@ -193,36 +206,13 @@ sphinx_gallery_conf = {
 # ---
 
 
-def _custom_edit_url(
-    github_user,
-    github_repo,
-    github_version,
-    doc_path,
-    file_name,
-    default_edit_page_url_template,
-):
-    """Create custom 'edit' URLs for API modules since they are dynamically generated."""
-    if "examples/gallery_examples/" in doc_path:
-        # We are in a python example
-        doc_path = doc_path.replace("doc/source/examples/gallery_examples", "examples")
-        file_name = os.path.basename(file_name) + ".py"
-
-    return default_edit_page_url_template.format(
-        github_user=github_user,
-        github_repo=github_repo,
-        github_version=github_version,
-        doc_path=doc_path,
-        file_name=file_name,
-    )
-
-
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
-    "github_url": "https://github.com/pyansys/pymapdl",
+    "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,
     "show_breadcrumbs": True,
     "collapse_navigation": True,
@@ -233,7 +223,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "Support",
-            "url": "https://github.com/pyansys/pymapdl/discussions",
+            "url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}/discussions",
             "icon": "fa fa-comment fa-fw",
         },
         {
@@ -250,15 +240,13 @@ html_theme_options = {
 
 html_context = {
     "display_github": True,  # Integrate GitHub
-    "github_user": "pyansys",
-    "github_repo": "pymapdl",
-    "github_version": "main",
-    "doc_path": "doc/source",
-    # Edit "edit_button" to match examples location.
-    "edit_page_url_template": "{{ custom_edit_url(github_user, github_repo, github_version, doc_path, file_name, default_edit_page_url_template) }}",
-    "default_edit_page_url_template": "https://github.com/{github_user}/{github_repo}/edit/{github_version}/{doc_path}{file_name}",
-    "custom_edit_url": _custom_edit_url,
+    "github_user": USERNAME,
+    "github_repo": REPOSITORY_NAME,
+    "github_version": BRANCH,
+    "doc_path": DOC_PATH,
 }
+html_show_sourcelink = False
+
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -333,8 +321,67 @@ epub_title = project
 epub_exclude_files = ["search.html"]
 
 
-# Adding apdl syntax highlighting
-def setup(app):
+def setup_to_py(
+    app: Sphinx, pagename: str, templatename: str, context, doctree
+) -> None:
+    """Add a function that jinja can access for returning an "edit this page" link pointing to `main`."""
+
+    def fix_edit_link_button(link: str) -> str:
+        """Transform "edit on github" links and make sure they always point to the main branch.
+
+        Args:
+            link: the link to the github edit interface
+
+        Returns:
+            the link to the tip of the main branch for the same file
+        """
+        """Create custom 'edit' URLs for API modules since they are dynamically generated."""
+        doc_path = "/".join(link.split("/")[:-1])
+        file_name = link.split("/")[-1]
+
+        if GALLERY_EXAMPLES_PATH in doc_path:
+            # We are in a python example
+            doc_path = doc_path.replace(
+                f"{DOC_PATH}/{GALLERY_EXAMPLES_PATH}", EXAMPLES_ROOT
+            )
+            file_name = (
+                os.path.basename(file_name).replace(source_suffix, "")
+                + f".{DEFAULT_EXAMPLE_EXTENSION}"
+            )
+            return f"{doc_path}/{file_name}"
+
+        elif "_autosummary" in link:
+            # It is all a hack
+            # On API. Let's direct to a search window:
+            words = os.path.basename(file_name).split(".")[
+                :-1
+            ]  # getting rid of the extension
+            path = "%2F".join(words[:-1])
+            keywords = [words[-1]]
+            keywords.extend(
+                SEARCH_HINTS
+            )  # to increase the chances of hitting the definition
+            keywords = "+".join(keywords)
+            url = f"https://github.com/search?q=repo%3A{USERNAME}%2F{REPOSITORY_NAME}+path%3A**%2F{path}.{DEFAULT_EXAMPLE_EXTENSION}+{keywords}&type=code"
+            return url
+
+        else:
+            return link
+
+    context["fix_edit_link_button"] = fix_edit_link_button
+
+
+def setup(app: Sphinx) -> Dict[str, Any]:
+    """Add custom configuration to sphinx app.
+
+    Args:
+        app: the Sphinx application
+    Returns:
+        the 2 parallel parameters set to ``True``.
+    """
+    app.connect("html-page-context", setup_to_py)
+
+    # Adding apdl syntax highlighting
     from pygments.lexers.apdlexer import apdlexer
     from pygments.lexers.julia import JuliaLexer
 
@@ -344,3 +391,8 @@ def setup(app):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
