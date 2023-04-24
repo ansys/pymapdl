@@ -1325,7 +1325,16 @@ def launch_mapdl(
         verbose_mapdl = False
 
     # These parameters are partially used for unit testing
-    set_no_abort = kwargs.get("set_no_abort", True)
+    set_no_abort = kwargs.pop("set_no_abort", True)
+
+    # Extract arguments:
+    force_intel = kwargs.pop("force_intel", False)
+    broadcast = kwargs.pop("log_broadcast", False)
+
+    # Raising error if using non-allowed arguments
+    if kwargs:
+        ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
+        raise ValueError(f"The following arguments are not recognaised: {ms_}")
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
@@ -1494,7 +1503,7 @@ def launch_mapdl(
 
     #
     additional_switches = _validate_MPI(
-        additional_switches, exec_file, kwargs.pop("force_intel", False)
+        additional_switches, exec_file, force_intel=force_intel
     )
 
     additional_switches = _check_license_argument(license_type, additional_switches)
@@ -1540,7 +1549,6 @@ def launch_mapdl(
                     " with:\n\npip install ansys_corba"
                 ) from None
 
-            broadcast = kwargs.get("log_broadcast", False)
             mapdl = MapdlCorba(
                 loglevel=loglevel,
                 log_apdl=log_apdl,

@@ -147,6 +147,29 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     return setup_logger.log
 
 
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "exec_file",
+    "ip",
+    "jobname",
+    "local",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_timeout" "timeout",
+]
+
+
+def _sanitize_start_parm(start_parm):
+    for each_key in start_parm:
+        if each_key not in _ALLOWED_START_PARM:
+            raise ValueError(f"The argument '{each_key}' is not recognaised.")
+
+
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
@@ -193,17 +216,19 @@ class _MapdlCore(Commands):
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
-        self._jobname = start_parm.get("jobname", "file")
         self._cleanup = True
         self._vget_arr_counter = 0
-        self._start_parm = start_parm
-        self._path = start_parm.get("run_location", None)
-        self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
-        self._kylov = None
+        self._krylov = None
         self._on_docker = None
         self._platform = None
+
+        _sanitize_start_parm(start_parm)
+        self._start_parm = start_parm
+        self._jobname = start_parm.get("jobname", "file")
+        self._path = start_parm.get("run_location", None)
+        self._print_com = print_com  # print the command /COM input.
 
         # Setting up loggers
         self._log = logger.add_instance_logger(

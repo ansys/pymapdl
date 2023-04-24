@@ -929,6 +929,7 @@ class Information:
 
     def _get_between(self, init_string, end_string=None, string=None):
         if not string:
+            self._update()
             string = self._stats
 
         st = string.find(init_string) + len(init_string)
@@ -959,8 +960,9 @@ class Information:
     def _get_stitles(self):
         return [
             re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            for i in range(1, 5)
             if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+            else ""
+            for i in range(1, 5)
         ]
 
     def _get_products(self):
