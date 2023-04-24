@@ -225,10 +225,6 @@ class _MapdlCore(Commands):
 
         self._solution = Solution(self)
 
-        from ansys.mapdl.core.xpl import ansXpl
-
-        self._xpl = ansXpl(self)
-
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
