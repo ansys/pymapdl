@@ -72,6 +72,11 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
+    # sphinx.ext.linkcode
+    # This add the button ``[Source]`` to each website.
+    # The link of that button is created by calling ``linkcode_resolve``
+    # function which we overwrite in ansys.mapdl.core.docs
+    "sphinx.ext.linkcode",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",

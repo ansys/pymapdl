@@ -23,7 +23,8 @@ def linkcode_resolve(domain, info, edit=False):
 
     Notes
     -----
-    This has been adapted to deal with our "verbose" decorator.
+    This function is used by the extension "sphinx.ext.linkcode" to create the "[Source]"
+    button whose link is edited in this function.
 
     Adapted from mne (mne/utils/docs.py), which was adapted from SciPy (doc/source/conf.py).
     """
