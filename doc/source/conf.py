@@ -364,13 +364,13 @@ def setup_to_py(
     context["fix_edit_link_button"] = fix_edit_link_button
 
 
-def setup(app: Sphinx) -> Dict[str, Any]:
+def setup(app: Sphinx):
     """Add custom configuration to sphinx app.
 
-    Args:
-        app: the Sphinx application
-    Returns:
-        the 2 parallel parameters set to ``True``.
+    Parameters
+    ----------
+    app : sphinx.application.Sphinx
+        The Sphinx application.
     """
     app.connect("html-page-context", setup_to_py)
 
@@ -384,8 +384,3 @@ def setup(app: Sphinx) -> Dict[str, Any]:
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
-
-    return {
-        "parallel_read_safe": True,
-        "parallel_write_safe": True,
-    }
