@@ -373,7 +373,7 @@ class MapdlGrpc(_MapdlCore):
             self._create_process_stds_queue()
 
         try:
-            self._multi_connect(timeout=timeout, set_no_abort=set_no_abort)
+            self._multi_connect(timeout=timeout)
         except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
             self._log.debug(
@@ -396,6 +396,16 @@ class MapdlGrpc(_MapdlCore):
             self._mesh_rep = MeshGrpc(self)
         except ModuleNotFoundError:  # pragma: no cover
             self._mesh_rep = None
+
+        # Run at connect
+        self._run_at_connect()
+
+        # HOUSEKEEPING:
+        # Set to not abort after encountering errors.  Otherwise, many
+        # failures in a row will cause MAPDL to exit without returning
+        # anything useful.  Also avoids abort in batch mode if set.
+        if set_no_abort:
+            self._set_no_abort()
 
         # double check we have access to the local path if not
         # explicitly specified
@@ -431,7 +441,7 @@ class MapdlGrpc(_MapdlCore):
             ],
         )
 
-    def _multi_connect(self, n_attempts=5, timeout=15, set_no_abort=True):
+    def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
 
         Parameters
@@ -440,9 +450,6 @@ class MapdlGrpc(_MapdlCore):
             Number of connection attempts.
         timeout : float, optional
             Total timeout.
-        set_no_abort : bool, optional
-            Sets MAPDL to not abort at the first error within /BATCH mode.
-            Default ``True``.
 
         """
         # This prevents a single failed connection from blocking other attempts
@@ -453,9 +460,7 @@ class MapdlGrpc(_MapdlCore):
         i = 0
         while time.time() < max_time and i <= n_attempts:
             self._log.debug("Connection attempt %d", i + 1)
-            connected = self._connect(
-                timeout=attempt_timeout, set_no_abort=set_no_abort
-            )
+            connected = self._connect(timeout=attempt_timeout)
             i += 1
             if connected:
                 self._log.debug("Connected")
@@ -676,7 +681,7 @@ class MapdlGrpc(_MapdlCore):
         info = super().__repr__()
         return info
 
-    def _connect(self, timeout=5, set_no_abort=True, enable_health_check=False):
+    def _connect(self, timeout=5, enable_health_check=False):
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
@@ -713,14 +718,6 @@ class MapdlGrpc(_MapdlCore):
         if enable_health_check:
             self._enable_health_check()
 
-        # HOUSEKEEPING:
-        # Set to not abort after encountering errors.  Otherwise, many
-        # failures in a row will cause MAPDL to exit without returning
-        # anything useful.  Also avoids abort in batch mode if set.
-        if set_no_abort:
-            self._set_no_abort()
-
-        self._run_at_connect()
         return True
 
     @property
