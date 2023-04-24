@@ -3265,6 +3265,7 @@ class MapdlGrpc(_MapdlCore):
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
 
     def _create_session(self):
+        """Generate a session ID."""
         id_ = uuid4()
         id_ = str(id_)[:31].replace("-", "")
         self._session_id_ = id_
@@ -3272,9 +3273,11 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def _session_id(self):
+        """Return the session ID."""
         return self._session_id_
 
     def _check_session_id(self):
+        """Verify that the local session ID matches the remote MAPDL session ID."""
         if self._checking_session_id_:
             # To avoid recursion error
             return
@@ -3292,9 +3295,9 @@ class MapdlGrpc(_MapdlCore):
             return
         elif _RUNNING_ON_PYTEST:
             if pymapdl_session_id != self._mapdl_session_id:
-                self._log.debug("The session ids DO NOT match")
+                self._log.error("The session ids do not match")
                 raise DifferentSessionConnectionError(
-                    "You are connecting to a different MAPDL session."
+                    f"Local MAPDL session ID {pymapdl_session_id} is different from MAPDL session ID {self._mapdl_session_id}."
                 )
 
             else:
@@ -3304,7 +3307,7 @@ class MapdlGrpc(_MapdlCore):
             return pymapdl_session_id == self._mapdl_session_id
 
     def _get_mapdl_session_id(self):
-        # return self.parameters.__getitem__(SESSION_ID_NAME)
+        """Retreive MAPDL session ID."""
         try:
             parameter = interp_star_status(
                 self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
@@ -3314,5 +3317,4 @@ class MapdlGrpc(_MapdlCore):
 
         if parameter:
             return parameter[SESSION_ID_NAME]["value"]
-        else:
-            return None
+        return None
