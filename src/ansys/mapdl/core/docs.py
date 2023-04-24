@@ -40,6 +40,8 @@ def linkcode_resolve(domain, info, edit=False):
         return None
 
     obj = submod
+    fullname = fullname.replace(modname, "")
+
     for part in fullname.split("."):
         try:
             obj = getattr(obj, part)
