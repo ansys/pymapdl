@@ -15,10 +15,12 @@ from threading import Thread
 from warnings import warn
 import weakref
 
+from ansys.tools.path import get_available_ansys_installations
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA, LINUX_DEFAULT_DIRS, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core.errors import MapdlExitedError
 
 try:
     import ansys.tools.report as pyansys_report
@@ -80,57 +82,6 @@ def check_valid_routine(routine):
             f"Invalid routine {routine}. Should be one of:\n{valid_routines_str}"
         )
     return True
-
-
-def get_linux_default_ansys_bin(rver):
-    """Find the MAPDL executable file using standard Linux installation paths,
-
-    Raises:
-        FileNotFoundError: When no binary is found.
-
-    Returns:
-        str: Path to MAPDL executable.
-    """
-    for each_path in LINUX_DEFAULT_DIRS:
-        for each_file in [f"ansys{rver}", "mapdl"]:
-            ans_root = os.getenv(f"AWP_ROOT{rver}", each_path)
-            mapdlbin = os.path.join(ans_root, f"v{rver}", "ansys", "bin", each_file)
-
-            # rare case where the versioned binary doesn't exist
-            if os.path.isfile(mapdlbin):
-                LOG.debug(f"Found ANSYS binary at {mapdlbin}")
-                return mapdlbin
-            else:
-                LOG.debug(f"NOT found Ansys binary at {mapdlbin}")
-
-    # We could not find a binary, returning a default one
-    return os.path.join(
-        LINUX_DEFAULT_DIRS[0], f"v{rver}", "ansys", "bin", f"ansys{rver}"
-    )
-
-
-def get_windows_default_ansys_bin(rver):
-    """Find the MAPDL executable using standard Windows installation paths"""
-    program_files = os.getenv("PROGRAMFILES", os.path.join("c:\\", "Program Files"))
-    ans_root = os.getenv(
-        f"AWP_ROOT{rver}", os.path.join(program_files, "ANSYS Inc", f"v{rver}")
-    )
-    return os.path.join(ans_root, "ansys", "bin", "winx64", f"ANSYS{rver}.exe")
-
-
-def get_ansys_bin(rver):
-    """Identify the ansys executable based on the release version (e.g. "201")"""
-    if os.getenv(f"AWP_ROOT{rver}") is not None:
-        LOG.debug(
-            f"Found 'AWP_ROOT{rver}' environment variable and it has value {os.getenv(f'AWP_ROOT{rver}')}"
-        )
-
-    if os.name == "nt":  # pragma: no cover
-        mapdlbin = get_windows_default_ansys_bin(rver)
-    else:
-        mapdlbin = get_linux_default_ansys_bin(rver)
-
-    return mapdlbin
 
 
 class Plain_Report:
@@ -234,12 +185,11 @@ class Plain_Report:
     def mapdl_info(self):
         """Return information regarding the ansys environment and installation."""
         # this is here to avoid circular imports
-        from ansys.mapdl.core.launcher import _get_available_base_ansys
 
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = _get_available_base_ansys()
+        mapdl_install = get_available_ansys_installations()
         if not mapdl_install:
             lines.append("Unable to locate any Ansys installations")
         else:  # pragma: no cover
@@ -528,7 +478,7 @@ def create_temp_dir(tmpdir=None):
     try:
         os.mkdir(path)
     except:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             "Unable to create temporary working "
             "directory %s\n" % path + "Please specify run_location="
         )
@@ -759,12 +709,12 @@ class Information:
         that change over the MAPDL session."""
         try:
             if self._mapdl._exited:  # pragma: no cover
-                raise RuntimeError("Information class: MAPDL exited")
+                raise MapdlExitedError("Information class: MAPDL exited")
 
             stats = self._mapdl.slashstatus("ALL")
         except Exception:  # pragma: no cover
             self._stats = None
-            raise RuntimeError("Information class: MAPDL exited")
+            raise MapdlExitedError("Information class: MAPDL exited")
 
         stats = stats.replace("\n ", "\n")  # Bit of formatting
         self._stats = stats

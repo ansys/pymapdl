@@ -59,7 +59,7 @@ class _QueryExecution:
 
         # non_interactive mode won't work with these commands
         if self._mapdl._store_commands:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Inline MAPDL functions are incompatible with the "
                 "non_interactive mode."
             )
@@ -69,7 +69,7 @@ class _QueryExecution:
         if isinstance(self._mapdl, MapdlGrpc):
             value = self._mapdl.scalar_param(QUERY_NAME)
             if value is None:
-                raise RuntimeError(resp)
+                raise MapdlRuntimeError(resp)
             if integer:
                 return int(value)
             return value

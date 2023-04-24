@@ -1,7 +1,6 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
 import atexit
-from glob import glob
 import os
 import platform
 from queue import Empty, Queue
@@ -20,12 +19,19 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
+from ansys.tools.path import find_ansys, get_ansys_path
+from ansys.tools.path.path import _version_from_path
 import appdirs
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LINUX_DEFAULT_DIRS, LOG
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-from ansys.mapdl.core.errors import LockFileException, MapdlDidNotStart, VersionError
+from ansys.mapdl.core.errors import (
+    LockFileException,
+    MapdlDidNotStart,
+    MapdlRuntimeError,
+    VersionError,
+)
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -34,7 +40,6 @@ from ansys.mapdl.core.misc import (
     check_valid_port,
     check_valid_start_instance,
     create_temp_dir,
-    is_float,
     random_string,
     threaded,
 )
@@ -113,36 +118,6 @@ def _is_ubuntu():
     except ImportError:
         # finally, check platform
         return "ubuntu" in platform.platform().lower()
-
-
-def _version_from_path(path):
-    """Extract ansys version from a path.  Generally, the version of
-    ANSYS is contained in the path:
-
-    C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe
-
-    /usr/ansys_inc/v211/ansys/bin/mapdl
-
-    Note that if the MAPDL executable, you have to rely on the version
-    in the path.
-
-    Parameters
-    ----------
-    path : str
-        Path to the MAPDL executable
-
-    Returns
-    -------
-    int
-        Integer version number (e.g. 211).
-
-    """
-    # expect v<ver>/ansys
-    # replace \\ with / to account for possible windows path
-    matches = re.findall(r"v(\d\d\d).ansys", path.replace("\\", "/"), re.IGNORECASE)
-    if not matches:
-        raise RuntimeError(f"Unable to extract Ansys version from {path}")
-    return int(matches[-1])
 
 
 def close_all_local_instances(port_range=None):
@@ -746,202 +721,6 @@ def get_start_instance(start_instance_default=True):
     return start_instance_default
 
 
-def _get_available_base_ansys():
-    """Return a dictionary of available Ansys versions with their base paths.
-
-    Returns
-    -------
-    dict[int: str]
-        Return all installed Ansys paths in Windows.
-
-    Notes
-    -----
-
-    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
-
-    The student versions are returned at the end of the dict and with negative value for the version.
-
-    Examples
-    --------
-
-    >>> from ansys.mapdl.core import _get_available_base_ansys
-    >>> _get_available_base_ansys()
-    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
-     212: 'C:\\Program Files\\ANSYS Inc\\v212',
-     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
-
-    Return all installed Ansys paths in Linux.
-
-    >>> _get_available_base_ansys()
-    {194: '/usr/ansys_inc/v194',
-     202: '/usr/ansys_inc/v202',
-     211: '/usr/ansys_inc/v211'}
-    """
-    base_path = None
-    if os.name == "nt":  # pragma: no cover
-        supported_versions = SUPPORTED_ANSYS_VERSIONS
-        # The student version overwrites the AWP_ROOT env var (if it is installed later)
-        # However the priority should be given to the non-student version.
-        awp_roots = []
-        awp_roots_student = []
-
-        for ver in supported_versions:
-            path_ = os.environ.get(f"AWP_ROOT{ver}", "")
-            path_non_student = path_.replace("\\ANSYS Student", "")
-
-            if "student" in path_.lower() and os.path.exists(path_non_student):
-                # Check if also exist a non-student version
-                awp_roots.append([ver, path_non_student])
-                awp_roots_student.insert(0, [-1 * ver, path_])
-
-            else:
-                awp_roots.append([ver, path_])
-
-        awp_roots.extend(awp_roots_student)
-        installed_versions = {
-            ver: path for ver, path in awp_roots if path and os.path.isdir(path)
-        }
-
-        if installed_versions:
-            LOG.debug(
-                f"Found the following installed Ansys versions: {installed_versions}"
-            )
-            return installed_versions
-        else:  # pragma: no cover
-            LOG.debug(
-                "No installed ANSYS found using 'AWP_ROOT' environments. Let's suppose a base path."
-            )
-            base_path = os.path.join(os.environ["PROGRAMFILES"], "ANSYS INC")
-            if not os.path.exists(base_path):
-                LOG.debug(
-                    f"The supposed 'base_path'{base_path} does not exist. No available ansys found."
-                )
-                return {}
-    elif os.name == "posix":
-        for path in LINUX_DEFAULT_DIRS:
-            if os.path.isdir(path):
-                base_path = path
-    else:  # pragma: no cover
-        raise OSError(f"Unsupported OS {os.name}")
-
-    if base_path is None:
-        return {}
-
-    paths = glob(os.path.join(base_path, "v*"))
-
-    # Testing for ANSYS STUDENT version
-    if not paths:  # pragma: no cover
-        paths = glob(os.path.join(base_path, "ANSYS*"))
-
-    if not paths:
-        return {}
-
-    ansys_paths = {}
-    for path in paths:
-        ver_str = path[-3:]
-        if is_float(ver_str):
-            ansys_paths[int(ver_str)] = path
-
-    return ansys_paths
-
-
-def get_available_ansys_installations():
-    """Return a dictionary of available Ansys versions with their base paths.
-
-    Returns
-    -------
-    dict[int: str]
-        Return all installed Ansys paths in Windows.
-
-    Notes
-    -----
-
-    On Windows, It uses the environment variable ``AWP_ROOTXXX``.
-
-    The student versions are returned at the end of the dict and with negative value for the version.
-
-    Examples
-    --------
-
-    >>> from ansys.mapdl.core import get_available_ansys_installations
-    >>> get_available_ansys_installations()
-    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
-     212: 'C:\\Program Files\\ANSYS Inc\\v212',
-     -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
-
-    Return all installed Ansys paths in Linux.
-
-    >>> get_available_ansys_installations()
-    {194: '/usr/ansys_inc/v194',
-     202: '/usr/ansys_inc/v202',
-     211: '/usr/ansys_inc/v211'}
-    """
-    return _get_available_base_ansys()
-
-
-def find_ansys(version=None):
-    """Searches for ansys path within the standard install location
-    and returns the path of the latest version.
-
-    Parameters
-    ----------
-    version : int, float, optional
-        Version of ANSYS to search for.
-        If using ``int``, it should follow the convention ``XXY``, where ``XX`` is the major version,
-        and ``Y`` is the minor.
-        If using ``float``, it should follow the convention ``XX.Y``, where ``XX`` is the major version,
-        and ``Y`` is the minor.
-        If ``None``, use latest available version on the machine.
-
-    Returns
-    -------
-    ansys_path : str
-        Full path to ANSYS executable.
-
-    version : float
-        Version float.  For example, 21.1 corresponds to 2021R1.
-
-    Examples
-    --------
-    Within Windows
-
-    >>> from ansys.mapdl.core.launcher import find_ansys
-    >>> find_ansys()
-    'C:/Program Files/ANSYS Inc/v211/ANSYS/bin/winx64/ansys211.exe', 21.1
-
-    Within Linux
-
-    >>> find_ansys()
-    (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
-    """
-    versions = _get_available_base_ansys()
-    if not versions:
-        return "", ""
-
-    if not version:
-        version = max(versions.keys())
-
-    elif isinstance(version, float):
-        # Using floats, converting to int.
-        version = int(version * 10)
-
-    try:
-        ans_path = versions[version]
-    except KeyError as e:
-        raise ValueError(
-            f"Version {version} not found. Available versions are {list(versions.keys())}"
-        ) from e
-
-    version = abs(version)
-    if os.name == "nt":
-        ansys_bin = os.path.join(
-            ans_path, "ansys", "bin", "winx64", f"ansys{version}.exe"
-        )
-    else:
-        ansys_bin = os.path.join(ans_path, "ansys", "bin", f"ansys{version}")
-    return ansys_bin, version / 10
-
-
 def get_default_ansys():
     """Searches for ansys path within the standard install location
     and returns the path and version of the latest MAPDL version installed.
@@ -967,7 +746,7 @@ def get_default_ansys():
     >>> get_default_ansys()
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    return find_ansys()
+    return find_ansys(supported_versions=SUPPORTED_ANSYS_VERSIONS)
 
 
 def get_default_ansys_path():
@@ -1020,37 +799,6 @@ def get_default_ansys_version():
     return get_default_ansys()[1]
 
 
-def get_ansys_path(allow_input=True, version=None):
-    """Acquires ANSYS Path from a cached file or user input
-
-    Parameters
-    ----------
-    allow_input : bool, optional
-        Allow user input to find ANSYS path.  The default is ``True``.
-
-    version : float, optional
-        Version of ANSYS to search for. For example ``version=22.2``.
-        If ``None``, use latest.
-
-    """
-    exe_loc = None
-    if not version and os.path.isfile(CONFIG_FILE):
-        with open(CONFIG_FILE) as f:
-            exe_loc = f.read()
-        # verify
-        if not os.path.isfile(exe_loc) and allow_input:
-            exe_loc = save_ansys_path()
-    elif not version and allow_input:  # create configuration file
-        exe_loc = save_ansys_path()
-
-    if exe_loc is None:
-        exe_loc = find_ansys(version=version)[0]
-        if not exe_loc:
-            exe_loc = None
-
-    return exe_loc
-
-
 def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
     ansys_bin = get_ansys_path(allow_input=False)
@@ -1058,161 +806,6 @@ def check_valid_ansys():
         version = _version_from_path(ansys_bin)
         return not (version < 170 and os.name != "posix")
     return False
-
-
-def change_default_ansys_path(exe_loc):
-    """Change your default ansys path.
-
-    Parameters
-    ----------
-    exe_loc : str
-        Ansys executable path.  Must be a full path.
-
-    Examples
-    --------
-    Change default Ansys location on Linux
-
-    >>> from ansys.mapdl.core import launcher
-    >>> launcher.change_default_ansys_path('/ansys_inc/v201/ansys/bin/ansys201')
-    >>> launcher.get_ansys_path()
-    '/ansys_inc/v201/ansys/bin/ansys201'
-
-    Change default Ansys location on Windows
-
-    >>> ans_pth = 'C:/Program Files/ANSYS Inc/v193/ansys/bin/winx64/ANSYS193.exe'
-    >>> launcher.change_default_ansys_path(ans_pth)
-    >>> launcher.check_valid_ansys()
-    True
-
-    """
-    if os.path.isfile(exe_loc):
-        with open(CONFIG_FILE, "w") as f:
-            f.write(exe_loc)
-    else:
-        raise FileNotFoundError("File %s is invalid or does not exist" % exe_loc)
-
-
-def save_ansys_path(exe_loc=None):  # pragma: no cover
-    """Find MAPDL's path or query user.
-
-    If no ``exe_loc`` argument is supplied, this function attempt
-    to obtain the MAPDL executable from (and in order):
-
-    - The default ansys paths (i.e. ``'C:/Program Files/Ansys Inc/vXXX/ansys/bin/ansysXXX'``)
-    - The configuration file
-    - User input
-
-    If ``exe_loc`` is supplied, this function does some checks.
-    If successful, it will write that ``exe_loc`` into the config file.
-
-    Parameters
-    ----------
-    exe_loc : str, optional
-        Path of the MAPDL executable ('ansysXXX'), by default ``None``.
-
-    Returns
-    -------
-    str
-        Path of the MAPDL executable.
-
-    Notes
-    -----
-    The configuration file location (``config.txt``) can be found in
-    ``appdirs.user_data_dir("ansys_mapdl_core")``. For example:
-
-    .. code:: pycon
-
-        >>> import appdirs
-        >>> import os
-        >>> print(os.path.join(appdirs.user_data_dir("ansys_mapdl_core"), "config.txt"))
-        C:/Users/user/AppData/Local/ansys_mapdl_core/ansys_mapdl_core/config.txt
-
-    Examples
-    --------
-    You can change the default ``exe_loc`` either by modifying the mentioned
-    ``config.txt`` file or by executing:
-
-    >>> from ansys.mapdl.core import save_ansys_path
-    >>> save_ansys_path('/new/path/to/executable')
-
-    """
-    if exe_loc is None:
-        exe_loc, _ = find_ansys()
-
-    if is_valid_executable_path(exe_loc):  # pragma: not cover
-        if not is_common_executable_path(exe_loc):
-            warn_uncommon_executable_path(exe_loc)
-
-        change_default_ansys_path(exe_loc)
-        return exe_loc
-
-    if exe_loc is not None:
-        if is_valid_executable_path(exe_loc):
-            return exe_loc  # pragma: no cover
-
-    # otherwise, query user for the location
-    print("Cached ANSYS executable not found")
-    print(
-        "You are about to enter manually the path of the ANSYS MAPDL executable (ansysXXX, where XXX is the version"
-        "This file is very likely to contained in path ending in 'vXXX/ansys/bin/ansysXXX', but it is not required.\n"
-        "\nIf you experience problems with the input path you can overwrite the configuration file by typing:\n"
-        ">>> from ansys.mapdl.core.launcher import save_ansys_path\n"
-        ">>> save_ansys_path('/new/path/to/executable/')\n"
-    )
-    need_path = True
-    while need_path:  # pragma: no cover
-        exe_loc = input("Enter the location of an ANSYS executable (ansysXXX):")
-
-        if is_valid_executable_path(exe_loc):
-            if not is_common_executable_path(exe_loc):
-                warn_uncommon_executable_path(exe_loc)
-            with open(CONFIG_FILE, "w") as f:
-                f.write(exe_loc)
-            need_path = False
-        else:
-            print(
-                "The supplied path is either: not a valid file path, or does not match 'ansysXXX' name."
-            )
-
-    return exe_loc
-
-
-def is_valid_executable_path(exe_loc):  # pragma: no cover
-    return (
-        os.path.isfile(exe_loc)
-        and re.search("ansys\d\d\d", os.path.basename(os.path.normpath(exe_loc)))
-        is not None
-    )
-
-
-def is_common_executable_path(exe_loc):  # pragma: no cover
-    path = os.path.normpath(exe_loc)
-    path = path.split(os.sep)
-    if (
-        re.search("v(\d\d\d)", exe_loc) is not None
-        and re.search("ansys(\d\d\d)", exe_loc) is not None
-    ):
-        equal_version = (
-            re.search("v(\d\d\d)", exe_loc)[1] == re.search("ansys(\d\d\d)", exe_loc)[1]
-        )
-    else:
-        equal_version = False
-
-    return (
-        is_valid_executable_path(exe_loc)
-        and re.search("v\d\d\d", exe_loc)
-        and "ansys" in path
-        and "bin" in path
-        and equal_version
-    )
-
-
-def warn_uncommon_executable_path(exe_loc):  # pragma: no cover
-    warnings.warn(
-        f"The supplied path ('{exe_loc}') does not match the usual ansys executable path style"
-        "('directory/vXXX/ansys/bin/ansysXXX'). "
-        "You might have problems at later use."
-    )
 
 
 def check_lock_file(path, jobname, override):
@@ -1534,7 +1127,7 @@ def launch_mapdl(
         Versions can be provided as integers (i.e. ``version=222``) or
         floats (i.e. ``version=22.2``).
         To retrieve the available installed versions, use the function
-        :meth:`ansys.mapdl.core.get_available_ansys_installations`.
+        :meth:`ansys.tools.path.path.get_available_ansys_installations`.
 
         .. note::
 
@@ -1750,11 +1343,25 @@ def launch_mapdl(
         check_valid_port(port)
         LOG.debug(f"Using default port {port}")
 
+    # verify version
+    if exec_file and version:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
+    if version is None:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
+
+    version = _verify_version(version)  # return a int version or none
+
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
     if _HAS_PIM and exec_file is None and pypim.is_configured():
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit)
+        if version:
+            version = str(version)
+        else:
+            version = None
+
+        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
 
     # connect to an existing instance if enabled
     if start_instance is None:
@@ -1831,15 +1438,6 @@ def launch_mapdl(
             mapdl.clear()
         return mapdl
 
-    # verify version
-    if exec_file and version:
-        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
-
-    if version is None:
-        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
-
-    version = _verify_version(version)  # return a int version or none
-
     # verify executable
     if exec_file is None:
         exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
@@ -1871,7 +1469,7 @@ def launch_mapdl(
                 os.mkdir(run_location)
                 LOG.debug("Created run location at %s", run_location)
             except:
-                raise RuntimeError(
+                raise MapdlRuntimeError(
                     "Unable to create the temporary working "
                     f'directory "{run_location}"\n'
                     "Please specify run_location="

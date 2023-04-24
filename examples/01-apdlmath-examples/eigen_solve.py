@@ -3,6 +3,7 @@
 
 Using APDLMath to solve Eigenproblems
 -------------------------------------
+
 Use APDLMath to solve eigenproblems.
 
 This example uses a verification manual input file, but you can use
@@ -174,5 +175,7 @@ ax.bar(x, mapdl_acc, label="MAPDL Results")
 plt.show()
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

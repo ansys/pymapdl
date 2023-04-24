@@ -234,7 +234,9 @@ mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
 mapdl.eplot(
-    # plot_bc=True, bc_glyph_size=3, title="", background="white", show_axes=False
+    plot_bc=True,
+    bc_glyph_size=3,
+    title="",
 )
 
 ###############################################################################
@@ -356,7 +358,7 @@ add_op = dpf.operators.math.add(fieldA=mesh_field)
 add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
 # Instantiate a PyVista plotter and start the creation of a GIF
-plotter = pv.Plotter()
+plotter = pv.Plotter(notebook=False, off_screen=True)
 plotter.open_gif("dcb.gif")
 
 # Add the beam mesh to the scene
@@ -405,6 +407,8 @@ for i in range(1, 100):
 
 plotter.show()
 
+
+###############################################################################
 # Plot the reaction force at the bottom nodes
 mesh_scoping = model.metadata.named_selection("BOT_NOD")
 f_tot = []
@@ -427,7 +431,7 @@ f_tot[0] = 0
 
 fig, ax = plt.subplots()
 
-plt.plot(d_tot, f_tot, "k")
+plt.plot(d_tot, f_tot, "b")
 plt.ylabel("Force [N]")
 plt.xlabel("Displacement [mm]")
 plt.show()
@@ -439,7 +443,7 @@ plt.show()
 # an animation.
 disp = model.results.displacement.on_all_time_freqs.eval()
 camera_pos = disp.animate(
-    scale_factor=10.0,
+    scale_factor=1.0,
     save_as="dcb_animate.gif",
     return_cpos=True,
     show_axes=True,

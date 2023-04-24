@@ -3,6 +3,7 @@
 
 Pressure Vessel
 ---------------
+
 This example demonstrates how to create a basic pressure vessel and
 apply a pressure to it.
 
@@ -161,5 +162,7 @@ print(f"LEGACY Reader and MAPDL VGET Min: {max_von_mises}")
 print(f"PRNSOL MAPDL Min:                 {prnsol_eqv.max()}")
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

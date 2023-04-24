@@ -20,13 +20,6 @@ def check_manager():
     except:
         raise RuntimeError("Unable to connect to scheduler")
 
-    # consider checking the version
-    # version = re.findall('(\d*\.\d*\.\d*)', response)
-    # if not version:
-    #     raise RuntimeError('Unable to parse version')
-    # if version[0] != '0.1.6':
-    #     raise RuntimeError('Invalid scheduler version')
-
 
 def launch_mapdl_on_cluster(
     nproc=2,
@@ -128,9 +121,13 @@ def launch_mapdl_on_cluster(
         verbose=verbose,
         cpu=1000 * nproc,
         memory=memory,
+        start_timeout=start_timeout,
     )
 
     # connect to the pod instance
     from ansys.mapdl.core import Mapdl
 
-    return Mapdl(ip, loglevel=loglevel)
+    mapdl = Mapdl(ip, loglevel=loglevel)
+    mapdl._name = name
+
+    return mapdl

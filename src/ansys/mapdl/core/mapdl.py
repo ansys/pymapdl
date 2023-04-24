@@ -503,7 +503,7 @@ class _MapdlCore(Commands):
         >>> mapdl.solution.converged
         """
         if self._exited:
-            raise RuntimeError("MAPDL exited.")
+            raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
     @property
@@ -526,7 +526,7 @@ class _MapdlCore(Commands):
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
         if self._exited:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
         return self._post
@@ -560,7 +560,7 @@ class _MapdlCore(Commands):
 
         """
         if self._distributed:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Chained commands are not permitted in distributed ansys."
             )
         return self._chain_commands(self)
@@ -972,7 +972,7 @@ class _MapdlCore(Commands):
         >>> mapdl.open_apdl_log("log.inp")
         """
         if self._apdl_log is not None:
-            raise RuntimeError("APDL command logging already enabled")
+            raise MapdlRuntimeError("APDL command logging already enabled")
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1041,7 +1041,7 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.launcher import get_ansys_path
 
         if not self._local:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "``open_gui`` can only be called from a local MAPDL instance."
             )
 
@@ -2055,7 +2055,9 @@ class _MapdlCore(Commands):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError("Distributed Cyclic result not supported")
+                        raise MapdlRuntimeError(
+                            "Distributed Cyclic result not supported"
+                        )
                     result_path = self._result_file
             else:
                 result_path = self._result_file
@@ -2234,6 +2236,10 @@ class _MapdlCore(Commands):
         it1num="",
         item2="",
         it2num="",
+        item3="",
+        it3num="",
+        item4="",
+        it4num="",
         **kwargs,
     ):
         """Runs the MAPDL GET command and returns a Python value.
@@ -2277,6 +2283,25 @@ class _MapdlCore(Commands):
             any). Some ``item2`` labels do not require an ``it2num``
             value.
 
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
+
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
+
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
+
         Returns
         -------
         float
@@ -2303,6 +2328,10 @@ class _MapdlCore(Commands):
             it1num=it1num,
             item2=item2,
             it2num=it2num,
+            item3=item3,
+            it3num=it3num,
+            item4=item4,
+            it4num=it4num,
             **kwargs,
         )
 
@@ -2316,6 +2345,9 @@ class _MapdlCore(Commands):
         item2="",
         it2num="",
         item3="",
+        it3num="",
+        item4="",
+        it4num="",
         **kwargs,
     ):
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
@@ -2394,6 +2426,25 @@ class _MapdlCore(Commands):
             the item for which data are to be retrieved. Almost all items do
             not require this level of information.
 
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
+
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
+
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
+
         Returns
         -------
         float
@@ -2418,9 +2469,7 @@ class _MapdlCore(Commands):
 
         self._check_parameter_name(par)
 
-        command = (
-            f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}"
-        )
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
         kwargs["mute"] = False
 
         # Checking printout is not suppressed by checking "wrinqr" flag.
@@ -2865,13 +2914,13 @@ class _MapdlCore(Commands):
             )
 
         if command[:3].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
         elif command[:4].upper() in INVAL_COMMANDS:
-            exception = RuntimeError(
+            exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
             )
@@ -3348,7 +3397,7 @@ class _MapdlCore(Commands):
         while arr.size == 1 and arr[0] == -1:
             arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
             if ntry > 5:
-                raise RuntimeError("Unable to get array for %s" % entity)
+                raise MapdlRuntimeError("Unable to get array for %s" % entity)
             ntry += 1
         return arr
 
@@ -3844,17 +3893,20 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     def _raise_errors(self, text):
-        if "is not a recognized" in text:
+        # to make sure the following error messages are caught even if a breakline is in between.
+        flat_text = " ".join([each.strip() for each in text.splitlines()])
+
+        if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
             text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
             raise MapdlInvalidRoutineError(text)
 
-        if "command is ignored" in text:
+        if "command is ignored" in flat_text:
             text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
             raise MapdlCommandIgnoredError(text)
 
         # flag errors
-        if "*** ERROR ***" in text:
+        if "*** ERROR ***" in flat_text:
             self._raise_output_errors(text)
 
     def _raise_output_errors(self, response):

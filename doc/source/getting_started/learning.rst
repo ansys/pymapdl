@@ -19,7 +19,7 @@ Downloads
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>` to help
+- View and download `PyMAPDL cheatsheet <pymapdl_cheatsheet_>`_ to help
   you to learn PyMAPDL.
 
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be
@@ -102,4 +102,4 @@ Recommended links
 * PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
 * `Ansys Innovation Courses <ansys_innovation_space_>`_
 
-Feel free to email any educational or learning resource to `PyAnsys Support <pyansys_support_>`_.
+Feel free to email any educational or learning resource to |pyansys_contact|.

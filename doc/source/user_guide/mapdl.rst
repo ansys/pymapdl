@@ -891,7 +891,7 @@ used to control the behavior or launching of PyMAPDL and MAPDL, including those
 described in the following table.
 
 +---------------------------------+-------------------------------------------------+
-| ``ANSYSLMD_LICENSE_FILE``       | License file or IP address (192.168.0.16).      |
+| :envvar:`ANSYSLMD_LICENSE_FILE` | License file or IP address (192.168.0.16).      |
 |                                 | This is helpful for supplying licensing for     |
 |                                 | Docker.                                         |
 +---------------------------------+-------------------------------------------------+

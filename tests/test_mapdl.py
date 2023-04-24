@@ -1,6 +1,8 @@
 """Test MAPDL interface"""
 import os
 from pathlib import Path
+import re
+import shutil
 import time
 
 from ansys.mapdl.reader import examples
@@ -322,7 +324,7 @@ def test_allow_ignore(mapdl):
 def test_chaining(mapdl, cleared):
     # test chaining with distributed only
     if mapdl._distributed:
-        with pytest.raises(RuntimeError):
+        with pytest.raises(MapdlRuntimeError):
             with mapdl.chain_commands:
                 mapdl.prep7()
     else:
@@ -540,7 +542,7 @@ def test_apdl_logging(mapdl, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
     # don't allow double logger:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.open_apdl_log(file_name, mode="w")
 
     # Testing
@@ -1123,7 +1125,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.run(each_cmd)
 
 
@@ -1160,7 +1162,7 @@ def test_path_with_spaces(mapdl, path_tests):
 
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
 
 
@@ -1621,21 +1623,6 @@ def test_lsread(mapdl, cleared):
     assert "No nodal" not in mapdl.flist()
 
 
-def test_get_available_ansys_installations():
-    from ansys.mapdl.core.launcher import (
-        _get_available_base_ansys,
-        get_available_ansys_installations,
-    )
-
-    _get_doc = _get_available_base_ansys.__doc__
-    get_doc = get_available_ansys_installations.__doc__
-
-    assert _get_doc == get_doc.replace(
-        "get_available_ansys_installations", "_get_available_base_ansys"
-    )
-    assert _get_available_base_ansys() == get_available_ansys_installations()
-
-
 def test_get_fallback(mapdl, cleared):
     with pytest.raises(ValueError, match="There are no NODES defined"):
         mapdl.get_value("node", 0, "num", "maxd")
@@ -1902,3 +1889,31 @@ def test_session_id(mapdl):
     assert not mapdl._check_session_id()
 
     mapdl._session_id_ = id_
+
+
+def test_igesin_whitespace(mapdl, cleared, tmpdir):
+    bracket_file = pymapdl.examples.download_bracket()
+    assert os.path.isfile(bracket_file)
+
+    # moving to another location
+    tmpdir_ = tmpdir.mkdir("directory with white spaces")
+    fname = os.path.basename(bracket_file)
+    dest = os.path.join(tmpdir_, fname)
+    shutil.copy(bracket_file, dest)
+
+    # Reading file
+    mapdl.aux15()
+    out = mapdl.igesin(dest)
+    n_ent = re.findall(r"TOTAL NUMBER OF ENTITIES \s*=\s*(\d*)", out)
+    assert int(n_ent[0]) > 0
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )

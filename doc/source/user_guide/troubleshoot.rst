@@ -186,7 +186,7 @@ For more comprehensive information, download the `ANSYS Licensing Guide <licensi
 Incorrect licensing environment variables
 -----------------------------------------
 
-The license server can be also specified using the environment variable ``ANSYSLMD_LICENSE_FILE``.
+The license server can be also specified using the environment variable :envvar:`ANSYSLMD_LICENSE_FILE`.
 The following code examples show how you can see the value of this environment variable on
 either Windows or Linux.
 
@@ -500,7 +500,7 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
 .. code:: pycon
 
-    >>> from ansys.mapdl.core.launcher import get_available_ansys_installations
+    >>> from ansys.mapdl.core import get_available_ansys_installations
     >>> get_available_ansys_installations()
     {222: 'C:\\Program Files\\ANSYS Inc\\v222',
     212: 'C:\\Program Files\\ANSYS Inc\\v212',
@@ -632,5 +632,5 @@ issue is already listed. If not, you can do one of the following:
 * Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
   or want to create a feature request.
 
-For more complex issues or queries, contact `PyAnsys Support <pyansys_support_>`_.
+For more complex issues or queries, contact |pyansys_contact|.
 

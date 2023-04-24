@@ -3,9 +3,9 @@
 
 Build a Finite Element
 ----------------------
-In the following exercise we build the finite element machinery for a
-quadrilateral element using an isoparametric formulation and validate it with
-PyMAPDL.
+
+A finite element machinery built for a quadrilateral element using an
+isoparametric formulation and validated with PyMAPDL.
 
 To illustrate it with a concrete example, we take a 2D element described by the
 following (x, y) node locations, an isotropic material (Young's modulus of 30e6
@@ -894,5 +894,7 @@ if np.allclose(stiffnes_mapdl_scaled, stiffness_scaled):
 
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

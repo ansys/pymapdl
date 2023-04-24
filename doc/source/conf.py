@@ -45,7 +45,7 @@ author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
-cname = os.getenv("DOCUMENTATION_CNAME", "nocname.com")
+cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
 
 # -- General configuration ---------------------------------------------------
@@ -76,7 +76,7 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/dev/", None),
+    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
@@ -144,12 +144,17 @@ exclude_patterns = [
     # because we include this in examples/index.rst
     "examples/gallery_examples/index.rst",
     "links.rst",
+    "substitutions.rst",
 ]
 
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""
 # Read link all targets from file
 with open("links.rst") as f:
+    rst_epilog += f.read()
+
+# Read link all substitutions from file
+with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -214,10 +219,9 @@ html_theme_options = {
         },
     ],
     "switcher": {
-        "json_url": f"https://{cname}/release/versions.json",
+        "json_url": f"https://{cname}/versions.json",
         "version_match": get_version_match(__version__),
     },
-    "navbar_end": ["version-switcher", "theme-switcher", "navbar-icon-links"],
 }
 
 html_context = {

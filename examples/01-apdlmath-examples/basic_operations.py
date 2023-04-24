@@ -221,5 +221,7 @@ np_array = apdl_mat.asarray()
 print(np.allclose(apdl_mat, np_array))
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

@@ -1,6 +1,7 @@
 """
 Use APDLMath to Solve a Dense Matrix Linear System
 --------------------------------------------------
+
 Use the APDLMath module to solve a Dense Matrix Linear System.
 
 """
@@ -64,5 +65,7 @@ print(f"Elapsed time to solve the linear system using numpy: {t2 - t1} seconds")
 np.linalg.norm(x_py)
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

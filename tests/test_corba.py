@@ -298,7 +298,7 @@ def test_logging(mapdl_corba, tmpdir):
     mapdl_corba.open_apdl_log(filename, mode="a")
 
     # don't allow to double log
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl_corba.open_apdl_log(filename, mode="w")
 
     mapdl_corba.prep7()

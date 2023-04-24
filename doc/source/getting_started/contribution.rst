@@ -38,7 +38,7 @@ use these issue templates:
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email `pyansys.support@ansys.com <pyansys_support_>`_.
+To reach the project support team, email |pyansys_contact|.
 
 Viewing PyMAPDL documentation
 =============================
@@ -46,10 +46,10 @@ Viewing PyMAPDL documentation
 Documentation for the latest stable release of PyMAPDL is hosted at
 `PyMAPDL Documentation <pymapdl_docs_>`_.
 
-Documentation for the latest development version, which tracks the
-``main`` branch, is hosted at 
-`Development PyMAPDL Documentation <pymapdl_dev_docs_>`_.
-This version is automatically kept up to date via GitHub actions.
+In the upper right corner of the documentation's title bar, there is an option
+for switching from viewing the documentation for the latest stable release
+to viewing the documentation for the development version or previously
+released versions.
 
 Testing MAPDL
 =============

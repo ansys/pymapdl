@@ -836,8 +836,8 @@ class MapdlGrpc(_MapdlCore):
         This should only need to be used for legacy ``open_gui``
         """
         if not self._local:
-            raise RuntimeError(
-                "Can only launch the GUI with a local instance of " "MAPDL"
+            raise MapdlRuntimeError(
+                "Can only launch the GUI with a local instance of MAPDL"
             )
         from ansys.mapdl.core.launcher import launch_grpc
 
@@ -857,7 +857,7 @@ class MapdlGrpc(_MapdlCore):
                 pass
 
         if not success:
-            raise RuntimeError("Unable to reconnect to MAPDL")
+            raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
     @property
     def post_processing(self):
@@ -1303,7 +1303,7 @@ class MapdlGrpc(_MapdlCore):
             return []
 
         elif self._exited:
-            raise RuntimeError("Cannot list remote files since MAPDL has exited")
+            raise MapdlExitedError("Cannot list remote files since MAPDL has exited")
 
         # this will sometimes return 'LINUX x6', 'LIN', or 'L'
         if "L" in self.parameters.platform[:1]:
@@ -2009,7 +2009,9 @@ class MapdlGrpc(_MapdlCore):
             self._log.warning("Unable to remove temporary file %s", tmp_filename)
 
     @protect_grpc
-    def _get(self, entity, entnum, item1, it1num, item2, it2num):
+    def _get(
+        self, entity, entnum, item1, it1num, item2, it2num, item3, it3num, item4, it4num
+    ):
         """Sends gRPC *Get request.
 
         .. warning::
@@ -2025,7 +2027,7 @@ class MapdlGrpc(_MapdlCore):
                 "Exit non_interactive mode before using this method."
             )
 
-        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num}"
+        cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
         while self._get_lock:
@@ -2055,7 +2057,9 @@ class MapdlGrpc(_MapdlCore):
         elif getresponse.type == 2:
             return getresponse.sval
 
-        raise RuntimeError(f"Unsupported type {getresponse.type} response from MAPDL")
+        raise MapdlRuntimeError(
+            f"Unsupported type {getresponse.type} response from MAPDL"
+        )
 
     def download_project(self, extensions=None, target_dir=None, progress_bar=False):
         """Download all the project files located in the MAPDL working directory.
@@ -2790,7 +2794,9 @@ class MapdlGrpc(_MapdlCore):
                 result = Result(result_path, read_mesh=False)
                 if result._is_cyclic:
                     if not os.path.isfile(self._result_file):
-                        raise RuntimeError("Distributed Cyclic result not supported")
+                        raise MapdlRuntimeError(
+                            "Distributed Cyclic result not supported"
+                        )
                     result_path = self._result_file
             else:
                 result_path = self._result_file
@@ -2805,24 +2811,27 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
         """Wrap the IGESIN command to handle the remote case."""
-        if self._local:
-            out = super().igesin(fname, ext, **kwargs)
-        elif not fname:
-            out = super().igesin(**kwargs)
-        elif fname in self.list_files():
-            # check if this file is already remote
-            out = super().igesin(fname, ext, **kwargs)
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        if " " in fname:
+            # Bug in reading file paths with whitespaces.
+            # https://github.com/pyansys/pymapdl/issues/1601
+
+            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+            self._log.debug(msg_)
+
+            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+            self.input_strings(cmd)
+
+            out = super().igesin(fname="__iges_file__(1)", **kwargs)
+            self.run("__iges_file__ =")  # cleaning array.
+            self.run("! Ending \\IGESIN whitespace patch.")
+            return out
         else:
-            if not os.path.isfile(fname):
-                raise FileNotFoundError(
-                    f"Unable to find {fname}.  You may need to "
-                    "input the full path to the file."
-                )
-
-            basename = self.upload(fname, progress_bar=False)
-            out = super().igesin(basename, **kwargs)
-
-        return out
+            return super().igesin(fname=filename, **kwargs)
 
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(

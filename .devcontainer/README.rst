@@ -24,7 +24,7 @@ If you want to build your own docker image, visit the following link
 Develop on a remote container
 =============================
 
-.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email pyansys.support@ansys.com.
+.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email |pyansys_contact|.
 
 To use a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_, you must install:
 
@@ -57,9 +57,9 @@ with your custom image:
    Be careful to not commit those changes in your PRs.
 
 You can now open the current folder (or PyMAPDL repository) using
-``ctr/cmd`` + ``shift`` + ``p`` to open the VSCode *Command palette*.
+:kbd:`ctr/cmd` + :kbd:`shift` + :kbd:`p` to open the VSCode *Command palette*.
 Then select ``Dev Containers: Open Folder in Container``.
-Because the configuration is available in ``.devcontainer`` directory, VS Code will automatically
+Because the configuration is available in :file:`.devcontainer` directory, VS Code will automatically
 launch the MAPDL container with the desired configuration.
 
 You can now work normally, but you will be, in fact, working from inside the container.
@@ -76,14 +76,14 @@ License
 -------
 
 As mentioned before, you must have a valid license to run MAPDL.
-When you launch the container, the file ``script.sh`` automatically checks if the environment
-variable ``ANSYSLMD_LICENSE_FILE`` exists.
+When you launch the container, the file :file:`script.sh` automatically checks if the environment
+variable :envvar:`ANSYSLMD_LICENSE_FILE` exists.
 This environment variable sets the port and IP address of the license server.
 
 If you do not have set this environment variable before launching the container, you are prompt to enter
 your license server port and address.
 
-You can set your license using the environment variable ``ANSYSLMD_LICENSE_FILE`` from the terminal before launching
+You can set your license using the environment variable :envvar:`ANSYSLMD_LICENSE_FILE` from the terminal before launching
 VS Code. This is recommended if you are using Windows OS.
 For example, if you have a license server at the address ``123.45.67.89``, you can set the license using:
 
@@ -103,4 +103,5 @@ You can launch a container which all the required tools and start to work in cou
 This is an easy way to get started with PyMAPDL development.
 
 .. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
-   If you are an Ansys employee and wants use this development method, please email pyansys.support@ansys.com.
+   If you are an Ansys employee and wants use this development method, please email |pyansys_contact|.
+

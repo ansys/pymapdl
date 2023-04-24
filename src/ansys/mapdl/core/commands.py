@@ -110,7 +110,10 @@ str
     :meth:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`,
     :meth:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` (only on listing commands) and
     :meth:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` (only if Pandas is installed).
-
+    |bl|
+    **NOTE**: If you use these methods, you might
+    obtain a lower precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
+    |bl|
     For more information visit :ref:`user_guide_postprocessing`.
 
 """
