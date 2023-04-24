@@ -46,8 +46,6 @@ try:
     from ansys.api.mapdl.v0 import mapdl_pb2_grpc as mapdl_grpc
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
-except ModuleNotFoundError:  # pragma: no cover
-    raise ImportError(MSG_MODULE)
 
 from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
@@ -72,7 +70,6 @@ from ansys.mapdl.core.misc import (
     run_as_prep7,
     supress_logging,
 )
-from ansys.mapdl.core.post import PostProcessing
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
@@ -400,6 +397,14 @@ class MapdlGrpc(_MapdlCore):
         # It might trigger some errors later on if not.
         self._run("/gopr")
 
+        # initialize mesh, post processing, and file explorer interfaces
+        try:
+            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+
+            self._mesh_rep = MeshGrpc(self)
+        except ModuleNotFoundError:  # pragma: no cover
+            self._mesh_rep = None
+
         # double check we have access to the local path if not
         # explicitly specified
         if "local" not in start_parm:
@@ -712,19 +717,6 @@ class MapdlGrpc(_MapdlCore):
             self._timer.daemon = True
             self._timer.start()
 
-        # initialize mesh, post processing, and file explorer interfaces
-        try:
-            from ansys.mapdl.core.mesh_grpc import MeshGrpc
-
-            self._mesh_rep = MeshGrpc(self)
-        except ModuleNotFoundError:  # pragma: no cover
-            self._mesh_rep = None
-
-        from ansys.mapdl.core.xpl import ansXpl
-
-        self._post = PostProcessing(self)
-        self._xpl = ansXpl(self)
-
         # enable health check
         if enable_health_check:
             self._enable_health_check()
@@ -848,22 +840,6 @@ class MapdlGrpc(_MapdlCore):
 
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
-
-    @property
-    def post_processing(self):
-        """Post-process in an active MAPDL session.
-
-        Examples
-        --------
-        Get the nodal displacement in the X direction for the first
-        result set.
-
-        >>> mapdl.set(1, 1)
-        >>> disp_x = mapdl.post_processing.nodal_displacement('X')
-        array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
-               5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
-        """
-        return self._post
 
     @supress_logging
     def _set_no_abort(self):
@@ -2720,80 +2696,6 @@ class MapdlGrpc(_MapdlCore):
             )
 
         return self._download_as_raw(error_file).decode("latin-1")
-
-    @property
-    @requires_package("ansys.mapdl.reader", softerror=True)
-    def result(self):
-        """Binary interface to the result file using ``pyansys.Result``
-
-        Examples
-        --------
-        >>> mapdl.solve()
-        >>> mapdl.finish()
-        >>> result = mapdl.result
-        >>> print(result)
-        PyANSYS MAPDL Result file object
-        Units       : User Defined
-        Version     : 18.2
-        Cyclic      : False
-        Result Sets : 1
-        Nodes       : 3083
-        Elements    : 977
-
-        Available Results:
-        EMS : Miscellaneous summable items (normally includes face pressures)
-        ENF : Nodal forces
-        ENS : Nodal stresses
-        ENG : Element energies and volume
-        EEL : Nodal elastic strains
-        ETH : Nodal thermal strains (includes swelling strains)
-        EUL : Element euler angles
-        EMN : Miscellaneous nonsummable items
-        EPT : Nodal temperatures
-        NSL : Nodal displacements
-        RF  : Nodal reaction forces
-        """
-        from ansys.mapdl.reader import read_binary
-        from ansys.mapdl.reader.rst import Result
-
-        if not self._local:
-            # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
-            result_path = self.download_result(save_path)
-        else:
-            if self._distributed_result_file and self._result_file:
-                result_path = self._distributed_result_file
-                result = Result(result_path, read_mesh=False)
-                if result._is_cyclic:
-                    result_path = self._result_file
-                else:  # pragma: no cover
-                    # return the file with the last access time
-                    filenames = [
-                        self._distributed_result_file,
-                        self._result_file,
-                    ]
-                    result_path = last_created(filenames)
-                    if result_path is None:  # if same return result_file
-                        result_path = self._result_file
-
-            elif self._distributed_result_file:
-                result_path = self._distributed_result_file
-                result = Result(result_path, read_mesh=False)
-                if result._is_cyclic:
-                    if not os.path.isfile(self._result_file):
-                        raise MapdlRuntimeError(
-                            "Distributed Cyclic result not supported"
-                        )
-                    result_path = self._result_file
-            else:
-                result_path = self._result_file
-
-        if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
-
-        return read_binary(result_path)
 
     @wraps(_MapdlCore.igesin)
     def igesin(self, fname="", ext="", **kwargs):
