@@ -458,3 +458,13 @@ def test_is_ubuntu():
 )
 def test_get_default_ansys():
     assert get_default_ansys() is not None
+
+
+def test_launch_mapdl_non_recognaised_arguments():
+    with pytest.raises(ValueError, match="my_fake_argument"):
+        launch_mapdl(my_fake_argument="my_fake_value")
+
+
+def test_mapdl_non_recognaised_arguments():
+    with pytest.raises(ValueError, match="my_fake_argument"):
+        pymapdl.Mapdl(my_fake_argument="my_fake_value")
