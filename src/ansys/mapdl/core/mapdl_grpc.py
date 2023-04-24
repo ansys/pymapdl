@@ -31,6 +31,14 @@ Please make sure you have the latest updated version using:
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
+MSG_MODULE = """ANSYS API module `ansys.api.mapdl` could not be found.
+This might be due to a faulty installation or obsolete API module version.
+Please make sure you have the latest updated version using:
+
+'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
+
+If this does not solve it, please reinstall 'ansys.mapdl.core'.
+or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
 try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
