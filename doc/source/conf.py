@@ -12,6 +12,7 @@ from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+from ansys.mapdl.core.docs import linkcode_resolve
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -351,19 +352,11 @@ def setup_to_py(
             return f"{doc_path}/{file_name}"
 
         elif "_autosummary" in link:
-            # It is all a hack
-            # On API. Let's direct to a search window:
-            words = os.path.basename(file_name).split(".")[
-                :-1
-            ]  # getting rid of the extension
-            path = "%2F".join(words[:-1])
-            keywords = [words[-1]]
-            keywords.extend(
-                SEARCH_HINTS
-            )  # to increase the chances of hitting the definition
-            keywords = "+".join(keywords)
-            url = f"https://github.com/search?q=repo%3A{USERNAME}%2F{REPOSITORY_NAME}+path%3A**%2F{path}.{DEFAULT_EXAMPLE_EXTENSION}+{keywords}&type=code"
-            return url
+            # This is an API example
+            fullname = link.split("_autosummary")[1][1:]
+            return linkcode_resolve(
+                "py", {"module": "ansys.mapdl.core", "fullname": fullname}, edit=True
+            )
 
         else:
             return link
