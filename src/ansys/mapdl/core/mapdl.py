@@ -1996,7 +1996,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
-    def result(self) -> "ansys.mapdl.reader.rst.Result":
+    def result(self):
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
