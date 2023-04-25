@@ -104,7 +104,13 @@ def linkcode_resolve(domain, info, edit=False):
         return None
 
     repo_path = pymapdl.__file__
-    repo_path = repo_path[: repo_path.find("src")]
+    if "src" in repo_path:
+        # repo is cloned.
+        repo_path = repo_path[: repo_path.find("src")]
+    elif "site-packages" in repo_path:
+        # cicd case
+        repo_path = repo_path[: repo_path.find("site-packages")]
+
     fn = fn.replace(repo_path, "")
 
     try:
