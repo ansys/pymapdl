@@ -1815,7 +1815,7 @@ class MapdlGrpc(_MapdlCore):
         if write_to_log and self._apdl_log is not None:
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
-        
+
         # Escaping early if inside non_interactive context
         if self._store_commands:
             self._stored_commands.append(tmp_dat.splitlines()[1])

@@ -21,7 +21,6 @@ from ansys.mapdl.core.errors import (
     MapdlConnectionError,
     MapdlRuntimeError,
 )
-from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
 
@@ -1900,7 +1899,6 @@ def test_input_strings_inside_non_interactive(mapdl, cleared):
     assert "PREP7" in mapdl._response
     assert "General Kenobi. You are a bold one.  Kill him!" in mapdl._response
     assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
-
 
 
 def test_input_inside_non_interactive(mapdl, cleared):
