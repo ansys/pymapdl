@@ -3307,7 +3307,7 @@ class MapdlGrpc(_MapdlCore):
             return pymapdl_session_id == self._mapdl_session_id
 
     def _get_mapdl_session_id(self):
-        """Retreive MAPDL session ID."""
+        """Retrieve MAPDL session ID."""
         try:
             parameter = interp_star_status(
                 self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
