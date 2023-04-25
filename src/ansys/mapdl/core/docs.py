@@ -110,6 +110,9 @@ def linkcode_resolve(domain, info, edit=False):
     elif "site-packages" in repo_path:
         # cicd case
         repo_path = repo_path[: repo_path.find("site-packages")]
+        repo_path = repo_path.replace(
+            "site-packages", "src"
+        )  # adapting to repository struct
 
     fn = fn.replace(repo_path, "")
 
