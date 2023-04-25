@@ -250,6 +250,10 @@ class _MapdlCore(Commands):
 
         self._solution = Solution(self)
 
+        from ansys.mapdl.core.xpl import ansXpl
+
+        self._xpl = ansXpl(self)
+
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
@@ -2017,7 +2021,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
-    def result(self) -> "ansys.mapdl.reader.rst.Result":
+    def result(self):
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -2057,7 +2061,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir(), "ansys_tmp")
+            save_path = os.path.join(tempfile.gettempdir())
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
