@@ -1892,20 +1892,24 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.parameters["my_par"] = "asdf"
-    db_name = "mydb.db"
-    db_dir = mapdl.directory
+    db_name = mapdl2.jobname + ".db"
+    db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
 
     mapdl2.save(db_name)
+    assert os.path.exists(db_path)
+
     mapdl2.parameters["my_par"] = "qwerty"
     mapdl2.exit()
 
-    mapdl2 = launch_mapdl(start_instance=False)
+    mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "asdf"
 
     mapdl2.parameters["my_par"] = "qwerty"
     mapdl2.exit(save=True)
-    mapdl2 = launch_mapdl(start_instance=False)
+
+    mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "qwerty"
+    mapdl2.exit()
