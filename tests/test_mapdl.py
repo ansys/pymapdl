@@ -21,9 +21,9 @@ from ansys.mapdl.core.errors import (
     MapdlConnectionError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.misc import random_string
-from ansys.mapdl.core.examples import vmfiles
 
 skip_in_cloud = pytest.mark.skipif(
     not get_start_instance(),
