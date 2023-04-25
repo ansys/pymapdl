@@ -1,6 +1,8 @@
 import inspect
 import sys
 
+from ansys.mapdl.core import LOG
+
 
 def linkcode_resolve(domain, info, edit=False):
     """Determine the URL corresponding to a Python object.
@@ -81,6 +83,7 @@ def linkcode_resolve(domain, info, edit=False):
     obj = submod
     fullname = fullname.replace(modname, "")
 
+    LOG.debug("fullname")
     for part in fullname.split("."):
         try:
             obj = getattr(obj, part)
@@ -95,6 +98,7 @@ def linkcode_resolve(domain, info, edit=False):
         fn = inspect.getsourcefile(obj)
     except Exception:  # pragma: no cover
         fn = None
+    LOG.debug(f"Filename: {fn}")
 
     if not fn:  # pragma: no cover
         try:
@@ -105,12 +109,13 @@ def linkcode_resolve(domain, info, edit=False):
 
     repo_path = str(pymapdl.__file__)
 
-    if "site-packages" in repo_path:
-        repo_path = repo_path.replace("site-packages", "src")
-
+    LOG.debug(f"repo_path: {repo_path}")
+    repo_path = repo_path.replace("site-packages", "src")
     repo_path = repo_path[: repo_path.find("src")]
+    LOG.debug(f"repo_path: {repo_path}")
 
     fn = fn.replace(repo_path, "")
+    LOG.debug(f"fn: {fn}")
 
     try:
         source, lineno = inspect.getsourcelines(obj)
