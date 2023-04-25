@@ -103,7 +103,7 @@ def linkcode_resolve(domain, info, edit=False):
             return None
         return None
 
-    repo_path = pymapdl.__file__
+    repo_path = str(pymapdl.__file__)
 
     if "site-packages" in repo_path:
         repo_path = repo_path.replace("site-packages", "src")
