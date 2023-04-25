@@ -1894,18 +1894,18 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.parameters["my_par"] = "asdf"
     db_name = "mydb.db"
     db_dir = mapdl.directory
-    db_path = os.path.join(mapdl.directory, db_name)
+    db_path = os.path.join(db_dir, db_name)
 
     mapdl2.save(db_name)
     mapdl2.parameters["my_par"] = "qwerty"
     mapdl2.exit()
 
     mapdl2 = launch_mapdl(start_instance=False)
-    mapdl2.resume(db_name)
+    mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "asdf"
 
     mapdl2.parameters["my_par"] = "qwerty"
     mapdl2.exit(save=True)
     mapdl2 = launch_mapdl(start_instance=False)
-    mapdl2.resume(db_name)
+    mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "qwerty"
