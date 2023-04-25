@@ -1901,7 +1901,6 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.exit()
 
     mapdl2 = launch_mapdl(start_instance=False)
-    # mapdl.cwd(db_dir)
     mapdl2.resume(db_name)
     assert mapdl2.parameters["my_par"] == "asdf"
 
