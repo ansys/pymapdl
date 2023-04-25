@@ -2036,7 +2036,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir(), "ansys_tmp")
+            save_path = os.path.join(tempfile.gettempdir())
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
