@@ -311,7 +311,8 @@ class MapdlGrpc(_MapdlCore):
 
         # port and ip are needed to setup the log
         self._port = port
-        ip = check_valid_ip(ip)
+
+        check_valid_ip(ip)
         self._ip = ip
         super().__init__(
             loglevel=loglevel,
@@ -429,7 +430,6 @@ class MapdlGrpc(_MapdlCore):
 
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
-        check_valid_ip(ip)
 
         # open the channel
         channel_str = f"{ip}:{port}"
