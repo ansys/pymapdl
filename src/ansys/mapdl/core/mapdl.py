@@ -661,6 +661,7 @@ class _MapdlCore(Commands):
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
+            self._parent()._store_commands = False
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -2830,9 +2831,12 @@ class _MapdlCore(Commands):
         if isinstance(commands, str):
             commands = commands.splitlines()
 
-        self._stored_commands = commands
-        self._flush_stored()
-        return self._response
+        self._stored_commands.extend(commands)
+        if self._store_commands:
+            return None
+        else:
+            self._flush_stored()
+            return self._response
 
     def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
         """
