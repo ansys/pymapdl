@@ -1781,6 +1781,11 @@ class MapdlGrpc(_MapdlCore):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
+        # Escaping early if inside non_interactive context
+        if self._store_commands:
+            self._stored_commands.append(tmp_dat.splitlines()[1])
+            return None
+
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)

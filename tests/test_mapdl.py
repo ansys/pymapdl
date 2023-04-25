@@ -1886,3 +1886,34 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
         )
         is None
     )
+
+
+def test_input_strings_inside_non_interactive(mapdl, cleared):
+    cmd = """/com General Kenobi. You are a bold one.  Kill him!\n/prep7"""
+    with mapdl.non_interactive:
+        mapdl.com("Hello there")
+        mapdl.input_strings(cmd)
+        mapdl.com("Back away! I will deal with this Jedi slime myself.")
+
+    assert "Hello there" in mapdl._response
+    assert "PREP7" in mapdl._response
+    assert "General Kenobi. You are a bold one.  Kill him!" in mapdl._response
+    assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
+
+
+def test_input_inside_non_interactive(mapdl, cleared):
+    cmd = """/com General Kenobi. You are a bold one.  Kill him!\n/prep7"""
+    with open("myinput.inp", "w") as fid:
+        fid.write(cmd)
+
+    with mapdl.non_interactive:
+        mapdl.com("Hello there")
+        mapdl.input("myinput.inp")
+        mapdl.com("Back away! I will deal with this Jedi slime myself.")
+
+    assert "Hello there" in mapdl._response
+    assert "PREP7" in mapdl._response
+    assert "General Kenobi. You are a bold one.  Kill him!" in mapdl._response
+    assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
+
+    os.remove("myinput.inp")
