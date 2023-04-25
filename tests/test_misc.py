@@ -150,7 +150,7 @@ def test_info_title(mapdl):
 def test_info_stitle(mapdl):
     info = mapdl.info
 
-    assert not info.stitles
+    assert all([not each for each in info.stitles])
     stitles = ["asfd", "qwer", "zxcv", "jkl"]
     info.stitles = "\n".join(stitles)
 
@@ -162,7 +162,7 @@ def test_info_stitle(mapdl):
     assert stitles == info.stitles
 
     info.stitles = None
-    assert not info.stitles
+    assert all([not each for each in info.stitles])
 
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
