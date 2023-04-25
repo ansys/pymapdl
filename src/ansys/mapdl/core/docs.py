@@ -66,7 +66,7 @@ def linkcode_resolve(domain, info, edit=False):
         return None
 
     repo_path = pymapdl.__file__
-    repo_path = repo_path[: repo_path.index("src")]
+    repo_path = repo_path[: repo_path.find("src")]
     fn = fn.replace(repo_path, "")
 
     try:
