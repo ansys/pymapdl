@@ -3,6 +3,7 @@ import pytest
 from ansys.mapdl.core.docs import linkcode_resolve
 
 
+@pytest.mark.parametrize("edit", [True, False])
 @pytest.mark.parametrize(
     "test_input,expected",
     [
@@ -26,16 +27,21 @@ from ansys.mapdl.core.docs import linkcode_resolve
             "ansys.mapdl.core.database.nodes.DbNodes",
             "http://github.com/pyansys/pymapdl/edit/main/src/ansys/mapdl/core/database/nodes.py",
         ),
-        (pytest.param("Query.lsy", "", marks=pytest.mark.xfail)),
-        (pytest.param("Mapdl.chain_commands", "", marks=pytest.mark.xfail)),
-        (pytest.param("Mapdl.last_response", "", marks=pytest.mark.xfail)),
-        (pytest.param("Mapdl.chain_commands", "", marks=pytest.mark.xfail)),
+        (
+            "Mapdl.chain_commands",
+            "http://github.com/pyansys/pymapdl/edit/main/src/ansys/mapdl/core/mapdl.py",
+        ),
+        (
+            "Mapdl.last_response",
+            "http://github.com/pyansys/pymapdl/edit/main/src/ansys/mapdl/core/mapdl.py",
+        ),
     ],
 )
-def test_linkcode_resolve_edit(test_input, expected):
-    assert (
-        linkcode_resolve(
-            "py", {"module": "ansys.mapdl.core", "fullname": test_input}, True
-        )
-        == expected
-    )
+def test_linkcode_resolve(test_input, expected, edit):
+    if not edit:
+        expected = expected.replace("/pymapdl/edit", "/pymapdl/blob")
+
+    info = {"module": "ansys.mapdl.core", "fullname": test_input}
+    url = linkcode_resolve("py", info, edit)
+
+    assert expected in url
