@@ -355,10 +355,81 @@ class Parameters:
             self._set_parameter(key, value)
 
     def __contains__(self, key):
+        """
+        Check if a given key is present in the dictionary.
+
+        Parameters
+        ----------
+        key : hashable
+            The key to search for in the dictionary.
+
+        Returns
+        -------
+        bool
+            True if the key is in the dictionary, False otherwise.
+
+        """
         return key in self._parm.keys()
 
     def __iter__(self):
+        """
+        Return an iterator over the keys in the dictionary.
+
+        Returns
+        -------
+        iterator
+            An iterator over the keys in the dictionary.
+
+        """
         yield from self._parm.keys()
+
+    def keys(self):
+        """
+        Return a view object that contains the keys in the dictionary.
+
+        Returns
+        -------
+        dict_keys
+            A view object that contains the keys in the dictionary.
+
+        """
+        return self._parm.keys()
+
+    def values(self):
+        """
+        Return a view object that contains the values in the dictionary.
+
+        Returns
+        -------
+        dict_values
+            A view object that contains the values in the dictionary.
+
+        """
+        return self._parm.values()
+
+    def copy(self):
+        """
+        Return a shallow copy of the dictionary.
+
+        Returns
+        -------
+        dict
+            A shallow copy of the dictionary.
+
+        """
+        return self._parm.copy()
+
+    def items(self):
+        """
+        Return a view object that contains the key-value pairs in the dictionary.
+
+        Returns
+        -------
+        dict_items
+            A view object that contains the key-value pairs in the dictionary.
+
+        """
+        return self._parm.items()
 
     @supress_logging
     def _set_parameter(self, name, value):
