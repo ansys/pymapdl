@@ -646,7 +646,9 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "There are no parameters defined." in status:
+    if "There are no parameters defined." in status or not re.search(
+        "NAME\s+VALUE\s+TYPE\s+", status
+    ):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
