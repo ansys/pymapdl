@@ -43,7 +43,7 @@ UNITS_MAP = {
 }
 
 
-class Parameters:
+class Parameters(dict):
     """Collection of MAPDL parameters.
 
     Notes
