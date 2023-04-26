@@ -6,10 +6,12 @@ import warnings
 from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
 import pyvista
+from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+from ansys.mapdl.core.docs import linkcode_resolve
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -47,6 +49,17 @@ author = "ANSYS Inc."
 release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
+REPOSITORY_NAME = "pymapdl"
+USERNAME = "pyansys"
+BRANCH = "main"
+
+
+DEFAULT_EXAMPLE_EXTENSION = "py"
+GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
+EXAMPLES_ROOT = "examples"
+EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
+DOC_PATH = "doc/source"
+SEARCH_HINTS = ["def", "class"]
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -58,6 +71,11 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
+    # sphinx.ext.linkcode
+    # This add the button ``[Source]`` to each website.
+    # The link of that button is created by calling ``linkcode_resolve``
+    # function which we overwrite in ansys.mapdl.core.docs
+    "sphinx.ext.linkcode",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
@@ -142,7 +160,7 @@ exclude_patterns = [
     "Thumbs.db",
     ".DS_Store",
     # because we include this in examples/index.rst
-    "examples/gallery_examples/index.rst",
+    f"{GALLERY_EXAMPLES_PATH}/index.rst",
     "links.rst",
     "substitutions.rst",
 ]
@@ -173,11 +191,11 @@ sphinx_gallery_conf = {
     # convert rst to md for ipynb
     "pypandoc": True,
     # path to your examples scripts
-    "examples_dirs": ["../../examples/"],
+    "examples_dirs": [EXAMPLES_PATH_FOR_DOCS],
     # path where to save gallery generated examples
-    "gallery_dirs": ["examples/gallery_examples"],
+    "gallery_dirs": [GALLERY_EXAMPLES_PATH],
     # Pattern to search for example files
-    "filename_pattern": r"\.py",
+    "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
     # Remove the "Download all examples" button from the top level gallery
     "download_all_examples": False,
     # Sort gallery example by file name instead of number of lines (default)
@@ -190,6 +208,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
 }
+# ---
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -198,7 +217,7 @@ html_theme = "ansys_sphinx_theme"
 html_logo = pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
-    "github_url": "https://github.com/pyansys/pymapdl",
+    "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,
     "show_breadcrumbs": True,
     "collapse_navigation": True,
@@ -209,12 +228,12 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "Support",
-            "url": "https://github.com/pyansys/pymapdl/discussions",
+            "url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}/discussions",
             "icon": "fa fa-comment fa-fw",
         },
         {
             "name": "Contribute",
-            "url": "https://mapdl.docs.pyansys.com/dev/getting_started/contribution.html",
+            "url": "https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html",
             "icon": "fa fa-wrench",
         },
     ],
@@ -226,11 +245,13 @@ html_theme_options = {
 
 html_context = {
     "display_github": True,  # Integrate GitHub
-    "github_user": "pyansys",
-    "github_repo": "pymapdl",
-    "github_version": "main",
-    "doc_path": "doc/source",
+    "github_user": USERNAME,
+    "github_repo": REPOSITORY_NAME,
+    "github_version": BRANCH,
+    "doc_path": DOC_PATH,
 }
+html_show_sourcelink = False
+
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -305,8 +326,59 @@ epub_title = project
 epub_exclude_files = ["search.html"]
 
 
-# Adding apdl syntax highlighting
-def setup(app):
+def setup_to_py(
+    app: Sphinx, pagename: str, templatename: str, context, doctree
+) -> None:
+    """Add a function that jinja can access for returning an "edit this page" link pointing to `main`."""
+
+    def fix_edit_link_button(link: str) -> str:
+        """Transform "edit on github" links and make sure they always point to the main branch.
+
+        Args:
+            link: the link to the github edit interface
+
+        Returns:
+            the link to the tip of the main branch for the same file
+        """
+        # Create custom 'edit' URLs for API modules since they are dynamically generated.
+        doc_path = "/".join(link.split("/")[:-1])
+        file_name = link.split("/")[-1]
+
+        if GALLERY_EXAMPLES_PATH in doc_path:
+            # We are in a python example
+            doc_path = doc_path.replace(
+                f"{DOC_PATH}/{GALLERY_EXAMPLES_PATH}", EXAMPLES_ROOT
+            )
+            file_name = (
+                os.path.basename(file_name).replace(source_suffix, "")
+                + f".{DEFAULT_EXAMPLE_EXTENSION}"
+            )
+            return f"{doc_path}/{file_name}"
+
+        elif "_autosummary" in link:
+            # This is an API example
+            fullname = link.split("_autosummary")[1][1:]
+            return linkcode_resolve(
+                "py", {"module": "ansys.mapdl.core", "fullname": fullname}, edit=True
+            )
+
+        else:
+            return link
+
+    context["fix_edit_link_button"] = fix_edit_link_button
+
+
+def setup(app: Sphinx):
+    """Add custom configuration to sphinx app.
+
+    Parameters
+    ----------
+    app : sphinx.application.Sphinx
+        The Sphinx application.
+    """
+    app.connect("html-page-context", setup_to_py)
+
+    # Adding apdl syntax highlighting
     from pygments.lexers.apdlexer import apdlexer
     from pygments.lexers.julia import JuliaLexer
 
