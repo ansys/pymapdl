@@ -1506,6 +1506,7 @@ class MapdlGrpc(_MapdlCore):
         **kwargs,
     ):
         """Wraps ``_MapdlCore.tbft``."""
+        extra_info = ""
         if oper.lower() == "eadd":
             # Option 2 is a file and option 4 is the directory.
             # Option 3 is be extension
@@ -1513,18 +1514,22 @@ class MapdlGrpc(_MapdlCore):
             fname = option2 if not option3 else option2 + "." + option3
             filename = os.path.join(option4, fname)
 
-            if self._local:
-                if not os.path.exists(filename) and filename not in self.list_files():
-                    raise FileNotFoundError(f"File '{filename}' could not be found.")
-            else:
-                if os.path.exists(filename):
-                    self.upload(filename)
-                    option4 = ""  # You don't need the directory if you upload it.
-                elif filename in self.list_files():
-                    option4 = ""  # You don't need the directory if the file is in WDIR
-                    pass
-                else:
-                    raise FileNotFoundError(f"File '{filename}' could not be found.")
+            fname = self._get_file_name(fname=option2, ext=option3)
+            if option4:  # if directory is supplied
+                fname = os.path.join(option4, fname)
+
+            filename = self._get_file_path(fname, progress_bar=False)
+
+            # since we upload the file, we dont need the full path: not in option2 nor option4.
+            if not self._local:
+                extra_info = f"PyMAPDL has upload the file {option2} to the MAPDL instance, hence the options for 'TBFT' command have changed."
+                option2 = filename
+                option3 = ""  # the extension is now included in filename
+                option4 = ""
+
+        if extra_info:
+            self.com("")
+            self._log.debug(extra_info)
 
         return super().tbft(
             oper,
@@ -1903,6 +1908,10 @@ class MapdlGrpc(_MapdlCore):
 
         # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
+
+        # Sanitizing ext
+        while ext and ext[0] == ".":
+            ext = ext[1:]
 
         if ext:
             fname = fname + "." + ext
