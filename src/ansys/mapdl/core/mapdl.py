@@ -254,6 +254,10 @@ class _MapdlCore(Commands):
 
         self._xpl = ansXpl(self)
 
+        from ansys.mapdl.core.component import ComponentManager
+
+        self._componentmanager = ComponentManager(self)
+
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
@@ -534,6 +538,24 @@ class _MapdlCore(Commands):
         if self._exited:
             raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
+
+    @property
+    def component(self):
+        """MAPDL Component manager.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.core.component.ComponentManager`
+
+        Examples
+        --------
+        Check if a solution has converged.
+
+        >>> mapdl.solution.converged
+        """
+        if self._exited:
+            raise MapdlRuntimeError("MAPDL exited.")
+        return self._componentmanager
 
     @property
     def _distributed(self):
