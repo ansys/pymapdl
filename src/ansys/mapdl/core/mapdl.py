@@ -3901,6 +3901,23 @@ class _MapdlCore(Commands):
 
         return wrapped(self, *args, **kwargs)
 
+    @wraps(Commands.esel)
+    def esel(self, *args, **kwargs):
+        """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().esel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points()
+        @wrap_point_SEL(entity="elem")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
     @wraps(Commands.ksel)
     def ksel(self, *args, **kwargs):
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
@@ -3913,6 +3930,57 @@ class _MapdlCore(Commands):
 
         @allow_pickable_points(entity="kp", plot_function="kplot")
         @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.lsel)
+    def lsel(self, *args, **kwargs):
+        """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().lsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="line", plot_function="lplot")
+        @wrap_point_SEL(entity="line")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.asel)
+    def asel(self, *args, **kwargs):
+        """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().asel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="area", plot_function="aplot")
+        @wrap_point_SEL(entity="area")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.vsel)
+    def vsel(self, *args, **kwargs):
+        """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().vsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="volume", plot_function="vplot")
+        @wrap_point_SEL(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
