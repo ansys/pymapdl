@@ -109,13 +109,15 @@ def linkcode_resolve(domain, info, edit=False):
 
     repo_path = str(pymapdl.__file__)
 
-    LOG.debug(f"repo_path: {repo_path}")
-    repo_path = repo_path.replace("site-packages", "src")
-    repo_path = repo_path[: repo_path.find("src")]
-    LOG.debug(f"repo_path: {repo_path}")
+    if "site-packages" in repo_path:
+        src = "site-packages"
+    else:
+        src = "src"
 
-    fn = fn.replace(repo_path, "")
-    LOG.debug(f"fn: {fn}")
+    repo_path = repo_path[: repo_path.find(src)]
+
+    # Replacing site-packages for source
+    fn = fn.replace(repo_path, "").replace("site-packages", "src")
 
     try:
         source, lineno = inspect.getsourcelines(obj)
