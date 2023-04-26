@@ -1,10 +1,12 @@
 from typing import Any
 import weakref
 
+import numpy as np
+
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 
-class Component(dict):
+class Component:
     def __setitem__(self, __key: Any, __value: Any) -> None:
         if __key not in ["type", "items"]:
             raise KeyError(f"The key '{__key}' is not allowed in 'Component' class.")
@@ -37,6 +39,7 @@ class ComponentManager(dict):
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
+        self._comp = None
 
     @property
     def _mapdl(self):
@@ -49,3 +52,51 @@ class ComponentManager(dict):
     @property
     def _log(self):
         return self._mapdl._log
+
+    def __getitem__(self, __key: Any) -> Any:
+        self._comp = self._mapdl._parse_cmlist()
+        try:
+            cmtype = self._comp[__key.upper()]
+        except KeyError:
+            raise KeyError(
+                f"The component named '{__key}' does not exist in the MAPDL instance."
+            )
+        return self._mapdl._parse_cmlist_indiv(__key, cmtype)
+
+    def __setitem__(self, __key: Any, __value: Any) -> None:
+        if isinstance(__value, tuple):
+            if len(__value) != 2:
+                raise ValueError(
+                    "Only two values are allowed for assignment. The first one a string with the type name and the second a list or numpy array with the selected elements"
+                )
+            if not isinstance(__value[0], str) or not isinstance(
+                __value[1], (list, np.array)
+            ):
+                raise ValueError(
+                    "Only strings are allowed for the first argument, and a list or numpy array for the second."
+                )
+
+            cmtype = __value[0]
+            cmitems = __value[1]
+
+            # Selecting
+            for i in cmitems:
+                self._mapdl.run()
+
+        elif isinstance(__value, str):
+            cmtype = __value
+
+        else:
+            raise ValueError("Only strings or tuples are allowed for assignment.")
+
+        # type_ =
+        self._mapdl.cm("")
+
+    def __repr__(self):
+        """Return the current parameters in a pretty format"""
+        lines = ["MAPDL Components", "----------------"]
+        if self._comp:
+            for key, item in self._comp:
+                lines.append("%-32s : %s" % (key, item))
+
+        return "\n".join(lines)
