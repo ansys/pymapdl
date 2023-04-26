@@ -306,12 +306,15 @@ class MapdlGrpc(_MapdlCore):
                 raise ValueError(
                     "If `channel` is specified, neither `port` nor `ip` can be specified."
                 )
-        elif ip is None:
+        if ip is None:
             ip = "127.0.0.1"
 
         # port and ip are needed to setup the log
         self._port = port
+
+        check_valid_ip(ip)
         self._ip = ip
+
         super().__init__(
             loglevel=loglevel,
             log_apdl=log_apdl,
@@ -428,7 +431,6 @@ class MapdlGrpc(_MapdlCore):
 
     def _create_channel(self, ip, port):
         """Create an insecured grpc channel."""
-        check_valid_ip(ip)
 
         # open the channel
         channel_str = f"{ip}:{port}"
