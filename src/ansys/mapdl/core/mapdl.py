@@ -491,9 +491,9 @@ class _MapdlCore(Commands):
     def non_interactive(self):
         """Non-interactive context manager.
 
-        Allows to execute code without user interaction or waiting
+        Allow to execute code without user interaction or waiting
         between PyMAPDL responses.
-        It can be also used to execute some commands which are not
+        It can also be used to execute some commands which are not
         supported in interactive mode. For a complete list of commands
         visit :ref:`ref_unsupported_interactive_commands`.
 
