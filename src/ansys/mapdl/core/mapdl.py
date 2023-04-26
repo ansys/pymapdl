@@ -4239,3 +4239,46 @@ class _MapdlCore(Commands):
             if self._in_nopr:
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
+
+    def _parse_cmlist(self, cmlist=None):
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        header = "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+        cmlist = "\n".join(blocks)
+
+        def extr(each_line, ind):
+            return each_line.split()[ind].strip()
+
+        return {
+            extr(each_line, 0): extr(each_line, 1)
+            for each_line in cmlist.splitlines()
+            if each_line
+        }
+
+    def _parse_cmlist_indiv(self, cmname, cmtype, cmlist=None):
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+        # Capturing blocks
+        cmlist = "\n\n".join(
+            re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        )
+
+        # Capturing items in each block
+        rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+        items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+        # Joining them together and giving them format.
+        items = items.replace("\n", "  ").split()
+        items = [int(each) for each in items]
+
+        return items
