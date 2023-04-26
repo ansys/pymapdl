@@ -4239,3 +4239,37 @@ class _MapdlCore(Commands):
             if self._in_nopr:
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
+
+    def _parse_rlist(self):
+        # mapdl.rmore(*list)
+        with self.force_output:
+            rlist = self.rlist()
+
+        # removing ueless part
+        rlist = rlist.replace(
+            """   *****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+""",
+            "",
+        )
+        constants_ = re.findall(
+            r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
+        )
+
+        const_ = {}
+        for each in constants_:
+            values = [0 for i in range(18)]
+            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            limits = (
+                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
+                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+            )
+            values_ = [float(i) for i in each.strip().splitlines()[1].split()]
+
+            if not set_ in const_.keys():
+                const_[set_] = values
+
+            for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
+                const_[set_][jlimit] = values_[i]
+
+        return const_
