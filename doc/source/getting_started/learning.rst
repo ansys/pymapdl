@@ -95,7 +95,7 @@ Course content
 * Post Completion Survey
 * Meet the Instructors
 
-Ansys Innovation Space
+Ansys innovation space
 ----------------------
 
 You can find more courses for different Ansys product organized in 

@@ -139,6 +139,8 @@ Or, you can specify the directory using the ``-dir`` flag:
 
 If this command doesn't launch MAPDL, look at the command output:
 
+.. vale off
+
 .. code:: pwsh-session
 
     (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
@@ -148,6 +150,7 @@ If this command doesn't launch MAPDL, look at the command output:
     terminated Ansys run. To disable this check, set the ANSYS_LOCK environment
     variable to OFF.
 
+.. vale on
 
 Licensing issues
 ================
@@ -356,6 +359,8 @@ environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
+.. vale off
+
 .. code:: pwsh-session
 
     PS echo $env:AWP_ROOT222
@@ -377,6 +382,7 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
     PS echo $env:CADOE_LIBDIR222
     C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
 
+.. vale on
 
 Using a proxy server
 ====================
