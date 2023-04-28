@@ -70,9 +70,7 @@ In those cases, you might see the following message:
 
 .. vale off
 
-.. rubric::
-    PyMAPDL is taking longer than expected to connect to an MAPDL session.
-    Checking if there are any available licenses...
+.. rubric:: PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...
 
 .. vale on
 
@@ -104,12 +102,11 @@ On Windows
 
 Open up a command prompt and run the version-dependent command:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
-.. note::
-   PowerShell users can run the preceding command without quotes.
+.. note:: PowerShell users can run the preceding command without quotes.
 
 
 On Linux
@@ -117,7 +114,7 @@ On Linux
 
 Run the version-dependent command:
 
-.. code:: bash
+.. code:: console
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
@@ -126,15 +123,15 @@ several temporary files.
 
 You can specify a directory by launching MAPDL from the temporary directory:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     mkdir temporary_directory
     cd temporary_directory
-     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+    & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
 
 Or, you can specify the directory using the ``-dir`` flag:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     mkdir temporary_directory
     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe' -dir "C:\ansys_job\mytest1"
@@ -142,7 +139,7 @@ Or, you can specify the directory using the ``-dir`` flag:
 
 If this command doesn't launch MAPDL, look at the command output:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
     *** ERROR ***
@@ -158,7 +155,7 @@ Licensing issues
 Incorrect license server configuration can prevent MAPDL from being able to get a valid license.
 In such cases, you might see output **similar** to:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
 
@@ -181,7 +178,7 @@ example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. If you a
 for maintaining Ansys licensing or have a personal install of Ansys, see the online
 `Ansys Installation and Licensing documentation <ansys_installation_and_licensing_>`_.
 
-For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
+For more comprehensive information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
 
 Incorrect licensing environment variables
 -----------------------------------------
@@ -192,17 +189,17 @@ either Windows or Linux.
 
 **On Windows**
 
-  .. code:: pwsh
-    
-    $env:ANSYSLMD_LICENSE_FILE
-    1055@1.1.1.1
+.. code:: pwsh-session
+
+   $env:ANSYSLMD_LICENSE_FILE
+   1055@1.1.1.1
 
 
 **On Linux**
 
-  .. code:: bash
+.. code:: console
 
-    printenv | grep ANSYSLMD_LICENSE_FILE
+   printenv | grep ANSYSLMD_LICENSE_FILE
 
 
 .. _vpn_issues_troubleshooting:
@@ -262,10 +259,9 @@ CentOS 7
 
 On CentOS 7, you can install missing dependencies with:
 
-.. code:: bash
+.. code:: console
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
-
 
 
 .. _installing_mapdl_on_ubuntu:
@@ -275,7 +271,7 @@ Ubuntu
 
 On Ubuntu 22.04, use this code to install the needed dependencies:
 
-.. code:: bash
+.. code:: console
 
     apt-get update
 
@@ -290,7 +286,7 @@ On Ubuntu 22.04, use this code to install the needed dependencies:
 The preceding code takes care of everything except for ``libxp6``, which you must install
 using this code:
 
-.. code:: bash
+.. code:: console
 
     # This is a workaround
     # Source: https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
@@ -305,7 +301,7 @@ Ubuntu 20.04 and older
 
 If you are using Ubuntu 16.04, you can install ``libxp16`` with this code:
 
-.. code:: bash
+.. code:: console
 
    sudo apt install libxp6. 
    
@@ -318,7 +314,7 @@ package configuration. The following code downloads and modifies the
 ``libxp6`` package to remove the ``multiarch-support`` dependency and
 then installs it via the ``dpkg`` package.
 
-.. code:: bash
+.. code:: console
 
     cd /tmp
     wget http://ftp.br.debian.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
@@ -360,7 +356,7 @@ environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\ANSYS Student\v222
@@ -621,7 +617,9 @@ Issues
 More help needed?
 -----------------
 
-  *"What do you do if a problem is not listed here?"*  
+.. epigraph::
+
+   *"What do you do if a problem is not listed here?"*  
 
 
 Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
