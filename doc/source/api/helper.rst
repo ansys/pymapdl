@@ -15,10 +15,4 @@ or automating other tasks.
    convert_script
 
 
-.. currentmodule:: ansys.mapdl.core.misc
-
-.. autosummary::
-   :toctree: _autosummary
-
-   Information
 
