@@ -171,6 +171,8 @@ rst_epilog = ""
 with open("links.rst") as f:
     rst_epilog += f.read()
 
+rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
