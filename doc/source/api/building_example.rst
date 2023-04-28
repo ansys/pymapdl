@@ -10,7 +10,7 @@ Building an example
 To run the documentation, you need to have the correct versions of each tool. To do so, execute the
 following instruction.
 
-.. code:: bash
+.. code:: console
 
     pip install -r requirements/requirements_docs.txt
 
@@ -21,7 +21,7 @@ The Sphinx configuration is in the file
 
 To run the sphinx tool:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     doc\make.bat html
 

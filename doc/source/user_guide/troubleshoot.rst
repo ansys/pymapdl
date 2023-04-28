@@ -104,7 +104,7 @@ On Windows
 
 Open up a command prompt and run the version-dependent command:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
@@ -117,7 +117,7 @@ On Linux
 
 Run the version-dependent command:
 
-.. code:: bash
+.. code:: console
 
     /usr/ansys_inc/v211/ansys/bin/ansys211
 
@@ -126,7 +126,7 @@ several temporary files.
 
 You can specify a directory by launching MAPDL from the temporary directory:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     mkdir temporary_directory
     cd temporary_directory
@@ -134,7 +134,7 @@ You can specify a directory by launching MAPDL from the temporary directory:
 
 Or, you can specify the directory using the ``-dir`` flag:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     mkdir temporary_directory
     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe' -dir "C:\ansys_job\mytest1"
@@ -142,7 +142,7 @@ Or, you can specify the directory using the ``-dir`` flag:
 
 If this command doesn't launch MAPDL, look at the command output:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
     *** ERROR ***
@@ -158,7 +158,7 @@ Licensing issues
 Incorrect license server configuration can prevent MAPDL from being able to get a valid license.
 In such cases, you might see output **similar** to:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
    (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
 
@@ -192,7 +192,7 @@ either Windows or Linux.
 
 **On Windows**
 
-  .. code:: pwsh
+  .. code:: pwsh-session
     
     $env:ANSYSLMD_LICENSE_FILE
     1055@1.1.1.1
@@ -200,7 +200,7 @@ either Windows or Linux.
 
 **On Linux**
 
-  .. code:: bash
+  .. code:: console
 
     printenv | grep ANSYSLMD_LICENSE_FILE
 
@@ -262,7 +262,7 @@ CentOS 7
 
 On CentOS 7, you can install missing dependencies with:
 
-.. code:: bash
+.. code:: console
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
@@ -275,7 +275,7 @@ Ubuntu
 
 On Ubuntu 22.04, use this code to install the needed dependencies:
 
-.. code:: bash
+.. code:: console
 
     apt-get update
 
@@ -290,7 +290,7 @@ On Ubuntu 22.04, use this code to install the needed dependencies:
 The preceding code takes care of everything except for ``libxp6``, which you must install
 using this code:
 
-.. code:: bash
+.. code:: console
 
     # This is a workaround
     # Source: https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
@@ -305,7 +305,7 @@ Ubuntu 20.04 and older
 
 If you are using Ubuntu 16.04, you can install ``libxp16`` with this code:
 
-.. code:: bash
+.. code:: console
 
    sudo apt install libxp6. 
    
@@ -318,7 +318,7 @@ package configuration. The following code downloads and modifies the
 ``libxp6`` package to remove the ``multiarch-support`` dependency and
 then installs it via the ``dpkg`` package.
 
-.. code:: bash
+.. code:: console
 
     cd /tmp
     wget http://ftp.br.debian.org/debian/pool/main/libx/libxp/libxp6_1.0.2-2_amd64.deb
@@ -360,7 +360,7 @@ environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     PS echo $env:AWP_ROOT222
     C:\Program Files\ANSYS Inc\ANSYS Student\v222

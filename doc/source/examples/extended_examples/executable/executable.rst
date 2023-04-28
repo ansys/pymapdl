@@ -75,7 +75,7 @@ This ensure the new function is called when the script is executed.
 Now you can call your function from the command line using
 this code:
 
-.. code:: bash
+.. code:: console
 
    $ python rotor.py 8
    Initialize script with values:
@@ -89,7 +89,7 @@ this code:
 The preceding code sets the number of blades to ``8``.
 This code shows how you can input other arguments:
 
-.. code:: bash
+.. code:: console
 
    $ python rotor.py 8 --density 7000
    Initialize script with values:
@@ -122,14 +122,14 @@ To create an image with PyMAPDL, you can add this code to the
 
 To add a frame, you can use `ImageMagick <https://www.imagemagick.org>`_:
 
-.. code:: bash
+.. code:: console
 
    mogrify -mattecolor #f1ce80 -frame 10x10 volumes.jpg
 
 
 You can also use Imagemagick to add a watermark:
 
-.. code:: bash
+.. code:: console
 
    COMPOSITE=/usr/bin/composite
    $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
