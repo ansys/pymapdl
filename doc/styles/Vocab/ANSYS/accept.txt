@@ -47,6 +47,7 @@ eigensolution
 eigensolvers
 elastoplastic
 emiss
+env
 Eser
 ethernet
 extrem
@@ -139,4 +140,3 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
-env
