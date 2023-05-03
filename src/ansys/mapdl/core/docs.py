@@ -70,14 +70,14 @@ def linkcode_resolve(domain, info, edit=False):
     from ansys.mapdl.core.inline_functions import core  # noqa: F401
     from ansys.mapdl.core.inline_functions import inline_functions  # noqa: F401
 
-    if domain != "py":
+    if domain != "py":  # pragma: no cover
         return None
 
     modname = info["module"]
     fullname = info["fullname"]
 
     submod = sys.modules.get(modname)
-    if submod is None:  # Pragma: no cover
+    if submod is None:  # pragma: no cover
         return None
 
     obj = submod
@@ -111,7 +111,7 @@ def linkcode_resolve(domain, info, edit=False):
 
     if "site-packages" in repo_path:
         src = "site-packages"
-    else:
+    else:  # pragma: no cover
         src = "src"
 
     repo_path = repo_path[: repo_path.find(src)]
