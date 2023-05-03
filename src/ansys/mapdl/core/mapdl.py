@@ -4345,7 +4345,6 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-
     def _parse_rlist(self):
         # mapdl.rmore(*list)
         with self.force_output:
@@ -4379,7 +4378,6 @@ class _MapdlCore(Commands):
                 const_[set_][jlimit] = values_[i]
 
         return const_
-
 
     def _parse_cmlist(self, cmlist=None):
         if not cmlist:
@@ -4423,4 +4421,3 @@ class _MapdlCore(Commands):
         items = [int(each) for each in items]
 
         return items
-
