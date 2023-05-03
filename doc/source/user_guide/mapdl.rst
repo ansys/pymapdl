@@ -854,6 +854,8 @@ or the
 method. The results should be same as running them in a normal batch MAPDL session.
 
 
+.. _ref_unsupported_interactive_commands:
+
 Unsupported "interactive" commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
