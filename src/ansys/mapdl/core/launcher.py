@@ -19,8 +19,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
-from ansys.tools.path import find_ansys, get_ansys_path
-from ansys.tools.path.path import _version_from_path
+from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
 import appdirs
 
 from ansys.mapdl import core as pymapdl
@@ -404,7 +403,7 @@ def launch_grpc(
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    if _version_from_path(exec_file) < 202:
+    if version_from_path(exec_file) < 202:
         raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
 
     # verify lock file does not exist
@@ -803,7 +802,7 @@ def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
     ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
-        version = _version_from_path(ansys_bin)
+        version = version_from_path(ansys_bin)
         return not (version < 170 and os.name != "posix")
     return False
 
@@ -866,7 +865,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         if (
             os.name == "nt"
             and not force_intel
-            and (222 > _version_from_path(exec_path) >= 210)
+            and (222 > version_from_path(exec_path) >= 210)
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
@@ -1495,7 +1494,7 @@ def launch_mapdl(
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
 
-    mode = check_mode(mode, _version_from_path(exec_file))
+    mode = check_mode(mode, version_from_path(exec_file))
     LOG.debug("Using mode %s", mode)
 
     # Setting SMP by default if student version is used.
