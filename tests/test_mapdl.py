@@ -6,6 +6,7 @@ import shutil
 import time
 
 from ansys.mapdl.reader import examples
+from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
@@ -1511,7 +1512,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     mapdl.post1()
     # this file already exists remotely
-    mapdl.file("file.rst")
+    mapdl.file("file", ".rst")
 
     with pytest.raises(FileNotFoundError):
         mapdl.file()
@@ -1942,3 +1943,8 @@ def test_rlblock_rlblock_num(mapdl):
             assert comparison[i][j] == rlblock[i][j]
 
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
+
+
+def test_download_results_non_local(mapdl, cube_solve):
+    assert mapdl.result is not None
+    assert isinstance(mapdl.result, Result)
