@@ -1907,6 +1907,9 @@ def test_save_on_exit(mapdl, cleared):
     assert mapdl2.parameters["my_par"] == "qwerty"
 
     mapdl2.parameters["my_par"] = "zxcv"
+    db_name = mapdl2.jobname + ".db"  # reupdating db path
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
     mapdl2.exit(save=True)
 
     mapdl2 = launch_mapdl(license_server_check=False)
