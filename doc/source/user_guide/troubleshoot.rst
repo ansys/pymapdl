@@ -70,9 +70,7 @@ In those cases, you might see the following message:
 
 .. vale off
 
-.. rubric::
-    PyMAPDL is taking longer than expected to connect to an MAPDL session.
-    Checking if there are any available licenses...
+.. rubric:: PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...
 
 .. vale on
 
@@ -108,8 +106,7 @@ Open up a command prompt and run the version-dependent command:
 
     "C:\Program Files\ANSYS Inc\v211\ansys\bin\winx64\ANSYS211.exe"
 
-.. note::
-   PowerShell users can run the preceding command without quotes.
+.. note:: PowerShell users can run the preceding command without quotes.
 
 
 On Linux
@@ -130,7 +127,7 @@ You can specify a directory by launching MAPDL from the temporary directory:
 
     mkdir temporary_directory
     cd temporary_directory
-     & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
+    & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
 
 Or, you can specify the directory using the ``-dir`` flag:
 
@@ -142,6 +139,8 @@ Or, you can specify the directory using the ``-dir`` flag:
 
 If this command doesn't launch MAPDL, look at the command output:
 
+.. vale off
+
 .. code:: pwsh-session
 
     (base) PS C:\Users\user\temp> & 'C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe'
@@ -151,6 +150,7 @@ If this command doesn't launch MAPDL, look at the command output:
     terminated Ansys run. To disable this check, set the ANSYS_LOCK environment
     variable to OFF.
 
+.. vale on
 
 Licensing issues
 ================
@@ -181,7 +181,7 @@ example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. If you a
 for maintaining Ansys licensing or have a personal install of Ansys, see the online
 `Ansys Installation and Licensing documentation <ansys_installation_and_licensing_>`_.
 
-For more comprehensive information, download the `ANSYS Licensing Guide <licensing_guide_pdf_>`.
+For more comprehensive information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
 
 Incorrect licensing environment variables
 -----------------------------------------
@@ -192,17 +192,18 @@ either Windows or Linux.
 
 **On Windows**
 
-  .. code:: pwsh-session
-    
-    $env:ANSYSLMD_LICENSE_FILE
-    1055@1.1.1.1
+
+.. code:: pwsh-session
+
+   $env:ANSYSLMD_LICENSE_FILE
+   1055@1.1.1.1
 
 
 **On Linux**
 
-  .. code:: console
+.. code:: console
 
-    printenv | grep ANSYSLMD_LICENSE_FILE
+   printenv | grep ANSYSLMD_LICENSE_FILE
 
 
 .. _vpn_issues_troubleshooting:
@@ -265,7 +266,6 @@ On CentOS 7, you can install missing dependencies with:
 .. code:: console
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
-
 
 
 .. _installing_mapdl_on_ubuntu:
@@ -360,6 +360,9 @@ environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 
+
+.. vale off
+
 .. code:: pwsh-session
 
     PS echo $env:AWP_ROOT222
@@ -381,6 +384,7 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
     PS echo $env:CADOE_LIBDIR222
     C:\Program Files\ANSYS Inc\v222\CommonFiles\Language\en-us
 
+.. vale on
 
 Using a proxy server
 ====================
@@ -621,7 +625,9 @@ Issues
 More help needed?
 -----------------
 
-  *"What do you do if a problem is not listed here?"*  
+.. epigraph::
+
+   *"What do you do if a problem is not listed here?"*  
 
 
 Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
