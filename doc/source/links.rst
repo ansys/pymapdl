@@ -85,6 +85,8 @@
 .. #External links
 .. _padt_post: https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/
 .. _padt_licensing: https://www.padtinc.com/blog/15271-2/
+.. _ansys_python_power_article: https://www.ansys.com/blog/accessing-ansys-from-python
+.. _ansys_open_source_article: https://www.ansys.com/blog/ansys-gets-into-open-source-with-github
 .. _install_wsl_microsoft: https://docs.microsoft.com/en-us/windows/wsl/install/
 .. _WikipediaWSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
