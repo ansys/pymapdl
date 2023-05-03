@@ -1904,14 +1904,14 @@ def test_save_on_exit(mapdl, cleared):
 
     mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "asdf"
+    assert mapdl2.parameters["my_par"] == "qwerty"
 
-    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.parameters["my_par"] = "zxcv"
     mapdl2.exit(save=True)
 
     mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "qwerty"
+    assert mapdl2.parameters["my_par"] == "zxcv"
     mapdl2.exit()
 
 
