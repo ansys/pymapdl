@@ -95,8 +95,12 @@ Course content
 * Post Completion Survey
 * Meet the Instructors
 
+.. vale off
+
 Ansys Innovation Space
 ----------------------
+
+.. vale on
 
 You can find more courses for different Ansys product organized in 
 different categories such as
