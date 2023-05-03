@@ -392,3 +392,40 @@ def test_parameter_with_spaces(mapdl):
     assert mapdl.parameters
     assert "SIMULATION" in mapdl.parameters
     assert string_.strip() == mapdl.parameters["SIMULATION"]
+
+
+def test_parameters_keys(mapdl):
+    mapdl.parameters["MYPAR"] = 1234
+
+    assert "MYPAR" in list(mapdl.parameters.keys())
+    assert mapdl.parameters.keys() is not None
+    assert mapdl.parameters["MYPAR"] == 1234
+
+
+def test_parameters_values(mapdl, cleared):
+    mapdl.parameters["MYPAR"] = 9876
+
+    assert 9876 == list(mapdl.parameters.values())[0]["value"]
+    assert mapdl.parameters["MYPAR"] == 9876
+
+
+def test_parameters_copy(mapdl, cleared):
+    mapdl.parameters["MYPAR"] = 9876
+
+    copy = mapdl.parameters.copy()
+    assert isinstance(copy, dict)
+    assert copy["MYPAR"]["value"] == 9876
+
+
+def test_parameters_items(mapdl, cleared):
+    mapdl.parameters["MYPAR"] = 9876
+
+    for each_key, each_item in mapdl.parameters.items():
+        assert each_key == "MYPAR"
+        assert each_item["value"] == 9876
+
+
+def test_parameter_contains(mapdl, cleared):
+    mapdl.parameters["mypar"] = 9876
+
+    assert "mypar" in mapdl.parameters
