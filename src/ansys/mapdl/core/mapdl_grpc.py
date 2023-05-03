@@ -2087,7 +2087,7 @@ class MapdlGrpc(_MapdlCore):
             Name of the file on the server. File must be in the same
             directory as the mapdl instance. A list of string names or
             tuples of string names can also be used.
-            List current files with :func:`Mapdl.directory <ansys.mapdl.core.Mapdl.list_files>`.
+            List current files with :meth:`Mapdl.list_files <MapdlGrpc.list_files>`.
 
             Alternatively, you can also specify **glob expressions** to
             match file names. For example: `'file*'` to match every file whose
@@ -2097,9 +2097,8 @@ class MapdlGrpc(_MapdlCore):
             Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
 
         progress_bar : bool, optional
-            Display a progress bar using
-            ``tqdm`` when ``True``.  Helpful for showing download
-            progress.
+            Display a progress bar using ``tqdm`` when ``True``.
+            Helpful for showing download progress.
 
         recursive : bool
             Use recursion when using glob pattern.
