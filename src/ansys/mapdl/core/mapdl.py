@@ -491,13 +491,28 @@ class _MapdlCore(Commands):
     def non_interactive(self):
         """Non-interactive context manager.
 
-        Use this when using commands that require user
-        interaction within MAPDL (e.g. :func:`Mapdl.vwrite`).
+        Allow to execute code without user interaction or waiting
+        between PyMAPDL responses.
+        It can also be used to execute some commands which are not
+        supported in interactive mode. For a complete list of commands
+        visit :ref:`ref_unsupported_interactive_commands`.
+
+        View the last response with :attr:`Mapdl.last_response` method.
+
+        Notes
+        -----
+        All the commands executed inside this context manager are not
+        executed until the context manager exits which then execute them
+        all at once in the MAPDL instance.
+
+        This command uses :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+        method.
 
         Examples
         --------
-        Use the non-interactive context manager for the VWRITE
-        command.  View the last response with :attr:`Mapdl.last_response`.
+        Use the non-interactive context manager for the VWRITE (
+        :func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>`)
+        command.
 
         >>> with mapdl.non_interactive:
         ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")

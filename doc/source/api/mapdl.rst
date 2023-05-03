@@ -67,8 +67,6 @@ Constants
 
 .. currentmodule:: ansys.mapdl.core.misc
 
-.. autoclass:: ansys.mapdl.core.misc.Information
-
 .. autosummary::
    :toctree: _autosummary
 
