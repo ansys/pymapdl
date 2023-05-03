@@ -995,11 +995,8 @@ class MapdlGrpc(_MapdlCore):
             mapdl_path = self.directory
 
         if save:
-            try:
-                self._log.debug("Saving MAPDL database")
-                self.save()
-            except:
-                pass
+            self._log.debug("Saving MAPDL database")
+            self.save()
 
         if not force:
             # lazy import here to avoid circular import
