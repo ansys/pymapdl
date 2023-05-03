@@ -1944,3 +1944,28 @@ def test_input_inside_non_interactive(mapdl, cleared):
     assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
 
     os.remove("myinput.inp")
+
+
+def test_rlblock_rlblock_num(mapdl):
+    def num_():
+        return np.round(np.random.random(), 4)
+
+    comparison = {
+        1: [num_() for _ in range(18)],
+        2: [num_() for _ in range(18)],
+        4: [num_() for _ in range(18)],
+    }
+
+    mapdl.prep7()
+    for i in comparison.keys():
+        mapdl.r(i, *comparison[i][0:6])
+        mapdl.rmore(*comparison[i][6:12])
+        mapdl.rmore(*comparison[i][12:18])
+
+    rlblock = mapdl.mesh.rlblock
+
+    for i in [1, 2, 4]:
+        for j in range(18):
+            assert comparison[i][j] == rlblock[i][j]
+
+    assert [1, 2, 4] == mapdl.mesh.rlblock_num

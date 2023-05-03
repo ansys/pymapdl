@@ -363,18 +363,12 @@ class MeshGrpc:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        # if not self._rdat:
-        #     pass # todo: fix this
-        # return self._rdat
-        raise NotImplementedError()
+        return self._mapdl._parse_rlist()
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        # if not self._rnum:
-        #     pass # todo: to fix
-        # return self._rnum
-        raise NotImplementedError()
+        return list(self._mapdl._parse_rlist().keys())
 
     @property
     def nnum(self) -> np.ndarray:
