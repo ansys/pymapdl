@@ -1,3 +1,7 @@
+.. If you need to refer to a specific version of MAPDL replace
+.. the `vXXX` for `%%VERSION%%`.
+.. The substitution for the actual value is made on conf.py file.
+
 .. #Pyansys
 .. _pyansys: https://docs.pyansys.com/dev/
 .. _pyansys_support: pyansys.core@ansys.com
@@ -16,6 +20,7 @@
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/dev/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/dev/coding-style/index.html
+
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org
 .. _jupyter: https://jupyter.org/
@@ -33,28 +38,43 @@
 .. _dash_bootstrap_components: https://dash-bootstrap-components.opensource.faculty.ai/
 .. _webbrowser_library: https://docs.python.org/3/library/webbrowser.html
 
-
 .. #Ansys
 .. _ansys: https://www.ansys.com/
+.. _ansys_help: https://ansyshelp.ansys.com
 .. _ansys_student_version: https://www.ansys.com/academic/students
 .. _ansys_innovation_space: https://courses.ansys.com/
+.. _ansys_innovation_space_structures: https://courses.ansys.com/index.php/structures/
+.. _ansys_innovation_space_fluids: https://courses.ansys.com/index.php/fluids/
+.. _ansys_innovation_space_materials: https://courses.ansys.com/index.php/materials/
+.. _ansys_innovation_space_geometry: https://courses.ansys.com/index.php/discovery/
 .. _ansys_platform_support: https://www.ansys.com/solutions/solutions-by-role/it-professionals/platform-support
 .. _ansys_current_release: https://download.ansys.com/Current%20Release
+.. _ansys_introductory_mapdl_courses: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
+
+.. # Ansys guides
+.. _ansys_command_reference_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_cmd/Hlp_C_CmdTOC.html
+.. _ansys_techdemo_guide: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tec/tecintro.html
+.. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
+.. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_dan/dantoc.html
+.. _ansys_verification_manual: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_vm/Hlp_V_VMTOC.html
+
+.. # Ansys introductory tutorials
+.. _ansys_introtut: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
+.. _ansys_introtut_structures: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/structural_tut.html
+.. _ansys_introtut_thermal: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/thermal_tut.html
+.. _ansys_introtut_electromag: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/emag_tut.html
+.. _ansys_introtut_mems: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/mems_tut.html
+.. _ansys_introtut_contact: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/ffcontact_tut.html
+.. _ansys_introtut_modal: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tut/modal_tut.html
 
 .. # PyMAPDL Examples related
 .. _pymapdl_ex_doc: https://examples.mapdl.docs.pyansys.com/
-.. _pymapdl_ex_intro: https://ansyshelp.ansys.com/Views/Secured/corp/v212/en/ans_tec/tecintro.html
 .. _pymapdl_ex_repo: https://github.com/pyansys/pymapdl-examples
 .. _pymapdl_ex_ts: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
 
-.. #Ansys internal documentation
-.. _ansys_help: https://ansyshelp.ansys.com
-.. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
-.. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_dan/dantoc.html
-
 .. # Ansys Structural Guide links:
-.. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v222/en/ans_str/str_Krysweep.html
+.. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
 
 .. #Ansys learning
 .. _learning_resources: https://www.ansys.com/academic/learning-resources
@@ -65,6 +85,8 @@
 .. #External links
 .. _padt_post: https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/
 .. _padt_licensing: https://www.padtinc.com/blog/15271-2/
+.. _ansys_python_power_article: https://www.ansys.com/blog/accessing-ansys-from-python
+.. _ansys_open_source_article: https://www.ansys.com/blog/ansys-gets-into-open-source-with-github
 .. _install_wsl_microsoft: https://docs.microsoft.com/en-us/windows/wsl/install/
 .. _WikipediaWSL: https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
@@ -91,11 +113,9 @@
 .. _pymapdl_docs: https://mapdl.docs.pyansys.com/version/stable/
 .. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/version/dev/
 .. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
-.. _pymapdl_cheatsheet: ./_assets/Cheat_Sheet_PyMAPDL.pdf
 .. _pymapdl_tests: https://github.com/pyansys/pymapdl/tree/main/tests
 .. _pymapdl_test_math: https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py
 .. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/version/dev/user_guide/math.html
-.. _licensing_guide_pdf: ./_assets/lic_guide.pdf
 .. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 .. _pymapdl_examples: https://github.com/pyansys/pymapdl/tree/main/examples
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
