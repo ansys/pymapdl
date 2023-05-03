@@ -99,7 +99,7 @@ class Geometry:
         from ansys.mapdl.core.mapdl import _MapdlCore
 
         if not isinstance(mapdl, _MapdlCore):
-            raise TypeError("Must be initialized using a MAPDL class")
+            raise TypeError("Must be initialized using a gRPC MAPDL class")
 
         self._mapdl = mapdl
         self._keypoints_cache = None
@@ -890,34 +890,17 @@ class Geometry:
             raise TypeError("Item numbers must be a numeric type")
         items = items.ravel().astype(np.int_, copy=False)
 
-        # consider logic for negative values to support ranges.  This
-        # is the 'ORDER' option
-
-        # ordered items
-        # FLST,5,76,4,ORDE,74
-        # FITEM,5,2
-        # LSEL, , , ,P51X
-
-        # unordered option
-        with self._mapdl.non_interactive:
-            self._mapdl.flst(5, items.size, FLST_LOOKUP[item_type])
-            for item in items:
-                self._mapdl.fitem(5, item)
-
-            # Using 'return_mapdl_output' avoid querying MAPDL in a non-interactive
-            # environment. Otherwise a *get command is issued to MAPDL which will return
-            # none in this non_interactive environment.
-            if item_type == "NODE":
-                self._mapdl.nsel(sel_type, vmin="P51X", return_mapdl_output=True)
-            elif item_type == "ELEM":
-                self._mapdl.esel(sel_type, vmin="P51X", return_mapdl_output=True)
-            elif item_type == "KP":
-                self._mapdl.ksel(sel_type, vmin="P51X", return_mapdl_output=True)
-            elif item_type == "LINE":
-                self._mapdl.lsel(sel_type, vmin="P51X", return_mapdl_output=True)
-            elif item_type == "AREA":
-                self._mapdl.asel(sel_type, vmin="P51X", return_mapdl_output=True)
-            elif item_type == "VOLU":
-                self._mapdl.vsel(sel_type, vmin="P51X", return_mapdl_output=True)
-            else:
-                raise ValueError(f'Unable to select "{item_type}"')
+        if item_type == "NODE":
+            self._mapdl.nsel(sel_type, vmin=items, return_mapdl_output=True)
+        elif item_type == "ELEM":
+            self._mapdl.esel(sel_type, vmin=items, return_mapdl_output=True)
+        elif item_type == "KP":
+            self._mapdl.ksel(sel_type, vmin=items, return_mapdl_output=True)
+        elif item_type == "LINE":
+            self._mapdl.lsel(sel_type, vmin=items, return_mapdl_output=True)
+        elif item_type == "AREA":
+            self._mapdl.asel(sel_type, vmin=items, return_mapdl_output=True)
+        elif item_type == "VOLU":
+            self._mapdl.vsel(sel_type, vmin=items, return_mapdl_output=True)
+        else:
+            raise ValueError(f'Unable to select "{item_type}"')
