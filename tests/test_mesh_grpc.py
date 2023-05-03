@@ -205,16 +205,6 @@ def test_nodes(mapdl, cube_solve):
     assert mapdl.mesh.nodes.shape == (81, 3)
 
 
-def test_rlblock(mapdl, cube_solve):
-    with pytest.raises(NotImplementedError):
-        out = mapdl.mesh.rlblock
-
-
-def test_rlblock_num(mapdl, cube_solve):
-    with pytest.raises(NotImplementedError):
-        out = mapdl.mesh.rlblock_num
-
-
 def test_nodes_in_current_CS(mapdl, cleared, cube_solve):
     for icoord in range(6):
         mapdl.csys(icoord)

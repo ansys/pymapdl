@@ -38,7 +38,7 @@ and accurately solve interdisciplinary problems from a variety of industries
 and engineering fields.
 
 The examples initially come from the `APDL Technology Showcase Manual
-<pymapdl_ex_intro_>`_ and are modeled with MAPDL files. Some of them have been
+<ansys_techdemo_guide_>`_ and are modeled with MAPDL files. Some of them have been
 reproduced in Python files using PyMAPDL with the ``ansys-mapdl-core``
 library.
 
