@@ -890,6 +890,7 @@ class Geometry:
             raise TypeError("Item numbers must be a numeric type")
         items = items.ravel().astype(np.int_, copy=False)
 
+        # We can use list or arrays for vmin
         if item_type == "NODE":
             self._mapdl.nsel(sel_type, vmin=items, return_mapdl_output=True)
         elif item_type == "ELEM":
