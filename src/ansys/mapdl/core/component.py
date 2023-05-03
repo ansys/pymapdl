@@ -79,11 +79,18 @@ class ComponentManager(dict):
             cmtype = __value[0]
             cmitems = __value[1]
 
-            # Selecting
+            # Save current selection
+
+            # Select the cmitems entities
+
+            # create component
+
+            # reselecting previous selection
             for i in cmitems:
                 self._mapdl.run()
 
         elif isinstance(__value, str):
+            # create a component with the already selected elements
             cmtype = __value
 
         else:
