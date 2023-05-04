@@ -1098,9 +1098,6 @@ class _MapdlCore(Commands):
         if inplace and include_result is None:
             include_result = False
 
-        elif not include_result:
-            include_result = True
-
         if not inplace:
             inplace = False
 
