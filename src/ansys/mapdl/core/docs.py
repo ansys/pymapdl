@@ -136,4 +136,7 @@ def linkcode_resolve(domain, info, edit=False):
 
     blob_or_edit = "edit" if edit else "blob"
 
-    return f"http://github.com/pyansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"
+    url = f"http://github.com/pyansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"
+    url = url.replace("\\", "/")  # For windows case
+
+    return url
