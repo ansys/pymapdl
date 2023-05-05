@@ -13,7 +13,7 @@ from ansys.tools.path import find_ansys, get_available_ansys_installations
 import pyvista
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
