@@ -65,7 +65,6 @@ from ansys.mapdl.core.misc import (
     supress_logging,
 )
 from ansys.mapdl.core.parameters import interp_star_status
-from ansys.mapdl.core.post import PostProcessing
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
@@ -1005,6 +1004,10 @@ class MapdlGrpc(_MapdlCore):
         else:
             mapdl_path = self.directory
 
+        if save:
+            self._log.debug("Saving MAPDL database")
+            self.save()
+
         if not force:
             # lazy import here to avoid circular import
             from ansys.mapdl.core.launcher import get_start_instance
@@ -1019,13 +1022,6 @@ class MapdlGrpc(_MapdlCore):
             if pymapdl.BUILDING_GALLERY:
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
-
-        if save:
-            try:
-                self._log.debug("Saving MAPDL database")
-                self.save()
-            except:
-                pass
 
         self._exiting = True
         self._log.debug("Exiting MAPDL")

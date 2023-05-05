@@ -6,6 +6,7 @@ import shutil
 import time
 
 from ansys.mapdl.reader import examples
+from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
@@ -804,7 +805,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl, make_block):
+def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl.mesh._grid.n_cells == 11
@@ -1512,7 +1513,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     mapdl.post1()
     # this file already exists remotely
-    mapdl.file("file.rst")
+    mapdl.file("file", ".rst")
 
     with pytest.raises(FileNotFoundError):
         mapdl.file()
@@ -1919,6 +1920,36 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
     )
 
 
+@skip_if_not_local
+def test_save_on_exit(mapdl, cleared):
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.parameters["my_par"] = "asdf"
+    db_name = mapdl2.jobname + ".db"
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+
+    mapdl2.save(db_name)
+    assert os.path.exists(db_path)
+
+    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.exit()
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "qwerty"
+
+    mapdl2.parameters["my_par"] = "zxcv"
+    db_name = mapdl2.jobname + ".db"  # reupdating db path
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+    mapdl2.exit(save=True)
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "zxcv"
+    mapdl2.exit()
+
+
 def test_input_strings_inside_non_interactive(mapdl, cleared):
     cmd = """/com General Kenobi. You are a bold one.  Kill him!\n/prep7"""
     with mapdl.non_interactive:
@@ -1973,3 +2004,8 @@ def test_rlblock_rlblock_num(mapdl):
             assert comparison[i][j] == rlblock[i][j]
 
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
+
+
+def test_download_results_non_local(mapdl, cube_solve):
+    assert mapdl.result is not None
+    assert isinstance(mapdl.result, Result)

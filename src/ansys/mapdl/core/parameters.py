@@ -368,7 +368,7 @@ class Parameters:
             True if the key is in the dictionary, False otherwise.
 
         """
-        return key in self._parm.keys()
+        return key.upper() in self._parm.keys()
 
     def __iter__(self):
         """

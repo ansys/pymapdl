@@ -16,7 +16,7 @@ import ansys.mapdl.core as pymapdl
 
 pymapdl._RUNNING_ON_PYTEST = True
 
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
