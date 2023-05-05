@@ -464,13 +464,13 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
 
-    from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
+    from ansys.mapdl.core.launcher import get_ansys_path, version_from_path
 
     name = "licdebug"
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = _version_from_path(get_ansys_path(allow_input=False))
+    version = version_from_path("mapdl", get_ansys_path(allow_input=False))
     ending = "out"
 
     if version < 221:
