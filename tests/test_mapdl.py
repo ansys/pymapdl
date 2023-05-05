@@ -804,7 +804,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl, make_block):
+def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl.mesh._grid.n_cells == 11
@@ -1887,6 +1887,36 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
         )
         is None
     )
+
+
+@skip_if_not_local
+def test_save_on_exit(mapdl, cleared):
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.parameters["my_par"] = "asdf"
+    db_name = mapdl2.jobname + ".db"
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+
+    mapdl2.save(db_name)
+    assert os.path.exists(db_path)
+
+    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.exit()
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "qwerty"
+
+    mapdl2.parameters["my_par"] = "zxcv"
+    db_name = mapdl2.jobname + ".db"  # reupdating db path
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+    mapdl2.exit(save=True)
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "zxcv"
+    mapdl2.exit()
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
