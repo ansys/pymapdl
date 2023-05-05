@@ -137,7 +137,7 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if version_from_path(exec_file) < 211:
+        if version_from_path("mapdl", exec_file) < 211:
             raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports

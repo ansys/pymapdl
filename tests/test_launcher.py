@@ -97,7 +97,7 @@ def test_validate_sw():
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
-    assert version_from_path(exec_file) == version
+    assert version_from_path("mapdl", exec_file) == version
 
 
 @pytest.mark.skipif(
@@ -107,7 +107,7 @@ def test_version_from_path(path_data):
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
-        version_from_path("abc")
+        version_from_path("mapdl", "abc")
 
 
 @pytest.mark.skipif(
