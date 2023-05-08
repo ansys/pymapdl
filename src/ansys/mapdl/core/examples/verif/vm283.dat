@@ -1,4 +1,4 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
 /VERIFY,VM283 
 /TITLE,VM283,Low Reduced Frequency Model for Visco-thermal Fluid with Thin Structure
 /COM,
@@ -137,7 +137,8 @@ ALLSEL,ALL
 NSEL,S,LOC,Z,zz(6)
 SF,ALL,PORT,1                       ! PORT NUMBER
 NSEL,R,LOC,X,LX
-BF,ALL,JS,1                         ! MASS SOURCE RATE
+!BF,ALL,JS,1                         ! MASS SOURCE RATE
+BF,ALL,MASS,1
 ALLSEL,ALL
 
 NSEL,S,LOC,Z,zz(1)
@@ -224,4 +225,5 @@ R9 = 26.7/29.0
 /OUT,
 *list,vm283,vrt
 FINISH
+/EXIT,NOSAVE
 
