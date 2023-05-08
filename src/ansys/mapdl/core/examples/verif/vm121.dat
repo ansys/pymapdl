@@ -1,4 +1,4 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
 /VERIFY,VM121
 JPGPRF,500,100,1
 /SHOW,JPEG
@@ -132,13 +132,12 @@ SET,FIRST
 PLVE,B,,,,VECT,,ON
 VSEL,S,MAT,,2
 ALLS,BELO,VOLU
-/OUT
 PLVE,JT,,,,VECT,,ON
 VSEL,S,MAT,,3
 ALLS,BELO,VOLU
 PLVE,JT,,,,VECT,,ON
 FINI
-/OUT,SCRATCH
+
 /POST26
 *DIM,VALUE,,2,3
 *DIM,VALUE4,,2,3
@@ -184,9 +183,8 @@ VALUE4(1,3)=VALUE4(1,2)/VALUE4(1,1)
 VALUE4(2,3)=VALUE4(2,2)/VALUE4(2,1)
 VALUE7(1,3)=VALUE7(1,2)/VALUE7(1,1)
 VALUE7(2,3)=VALUE7(2,2)/VALUE7(2,1)
-/OUT
 *VLEN,2
-/OUT,VM121_1,vrt
+/OUT,vm121,vrt
 /COM
 /COM,----------- VM121 RESULTS COMPARISON at Time=1e-2 Sec -------------
 /COM,
@@ -195,7 +193,6 @@ VALUE7(2,3)=VALUE7(2,2)/VALUE7(2,1)
 *VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
 (1X,A8,'    ',F7.3,'     ',F10.3,'       ',1F15.3)
 /COM,------------------------------------------------------------------
-/OUT,VM121_4,vrt
 /COM
 /COM,----------- VM121 RESULTS COMPARISON at Time=4e-2 Sec -------------
 /COM,
@@ -204,7 +201,6 @@ VALUE7(2,3)=VALUE7(2,2)/VALUE7(2,1)
 *VWRITE,LABEL(1),VALUE4(1,1),VALUE4(1,2),VALUE4(1,3)
 (1X,A8,'    ',F7.3,'     ',F10.3,'       ',1F15.3)
 /COM,------------------------------------------------------------------
-/OUT,VM121_7,vrt
 /COM
 /COM,----------- VM121 RESULTS COMPARISON at Time=7e-2 Sec -------------
 /COM,
@@ -218,9 +214,5 @@ VALUE7(2,3)=VALUE7(2,2)/VALUE7(2,1)
 /AXL,Y,COIL CURRENT (A)
 PLVAR,2,3
 PRVAR,2,3
-*LIST,VM121_1,vrt
-*LIST,VM121_4,vrt
-*LIST,VM121_7,vrt
+*LIST,vm121,vrt
 FINISH
-
-
