@@ -229,3 +229,10 @@ class EmptyRecordError(RuntimeError):
 
     def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
+
+
+class ComponentNoData(MapdlException):
+    """Raised when the component has no data"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)

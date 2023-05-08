@@ -32,6 +32,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    ComponentNoData,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
@@ -555,7 +556,7 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
-    def component(self):
+    def components(self):
         """MAPDL Component manager.
 
         Returns
@@ -4026,15 +4027,23 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlInvalidRoutineError(text)
 
         if "command is ignored" in flat_text:
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlCommandIgnoredError(text)
+
+        if (
+            "The component definition of" in flat_text
+            and "contains no data." in flat_text
+        ):
+            text += base_error_msg
+            raise ComponentNoData(text)
 
         # flag errors
         if "*** ERROR ***" in flat_text:
