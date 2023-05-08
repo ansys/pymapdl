@@ -37,8 +37,8 @@ CentOS
 CentOS7
 Chao
 delet
-Docker
 docker
+Docker
 dof
 ect
 eigenfrequency
@@ -47,6 +47,7 @@ eigensolution
 eigensolvers
 elastoplastic
 emiss
+env
 Eser
 ethernet
 extrem
@@ -77,6 +78,7 @@ MATLAB
 mesher
 midside
 Mises
+mkdir
 MSc
 multipoint
 nce
@@ -135,6 +137,6 @@ WAN
 Windows
 Windows Subsystem
 Windows Subsystem for Linux
-WSL
 wsl
+WSL
 Zhu

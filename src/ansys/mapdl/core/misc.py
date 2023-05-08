@@ -686,6 +686,7 @@ class Information:
     """
 
     def __init__(self, mapdl):
+        """Class Initializer"""
         from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
 
         if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
@@ -1223,7 +1224,17 @@ def wrap_point_SEL(entity="node"):
                 else:
                     return
             else:
-                return original_sel_func(self, *args, **kwargs)
+                return original_sel_func(
+                    self,
+                    type_=type_,
+                    item=item,
+                    comp=comp,
+                    vmin=vmin,
+                    vmax=vmax,
+                    vinc=vinc,
+                    kabs=kabs,
+                    **kwargs,
+                )
 
         return wrapper
 
