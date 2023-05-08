@@ -60,7 +60,8 @@ class ComponentManager(dict):
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
-        self._comp = None
+        self.__comp = None
+        self._update_always = True
 
     @property
     def _mapdl(self):
@@ -73,6 +74,16 @@ class ComponentManager(dict):
     @property
     def _log(self):
         return self._mapdl._log
+
+    @property
+    def _comp(self):
+        if self.__comp is None or self._update_always:
+            self.__comp = self._mapdl._parse_cmlist()
+        return self.__comp
+
+    @_comp.setter
+    def _comp(self, value):
+        self.__comp = value
 
     def __getitem__(self, __key: Any) -> Any:
         self._comp = self._mapdl._parse_cmlist()
@@ -148,10 +159,87 @@ class ComponentManager(dict):
         self._mapdl.cmdele("__temp_comp__")
 
     def __repr__(self):
-        """Return the current parameters in a pretty format"""
+        """Return the current components in a pretty format"""
         lines = ["MAPDL Components", "----------------"]
         if self._comp:
-            for key, item in self._comp:
+            for key, item in self._comp.items():
                 lines.append("%-32s : %s" % (key, item))
 
         return "\n".join(lines)
+
+    def __contains__(self, key):
+        """
+        Check if a given key is present in the dictionary.
+
+        Parameters
+        ----------
+        key : hashable
+            The key to search for in the dictionary.
+
+        Returns
+        -------
+        bool
+            True if the key is in the dictionary, False otherwise.
+
+        """
+        return key.upper() in self._comp.keys()
+
+    def __iter__(self):
+        """
+        Return an iterator over the keys in the dictionary.
+
+        Returns
+        -------
+        iterator
+            An iterator over the keys in the dictionary.
+
+        """
+        yield from self._comp.keys()
+
+    def keys(self):
+        """
+        Return a view object that contains the keys in the dictionary.
+
+        Returns
+        -------
+        dict_keys
+            A view object that contains the keys in the dictionary.
+
+        """
+        return self._comp.keys()
+
+    def values(self):
+        """
+        Return a view object that contains the values in the dictionary.
+
+        Returns
+        -------
+        dict_values
+            A view object that contains the values in the dictionary.
+
+        """
+        return self._comp.values()
+
+    def copy(self):
+        """
+        Return a shallow copy of the dictionary.
+
+        Returns
+        -------
+        dict
+            A shallow copy of the dictionary.
+
+        """
+        return self._comp.copy()
+
+    def items(self):
+        """
+        Return a view object that contains the key-value pairs in the dictionary.
+
+        Returns
+        -------
+        dict_items
+            A view object that contains the key-value pairs in the dictionary.
+
+        """
+        return self._comp.items()
