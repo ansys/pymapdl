@@ -405,8 +405,7 @@ for i in range(1, 100):
 
     plotter.write_frame()
 
-plotter.show()
-
+plotter.close()
 
 
 import numpy as np
