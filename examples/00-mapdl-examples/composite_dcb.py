@@ -407,7 +407,6 @@ for i in range(1, 100):
 
 plotter.close()
 
-
 import numpy as np
 import pyvista as pv
 
