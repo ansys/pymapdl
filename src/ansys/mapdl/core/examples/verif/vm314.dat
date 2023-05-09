@@ -1,0 +1,120 @@
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
+/VERIFY,VM314
+/TITLE,VM314, STRESSES OF UHMWPE UNDER UNIAXIAL TENSION
+/COM,   REF: JS BERGSTROM, JE BISCHOFF
+/COM,   "AN ADVANCED THERMOMECHANICAL CONSTITUTIVE MODEL FOR UHMWPE""
+/COM,   INTERNATIONAL JOURNAL OF STRUCTURAL CHANGES IN SOLIDS, VOL.2, 2010
+/COM,
+/PREP7
+/OUT,vm314_SCRATCH
+ET,1,SOLID185                        !* 3D 8-NODE STRUCTURAL SOLID ELEMENT
+
+/COM, DEFINING THREE NETWORK MODEL MATERIAL PROPERTIES
+MUA                    = 200      !MPA
+THETAHAT               = 300      !K
+LAMBDAL                = 3.25
+KAPPA                  = 6000     !MPA
+TAUHATA                = 3.25     !MPA
+A                      = 0.073
+MA                     = 20
+N                      = 0.0
+MUBI                   = 293      !MPA
+MUBF                   = 79.1     !MPA
+BETA                   = 31.9
+TAUHATB                = 20.1     !MPA
+MB                     = 20
+MUC                    = 10.0     !MPA
+Q                      = 0.23
+THETA0                 = 300      !K
+
+K = 6000               
+MU = 250
+
+YOUNG = 9.d0*K*MU/(3.d0*K+MU)
+POSN  = (YOUNG-2.d0*MU)/(2.d0*MU)
+
+TB, ELAS, 1,,,ISOT
+TBDATA, 1, YOUNG, POSN
+
+TB,TNM,1, , ,NETA
+TBDATA,1,MUA         ! TBDATA, 1
+TBDATA,2,TAUHATA     ! TBDATA, 5
+TBDATA,3,MA          ! TBDATA, 7
+
+TB,TNM,1, , ,NETB
+TBDATA,1,MUBI        ! TBDATA, 9
+TBDATA,2,MUBF        ! TBDATA, 10
+TBDATA,3,BETA        ! TBDATA, 11
+TBDATA,4,TAUHATB     ! TBDATA, 12
+TBDATA,5,MB          ! TBDATA, 13
+
+TB,TNM,1, , ,NETC
+TBDATA,1,MUC         ! TBDATA, 14
+TBDATA,2,Q           ! TBDATA, 15
+
+TB,TNM,1, , ,FLOW
+TBDATA,1,A           ! TBDATA, 6     
+TBDATA,2,N           ! TBDATA, 8        
+
+TB,TNM,1, , ,TDEP
+TBDATA,1,THETAHAT    ! TBDATA, 2
+
+TB,TNM,1, , ,LOCK
+TBDATA,1,LAMBDAL     ! TBDATA, 3
+
+TB,TNM,1, , ,BULK
+TBDATA,1,KAPPA       ! TBDATA, 4
+
+MP,REFT,1,THETA0     ! TBDATA, 17
+TOFFS, 0
+
+BLOCK,0.00,100.00,0.00,100.00,0.00,100.00
+ESIZE,100
+TYPE,1
+MAT,1
+VMESH,1
+
+NSEL,S,LOC,X
+D,ALL,UX
+NSEL,S,LOC,Y
+D,ALL,UY
+NSEL,S,LOC,Z
+D,ALL,UZ
+NSEL,ALL
+BFUNIF,TEMP,300
+FINISH
+/SOLU
+TIME, 372                 ! ENG STRAIN RATE =0.007/S
+NLGEOM, ON
+OUTRES,ALL,LAST
+NSUBST,50,50,50
+TIME,1
+NSEL,S,LOC,Y,100
+D,ALL,UY,260               ! TENSION LOADING
+ALLSEL
+/OUT,SCRATCH
+
+SOLVE
+FINISH
+
+/POST1
+SET,1,LAST
+/OUT,
+*GET, S_Y, NODE, NODE(1,1,0),S,Y
+*GET,EPEL_Y, NODE, NODE(1,1,0),EPEL, Y
+/COM, REFERENCE RESULTS:
+SY_REF=174
+RATIO=S_Y/SY_REF
+/COM
+/OUT,vm314,vrt
+/COM,
+/COM,-------------------- VM314 RESULTS COMPARISON -------------------------
+/COM,
+/COM,    |   TARGET   | Mechanical APDL |  RATIO
+/COM,
+*VWRITE,SY_REF,S_Y,RATIO
+(8X,F8.3,'    ',F8.3,'         ',F5.3)
+/COM,-----------------------------------------------------------------------
+/OUT
+*LIST,vm314,vrt
+FINISH

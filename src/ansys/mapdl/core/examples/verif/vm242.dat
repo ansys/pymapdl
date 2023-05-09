@@ -1,4 +1,4 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
 /verify,vm242
 /title,vm242,Johnson-Champoux-Allard Equivalent Fluid Model
 /com,
@@ -70,7 +70,8 @@ vmesh,all
 
 asel,s,loc,y,DIM_LENGTH
 nsla,s,1
-bf,all,js,LOADING		! mass source
+!bf,all,js,LOADING		! mass source
+bf,all,mass,LOADING
 sf,all,inf			! Robin radiation boundary flag
 allsel,all
 finish
@@ -151,4 +152,5 @@ resume,table_1
 /out,
 *list,vm242,vrt
 finish
+/exit,nosave
     
