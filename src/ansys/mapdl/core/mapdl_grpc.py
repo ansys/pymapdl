@@ -1329,7 +1329,8 @@ class MapdlGrpc(_MapdlCore):
 
         preference : str
           Specify the preferred result file, either ``rst`` or ``rth``.
-          Only required when both files are present. The default is 'rst'.
+          This parameter is only required when both files are present. The default is ```None``,
+          in which case ``"rst"`` is used.
 
         Examples
         --------
