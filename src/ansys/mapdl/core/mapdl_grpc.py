@@ -869,7 +869,7 @@ class MapdlGrpc(_MapdlCore):
         mute : bool, optional
             Whether output is to be sent from the gRPC server. The default
             is ``None``, in which case the global setting specified by
-            ``mapdl.mute = <bool>`` is used, which is ``False`` by default. 
+            ``mapdl.mute = <bool>`` is used, which is ``False`` by default.
             The default is the global setting as specified with
             ``mapdl.mute = <bool>`` which is by default ``False``
 
