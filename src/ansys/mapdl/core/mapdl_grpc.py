@@ -1328,7 +1328,7 @@ class MapdlGrpc(_MapdlCore):
           Show the progress bar or not, default to False.
 
         preference : str
-          Specify the preferred result file, either ``rst`` or ``rth``.
+          Preferred type for the result file, which is either ``rst`` or ``rth``.
           This parameter is only required when both files are present. The default is ```None``,
           in which case ``"rst"`` is used.
 
