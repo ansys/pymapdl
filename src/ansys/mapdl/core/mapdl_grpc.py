@@ -1576,7 +1576,7 @@ class MapdlGrpc(_MapdlCore):
         Parameters
         ----------
         fname : str, optional
-            MAPDL input file to stream to the MAPDL grpc server.
+            MAPDL input file to stream to the MAPDL gRPC server.
             File name and directory path.
             An unspecified directory path defaults to the Python working
             directory; in this case, you can use all 248 characters for the file name.
