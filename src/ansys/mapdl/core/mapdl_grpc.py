@@ -867,7 +867,9 @@ class MapdlGrpc(_MapdlCore):
             Print the response of a command while it is being run.
 
         mute : bool, optional
-            Request that no output be sent from the gRPC server.
+            Whether output is to be sent from the gRPC server. The default
+            is ``None``, in which case the global setting specified by
+            ``mapdl.mute = <bool>`` is used, which is ``False`` by default. 
             The default is the global setting as specified with
             ``mapdl.mute = <bool>`` which is by default ``False``
 
@@ -2039,7 +2041,7 @@ class MapdlGrpc(_MapdlCore):
             by default None.
 
         target_dir : str, optional
-            Path where the downloaded files will be located. The default is None.
+            Path to downloaded the files will to. The default is ``None``.
 
         progress_bar : bool, optional
             Display a progress bar using
@@ -2298,9 +2300,8 @@ class MapdlGrpc(_MapdlCore):
             Local file to upload.
 
         progress_bar : bool, optional
-            Display a progress bar using ``tqdm`` when ``True``.
-            Helpful for showing download progress. The default is
-            True.
+            Whether to display a progress bar using ``tqdm``. The default is ``True``.
+            This parameter is helpful for showing download progress.
 
         Returns
         -------
@@ -2994,7 +2995,7 @@ class MapdlGrpc(_MapdlCore):
         Parameters
         ----------
         node : int
-            Node for which data are to be stored.
+            Node for which data is to be stored.
 
         item : str
             Label identifying the item.  Valid item labels are shown in the
@@ -3007,7 +3008,7 @@ class MapdlGrpc(_MapdlCore):
         name : str, optional
             Thirty-two character name identifying the item on printouts and
             displays.  The default is a label formed by concatenating the first
-            four characters of the Item and Comp labels.
+            four characters of the ``item`` and ``comp`` labels.
 
         sector : int, optional
             For a full harmonic cyclic symmetry solution, the sector number for
@@ -3088,8 +3089,8 @@ class MapdlGrpc(_MapdlCore):
         name : str, optional
             Thirty-two character name for identifying the item on the
             printout and displays.  The default is a label formed by
-            concatenating the first four characters of the Item and
-            Comp labels.
+            concatenating the first four characters of the ``item`` and
+           ``comp`` labels.
 
         tstrt : str, optional
             Time (or frequency) corresponding to start of IR data.  If between
