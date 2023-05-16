@@ -99,7 +99,7 @@ doc = [
 name = "ansys.mapdl.core"
 
 [project.urls]
-Source = "https://github.com/pyansys/pymapdl"
+Source = "https://github.com/ansys/pymapdl"
 
 [project.scripts]
 pymapdl_convert_script = "ansys.mapdl.core.convert:cli"

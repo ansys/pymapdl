@@ -21,7 +21,7 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
-  DOCKER_PACKAGE: ghcr.io/pyansys/mapdl
+  DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
@@ -51,7 +51,7 @@ jobs:
     name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
-      - name: "PyAnsys documentation style checks"
+      - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -174,8 +174,8 @@ jobs:
 
       - name: "DPF server activation"
         run: |
-          docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker pull ghcr.io/ansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Build documentation"
         run: |
@@ -334,7 +334,7 @@ jobs:
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
+          MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
 
       - name: "Unit testing requirements installation"
         run: |
@@ -342,8 +342,8 @@ jobs:
 
       - name: "DPF server activation"
         run: |
-          docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker pull ghcr.io/ansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         run: |
@@ -439,7 +439,7 @@ jobs:
     if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     container:
-      image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
+      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
@@ -487,8 +487,8 @@ jobs:
 
       # - name: DPF Server Activation
       #   run: |
-      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
-      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+      #     docker pull ghcr.io/ansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         run: |
@@ -557,8 +557,8 @@ jobs:
 
       # - name: DPF Server Activation
       #   run: |
-      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
-      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+      #     docker pull ghcr.io/ansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         shell: powershell
