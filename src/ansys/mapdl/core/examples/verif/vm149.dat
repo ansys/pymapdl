@@ -1,4 +1,4 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
 /verify,vm149
 /title,vm149,Residual Vector in Mode Superposition Harmonic Analysis
 /com,
@@ -413,6 +413,7 @@ resume,table_2
 /out,
 *list,vm149,vrt
 finish
+/exit,nosave
     
 
 

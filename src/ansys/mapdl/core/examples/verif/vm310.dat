@@ -1,0 +1,330 @@
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
+/VERIFY,VM310
+/TITLE,VM310, ELECTROSTATIC-STRUCTURAL ANALYSIS OF A MEMS PARALLEL-PLATE CAPACITOR
+/COM,
+/COM,  REF: ANY ELECTROSTATICS TEXTBOOK
+/COM,
+
+PI=ACOS(-1)  
+
+K=3           ! SPRING CONSTANT PER UNIT AREA, KG/(UM^2 S^2)
+M=1E-6        ! PLATE MASS PER UNIT AREA, KG/UM^2
+L=10          ! PLATE LENGTH, UM
+D=1           ! CAPACITOR THICKNESS, UM
+PER=8.854E-6  ! FREE SPACE PERMITTIVITY, PF/UM
+
+VLP=10        ! VOLTAGE APPLIED IN A LINEAR PERTURBATION ANALYSIS, VOLT
+FLP=15        ! FORCE APPLIED IN A LINEAR PERTURBATION HARMONIC ANALYSIS, UN
+FRQ=20        ! FREQUENCY OF HARMONINC LOAD, HZ
+
+NS1=40        ! TOTAL NUMBER OF SUBSTEPS FOR NONLINEAR STATIC ANALYSIS
+NS2=25        ! SUBSTEP TO RESTART FROM IN LINEAR PERTURBATION ANALYSIS
+TOL=1E-6      ! CONVERGENCE TOLERANCE IN NONLINEAR STATIC ANALYSIS
+
+A=L**2        ! PLATE AREA, UM^2
+
+! TO CREATE WHITE BACKGROUND
+/RGB,INDEX,100,100,100, 0
+/RGB,INDEX, 80, 80, 80,13
+/RGB,INDEX, 60, 60, 60,14
+/RGB,INDEX, 0, 0, 0,15
+
+/PREP7
+ET,1,226,1001
+KEYOP,1,4,1      
+BLOCK,,D,,L,,L
+ESIZE,,1
+VMESH,1
+
+/SHOW,PNG
+/VIEW,1,1,1,1
+EPLOT
+/SHOW,CLOSE
+
+EMUNIT,EPZRO,1
+MP,EX,1,1E-6
+MP,PRXY,1,0
+MP,PERX,1,PER
+
+D,ALL,UY,0,,,,UZ
+
+NSEL,S,LOC,X,0
+D,ALL,UX,0
+D,ALL,VOLT,0
+NSEL,S,LOC,X,D
+CP,NEXT,UX,ALL
+CP,NEXT,VOLT,ALL
+NLOAD=NDNEXT(0)
+NSEL,ALL
+
+ET,2,14       ! LINEAR SPRING WITH UX,UY,UZ DOFS
+ET,3,21,,,2   ! MASS WITH UX, UY, UZ DOFS
+
+*GET,NMAX,NODE,0,NUM,MAX
+NSEL,S,LOC,X,D
+*GET,NMAXS,NODE,0,COUNT,MAX
+
+R,2,K*A/NMAXS    ! NODAL STIFFNESS
+R,3,M*A/NMAXS    ! NODAL MASS
+
+_J=0
+*DO,_I,1,NMAXS
+	N1=NDNEXT(_J)
+	_J=N1
+	N2=N1+NMAX
+	N,N2,NX(N1)+1,NY(N1),NZ(N1)
+	D,N2,UX,0
+	
+	TYPE,2
+	REAL,2
+	E,N2,N1
+
+	TYPE,3
+	REAL,3
+	E,N1
+*ENDDO
+ALLSE
+FINISH
+/COM, 
+/COM, ******************************************
+/COM, ***              NONLINEAR             ***
+/COM, ***           STATIC ANALYSIS          ***
+/COM, ******************************************
+/COM,
+/SOLU 
+D,NLOAD,VOLT,500
+
+ALLSE
+ANTYPE,STATIC
+OUTRES,ALL,ALL
+RESCONTROL,DEFINE,ALL,ALL
+NLGEOM,ON
+NSUB,NS1
+CNVTOL,U,1.,TOL
+ARCLEN,ON
+ARCTRM,U,.95*D,NLOAD,UX
+SOLVE
+FINISH
+
+/POST26
+NSOL,3,NLOAD,VOLT,,VOLT    
+NSOL,4,NLOAD,U,X,'UX VS VOLT'
+FILLDATA,5,,,,-D/3,0
+VARNAM,5,'PULL-IN UX'
+PRVAR,3,4
+/SHOW,PNG
+XVAR,3
+/AXLAB,X,VOLTAGE
+/AXLAB,Y,DISPLACEMENT
+PLVAR,4,5
+/SHOW,CLOSE
+
+VGET,VEC1,3
+VGET,VEC2,4
+*GET,NS,ACTIVE,0,SET,NSET
+VPI=0
+UPI=0
+RATIO=0
+*DO,I,1,NS,1
+	*IF,VEC1(I),GT,VPI,THEN
+		VPI=VEC1(I)
+		UPI=-VEC2(I)
+	*ENDIF
+	U1=-VEC2(I)
+	V1=(D-U1)*SQRT(2*K*U1/PER)
+	RATIO=RATIO+V1/VEC1(I)
+*ENDDO
+RATIO=RATIO/NS
+FINISH
+PARSAV
+/COM, 
+/COM, ******************************************
+/COM, ***         LINEAR PERTURBATION        ***
+/COM, ***           STATIC ANALYSIS          ***
+/COM, ******************************************
+/COM,
+/SOLU
+ANTYP,STATIC,RESTART,1,NS2,PERTURB
+PERTURB,STATIC
+SOLVE,ELFORM
+
+D,NLOAD,VOLT,VLP
+SOLVE
+FINISH
+
+PARRES
+/POST1
+FILE,,rst
+SET,1,NS2
+UBI=-UX(NLOAD)
+*GET,VBI,NODE,NLOAD,VOLT
+*GET,QBI,NODE,NLOAD,RF,CHRG
+C=-QBI/VBI
+
+FILE,,rstp
+SET,LAST
+ULP=-UX(NLOAD)
+FINISH
+PARSAV
+/COM, 
+/COM, ******************************************
+/COM, ***         LINEAR PERTURBATION        ***
+/COM, ***            MODAL ANALYSIS          ***
+/COM, ***             (RESONANCE)            ***
+/COM, ******************************************
+/COM,
+/SOLU
+ANTYP,STATIC,RESTART,1,NS2,PERTURB
+PERTURB,MODAL
+SOLVE,ELFORM
+D,NLOAD,VOLT,0
+MODOPT,LANB,1  
+MXPAND           
+SOLVE
+FINISH
+
+PARRES
+/POST1
+SET,LAST
+*GET,FRQ1,MODE,1,FREQ
+FINISH
+PARSAV
+/COM, 
+/COM, ******************************************
+/COM, ***         LINEAR PERTURBATION        ***
+/COM, ***            MODAL ANALYSIS          ***
+/COM, ***           (ANTI-RESONANCE)         ***
+/COM, ******************************************
+/COM,
+/SOLU
+ANTYP,STATIC,RESTART,1,NS2,PERTURB
+PERTURB,MODAL
+SOLVE,ELFORM
+DDELE,NLOAD,VOLT
+MODOPT,LANB,1   
+MXPAND         
+SOLVE
+FINISH
+
+PARRES
+/POST1
+SET,LAST
+*GET,FRQ2,MODE,1,FREQ
+FINISH
+PARSAV
+/COM, 
+/COM, ******************************************
+/COM, ***         LINEAR PERTURBATION        ***
+/COM, ***          HARMONIC ANALYSIS         ***
+/COM, ***           (ACTUATOR MODE)          ***
+/COM, ******************************************
+/COM,
+/SOLU
+ANTYP,STATIC,RESTART,1,NS2,PERTURB
+PERTURB,HARM
+SOLVE,ELFORM
+
+D,NLOAD,VOLT,VLP
+
+NSUB,1
+HARFRQ,FRQ
+SOLVE
+FINISH
+
+PARRES
+/POST1
+FILE,,rstp
+SET,LAST
+UHR=-UX(NLOAD)
+FINISH
+PARSAV
+/COM, 
+/COM, ******************************************
+/COM, ***         LINEAR PERTURBATION        ***
+/COM, ***          HARMONIC ANALYSIS         ***
+/COM, ***            (SENSOR MODE)           ***
+/COM, ******************************************
+/COM,
+/SOLU
+ANTYP,STATIC,RESTART,1,NS2,PERTURB
+PERTURB,HARM
+SOLVE,ELFORM
+
+DDELE,NLOAD,VOLT
+F,NLOAD,FX,-FLP
+
+NSUB,1
+HARFRQ,FRQ
+SOLVE
+FINISH
+
+PARRES
+/POST1
+FILE,,rstp
+SET,LAST
+VHR=VOLT(NLOAD)
+FINISH
+
+! ANALYTICAL SOLUTION
+VPI_TAR=SQRT(8*K*D**3/(27*PER))
+UPI_TAR=D/3
+
+DBI=D-UBI
+C_TAR=PER*A/DBI
+KR=K-PER*VBI**2/DBI**3  ! ELECTROSTATICALLY SOFTENED STIFFNESS
+F=PER*VBI**2/(2*DBI**2)
+ULP_TAR=2*F/KR*VLP/VBI
+
+FRQ1_TAR=1/(2*PI)*SQRT(KR/M)
+
+FRQ2_TAR=1/(2*PI)*SQRT(K/M)
+
+W=2*PI*FRQ
+UHR_TAR=2*F/(-W**2*M+KR)*VLP/VBI
+
+VHR_TAR=-(FLP/A)/(-W**2*M+K)*VBI/DBI
+
+/OUT,vm310,vrt
+/COM,
+/COM, ---------------------------- VM310 RESULTS COMPARISON ----------------------
+/COM,
+/COM,                      |    TARGET    |  MECHANICAL APDL  |    RATIO
+/COM,                      |              |                   |
+/COM, NONLINEAR STATIC ANALYSIS:
+/COM,                      |              |                   |
+*VWRITE,VPI_TAR,VPI,VPI/VPI_TAR
+(2X,'PULL-IN VOLTAGE',6X,'|',2X,F8.3,4X,'|',4X,F8.3,7X,'|',2X,F9.6)
+*VWRITE,UPI_TAR,UPI,UPI/UPI_TAR
+(2X,'PULL-IN DISPLACEMENT',1X,'|',2X,F9.6,3X,'|',4X,F9.6,6X,'|',2X,F9.6)
+*VWRITE,RATIO
+(2X,'VOLT-DISP CURVE',6X,'|',14X,'|',19X,'|',2X,F9.6)
+*VWRITE,C_TAR,C,C/C_TAR
+(2X,'CAPACITANCE AT V_DC',2X,'|',1X,E12.6,1X,'|',3X,E12.6,4X,'|',2X,F9.6)
+/COM,                      |              |                   |
+/COM, LINEAR PERTURBATION STATIC ANALYSIS:
+/COM,                      |              |                   |
+*VWRITE,ULP_TAR,ULP,ULP/ULP_TAR
+(2X,'DISPLACEMENT',9X,'|',1X,E12.6,1X,'|',3X,E12.6,4X,'|',2X,F9.6)
+/COM,                      |              |                   |
+/COM, LINEAR PERTURBATION MODAL ANALYSIS (RESONANCE):
+/COM,                      |              |                   |
+*VWRITE,FRQ1_TAR,FRQ1,FRQ1/FRQ1_TAR
+(2X,'FREQUENCY',12X,'|',2X,F9.3,3X,'|',4X,F9.3,6X,'|',2X,F9.6)
+/COM,                      |              |                   |
+/COM, LINEAR PERTURBATION MODAL ANALYSIS (ANTI-RESONANCE):
+/COM,                      |              |                   |
+*VWRITE,FRQ2_TAR,FRQ2,FRQ2/FRQ2_TAR
+(2X,'FREQUENCY',12X,'|',2X,F9.3,3X,'|',4X,F9.3,6X,'|',2X,F9.6)
+/COM,                      |              |                   |
+/COM, LINEAR PERTURBATION HARMONIC ANALYSIS (ACTUATOR MODE):
+/COM,                      |              |                   |
+*VWRITE,UHR_TAR,UHR,UHR/UHR_TAR
+(2X,'DISPLACEMENT',9X,'|',1X,E12.6,1X,'|',3X,E12.6,4X,'|',2X,F9.6)
+/COM,                      |              |                   |
+/COM, LINEAR PERTURBATION HARMONIC ANALYSIS (SENSOR MODE):
+/COM,                      |              |                   |
+*VWRITE,VHR_TAR,VHR,VHR/VHR_TAR
+(2X,'VOLTAGE',14X,'|',2X,F9.5,3X,'|',3X,F9.5,7X,'|',2X,F9.6)
+/COM,
+/OUT
+*LIST,vm310,vrt

@@ -1,0 +1,277 @@
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
+/VERIFY,VM298
+/TITLE,VM298,PSD ANALYSIS OF 40-STORY BUILDING UNDER WIND LOAD EXCITATION
+/COM,
+/COM, REFERENCE: J.N.YANG,Y.K.LIN,"ALONG-WIND MOTION OF MULTISTORY BUILDING"
+/COM,            ASCE PUBLICATIONS, APRIL 1981.
+/COM, 
+
+/COM,
+/COM, STRUCTURAL PARAMETERS OF BUILDING
+_N      = 40                ! NUMBER OF STORIES
+_H      = 4                 ! M, STORY HEIGHT
+_HT     = _N*_H             ! M, TOTAL HEIGHT
+_MASS   = 1.29E+6           ! KG, LUMPED MASS AT FLOOR LEVEL
+_K      = 1E+9              ! N/M, ELASTIC STIFFNESS BETWEEN FLOORS
+_BETA   = 2.155E+4          ! N/M/SEC, DAMPING COEFFICIENT BETWEEN FLOORS
+/COM,
+/COM, AERODYNAMIC PARAMETERS OF WIND EXCITATION
+_Aw     = 192               ! M^2, WIND LOAD TRIBUTARY AREA
+Zg      = 300               ! M, GRADIENT HEIGHT
+_Ug     = 44.69             ! M/SEC, GRADIENT WIND VELOCITY
+_Ur     = 11.46             ! M/SEC, REFERENCE MEAN WIND VELOCITY AT 10 M HEIGHT
+_Cd     = 1.2               ! DRAG COEFFICIENT
+_RHO    = 1.23              ! KG/M^3, AIR DENSITY
+_KO     = 0.03              ! GROUND SURFACE DRAG COEFFICIENT
+_ALPHA  = 0.4               ! EXPONENT FOR THE MEAN-WIND-PROFILE POWER LAW
+_C1     = 7.7               ! CONSTANT TERM
+
+_PI     = 4*ATAN(1)
+
+/OUT,SCRATCH
+/PREP7
+
+/COM, NODES ALONG X
+*DO,i,1,_N+1
+    N,i,0,_H*(i-1),0        
+*ENDDO
+
+/COM, SPRING-DAMPER ELEMENTS
+ET,1,14
+KEYOPT,1,2,1
+R,1,_K,_BETA
+TYPE,1
+REAL,1
+MAT,1
+*DO,i,1,_N
+    E,i,i+1
+*ENDDO
+
+/COM, POINT MASS ELEMENTS
+ET,2,21
+KEYOPT,2,3,2
+R,2,_MASS
+TYPE,2
+REAL,2
+MAT,2
+*GET,MAXNOD,NODE,0,NUM,MAX,,,
+*DO,I,2,MAXNOD
+    E,I
+*ENDDO
+
+/COM, NODE COMPONENTS
+NSEL,S,LOC,Y,0
+CM,NODE_BASE,NODE
+NSEL,INVE
+CM,NODE_FLOOR,NODE
+ALLSEL,ALL,ALL
+
+/COM, BOUNDARY CONDITIONS
+CMSEL,S,NODE_BASE
+D,ALL,ALL
+ALLSEL,ALL,ALL
+CMSEL,S,NODE_FLOOR
+D,ALL,UY
+D,ALL,UZ
+ALLSEL,ALL,ALL
+FINISH
+
+/COM, ****************
+/COM, MODAL ANALYSIS
+/COM, ****************
+NMODES = 1
+/SOLU
+ANTYPE,MODAL
+MODOPT,LANB,NMODES
+MXPAND
+SOLVE
+FINISH
+
+*GET,FREQ_1,MODE,1,FREQ
+OMG_1 = 2*_PI*FREQ_1
+
+/COM, **************************
+/COM, WIND LOAD SPECTRUM INPUT
+/COM, **************************
+FREQ_PTS = 120
+FREQ_END = 2/(2*_PI)
+FREQ_BEGIN = 1E-03          
+FREQ_INC = (FREQ_END - FREQ_BEGIN)/FREQ_PTS
+
+/COM, FREQUENCY TABLE (HZ)
+*DIM,_FREQ_ARRAY,ARRAY,FREQ_PTS
+*VFILL,_FREQ_ARRAY,RAMP,FREQ_BEGIN,FREQ_INC
+
+/COM, CIRCULAR FREQUENCY TABLE (RAD/S)
+*DIM,_OMG_ARRAY,ARRAY,FREQ_PTS
+OMG_BEG = 2*_PI*FREQ_BEGIN
+OMG_INC = 2*_PI*FREQ_INC
+*VFILL,_OMG_ARRAY,RAMP,OMG_BEG,OMG_INC
+
+/COM, TABLE OF DIRECT AND COSPECTRAL INPUT PSD WIND SPECTRUM VALUES (DAVENPORT)
+*DIM,_COPHIFF,ARRAY,_N,_N,FREQ_PTS
+*DO,j,1,_N
+    _uj = _Ug*((j*_H)/Zg)**_ALPHA
+    _vj = 0.5*_RHO*_Aw*_Cd*(_uj)**2
+    *DO,k,j,_N
+        _uk = _Ug*((k*_H)/Zg)**_ALPHA
+        _vk = 0.5*_RHO*_Aw*_Cd*(_uk)**2
+           COEFV = 4*_vj*_vk*2*_KO*_Ur**2
+           COEFU = _uj*_uk
+        *DO,i,1,FREQ_PTS
+            OMG = _OMG_ARRAY(i)
+            TERM1 = (600*OMG/(_PI*_Ur))**2
+            TERM1 = TERM1/(1 + TERM1)**(4/3)
+            EXPO  = -(_C1*OMG*ABS(j-k)*_H)/(2*_PI*_Ur)
+            _COPHIFF(j,k,i) = COEFV*TERM1*EXP(EXPO)/(COEFU*OMG) 
+        *ENDDO
+    *ENDDO
+*ENDDO
+
+/COM, ***************
+/COM, PSD ANALYSIS
+/COM, ***************
+/SOLU
+ANTYPE,SPECTRUM                     ! PERFORM SPECTRUM ANALYSIS
+SPOPT,PSD                           ! POWER SPECTRAL DENSITY ANALYSIS
+
+_FACT = 4*_PI                       ! CONVERSION FACTOR FROM 2-SIDED INPUT PSD IN M2/RAD/S
+                                    ! TO 1-SIDED INPUT PSD IN M2/HZ 
+/COM, WIND SPECTRUM LOADING 
+*DO,j,1,_N
+    
+    PSDUNIT,j,FORC
+    *DO,k,j,_N
+        *DO,i,1,FREQ_PTS
+            PSDFRQ,j,k,_FREQ_ARRAY(i)
+            *IF,j,EQ,k,THEN
+               PSDVAL,j,_COPHIFF(j,j,i)*_FACT
+            *ELSE 
+               COVAL,j,k,_COPHIFF(j,k,i)*_FACT
+            *ENDIF          
+        *ENDDO  
+    *ENDDO
+    
+    *IF,j,EQ,40,THEN
+        /SHOW,PNG,REV
+        /PLOPTS,DATE,0  
+        PSDGRAPH,j-1,j,3            ! DISPLAY APPLIED WIND EXCITATION PSD SPECTRUM 
+    *ENDIF
+    
+    *IF,j,EQ,1,THEN
+        /SHOW,PNG,REV
+        /PLOPTS,DATE,0  
+        PSDGRAPH,j-1,j,3            ! DISPLAY APPLIED WIND EXCITATION PSD SPECTRUM
+    *ENDIF
+    
+    FDEL,j,FX                       ! DELETE PREVIOUS WIND SPECTRUM LOAD    
+    F,j+1,FX,1.0                    ! APPLY WIND LOAD ALONG X-DIRECTION     
+    PFACT,j,NODE                    ! PERFORM THE PARTICIPATION FACTOR CALCULATION
+*ENDDO  
+/SHOW,CLOSE
+    
+FDEL,ALL,FX                         ! DELETE PREVIOUS NODAL WIND FORCE
+
+PSDRES,DISP                         ! DISPLACEMENT RESPONSE (RELATIVE BY DEFAULT)
+PSDCOM                              ! PSD MODE COMBINATION (USE DEFAULT TOLERANCE)
+SOLVE
+FINISH
+
+/COM **********************************************************
+/COM  POSTPROCESSING RESULTS AT TOP FLOOR
+/COM **********************************************************
+/POST1
+SET,3,1
+NSEL,,NODE,,41
+/OUT,
+/COM **********************************************************
+/COM 1-SIGMA DISPLACEMENT SOLUTION FROM POST1
+/COM **********************************************************
+PRNSOL,U
+/OUT,SCRATCH,,,APPEND
+FINISH
+
+/POST26
+STORE,PSD,,,6.36E-03            ! USER-DEFINED FREQUENCY 6.36E-03 HZ (0.04 RAD/SEC)
+NSOL,2,41,U,X                   ! STORE DISPLACEMENT UX OF 40TH FLOOR
+RPSD,3,2,,1,2,RPSD_UX_HZ        ! CORRESPONDING RESPONSE PSD (ONE-SIDED M2/HZ)
+
+! GET THE CIRCULAR FREQUENCY AS A VARIABLE (AS ON REFERENCE PLOT FIG.2)
+VGET,FREQ,1
+*VFACT,2*_PI
+*VOPER,OMEGA,FREQ,MAX,FREQ
+VPUT,OMEGA,4,,,OMEGA
+
+! GET THE RPSD 2-SIDED IN M2/RAD/S (AS ON REFERENCE PLOT FIG.2)
+VGET,RPSD_UX_HZ,3
+*VFACT,(1/_FACT)
+*VOPER,RPSD_UX,RPSD_UX_HZ,MAX,RPSD_UX_HZ
+VPUT,RPSD_UX,5,,,RPSD_UX
+
+/COM **********************************************************
+/COM PLOT RPSD LIN-LOG (AS ON REFERENCE PLOT FIG.2)
+/COM **********************************************************
+/SHOW,PNG,REV
+/AXLAB,X,FREQUENCY, [RAD/SEC]
+/AXLAB,Y,RPSD OF TOP FLOOR,[M**2.SEC/RAD]
+/YRANGE,1e-5,1e-1
+/GROPT,LOGY,ON
+XVAR,4
+PLVAR,5
+
+! PLOT RPSD LOG-LOG
+/XRANGE,1E-2,2
+/GROPT,LOGX,ON                          
+PLVAR,5
+/SHOW,CLOSE
+
+/COM **********************************************************
+/COM 1-SIGMA DISPLACEMENT SOLUTION FROM POST26
+/COM **********************************************************
+INT1,6,3,1                              ! RPSD INTEGRATION
+*GET,D_VARIANCE,VARI,6,EXTREME,VLAST    ! VARIANCE
+RMS_VALUE = SQRT(D_VARIANCE)            ! STANDARD DEVIATION
+/COM **********************************************************
+/COM REFERENCE STANDARD DEVIATION VALUE, SigmaX40 = 4.65E-2 M
+/COM **********************************************************
+*STATUS,RMS_VALUE
+FINISH
+
+*DIM,LABEL,CHAR,1,2
+*DIM,VALUE,,2,3
+
+LABEL(1,1)='RAD/SEC'
+LABEL(1,2)='STD_DEV'
+
+*VFILL,VALUE(1,1),DATA,1.02             ! MENTIONED IN THE REFERENCE PAPER
+*VFILL,VALUE(1,2),DATA,OMG_1
+*VFILL,VALUE(1,3),DATA,ABS(OMG_1/1.02)
+*VFILL,VALUE(2,1),DATA,0.0465           ! MENTIONED IN THE REFERENCE PAPER
+*VFILL,VALUE(2,2),DATA,RMS_VALUE
+*VFILL,VALUE(2,3),DATA,ABS(RMS_VALUE/0.0465)
+
+/OUT,vm298,vrt
+/COM,
+/COM, --------------- RESULT COMPARISON -------------------------------
+/COM,
+/COM,                 |  TARGET  |  MECHANICAL APDL  | RATIO     
+/COM,
+/COM,-------------------------------------------------------------------
+/COM,  MODAL FREQUENCY
+/COM,-------------------------------------------------------------------
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A12,'     ',F10.4,'  ',F14.4,'   ',F15.3)
+/COM
+/COM,-------------------------------------------------------------------
+/COM,  STANDARD DEVIATION OF RESPONSE PSD
+/COM,-------------------------------------------------------------------
+/COM,
+*VWRITE,LABEL(1,2),VALUE(2,1),VALUE(2,2),VALUE(2,3)
+(1X,A12,'     ',F10.4,'  ',F14.4,'   ',F15.3)
+/COM,
+/COM,-------------------------------------------------------------------
+/OUT,
+*LIST,vm298,vrt
+FINISH
+/EXIT,NOSAVE
