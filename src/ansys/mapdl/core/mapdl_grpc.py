@@ -194,7 +194,7 @@ class MapdlGrpc(_MapdlCore):
         IP address to connect to the server.  The default is 'localhost'.
 
     port : int, optional
-        Port to connect to the mapdl server.  The default is ``50052``.
+        Port to connect to the MAPDL server.  The default is ``50052``.
 
     timeout : float
         Maximum allowable time to connect to the MAPDL server.
@@ -2107,7 +2107,7 @@ class MapdlGrpc(_MapdlCore):
             Helpful for showing download progress.
 
         recursive : bool, optional
-            Use recursion when using glob pattern. The default is ``False``.
+            Whether to use recursion when using glob pattern. The default is ``False``.
 
         Notes
         -----
@@ -2260,7 +2260,7 @@ class MapdlGrpc(_MapdlCore):
         progress_bar : bool, optional
             Display a progress bar using ``tqdm`` when ``True``.
             Helpful for showing download progress. The default is
-            ``False``.
+            ``False`` to avoid excessive command printout.
 
         Examples
         --------
