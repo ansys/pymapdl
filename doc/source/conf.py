@@ -86,7 +86,7 @@ extensions = [
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/dev", None),
+    "python": ("https://docs.python.org/3", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
@@ -134,7 +134,7 @@ notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
 
 # static path
-html_static_path = ["_static", "_assets"]
+html_static_path = ["_static"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -170,6 +170,8 @@ rst_epilog = ""
 # Read link all targets from file
 with open("links.rst") as f:
     rst_epilog += f.read()
+
+rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
 
 # Read link all substitutions from file
 with open("substitutions.rst") as f:

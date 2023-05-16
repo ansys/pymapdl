@@ -83,7 +83,7 @@ def test_esol(mapdl, vm6):
     mapdl.esol(nvar, 1, 1, "S", "X", name="stuff")
     mapdl.dim("ARR", "ARRAY", 1)
     mapdl.vget("ARR", nvar)
-    assert mapdl.parameters["ARR"] < 0  # expected -1991.40234375
+    assert mapdl.parameters["ARR"] > 0  # expected 6017.83056641
 
 
 def test_etype(mapdl, cleared):

@@ -124,7 +124,7 @@ To add a frame, you can use `ImageMagick <https://www.imagemagick.org>`_:
 
 .. code:: console
 
-   mogrify -mattecolor #f1ce80 -frame 10x10 volumes.jpg
+   mogrify -mattecolor \#f1ce80 -frame 10x10 volumes.jpg
 
 
 You can also use Imagemagick to add a watermark:

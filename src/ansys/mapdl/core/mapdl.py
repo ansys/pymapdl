@@ -491,13 +491,28 @@ class _MapdlCore(Commands):
     def non_interactive(self):
         """Non-interactive context manager.
 
-        Use this when using commands that require user
-        interaction within MAPDL (e.g. :func:`Mapdl.vwrite`).
+        Allow to execute code without user interaction or waiting
+        between PyMAPDL responses.
+        It can also be used to execute some commands which are not
+        supported in interactive mode. For a complete list of commands
+        visit :ref:`ref_unsupported_interactive_commands`.
+
+        View the last response with :attr:`Mapdl.last_response` method.
+
+        Notes
+        -----
+        All the commands executed inside this context manager are not
+        executed until the context manager exits which then execute them
+        all at once in the MAPDL instance.
+
+        This command uses :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+        method.
 
         Examples
         --------
-        Use the non-interactive context manager for the VWRITE
-        command.  View the last response with :attr:`Mapdl.last_response`.
+        Use the non-interactive context manager for the VWRITE (
+        :func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>`)
+        command.
 
         >>> with mapdl.non_interactive:
         ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
@@ -1083,7 +1098,7 @@ class _MapdlCore(Commands):
         if inplace and include_result is None:
             include_result = False
 
-        elif not include_result:
+        if include_result is None:
             include_result = True
 
         if not inplace:
@@ -3901,6 +3916,23 @@ class _MapdlCore(Commands):
 
         return wrapped(self, *args, **kwargs)
 
+    @wraps(Commands.esel)
+    def esel(self, *args, **kwargs):
+        """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().esel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points()
+        @wrap_point_SEL(entity="elem")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
     @wraps(Commands.ksel)
     def ksel(self, *args, **kwargs):
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
@@ -3913,6 +3945,57 @@ class _MapdlCore(Commands):
 
         @allow_pickable_points(entity="kp", plot_function="kplot")
         @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.lsel)
+    def lsel(self, *args, **kwargs):
+        """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().lsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="line", plot_function="lplot")
+        @wrap_point_SEL(entity="line")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.asel)
+    def asel(self, *args, **kwargs):
+        """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().asel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="area", plot_function="aplot")
+        @wrap_point_SEL(entity="area")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.vsel)
+    def vsel(self, *args, **kwargs):
+        """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().vsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="volume", plot_function="vplot")
+        @wrap_point_SEL(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
