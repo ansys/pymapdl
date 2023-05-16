@@ -191,10 +191,10 @@ class MapdlGrpc(_MapdlCore):
     Parameters
     ----------
     ip : str, optional
-        IP address to connect to the server.  Defaults to 'localhost'.
+        IP address to connect to the server.  The default is 'localhost'.
 
     port : int, optional
-        Port to connect to the mapdl server.  Defaults to 50052.
+        Port to connect to the MAPDL server.  The default is ``50052``.
 
     timeout : float
         Maximum allowable time to connect to the MAPDL server.
@@ -211,20 +211,20 @@ class MapdlGrpc(_MapdlCore):
 
     set_no_abort : bool, optional
         Sets MAPDL to not abort at the first error within /BATCH mode.
-        Default ``True``.
+        The default is ``True``.
 
     remove_temp_dir : bool, optional
         When this parameter is ``True``, the MAPDL working directory will be
         deleted when MAPDL is exited provided that it is within the temporary
-        user directory. Default ``False``.
+        user directory. The default is ``False``.
 
     log_file : bool, optional
         Copy the log to a file called `logs.log` located where the
-        python script is executed. Default ``True``.
+        python script is executed. The default is ``True``.
 
     print_com : bool, optional
         Print the command ``/COM`` arguments to the standard output.
-        Default ``False``.
+        The default is ``False``.
 
     channel : grpc.Channel, optional
         gRPC channel to use for the connection. Can be used as an
@@ -867,9 +867,9 @@ class MapdlGrpc(_MapdlCore):
             Print the response of a command while it is being run.
 
         mute : bool, optional
-            Request that no output be sent from the gRPC server.
-            Defaults to the global setting as specified with
-            ``mapdl.mute = <bool>``.  Default ``False``
+            Whether output is to be sent from the gRPC server. The default
+            is ``None``, in which case the global setting specified by
+            ``mapdl.mute = <bool>`` is used, which is ``False`` by default.
 
         Examples
         --------
@@ -966,7 +966,7 @@ class MapdlGrpc(_MapdlCore):
         Parameters
         ----------
         save : bool, optional
-            Save the database on exit.  Default ``False``.
+            Save the database on exit.  The default is ``False``.
         force : bool, optional
             Override any environment variables that may inhibit exiting MAPDL.
 
@@ -1326,8 +1326,9 @@ class MapdlGrpc(_MapdlCore):
           Show the progress bar or not, default to False.
 
         preference : str
-          Specify the preferred result file, either ``rst`` or ``rth``.
-          Only required when both files are present. Defaults to 'rst'.
+          Preferred type for the result file, which is either ``rst`` or ``rth``.
+          This parameter is only required when both files are present. The default is ```None``,
+          in which case ``"rst"`` is used.
 
         Examples
         --------
@@ -1572,34 +1573,34 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        fname : str
-            MAPDL input file to stream to the MAPDL grpc server.
+        fname : str, optional
+            MAPDL input file to stream to the MAPDL gRPC server.
             File name and directory path.
             An unspecified directory path defaults to the Python working
             directory; in this case, you can use all 248 characters for the file name.
             The file name defaults to the current ``Jobname`` if ``Ext`` is specified.
 
-        ext : str
+        ext : str, optional
             Filename extension (eight-character maximum).
 
-        dir : str
-            Directory path. Defaults to current directory.
+        dir : str, optional
+            Directory path. The default is the current working directory.
 
-        line : int
+        line : int, optional
             A value indicating either a line number in the file from which to
             begin reading the input file. The first line is the zero line (Python
             convention).
 
             (blank), or 0
-                Begins reading from the top of the file (default).
+                Begins reading from the top of the file. Default.
 
             LINE_NUMBER
                 Begins reading from the specified line number in the file.
 
-        log
+        log : optional
             Not supported in the gRPC implementation.
 
-        time_step_stream : int
+        time_step_stream : int, optional
             Time to wait between streaming updates to send back chunks
             from the listener file.  Larger values mean more data per
             chunk and less chunks, but if the command is short, will
@@ -1615,7 +1616,7 @@ class MapdlGrpc(_MapdlCore):
             These defaults will be ignored if ``time_step_stream`` is
             manually set.
 
-        orig_cmd : str
+        orig_cmd : str, optional
             Original command. There are some cases, were input is
             used to send the file to the grpc server but then we want
             to run something different than ``/INPUT``, for example
@@ -1901,8 +1902,12 @@ class MapdlGrpc(_MapdlCore):
         ----------
         fname : str
             File name (with our with extension). It can be a full path.
+
         ext : str, optional
-            File extension, by default None
+            File extension. The default is None.
+
+        default_extension : str
+            Default filename extension. The default is None.
         """
 
         # the old behaviour is to supplied the name and the extension separately.
@@ -2030,17 +2035,17 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        extensions : List[Str], Tuple[Str], optional
+        extensions : list[str], tuple[str], optional
             List of extensions to filter the files before downloading,
             by default None.
 
-        target_dir : Str, optional
-            Path where the downloaded files will be located, by default None.
+        target_dir : str, optional
+            Path to downloaded the files will to. The default is ``None``.
 
         progress_bar : bool, optional
             Display a progress bar using
             ``tqdm`` when ``True``.  Helpful for showing download
-            progress. Default to ``False``.
+            progress. The default is ``False``.
 
         Returns
         -------
@@ -2090,15 +2095,19 @@ class MapdlGrpc(_MapdlCore):
             match file names. For example: `'file*'` to match every file whose
             name starts with `'file'`.
 
+        target_dir : str, optional
+            Path where the downloaded files will be located. The default is the current
+            working directory.
+
         chunk_size : int, optional
-            Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
+            Chunk size in bytes.  Must be less than 4MB. The default is 256 kB.
 
         progress_bar : bool, optional
             Display a progress bar using ``tqdm`` when ``True``.
             Helpful for showing download progress.
 
-        recursive : bool
-            Use recursion when using glob pattern.
+        recursive : bool, optional
+            Whether to use recursion when using glob pattern. The default is ``False``.
 
         Notes
         -----
@@ -2230,7 +2239,7 @@ class MapdlGrpc(_MapdlCore):
         target_name,
         out_file_name=None,
         chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=None,
+        progress_bar=False,
     ):
         """Download a file from the gRPC instance.
 
@@ -2246,11 +2255,12 @@ class MapdlGrpc(_MapdlCore):
             ``target_name``.
 
         chunk_size : int, optional
-            Chunk size in bytes.  Must be less than 4MB.  Defaults to 256 kB.
+            Chunk size in bytes.  Must be less than 4MB.  The default is 256 kB.
 
-        progress_bar : bool, optional Display a progress bar using
-            ``tqdm`` when ``True``.  Helpful for showing download
-            progress.
+        progress_bar : bool, optional
+            Display a progress bar using ``tqdm`` when ``True``.
+            Helpful for showing download progress. The default is
+            ``False`` to avoid excessive command printout.
 
         Examples
         --------
@@ -2288,9 +2298,9 @@ class MapdlGrpc(_MapdlCore):
         file_name : str
             Local file to upload.
 
-        progress_bar : bool, optional Display a progress bar using
-            ``tqdm`` when ``True``.  Helpful for showing download
-            progress.
+        progress_bar : bool, optional
+            Whether to display a progress bar using ``tqdm``. The default is ``True``.
+            This parameter is helpful for showing download progress.
 
         Returns
         -------
@@ -2983,23 +2993,23 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        node
-            Node for which data are to be stored.
+        node : int
+            Node for which data is to be stored.
 
-        item
+        item : str
             Label identifying the item.  Valid item labels are shown in the
-            table below.  Some items also require a component label.
+            table below. Some items also require a component label.
 
-        comp
+        comp : str
             Component of the item (if required).  Valid component labels are
             shown in the table below.
 
-        name
+        name : str, optional
             Thirty-two character name identifying the item on printouts and
-            displays.  Defaults to a label formed by concatenating the first
-            four characters of the Item and Comp labels.
+            displays.  The default is a label formed by concatenating the first
+            four characters of the ``item`` and ``comp`` labels.
 
-        sector
+        sector : int, optional
             For a full harmonic cyclic symmetry solution, the sector number for
             which the results from NODE are to be stored.
 
@@ -3056,30 +3066,30 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        elem
+        elem : int
             Element for which data are to be stored.
 
-        node
+        node : int
             Node number on this element for which data are to be
             stored. If blank, store the average element value (except
             for FMAG values, which are summed instead of averaged).
 
-        item
+        item : str
             Label identifying the item. General item labels are shown
             in Table 134: ESOL - General Item and Component Labels
             below. Some items also require a component label.
 
-        comp
+        comp : str
             Component of the item (if required). General component
             labels are shown in Table 134: ESOL - General Item and
             Component Labels below.  If Comp is a sequence number (n),
             the NODE field will be ignored.
 
-        name
+        name : str, optional
             Thirty-two character name for identifying the item on the
-            printout and displays.  Defaults to a label formed by
-            concatenating the first four characters of the Item and
-            Comp labels.
+            printout and displays.  The default is a label formed by
+            concatenating the first four characters of the ``item`` and
+           ``comp`` labels.
 
         tstrt : str, optional
             Time (or frequency) corresponding to start of IR data.  If between
