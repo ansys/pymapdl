@@ -101,13 +101,13 @@ In Linux, the preceding code prints the following, where ``python3`` is the defa
 
 You would use this Python executable to install PyMAPDL:
 
-.. code:: bash
+.. code:: console
 
     C:\Users\USER\.julia\conda\3\python.exe -m pip install ansys-mapdl-core
 
 In Linux:, you would install with:
 
-.. code:: bash
+.. code:: console
 
     python3 -m pip install ansys-mapdl-core
 

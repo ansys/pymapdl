@@ -87,7 +87,7 @@ You can set your license using the environment variable :envvar:`ANSYSLMD_LICENS
 VS Code. This is recommended if you are using Windows OS.
 For example, if you have a license server at the address ``123.45.67.89``, you can set the license using:
 
-.. code:: pwsh
+.. code:: pwsh-session
   
    $env:ANSYSLMD_LICENSE_FILE = '1055@123.45.65.89'
    code . # launch VS Code

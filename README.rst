@@ -178,7 +178,7 @@ adapted to run from Linux, or the LAN provided the necessary ports are
 open. This example specifies the port with ``-port 50052``, but this
 option can be left out if you plan on using the default port 50052.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     start "MAPDL" "%ANSYS211_DIR%\bin\winx64\ANSYS211.exe" -port 50052 -grpc
 
