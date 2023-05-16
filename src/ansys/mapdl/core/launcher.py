@@ -964,7 +964,7 @@ def launch_mapdl(
            The executable path can be also set through the environment variable
            ``PYMAPDL_MAPDL_EXEC``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
@@ -1134,7 +1134,7 @@ def launch_mapdl(
            The default version can be also set through the environment variable
            ``PYMAPDL_MAPDL_VERSION``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_VERSION=22.2
 
