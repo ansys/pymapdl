@@ -14,7 +14,7 @@ jobs:
 
     env:
       DISPLAY: ':99.0'
-      MAPDL_IMAGE: 'ghcr.io/pyansys/pymapdl/mapdl:v23.1.0'
+      MAPDL_IMAGE: 'ghcr.io/ansys/pymapdl/mapdl:v23.1.0'
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on azure
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -59,7 +59,7 @@ jobs:
   
       - name: DPF Server Activation
         run: |
-          docker run -d -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev
+          docker run -d -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev
 
       - name: Build Documentation
         run: |
