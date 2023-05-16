@@ -52,7 +52,7 @@ Prerequisites
 If you are using CentOS 7, before installing MAPDL, you must install some
 required libraries:
 
-.. code:: bash
+.. code:: console
    
    sudo yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
@@ -75,7 +75,7 @@ To install Ansys products in WSL Linux, perform these steps:
 
 2. Extract the compressed source code file (``tar.gz``) with this command:
 
-   .. code:: bash
+   .. code:: console
    
        tar xvzf STRUCTURES_2021R2_LINX64.tgz
 
@@ -83,34 +83,34 @@ To install Ansys products in WSL Linux, perform these steps:
 3. To install MAPDL, go into the folder where the files have been extracted and
    run this command:
 
-   .. code:: bash
+   .. code:: console
    
-       sudo ./INSTALL -silent -install_dir /usr/ansys_inc/ -mechapdl
+      sudo ./INSTALL -silent -install_dir /usr/ansys_inc/ -mechapdl
 
    where: 
 
-  - ``-silent`` : Initiates a silent installation, which means no GUI is shown.
-  - ``-install_dir /path/`` : Specifies the directory to install the product or
-    license manager to. If you want to install to the default location, you can
-    omit the ``-install_dir`` argument. The default location is ``/ansys_inc``
-    if the symbolic link is set. Otherwise, it defaults to ``/usr/ansys_inc``.
-  - ``-<product_flag>`` : Specifies the one or more products to install.
-    If you omit this argument, all products are installed. The *Ansys, Inc.
-    Installation Guides* in the Ansys Help provides a list of valid
-    values for the ``product_flags`` argument in `Chapter 6
-    <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/unix_silent.html>`_
-    of the *Linux Installation Guide* and `Chapter 7
-    <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/win_silent.html>`_
-    of the *Windows Installation Guide*.
+   - ``-silent`` : Initiates a silent installation, which means no GUI is shown.
+   - ``-install_dir /path/`` : Specifies the directory to install the product or
+     license manager to. If you want to install to the default location, you can
+     omit the ``-install_dir`` argument. The default location is ``/ansys_inc``
+     if the symbolic link is set. Otherwise, it defaults to ``/usr/ansys_inc``.
+   - ``-<product_flag>`` : Specifies the one or more products to install.
+     If you omit this argument, all products are installed. The *Ansys, Inc.
+     Installation Guides* in the Ansys Help provides a list of valid
+     values for the ``product_flags`` argument in `Chapter 6
+     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/unix_silent.html>`_
+     of the *Linux Installation Guide* and `Chapter 7
+     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/win_silent.html>`_
+     of the *Windows Installation Guide*.
 
-    In the preceding example for MAPDL, you only need to specify the ``-mechapdl`` flag.
+     In the preceding example for MAPDL, you only need to specify the ``-mechapdl`` flag.
 
 After installing MAPDL directly in ``/ansys_inc`` or in ``/usr/ansys_inc``,
 you create a symbolic link with this command:
 
-.. code:: bash
+.. code:: console
 
-    sudo ln -s /usr/ansys_inc /ansys_inc
+   sudo ln -s /usr/ansys_inc /ansys_inc
 
 By default, PyMAPDL expects the MAPDL executable to be in
 ``/usr/ansys_inc``. Whether you install it there or not, you should
@@ -189,7 +189,7 @@ environment variable with this IP address:
 
 .. _ref_bash_win_ip:
 
-.. code:: bash
+.. code:: console
 
     winhostIP=$(grep -m 1 host.docker.internal /etc/hosts | awk '{print $1}')
     export ANSYSLMD_LICENSE_FILE=1055@$winhostIP
@@ -201,14 +201,14 @@ Launch MAPDL in WSL
 To launch MAPDL in WSL, you must launch MAPDL process.
 An example follows.
 
-.. code:: bash
+.. code:: console
 
     /ansys_inc/v222/ansys/bin/ansys222 -grpc
 
 This launches an MAPDL instance whose working directory is the current directory.
 If you want to change the working directory, you can use the ``-dir`` flag.
 
-.. code:: bash
+.. code:: console
 
     /ansys_inc/v222/ansys/bin/ansys222 -grpc -dir /tmp/ansys_jobs/myjob
 
@@ -219,11 +219,10 @@ Connect to an MAPDL instance running in WSL
 To connect to the WSL instance that is running the MAPDL instance,
 you need to specify the IP address of the WSL instance:
 
-.. code:: python 
+.. code:: pycon
 
-    from ansys.mapdl.core import Mapdl
-    
-    mapdl = Mapdl(ip='127.0.0.1', port=50053)
+    >>> from ansys.mapdl.core import Mapdl
+    >>> mapdl = Mapdl(ip="127.0.0.1", port=50053)
 
 
 Additional information
@@ -263,14 +262,14 @@ and then inspect the last few lines.
 Method 1
 --------
 
-.. code:: bash
+.. code:: console
 
     ./INSTALL --help
 
 Method 2
 --------
 
-.. code:: bash
+.. code:: console
 
     cat ./INSTALL
 
@@ -286,13 +285,13 @@ Single license server
 
 The format for a single license server is:
 
-.. code:: bash
+.. code:: console
 
    -licserverinfo LI_port_number:FLEXlm_port_number:hostname
 
 Here is an example:
 
-.. code:: bash
+.. code:: console
 
    ./INSTALL -silent -install_dir /ansys_inc/ -mechapdl -licserverinfo 2325:1055:winhostIP
 
@@ -301,13 +300,13 @@ Three license servers
 
 The format for three license servers is:
 
-.. code:: bash
+.. code:: console
 
    -licserverinfo LI_port_number:FLEXlm_port_number:hostname1,hostname2,hostname3
 
 Here is an example:
 
-.. code:: bash
+.. code:: console
 
    ./INSTALL -silent -install_dir /ansys_inc/ -mechapdl -licserverinfo 2325:1055:abc,def,xyz
 
@@ -335,7 +334,7 @@ Method 1
 
 This method shows a notification:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     Set-NetFirewallProfile -DisabledInterfaceAliases "vEthernet (WSL)"
 
@@ -344,7 +343,7 @@ Method 2
 
 This method does not show a notification:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
@@ -360,7 +359,7 @@ Link ports between WSL and Windows
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This command links ports between WSL and Windows:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     netsh interface portproxy add v4tov4 listenport=1055 listenaddress=0.0.0.0 connectport=1055 connectaddress=XXX.XX.XX.XX
 
@@ -370,7 +369,7 @@ View all forwards
 
 This command allows you to view all forwards:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     netsh interface portproxy show v4tov4
 
@@ -380,7 +379,7 @@ Delete port forwarding
 
 This command allows you to delete port forwarding:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     netsh interface portproxy delete v4tov4 listenport=1055 listenaddres=0.0.0.0 protocol=tcp
 
@@ -389,7 +388,7 @@ Reset Windows network adapters
 
 You can reset Windows network adapters with this code:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     netsh int ip reset all
     netsh winhttp reset proxy
@@ -402,7 +401,7 @@ Restart the WSL service
 
 You can restart the WSL service with this command:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     Get-Service LxssManager | Restart-Service
 
@@ -412,7 +411,7 @@ Stop all processes with a given name
 
 You can stop all processes with a given name with this command.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
    Get-Process "ANSYS212" | Stop-Process
 
@@ -423,7 +422,7 @@ Install ``xvfb`` in CentOS 7
 If you want to replicate the CI/CD behavior, you must install the ``xvfb`` package
 as shown in the following command. For more information, see the ``.ci`` folder.
 
-.. code:: bash
+.. code:: console
 
    yum install xorg-x11-server-Xvfb
 

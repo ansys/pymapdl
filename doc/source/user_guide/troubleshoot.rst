@@ -192,6 +192,7 @@ either Windows or Linux.
 
 **On Windows**
 
+
 .. code:: pwsh-session
 
    $env:ANSYSLMD_LICENSE_FILE
@@ -358,6 +359,7 @@ environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 ``CADOE_LIBDIRXXX`` to the correct location. 
 The three-digit MAPDL version appears where ``XXX`` is
 shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
+
 
 .. vale off
 
