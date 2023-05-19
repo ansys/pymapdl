@@ -4,6 +4,21 @@ import os
 
 import appdirs
 
+# Setup data directory
+try:
+    USER_DATA_PATH = appdirs.user_data_dir(
+        appname="ansys_mapdl_core", appauthor="Ansys"
+    )
+    if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
+        os.makedirs(USER_DATA_PATH)
+
+    EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
+    if not os.path.exists(EXAMPLES_PATH):  # pragma: no cover
+        os.makedirs(EXAMPLES_PATH)
+
+except:  # pragma: no cover
+    pass
+
 from ansys.mapdl.core.logging import Logger
 
 LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
@@ -54,21 +69,6 @@ from ansys.mapdl.core.pool import LocalMapdlPool
 from ansys.mapdl.core.theme import MapdlTheme
 
 _HAS_ANSYS = _check_has_ansys()
-
-# Setup data directory
-try:
-    USER_DATA_PATH = appdirs.user_data_dir(
-        appname="ansys_mapdl_core", appauthor="Ansys"
-    )
-    if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
-        os.makedirs(USER_DATA_PATH)
-
-    EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
-    if not os.path.exists(EXAMPLES_PATH):  # pragma: no cover
-        os.makedirs(EXAMPLES_PATH)
-
-except:  # pragma: no cover
-    pass
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False
