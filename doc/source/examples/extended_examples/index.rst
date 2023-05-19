@@ -3,7 +3,6 @@
 Extended examples
 =================
 
-
 These extended examples explain other concepts such as interoperability
 with other programs, libraries, and features in development.
 
@@ -24,4 +23,5 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
-.. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html
+.. _Cart-Pole Simulation: cartpole_example_notebook_
+
