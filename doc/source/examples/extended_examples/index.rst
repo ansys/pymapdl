@@ -1,5 +1,20 @@
 .. _ref_extended_examples:
 
+.. toctree::
+    :hidden:
+    :maxdepth: 3
+
+    Cart-Pole Simulation <http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html>
+    ex_01-gmsh_example/ex_01-gmsh_example
+    Python_UPF/python_upf_examples
+    Krylov/krylov_example
+    dash/dash_example
+    executable/executable
+
+
+.. extended_text_start
+
+
 Extended examples
 =================
 

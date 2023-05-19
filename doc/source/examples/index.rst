@@ -32,19 +32,15 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 .. === EXTENDED EXAMPLES ===
 
-.. toctree::
-    :hidden:
-    :maxdepth: 3
 
-    Cart-Pole Simulation <http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html>
-    extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
-    extended_examples/Python_UPF/python_upf_examples
-    extended_examples/Krylov/krylov_example
-    extended_examples/dash/dash_example
-    extended_examples/executable/executable
+.. toctree::
+   :hidden:
+
+   extended_examples/index.rst
+
 
 .. include:: extended_examples/index.rst
-   :start-line: 2
+   :start-after: extended_text_start
 
 
 .. === DOWNLOAD EXAMPLES ===
