@@ -57,7 +57,9 @@ _HAS_ANSYS = _check_has_ansys()
 
 # Setup data directory
 try:
-    USER_DATA_PATH = appdirs.user_data_dir("ansys_mapdl_core")
+    USER_DATA_PATH = appdirs.user_data_dir(
+        appname="ansys_mapdl_core", appauthor="Ansys"
+    )
     if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
         os.makedirs(USER_DATA_PATH)
 
