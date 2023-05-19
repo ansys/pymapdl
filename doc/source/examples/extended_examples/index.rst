@@ -22,7 +22,7 @@ These extended examples explain other concepts such as interoperability
 with other programs, libraries, and features in development.
 
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-| Name                       | Description                                                                                             |
+| **Name**                   | **Description**                                                                                         |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | `Cart-Pole Simulation`_    | Demonstrates a reinforcement machine learning example using MAPDL through PyMAPDL.                      |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
