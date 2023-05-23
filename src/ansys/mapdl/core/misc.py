@@ -1244,8 +1244,15 @@ def wrap_point_SEL(entity="node"):
 
 def get_active_branch_name():
     head_dir = Path(".") / ".git" / "HEAD"
-    with head_dir.open("r") as f:
-        content = f.read().splitlines()
+
+    if os.path.exists(head_dir):
+        with head_dir.open("r") as f:
+            content = f.read().splitlines()
+    else:
+        if "dev" in pymapdl.__version__:
+            kind = "main"
+        else:  # pragma: no cover
+            kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
 
     for line in content:
         if line[0:4] == "ref:":
