@@ -25,6 +25,7 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
     
     Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
     Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
+    extended_examples/index.rst
 
 
 .. include:: pymapdl_examples_repo/index.rst
@@ -33,14 +34,9 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 .. === EXTENDED EXAMPLES ===
 
 
-.. toctree::
-   :hidden:
-
-   extended_examples/index.rst
-
-
 .. include:: extended_examples/index.rst
-   :start-after: extended_text_start
+   :start-line: 2
+   :end-line: 27
 
 
 .. === DOWNLOAD EXAMPLES ===
