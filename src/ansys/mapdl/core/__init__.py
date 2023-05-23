@@ -5,19 +5,16 @@ import os
 import appdirs
 
 # Setup data directory
-try:
-    USER_DATA_PATH = appdirs.user_data_dir(
-        appname="ansys_mapdl_core", appauthor="Ansys"
-    )
-    if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
-        os.makedirs(USER_DATA_PATH)
+USER_DATA_PATH = appdirs.user_data_dir(
+    appname="ansys_mapdl_core", appauthor="Ansys"
+)
+if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
+    os.makedirs(USER_DATA_PATH)
 
-    EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
-    if not os.path.exists(EXAMPLES_PATH):  # pragma: no cover
-        os.makedirs(EXAMPLES_PATH)
+EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
+if not os.path.exists(EXAMPLES_PATH):  # pragma: no cover
+    os.makedirs(EXAMPLES_PATH)
 
-except:  # pragma: no cover
-    pass
 
 from ansys.mapdl.core.logging import Logger
 
