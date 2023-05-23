@@ -1253,10 +1253,10 @@ def get_active_branch_name():
             if line[0:4] == "ref:":
                 return line.partition("refs/heads/")[2]
 
-    else:
-        if "dev" in pymapdl.__version__:
-            kind = "main"
-        else:  # pragma: no cover
-            kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
+    # In case the previous statements return None
+    if "dev" in pymapdl.__version__:
+        kind = "main"
+    else:  # pragma: no cover
+        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
 
-        return kind
+    return kind
