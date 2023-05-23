@@ -10,7 +10,9 @@ from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
-ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
+ON_CI = "ON_CI" in os.environ or (
+    "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
+)
 
 
 @pytest.fixture(scope="session")
@@ -73,6 +75,12 @@ def test_database_start_stop(mapdl):
     if not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION):
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
+
+    # Exception for 22.2
+    if mapdl_version == "22.2" and ON_CI:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
     # verify it can be created twice
