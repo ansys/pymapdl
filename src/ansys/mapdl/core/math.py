@@ -902,7 +902,7 @@ class MapdlMath:
         kwargs.setdefault("mute", True)
         self._mapdl.run(f"*COMP,{mat.id},SPARSE,{thresh}", **kwargs)
 
-    def eigs(self, nev, k, m=None, c=None, phi=None, algo=None, fmin=None, fmax=None):
+    def eigs(self, nev, k, m=None, c=None, phi=None, algo=None, fmin=None, fmax=None, cpxmod=None):
         """Solve an eigenproblem.
 
         Parameters
@@ -947,7 +947,7 @@ class MapdlMath:
 
         self._mapdl.run("/SOLU", mute=True)
         self._mapdl.run("antype,modal", mute=True)
-        self._mapdl.run(f"modopt,{algo},{nev},{fmin},{fmax}", mute=True)
+        self._mapdl.run(f"modopt,{algo},{nev},{fmin},{fmax},{cpxmod}", mute=True)
         ev = self.vec()
 
         phistr = "" if not phi else phi.id
