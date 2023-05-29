@@ -38,7 +38,8 @@ mapdl.list_files()
 #
 # Printout the dimensions of this Sparse Matrix
 #
-k = mm.stiff(fname="PRSMEMB.full")
+fullfile = mapdl.jobname + ".full"
+k = mm.stiff(fname=fullfile)
 k
 
 ###############################################################################
@@ -52,7 +53,7 @@ ky
 #
 # Printout the norm of this vector.
 #
-b = mm.rhs(fname="PRSMEMB.full")
+b = mm.rhs(fname=fullfile)
 b.norm()
 
 ###############################################################################
