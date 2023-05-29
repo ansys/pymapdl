@@ -23,7 +23,7 @@ mm = mapdl.math
 # After a solve command, the full contains the assemblied stiffness
 # matrix, mass matrix, and the load vector.
 #
-out = mapdl.input(vmfiles["vm153"])
+out = mapdl.input(vmfiles["vm152"])
 
 ###############################################################################
 # List the files in current directory
