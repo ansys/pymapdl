@@ -21,7 +21,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 
 try:
     import ansys.tools.report as pyansys_report
@@ -549,14 +549,14 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
     base_fname = os.path.basename(fname)
     if not os.path.exists(fname) and base_fname not in mapdl.list_files():
         raise FileNotFoundError(
-            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}') "
             f"nor in the MAPDL working directory ('{mapdl.directory}')."
         )
 
     elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
         if priority_mapdl_file is None:
             warn(
-                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
+                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}') "
                 f"and in the MAPDL working directory ('{mapdl.directory}'). "
                 "Using the one already in the MAPDL directory.\n"
                 "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
@@ -1207,8 +1207,8 @@ def wrap_point_SEL(entity="node"):
 
                 if vmax or vinc:
                     raise ValueError(
-                        "If an iterable is used as 'vmin' argument,"
-                        " it is not allowed to use 'vmax' or 'vinc' arguments."
+                        "If an iterable is used as 'vmin' argument, "
+                        "it is not allowed to use 'vmax' or 'vinc' arguments."
                     )
 
                 if len(vmin) == 0 and type_ == "S":
