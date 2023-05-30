@@ -1,4 +1,4 @@
-name: Dependabot
+name: MultiPR Dependabot
 on:
   workflow_dispatch:
   schedule:
