@@ -1,8 +1,8 @@
 """
 .. _build_element_example:
 
-Build a Finite Element
-----------------------
+Build a Finite Element Model
+----------------------------
 
 A finite element machinery built for a quadrilateral element using an
 isoparametric formulation and validated with PyMAPDL.
