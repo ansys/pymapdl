@@ -20,7 +20,8 @@ mm = mapdl.math
 # Load and solve verification manual example 153.  Then load the
 # stiffness matrix into APDLmath.
 out = mapdl.input(vmfiles["vm153"])
-k = mm.stiff(fname="PRSMEMB.full")
+fullfile = mapdl.jobname + ".full"
+k = mm.stiff(fname=fullfile)
 k
 
 ################################################################################
