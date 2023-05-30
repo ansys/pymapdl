@@ -281,6 +281,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           cache: 'pip'
+          cache-dependency-path: pyproject.toml
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install os packages"
