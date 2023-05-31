@@ -134,7 +134,14 @@ class Geometry:
 
     @property
     def keypoints(self):
-        """Keypoint coordinates"""
+        """Keypoint entities as Pyvista MultiBlock"""
+        points = pv.MultiBlock()
+        for each_kp in self._keypoints.points:
+            points.append(pv.PointSet(each_kp))
+        return points
+
+    def get_keypoints(self):
+        """Keypoint coordinates entities as a Pyvista Multiblock"""
         return np.asarray(self._keypoints.points)
 
     @property
@@ -146,10 +153,19 @@ class Geometry:
 
     @property
     def lines(self):
-        """Active lines as a pyvista.PolyData"""
+        """Active lines as a pyvista.MultiBlock"""
         return self._lines
 
-    def areas(self, quality=4, merge=False):
+    def get_lines(self):
+        """Active lines as a pyvista.MultiBlock"""
+        return self.lines
+
+    @property
+    def areas(self):
+        """List of areas from MAPDL represented as ``pyvista.MultiBlock"""
+        return self.get_areas()
+
+    def get_areas(self, quality=4, merge=False):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
@@ -176,7 +192,7 @@ class Geometry:
         Return a list of areas as indiviudal grids
 
         >>> areas = mapdl.areas(quality=3)
-        >>> areab
+        >>> areas
         [UnstructuredGrid (0x7f14add95040)
           N Cells:	12
           N Points:	20
@@ -215,7 +231,7 @@ class Geometry:
             return surf
 
         entity_num = surf["entity_num"]
-        areas = []
+        areas = pv.MultiBlock()
         anums = np.unique(entity_num)
         for anum in anums:
             areas.append(surf.extract_cells(entity_num == anum))
@@ -488,17 +504,18 @@ class Geometry:
                 entity_num = int(line.d["entity_subs_num"])
                 if entity_num not in entity_nums and entity_num in selected_lnum:
                     entity_nums.append(entity_num)
-                    line = line.to_vtk(resolution=100)
+                    line = line.to_vtk(resolution=1)
                     line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
         if lines:
-            lines = merge_polydata(lines)
-            lines["entity_num"] = lines["entity_num"].astype(np.int32)
+            lines_ = pv.MultiBlock()
+            for line in lines:
+                lines_.append(line)
         else:
-            lines = pv.PolyData()
+            lines_ = pv.MultiBlock()
 
-        return lines
+        return lines_
 
     def _load_keypoints(self):
         """Load keypoints from MAPDL using IGES"""
@@ -766,6 +783,29 @@ class Geometry:
 
         if return_selected:
             return self.anum
+
+    @property
+    def volumes(self):
+        """Get volumes from MAPDL represented as ``pyvista.MultiBlock``"""
+        return self.get_volumes(return_as_list=False)
+
+    def get_volumes(self, return_as_list=True):
+        """List of volumes from MAPDL represented as ``pyvista.UnstructuredGrid``"""
+
+        # Cache current selection
+        self._mapdl.cm("__temp_volu__", "volu")
+
+        if return_as_list:
+            volumes_ = []
+        else:
+            volumes_ = pv.MultiBlock()
+
+        for each_volu in self.vnum:
+            self._mapdl.vsel("S", vmin=each_volu)
+            volumes_.append(self._mapdl.mesh.grid.copy())
+
+        self._mapdl.cmsel("S", "__temp_volu__")
+        return volumes_
 
     def volume_select(self, items, sel_type="S", return_selected=False):
         """Select volumes using a sequence of items.
