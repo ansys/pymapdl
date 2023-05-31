@@ -181,8 +181,7 @@ with open("substitutions.rst") as f:
 
 # Setting redicts
 redirects = {
-    # https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
-    # https://mapdl.docs.pyansys.com
+    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
     "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
 }
 
