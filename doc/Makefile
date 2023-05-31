@@ -2,11 +2,11 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -j auto -d .doctrees
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
+SPHINXOPTS    = -j auto -d $(BUILDDIR)/.doctrees -W --keep-going
 
 # Put it first so that "make" without argument is like "make help".
 help:

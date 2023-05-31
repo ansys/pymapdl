@@ -179,7 +179,15 @@ jobs:
 
       - name: "Build documentation"
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+          xvfb-run make -C doc html
+      
+      - name: "Check links"
+        run: |
+          xvfb-run make -C doc linkcheck
+      
+      - name: "Display linkchecker results"
+        run: |
+          echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."          
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
