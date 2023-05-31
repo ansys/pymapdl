@@ -358,7 +358,7 @@ add_op = dpf.operators.math.add(fieldA=mesh_field)
 add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
 # Instantiate a PyVista plotter and start the creation of a GIF
-plotter = pv.Plotter(window_size=[512, 512], multi_samples=4, polygon_smoothing=True)
+plotter = pv.Plotter(window_size=[640, 480])
 plotter.open_gif("dcb.gif")
 
 # Add the beam mesh to the scene
@@ -399,9 +399,9 @@ for i in range(1, 100):
     dam_op.inputs.time_scoping([i])
     cohesive_damage = dam_op.outputs.fields_container()[0]
     # Update coordinates and scalars
-    plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=True)
-    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=True)
-    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=True)
+    plotter.update_coordinates(disp_result.data, mesh=mesh_beam)
+    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact)
+    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact)
 
     plotter.write_frame()
 
