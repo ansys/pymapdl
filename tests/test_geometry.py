@@ -1,7 +1,7 @@
 """Test geometry commands"""
-import math
-
 import numpy as np
+import pytest
+import pyvista as pv
 
 
 def test_keypoint_selection(mapdl, cleared):
@@ -170,7 +170,7 @@ def test_kdist(cleared, mapdl):
     knum1 = mapdl.k("", *kp1)
     kpdist, xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
     assert kpdist == round(
-        math.sqrt(
+        np.sqrt(
             (kp1[0] - kp0[0]) ** 2 + (kp1[1] - kp0[1]) ** 2 + (kp1[2] - kp0[2]) ** 2
         ),
         7,
@@ -474,7 +474,7 @@ def test_ndist(cleared, mapdl):
     node_num2 = mapdl.n("", *node2)
     node_dist, node_xdist, node_ydist, node_zdist = mapdl.ndist(node_num1, node_num2)
     assert node_dist == round(
-        math.sqrt(
+        np.sqrt(
             (node2[0] - node1[0]) ** 2
             + (node2[1] - node1[1]) ** 2
             + (node2[2] - node1[2]) ** 2
@@ -493,3 +493,21 @@ def test_empty_model(mapdl):
     assert mapdl.geometry.lnum.size == 0
     assert mapdl.geometry.anum.size == 0
     assert mapdl.geometry.vnum.size == 0
+
+
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 8], ["lines", 12], ["areas", 6], ["volumes", 1])
+)
+def test_entities_simple_cube(mapdl, cube_solve, entity, number):
+    entity = getattr(mapdl.geometry, entity)
+    assert len(entity) == number
+    assert isinstance(entity, pv.MultiBlock)
+
+
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
+)
+def test_entities_multiple_bodies(mapdl, contact_solve, entity, number):
+    entity = getattr(mapdl.geometry, entity)
+    assert len(entity) == number
+    assert isinstance(entity, pv.MultiBlock)
