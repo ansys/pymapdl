@@ -20,7 +20,6 @@ except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
 from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
-import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
@@ -44,7 +43,7 @@ from ansys.mapdl.core.misc import (
 )
 
 # settings directory
-SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
+SETTINGS_DIR = pymapdl.USER_DATA_PATH
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
