@@ -142,7 +142,7 @@ MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution. For more information, see
-:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section_>`.
+:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -324,7 +324,7 @@ install. When you do so, you must use the ``-productfile`` argument to specify t
 full path to the ``options`` file.
 
 
-.. _disable_firewall_on_wsl_ethernet_section
+.. _disable_firewall_on_wsl_ethernet_section:
 
 Disable firewall on WSL ethernet
 ================================
