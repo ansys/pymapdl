@@ -408,9 +408,10 @@ for i in range(1, 100):
 plotter.close()
 
 
+
 # Instantiate a PyVista plotter and start the creation of a GIF
 plotter = pv.Plotter()
-plotter.open_gif("dcb.gif")
+plotter.open_gif("dcb2.gif")
 
 # Add the beam mesh to the scene
 mesh_beam = meshed_region.grid
@@ -457,6 +458,7 @@ for i in range(1, 100):
     plotter.write_frame()
 
 plotter.close()
+
 
 
 ###############################################################################
