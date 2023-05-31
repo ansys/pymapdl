@@ -2079,7 +2079,7 @@ class MapdlGrpc(_MapdlCore):
         progress_bar=None,
         recursive=False,
     ):  # pragma: no cover
-        """Download files from the gRPC instance workind directory
+        """Download files from the gRPC instance working directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
@@ -2154,7 +2154,7 @@ class MapdlGrpc(_MapdlCore):
         if isinstance(files, str):
             if self._local:  # pragma: no cover
                 # in local mode
-                if os.path.exists(files):
+                if os.path.exists(os.path.join(self.directory, files)):
                     # file exist
                     list_files = [files]
                 elif "*" in files:
