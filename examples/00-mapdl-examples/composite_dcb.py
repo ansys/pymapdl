@@ -408,6 +408,57 @@ for i in range(1, 100):
 plotter.close()
 
 
+# Instantiate a PyVista plotter and start the creation of a GIF
+plotter = pv.Plotter()
+plotter.open_gif("dcb.gif")
+
+# Add the beam mesh to the scene
+mesh_beam = meshed_region.grid
+plotter.add_mesh(
+    mesh_beam,
+    lighting=False,
+    show_edges=True,
+    scalar_bar_args={"title": "Cohesive Damage"},
+    clim=[0, 1],
+    opacity=0.3,
+)
+
+# Add the contact mesh to the scene
+mesh_contact = result_mesh.grid
+plotter.add_mesh(
+    mesh_contact,
+    opacity=0.9,
+    scalar_bar_args={"title": "Cohesive Damage"},
+    clim=[0, 1],
+    scalars=np.zeros((mesh_contact.n_cells)),
+)
+
+for i in range(1, 100):
+    # Get displacements
+    disp = model.results.displacement(time_scoping=i).eval()
+    # Getting the updated coordinates
+    add_op.inputs.fieldB.connect(disp[0])
+    disp_result = add_op.outputs.field()
+    # Get displacements for the cohesive layer
+    disp = model.results.displacement(
+        time_scoping=i, mesh_scoping=mesh_scoping_cohesive
+    ).eval()
+    # Get the updated coordinates for the cohesive layer
+    add_op_cohesive.inputs.fieldB.connect(disp[0])
+    disp_cohesive = add_op_cohesive.outputs.field()
+    # Get the damage field
+    dam_op.inputs.time_scoping([i])
+    cohesive_damage = dam_op.outputs.fields_container()[0]
+    # Update coordinates and scalars
+    plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=True)
+    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=True)
+    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=True)
+
+    plotter.write_frame()
+
+plotter.close()
+
+
 ###############################################################################
 # Plot the reaction force at the bottom nodes
 mesh_scoping = model.metadata.named_selection("BOT_NOD")
