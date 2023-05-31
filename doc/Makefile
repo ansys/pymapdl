@@ -40,8 +40,9 @@ pdf:
 	cd $(BUILDDIR)/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
 	(test -f $(BUILDDIR)/latex/pymapdl-Documentation-*.pdf && echo pdf exists) || exit 1
 
+#@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) 
 linkcheck:
-	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" -D nitpicky=1 -d _build/doctrees . $(LINKCHECKDIR)
+	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(LINKCHECKDIR)" $(SPHINXOPTS) 
 	@echo
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
