@@ -933,6 +933,8 @@ class MapdlMath:
             fmin = ""
         if not fmax:
             fmax = ""
+        if not cpxmod:
+            cpxmod = ""
 
         cid = ""
         if not c:
