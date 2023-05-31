@@ -24,4 +24,4 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
-.. _Cart-Pole Simulation: https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html
+.. _Cart-Pole Simulation: https://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html
