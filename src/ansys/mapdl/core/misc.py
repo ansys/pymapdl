@@ -4,6 +4,7 @@ from functools import wraps
 import importlib
 import inspect
 import os
+from pathlib import Path
 import platform
 import random
 import re
@@ -1239,3 +1240,23 @@ def wrap_point_SEL(entity="node"):
         return wrapper
 
     return decorator
+
+
+def get_active_branch_name():
+    head_dir = Path(".") / ".git" / "HEAD"
+
+    if os.path.exists(head_dir):
+        with head_dir.open("r") as f:
+            content = f.read().splitlines()
+
+        for line in content:
+            if line[0:4] == "ref:":
+                return line.partition("refs/heads/")[2]
+
+    # In case the previous statements return None
+    if "dev" in pymapdl.__version__:
+        kind = "main"
+    else:  # pragma: no cover
+        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
+
+    return kind
