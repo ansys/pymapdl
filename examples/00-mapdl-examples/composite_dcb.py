@@ -410,7 +410,7 @@ plotter.close()
 
 # Instantiate a PyVista plotter and start the creation of a GIF
 plotter = pv.Plotter()
-plotter.open_gif("dcb2.gif", palettesize = 16)
+plotter.open_gif("dcb2.gif", palettesize=16)
 
 # Add the beam mesh to the scene
 mesh_beam = meshed_region.grid
