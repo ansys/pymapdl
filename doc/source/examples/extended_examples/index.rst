@@ -3,12 +3,11 @@
 Extended examples
 =================
 
-
 These extended examples explain other concepts such as interoperability
 with other programs, libraries, and features in development.
 
 +----------------------------+---------------------------------------------------------------------------------------------------------+
-| Name                       | Description                                                                                             |
+| **Name**                   | **Description**                                                                                         |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 | `Cart-Pole Simulation`_    | Demonstrates a reinforcement machine learning example using MAPDL through PyMAPDL.                      |
 +----------------------------+---------------------------------------------------------------------------------------------------------+
@@ -24,4 +23,15 @@ with other programs, libraries, and features in development.
 +----------------------------+---------------------------------------------------------------------------------------------------------+
 
 
-.. _Cart-Pole Simulation: https://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html
+.. _Cart-Pole Simulation: cartpole_example_notebook_
+
+.. toctree::
+    :hidden:
+    :maxdepth: 2
+
+    Cart-Pole Simulation <http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html>
+    ex_01-gmsh_example/ex_01-gmsh_example.rst
+    Python_UPF/python_upf_examples.rst
+    Krylov/krylov_example.rst
+    dash/dash_example.rst
+    executable/executable.rst
