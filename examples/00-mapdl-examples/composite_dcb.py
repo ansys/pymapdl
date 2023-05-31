@@ -374,13 +374,6 @@ plotter.add_mesh(
 
 # Add the contact mesh to the scene
 mesh_contact = result_mesh.grid
-plotter.add_mesh(
-    mesh_contact,
-    opacity=0.9,
-    scalar_bar_args={"title": "Cohesive Damage"},
-    clim=[0, 1],
-    scalars=np.zeros((mesh_contact.n_cells)),
-)
 
 for i in range(1, 100):
     # Get displacements
@@ -400,9 +393,6 @@ for i in range(1, 100):
     cohesive_damage = dam_op.outputs.fields_container()[0]
     # Update coordinates and scalars
     plotter.update_coordinates(disp_result.data, mesh=mesh_beam)
-    plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact)
-    plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact)
-
     plotter.write_frame()
 
 plotter.close()
