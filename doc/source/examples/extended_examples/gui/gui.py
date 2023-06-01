@@ -1,10 +1,19 @@
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
-                               QLineEdit, QPushButton, QSlider, QLabel,
-                               QGridLayout)
-from PySide6.QtGui import QIntValidator
-from PySide6 import QtWidgets
 import sys
+
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIntValidator
+from PySide6.QtWidgets import (
+    QApplication,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class MainWindow(QMainWindow):
