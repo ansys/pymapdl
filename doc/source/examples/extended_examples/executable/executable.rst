@@ -39,7 +39,7 @@ is used. Another suitable package is the builtin package
 
 First, you must convert the script to a function. You can
 accomplish this by using the input arguments
-in a function signature. 
+in a function signature.
 
 In this case, the following arguments must be specified:
 
@@ -101,6 +101,62 @@ This code shows how you can input other arguments:
    The first natural frequency is 344.28 Hz.
 
 
+Convert the app to an executable
+================================
+
+Using the python library `PyInstaller <https://pyinstaller.org>`, it is possible to convert the app to an executable by taking a few precautions.
+
+.. code:: console
+
+   pyi-makespec cli_rotor.py
+
+Add the argument ``--onefile`` to put everything in a single file. Otherwise you will have a folder containing the application and dll dependencies.
+
+.. code:: console
+
+   pyi-makespec cli_rotor.py --onefile
+
+After the first line in the file ``cli_rotor.spec``, add the following lines:
+
+.. code:: python
+
+   import os
+   import importlib
+
+   proot = os.path.dirname(importlib.import_module('ansys.api.mapdl').__file__)
+   files_to_add = [(os.path.join(proot, 'VERSION'), '.\\ansys\\api\\mapdl')]  # use / instead of \\ if you are on Linux
+
+And set the argument of ``Analysis`` datas from the empty list to ``files_to_add``
+
+.. code-block:: python
+   :emphasize-lines: 5
+
+   a = Analysis(
+      ['cli_rotor.py'],
+      pathex=[],
+      binaries=[],
+      datas=files_to_add,
+      hiddenimports=[],
+      hookspath=[],
+      hooksconfig={},
+      runtime_hooks=[],
+      excludes=[],
+      win_no_prefer_redirects=False,
+      win_private_assemblies=False,
+      cipher=block_cipher,
+      noarchive=False,
+   )
+
+Then generate the executable form the .spec file
+
+.. code:: console
+
+   pyinstaller cli_rotor.spec
+
+
+The output will be in the folder ``./dist/cli_rotor/cli_rotor.exe``
+
+
 Advanced usage
 ==============
 
@@ -138,7 +194,7 @@ Here are descriptions for values used in the preceding code:
 
 - ``-gravity``: Location of the watermark in case the watermark is
   smaller than the image.
-- ``COMPOSITE``: Path to the ImageMagick ``composite`` function. 
+- ``COMPOSITE``: Path to the ImageMagick ``composite`` function.
 - ``watermark.png``: Name of the PNG file with the watermark image.
 - ``volumes_with_watermark.jpg``: Name of the JPG file to save the output to.
 
@@ -159,7 +215,7 @@ For example, you can execute the previous example on a GitHub runner
 using this approach (non-tested):
 
 .. code:: yaml
-  
+
    my_job:
       name: 'Generate watermarked images'
       runs-on: ubuntu-latest
@@ -174,7 +230,7 @@ using this approach (non-tested):
          - name: "Install ansys-mapdl-core"
            run: |
                python -m pip install ansys-mapdl-core
-         
+
          - name: "Install ImageMagic"
            run: |
             sudo apt install imagemagick
