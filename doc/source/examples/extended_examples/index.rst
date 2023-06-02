@@ -37,3 +37,4 @@ with other programs, libraries, and features in development.
     Krylov/krylov_example.rst
     dash/dash_example.rst
     executable/executable.rst
+    gui/executable.rst
