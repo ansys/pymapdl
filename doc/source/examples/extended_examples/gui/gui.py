@@ -61,7 +61,8 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(young_modulus_label, 1, 0)
         self._young_modulus_input = QLineEdit()
         self._young_modulus_input.setPlaceholderText(
-            "Young's modulus in the x direction")
+            "Young's modulus in the x direction"
+        )
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
@@ -79,19 +80,21 @@ class MainWindow(QMainWindow):
 
         number_of_nodes_label = QLabel("Number of nodes: ")
         container_layout.addWidget(number_of_nodes_label, 4, 0)
-        self._number_of_nodes_input = QSlider(
-            orientation=Qt.Orientation.Horizontal)
+        self._number_of_nodes_input = QSlider(orientation=Qt.Orientation.Horizontal)
         self._number_of_nodes_input.setMinimum(3)
         self._number_of_nodes_input.setMaximum(9)
         self._number_of_nodes_input.setValue(5)
         self._number_of_nodes_input.setSingleStep(2)
         self._number_of_nodes_input.setPageStep(2)
-        self._number_of_nodes_input.setMaximumWidth(max_qlineedit_width-50)
+        self._number_of_nodes_input.setMaximumWidth(max_qlineedit_width - 50)
         self._number_of_node_label = QLabel(
-            f"{self._number_of_nodes_input.value()} nodes")
+            f"{self._number_of_nodes_input.value()} nodes"
+        )
         self._number_of_nodes_input.valueChanged.connect(
             lambda _: self._number_of_node_label.setText(
-                f"{self._number_of_nodes_input.value()} nodes"))
+                f"{self._number_of_nodes_input.value()} nodes"
+            )
+        )
 
         # Button to run the preprocessor
         self._run_preprocessor_button = QPushButton(text="Run preprocessor")

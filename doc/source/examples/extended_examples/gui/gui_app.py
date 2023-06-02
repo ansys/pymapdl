@@ -66,7 +66,8 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(young_modulus_label, 1, 0)
         self._young_modulus_input = QLineEdit()
         self._young_modulus_input.setPlaceholderText(
-            "Young's modulus in the x direction")
+            "Young's modulus in the x direction"
+        )
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
@@ -84,19 +85,21 @@ class MainWindow(QMainWindow):
 
         number_of_nodes_label = QLabel("Number of nodes: ")
         container_layout.addWidget(number_of_nodes_label, 4, 0)
-        self._number_of_nodes_input = QSlider(
-            orientation=Qt.Orientation.Horizontal)
+        self._number_of_nodes_input = QSlider(orientation=Qt.Orientation.Horizontal)
         self._number_of_nodes_input.setMinimum(3)
         self._number_of_nodes_input.setMaximum(9)
         self._number_of_nodes_input.setValue(5)
         self._number_of_nodes_input.setSingleStep(2)
         self._number_of_nodes_input.setPageStep(2)
-        self._number_of_nodes_input.setMaximumWidth(max_qlineedit_width-50)
+        self._number_of_nodes_input.setMaximumWidth(max_qlineedit_width - 50)
         self._number_of_node_label = QLabel(
-            f"{self._number_of_nodes_input.value()} nodes")
+            f"{self._number_of_nodes_input.value()} nodes"
+        )
         self._number_of_nodes_input.valueChanged.connect(
             lambda _: self._number_of_node_label.setText(
-                f"{self._number_of_nodes_input.value()} nodes"))
+                f"{self._number_of_nodes_input.value()} nodes"
+            )
+        )
 
         # Button to run the preprocessor
         self._run_preprocessor_button = QPushButton(text="Run preprocessor")
@@ -112,8 +115,7 @@ class MainWindow(QMainWindow):
 
         # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
-        container_layout.addWidget(self._preprocessing_plotter, 0, 4,
-                                   6, 50)
+        container_layout.addWidget(self._preprocessing_plotter, 0, 4, 6, 50)
 
     def _setup_tab_solver(self) -> None:
         container_layout = QGridLayout()
@@ -153,7 +155,7 @@ class MainWindow(QMainWindow):
         self._mapdl.verify()
         self._mapdl.prep7()
         self._mapdl.antype("STATIC")
-        #create element type
+        # create element type
         self._mapdl.et(1, "BEAM188")
 
         # create material
@@ -165,11 +167,10 @@ class MainWindow(QMainWindow):
         self._number_of_nodes = self._number_of_nodes_input.value()
 
         # create the nodes
-        for node_num in range(1, self._number_of_nodes+1):
-            self._mapdl.n(node_num,
-                          (node_num-1) * length / (self._number_of_nodes-1),
-                          0,
-                          0)
+        for node_num in range(1, self._number_of_nodes + 1):
+            self._mapdl.n(
+                node_num, (node_num - 1) * length / (self._number_of_nodes - 1), 0, 0
+            )
 
         # create the elements
         for elem_num in range(1, self._number_of_nodes):
@@ -180,16 +181,17 @@ class MainWindow(QMainWindow):
         self._mapdl.d(self._number_of_nodes, lab="ALL")
 
         #  Apply the force to the node in the middle
-        self._mapdl.f(self._number_of_nodes//2 + 1, lab="FY", value=force)
+        self._mapdl.f(self._number_of_nodes // 2 + 1, lab="FY", value=force)
 
         # Get the pv.Plotter object from mapdl.eplot function
         # to plot in the window
-        preprocessing_plotter = self._mapdl.eplot(show_node_numbering=True,
-                                                  show_edges=True, cpos="xy",
-                                                  return_plotter=True)
+        preprocessing_plotter = self._mapdl.eplot(
+            show_node_numbering=True, show_edges=True, cpos="xy", return_plotter=True
+        )
 
         self._preprocessing_plotter.GetRenderWindow().AddRenderer(
-            preprocessing_plotter.renderer)
+            preprocessing_plotter.renderer
+        )
 
         self._mapdl.finish()
 
@@ -208,16 +210,16 @@ class MainWindow(QMainWindow):
 
         mapdl.upcoord(2)
 
-        nodal_disp_plotter = self._mapdl.post_processing \
-            .plot_nodal_displacement("norm",
-                                     show_node_numbering=True, cpos="xy",
-                                     return_plotter=True)
+        nodal_disp_plotter = self._mapdl.post_processing.plot_nodal_displacement(
+            "norm", show_node_numbering=True, cpos="xy", return_plotter=True
+        )
         self._postprocessing_plotter.GetRenderWindow().AddRenderer(
-            nodal_disp_plotter.renderer)
+            nodal_disp_plotter.renderer
+        )
 
-        mid_node_uy = mapdl.get_value(entity="NODE",
-                                      entnum=self._number_of_nodes//2 + 1,
-                                      item1="u", it1num="y")
+        mid_node_uy = mapdl.get_value(
+            entity="NODE", entnum=self._number_of_nodes // 2 + 1, item1="u", it1num="y"
+        )
         self._deflection_label.setText(f"Deflection: {mid_node_uy:.3f}")
 
     def closeEvent(self, event) -> None:
