@@ -287,6 +287,25 @@ def test_download(mapdl, tmpdir, option, expected_files):
         assert os.path.exists(tmpdir.join(file_to_check))
 
 
+@pytest.mark.parametrize(
+    "option,expected_files",
+    [
+        ["myfile0.txt", ["myfile0.txt"]],
+        [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
+        ["myfile*", ["myfile0.txt", "myfile1.txt"]],
+    ],
+)
+@skip_in_cloud  # This is going to run only in local
+def test_local_download(mapdl, tmpdir, option, expected_files):
+    if mapdl._local:  # mapdl._local = True
+        write_tmp_in_mapdl_instance(mapdl, "myfile0")
+        write_tmp_in_mapdl_instance(mapdl, "myfile1")
+
+        mapdl.download(option, target_dir=tmpdir)
+        for file_to_check in expected_files:
+            assert os.path.exists(tmpdir.join(file_to_check))
+
+
 def test_download_without_target_dir(mapdl, tmpdir):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
