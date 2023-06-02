@@ -36,8 +36,7 @@ Then add a plotter in the first tab
 
         # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
-        container_layout.addWidget(self._preprocessing_plotter, 0, 4,
-                                   6, 50)
+        container_layout.addWidget(self._preprocessing_plotter, 0, 4, 6, 50)
 
 And one in the second tab:
 
@@ -88,6 +87,7 @@ Connect each button to a function that contains the logic.
         self._run_preprocessor_button = QPushButton(text="Run preprocessor")
         self._run_preprocessor_button.clicked.connect(self._run_preprocessor)
         ...
+
 
     def _setup_tab_solver(self) -> None:
         container_layout = QGridLayout()
