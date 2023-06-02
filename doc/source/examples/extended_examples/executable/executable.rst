@@ -104,7 +104,7 @@ This code shows how you can input other arguments:
 Convert the app to an executable
 ================================
 
-Using the python library `PyInstaller <https://pyinstaller.org>`, it is possible to convert the app to an executable by taking a few precautions.
+Using the Python library `PyInstaller <https://pyinstaller.org>`, it is possible to convert the app to an executable by taking a few precautions.
 
 .. code:: console
 
@@ -128,7 +128,7 @@ After the first line in the file ``cli_rotor.spec``, add the following lines:
        (os.path.join(proot, "VERSION"), ".\\ansys\\api\\mapdl")
    ]  # use / instead of \\ if you are on Linux
 
-And set the argument of ``Analysis`` datas from the empty list to ``files_to_add``
+Add ``files_to_add`` to ``Analysis`` data
 
 .. code-block:: python
    :emphasize-lines: 5
@@ -156,7 +156,7 @@ Then generate the executable form the .spec file
    pyinstaller cli_rotor.spec
 
 
-The output will be in the folder ``./dist/cli_rotor/cli_rotor.exe``
+The output is in the folder ``./dist/cli_rotor/cli_rotor.exe``
 
 
 Advanced usage
