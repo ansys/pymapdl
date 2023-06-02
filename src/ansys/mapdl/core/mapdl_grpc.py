@@ -2179,7 +2179,6 @@ class MapdlGrpc(_MapdlCore):
                 )
 
             for file in files:
-                exist = True
                 if os.path.exists(os.path.join(self.directory, file)):
                     if os.path.exists(
                         file
@@ -2189,7 +2188,9 @@ class MapdlGrpc(_MapdlCore):
                         )
                     shutil.copy(os.path.join(self.directory, file), file)
                 else:
-                    raise FileNotFound(f"The file {file} does not exist in the local MAPDL instance.")
+                    raise FileNotFoundError(
+                        f"The file {file} does not exist in the local MAPDL instance."
+                    )
 
         else:  # Remote or looking into MAPDL working directory
             if isinstance(files, str):
