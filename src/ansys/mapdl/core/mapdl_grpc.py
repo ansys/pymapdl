@@ -2180,22 +2180,16 @@ class MapdlGrpc(_MapdlCore):
 
             for file in files:
                 exist = True
-                try:
-                    os.path.exists(os.path.join(self.directory, file))
-                except:
-                    print(
-                        f"The file {file} does not exist in the local MAPDL instance."
-                    )
-                    exist = False
-                if exist is True:
+                if os.path.exists(os.path.join(self.directory, file)):
                     if os.path.exists(
                         file
-                    ):  # the file can already have been  downloaded in the cwd.
-                        os.remove(file)
-                        print(
+                    ):  # the file might have been already downloaded.
+                        warn(
                             f"The file {file} has been updated in the current working directory."
                         )
                     shutil.copy(os.path.join(self.directory, file), file)
+                else:
+                    raise FileNotFound(f"The file {file} does not exist in the local MAPDL instance.")
 
         else:  # Remote or looking into MAPDL working directory
             if isinstance(files, str):
