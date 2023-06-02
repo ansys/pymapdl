@@ -1,10 +1,9 @@
 from PySide6.QtCore import Qt
-from ansys.mapdl.core import launch_mapdl, Mapdl, MapdlTheme
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
                                QLineEdit, QPushButton, QSlider, QLabel,
                                QGridLayout, QMessageBox)
-from PySide6.QtGui import QIntValidator
 from PySide6 import QtWidgets
+from ansys.mapdl.core import launch_mapdl, Mapdl, MapdlTheme
 from pyvistaqt import QtInteractor
 import sys
 
@@ -49,7 +48,6 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(poisson_ratio_label, 0, 0)
         self._poisson_ratio_input = QLineEdit()
         self._poisson_ratio_input.setPlaceholderText("Poisson's ratio (PRXY)")
-        self._poisson_ratio_input.setValidator(QIntValidator())
         self._poisson_ratio_input.setText("0.3")
         self._poisson_ratio_input.setMaximumWidth(max_qlineedit_width)
 
@@ -58,7 +56,6 @@ class MainWindow(QMainWindow):
         self._young_modulus_input = QLineEdit()
         self._young_modulus_input.setPlaceholderText(
             "Young's modulus in the x direction")
-        self._young_modulus_input.setValidator(QIntValidator())
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
@@ -66,7 +63,6 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(length_label, 2, 0)
         self._length_input = QLineEdit()
         self._length_input.setPlaceholderText("Length")
-        self._length_input.setValidator(QIntValidator())
         self._length_input.setMaximumWidth(max_qlineedit_width)
 
         force_label = QLabel("Force: ")
@@ -103,7 +99,7 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(self._number_of_node_label, 4, 2, 1, 1)
         container_layout.addWidget(self._run_preprocessor_button, 5, 0, 1, 3)
 
-        # PyVista frame in our window
+        # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._preprocessing_plotter, 0, 4,
                                    6, 50)
@@ -132,9 +128,9 @@ class MainWindow(QMainWindow):
             length = float(self._length_input.text())
             force = float(self._force_input.text())
         except Exception:
-            msgBox = QMessageBox()
-            msgBox.setText("Expecting a number")
-            msgBox.exec()
+            msg_box = QMessageBox()
+            msg_box.setText("Expecting a number")
+            msg_box.exec()
             return
 
         poisson_ratio = float(self._poisson_ratio_input.text())
@@ -176,7 +172,7 @@ class MainWindow(QMainWindow):
         self._mapdl.f(self._number_of_nodes//2 + 1, lab="FY", value=force)
 
         # Get the pv.Plotter object from mapdl.eplot function
-        # to plot in our window
+        # to plot in the window
         preprocessing_plotter = self._mapdl.eplot(show_node_numbering=True,
                                                   show_edges=True, cpos="xy",
                                                   return_plotter=True)
@@ -187,12 +183,12 @@ class MainWindow(QMainWindow):
         self._mapdl.finish()
 
     def _run_solver(self) -> None:
+        # solve
         self._mapdl.slashsolu()
         self._mapdl.solve()
         self._mapdl.finish()
-        self._run_post_processor()
 
-    def _run_post_processor(self) -> None:
+        # run postprocessing
         self._mapdl.post1()
         self._mapdl.graphics("power")
         self._mapdl.eshape(1)

@@ -6,25 +6,25 @@
 Create a GUI app in Python with PySide6
 =======================================
 
-This example shows how to create a graphical user interface (GUI) application in Python that use PyMAPDL to compute the deflection of a squared shape beam.
+This example shows how to create a graphical user interface (GUI) app in Python that use PyMAPDL to compute the deflection of a squared shape beam.
 
-Simulation Configuration
+Simulation configuration
 ========================
 
-The :download:`gui.py <gui.py>` scripts launch an graphical application using PySide6.
-In the preprocessor tab we can enter the `poisson's ratio`, the `Young modulus`, the length of the beam, and the number of point for our simulation.
+The :download:`gui.py <gui.py>` scripts launch an graphical app using PySide6.
+In the preprocesing tab, there is a field for the `poisson's ratio`, the `Young modulus`, the length of the beam, and the number of point for our simulation.
 
-Add a PyVista plotting frame in our window
+Add a PyVista plotting frame in the window
 ==========================================
 
-You can start by importing `QtInteractor` from pyvistaqt and `MapdlTheme` from pymapdl
+Start by importing `QtInteractor` from pyvistaqt and `MapdlTheme` from pymapdl
 
 .. code:: python
 
     from pyvistaqt import QtInteractor
     from pymapdl import MapdlTheme
 
-We can then add a plotter in the first tab
+Then add a plotter in the first tab
 
 .. code:: python
 
@@ -32,7 +32,7 @@ We can then add a plotter in the first tab
         ...
         container_layout.addWidget(self._run_preprocessor_button, 5, 0, 1, 3)
 
-        # PyVista frame in our window
+        # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._preprocessing_plotter, 0, 4,
                                    6, 50)
@@ -49,7 +49,7 @@ And one in the second tab:
         self._deflection_label = QLabel("Deflection: ")
         container_layout.addWidget(self._deflection_label)
 
-Finally we close the widget correctly with the application:
+Finally, close the widget correctly with the app:
 
 .. code:: python
 
@@ -62,7 +62,7 @@ Finally we close the widget correctly with the application:
 Develop the logic
 ==============================
 
-In our main section we launch mapdl.
+In the main section, launch MAPDL.
 
 .. code:: python
 
@@ -76,7 +76,7 @@ In our main section we launch mapdl.
         window.show()
         sys.exit(app.exec())
 
-For each button we connect it to a function that contains the logic.
+Connect each button to a function that contains the logic.
 
 .. code:: python
 
@@ -98,92 +98,9 @@ For each button we connect it to a function that contains the logic.
 
 And write the related functions
 
-.. code:: python
-    def _run_preprocessor(self) -> None:
-        try:
-            poisson_ratio = float(self._poisson_ratio_input.text())
-            young_modulus = float(self._young_modulus_input.text())
-            length = float(self._length_input.text())
-            force = float(self._force_input.text())
-        except Exception:
-            msgBox = QMessageBox()
-            msgBox.setText("Expecting a number")
-            msgBox.exec()
-            return
-
-        poisson_ratio = float(self._poisson_ratio_input.text())
-        young_modulus = float(self._young_modulus_input.text())
-        length = float(self._length_input.text())
-        force = float(self._force_input.text())
-
-        self._mapdl.clear()
-        self._mapdl.verify()
-        self._mapdl.prep7()
-        self._mapdl.antype("STATIC")
-        #create element type
-        self._mapdl.et(1, "BEAM188")
-
-        # create material
-        self._mapdl.mp("PRXY", 1, poisson_ratio)
-        self._mapdl.mp("EX", 1, young_modulus)
-        self._mapdl.sectype(1, "BEAM", "RECT")
-        self._mapdl.secdata("10", "10")
-
-        self._number_of_nodes = self._number_of_nodes_input.value()
-
-        # create the nodes
-        for node_num in range(1, self._number_of_nodes+1):
-            self._mapdl.n(node_num,
-                          (node_num-1) * length / (self._number_of_nodes-1),
-                          0,
-                          0)
-
-        # create the elements
-        for elem_num in range(1, self._number_of_nodes):
-            self._mapdl.e(elem_num, elem_num + 1)
-
-        # fix the extremities of the beam
-        self._mapdl.d(1, lab="ALL")
-        self._mapdl.d(self._number_of_nodes, lab="ALL")
-
-        #  Apply the force to the node in the middle
-        self._mapdl.f(self._number_of_nodes//2 + 1, lab="FY", value=force)
-
-        # Get the pv.Plotter object from mapdl.eplot function
-        # to plot in our window
-        preprocessing_plotter = self._mapdl.eplot(show_node_numbering=True,
-                                                  show_edges=True, cpos="xy",
-                                                  return_plotter=True)
-
-        self._preprocessing_plotter.GetRenderWindow().AddRenderer(
-            preprocessing_plotter.renderer)
-
-        self._mapdl.finish()
-
-    def _run_solver(self) -> None:
-        # solve
-        self._mapdl.slashsolu()
-        self._mapdl.solve()
-        self._mapdl.finish()
-
-        # run postprocessing
-        self._mapdl.post1()
-        self._mapdl.graphics("power")
-        self._mapdl.eshape(1)
-        self._mapdl.rgb("index", 100, 100, 100, 0)
-        self._mapdl.rgb("index", 0, 0, 0, 15)
-
-        nodal_disp_plotter = self._mapdl.post_processing \
-            .plot_nodal_displacement("norm",
-                                     show_node_numbering=True, cpos="xy",
-                                     return_plotter=True)
-        self._postprocessing_plotter.GetRenderWindow().AddRenderer(
-            nodal_disp_plotter.renderer)
-
-        mid_node_uy = mapdl.get_value(entity="NODE",
-                                      entnum=self._number_of_nodes//2 + 1,
-                                      item1="u", it1num="y")
-        self._deflection_label.setText(f"Deflection: {mid_node_uy:.3f}")
+.. literalinclude:: gui_app.py
+    :start-line: 124
+    :end-line: 210
 
 Additional files
 ================

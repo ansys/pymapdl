@@ -2,7 +2,6 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
                                QLineEdit, QPushButton, QSlider, QLabel,
                                QGridLayout)
-from PySide6.QtGui import QIntValidator
 from PySide6 import QtWidgets
 import sys
 
@@ -46,7 +45,6 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(poisson_ratio_label, 0, 0)
         self._poisson_ratio_input = QLineEdit()
         self._poisson_ratio_input.setPlaceholderText("Poisson's ratio (PRXY)")
-        self._poisson_ratio_input.setValidator(QIntValidator())
         self._poisson_ratio_input.setText("0.3")
         self._poisson_ratio_input.setMaximumWidth(max_qlineedit_width)
 
@@ -55,7 +53,6 @@ class MainWindow(QMainWindow):
         self._young_modulus_input = QLineEdit()
         self._young_modulus_input.setPlaceholderText(
             "Young's modulus in the x direction")
-        self._young_modulus_input.setValidator(QIntValidator())
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
@@ -63,7 +60,6 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(length_label, 2, 0)
         self._length_input = QLineEdit()
         self._length_input.setPlaceholderText("Length")
-        self._length_input.setValidator(QIntValidator())
         self._length_input.setMaximumWidth(max_qlineedit_width)
 
         force_label = QLabel("Force: ")
