@@ -625,6 +625,7 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          render-last: '5'
 
   upload-dev-docs:
     name: Upload dev documentation
