@@ -1,11 +1,22 @@
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QWidget,
-                               QLineEdit, QPushButton, QSlider, QLabel,
-                               QGridLayout, QMessageBox)
-from PySide6 import QtWidgets
-from ansys.mapdl.core import launch_mapdl, Mapdl, MapdlTheme
-from pyvistaqt import QtInteractor
 import sys
+
+from PySide6 import QtWidgets
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QApplication,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
+from pyvistaqt import QtInteractor
+
+from ansys.mapdl.core import Mapdl, MapdlTheme, launch_mapdl
 
 
 class MainWindow(QMainWindow):
