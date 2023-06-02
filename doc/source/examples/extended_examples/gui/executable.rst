@@ -14,6 +14,8 @@ Simulation configuration
 The :download:`gui.py <gui.py>` scripts launch an graphical app using PySide6.
 In the preprocessing tab, there is a field for the Poisson's ratio, the Young modulus, the length of the beam, and the number of point for the simulation.
 
+.. literalinclude:: gui.py
+
 Add a PyVista plotting frame in the window
 ==========================================
 
@@ -58,23 +60,23 @@ Finally, close the widget correctly with the app:
         self._postprocessing_plotter.close()
         event.accept()  # let the window close
 
+Import MAPDL instance in your window
+====================================
 
-Develop the logic
-==============================
-
-In the main section, launch MAPDL.
+Add an attribute to your MainWindow for the MAPDL instance and import launch_mapdl
 
 .. code:: python
 
-    from pymapdl import launch_mapdl, Mapdl, MapdlTheme
-    ...
-    if __name__ == "__main__"
-        app = QApplication(sys.argv)
-        # Launch mapdl
-        mapdl = launch_mapdl()
-        window = MainWindow(mapdl)
-        window.show()
-        sys.exit(app.exec())
+    from pymapdl import Mapdl, launch_mapdl
+
+.. literalinclude:: gui_app.py
+    :lines: 22-26
+
+.. literalinclude:: gui_app.py
+    :lines: 231-236
+
+Develop the logic
+==============================
 
 Connect each button to a function that contains the logic.
 
@@ -99,8 +101,7 @@ Connect each button to a function that contains the logic.
 And write the related functions
 
 .. literalinclude:: gui_app.py
-    :start-line: 124
-    :end-line: 210
+    :lines: 137-223
 
 Additional files
 ================
