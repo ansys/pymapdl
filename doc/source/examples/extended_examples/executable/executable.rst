@@ -123,8 +123,10 @@ After the first line in the file ``cli_rotor.spec``, add the following lines:
    import os
    import importlib
 
-   proot = os.path.dirname(importlib.import_module('ansys.api.mapdl').__file__)
-   files_to_add = [(os.path.join(proot, 'VERSION'), '.\\ansys\\api\\mapdl')]  # use / instead of \\ if you are on Linux
+   proot = os.path.dirname(importlib.import_module("ansys.api.mapdl").__file__)
+   files_to_add = [
+       (os.path.join(proot, "VERSION"), ".\\ansys\\api\\mapdl")
+   ]  # use / instead of \\ if you are on Linux
 
 And set the argument of ``Analysis`` datas from the empty list to ``files_to_add``
 
@@ -132,19 +134,19 @@ And set the argument of ``Analysis`` datas from the empty list to ``files_to_add
    :emphasize-lines: 5
 
    a = Analysis(
-      ['cli_rotor.py'],
-      pathex=[],
-      binaries=[],
-      datas=files_to_add,
-      hiddenimports=[],
-      hookspath=[],
-      hooksconfig={},
-      runtime_hooks=[],
-      excludes=[],
-      win_no_prefer_redirects=False,
-      win_private_assemblies=False,
-      cipher=block_cipher,
-      noarchive=False,
+       ["cli_rotor.py"],
+       pathex=[],
+       binaries=[],
+       datas=files_to_add,
+       hiddenimports=[],
+       hookspath=[],
+       hooksconfig={},
+       runtime_hooks=[],
+       excludes=[],
+       win_no_prefer_redirects=False,
+       win_private_assemblies=False,
+       cipher=block_cipher,
+       noarchive=False,
    )
 
 Then generate the executable form the .spec file
