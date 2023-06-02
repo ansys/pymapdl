@@ -16,6 +16,8 @@ In the preprocessing tab, there is a field for the Poisson's ratio, the Young mo
 
 .. literalinclude:: gui.py
 
+.. image:: base_app.png
+
 Add a PyVista plotting frame in the window
 ==========================================
 
@@ -102,6 +104,11 @@ And write the related functions
 
 .. literalinclude:: gui_app.py
     :lines: 137-223
+
+.. image:: final_app_preprocessing.png
+
+
+.. image:: final_app_postprocessing.png
 
 Additional files
 ================
