@@ -12,12 +12,12 @@ Simulation configuration
 ========================
 
 The :download:`gui.py <gui.py>` scripts launch an graphical app using PySide6.
-In the preprocesing tab, there is a field for the `poisson's ratio`, the `Young modulus`, the length of the beam, and the number of point for our simulation.
+In the preprocessing tab, there is a field for the poisson's ratio, the Young modulus, the length of the beam, and the number of point for the simulation.
 
 Add a PyVista plotting frame in the window
 ==========================================
 
-Start by importing `QtInteractor` from pyvistaqt and `MapdlTheme` from pymapdl
+Start by importing `QtInteractor` from pyvistaqt and `MapdlTheme` from PyMAPDL
 
 .. code:: python
 
