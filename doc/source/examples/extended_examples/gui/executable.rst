@@ -12,7 +12,7 @@ Simulation configuration
 ========================
 
 The :download:`gui.py <gui.py>` scripts launch an graphical app using PySide6.
-In the preprocessing tab, there is a field for the poisson's ratio, the Young modulus, the length of the beam, and the number of point for the simulation.
+In the preprocessing tab, there is a field for the Poisson's ratio, the Young modulus, the length of the beam, and the number of point for the simulation.
 
 Add a PyVista plotting frame in the window
 ==========================================
