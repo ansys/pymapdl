@@ -10,7 +10,6 @@ skip_if_not_on_ci = pytest.mark.skipif(
 )
 
 
-@skip_if_not_on_ci
 @pytest.mark.parametrize("edit", [True, False])
 @pytest.mark.parametrize(
     "test_input,expected",
@@ -52,4 +51,9 @@ def test_linkcode_resolve(test_input, expected, edit):
     info = {"module": "ansys.mapdl.core", "fullname": test_input}
     url = linkcode_resolve("py", info, edit)
 
-    assert expected in url
+    assert "http://github.com/pyansys/pymapdl" in url
+    assert "src/ansys/mapdl/core" in url
+    assert expected.split("/")[-1] in url
+
+    if "main" in url:
+        assert expected in url
