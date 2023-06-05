@@ -4,7 +4,7 @@
 Create a GUI app in Python with PySide6
 =======================================
 
-This example shows how to create a graphical user interface (GUI) application in Python that uses PyMAPDL to compute the deflection of a square beam.
+This example shows how to create a graphical user interface (GUI) app in Python that uses PyMAPDL to compute the deflection of a square beam.
 
 Simulation setup
 ================
