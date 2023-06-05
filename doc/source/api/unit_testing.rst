@@ -144,11 +144,6 @@ Here are some examples of how you use ``pytest``:
     import ansys.mapdl.core.math as apdl_math
 
 
-    @pytest.fixture(scope="module")
-    def mm(mapdl):  # pass the 'mapdl' fixture as an argument.
-        return mapdl.math
-
-
     def test_rand(mm):  # pass the 'mm' fixture as an argument.
         w = mm.rand(10)
         assert w.size == 10  # if it is False, AssertionError is raised

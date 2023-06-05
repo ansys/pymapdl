@@ -96,8 +96,8 @@ on Windows and with Ansys 13.0 on Linux.
 .. note::
 
     The latest versions of Ansys provide significantly better support
-    and features. Certain features, such as APDL Math, are not supported
-    on earlier Ansys versions.
+    and features. Certain features are not supported on earlier
+    Ansys versions.
 
 For more information, see :ref:`install_mapdl`.
 

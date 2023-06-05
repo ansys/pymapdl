@@ -1,8 +1,8 @@
 .. _mapdl_math_class_ref:
 
-APDL Math overview
-==================
-APDL Math provides the ability to access and manipulate the large
+PyAnsys Math overview
+=====================
+PyAnsys Math provides the ability to access and manipulate the large
 sparse matrices and solve a variety of eigenproblems. PyMAPDL classes
 and bindings present APDL Math in a similar manner to the popular
 `numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
@@ -94,7 +94,13 @@ in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlM
 
 .. code:: python
 
-    mm = mapdl.math
+    from ansys.math.core.math import AnsMath
+
+    mapdl = launch_mapdl(nproc=4)
+    mapdl.clear()
+
+    # Importing and connecting PyAnsys Math with PyMAPDL
+    mm = AnsMath(mapdl)
 
     # load by default from file.full
     k = mm.stiff()

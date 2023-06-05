@@ -1,6 +1,7 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 import os
 
+from ansys.math.core.math import AnsMath
 from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
@@ -89,7 +90,7 @@ def test_krylov_with_point_load(mapdl):
 
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
-    mm = mapdl.math
+    mm = AnsMath(mapdl)
     mapdl.jobname = "point_load_py"
 
     # Parameters set for Krylov
@@ -123,7 +124,7 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
     # With ramped loading
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
-    mm = mapdl.math
+    mm = AnsMath(mapdl)
     mapdl.jobname = "pressure_py"
 
     # Parameters set for Krylov

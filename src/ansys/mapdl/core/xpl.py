@@ -6,6 +6,7 @@ import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
+from ansys.math.core.math import AnsMath
 import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
@@ -446,7 +447,8 @@ class ansXpl:
             f"{num_first},{num_last},{recordname}",
             mute=False,
         )
-        return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+
+        return AnsMath(self._mapdl).mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname, asarray=False):
         """
@@ -481,13 +483,14 @@ class ansXpl:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type
+        mm = AnsMath(self._mapdl)
         if data_info.objtype == mapdl_pb2.DataType.VEC:
-            out = self._mapdl.math.vec(dtype=dtype, name=rand_name)
+            out = mm.vec(dtype=dtype, name=rand_name)
         elif data_info.objtype in [
             mapdl_pb2.DataType.DMAT,
             mapdl_pb2.DataType.SMAT,
         ]:  # pragma: no cover
-            out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
+            out = mm.mat(dtype=dtype, name=rand_name)
         else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 

@@ -2,6 +2,7 @@
 import os
 import re
 
+from ansys.math.core.math import AnsMath
 from ansys.tools.versioning.exceptions import VersionError
 from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
@@ -31,7 +32,7 @@ lib_path = os.path.join(PATH, "test_files")
 
 @pytest.fixture(scope="module")
 def mm(mapdl):
-    return mapdl.math
+    return AnsMath(mapdl)
 
 
 @pytest.fixture()
