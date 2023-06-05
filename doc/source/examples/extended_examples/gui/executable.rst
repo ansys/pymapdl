@@ -1,4 +1,3 @@
-
 .. _gui_example:
 
 =======================================
@@ -105,9 +104,13 @@ You can now write the related functions:
     :lines: 137-223
 
 .. image:: final_app_preprocessing.png
+    :width: 32 %
 
+.. image:: final_app_solver.png
+    :width: 32 %
 
 .. image:: final_app_postprocessing.png
+    :width: 32 %
 
 Additional files
 ================
