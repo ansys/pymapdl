@@ -2151,7 +2151,7 @@ class MapdlGrpc(_MapdlCore):
 
         self_files = self.list_files()  # to avoid calling it too much
 
-        if self._local == "localhost":
+        if self._local:
             if isinstance(files, str):
                 if os.path.exists(os.path.join(self.directory, files)):  # file exist
                     list_files = [files]
