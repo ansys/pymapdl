@@ -21,7 +21,7 @@ class MainWindow(QMainWindow):
         self._setup_ui()
 
     def _setup_ui(self) -> None:
-        self.setWindowTitle("pyMAPDL example application")
+        self.setWindowTitle("PyMAPDL example application")
         self.resize(1000, 500)
         self._widget = QWidget()
         self._layout = QVBoxLayout()

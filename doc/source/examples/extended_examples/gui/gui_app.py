@@ -26,7 +26,7 @@ class MainWindow(QMainWindow):
         self._mapdl = mapdl
 
     def _setup_ui(self) -> None:
-        self.setWindowTitle("pyMAPDL example application")
+        self.setWindowTitle("PyMAPDL example application")
         self.resize(1000, 500)
         self._widget = QWidget()
         self._layout = QVBoxLayout()
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(young_modulus_label, 1, 0)
         self._young_modulus_input = QLineEdit()
         self._young_modulus_input.setPlaceholderText(
-            "Young's modulus in the x direction"
+            "Young's modulus in the x direction (E)"
         )
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
@@ -158,7 +158,7 @@ class MainWindow(QMainWindow):
         # create element type
         self._mapdl.et(1, "BEAM188")
 
-        # create material
+        # Create material
         self._mapdl.mp("PRXY", 1, poisson_ratio)
         self._mapdl.mp("EX", 1, young_modulus)
         self._mapdl.sectype(1, "BEAM", "RECT")
@@ -166,17 +166,17 @@ class MainWindow(QMainWindow):
 
         self._number_of_nodes = self._number_of_nodes_input.value()
 
-        # create the nodes
+        # Create the nodes
         for node_num in range(1, self._number_of_nodes + 1):
             self._mapdl.n(
                 node_num, (node_num - 1) * length / (self._number_of_nodes - 1), 0, 0
             )
 
-        # create the elements
+        # Create the elements
         for elem_num in range(1, self._number_of_nodes):
             self._mapdl.e(elem_num, elem_num + 1)
 
-        # fix the extremities of the beam
+        # Fix beam ends
         self._mapdl.d(1, lab="ALL")
         self._mapdl.d(self._number_of_nodes, lab="ALL")
 
