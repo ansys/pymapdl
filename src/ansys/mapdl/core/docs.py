@@ -54,6 +54,8 @@ def linkcode_resolve(domain, info, edit=False):
         from ansys.mapdl.core import mapdl_corba  # noqa: F401
     except ImportError:
         pass
+    from ansys.math.core import math  # noqa: F401
+
     from ansys.mapdl.core import commands  # noqa: F401
     from ansys.mapdl.core import errors  # noqa: F401
     from ansys.mapdl.core import krylov  # noqa: F401
@@ -61,7 +63,6 @@ def linkcode_resolve(domain, info, edit=False):
     from ansys.mapdl.core import licensing  # noqa: F401
     from ansys.mapdl.core import mapdl_geometry  # noqa: F401
     from ansys.mapdl.core import mapdl_grpc  # noqa: F401
-    from ansys.mapdl.core import math  # noqa: F401
     from ansys.mapdl.core import parameters  # noqa: F401
     from ansys.mapdl.core import pool  # noqa: F401
     from ansys.mapdl.core import xpl  # noqa: F401

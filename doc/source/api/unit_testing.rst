@@ -133,7 +133,9 @@ It will be executed upstream of each test and not within all tests.
 Example
 --------
 
-The `test_math.py <pymapdl_test_math_>`_ file contains the unit tests and integration tests of the `ansys.mapdl.core.math module <pymapdl_user_guide_math_>`_. These are just some of the many
+.. TO BE MODIFIED
+
+The `test_math.py <pymapdl_test_math_>`_ file contains the unit tests and integration tests of the `ansys.math.core.math module <pymapdl_user_guide_math_>`_. These are just some of the many
 tests that you can find in the `test directory <pymapdl_tests_>`_.
 
 Here are some examples of how you use ``pytest``:
@@ -141,7 +143,12 @@ Here are some examples of how you use ``pytest``:
 .. code:: python
 
     import numpy as np
-    import ansys.mapdl.core.math as apdl_math
+    from ansys.math.core.math import AnsMath
+
+
+    @fixture
+    def mm():
+        return AnsMath()
 
 
     def test_rand(mm):  # pass the 'mm' fixture as an argument.

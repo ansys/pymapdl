@@ -15,6 +15,8 @@
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 .. _ansys_tools_path: http://path.tools.docs.pyansys.com/
+.. _pyansys_math: https://math.docs.pyansys.com/version/stable/
+.. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/

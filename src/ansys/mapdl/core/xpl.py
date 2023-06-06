@@ -379,13 +379,13 @@ class ansXpl:
 
         asarray : bool, optional
             Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            <ansy.math.core.math.AnsMat>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray or ansys.mapdl.core.math.AnsMat
+        numpy.ndarray or ansys.math.core.math.AnsMat
             A :class:`numpy.ndarray` or :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>` of the displacement vectors,
+            <ansys.math.core.math.AnsMat>` of the displacement vectors,
             depending on the value of ``asarray``.
 
         Notes
@@ -461,7 +461,7 @@ class ansXpl:
 
         asarray : bool, optional
             Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            <ansys.math.core.math.AnsMat>`. Default ``False``.
 
         Examples
         --------
