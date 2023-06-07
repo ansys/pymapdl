@@ -272,7 +272,7 @@ class KrylovSolver:
         # Get matrices from full file
         self._get_data_from_full_file()
 
-        # Get the force vector from the defined Ansvec
+        # Get the force vector from the defined AnsVec
         fz = self.mm.vec(name="fz")
 
         # Create subspace

@@ -1,7 +1,6 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 import os
 
-from ansys.math.core.math import AnsMath
 from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
@@ -90,7 +89,6 @@ def test_krylov_with_point_load(mapdl):
 
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
-    mm = AnsMath(mapdl)
     mapdl.jobname = "point_load_py"
 
     # Parameters set for Krylov
@@ -104,7 +102,7 @@ def test_krylov_with_point_load(mapdl):
     dd.gensubspace(max_dim_q, frequency, check_orthogonality=True)
     dd.solve(frequency, frequency, freq_steps=1, ramped_load=True)
     dd.expand(residual_computation=True, residual_algorithm="l2")
-    Xii_py = mm.vec(name="Xii").asarray()
+    Xii_py = dd.mm.vec(name="Xii").asarray()
 
     # setting the absolute and relative tolerance
     rtol = 1e-16
@@ -124,7 +122,6 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
     # With ramped loading
     # Case1 : Run Krylov Pymapdl
     mapdl.clear()
-    mm = AnsMath(mapdl)
     mapdl.jobname = "pressure_py"
 
     # Parameters set for Krylov
@@ -139,7 +136,7 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
     dd.gensubspace(max_q, frq, check_orthogonality=True)
     dd.solve(frq, frq, freq_steps=1, ramped_load=True)
     dd.expand(residual_computation=True, residual_algorithm=residual_algorithm)
-    Xii_py = mm.vec(name="Xii").asarray()
+    Xii_py = dd.mm.vec(name="Xii").asarray()
 
     # setting the absolute and relative tolerance
     rtol = 1e-16
