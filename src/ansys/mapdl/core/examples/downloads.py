@@ -1,5 +1,6 @@
 """Functions to download sample datasets from the pyansys data repository.
 """
+from functools import wraps
 import os
 import shutil
 import urllib.request
@@ -10,6 +11,22 @@ import requests
 from ansys.mapdl import core as pymapdl
 
 
+def check_directory_exist(directory):
+    # Wrapping LISTING FUNCTIONS.
+    def wrap_function(func):
+        @wraps(func)
+        def inner_wrapper(*args, **kwargs):
+            # Check if folder exists
+            if not os.path.exists(directory):  # pragma: no cover
+                os.makedirs(directory)
+
+            return func(*args, **kwargs)
+
+        return inner_wrapper
+
+    return wrap_function
+
+
 def get_ext(filename):
     """Extract the extension of the filename"""
     ext = os.path.splitext(filename)[1].lower()
@@ -18,11 +35,12 @@ def get_ext(filename):
 
 def delete_downloads():
     """Delete all downloaded examples to free space or update the files"""
-    shutil.rmtree(pymapdl.EXAMPLES_PATH)
-    os.makedirs(pymapdl.EXAMPLES_PATH)
+    if os.path.exists(pymapdl.EXAMPLES_PATH):
+        shutil.rmtree(pymapdl.EXAMPLES_PATH)
     return True
 
 
+@check_directory_exist(pymapdl.EXAMPLES_PATH)
 def _decompress(filename):
     zip_ref = zipfile.ZipFile(filename, "r")
     zip_ref.extractall(pymapdl.EXAMPLES_PATH)
@@ -45,6 +63,7 @@ def _check_url_exist(url):
         return [False]
 
 
+@check_directory_exist(pymapdl.EXAMPLES_PATH)
 def _retrieve_file(url, filename, _test=False):
     # scape test
     if pymapdl.RUNNING_TESTS:
