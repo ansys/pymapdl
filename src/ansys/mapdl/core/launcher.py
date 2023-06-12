@@ -12,6 +12,8 @@ import threading
 import time
 import warnings
 
+from typing import Optional, Literal, Dict, Any, Iterable
+
 try:
     import ansys.platform.instancemanagement as pypim
 
@@ -118,7 +120,7 @@ def _is_ubuntu():
         return "ubuntu" in platform.platform().lower()
 
 
-def close_all_local_instances(port_range=None):
+def close_all_local_instances(port_range: Optional[Iterable[int]]=None):
     """Close all MAPDL instances within a port_range.
 
     This function can be used when cleaning up from a failed pool or
@@ -142,7 +144,7 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port, name="Closing mapdl thread."):
+    def close_mapdl(port: int, name: str="Closing mapdl thread."):
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
@@ -155,15 +157,15 @@ def close_all_local_instances(port_range=None):
             close_mapdl(port)
 
 
-def check_ports(port_range, ip="localhost"):
+def check_ports(port_range: Iterable[int], ip: str="localhost"):
     """Check the state of ports in a port range"""
-    ports = {}
+    ports: dict[int, bool] = {}
     for port in port_range:
         ports[port] = port_in_use(port, ip)
     return ports
 
 
-def port_in_use(port, host=LOCALHOST):
+def port_in_use(port: int, host: str=LOCALHOST):
     """Returns True when a port is in use at the given host.
 
     Must actually "bind" the address.  Just checking if we can create
@@ -182,21 +184,21 @@ def port_in_use(port, host=LOCALHOST):
 
 
 def launch_grpc(
-    exec_file="",
-    jobname="file",
-    nproc=2,
-    ram=None,
-    run_location=None,
-    port=MAPDL_DEFAULT_PORT,
-    ip=LOCALHOST,
-    additional_switches="",
-    override=True,
-    timeout=20,
-    verbose=None,
-    add_env_vars=None,
+    exec_file: str="",
+    jobname: str="file",
+    nproc: int=2,
+    ram: Optional[float]=None,
+    run_location: Optional[str]=None,
+    port: Optional[int]=MAPDL_DEFAULT_PORT,
+    ip: str=LOCALHOST,
+    additional_switches: str="",
+    override: bool=True,
+    timeout: float=20,
+    verbose: Optional[bool]=None,
+    add_env_vars: Dict[str, str]={},
     replace_env_vars=None,
-    **kwargs,
-) -> tuple:  # pragma: no cover
+    **kwargs: Dict[str, Any],
+) -> tuple[int, str, subprocess.Popen[bytes]]:  # pragma: no cover
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -459,7 +461,7 @@ def launch_grpc(
             LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
         # must start in batch mode on windows to hide APDL window
-        command_parm = [
+        command_parm: list[str] = [
             '"%s"' % exec_file,
             job_sw,
             cpu_sw,
@@ -511,6 +513,8 @@ def launch_grpc(
     )
 
     LOG.debug("Generating queue object for stdout")
+    if process.stdout is None:
+        return
     stdout_queue, _ = _create_queue_for_std(process.stdout)
 
     # Checking connection
@@ -543,7 +547,7 @@ def _check_process_is_alive(process, run_location):
         )
 
 
-def _check_file_error_created(run_location, timeout):
+def _check_file_error_created(run_location: str, timeout: float):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
@@ -564,7 +568,7 @@ def _check_file_error_created(run_location, timeout):
         )
 
 
-def _check_server_is_alive(stdout_queue, run_location, timeout):
+def _check_server_is_alive(stdout_queue, run_location: str, timeout: float):
     t0 = time.time()
     empty_attemps = 3
     empty_i = 0
@@ -594,9 +598,8 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             f"The full terminal output is:\n\n" + terminal_output
         )
 
-
-def _get_std_output(std_queue, timeout=1):
-    lines = []
+def _get_std_output(std_queue: Queue, timeout: float=1):
+    lines: list[str] = []
     reach_empty = False
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
@@ -607,11 +610,10 @@ def _get_std_output(std_queue, timeout=1):
 
     return lines
 
-
 def _create_queue_for_std(std):
     """Create a queue and thread objects for a given PIPE std"""
 
-    def enqueue_output(out, queue):
+    def enqueue_output(out, queue: Queue):
         try:
             for line in iter(out.readline, b""):
                 queue.put(line)
@@ -621,7 +623,7 @@ def _create_queue_for_std(std):
             # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
             pass
 
-    q = Queue()
+    q: Queue = Queue()
     t = threading.Thread(target=enqueue_output, args=(std, q))
     t.daemon = True  # thread dies with the program
     t.start()
@@ -630,8 +632,8 @@ def _create_queue_for_std(std):
 
 
 def launch_remote_mapdl(
-    version=None,
-    cleanup_on_exit=True,
+    version: Optional[str]=None,
+    cleanup_on_exit: bool=True,
 ) -> _MapdlCore:
     """Start MAPDL remotely using the product instance management API.
 
@@ -676,7 +678,7 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance_default=True):
+def get_start_instance(start_instance_default: bool=True):
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
@@ -806,7 +808,7 @@ def check_valid_ansys():
     return False
 
 
-def check_lock_file(path, jobname, override):
+def check_lock_file(path: str, jobname: str, override: bool):
     LOG.debug("Checking for lock file")
     # Check for lock file
     lockfile = os.path.join(path, jobname + ".lock")
@@ -830,7 +832,7 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_MPI(add_sw, exec_path, force_intel=False):
+def _validate_MPI(add_sw: str, exec_path: str, force_intel: bool=False):
     """Validate MPI configuration.
 
     Enforce Microsoft MPI in version 21.0 or later, to fix a
@@ -892,7 +894,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
     return add_sw
 
 
-def _force_smp_student_version(add_sw, exec_path):
+def _force_smp_student_version(add_sw: str, exec_path: str):
     """Force SMP in student version.
 
     Parameters
@@ -921,32 +923,32 @@ def _force_smp_student_version(add_sw, exec_path):
 
 
 def launch_mapdl(
-    exec_file=None,
-    run_location=None,
-    jobname="file",
-    nproc=2,
-    ram=None,
-    mode=None,
-    override=False,
+    exec_file: Optional[str]=None,
+    run_location: Optional[str]=None,
+    jobname: str="file",
+    nproc: int=2,
+    ram: Optional[float]=None,
+    mode: Optional[Literal['grpc', 'corba', 'console']]=None,
+    override: bool=False,
     loglevel="ERROR",
-    additional_switches="",
-    start_timeout=45,
-    port=None,
-    cleanup_on_exit=True,
-    start_instance=None,
-    ip=None,
-    clear_on_connect=True,
-    log_apdl=None,
-    remove_temp_files=None,
-    remove_temp_dir_on_exit=False,
-    verbose_mapdl=None,
-    license_server_check=True,
-    license_type=None,
-    print_com=False,
-    add_env_vars=None,
-    replace_env_vars=None,
-    version=None,
-    **kwargs,
+    additional_switches: str="",
+    start_timeout: float=45,
+    port: Optional[int]=None,
+    cleanup_on_exit: bool=True,
+    start_instance: Optional[bool]=None,
+    ip: Optional[str]=None,
+    clear_on_connect: bool=True,
+    log_apdl: Optional[str]=None,
+    remove_temp_files: Optional[bool]=None,
+    remove_temp_dir_on_exit: bool=False,
+    verbose_mapdl: Optional[bool]=None,
+    license_server_check: bool=True,
+    license_type: Optional[str]=None,
+    print_com: bool=False,
+    add_env_vars: Dict[str, str]={},
+    replace_env_vars: Optional[Dict[str, str]]=None,
+    version: Optional[float]=None,
+    **kwargs: Dict[str, Any],
 ) -> _MapdlCore:
     """Start MAPDL locally.
 
@@ -1043,7 +1045,7 @@ def launch_mapdl(
         override the default behavior of this keyword argument with
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
-    ip : bool, optional
+    ip : str, optional
         Used only when ``start_instance`` is ``False``. If provided,
         it will force ``start_instance`` to be ``False``.
         Specify the IP address of the MAPDL instance to connect to.
@@ -1113,7 +1115,7 @@ def launch_mapdl(
     add_env_vars : dict, optional
         The provided dictionary will be used to extend the system or process
         environment variables. If you want to control all of the environment
-        variables, use ``replace_env_vars``. Defaults to ``None``.
+        variables, use ``replace_env_vars``. Defaults to ``{}``.
 
     replace_env_vars : dict, optional
         The provided dictionary will be used to replace all the system or process
@@ -1597,7 +1599,7 @@ def launch_mapdl(
     return mapdl
 
 
-def check_mode(mode, version):
+def check_mode(mode: Optional[Literal["grpc", "corba", "console"]], version):
     """Check if the MAPDL server mode matches the allowable version
 
     If ``None``, the newest mode will be selected.
@@ -1658,7 +1660,7 @@ def check_mode(mode, version):
     return mode
 
 
-def update_env_vars(add_env_vars, replace_env_vars):
+def update_env_vars(add_env_vars: Dict[str, str], replace_env_vars: Dict[str, str]):
     """
     Update environment variables for the MAPDL process.
 
@@ -1704,7 +1706,7 @@ def update_env_vars(add_env_vars, replace_env_vars):
         return replace_env_vars
 
 
-def _check_license_argument(license_type, additional_switches):
+def _check_license_argument(license_type: Optional[str], additional_switches: str):
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
@@ -1772,7 +1774,7 @@ def _check_license_argument(license_type, additional_switches):
     return additional_switches
 
 
-def _verify_version(version):
+def _verify_version(version: Optional[float|str]):
     """Verify the MAPDL version is valid."""
     if isinstance(version, float):
         version = int(version * 10)
