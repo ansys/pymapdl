@@ -80,7 +80,7 @@ doc = [
     "matplotlib==3.7.1",
     "numpydoc==1.5.0",
     "pandas==2.0.2",
-    "plotly==5.14.1",
+    "plotly==5.15.0",
     "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
