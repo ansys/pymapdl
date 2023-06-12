@@ -31,7 +31,6 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 0
   RESET_EXAMPLES_CACHE: 0
   RESET_DOC_BUILD_CACHE: 0
   RESET_AUTOSUMMARY_CACHE: 0
@@ -100,20 +99,13 @@ jobs:
       - name: "Setup Python"
         uses: actions/setup-python@v4
         with:
+          cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install OS packages"
         run: |
           sudo apt update 
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
-
-      - name: "Cache pip"
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -296,20 +288,14 @@ jobs:
       - name: "Setup Python"
         uses: actions/setup-python@v4
         with:
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install os packages"
         run: |
           sudo apt update
           sudo apt install libgl1-mesa-glx xvfb
-
-      - name: "Cache pip"
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -647,6 +633,7 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          render-last: '5'
 
   upload-dev-docs:
     name: Upload dev documentation
