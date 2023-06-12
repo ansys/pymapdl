@@ -12,14 +12,13 @@ Simulation setup
 The :download:`gui.py <gui.py>` script launches a graphical app using PySide6.
 The preprocessing tab contains input fields for Poisson's ratio, Young modulus, beam length, and number of simulation points.
 
-.. literalinclude:: gui.py
 
 .. image:: base_app.png
 
 Add a PyVista plotting frame in the window
 ==========================================
 
-Start by importing ``QtInteractor` from ``pyvistaqt`` and ``MapdlTheme`` from ``ansys-mapdl-core``.
+Start by importing ``QtInteractor`` from ``pyvistaqt`` and ``MapdlTheme`` from ``ansys-mapdl-core``.
 
 .. code:: python
 
@@ -59,20 +58,13 @@ Finally, make sure to correctly close the widget using the app:
         self._postprocessing_plotter.close()
         event.accept()  # let the window close
 
-Import MAPDL instance in your window
-====================================
+Launch an MAPDL instance in your window
+================================
 
 Add an attribute to your MainWindow for the MAPDL instance and import ``launch_mapdl``.
 
-.. code:: python
-
-    from ansys.mapdl.core import Mapdl, launch_mapdl
-
 .. literalinclude:: gui_app.py
-    :lines: 22-26
-
-.. literalinclude:: gui_app.py
-    :lines: 231-236
+    :lines: 19, 22-26, 231-236
 
 Develop the logic
 =================
