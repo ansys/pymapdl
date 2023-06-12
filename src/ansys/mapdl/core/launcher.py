@@ -197,7 +197,7 @@ def launch_grpc(
     verbose: Optional[bool]=None,
     add_env_vars: Dict[str, str]={},
     replace_env_vars=None,
-    **kwargs: Dict[str, Any],
+    **kwargs: Any,
 ) -> tuple[int, str, subprocess.Popen[bytes]]:  # pragma: no cover
     """Start MAPDL locally in gRPC mode.
 
@@ -948,7 +948,7 @@ def launch_mapdl(
     add_env_vars: Dict[str, str]={},
     replace_env_vars: Optional[Dict[str, str]]=None,
     version: Optional[float]=None,
-    **kwargs: Dict[str, Any],
+    **kwargs: Any,
 ) -> _MapdlCore:
     """Start MAPDL locally.
 

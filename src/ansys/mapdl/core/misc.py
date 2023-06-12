@@ -15,6 +15,9 @@ import tempfile
 from threading import Thread
 from warnings import warn
 import weakref
+from typing import Iterable, Optional, Dict, Any, Callable
+from _typeshed import FileDescriptorOrPath
+from numpy.typing import NDArray
 
 from ansys.tools.path import get_available_ansys_installations
 import numpy as np
@@ -49,7 +52,7 @@ class ROUTINES(Enum):
     AUX15 = 65
 
 
-def check_valid_routine(routine):
+def check_valid_routine(routine: str):
     """Check if a routine is valid.
 
     Acceptable aliases for "Begin level" include "begin".
@@ -73,7 +76,7 @@ def check_valid_routine(routine):
     if routine.lower().startswith("begin"):
         return True
     if not hasattr(ROUTINES, routine.upper()):
-        valid_routines = []
+        valid_routines: list[str] = []
         for item in dir(ROUTINES):
             if not item.startswith("_") and not item.startswith("BEGIN"):
                 valid_routines.append(item)
@@ -86,7 +89,7 @@ def check_valid_routine(routine):
 
 
 class Plain_Report:
-    def __init__(self, core, optional=None, additional=None, **kwargs):
+    def __init__(self, core: Iterable[str], optional=None, additional: Optional[Iterable[str]] =None, **kwargs: Any):
         """
         Base class for a plain report.
 
@@ -229,13 +232,13 @@ class Report(base_report_class):
 
     def __init__(
         self,
-        additional=None,
-        ncol=3,
-        text_width=80,
-        sort=False,
-        gpu=True,
-        ansys_vars=None,
-        ansys_libs=None,
+        additional: Optional[list[ModuleType]| list[str]]=None,
+        ncol: int=3,
+        text_width: int=80,
+        sort: bool=False,
+        gpu: bool=True,
+        ansys_vars: Optional[list[str]]=None,
+        ansys_libs: Optional[Dict[str, str]]=None,
     ):
         """Generate a :class:`scooby.Report` instance.
 
@@ -314,7 +317,7 @@ class Report(base_report_class):
             )
 
 
-def is_float(input_string):
+def is_float(input_string: str):
     """Returns true when a string can be converted to a float"""
     try:
         float(input_string)
@@ -323,9 +326,9 @@ def is_float(input_string):
         return False
 
 
-def random_string(stringLength=10, letters=string.ascii_lowercase):
+def random_string(stringLength: int=10, letters: str=string.ascii_lowercase):
     """Generate a random string of fixed length"""
-    return "".join(random.choice(letters) for i in range(stringLength))
+    return "".join(random.choice(letters) for _ in range(stringLength))
 
 
 def _check_has_ansys():
@@ -345,11 +348,11 @@ def _check_has_ansys():
         return False
 
 
-def supress_logging(func):
+def supress_logging(func: Callable[..., Any]):
     """Decorator to suppress logging for a MAPDL instance"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any):
         mapdl = args[0]
         prior_log_level = mapdl._log.level
         if prior_log_level != "CRITICAL":
@@ -416,7 +419,7 @@ def threaded_daemon(func):
     return wrapper
 
 
-def unique_rows(a):
+def unique_rows(a: NDArray):
     """Returns unique rows of a and indices of those rows"""
     if not a.flags.c_contiguous:
         a = np.ascontiguousarray(a)
@@ -427,7 +430,7 @@ def unique_rows(a):
     return a[idx], idx, idx2
 
 
-def creation_time(path_to_file):
+def creation_time(path_to_file: FileDescriptorOrPath):
     """The file creation time.
 
     Try to get the date that a file was created, falling back to when
@@ -446,7 +449,7 @@ def creation_time(path_to_file):
             return stat.st_mtime
 
 
-def last_created(filenames):
+def last_created(filenames: list[FileDescriptorOrPath]):
     """Return the last created file given a list of filenames
 
     If all filenames have the same creation time, then return the last
@@ -460,7 +463,7 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None):
+def create_temp_dir(tmpdir: Optional[str]=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -470,7 +473,7 @@ def create_temp_dir(tmpdir=None):
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
     letters = string.ascii_lowercase.replace("n", "")
-    path = os.path.join(tmpdir, random_string(10, letters))
+    path: str = os.path.join(tmpdir, random_string(10, letters))
 
     # in the *rare* case of a duplicate path
     while os.path.isdir(path):
@@ -504,7 +507,7 @@ def get_bounding_box(nodes_xyz):
     return max_ - min_
 
 
-def load_file(mapdl, fname, priority_mapdl_file=None):
+def load_file(mapdl, fname: str, priority_mapdl_file: Optional[bool]=None):
     """
     Provide a file to the MAPDL instance.
 
@@ -579,14 +582,14 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
     return os.path.basename(fname)
 
 
-def check_valid_ip(ip):
+def check_valid_ip(ip: str):
     """Check for valid IP address"""
     if ip.lower() != "localhost":
         ip = ip.replace('"', "").replace("'", "")
         socket.inet_aton(ip)
 
 
-def check_valid_port(port, lower_bound=1000, high_bound=60000):
+def check_valid_port(port: int, lower_bound: int=1000, high_bound: int=60000):
     if not isinstance(port, int):
         raise ValueError("The 'port' parameter should be an integer.")
 
@@ -598,7 +601,7 @@ def check_valid_port(port, lower_bound=1000, high_bound=60000):
         )
 
 
-def check_valid_start_instance(start_instance):
+def check_valid_start_instance(start_instance: str|bool):
     """
     Checks if the value obtained from the environmental variable is valid.
 
@@ -628,7 +631,7 @@ def check_valid_start_instance(start_instance):
     return start_instance.lower() == "true"
 
 
-def update_information_first(update=False):
+def update_information_first(update: bool=False):
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -820,7 +823,7 @@ class Information:
 
     @property
     @update_information_first(True)
-    def stitles(self, i=None):
+    def stitles(self, i: Optional[int]=None):
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
         If 'stitle' includes newline characters (`\\n`), then each line
@@ -838,7 +841,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle, i=None):
+    def stitles(self, stitle: Optional[str|list[str]], i=None):
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -1053,7 +1056,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: str, array: NDArray):
     """
     Write an array to a file.
 
@@ -1070,7 +1073,7 @@ def write_array(filename, array):
     np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
 
 
-def requires_package(package_name, softerror=False):
+def requires_package(package_name: str, softerror: bool=False):
     """
     Decorator check whether a package is installed or not.
 
@@ -1108,7 +1111,7 @@ def requires_package(package_name, softerror=False):
     return decorator
 
 
-def _get_args_xsel(*args, **kwargs):
+def _get_args_xsel(*args: Any, **kwargs: Any):
     type_ = kwargs.pop("type_", str(args[0]) if len(args) else "").upper()
     item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
     comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()
@@ -1119,7 +1122,7 @@ def _get_args_xsel(*args, **kwargs):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_points(entity="node", plot_function="nplot"):
+def allow_pickable_points(entity: str="node", plot_function: str="nplot"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
@@ -1175,7 +1178,7 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
     return decorator
 
 
-def wrap_point_SEL(entity="node"):
+def wrap_point_SEL(entity: str="node"):
     def decorator(original_sel_func):
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
