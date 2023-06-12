@@ -26,7 +26,7 @@ def test_check_directory_exist(tmpdir):
 
     @check_directory_exist(tmp_dir)
     def myfunc():
-        return "Directory should exists after this"
+        return "Directory should exist after this"
 
     assert not os.path.exists(tmp_dir)
 
