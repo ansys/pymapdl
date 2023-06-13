@@ -49,7 +49,7 @@ And another one in the second tab:
         self._deflection_label = QLabel("Deflection: ")
         container_layout.addWidget(self._deflection_label)
 
-Finally, make sure to correctly close the vtk widgets when closing the app:
+Finally, make sure to correctly close the VTK widgets when closing the app:
 
 .. code:: python
 
