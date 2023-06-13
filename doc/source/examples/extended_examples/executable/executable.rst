@@ -104,34 +104,41 @@ This code shows how you can input other arguments:
 Convert the app to an executable
 ================================
 
-Using the Python library `PyInstaller <https://pyinstaller.org>`, it is possible to convert the app to an executable by taking a few precautions.
+Using the Python library `PyInstaller <https://pyinstaller.org>`_, it is possible to convert the app to an executable by taking a few precautions.
+Because it is necessary to have the VERSION of PyMAPDL for the app to work, the file need to be added next to our executable.
+
+Start by generating the `specification file <https://pyinstaller.org/en/stable/spec-files.html>`_ for the app.
+
 
 .. code:: console
 
    pyi-makespec cli_rotor.py
 
-Add the argument ``--onefile`` to put everything in a single file. Otherwise you will have a folder containing the application and dll dependencies.
+PyInstaller provides two modes for generating executables:
+
+- ``onedir`` (default): This mode generates a folder that includes the executable file along with its dependencies.
+- ``onefile``: In this mode, PyInstaller generates a single executable file.
+
+To generate the executable in "onefile" mode, include the argument ``--onefile`` in the command.
 
 .. code:: console
 
    pyi-makespec cli_rotor.py --onefile
 
-After the first line in the file ``cli_rotor.spec``, add the following lines:
+Then, add the link to the ``VERSION`` file from the PyMAPDL package in ``cli_rotor.spec``
 
-.. code:: python
+.. code-block:: python
+   :emphasize-lines: 1-9,15
 
    import os
    import importlib
 
    proot = os.path.dirname(importlib.import_module("ansys.api.mapdl").__file__)
+   # The list "files_to_add" contains tuples that define the mapping between the original file paths and their corresponding paths within the executable folder.
+   # NOTE: If you have chosen the "onefile" mode, this file will be integrated into the executable file.
    files_to_add = [
-       (os.path.join(proot, "VERSION"), os.path.join(".", "ansys", "api", "mapdl")
-   ]  # use / instead of \\ if you are on Linux
-
-Add ``files_to_add`` to ``Analysis`` data
-
-.. code-block:: python
-   :emphasize-lines: 5
+       (os.path.join(proot, "VERSION"), os.path.join(".", "ansys", "api", "mapdl"))
+   ]
 
    a = Analysis(
        ["cli_rotor.py"],
@@ -149,7 +156,7 @@ Add ``files_to_add`` to ``Analysis`` data
        noarchive=False,
    )
 
-Then generate the executable form the .spec file
+And generate the executable form the .spec file
 
 .. code:: console
 
