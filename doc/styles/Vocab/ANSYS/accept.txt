@@ -25,6 +25,7 @@ ANSYS
 APDL Math
 APDLMath
 APIs
+api
 appen
 argparse
 Arruda-Boyce
@@ -63,6 +64,7 @@ hostname
 Imagemagick
 ImageMagick
 imagin
+importlib
 Intro to Ansys Mechanical APDL Scripting
 ist
 Julia
@@ -88,6 +90,7 @@ nin
 nonlinearities
 NumPy
 optiSLang
+onefile
 parm
 performant
 PMLs

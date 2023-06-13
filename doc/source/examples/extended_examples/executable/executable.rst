@@ -105,9 +105,10 @@ Convert the app to an executable
 ================================
 
 Using the Python library `PyInstaller <https://pyinstaller.org>`_, it is possible to convert the app to an executable by taking a few precautions.
-Because it is necessary to have the VERSION of PyMAPDL for the app to work, the file need to be added next to our executable.
+As the PyMAPDL ``VERSION`` file is essential for the  of the application, the file needs to be added alongside the executable.
 
 Start by generating the `specification file <https://pyinstaller.org/en/stable/spec-files.html>`_ for the app.
+At the root of the project, execute the following command:
 
 
 .. code:: console
@@ -127,34 +128,12 @@ To generate the executable in "onefile" mode, include the argument ``--onefile``
 
 Then, add the link to the ``VERSION`` file from the PyMAPDL package in ``cli_rotor.spec``
 
-.. code-block:: python
-   :emphasize-lines: 1-9,15
 
-   import os
-   import importlib
+.. literalinclude:: cli_rotor.spec
+   :language: python
+   :lines: 1-30
+   :emphasize-lines: 3-11,20
 
-   proot = os.path.dirname(importlib.import_module("ansys.api.mapdl").__file__)
-   # The list "files_to_add" contains tuples that define the mapping between the original file paths and their corresponding paths within the executable folder.
-   # NOTE: If you have chosen the "onefile" mode, this file will be integrated into the executable file.
-   files_to_add = [
-       (os.path.join(proot, "VERSION"), os.path.join(".", "ansys", "api", "mapdl"))
-   ]
-
-   a = Analysis(
-       ["cli_rotor.py"],
-       pathex=[],
-       binaries=[],
-       datas=files_to_add,
-       hiddenimports=[],
-       hookspath=[],
-       hooksconfig={},
-       runtime_hooks=[],
-       excludes=[],
-       win_no_prefer_redirects=False,
-       win_private_assemblies=False,
-       cipher=block_cipher,
-       noarchive=False,
-   )
 
 And generate the executable form the .spec file
 
