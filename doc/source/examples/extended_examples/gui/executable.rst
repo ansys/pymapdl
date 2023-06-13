@@ -10,7 +10,7 @@ Simulation setup
 ================
 
 The :download:`gui.py <gui.py>` script launches a graphical app using PySide6.
-The preprocessing tab contains input fields for Poisson's ratio, Young modulus, beam length, and number of simulation points.
+The preprocessing tab contains input fields for Poisson's ratio, Young modulus, beam length, and number of simulation nodes.
 
 
 .. image:: base_app.png
@@ -18,7 +18,7 @@ The preprocessing tab contains input fields for Poisson's ratio, Young modulus, 
 Add a PyVista plotting frame in the window
 ==========================================
 
-Start by importing ``QtInteractor`` from ``pyvistaqt`` and ``MapdlTheme`` from ``ansys-mapdl-core``.
+Start by importing `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_ from ``pyvistaqt`` and :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>` from ``ansys-mapdl-core``.
 
 .. code:: python
 
@@ -49,7 +49,7 @@ And another one in the second tab:
         self._deflection_label = QLabel("Deflection: ")
         container_layout.addWidget(self._deflection_label)
 
-Finally, make sure to correctly close the widget using the app:
+Finally, make sure to correctly close the vtk widgets when closing the app:
 
 .. code:: python
 
@@ -59,7 +59,7 @@ Finally, make sure to correctly close the widget using the app:
         event.accept()  # let the window close
 
 Launch an MAPDL instance in your window
-================================
+=======================================
 
 Add an attribute to your MainWindow for the MAPDL instance and import ``launch_mapdl``.
 
@@ -71,7 +71,8 @@ Develop the logic
 
 Connect each button to a function that contains the logic.
 
-.. code:: python
+.. code-block:: python
+    :emphasize-lines: 5,14
 
     def _setup_tab_preprocessing(self) -> None:
         ...
