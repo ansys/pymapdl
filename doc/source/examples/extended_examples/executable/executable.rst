@@ -125,7 +125,7 @@ After the first line in the file ``cli_rotor.spec``, add the following lines:
 
    proot = os.path.dirname(importlib.import_module("ansys.api.mapdl").__file__)
    files_to_add = [
-       (os.path.join(proot, "VERSION"), ".\\ansys\\api\\mapdl")
+       (os.path.join(proot, "VERSION"), os.path.join(".", "ansys", "api", "mapdl")
    ]  # use / instead of \\ if you are on Linux
 
 Add ``files_to_add`` to ``Analysis`` data
@@ -156,7 +156,7 @@ Then generate the executable form the .spec file
    pyinstaller cli_rotor.spec
 
 
-The output is in the folder ``./dist/cli_rotor/cli_rotor.exe``
+The output is an executable file named ``cli_rotor.exe`` in the directory ``./dist/cli_rotor``
 
 
 Advanced usage
