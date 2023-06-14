@@ -26,12 +26,14 @@ class MainWindow(QMainWindow):
         self._mapdl = mapdl
 
     def _setup_ui(self) -> None:
+        # General settings for the window
         self.setWindowTitle("PyMAPDL example application")
         self.resize(1000, 500)
         self._widget = QWidget()
         self._layout = QVBoxLayout()
         self._layout.setContentsMargins(0, 0, 0, 0)
 
+        # Create the tabs
         self._tab_widget = QtWidgets.QTabWidget()
 
         self._tab_preprocessing = QtWidgets.QWidget()
@@ -55,6 +57,7 @@ class MainWindow(QMainWindow):
         max_qlineedit_width = 250
         self._tab_preprocessing.setLayout(container_layout)
 
+        # Poisson's ration input
         poisson_ratio_label = QLabel("Poisson's ratio: ")
         container_layout.addWidget(poisson_ratio_label, 0, 0)
         self._poisson_ratio_input = QLineEdit()
@@ -62,6 +65,7 @@ class MainWindow(QMainWindow):
         self._poisson_ratio_input.setText("0.3")
         self._poisson_ratio_input.setMaximumWidth(max_qlineedit_width)
 
+        # Young modulus input
         young_modulus_label = QLabel("Young's modulus: ")
         container_layout.addWidget(young_modulus_label, 1, 0)
         self._young_modulus_input = QLineEdit()
@@ -71,18 +75,21 @@ class MainWindow(QMainWindow):
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
+        # Beam length input
         length_label = QLabel("Length: ")
         container_layout.addWidget(length_label, 2, 0)
         self._length_input = QLineEdit()
         self._length_input.setPlaceholderText("Length")
         self._length_input.setMaximumWidth(max_qlineedit_width)
 
+        # Input for the force exerced on the beam
         force_label = QLabel("Force: ")
         container_layout.addWidget(force_label, 3, 0)
         self._force_input = QLineEdit()
         self._force_input.setPlaceholderText("Load force")
         self._force_input.setMaximumWidth(max_qlineedit_width)
 
+        # Slider for the number of nodes (between 3 and 9)
         number_of_nodes_label = QLabel("Number of nodes: ")
         container_layout.addWidget(number_of_nodes_label, 4, 0)
         self._number_of_nodes_input = QSlider(orientation=Qt.Orientation.Horizontal)
@@ -121,6 +128,7 @@ class MainWindow(QMainWindow):
         container_layout = QGridLayout()
         self._tab_solver.setLayout(container_layout)
 
+        # Button to run the solver
         self._solve_button = QPushButton(text="Solve")
         self._solve_button.clicked.connect(self._run_solver)
 
@@ -129,6 +137,7 @@ class MainWindow(QMainWindow):
     def _setup_tab_postprocessing(self) -> None:
         container_layout = QtWidgets.QVBoxLayout()
         self._tab_postprocessing.setLayout(container_layout)
+        # Add a PyVista frame
         self._postprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._postprocessing_plotter)
         self._deflection_label = QLabel("Deflection: ")
