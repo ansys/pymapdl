@@ -3,7 +3,7 @@
 Extended examples
 =================
 
-These extended examples explain other concepts such as interoperability
+These extended examples explain concepts such as interoperability
 with other programs, libraries, and features in development.
 
 +----------------------------+--------------------------------------------------------------------------------------------+
@@ -19,9 +19,9 @@ with other programs, libraries, and features in development.
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`dash_example`        | Demonstrates the use of PyMAPDL with Dash.                                                 |
 +----------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`executable_example`  | Create your own Python app with a command-line interface.                                  |
+| :ref:`executable_example`  |  Demonstrates how to create your own Python app with a command-line interface.             |
 +----------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`gui_example`         | Create your own GUI app with Python and PySide6                                            |
+| :ref:`gui_example`         |  Demonstrates how to create your own GUI app with Python and PySide6                       |
 +----------------------------+--------------------------------------------------------------------------------------------+
 
 
