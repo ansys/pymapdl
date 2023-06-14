@@ -10,7 +10,7 @@ Simulation setup
 ================
 
 The :download:`gui.py <gui.py>` script launches a graphical app using PySide6.
-The preprocessing tab contains input fields for Poisson's ratio, Young modulus, beam length, and number of simulation nodes.
+The **Preprocessing** tab contains input fields for Poisson's ratio, Young modulus, beam length, and a number of simulation nodes.
 
 
 .. image:: base_app.png
@@ -18,7 +18,7 @@ The preprocessing tab contains input fields for Poisson's ratio, Young modulus, 
 Add a PyVista plotting frame in the window
 ==========================================
 
-Start by importing `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_ from ``pyvistaqt`` and :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>` from ``ansys-mapdl-core``.
+Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_ class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>` class from the ``ansys-mapdl-core`` package:
 
 .. code:: python
 
