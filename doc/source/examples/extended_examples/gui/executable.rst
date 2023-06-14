@@ -25,7 +25,7 @@ Start by importing `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#
     from pyvistaqt import QtInteractor
     from ansys.mapdl.core import MapdlTheme
 
-Then, add a plotter in the first tab:
+Then, add a plotter on the first tab:
 
 .. code:: python
 
@@ -37,7 +37,7 @@ Then, add a plotter in the first tab:
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._preprocessing_plotter, 0, 4, 6, 50)
 
-And another one in the second tab:
+Add another plotter on the second tab:
 
 .. code:: python
 
@@ -61,7 +61,7 @@ Finally, make sure to correctly close the VTK widgets when closing the app:
 Launch an MAPDL instance in your window
 =======================================
 
-Add an attribute to your MainWindow for the MAPDL instance and import ``launch_mapdl``.
+Add an attribute to your MainWindow for the MAPDL instance and import the ``launch_mapdl`` package.
 
 .. literalinclude:: gui_app.py
     :lines: 19, 22-26, 231-236
@@ -69,7 +69,7 @@ Add an attribute to your MainWindow for the MAPDL instance and import ``launch_m
 Develop the logic
 =================
 
-Connect each button to a function that contains the logic.
+Connect each button to a function that contains the logic:
 
 .. code-block:: python
     :emphasize-lines: 5,14
@@ -105,7 +105,7 @@ You can now write the related functions:
 Additional files
 ================
 
-The examples files can be downloaded at the following links:
+The example files can be downloaded using these links:
 
 * Original :download:`gui.py <gui.py>` script
 * Original :download:`gui_app.py <gui_app.py>` script
