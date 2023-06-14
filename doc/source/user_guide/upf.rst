@@ -172,7 +172,7 @@ server:
 
     Python UPF Detected
 
-    PYTHON VERSION : 3.8
+    PYTHON VERSION : 3.10
     >>
     >> START PYTHON GRPC SERVER
     >>
