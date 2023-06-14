@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.66.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.rst"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = {file = "LICENSE"}
 authors = [
     {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
@@ -46,7 +46,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: MacOS",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -70,7 +69,7 @@ tests = [
 doc = [
     "sphinx==6.2.1",
     "ansys-dpf-core==0.8.1",
-    "ansys-mapdl-reader==0.52.13",
+    "ansys-mapdl-reader==0.52.14",
     "ansys-sphinx-theme==0.9.9",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
@@ -80,7 +79,7 @@ doc = [
     "matplotlib==3.7.1",
     "numpydoc==1.5.0",
     "pandas==2.0.2",
-    "plotly==5.14.1",
+    "plotly==5.15.0",
     "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
