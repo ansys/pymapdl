@@ -104,10 +104,10 @@ This code shows how you can input other arguments:
 Convert the app to an executable file
 =====================================
 
-Using the Python library `PyInstaller <https://pyinstaller.org>`_, you can convert the app to an executable file.
+Using the Python library `PyInstaller <pyinstaller_>`_, you can convert the app to an executable file.
 However, for the app to work, you must add the ``VERSION`` file that specifies the PyMAPDL version to the executable file.
 
-Start by generating the `specification file <https://pyinstaller.org/en/stable/spec-files.html>`_ for the app.
+Start by generating the `specification file <pyinstaller_spec_files_>`_ for the app.
 At the root of the project, execute the following command:
 
 
