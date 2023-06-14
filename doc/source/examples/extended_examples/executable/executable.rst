@@ -101,8 +101,8 @@ This code shows how you can input other arguments:
    The first natural frequency is 344.28 Hz.
 
 
-Convert the app to an executable
-================================
+Convert the app to an executable file
+=====================================
 
 Using the Python library `PyInstaller <https://pyinstaller.org>`_, it is possible to convert the app to an executable by taking a few precautions.
 As the PyMAPDL ``VERSION`` file is essential for the  of the application, the file needs to be added alongside the executable.
@@ -118,15 +118,15 @@ At the root of the project, execute the following command:
 PyInstaller provides two modes for generating executables:
 
 - ``onedir`` (default): This mode generates a folder that includes the executable file along with its dependencies.
-- ``onefile``: In this mode, PyInstaller generates a single executable file.
+- ``onefile``: This mode has PyInstaller generate a single executable file.
 
-To generate the executable in "onefile" mode, include the argument ``--onefile`` in the command.
+To generate the executable file in ``onefile`` mode, include the argument ``--onefile`` in the command:
 
 .. code:: console
 
    pyi-makespec cli_rotor.py --onefile
 
-Then, add the link to the ``VERSION`` file from the PyMAPDL package in ``cli_rotor.spec``
+Then, add the link to the ``VERSION`` file from the PyMAPDL package in the ``cli_rotor.spec`` file:
 
 
 .. literalinclude:: cli_rotor.spec
@@ -135,14 +135,14 @@ Then, add the link to the ``VERSION`` file from the PyMAPDL package in ``cli_rot
    :emphasize-lines: 3-11,20
 
 
-And generate the executable form the .spec file
+Generate the executable file from the ``cli_rotor.spec`` file:
 
 .. code:: console
 
    pyinstaller cli_rotor.spec
 
 
-The output is an executable file named ``cli_rotor.exe`` in the directory ``./dist/cli_rotor``
+The output is an executable file named ``cli_rotor.exe`` in the directory ``./dist/cli_rotor``.
 
 
 Advanced usage
