@@ -25,7 +25,6 @@ ANSYS
 APDL Math
 APDLMath
 APIs
-api
 appen
 argparse
 Arruda-Boyce

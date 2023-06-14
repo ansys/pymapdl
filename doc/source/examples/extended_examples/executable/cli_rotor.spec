@@ -4,8 +4,8 @@ import os
 import importlib
 
 root = os.path.dirname(importlib.import_module("ansys.api.mapdl").__file__)
-# The list "files_to_add" contains tuples that define the mapping between the original file paths and their corresponding paths within the executable folder.
-# NOTE: In the "onefile" mode, the chosen file gets integrated into the executable file.
+# The ``files_to_add`` list contains tuples that define the mapping between the original file paths and their corresponding paths within the executable folder.
+# Note: If you have chosen the ``onefile`` mode, the files in ``files_to_add`` are integrated into the executable file.
 files_to_add = [
     (os.path.join(root, "VERSION"), os.path.join(".", "ansys", "api", "mapdl"))
 ]
