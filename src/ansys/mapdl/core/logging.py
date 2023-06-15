@@ -126,7 +126,7 @@ from typing import (
 )
 import weakref
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import _MapdlCore
 
     _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
@@ -584,7 +584,7 @@ class Logger:
         """This just redirect the output of an exception to the logger."""
 
         def handle_exception(
-            exc_type,
+            exc_type: type[BaseException],
             exc_value: BaseException,
             exc_traceback: Optional[TracebackType],
         ):
