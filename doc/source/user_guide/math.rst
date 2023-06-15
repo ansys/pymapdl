@@ -2,7 +2,7 @@
 
 PyAnsys Math overview
 =====================
-`PyAnsys Math <pyansys_math>`_ provides the ability to access and manipulate
+`PyAnsys Math <pyansys_math_>`_ provides the ability to access and manipulate
 the large sparse matrices and solve a variety of eigenproblems in a similar
 manner to the popular `numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
 
@@ -64,8 +64,8 @@ in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlM
 
     from ansys.math.core.math import AnsMath
 
-    # Importing and connecting PyAnsys Math with PyMAPDL
-    mm = AnsMath()
+    # Importing and connecting PyAnsys Math to PyMAPDL
+    mm = AnsMath(mapdl)
 
     # load by default from file.full
     k = mm.stiff()
@@ -89,6 +89,14 @@ these matrices are stored solely within Python.
     (240, 241)	11217948717.943113
     (241, 241)	50854700854.68495
     (242, 242)	95726495726.47179
+
+Another way to call PyAnsys Math directly from PyMAPDL exists
+with the following command:
+
+.. code:: python
+
+    # Launching PyAnsys Math directly with PyMAPDL
+    mm = mapdl.math
 
 
 The final step is to send these matrices back to MAPDL to be solved.
@@ -126,9 +134,9 @@ initialize a matrix ``eigvec`` and send that to the
     >>> eigvec = mm.zeros(my_stiff.nrow, nmode)  # for eigenvectors
     >>> val = mm.eigs(nmode, my_stiff, my_mass, fmin=1)
 
-The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
+The AnsMath matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
-APDL Math reference
-~~~~~~~~~~~~~~~~~~~
-For more information, see the `PyAnsys Math API reference<pyansys_math_api>`_.
+PyAnsys Math reference
+~~~~~~~~~~~~~~~~~~~~~~
+For more information, see the `PyAnsys Math API reference<pyansys_math_api_>`_.

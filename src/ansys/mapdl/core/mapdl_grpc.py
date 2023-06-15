@@ -2463,10 +2463,7 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def math(self):
-        """Interface to access to `ansys-math-core` objects."""
-        # This function can be completely deleted
-        # or can became a shortcut to the PyAnsys Math
-        # library in PyMAPDL.
+        """Interface to launch PyAnsys Math from PyMAPDL."""
         import ansys.math.core.math as pymath
 
         return pymath.AnsMath(self)
