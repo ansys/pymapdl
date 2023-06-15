@@ -380,7 +380,7 @@ class Logger:
         self.critical = self.logger.critical
         self.log = self.logger.log
 
-        if to_file or filename != FILE_NAME:
+        if to_file:
             # We record to file
             self.log_to_file(filename=filename, level=level)
 
@@ -446,7 +446,7 @@ class Logger:
         logger.std_out_handler = None
         logger.file_handler = None
 
-        if self.logger.hasHandlers:
+        if self.logger.hasHandlers():
             for each_handler in self.logger.handlers:
                 new_handler = copy(each_handler)
                 if each_handler == self.file_handler:
