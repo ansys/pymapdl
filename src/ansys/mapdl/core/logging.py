@@ -108,8 +108,6 @@ you would do in any other script.  There shall no be conflicts between
 these loggers.
 
 """
-from __future__ import annotations
-
 from copy import copy
 from datetime import datetime
 import logging
@@ -586,7 +584,7 @@ class Logger:
         """This just redirect the output of an exception to the logger."""
 
         def handle_exception(
-            exc_type: type[BaseException],
+            exc_type,
             exc_value: BaseException,
             exc_traceback: Optional[TracebackType],
         ):
