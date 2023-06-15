@@ -216,7 +216,7 @@ class PymapdlCustomAdapter(_LoggerAdapter):
         ----------
         filename : str, optional
             Name of the file where the logs are recorded. By default FILE_NAME
-        level : str, optional
+        level : str or int, optional
             Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
         """
 
@@ -228,7 +228,7 @@ class PymapdlCustomAdapter(_LoggerAdapter):
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging record. By default LOG_LEVEL
         """
         if self.std_out_handler:
@@ -357,7 +357,7 @@ class Logger:
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging as defined in the package ``logging``. By default 'DEBUG'.
         to_file : bool, optional
             To record the logs in a file, by default ``False``.
@@ -404,7 +404,7 @@ class Logger:
         filename : str, optional
             Name of the file where the logs are recorded. By default
             ``'pymapdl.log'``.
-        level : str, optional
+        level : str or int, optional
             Level of logging. By default ``'DEBUG'``.
 
         Examples
@@ -425,7 +425,7 @@ class Logger:
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging record. By default  ``'DEBUG'``.
         """
 
@@ -500,7 +500,7 @@ class Logger:
         ----------
         sufix : str
             Name of the logger.
-        level : str, optional
+        level : str or int, optional
             Level of logging
 
         Returns
@@ -613,7 +613,7 @@ def addfile_handler(
         Logger where to add the file handler.
     filename : str, optional
         Name of the output file. By default FILE_NAME
-    level : str, optional
+    level : str or int, optional
         Level of log recording. By default LOG_LEVEL
     write_headers : bool, optional
         Record the headers to the file. By default False
@@ -654,7 +654,7 @@ def add_stdout_handler(
     ----------
     logger : logging.Logger or logging.Logger
         Logger where to add the file handler.
-    level : str, optional
+    level : str or int, optional
         Level of log recording. By default ``logging.DEBUG``.
     write_headers : bool, optional
         Record the headers to the file. By default ``False``.
