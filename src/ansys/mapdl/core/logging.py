@@ -130,8 +130,10 @@ if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import _MapdlCore
 
     _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
+    _StreamHandler = logging.StreamHandler[Any]
 else:
     _LoggerAdapter = logging.LoggerAdapter
+    _StreamHandler = logging.StreamHandler
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -188,7 +190,7 @@ class PymapdlCustomAdapter(_LoggerAdapter):
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[logging.StreamHandler[Any]] = None
+    std_out_handler: Optional[_StreamHandler] = None
 
     def __init__(self, logger: logging.Logger, extra: Optional["_MapdlCore"] = None):
         self.logger = logger
@@ -340,7 +342,7 @@ class Logger:
     """
 
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[logging.StreamHandler[Any]] = None
+    std_out_handler: Optional[_StreamHandler] = None
     _level = logging.DEBUG
     _instances: Dict[str, Any] = {}
 
