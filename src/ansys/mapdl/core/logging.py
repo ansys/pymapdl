@@ -122,6 +122,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Union,
     cast,
 )
 import weakref
@@ -159,7 +160,7 @@ NEW_SESSION_HEADER = f"""
 ==============================================================================="""
 
 LOG_LEVEL_STRING_TYPE = Literal["DEBUG", "INFO", "WARN", "WARNING", "ERROR", "CRITICAL"]
-LOG_LEVEL_TYPE = LOG_LEVEL_STRING_TYPE | int
+LOG_LEVEL_TYPE = Union[LOG_LEVEL_STRING_TYPE, int]
 
 string_to_loglevel: Dict[LOG_LEVEL_STRING_TYPE, int] = {
     "DEBUG": DEBUG,
@@ -594,7 +595,7 @@ class Logger:
 
 
 def addfile_handler(
-    logger: Logger | logging.Logger,
+    logger: Union[Logger, logging.Logger],
     filename: str = FILE_NAME,
     level: LOG_LEVEL_TYPE = LOG_LEVEL,
     write_headers: bool = False,
@@ -638,7 +639,7 @@ def addfile_handler(
 
 
 def add_stdout_handler(
-    logger: Logger | logging.Logger,
+    logger: Union[Logger, logging.Logger],
     level: LOG_LEVEL_TYPE = LOG_LEVEL,
     write_headers: bool = False,
 ):
