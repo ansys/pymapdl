@@ -108,8 +108,6 @@ you would do in any other script.  There shall no be conflicts between
 these loggers.
 
 """
-from __future__ import annotations
-
 from copy import copy
 from datetime import datetime
 import logging
@@ -130,6 +128,10 @@ import weakref
 
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import _MapdlCore
+
+    _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
+else:
+    _LoggerAdapter = logging.LoggerAdapter
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -173,7 +175,7 @@ string_to_loglevel: Dict[LOG_LEVEL_STRING_TYPE, int] = {
 }
 
 
-class PymapdlCustomAdapter(logging.LoggerAdapter[logging.Logger]):
+class PymapdlCustomAdapter(_LoggerAdapter):
     """This is key to keep the reference to the MAPDL instance name dynamic.
 
     If we use the standard approach which is supplying ``extra`` input
