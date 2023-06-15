@@ -237,7 +237,7 @@ class PymapdlCustomAdapter(_LoggerAdapter):
         add_stdout_handler(self.logger, level=level)
         self.std_out_handler = self.logger.std_out_handler
 
-    def setLevel(self, level: int | str = "DEBUG"):
+    def setLevel(self, level: Union[int, str] = "DEBUG"):
         """Change the log level of the object and the attached handlers."""
         if isinstance(level, str):
             level = string_to_loglevel[cast(LOG_LEVEL_STRING_TYPE, level.upper())]
