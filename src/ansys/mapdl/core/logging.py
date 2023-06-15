@@ -108,6 +108,8 @@ you would do in any other script.  There shall no be conflicts between
 these loggers.
 
 """
+from __future__ import annotations
+
 from copy import copy
 from datetime import datetime
 import logging
@@ -313,14 +315,14 @@ class Logger:
     level : int, optional
         Logging level to filter the message severity allowed in the logger.
         The default is ``logging.DEBUG``.
-    to_filet : bool, optional
+    to_file : bool, optional
         Write log messages to a file. The default is ``False``.
     to_stdout : bool, optional
         Write log messages into the standard output. The default is
         ``True``.
     filename : str, optional
         Name of the file where log messages are written to.
-        The default is ``None``.
+        The default is ``FILE_NAME``.
 
     Examples
     --------
