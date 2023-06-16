@@ -171,7 +171,7 @@ string_to_loglevel: Dict[LOG_LEVEL_STRING_TYPE, int] = {
 }
 
 
-class PymapdlCustomAdapter(logging.LoggerAdapter):  # noqa
+class PymapdlCustomAdapter(logging.LoggerAdapter):
     """This is key to keep the reference to the MAPDL instance name dynamic.
 
     If we use the standard approach which is supplying ``extra`` input
@@ -184,7 +184,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):  # noqa
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[logging.StreamHandler] = None  # noqa
+    std_out_handler: Optional[logging.StreamHandler] = None
 
     def __init__(self, logger: logging.Logger, extra: Optional["_MapdlCore"] = None):
         self.logger = logger
@@ -336,7 +336,7 @@ class Logger:
     """
 
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[logging.StreamHandler] = None  # noqa
+    std_out_handler: Optional[logging.StreamHandler] = None
     _level = logging.DEBUG
     _instances: Dict[str, Any] = {}
 
