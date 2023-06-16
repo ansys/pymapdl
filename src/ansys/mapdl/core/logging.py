@@ -129,12 +129,6 @@ import weakref
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import _MapdlCore
 
-    _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
-    _StreamHandler = logging.StreamHandler[Any]
-else:
-    _LoggerAdapter = logging.LoggerAdapter
-    _StreamHandler = logging.StreamHandler
-
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
 FILE_NAME = "pymapdl.log"
@@ -177,7 +171,7 @@ string_to_loglevel: Dict[LOG_LEVEL_STRING_TYPE, int] = {
 }
 
 
-class PymapdlCustomAdapter(_LoggerAdapter):  # noqa
+class PymapdlCustomAdapter(logging.LoggerAdapter):  # noqa
     """This is key to keep the reference to the MAPDL instance name dynamic.
 
     If we use the standard approach which is supplying ``extra`` input
@@ -190,7 +184,7 @@ class PymapdlCustomAdapter(_LoggerAdapter):  # noqa
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[_StreamHandler] = None  # noqa
+    std_out_handler: Optional[logging.StreamHandler] = None  # noqa
 
     def __init__(self, logger: logging.Logger, extra: Optional["_MapdlCore"] = None):
         self.logger = logger
@@ -342,7 +336,7 @@ class Logger:
     """
 
     file_handler: Optional[logging.FileHandler] = None
-    std_out_handler: Optional[_StreamHandler] = None  # noqa
+    std_out_handler: Optional[logging.StreamHandler] = None  # noqa
     _level = logging.DEBUG
     _instances: Dict[str, Any] = {}
 
