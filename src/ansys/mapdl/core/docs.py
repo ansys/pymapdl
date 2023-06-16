@@ -2,6 +2,7 @@ import inspect
 import sys
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core.misc import get_active_branch_name
 
 
 def linkcode_resolve(domain, info, edit=False):
@@ -129,11 +130,7 @@ def linkcode_resolve(domain, info, edit=False):
     else:
         linespec = ""
 
-    if "dev" in pymapdl.__version__:
-        kind = "main"
-    else:  # pragma: no cover
-        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
-
+    kind = get_active_branch_name()
     blob_or_edit = "edit" if edit else "blob"
 
     url = f"http://github.com/pyansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"

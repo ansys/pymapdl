@@ -20,7 +20,6 @@ except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
 from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
-import appdirs
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
@@ -44,7 +43,7 @@ from ansys.mapdl.core.misc import (
 )
 
 # settings directory
-SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
+SETTINGS_DIR = pymapdl.USER_DATA_PATH
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
@@ -963,7 +962,7 @@ def launch_mapdl(
            The executable path can be also set through the environment variable
            ``PYMAPDL_MAPDL_EXEC``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
@@ -1133,7 +1132,7 @@ def launch_mapdl(
            The default version can be also set through the environment variable
            ``PYMAPDL_MAPDL_VERSION``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_VERSION=22.2
 

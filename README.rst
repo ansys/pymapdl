@@ -90,8 +90,8 @@ For more information on each project, visit their GitHub pages.
 
 Installation
 ------------
-The ``ansys-mapdl-core`` package currently supports Python 3.7 through
-Python 3.10 on Windows, Mac OS, and Linux.
+The ``ansys-mapdl-core`` package currently supports Python 3.8 through
+Python 3.11 on Windows, Mac OS, and Linux.
 
 Install the latest release from `PyPi
 <https://pypi.org/project/ansys-mapdl-core/>`_ with:
@@ -125,14 +125,14 @@ Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
-PyMAPDL from scratch on Windows and Linux for Python 3.7 and 3.9. You can install
+PyMAPDL from scratch on Windows and Linux for Python 3.8 and 3.11. You can install
 this on an isolated system with a fresh python or on a virtual environment.
 
-For example, on Linux with Python 3.7, unzip it and install it with the following:
+For example, on Linux with Python 3.8, unzip it and install it with the following:
 
 .. code:: console
 
-   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.7.zip wheelhouse
+   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.8.zip wheelhouse
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
 If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
@@ -178,7 +178,7 @@ adapted to run from Linux, or the LAN provided the necessary ports are
 open. This example specifies the port with ``-port 50052``, but this
 option can be left out if you plan on using the default port 50052.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     start "MAPDL" "%ANSYS211_DIR%\bin\winx64\ANSYS211.exe" -port 50052 -grpc
 
