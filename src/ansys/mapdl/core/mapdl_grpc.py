@@ -8,7 +8,6 @@ import os
 import pathlib
 import re
 import shutil
-import subprocess
 import tempfile
 import threading
 import time
@@ -466,7 +465,7 @@ class MapdlGrpc(_MapdlCore):
             if connected:
                 self._log.debug("Connected")
                 break
-        else:  # pragma: no cover
+        else:
             # Check if mapdl process is alive
             msg = (
                 f"Unable to connect to MAPDL gRPC instance at {self._channel_str}.\n"
@@ -960,7 +959,7 @@ class MapdlGrpc(_MapdlCore):
             except Exception:
                 continue
 
-    def exit(self, save=False, force=False):  # pragma: no cover
+    def exit(self, save=False, force=False):
         """Exit MAPDL.
 
         Parameters
@@ -1028,9 +1027,9 @@ class MapdlGrpc(_MapdlCore):
 
         self._exited = True
 
-        if self._remote_instance:
+        if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
-            self._remote_instance.delete()  # pragma: no cover
+            self._remote_instance.delete()
 
         self._remove_temp_dir_on_exit()
 
@@ -1044,7 +1043,7 @@ class MapdlGrpc(_MapdlCore):
         user temporary directory.
 
         """
-        if self.__remove_temp_dir_on_exit and self._local:  # pragma: no cover
+        if self.__remove_temp_dir_on_exit and self._local:
             path = self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
@@ -1058,7 +1057,7 @@ class MapdlGrpc(_MapdlCore):
                     tmp_dir,
                 )
 
-    def _kill_server(self):  # pragma: no cover
+    def _kill_server(self):
         """Call exit(0) on the server.
 
         Notes
@@ -1184,38 +1183,6 @@ class MapdlGrpc(_MapdlCore):
                         os.remove(lock_file)
                     except OSError:
                         pass
-
-    def _run_cleanup_script(self):  # pragma: no cover
-        """Run the APDL cleanup script.
-
-        On distributed runs MAPDL creates a cleanup script to kill the
-        processes created by the ANSYS spawner.  Normally this file is
-        removed when APDL exits normally, but on a failure, it's
-        necessary to manually close these PIDs.
-        """
-        # run cleanup script when local
-        if self._local:
-            for filename in self.list_files():
-                if "cleanup" in filename:
-                    script = os.path.join(self.directory, filename)
-                    if not os.path.isfile(script):
-                        return
-                    if os.name != "nt":
-                        script = ["/bin/bash", script]
-                    process = subprocess.Popen(
-                        script,
-                        shell=False,
-                        stdin=subprocess.PIPE,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-                    # always communicate to allow process to run
-                    output, err = process.communicate()
-                    self._log.debug(
-                        "Cleanup output:\n\n%s\n%s",
-                        output.decode(),
-                        err.decode(),
-                    )
 
     def list_files(self, refresh_cache=True):
         """List the files in the working directory of MAPDL.
@@ -1808,7 +1775,7 @@ class MapdlGrpc(_MapdlCore):
         _ = [chunk.cmdout for chunk in chunks]  # unstable
 
         # all output (unless redirected) has been written to a temp output
-        if self._local:  # pragma: no cover
+        if self._local:
             tmp_out_path = os.path.join(local_path, tmp_out)
             with open(tmp_out_path) as f:
                 output = f.read()
@@ -2078,7 +2045,7 @@ class MapdlGrpc(_MapdlCore):
         chunk_size=None,
         progress_bar=None,
         recursive=False,
-    ):  # pragma: no cover
+    ):
         """Download files from the gRPC instance workind directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
@@ -2152,7 +2119,7 @@ class MapdlGrpc(_MapdlCore):
         self_files = self.list_files()  # to avoid calling it too much
 
         if isinstance(files, str):
-            if self._local:  # pragma: no cover
+            if self._local:
                 # in local mode
                 if os.path.exists(files):
                     # file exist

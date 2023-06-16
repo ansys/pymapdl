@@ -1982,3 +1982,14 @@ def test_rlblock_rlblock_num(mapdl):
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
+
+
+def test__flush_stored(mapdl):
+    with mapdl.non_interactive:
+        mapdl.com("mycomment")
+        mapdl.com("another comment")
+
+        assert any(["mycomment" in each for each in mapdl._stored_commands])
+        assert len(mapdl._stored_commands) >= 2
+
+    assert not mapdl._stored_commands

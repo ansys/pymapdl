@@ -1616,9 +1616,7 @@ class AnsMat(ApdlMathObj):
 
         info = self._mapdl._data_info(self.id)
 
-        if server_meets_version(
-            self._mapdl._server_version, (0, 5, 0)
-        ):  # pragma: no cover
+        if server_meets_version(self._mapdl._server_version, (0, 5, 0)):
             return info.mattype in [
                 0,
                 1,

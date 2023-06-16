@@ -207,6 +207,7 @@ def test_license_type_keyword():
         # Using first line to ensure not picking up other stuff.
         checks.append(license_description in mapdl.__str__().split("\n")[0])
         mapdl.exit()
+        del mapdl
 
     assert any(checks)
 

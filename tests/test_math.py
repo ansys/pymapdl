@@ -717,7 +717,7 @@ def test_repr(mm):
     assert mm._status == repr(mm)
 
 
-def test__load_file(mm, tmpdir):  # pragma: no cover
+def test__load_file(mm, tmpdir):
     # generating dummy file
     # mm._mapdl._local = True  # Uncomment to test locally.
     if not mm._mapdl._local:

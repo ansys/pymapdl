@@ -196,7 +196,7 @@ def launch_grpc(
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
-) -> tuple:  # pragma: no cover
+) -> tuple:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -1304,7 +1304,7 @@ def launch_mapdl(
     ...                       mode='console')
 
     """
-    if remove_temp_files is not None:  # pragma: no cover
+    if remove_temp_files is not None:
         warnings.warn(
             "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
             "Please use ``remove_temp_dir_on_exit`` instead.",
@@ -1336,7 +1336,7 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-    else:  # pragma: no cover
+    else:
         LOG.debug(
             "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
         )
@@ -1431,8 +1431,6 @@ def launch_mapdl(
 
     if not start_instance:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
-        if clear_on_connect is None:  # pragma: no cover
-            clear_on_connect = False
 
         mapdl = MapdlGrpc(
             ip=ip,

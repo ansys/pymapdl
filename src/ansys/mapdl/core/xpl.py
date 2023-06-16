@@ -360,7 +360,7 @@ class ansXpl:
         self._check_ignored(response)
         return response
 
-    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
+    def extract(self, recordname, sets="ALL", asarray=False):
         """
         Import a Matrix/Vector from a MAPDL result file.
 
@@ -477,7 +477,7 @@ class ansXpl:
         data_info = self._mapdl._data_info(rand_name)
 
         dtype = ANSYS_VALUE_TYPE[data_info.stype]
-        if dtype is None:  # pragma: no cover
+        if dtype is None:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type
@@ -486,9 +486,9 @@ class ansXpl:
         elif data_info.objtype in [
             mapdl_pb2.DataType.DMAT,
             mapdl_pb2.DataType.SMAT,
-        ]:  # pragma: no cover
+        ]:
             out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
-        else:  # pragma: no cover
+        else:
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
         if asarray:
