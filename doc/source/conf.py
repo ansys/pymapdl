@@ -95,6 +95,7 @@ intersphinx_mapping = {
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
     "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "pyansys-math": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
