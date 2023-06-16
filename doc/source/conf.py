@@ -94,8 +94,8 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/version/stable/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
-    "pyansys-math": ("https://math.docs.pyansys.com/version/stable/", None),
+    "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
