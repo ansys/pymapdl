@@ -24,7 +24,7 @@
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/dev/coding-style/index.html
 
 .. #Other libraries
-.. _pyvista_docs: https://docs.pyvista.org/
+.. _pyvista_docs: https://docs.pyvista.org/version/stable/
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
 .. _pandas_org: https://pandas.pydata.org/

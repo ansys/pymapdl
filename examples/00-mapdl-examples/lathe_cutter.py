@@ -392,8 +392,7 @@ sbar_kwargs = {
 #
 # .. note::
 #    We're using ``eye_dome_lighting`` here to enhance the plots of our slices.
-#    Read more about it at `Eye Dome Lighting
-#    <pyvista_eye_dome_lighting_>`_
+#    Read more about it at `Eye Dome Lighting <pyvista_eye_dome_lighting_>`_
 
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(
