@@ -139,4 +139,4 @@ solution.
 
 PyAnsys Math reference
 ~~~~~~~~~~~~~~~~~~~~~~
-For more information, see the `PyAnsys Math API reference<pyansys_math_api_>`_.
+For more information, see the `PyAnsys Math API reference <pyansys_math_api_>`_.

@@ -32,7 +32,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    plotting
    pool
    post
-   pyansys math <https://math.docs.pyansys.com/version/stable/>
+   Pyansys Math <https://math.docs.pyansys.com/version/stable/>
    solution
    xpl
    building_example
