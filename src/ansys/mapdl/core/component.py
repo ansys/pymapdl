@@ -30,21 +30,21 @@ def _check_valid_pyobj_to_entities(items):
             "Only list or numpy arrays are allowed for component definitions."
         )
 
-    if not all([isinstance(each, (int, np.int_)) for each in items]):
+    if not all([isinstance(each, (int, np.integer)) for each in items]):
         raise ValueError("Only integers are allowed for component definition.")
 
 
-class Component:
-    def __setitem__(self, __key: Any, __value: Any) -> None:
-        if __key not in ["type", "items"]:
-            raise KeyError(f"The key '{__key}' is not allowed in 'Component' class.")
+class Component(dict):
+    def __setitem__(self, key: Any, value: Any) -> None:
+        if key not in ["type", "items"]:
+            raise KeyError(f"The key '{key}' is not allowed in 'Component' class.")
 
-        if __key == "type":
-            if not isinstance(__value, str) or __value.upper() not in VALID_ENTITIES:
+        if key == "type":
+            if not isinstance(value, str) or value.upper() not in VALID_ENTITIES:
                 raise ValueError(
-                    f"The value '{__value[0]}' is not allowed for 'type' definition."
+                    f"The value '{value[0]}' is not allowed for 'type' definition."
                 )
-        return super().__setitem__(__key, __value)
+        return super().__setitem__(key, value)
 
     @property
     def type(self):
@@ -56,15 +56,16 @@ class Component:
 
 
 class ComponentManager(dict):
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: _MapdlCore) -> None:
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
+
         self._mapdl_weakref = weakref.ref(mapdl)
         self.__comp = None
         self._update_always = True
 
     @property
-    def _mapdl(self):
+    def _mapdl(self) -> _MapdlCore:
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
@@ -85,59 +86,59 @@ class ComponentManager(dict):
     def _comp(self, value):
         self.__comp = value
 
-    def __getitem__(self, __key: Any) -> Any:
+    def __getitem__(self, key: Any) -> Any:
         self._comp = self._mapdl._parse_cmlist()
         try:
-            cmtype = self._comp[__key.upper()]
+            cmtype = self._comp[key.upper()]
         except KeyError:
             raise KeyError(
-                f"The component named '{__key}' does not exist in the MAPDL instance."
+                f"The component named '{key}' does not exist in the MAPDL instance."
             )
-        return self._mapdl._parse_cmlist_indiv(__key, cmtype)
+        return self._mapdl._parse_cmlist_indiv(key, cmtype)
 
-    def __setitem__(self, __key: Any, __value: Any) -> None:
-        if not isinstance(__key, str):
+    def __setitem__(self, key: Any, value: Any) -> None:
+        if not isinstance(key, str):
             raise ValueError("Only strings are allowed for component names.")
 
-        if isinstance(__value, tuple):
-            if len(__value) != 2:
+        if isinstance(value, tuple):
+            if len(value) != 2:
                 raise ValueError(
                     "Only two values are allowed for assignment. The first one a string with the type name and the second a list or numpy array with the selected elements"
                 )
-            if not isinstance(__value[0], str) or not isinstance(
-                __value[1], (list, np.array)
+            if not isinstance(value[0], str) or not isinstance(
+                value[1], (list, np.ndarray)
             ):
                 raise ValueError(
                     "Only strings are allowed for the first argument, and a list or numpy array for the second."
                 )
 
-            if __value[0].upper() not in VALID_ENTITIES:
+            if value[0].upper() not in VALID_ENTITIES:
                 raise ValueError(
-                    f"The value '{__value}' is not allowed for 'type' definition."
+                    f"The value '{value}' is not allowed for 'type' definition."
                 )
 
-            cmname = __key
-            cmtype = __value[0].upper()
-            cmitems = __value[1]
+            cmname = key
+            cmtype = value[0].upper()
+            cmitems = value[1]
 
-        elif isinstance(__value, str):
+        elif isinstance(value, str):
             # create a component with the already selected elements
-            cmname = __key
-            cmtype = __value
+            cmname = key
+            cmtype = value
 
             self._mapdl.cm(cmname, cmtype)
 
             return  # Early exit
 
-        elif isinstance(__value, (list, np.ndarray)):
-            # Assuming we are defining a CM with  nodes
+        elif isinstance(value, (list, np.ndarray)):
+            # Assuming we are defining a CM with nodes
             warnings.warn(
                 "Assuming a NODE selection. It is recommended you use the following notation to avoid this warning:\n>>> mapdl.components['mycomp'] = 'nodes', [1, 2, 3,4]"
             )
 
-            cmname = __key
+            cmname = key
             cmtype = "NODES"
-            cmitems = __value
+            cmitems = value
 
         else:
             raise ValueError("Only strings or tuples are allowed for assignment.")
@@ -158,7 +159,7 @@ class ComponentManager(dict):
         self._mapdl.cmsel("S", "__temp_comp__")
         self._mapdl.cmdele("__temp_comp__")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return the current components in a pretty format"""
         lines = ["MAPDL Components", "----------------"]
         if self._comp:
@@ -167,7 +168,7 @@ class ComponentManager(dict):
 
         return "\n".join(lines)
 
-    def __contains__(self, key):
+    def __contains__(self, key) -> bool:
         """
         Check if a given key is present in the dictionary.
 
