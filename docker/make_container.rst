@@ -55,7 +55,7 @@ continuous integration workflow.
 To reduce the size of the final image, you might want to
 install the minimal files by using:
 
-.. code:: bash
+.. code:: console
 
     sh /path-to-mapdl-installer \
         -install_dir /path-to-install-mapdl/ \
@@ -76,7 +76,7 @@ all the files you need in the image.
 The steps to copy those files and build the image are detailed in the following script,
 which you should modify to adapt it to your needs.
 
-.. code:: bash
+.. code:: dockerfile
 
     # Creating working directory
     mkdir docker_image
