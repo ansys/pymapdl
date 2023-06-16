@@ -129,8 +129,8 @@ import weakref
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import _MapdlCore
 
-    _LoggerAdapter = logging.LoggerAdapter[logging.Logger]
-    _StreamHandler = logging.StreamHandler[Any]
+    _LoggerAdapter = logging.LoggerAdapter
+    _StreamHandler = logging.StreamHandler
 else:
     _LoggerAdapter = logging.LoggerAdapter
     _StreamHandler = logging.StreamHandler
