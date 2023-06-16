@@ -121,7 +121,6 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
-    Type,
     Union,
     cast,
 )
@@ -130,8 +129,8 @@ import weakref
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import _MapdlCore
 
-    _LoggerAdapter = Type[logging.LoggerAdapter[logging.Logger]]
-    _StreamHandler = Type[logging.StreamHandler[Any]]
+    _LoggerAdapter = type[logging.LoggerAdapter[logging.Logger]]
+    _StreamHandler = type[logging.StreamHandler[Any]]
 else:
     _LoggerAdapter = logging.LoggerAdapter
     _StreamHandler = logging.StreamHandler
