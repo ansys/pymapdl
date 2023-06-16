@@ -1,7 +1,9 @@
 """Module to support MAPDL CAD geometry"""
 import re
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
 
@@ -28,7 +30,7 @@ FLST_LOOKUP = {
 }
 
 
-def merge_polydata(items):
+def merge_polydata(items: Union[pv.PolyData, pv.UnstructuredGrid]):
     """Merge list of polydata or unstructured grids"""
 
     # lazy import here for faster module loading
@@ -45,7 +47,7 @@ def merge_polydata(items):
     return pv.wrap(afilter.GetOutput())
 
 
-def get_elements_per_area(resp):
+def get_elements_per_area(resp: str) -> List[int]:
     """Get the number of elements meshed for each area given the response
     from ``AMESH``.
 
@@ -106,10 +108,10 @@ class Geometry:
         self._lines_cache = None
         self._log = self._mapdl._log
 
-    def _set_log_level(self, level):
+    def _set_log_level(self, level: str) -> None:
         return self._mapdl.set_log_level(level)
 
-    def _load_iges(self):
+    def _load_iges(self) -> "Iges":
         """Loads the iges file from MAPDL as a pyiges class"""
         # Lazy import here for speed and stability
         # possible to exclude this import in the future
@@ -121,51 +123,51 @@ class Geometry:
             )
         return Iges(self._mapdl._generate_iges())
 
-    def _reset_cache(self):
+    def _reset_cache(self) -> None:
         self._keypoints_cache = None
         self._lines_cache = None
 
     @property
-    def _keypoints(self):
+    def _keypoints(self) -> pv.PolyData:
         """Returns keypoints cache"""
         if self._keypoints_cache is None:
             self._keypoints_cache = self._load_keypoints()
         return self._keypoints_cache
 
     @property
-    def keypoints(self):
+    def keypoints(self) -> pv.MultiBlock:
         """Keypoint entities as Pyvista MultiBlock"""
         points = pv.MultiBlock()
         for each_kp in self._keypoints.points:
             points.append(pv.PointSet(each_kp))
         return points
 
-    def get_keypoints(self):
-        """Keypoint coordinates entities as a Pyvista Multiblock"""
+    def get_keypoints(self) -> NDArray:
+        """Keypoint coordinates entities as a Numpy array"""
         return np.asarray(self._keypoints.points)
 
     @property
-    def _lines(self):
+    def _lines(self) -> pv.MultiBlock:
         """Returns lines cache"""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
         return self._lines_cache
 
     @property
-    def lines(self):
+    def lines(self) -> pv.MultiBlock:
         """Active lines as a pyvista.MultiBlock"""
         return self._lines
 
-    def get_lines(self):
+    def get_lines(self) -> pv.MultiBlock:
         """Active lines as a pyvista.MultiBlock"""
         return self.lines
 
     @property
-    def areas(self):
+    def areas(self) -> pv.MultiBlock:
         """List of areas from MAPDL represented as ``pyvista.MultiBlock"""
         return self.get_areas()
 
-    def get_areas(self, quality=4, merge=False):
+    def get_areas(self, quality: int = 4, merge: bool = False) -> pv.MultiBlock:
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
@@ -231,6 +233,7 @@ class Geometry:
             return surf
 
         entity_num = surf["entity_num"]
+
         areas = pv.MultiBlock()
         anums = np.unique(entity_num)
         for anum in anums:
@@ -240,7 +243,13 @@ class Geometry:
 
     @supress_logging
     @run_as_prep7
-    def generate_surface(self, density=4, amin=None, amax=None, ninc=None):
+    def generate_surface(
+        self,
+        density: int = 4,
+        amin: Optional[int] = None,
+        amax: Optional[int] = None,
+        ninc: Optional[int] = None,
+    ) -> pv.PolyData:
         """
         Generate an all-triangular surface of the active surfaces.
 
@@ -345,7 +354,7 @@ class Geometry:
         return pd
 
     @property
-    def n_volu(self):
+    def n_volu(self) -> int:
         """
         Number of volumes currently selected.
 
@@ -357,7 +366,7 @@ class Geometry:
         return self._item_count("VOLU")
 
     @property
-    def n_area(self):
+    def n_area(self) -> int:
         """
         Number of areas currently selected.
 
@@ -369,7 +378,7 @@ class Geometry:
         return self._item_count("AREA")
 
     @property
-    def n_line(self):
+    def n_line(self) -> int:
         """
         Number of lines currently selected.
 
@@ -381,7 +390,7 @@ class Geometry:
         return self._item_count("LINE")
 
     @property
-    def n_keypoint(self):
+    def n_keypoint(self) -> int:
         """
         Number of keypoints currently selected.
 
@@ -393,12 +402,12 @@ class Geometry:
         return self._item_count("KP")
 
     @supress_logging
-    def _item_count(self, entity):
+    def _item_count(self, entity: str) -> int:
         """Return item count for a given entity."""
         return int(self._mapdl.get(entity=entity, item1="COUNT"))
 
     @property
-    def knum(self):
+    def knum(self) -> NDArray[np.integer]:
         """
         Array of keypoint numbers.
 
@@ -414,7 +423,7 @@ class Geometry:
         return self._mapdl.get_array("KP", item1="KLIST").astype(np.int32)
 
     @property
-    def lnum(self):
+    def lnum(self) -> "ndarray[np.integer]":
         """Array of line numbers.
 
         Examples
@@ -435,7 +444,7 @@ class Geometry:
         return lnum.astype(np.int32)
 
     @property
-    def anum(self):
+    def anum(self) -> NDArray[np.integer]:
         """Array of area numbers.
 
         Examples
@@ -451,7 +460,7 @@ class Geometry:
         return self._mapdl.get_array("AREA", item1="ALIST").astype(np.int32)
 
     @property
-    def vnum(self):
+    def vnum(self) -> NDArray[np.integer]:
         """Array of volume numbers.
 
         Examples
@@ -466,7 +475,7 @@ class Geometry:
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
-    def _load_lines(self):
+    def _load_lines(self) -> pv.MultiBlock:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
@@ -517,7 +526,7 @@ class Geometry:
 
         return lines_
 
-    def _load_keypoints(self):
+    def _load_keypoints(self) -> pv.PolyData:
         """Load keypoints from MAPDL using IGES"""
         # write only keypoints
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
@@ -544,7 +553,7 @@ class Geometry:
         keypoints_pd["entity_num"] = kp_num
         return keypoints_pd
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Current geometry info"""
         info = "MAPDL Selected Geometry\n"
         info += "Keypoints:  %d\n" % self.n_keypoint
@@ -553,7 +562,9 @@ class Geometry:
         info += "Volumes:    %d\n" % self.n_volu
         return info
 
-    def keypoint_select(self, items, sel_type="S", return_selected=False):
+    def keypoint_select(
+        self, items, sel_type="S", return_selected=False
+    ) -> Optional[int]:
         """Select keypoints using a sequence of items.
 
         Parameters
@@ -630,7 +641,12 @@ class Geometry:
         if return_selected:
             return self.knum
 
-    def line_select(self, items, sel_type="S", return_selected=False):
+    def line_select(
+        self,
+        items: Optional[Sequence],
+        sel_type: Optional[str] = "S",
+        return_selected: Optional[bool] = False,
+    ) -> Optional[int]:
         """Select lines using a sequence of items.
 
         Parameters
@@ -707,7 +723,12 @@ class Geometry:
         if return_selected:
             return self.lnum
 
-    def area_select(self, items, sel_type="S", return_selected=False):
+    def area_select(
+        self,
+        items: Optional[Sequence],
+        sel_type: Optional[str] = "S",
+        return_selected: Optional[bool] = False,
+    ) -> Optional[int]:
         """Select areas using a sequence of items.
 
         Parameters
@@ -785,11 +806,11 @@ class Geometry:
             return self.anum
 
     @property
-    def volumes(self):
+    def volumes(self) -> pv.MultiBlock:
         """Get volumes from MAPDL represented as ``pyvista.MultiBlock``"""
         return self.get_volumes(return_as_list=False)
 
-    def get_volumes(self, return_as_list=True):
+    def get_volumes(self, return_as_list: bool = True) -> Union[list, pv.MultiBlock]:
         """List of volumes from MAPDL represented as ``pyvista.UnstructuredGrid``"""
 
         # Cache current selection
@@ -807,7 +828,12 @@ class Geometry:
         self._mapdl.cmsel("S", "__temp_volu__")
         return volumes_
 
-    def volume_select(self, items, sel_type="S", return_selected=False):
+    def volume_select(
+        self,
+        items: Optional[Sequence],
+        sel_type: Optional[str] = "S",
+        return_selected: Optional[bool] = False,
+    ) -> Optional[int]:
         """Select volumes using a sequence of items.
 
         Parameters
@@ -884,7 +910,7 @@ class Geometry:
         if return_selected:
             return self.vnum
 
-    def _select_items(self, items, item_type, sel_type):
+    def _select_items(self, items: Sequence, item_type: str, sel_type: str) -> None:
         """Select items using FLST
 
         Parameters
