@@ -15,7 +15,7 @@ After you have activated and installed the package as described
 in :ref:`installation`, you can use the converter from your terminal.
 Here is how you use the ``pymapdl_convert_script`` command:
 
-.. code:: bash
+.. code:: console
 
     $ pymapdl_convert_script mapdl.dat -o python.py
 
@@ -23,7 +23,7 @@ Here is how you use the ``pymapdl_convert_script`` command:
 
 To obtain help on converter usage, options, and examples, type this command:
 
-.. code:: bash
+.. code:: console
 
     $ pymapdl_convert_script --help
 
@@ -46,7 +46,7 @@ You can call this command from the terminal with different
 arguments. Here is an example that converts the ``mapdl.dat``
 file to a Python file named ``python.py``:
 
-.. code:: bash
+.. code:: console
     
     $ pymapdl_convert_script mapdl.dat -o python.py
 
@@ -55,7 +55,7 @@ file to a Python file named ``python.py``:
 The output argument is completely optional. If you don't specify it,
 the ``py`` extension is used for the file that is outputted:
 
-.. code:: bash
+.. code:: console
 
     $ pymapdl_convert_script mapdl.dat
 
@@ -67,7 +67,7 @@ You can use any option from the
 For example, to avoid exiting the MAPDL instance after running
 the script, you can use ``--auto-exit`` argument:
 
-.. code:: bash
+.. code:: console
 
     $ pymapdl_convert_script mapdl.dat --auto-exit False
 
@@ -76,7 +76,7 @@ the script, you can use ``--auto-exit`` argument:
 You can skip the imports by setting the ``--add_imports`` option
 to ``False``:
 
-.. code:: bash
+.. code:: console
 
     $ pymapdl_convert_script mapdl.dat --filename_out mapdl.out --add_imports
     False

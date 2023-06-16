@@ -28,9 +28,9 @@ mm = mapdl.math
 # after running the input file from Verification Manual 153
 #
 out = mapdl.input(vmfiles["vm153"])
-
-k = mm.stiff(fname="PRSMEMB.full")
-m = mm.mass(fname="PRSMEMB.full")
+fullfile = mapdl.jobname + ".full"
+k = mm.stiff(fname=fullfile)
+m = mm.mass(fname=fullfile)
 
 
 ###############################################################################

@@ -22,9 +22,10 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 .. toctree::
     :hidden:
     :maxdepth: 3
-    
+
     Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
     Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
+    extended_examples/index.rst
 
 
 .. include:: pymapdl_examples_repo/index.rst
@@ -32,19 +33,10 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 .. === EXTENDED EXAMPLES ===
 
-.. toctree::
-    :hidden:
-    :maxdepth: 3
-    
-    Cart-Pole Simulation <https://pyansys.github.io/ml-rl-cartpole/ml-rl-notebook.html>
-    extended_examples/ex_01-gmsh_example/ex_01-gmsh_example
-    extended_examples/Python_UPF/python_upf_examples
-    extended_examples/Krylov/krylov_example
-    extended_examples/dash/dash_example
-    extended_examples/executable/executable
 
 .. include:: extended_examples/index.rst
    :start-line: 2
+   :end-line: 29
 
 
 .. === DOWNLOAD EXAMPLES ===
@@ -62,5 +54,5 @@ These links refers to the following GitHub repository where you can find all of 
 `GitHub Example Data Repository <example_data_repo_>`_
 
 If you find a missing or broken link, open an issue in
-GitHub (`PyMAPDL Issues <pymapdl_issues_>`_) 
-or send an email to |pyansys_contact|. 
+GitHub (`PyMAPDL Issues <pymapdl_issues_>`_)
+or send an email to |pyansys_contact|.

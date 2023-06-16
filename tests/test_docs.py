@@ -1,6 +1,13 @@
+import os
+
 import pytest
 
 from ansys.mapdl.core.docs import linkcode_resolve
+
+skip_if_not_on_ci = pytest.mark.skipif(
+    not (os.environ.get("ON_CI", "").upper() == "TRUE"),
+    reason="Skipping if not in CI",
+)
 
 
 @pytest.mark.parametrize("edit", [True, False])
@@ -44,4 +51,9 @@ def test_linkcode_resolve(test_input, expected, edit):
     info = {"module": "ansys.mapdl.core", "fullname": test_input}
     url = linkcode_resolve("py", info, edit)
 
-    assert expected in url
+    assert "http://github.com/pyansys/pymapdl" in url
+    assert "src/ansys/mapdl/core" in url
+    assert expected.split("/")[-1] in url
+
+    if "main" in url:
+        assert expected in url
