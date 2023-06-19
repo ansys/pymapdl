@@ -321,8 +321,11 @@ def test_nodes(tmpdir, cleared, mapdl_corba):
 
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
-    mapdl_corba.nwrite(basename)
-    mapdl_corba.download(basename, filename)
+    if mapdl_corba._local:
+        mapdl_corba.nwrite(filename)
+    else:
+        mapdl_corba.nwrite(basename)
+        mapdl_corba.download(basename, filename)
 
     assert np.allclose(mapdl_corba.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_corba.mesh.n_node == 11

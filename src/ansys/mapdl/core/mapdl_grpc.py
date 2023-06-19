@@ -2710,6 +2710,7 @@ class MapdlGrpc(_MapdlCore):
         self._prioritize_thermal = False
         return result
 
+    @property
     def list_error_file(self):
         """Listing of errors written in JOBNAME.err"""
         files = self.list_files()
