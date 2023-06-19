@@ -485,3 +485,8 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+def test_launch_pyansys_math(mapdl):
+    mm = mapdl.math
+    assert mm._mapdl == mapdl
