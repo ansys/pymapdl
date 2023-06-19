@@ -2,6 +2,7 @@ import inspect
 import sys
 
 from ansys.mapdl.core import LOG
+from ansys.mapdl.core.misc import get_active_branch_name
 
 
 def linkcode_resolve(domain, info, edit=False):
@@ -53,6 +54,8 @@ def linkcode_resolve(domain, info, edit=False):
         from ansys.mapdl.core import mapdl_corba  # noqa: F401
     except ImportError:
         pass
+    from ansys.math.core import math  # noqa: F401
+
     from ansys.mapdl.core import commands  # noqa: F401
     from ansys.mapdl.core import errors  # noqa: F401
     from ansys.mapdl.core import krylov  # noqa: F401
@@ -60,7 +63,6 @@ def linkcode_resolve(domain, info, edit=False):
     from ansys.mapdl.core import licensing  # noqa: F401
     from ansys.mapdl.core import mapdl_geometry  # noqa: F401
     from ansys.mapdl.core import mapdl_grpc  # noqa: F401
-    from ansys.mapdl.core import math  # noqa: F401
     from ansys.mapdl.core import parameters  # noqa: F401
     from ansys.mapdl.core import pool  # noqa: F401
     from ansys.mapdl.core import xpl  # noqa: F401
@@ -129,11 +131,7 @@ def linkcode_resolve(domain, info, edit=False):
     else:
         linespec = ""
 
-    if "dev" in pymapdl.__version__:
-        kind = "main"
-    else:  # pragma: no cover
-        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
-
+    kind = get_active_branch_name()
     blob_or_edit = "edit" if edit else "blob"
 
     url = f"http://github.com/pyansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"

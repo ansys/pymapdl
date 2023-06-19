@@ -21,7 +21,7 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
-  DOCKER_PACKAGE: ghcr.io/pyansys/mapdl
+  DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
@@ -31,10 +31,9 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_PIP_CACHE: 0
-  RESET_EXAMPLES_CACHE: 0
-  RESET_DOC_BUILD_CACHE: 0
-  RESET_AUTOSUMMARY_CACHE: 0
+  RESET_EXAMPLES_CACHE: 2
+  RESET_DOC_BUILD_CACHE: 2
+  RESET_AUTOSUMMARY_CACHE: 2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,8 +50,8 @@ jobs:
     name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
-      - name: "PyAnsys documentation style checks"
-        uses: pyansys/actions/doc-style@v4
+      - name: "Ansys documentation style checks"
+        uses: ansys/actions/doc-style@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -74,7 +73,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: pyansys/actions/build-wheelhouse@v4
+        uses: ansys/actions/build-wheelhouse@v4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           library-namespace: ${{ env.PACKAGE_NAMESPACE }}
@@ -100,20 +99,13 @@ jobs:
       - name: "Setup Python"
         uses: actions/setup-python@v4
         with:
+          cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install OS packages"
         run: |
           sudo apt update 
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
-
-      - name: "Cache pip"
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -174,8 +166,8 @@ jobs:
 
       - name: "DPF server activation"
         run: |
-          docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker pull ghcr.io/ansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Build documentation"
         run: |
@@ -288,20 +280,14 @@ jobs:
       - name: "Setup Python"
         uses: actions/setup-python@v4
         with:
+          cache: 'pip'
+          cache-dependency-path: pyproject.toml
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install os packages"
         run: |
           sudo apt update
           sudo apt install libgl1-mesa-glx xvfb
-
-      - name: "Cache pip"
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -334,7 +320,7 @@ jobs:
         if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/pyansys/mapdl:${{ matrix.mapdl-version }}
+          MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
 
       - name: "Unit testing requirements installation"
         run: |
@@ -342,8 +328,8 @@ jobs:
 
       - name: "DPF server activation"
         run: |
-          docker pull ghcr.io/pyansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          docker pull ghcr.io/ansys/dpf-core:22.2dev
+          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         run: |
@@ -439,7 +425,7 @@ jobs:
     if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
     container:
-      image: ghcr.io/pyansys/mapdl:v22.2-ubuntu
+      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
@@ -487,8 +473,8 @@ jobs:
 
       # - name: DPF Server Activation
       #   run: |
-      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
-      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+      #     docker pull ghcr.io/ansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         run: |
@@ -557,8 +543,8 @@ jobs:
 
       # - name: DPF Server Activation
       #   run: |
-      #     docker pull ghcr.io/pyansys/dpf-core:22.2dev
-      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/pyansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+      #     docker pull ghcr.io/ansys/dpf-core:22.2dev
+      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
         shell: powershell
@@ -634,11 +620,12 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: pyansys/actions/doc-deploy-stable@v4
+        uses: ansys/actions/doc-deploy-stable@v4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          render-last: '5'
 
   upload-dev-docs:
     name: Upload dev documentation
@@ -647,7 +634,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: Deploy the latest documentation
-        uses: pyansys/actions/doc-deploy-dev@v4
+        uses: ansys/actions/doc-deploy-dev@v4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
