@@ -481,3 +481,7 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+def test_list_error_file(mapdl, contact_solve):
+    assert "The geometry is not available." in mapdl.list_error_file()
