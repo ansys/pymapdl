@@ -59,7 +59,6 @@ These commands are listed in Table-1_.
 |                |                                                                                                   | * :func:`Mapdl.prrsol() <ansys.mapdl.core.Mapdl.prrsol>`                 |
 |                |                                                                                                   | * :func:`Mapdl.prsect() <ansys.mapdl.core.Mapdl.prsect>`                 |
 |                |                                                                                                   | * :func:`Mapdl.prvect() <ansys.mapdl.core.Mapdl.prvect>`                 |
-|                |                                                                                                   | * :func:`Mapdl.stat() <ansys.mapdl.core.Mapdl.stat>`                     |
 |                |                                                                                                   | * :func:`Mapdl.swlist() <ansys.mapdl.core.Mapdl.swlist>`                 |
 |                |                                                                                                   |                                                                          |
 |                |                                                                                                   |  **Other Listing**                                                       |

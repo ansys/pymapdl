@@ -437,7 +437,7 @@ plt.xlabel("Displacement [mm]")
 plt.show()
 
 ###############################################################################
-# Animate results using PyDPF with .anmiate() method
+# Animate results using PyDPF with .animate() method
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Use PyDPF method :func:`FieldsContainer.animate() <ansys.dpf.core.fields_container.FieldsContainer.animate>` to visualize the crack opening throughout the simulation as
 # an animation.

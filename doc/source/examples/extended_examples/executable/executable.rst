@@ -39,7 +39,7 @@ is used. Another suitable package is the builtin package
 
 First, you must convert the script to a function. You can
 accomplish this by using the input arguments
-in a function signature. 
+in a function signature.
 
 In this case, the following arguments must be specified:
 
@@ -75,7 +75,7 @@ This ensure the new function is called when the script is executed.
 Now you can call your function from the command line using
 this code:
 
-.. code:: bash
+.. code:: console
 
    $ python rotor.py 8
    Initialize script with values:
@@ -89,7 +89,7 @@ this code:
 The preceding code sets the number of blades to ``8``.
 This code shows how you can input other arguments:
 
-.. code:: bash
+.. code:: console
 
    $ python rotor.py 8 --density 7000
    Initialize script with values:
@@ -99,6 +99,50 @@ This code shows how you can input other arguments:
    Density: 7000 Kg/m3
    Solving...
    The first natural frequency is 344.28 Hz.
+
+
+Convert the app to an executable file
+=====================================
+
+Using the Python library `PyInstaller <pyinstaller_>`_, you can convert the app to an executable file.
+However, for the app to work, you must add the ``VERSION`` file that specifies the PyMAPDL version to the executable file.
+
+Start by generating the `specification file <pyinstaller_spec_files_>`_ for the app.
+At the root of the project, execute the following command:
+
+
+.. code:: console
+
+   pyi-makespec cli_rotor.py
+
+PyInstaller provides two modes for generating executables:
+
+- ``onedir`` (default): This mode generates a folder that includes the executable file along with its dependencies.
+- ``onefile``: This mode has PyInstaller generate a single executable file.
+
+To generate the executable file in ``onefile`` mode, include the argument ``--onefile`` in the command:
+
+.. code:: console
+
+   pyi-makespec cli_rotor.py --onefile
+
+Then, add the link to the ``VERSION`` file from the PyMAPDL package in the ``cli_rotor.spec`` file:
+
+
+.. literalinclude:: cli_rotor.spec
+   :language: python
+   :lines: 1-30
+   :emphasize-lines: 3-11,20
+
+
+Generate the executable file from the ``cli_rotor.spec`` file:
+
+.. code:: console
+
+   pyinstaller cli_rotor.spec
+
+
+The output is an executable file named ``cli_rotor.exe`` in the directory ``./dist/cli_rotor``.
 
 
 Advanced usage
@@ -122,14 +166,14 @@ To create an image with PyMAPDL, you can add this code to the
 
 To add a frame, you can use `ImageMagick <https://www.imagemagick.org>`_:
 
-.. code:: bash
+.. code:: console
 
-   mogrify -mattecolor #f1ce80 -frame 10x10 volumes.jpg
+   mogrify -mattecolor \#f1ce80 -frame 10x10 volumes.jpg
 
 
 You can also use Imagemagick to add a watermark:
 
-.. code:: bash
+.. code:: console
 
    COMPOSITE=/usr/bin/composite
    $COMPOSITE -gravity SouthEast watermark.jpg volumes.jpg volumes_with_watermark.jpg
@@ -138,7 +182,7 @@ Here are descriptions for values used in the preceding code:
 
 - ``-gravity``: Location of the watermark in case the watermark is
   smaller than the image.
-- ``COMPOSITE``: Path to the ImageMagick ``composite`` function. 
+- ``COMPOSITE``: Path to the ImageMagick ``composite`` function.
 - ``watermark.png``: Name of the PNG file with the watermark image.
 - ``volumes_with_watermark.jpg``: Name of the JPG file to save the output to.
 
@@ -159,7 +203,7 @@ For example, you can execute the previous example on a GitHub runner
 using this approach (non-tested):
 
 .. code:: yaml
-  
+
    my_job:
       name: 'Generate watermarked images'
       runs-on: ubuntu-latest
@@ -174,7 +218,7 @@ using this approach (non-tested):
          - name: "Install ansys-mapdl-core"
            run: |
                python -m pip install ansys-mapdl-core
-         
+
          - name: "Install ImageMagic"
            run: |
             sudo apt install imagemagick

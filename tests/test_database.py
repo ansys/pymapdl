@@ -1,20 +1,18 @@
 import os
 import re
 
+from ansys.tools.versioning import server_meets_version
 import numpy as np
 import pytest
 
 ## Checking MAPDL versions
-from ansys.mapdl.core.database import VALID_MAPDL_VERSIONS, DBDef, MapdlDb
+from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
-ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-
-if ON_CI:  # Docker image seems to not support DB, but local does.
-    VALID_MAPDL_VERSIONS.remove(22.2)
-
-# We are skipping all these test until 0.5.X gets fixed.
+ON_CI = "ON_CI" in os.environ or (
+    "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
+)
 
 
 @pytest.fixture(scope="session")
@@ -27,10 +25,16 @@ def db(mapdl):
 
     ## Checking MAPDL versions
 
-    mapdl_version = mapdl.version
-    if mapdl_version not in VALID_MAPDL_VERSIONS:
+    mapdl_version = str(mapdl.version)
+    if not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION):
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
+
+    # Exception for 22.2
+    if mapdl_version == "22.2" and ON_CI:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
@@ -67,10 +71,16 @@ def test_database_start_stop(mapdl):
     if mapdl._server_version < (0, 4, 1):  # 2021R2
         pytest.skip("requires 2021R2 or newer")
 
-    mapdl_version = mapdl.version
-    if mapdl_version not in VALID_MAPDL_VERSIONS:
+    mapdl_version = str(mapdl.version)
+    if not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION):
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
+        )
+
+    # Exception for 22.2
+    if mapdl_version == "22.2" and ON_CI:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
     # verify it can be created twice

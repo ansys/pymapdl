@@ -19,9 +19,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
-from ansys.tools.path import find_ansys, get_ansys_path
-from ansys.tools.path.path import _version_from_path
-import appdirs
+from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
@@ -45,7 +43,7 @@ from ansys.mapdl.core.misc import (
 )
 
 # settings directory
-SETTINGS_DIR = appdirs.user_data_dir("ansys_mapdl_core")
+SETTINGS_DIR = pymapdl.USER_DATA_PATH
 if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
@@ -404,7 +402,7 @@ def launch_grpc(
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    if _version_from_path(exec_file) < 202:
+    if version_from_path("mapdl", exec_file) < 202:
         raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
 
     # verify lock file does not exist
@@ -803,7 +801,7 @@ def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
     ansys_bin = get_ansys_path(allow_input=False)
     if ansys_bin is not None:
-        version = _version_from_path(ansys_bin)
+        version = version_from_path("mapdl", ansys_bin)
         return not (version < 170 and os.name != "posix")
     return False
 
@@ -866,7 +864,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         if (
             os.name == "nt"
             and not force_intel
-            and (222 > _version_from_path(exec_path) >= 210)
+            and (222 > version_from_path("mapdl", exec_path) >= 210)
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
@@ -964,7 +962,7 @@ def launch_mapdl(
            The executable path can be also set through the environment variable
            ``PYMAPDL_MAPDL_EXEC``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
@@ -1134,7 +1132,7 @@ def launch_mapdl(
            The default version can be also set through the environment variable
            ``PYMAPDL_MAPDL_VERSION``. For example:
 
-           .. code:: bash
+           .. code:: console
 
               export PYMAPDL_MAPDL_VERSION=22.2
 
@@ -1325,7 +1323,16 @@ def launch_mapdl(
         verbose_mapdl = False
 
     # These parameters are partially used for unit testing
-    set_no_abort = kwargs.get("set_no_abort", True)
+    set_no_abort = kwargs.pop("set_no_abort", True)
+
+    # Extract arguments:
+    force_intel = kwargs.pop("force_intel", False)
+    broadcast = kwargs.pop("log_broadcast", False)
+
+    # Raising error if using non-allowed arguments
+    if kwargs:
+        ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
+        raise ValueError(f"The following arguments are not recognaised: {ms_}")
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
@@ -1486,7 +1493,7 @@ def launch_mapdl(
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
 
-    mode = check_mode(mode, _version_from_path(exec_file))
+    mode = check_mode(mode, version_from_path("mapdl", exec_file))
     LOG.debug("Using mode %s", mode)
 
     # Setting SMP by default if student version is used.
@@ -1494,7 +1501,7 @@ def launch_mapdl(
 
     #
     additional_switches = _validate_MPI(
-        additional_switches, exec_file, kwargs.pop("force_intel", False)
+        additional_switches, exec_file, force_intel=force_intel
     )
 
     additional_switches = _check_license_argument(license_type, additional_switches)
@@ -1540,7 +1547,6 @@ def launch_mapdl(
                     " with:\n\npip install ansys_corba"
                 ) from None
 
-            broadcast = kwargs.get("log_broadcast", False)
             mapdl = MapdlCorba(
                 loglevel=loglevel,
                 log_apdl=log_apdl,

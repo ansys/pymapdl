@@ -147,6 +147,29 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     return setup_logger.log
 
 
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "exec_file",
+    "ip",
+    "jobname",
+    "local",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_timeout" "timeout",
+]
+
+
+def _sanitize_start_parm(start_parm):
+    for each_key in start_parm:
+        if each_key not in _ALLOWED_START_PARM:
+            raise ValueError(f"The argument '{each_key}' is not recognaised.")
+
+
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
@@ -193,17 +216,20 @@ class _MapdlCore(Commands):
         self._log_filehandler = None
         self._version = None  # cached version
         self._local = local
-        self._jobname = start_parm.get("jobname", "file")
         self._cleanup = True
         self._vget_arr_counter = 0
-        self._start_parm = start_parm
-        self._path = start_parm.get("run_location", None)
-        self._print_com = print_com  # print the command /COM input.
         self._cached_routine = None
         self._geometry = None
-        self._kylov = None
+        self._math = None
+        self._krylov = None
         self._on_docker = None
         self._platform = None
+
+        _sanitize_start_parm(start_parm)
+        self._start_parm = start_parm
+        self._jobname = start_parm.get("jobname", "file")
+        self._path = start_parm.get("run_location", None)
+        self._print_com = print_com  # print the command /COM input.
 
         # Setting up loggers
         self._log = logger.add_instance_logger(
@@ -224,6 +250,10 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.solution import Solution
 
         self._solution = Solution(self)
+
+        from ansys.mapdl.core.xpl import ansXpl
+
+        self._xpl = ansXpl(self)
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -462,13 +492,28 @@ class _MapdlCore(Commands):
     def non_interactive(self):
         """Non-interactive context manager.
 
-        Use this when using commands that require user
-        interaction within MAPDL (e.g. :func:`Mapdl.vwrite`).
+        Allow to execute code without user interaction or waiting
+        between PyMAPDL responses.
+        It can also be used to execute some commands which are not
+        supported in interactive mode. For a complete list of commands
+        visit :ref:`ref_unsupported_interactive_commands`.
+
+        View the last response with :attr:`Mapdl.last_response` method.
+
+        Notes
+        -----
+        All the commands executed inside this context manager are not
+        executed until the context manager exits which then execute them
+        all at once in the MAPDL instance.
+
+        This command uses :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+        method.
 
         Examples
         --------
-        Use the non-interactive context manager for the VWRITE
-        command.  View the last response with :attr:`Mapdl.last_response`.
+        Use the non-interactive context manager for the VWRITE (
+        :func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>`)
+        command.
 
         >>> with mapdl.non_interactive:
         ...    mapdl.run("*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),VALUE(1,3)")
@@ -636,6 +681,7 @@ class _MapdlCore(Commands):
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
+            self._parent()._store_commands = False
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1053,7 +1099,7 @@ class _MapdlCore(Commands):
         if inplace and include_result is None:
             include_result = False
 
-        elif not include_result:
+        if include_result is None:
             include_result = True
 
         if not inplace:
@@ -1992,7 +2038,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
-    def result(self) -> "ansys.mapdl.reader.rst.Result":
+    def result(self):
         """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
 
         Returns
@@ -2032,7 +2078,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir(), "ansys_tmp")
+            save_path = os.path.join(tempfile.gettempdir())
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
@@ -2805,9 +2851,12 @@ class _MapdlCore(Commands):
         if isinstance(commands, str):
             commands = commands.splitlines()
 
-        self._stored_commands = commands
-        self._flush_stored()
-        return self._response
+        self._stored_commands.extend(commands)
+        if self._store_commands:
+            return None
+        else:
+            self._flush_stored()
+            return self._response
 
     def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
         """
@@ -3868,6 +3917,23 @@ class _MapdlCore(Commands):
 
         return wrapped(self, *args, **kwargs)
 
+    @wraps(Commands.esel)
+    def esel(self, *args, **kwargs):
+        """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().esel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points()
+        @wrap_point_SEL(entity="elem")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
     @wraps(Commands.ksel)
     def ksel(self, *args, **kwargs):
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
@@ -3880,6 +3946,57 @@ class _MapdlCore(Commands):
 
         @allow_pickable_points(entity="kp", plot_function="kplot")
         @wrap_point_SEL(entity="kp")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.lsel)
+    def lsel(self, *args, **kwargs):
+        """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().lsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="line", plot_function="lplot")
+        @wrap_point_SEL(entity="line")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.asel)
+    def asel(self, *args, **kwargs):
+        """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().asel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="area", plot_function="aplot")
+        @wrap_point_SEL(entity="area")
+        def wrapped(self, *args, **kwargs):
+            return sel_func(*args, **kwargs)
+
+        return wrapped(self, *args, **kwargs)
+
+    @wraps(Commands.vsel)
+    def vsel(self, *args, **kwargs):
+        """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
+
+        It will raise an error in case vmax or vinc are used too.
+        """
+        sel_func = (
+            super().vsel
+        )  # using super() inside the wrapped function confuses the references
+
+        # @allow_pickable_points(entity="volume", plot_function="vplot")
+        @wrap_point_SEL(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4206,3 +4323,37 @@ class _MapdlCore(Commands):
             if self._in_nopr:
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
+
+    def _parse_rlist(self):
+        # mapdl.rmore(*list)
+        with self.force_output:
+            rlist = self.rlist()
+
+        # removing ueless part
+        rlist = rlist.replace(
+            """   *****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+""",
+            "",
+        )
+        constants_ = re.findall(
+            r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
+        )
+
+        const_ = {}
+        for each in constants_:
+            values = [0 for i in range(18)]
+            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            limits = (
+                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
+                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+            )
+            values_ = [float(i) for i in each.strip().splitlines()[1].split()]
+
+            if not set_ in const_.keys():
+                const_[set_] = values
+
+            for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
+                const_[set_][jlimit] = values_[i]
+
+        return const_

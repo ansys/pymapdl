@@ -4,6 +4,7 @@ from functools import wraps
 import importlib
 import inspect
 import os
+from pathlib import Path
 import platform
 import random
 import re
@@ -20,7 +21,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 
 try:
     import ansys.tools.report as pyansys_report
@@ -548,14 +549,14 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
     base_fname = os.path.basename(fname)
     if not os.path.exists(fname) and base_fname not in mapdl.list_files():
         raise FileNotFoundError(
-            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}')"
+            f"The file {fname} could not be found in the Python working directory ('{os.getcwd()}') "
             f"nor in the MAPDL working directory ('{mapdl.directory}')."
         )
 
     elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
         if priority_mapdl_file is None:
             warn(
-                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}')"
+                f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}') "
                 f"and in the MAPDL working directory ('{mapdl.directory}'). "
                 "Using the one already in the MAPDL directory.\n"
                 "If you prefer to use the file in the Python directory, you shall remove the file in the MAPDL directory."
@@ -686,6 +687,7 @@ class Information:
     """
 
     def __init__(self, mapdl):
+        """Class Initializer"""
         from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
 
         if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
@@ -929,6 +931,7 @@ class Information:
 
     def _get_between(self, init_string, end_string=None, string=None):
         if not string:
+            self._update()
             string = self._stats
 
         st = string.find(init_string) + len(init_string)
@@ -959,8 +962,9 @@ class Information:
     def _get_stitles(self):
         return [
             re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            for i in range(1, 5)
             if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+            else ""
+            for i in range(1, 5)
         ]
 
     def _get_products(self):
@@ -1203,8 +1207,8 @@ def wrap_point_SEL(entity="node"):
 
                 if vmax or vinc:
                     raise ValueError(
-                        "If an iterable is used as 'vmin' argument,"
-                        " it is not allowed to use 'vmax' or 'vinc' arguments."
+                        "If an iterable is used as 'vmin' argument, "
+                        "it is not allowed to use 'vmax' or 'vinc' arguments."
                     )
 
                 if len(vmin) == 0 and type_ == "S":
@@ -1221,8 +1225,38 @@ def wrap_point_SEL(entity="node"):
                 else:
                     return
             else:
-                return original_sel_func(self, *args, **kwargs)
+                return original_sel_func(
+                    self,
+                    type_=type_,
+                    item=item,
+                    comp=comp,
+                    vmin=vmin,
+                    vmax=vmax,
+                    vinc=vinc,
+                    kabs=kabs,
+                    **kwargs,
+                )
 
         return wrapper
 
     return decorator
+
+
+def get_active_branch_name():
+    head_dir = Path(".") / ".git" / "HEAD"
+
+    if os.path.exists(head_dir):
+        with head_dir.open("r") as f:
+            content = f.read().splitlines()
+
+        for line in content:
+            if line[0:4] == "ref:":
+                return line.partition("refs/heads/")[2]
+
+    # In case the previous statements return None
+    if "dev" in pymapdl.__version__:
+        kind = "main"
+    else:  # pragma: no cover
+        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
+
+    return kind

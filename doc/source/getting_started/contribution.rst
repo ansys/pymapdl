@@ -59,7 +59,7 @@ unit testing, you must set up the following environment variables.
 
 In Windows, use:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     SET PYMAPDL_START_INSTANCE=False
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -67,7 +67,7 @@ In Windows, use:
 
 In Linux, use:
 
-.. code:: bash
+.. code:: console
 
     export PYMAPDL_START_INSTANCE=False
     export PYMAPDL_PORT=<MAPDL Port> (default 50052)

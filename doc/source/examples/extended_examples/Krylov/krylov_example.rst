@@ -43,10 +43,13 @@ Perform required imports
     import math
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
+    from ansys.math.core.math import AnsMath
 
     mapdl = launch_mapdl(nproc=4)
     mapdl.clear()
-    mm = mapdl.math
+
+    # Importing and connecting PyAnsys Math with PyMAPDL
+    mm = AnsMath(mapdl)
 
   
 Define parameters
@@ -170,7 +173,7 @@ a length element size constraint to the longitudinal lines.
     mapdl.eplot()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
+.. image:: files/file_15_1.png
 
 
 Define boundary conditions
@@ -370,7 +373,7 @@ Plot the calculated data.
     plt.show()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_36_1.png
+.. image:: files/file_36_1.png
 
 
 Plot the frequency response function
@@ -432,4 +435,4 @@ Plot the frequency response function for the selected node.
     plt.show()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_38_0.png
+.. image:: files/file_38_0.png

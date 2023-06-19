@@ -14,12 +14,12 @@ from ansys.mapdl.core.launcher import (
     _is_ubuntu,
     _validate_MPI,
     _verify_version,
-    _version_from_path,
     find_ansys,
     get_default_ansys,
     get_start_instance,
     launch_mapdl,
     update_env_vars,
+    version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
 
@@ -60,6 +60,18 @@ skip_on_not_local = pytest.mark.skipif(
 start_timeout = 30  # Seconds
 
 
+@pytest.fixture
+def fake_local_mapdl(mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+    # Setup: fill with any logic you want
+    mapdl._local = True
+
+    yield True  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    mapdl._local = False
+
+
 @pytest.mark.skipif(
     get_start_instance() is False,
     reason="Skip when start instance is disabled",
@@ -85,7 +97,7 @@ def test_validate_sw():
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
-    assert _version_from_path(exec_file) == version
+    assert version_from_path("mapdl", exec_file) == version
 
 
 @pytest.mark.skipif(
@@ -95,7 +107,7 @@ def test_version_from_path(path_data):
 @pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
-        _version_from_path("abc")
+        version_from_path("mapdl", "abc")
 
 
 @pytest.mark.skipif(
@@ -310,19 +322,27 @@ def test_env_injection():
 
 
 @pytest.mark.requires_gui
-def test_open_gui(mapdl):
-    mapdl.open_gui()
-    mapdl.open_gui(include_result=True)
-    mapdl.open_gui(inplace=True)
-
-    mapdl.open_gui(include_result=False)
-    mapdl.open_gui(inplace=False)
-
-    mapdl.open_gui(include_result=True, inplace=False)
-    mapdl.open_gui(include_result=False, inplace=True)
-
-    mapdl.open_gui(include_result=False, inplace=False)
-    mapdl.open_gui(include_result=True, inplace=True)
+@pytest.mark.parametrize(
+    "include_result,inplace,to_check",
+    (
+        [None, None, "GUI can be opened."],
+        [None, True, "Working directory is in the pytest directory."],
+        [None, False, "Working directory is NOT in the pytest directory."],
+        [True, None, "There is a result file, and WDIR is a temp dir."],
+        pytest.param(
+            True, True, "Both options (`True`) is not allowed.", marks=pytest.mark.xfail
+        ),
+        [True, False, "There is a result file, and WDIR is in a temp dir."],
+        [False, None, "There is NOT a result file, and WDIR is in a temp dir."],
+        [False, True, "There is NOT a result file, and WDIR is in pytest dir."],
+        [False, False, "There is NOT a result file, and WDIR is in a temp dir."],
+    ),
+)
+def test_open_gui(
+    mapdl, fake_local_mapdl, cube_solve, inplace, include_result, to_check
+):
+    print(to_check)  # in case we use -s flat with pytest
+    mapdl.open_gui(inplace=inplace, include_result=include_result)
 
 
 def test__force_smp_student_version():
@@ -458,3 +478,13 @@ def test_is_ubuntu():
 )
 def test_get_default_ansys():
     assert get_default_ansys() is not None
+
+
+def test_launch_mapdl_non_recognaised_arguments():
+    with pytest.raises(ValueError, match="my_fake_argument"):
+        launch_mapdl(my_fake_argument="my_fake_value")
+
+
+def test_mapdl_non_recognaised_arguments():
+    with pytest.raises(ValueError, match="my_fake_argument"):
+        pymapdl.Mapdl(my_fake_argument="my_fake_value")
