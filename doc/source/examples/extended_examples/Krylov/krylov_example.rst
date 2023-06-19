@@ -43,10 +43,13 @@ Perform required imports
     import math
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
+    from ansys.math.core.math import AnsMath
 
     mapdl = launch_mapdl(nproc=4)
     mapdl.clear()
-    mm = mapdl.math
+
+    # Importing and connecting PyAnsys Math with PyMAPDL
+    mm = AnsMath(mapdl)
 
   
 Define parameters
