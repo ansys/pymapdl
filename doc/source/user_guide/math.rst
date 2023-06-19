@@ -3,7 +3,7 @@
 PyAnsys Math overview
 =====================
 `PyAnsys Math <pyansys_math_>`_ provides the ability to access and manipulate
-the large sparse matrices and solve a variety of eigenproblems in a similar
+large sparse matrices and solve a variety of eigenproblems in a similar
 manner to the popular `numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
 
 
@@ -90,8 +90,7 @@ these matrices are stored solely within Python.
     (241, 241)	50854700854.68495
     (242, 242)	95726495726.47179
 
-Another way to call PyAnsys Math directly from PyMAPDL exists
-with the following command:
+To call PyAnsys Math directly from PyMAPDL, you can run this command:
 
 .. code:: python
 
