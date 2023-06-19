@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import Union
+from typing import Tuple
 import warnings
 
 try:
@@ -33,8 +33,6 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_console import MapdlConsole
-from ansys.mapdl.core.mapdl_corba import MapdlCorba
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -199,7 +197,7 @@ def launch_grpc(
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
-) -> tuple:
+) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -950,7 +948,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> Union[MapdlGrpc, MapdlCorba, MapdlConsole]:
+) -> MapdlGrpc:
     """Start MAPDL locally.
 
     Parameters
