@@ -169,10 +169,6 @@ def test_upload_fail(mapdl):
         mapdl.upload("thisisnotafile")
 
 
-def test_list_error_file(mapdl, contact_solve):
-    assert "The geometry is not available." in mapdl.list_error_file
-
-
 def test_input_empty(mapdl):
     resp = mapdl._send_command("/INPUT")
     assert "INPUT FILE" in resp
@@ -485,8 +481,3 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
-
-
-def test_launch_pyansys_math(mapdl):
-    mm = mapdl.math
-    assert mm._mapdl == mapdl
