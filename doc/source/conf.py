@@ -86,7 +86,7 @@ extensions = [
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
+    "python": ("https://docs.python.org/3/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
@@ -94,7 +94,8 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/version/stable/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]

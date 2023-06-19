@@ -15,6 +15,8 @@
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 .. _ansys_tools_path: http://path.tools.docs.pyansys.com/
+.. _pyansys_math: https://math.docs.pyansys.com/version/stable/
+.. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com
@@ -22,14 +24,14 @@
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 
 .. #Other libraries
-.. _pyvista_docs: https://docs.pyvista.org
+.. _pyvista_docs: https://docs.pyvista.org/version/stable/
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
-.. _pandas_org: https://pandas.pydata.org
-.. _numpy_org: https://numpy.org
+.. _pandas_org: https://pandas.pydata.org/
+.. _numpy_org: https://numpy.org/
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib_docs: https://matplotlib.org/stable/contents.html
-.. _matplotlib_main: https://matplotlib.org
+.. _matplotlib_main: https://matplotlib.org/
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
 .. _scipy_docs: https://docs.scipy.org/doc/scipy/reference/

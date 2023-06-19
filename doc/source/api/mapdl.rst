@@ -57,7 +57,6 @@ Constants
    mapdl_grpc.MapdlGrpc.download
    mapdl_grpc.MapdlGrpc.list_error_file
    mapdl_grpc.MapdlGrpc.list_files
-   mapdl_grpc.MapdlGrpc.math
    mapdl_grpc.MapdlGrpc.mute
    mapdl_grpc.MapdlGrpc.upload
 
