@@ -37,7 +37,7 @@ To change this and output lower level messages you can use the next snippet:
 
    LOG.logger.setLevel("DEBUG")
    LOG.file_handler.setLevel("DEBUG")  # If present.
-   LOG.stdout_handler.setLevel("DEBUG")  # If present.
+   LOG.std_out_handler.setLevel("DEBUG")  # If present.
 
 
 Alternatively:
@@ -108,12 +108,26 @@ you would do in any other script.  There shall no be conflicts between
 these loggers.
 
 """
-
 from copy import copy
 from datetime import datetime
 import logging
 import sys
+from types import TracebackType
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Literal,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Union,
+    cast,
+)
 import weakref
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl import _MapdlCore
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -144,7 +158,10 @@ NEW_SESSION_HEADER = f"""
        NEW SESSION - {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
 ==============================================================================="""
 
-string_to_loglevel = {
+LOG_LEVEL_STRING_TYPE = Literal["DEBUG", "INFO", "WARN", "WARNING", "ERROR", "CRITICAL"]
+LOG_LEVEL_TYPE = Union[LOG_LEVEL_STRING_TYPE, int]
+
+string_to_loglevel: Dict[LOG_LEVEL_STRING_TYPE, int] = {
     "DEBUG": DEBUG,
     "INFO": INFO,
     "WARN": WARN,
@@ -166,10 +183,10 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     """
 
     level = None  # This is maintained for compatibility with ``supress_logging``, but it does nothing.
-    file_handler = None
-    stdout_handler = None
+    file_handler: Optional[logging.FileHandler] = None
+    std_out_handler: Optional[logging.StreamHandler] = None
 
-    def __init__(self, logger, extra=None):
+    def __init__(self, logger: logging.Logger, extra: Optional["_MapdlCore"] = None):
         self.logger = logger
         if extra is not None:
             self.extra = weakref.proxy(extra)
@@ -178,7 +195,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         self.file_handler = logger.file_handler
         self.std_out_handler = logger.std_out_handler
 
-    def process(self, msg, kwargs):
+    def process(self, msg: str, kwargs: MutableMapping[str, Dict[str, str]]):
         kwargs["extra"] = {}
         # This are the extra parameters sent to log
         kwargs["extra"][
@@ -186,40 +203,38 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         ] = self.extra.name  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
-    def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
+    def log_to_file(self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL):
         """Add file handler to logger.
 
         Parameters
         ----------
         filename : str, optional
             Name of the file where the logs are recorded. By default FILE_NAME
-        level : str, optional
+        level : str or int, optional
             Level of logging. E.x. 'DEBUG'. By default LOG_LEVEL
         """
 
-        self.logger = addfile_handler(
-            self.logger, filename=filename, level=level, write_headers=True
-        )
+        addfile_handler(self.logger, filename=filename, level=level, write_headers=True)
         self.file_handler = self.logger.file_handler
 
-    def log_to_stdout(self, level=LOG_LEVEL):
+    def log_to_stdout(self, level: LOG_LEVEL_TYPE = LOG_LEVEL):
         """Add standard output handler to the logger.
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging record. By default LOG_LEVEL
         """
         if self.std_out_handler:
             raise Exception("Stdout logger already defined.")
 
-        self.logger = add_stdout_handler(self.logger, level=level)
+        add_stdout_handler(self.logger, level=level)
         self.std_out_handler = self.logger.std_out_handler
 
-    def setLevel(self, level="DEBUG"):
+    def setLevel(self, level: Union[int, str] = "DEBUG"):
         """Change the log level of the object and the attached handlers."""
         if isinstance(level, str):
-            level = string_to_loglevel[level.upper()]
+            level = string_to_loglevel[cast(LOG_LEVEL_STRING_TYPE, level.upper())]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
@@ -231,7 +246,7 @@ class PymapdlPercentStyle(logging.PercentStyle):
         self._fmt = fmt or self.default_format
         self._defaults = defaults
 
-    def _format(self, record):
+    def _format(self, record) -> str:
         defaults = self._defaults
         if defaults:
             values = defaults | record.__dict__
@@ -256,11 +271,11 @@ class PymapdlFormatter(logging.Formatter):
 
     def __init__(
         self,
-        fmt=STDOUT_MSG_FORMAT,
-        datefmt=None,
-        style="%",
-        validate=True,
-        defaults=None,
+        fmt: str = STDOUT_MSG_FORMAT,
+        datefmt: Optional[str] = None,
+        style: Literal["%", "{", "$"] = "%",
+        validate: bool = True,
+        defaults: Optional[Mapping[str, Any]] = None,
     ):
         if sys.version_info[1] < 8:
             super().__init__(fmt, datefmt, style)
@@ -273,7 +288,7 @@ class PymapdlFormatter(logging.Formatter):
 class InstanceFilter(logging.Filter):
     """Ensures that instance_name record always exists."""
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord):
         if not hasattr(record, "instance_name") and hasattr(record, "name"):
             record.instance_name = record.name
         elif not hasattr(record, "instance_name"):  # pragma: no cover
@@ -292,14 +307,14 @@ class Logger:
     level : int, optional
         Logging level to filter the message severity allowed in the logger.
         The default is ``logging.DEBUG``.
-    to_filet : bool, optional
+    to_file : bool, optional
         Write log messages to a file. The default is ``False``.
     to_stdout : bool, optional
         Write log messages into the standard output. The default is
         ``True``.
     filename : str, optional
         Name of the file where log messages are written to.
-        The default is ``None``.
+        The default is ``FILE_NAME``.
 
     Examples
     --------
@@ -320,23 +335,23 @@ class Logger:
 
     """
 
-    file_handler = None
-    std_out_handler = None
+    file_handler: Optional[logging.FileHandler] = None
+    std_out_handler: Optional[logging.StreamHandler] = None
     _level = logging.DEBUG
-    _instances = {}
+    _instances: Dict[str, Any] = {}
 
     def __init__(
         self,
-        level=logging.DEBUG,
-        to_file=False,
-        to_stdout=True,
-        filename=FILE_NAME,
+        level: LOG_LEVEL_TYPE = logging.DEBUG,
+        to_file: bool = False,
+        to_stdout: bool = True,
+        filename: str = FILE_NAME,
     ):
         """Customized logger class for Pymapdl.
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging as defined in the package ``logging``. By default 'DEBUG'.
         to_file : bool, optional
             To record the logs in a file, by default ``False``.
@@ -351,7 +366,7 @@ class Logger:
         self.logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
         if isinstance(level, str):
-            level = level.upper()
+            level = cast(LOG_LEVEL_STRING_TYPE, level.upper())
 
         self.logger.setLevel(level)
         self.logger.propagate = True
@@ -365,7 +380,7 @@ class Logger:
         self.critical = self.logger.critical
         self.log = self.logger.log
 
-        if to_file or filename != FILE_NAME:
+        if to_file:
             # We record to file
             self.log_to_file(filename=filename, level=level)
 
@@ -375,7 +390,7 @@ class Logger:
         # Using logger to record unhandled exceptions
         self.add_handling_uncaught_expections(self.logger)
 
-    def log_to_file(self, filename=FILE_NAME, level=LOG_LEVEL):
+    def log_to_file(self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL):
         """Add file handler to logger.
 
         Parameters
@@ -383,7 +398,7 @@ class Logger:
         filename : str, optional
             Name of the file where the logs are recorded. By default
             ``'pymapdl.log'``.
-        level : str, optional
+        level : str or int, optional
             Level of logging. By default ``'DEBUG'``.
 
         Examples
@@ -397,29 +412,31 @@ class Logger:
 
         """
 
-        self = addfile_handler(self, filename=filename, level=level, write_headers=True)
+        addfile_handler(self, filename=filename, level=level, write_headers=True)
 
-    def log_to_stdout(self, level=LOG_LEVEL):
+    def log_to_stdout(self, level: LOG_LEVEL_TYPE = LOG_LEVEL):
         """Add standard output handler to the logger.
 
         Parameters
         ----------
-        level : str, optional
+        level : str or int, optional
             Level of logging record. By default  ``'DEBUG'``.
         """
 
-        self = add_stdout_handler(self, level=level)
+        add_stdout_handler(self, level=level)
 
-    def setLevel(self, level="DEBUG"):
+    def setLevel(self, level: LOG_LEVEL_TYPE = "DEBUG"):
         """Change the log level of the object and the attached handlers."""
         if isinstance(level, str):
-            level = string_to_loglevel[level.upper()]
+            level = string_to_loglevel[cast(LOG_LEVEL_STRING_TYPE, level.upper())]
         self.logger.setLevel(level)
         for each_handler in self.logger.handlers:
             each_handler.setLevel(level)
         self._level = level
 
-    def _make_child_logger(self, sufix, level):
+    def _make_child_logger(
+        self, sufix: str, level: Optional[LOG_LEVEL_TYPE]
+    ) -> logging.Logger:
         """Create a child logger.
 
         Uses ``getChild`` or copying attributes between ``pymapdl_global``
@@ -429,10 +446,9 @@ class Logger:
         logger.std_out_handler = None
         logger.file_handler = None
 
-        if self.logger.hasHandlers:
+        if self.logger.hasHandlers():
             for each_handler in self.logger.handlers:
                 new_handler = copy(each_handler)
-
                 if each_handler == self.file_handler:
                     logger.file_handler = new_handler
                 elif each_handler == self.std_out_handler:
@@ -443,8 +459,10 @@ class Logger:
                     # the specified log level is lower than the one of the
                     # global.
                     if isinstance(level, str):
-                        new_loglevel = string_to_loglevel[level.upper()]
-                    elif isinstance(level, (int, float)):  # pragma: no cover
+                        new_loglevel = string_to_loglevel[
+                            cast(LOG_LEVEL_STRING_TYPE, level.upper())
+                        ]
+                    elif isinstance(level, int):  # pragma: no cover
                         new_loglevel = level
 
                     if each_handler.level > new_loglevel:
@@ -454,7 +472,7 @@ class Logger:
 
         if level:
             if isinstance(level, str):
-                level = string_to_loglevel[level.upper()]
+                level = string_to_loglevel[cast(LOG_LEVEL_STRING_TYPE, level.upper())]
             logger.setLevel(level)
 
         else:
@@ -463,7 +481,7 @@ class Logger:
         logger.propagate = True
         return logger
 
-    def add_child_logger(self, sufix, level=None):
+    def add_child_logger(self, sufix: str, level: Optional[LOG_LEVEL_TYPE] = None):
         """Add a child logger to the main logger.
 
         This logger is more general than an instance logger which is designed to
@@ -476,7 +494,7 @@ class Logger:
         ----------
         sufix : str
             Name of the logger.
-        level : str, optional
+        level : str or int, optional
             Level of logging
 
         Returns
@@ -485,10 +503,15 @@ class Logger:
             Logger class.
         """
         name = self.logger.name + "." + sufix
-        self._instances[name] = self._make_child_logger(self, name, level)
+        self._instances[name] = self._make_child_logger(name, level)
         return self._instances[name]
 
-    def _add_mapdl_instance_logger(self, name, mapdl_instance, level):
+    def _add_mapdl_instance_logger(
+        self,
+        name: Optional[str],
+        mapdl_instance: "_MapdlCore",
+        level: Optional[LOG_LEVEL_TYPE],
+    ):
         if isinstance(name, str):
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger(name, level), mapdl_instance
@@ -502,7 +525,12 @@ class Logger:
 
         return instance_logger
 
-    def add_instance_logger(self, name, mapdl_instance, level=None):
+    def add_instance_logger(
+        self,
+        name: str,
+        mapdl_instance: "_MapdlCore",
+        level: Optional[LOG_LEVEL_TYPE] = None,
+    ) -> PymapdlCustomAdapter:
         """Create a logger for a MAPDL instance.
 
         The MAPDL instance logger is a logger with an adapter which add the
@@ -540,16 +568,20 @@ class Logger:
         )
         return self._instances[new_name]
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         if key in self._instances.keys():
             return self._instances[key]
         else:
             raise KeyError(f"There is no instances with name {key}")
 
-    def add_handling_uncaught_expections(self, logger):
+    def add_handling_uncaught_expections(self, logger: logging.Logger):
         """This just redirect the output of an exception to the logger."""
 
-        def handle_exception(exc_type, exc_value, exc_traceback):
+        def handle_exception(
+            exc_type: type[BaseException],
+            exc_value: BaseException,
+            exc_traceback: Optional[TracebackType],
+        ):
             if issubclass(exc_type, KeyboardInterrupt):
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
                 return
@@ -561,7 +593,12 @@ class Logger:
         sys.excepthook = handle_exception
 
 
-def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=False):
+def addfile_handler(
+    logger: Union[Logger, logging.Logger],
+    filename: str = FILE_NAME,
+    level: LOG_LEVEL_TYPE = LOG_LEVEL,
+    write_headers: bool = False,
+):
     """Add a file handler to the input.
 
     Parameters
@@ -570,7 +607,7 @@ def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=F
         Logger where to add the file handler.
     filename : str, optional
         Name of the output file. By default FILE_NAME
-    level : str, optional
+    level : str or int, optional
         Level of log recording. By default LOG_LEVEL
     write_headers : bool, optional
         Record the headers to the file. By default False
@@ -600,14 +637,18 @@ def addfile_handler(logger, filename=FILE_NAME, level=LOG_LEVEL, write_headers=F
     return logger
 
 
-def add_stdout_handler(logger, level=LOG_LEVEL, write_headers=False):
+def add_stdout_handler(
+    logger: Union[Logger, logging.Logger],
+    level: LOG_LEVEL_TYPE = LOG_LEVEL,
+    write_headers: bool = False,
+):
     """Add a file handler to the logger.
 
     Parameters
     ----------
     logger : logging.Logger or logging.Logger
         Logger where to add the file handler.
-    level : str, optional
+    level : str or int, optional
         Level of log recording. By default ``logging.DEBUG``.
     write_headers : bool, optional
         Record the headers to the file. By default ``False``.
