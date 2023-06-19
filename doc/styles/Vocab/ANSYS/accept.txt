@@ -103,6 +103,7 @@ Pseudotime
 Puri
 py
 PyAnsys
+PyAnsys Math
 PyDPF-Core
 PyDPF-Post
 PyMAPDL

@@ -220,6 +220,7 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
+        self._math = None
         self._krylov = None
         self._on_docker = None
         self._platform = None

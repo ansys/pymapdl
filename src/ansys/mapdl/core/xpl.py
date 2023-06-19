@@ -6,6 +6,7 @@ import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
+from ansys.math.core.math import AnsMath
 import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
@@ -378,13 +379,13 @@ class ansXpl:
 
         asarray : bool, optional
             Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            <ansy.math.core.math.AnsMat>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray or ansys.mapdl.core.math.AnsMat
+        numpy.ndarray or ansys.math.core.math.AnsMat
             A :class:`numpy.ndarray` or :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>` of the displacement vectors,
+            <ansys.math.core.math.AnsMat>` of the displacement vectors,
             depending on the value of ``asarray``.
 
         Notes
@@ -446,7 +447,8 @@ class ansXpl:
             f"{num_first},{num_last},{recordname}",
             mute=False,
         )
-        return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+
+        return AnsMath(self._mapdl).mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname, asarray=False):
         """
@@ -459,7 +461,7 @@ class ansXpl:
 
         asarray : bool, optional
             Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            <ansys.math.core.math.AnsMat>`. Default ``False``.
 
         Examples
         --------
@@ -481,14 +483,15 @@ class ansXpl:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type
+        mm = AnsMath(self._mapdl)
         if data_info.objtype == mapdl_pb2.DataType.VEC:
-            out = self._mapdl.math.vec(dtype=dtype, name=rand_name)
+            out = mm.vec(dtype=dtype, name=rand_name)
         elif data_info.objtype in [
             mapdl_pb2.DataType.DMAT,
             mapdl_pb2.DataType.SMAT,
-        ]:
-            out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
-        else:
+        ]:  # pragma: no cover
+            out = mm.mat(dtype=dtype, name=rand_name)
+        else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
         if asarray:
