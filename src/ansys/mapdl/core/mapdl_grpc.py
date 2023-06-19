@@ -2723,7 +2723,7 @@ class MapdlGrpc(_MapdlCore):
         if not error_file:
             return None
 
-        if self.local:
+        if self._local:
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(
