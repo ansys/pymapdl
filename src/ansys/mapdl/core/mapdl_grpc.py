@@ -2178,7 +2178,7 @@ class MapdlGrpc(_MapdlCore):
                     "Only strings, tuple of strings or list of strings are allowed."
                 )
 
-            for file in files:
+            for file in list_files:
                 if os.path.exists(os.path.join(self.directory, file)):
                     if os.path.exists(
                         file
