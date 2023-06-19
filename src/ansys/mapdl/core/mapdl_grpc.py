@@ -2117,14 +2117,12 @@ class MapdlGrpc(_MapdlCore):
 
         self_files = self.list_files()  # to avoid calling it too much
 
-        if isinstance(files, str):
-            if self._local:
-                # in local mode
-                if os.path.exists(files):
-                    # file exist
+        if self._local:
+            if isinstance(files, str):
+                if os.path.exists(os.path.join(self.directory, files)):  # file exist
                     list_files = [files]
                 elif "*" in files:
-                    list_files = glob.glob(files, recursive=recursive)  # using filter
+                    list_files = glob.glob(files, recursive=recursive)
                     if not list_files:
                         raise ValueError(
                             f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client."
@@ -2133,8 +2131,35 @@ class MapdlGrpc(_MapdlCore):
                     raise ValueError(
                         f"The files parameter ('{files}') does not match any file or pattern."
                     )
+            elif isinstance(files, (list, tuple)):
+                if not all([isinstance(each, str) for each in files]):
+                    raise ValueError(
+                        "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                    )
+                list_files = files
 
-            else:  # Remote or looking into MAPDL working directory
+            else:
+                raise ValueError(
+                    f"The `file` parameter type ({type(files)}) is not supported."
+                    "Only strings, tuple of strings or list of strings are allowed."
+                )
+
+            for file in files:
+                if os.path.exists(os.path.join(self.directory, file)):
+                    if os.path.exists(
+                        file
+                    ):  # the file might have been already downloaded.
+                        warn(
+                            f"The file {file} has been updated in the current working directory."
+                        )
+                    shutil.copy(os.path.join(self.directory, file), file)
+                else:
+                    raise FileNotFoundError(
+                        f"The file {file} does not exist in the local MAPDL instance."
+                    )
+
+        else:  # Remote or looking into MAPDL working directory
+            if isinstance(files, str):
                 if files in self_files:
                     list_files = [files]
                 elif "*" in files:
@@ -2153,49 +2178,49 @@ class MapdlGrpc(_MapdlCore):
                         f"The `'files'` parameter ('{files}') does not match any file or pattern."
                     )
 
-        elif isinstance(files, (list, tuple)):
-            if not all([isinstance(each, str) for each in files]):
+            elif isinstance(files, (list, tuple)):
+                if not all([isinstance(each, str) for each in files]):
+                    raise ValueError(
+                        "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                    )
+                list_files = files
+            else:
                 raise ValueError(
-                    "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                    f"The `file` parameter type ({type(files)}) is not supported."
+                    "Only strings, tuple of strings or list of strings are allowed."
                 )
-            list_files = files
-        else:
-            raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
-                "Only strings, tuple of strings or list of strings are allowed."
-            )
 
-        if target_dir:
-            try:
-                os.mkdir(target_dir)
-            except FileExistsError:
-                pass
-        else:
-            target_dir = os.getcwd()
+            if target_dir:
+                try:
+                    os.mkdir(target_dir)
+                except FileExistsError:
+                    pass
+            else:
+                target_dir = os.getcwd()
 
-        for each_file in list_files:
-            try:
-                file_name = os.path.basename(
-                    each_file
-                )  # Getting only the name of the file.
-                #  We try to avoid that when the full path is supplied, it will crash when trying
-                # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
-                # This will produce the file structure to flat out, but it is find, because recursive
-                # does not work in remote.
-                self._download(
-                    each_file,
-                    out_file_name=os.path.join(target_dir, file_name),
-                    chunk_size=chunk_size,
-                    progress_bar=progress_bar,
-                )
-            except FileNotFoundError:
-                # So far the grpc interface returns size of the file equal
-                # zero, if the file does not exists or its size is zero,
-                # but they are two different things!
-                # In theory, since we are obtaining the files name from
-                # `mapdl.list_files()` they do exist, so
-                # if there is any error, it means their size is zero.
-                pass  # this is not the best.
+            for each_file in list_files:
+                try:
+                    file_name = os.path.basename(
+                        each_file
+                    )  # Getting only the name of the file.
+                    #  We try to avoid that when the full path is supplied, it will crash when trying
+                    # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
+                    # This will produce the file structure to flat out, but it is fine, because recursive
+                    # does not work in remote.
+                    self._download(
+                        each_file,
+                        out_file_name=os.path.join(target_dir, file_name),
+                        chunk_size=chunk_size,
+                        progress_bar=progress_bar,
+                    )
+                except FileNotFoundError:
+                    # So far the grpc interface returns size of the file equal
+                    # zero, if the file does not exists or its size is zero,
+                    # but they are two different things!
+                    # In theory, since we are obtaining the files name from
+                    # `mapdl.list_files()` they do exist, so
+                    # if there is any error, it means their size is zero.
+                    pass  # this is not the best.
 
         return list_files
 
@@ -2664,7 +2689,7 @@ class MapdlGrpc(_MapdlCore):
         if not error_file:
             return None
 
-        if self.local:
+        if self._local:
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(

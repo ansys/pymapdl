@@ -337,11 +337,8 @@ def test_nodes(tmpdir, cleared, mapdl_console):
 
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
-    if mapdl_console._local:
-        mapdl_console.nwrite(filename)
-    else:
-        mapdl_console.nwrite(basename)
-        mapdl_console.download(basename, filename)
+    mapdl_console.nwrite(filename)
+    mapdl_console.download(basename, filename)
 
     assert np.allclose(mapdl_console.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_console.mesh.n_node == 11

@@ -483,6 +483,5 @@ def test_input_compatibility_api_change(mapdl):
         mapdl.input()
 
 
-def test_launch_pyansys_math(mapdl):
-    mm = mapdl.math
-    assert mm._mapdl == mapdl
+def test_list_error_file(mapdl, contact_solve):
+    assert "The geometry is not available." in mapdl.list_error_file()
