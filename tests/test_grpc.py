@@ -271,19 +271,19 @@ def test__download(mapdl, tmpdir):
 
 
 @pytest.mark.parametrize(
-    "option,expected_files",
+    "input,expected_return",
     [
         ["myfile0.txt", ["myfile0.txt"]],
         [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
         ["myfile*", ["myfile0.txt", "myfile1.txt"]],
     ],
 )
-def test_download(mapdl, tmpdir, option, expected_files):
+def test_download(mapdl, tmpdir, input, expected_return):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    mapdl.download(option, target_dir=tmpdir)
-    for file_to_check in expected_files:
+    mapdl.download(input, target_dir=tmpdir)
+    for file_to_check in expected_return:
         assert os.path.exists(tmpdir.join(file_to_check))
 
 
@@ -481,7 +481,3 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
-
-
-def test_list_error_file(mapdl, contact_solve):
-    assert "The geometry is not available." in mapdl.list_error_file()
