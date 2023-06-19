@@ -329,7 +329,7 @@ class MapdlGrpc(_MapdlCore):
 
         self._prioritize_thermal = False
         self._locked = False  # being used within MapdlPool
-        self._stub = None
+        self._stub = None  # type: mapdl_grpc.MapdlServiceStub
         self._cleanup = cleanup_on_exit
         self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
         self._jobname = start_parm.get("jobname", "file")
@@ -355,7 +355,6 @@ class MapdlGrpc(_MapdlCore):
 
             port = MAPDL_DEFAULT_PORT
         self._state = None
-        self._stub = None
         self._timeout = timeout
         self._pids = []
 
@@ -913,7 +912,7 @@ class MapdlGrpc(_MapdlCore):
         return self._busy
 
     @protect_grpc
-    def _send_command(self, cmd, mute=False):
+    def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
         """Send a MAPDL command and return the response as a string"""
         opt = ""
         if mute:
@@ -929,7 +928,7 @@ class MapdlGrpc(_MapdlCore):
         return None
 
     @protect_grpc
-    def _send_command_stream(self, cmd, verbose=False):
+    def _send_command_stream(self, cmd, verbose=False) -> str:
         """Send a command and expect a streaming response"""
         request = pb_types.CmdRequest(command=cmd)
         metadata = [("time_step_stream", "100")]

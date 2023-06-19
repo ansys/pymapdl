@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import Union
 import warnings
 
 try:
@@ -32,6 +33,8 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl_console import MapdlConsole
+from ansys.mapdl.core.mapdl_corba import MapdlCorba
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -947,7 +950,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> _MapdlCore:
+) -> Union[MapdlGrpc, MapdlCorba, MapdlConsole]:
     """Start MAPDL locally.
 
     Parameters
