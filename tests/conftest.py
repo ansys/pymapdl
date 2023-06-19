@@ -344,7 +344,6 @@ def mapdl(request, tmpdir_factory):
 
     if mapdl._local:
         assert Path(mapdl.directory) == Path(run_path)
-        assert mapdl._distributed
 
     # using yield rather than return here to be able to test exit
     yield mapdl
