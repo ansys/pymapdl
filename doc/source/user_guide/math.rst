@@ -12,15 +12,15 @@ PyMAPDL and PyAnsys Math
 This example demonstrates how to take advantage of the `ansys-math-core` package
 with PyMAPDL.
 
-.. This example demonstrates how to send an MAPDL Math matrix from MAPDL
-.. to Python and then send it back to be solved. While this example runs the
-.. :func:`mm.eigs() <ansys.math.core.math.AnsMath.eigs>` method on mass
-.. and stiffness matrices generated from MAPDL, you could instead use
-.. mass and stiffness matrices generated from an external FEM tool or
-.. even modify the mass and stiffness matrices within Python.
+It illustrates how to send an MAPDL Math matrix from MAPDL to Python and then send
+it back to be solved. While this example runs the 
+:func:`mm.eigs() <ansys.math.core.math.AnsMath.eigs>` method on mass and stiffness
+matrices generated from MAPDL, you could instead use mass and stiffness matrices
+generated from an external FEM tool or even modify the mass and stiffness matrices
+within Python.
 
-.. First, solve the first 10 modes of a ``1 x 1 x 1`` steel meter cube
-.. in MAPDL.
+First, solve the first 10 modes of a ``1 x 1 x 1`` steel meter cube
+in MAPDL.
 
 .. code:: python
 

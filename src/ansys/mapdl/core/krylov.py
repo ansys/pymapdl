@@ -1,7 +1,6 @@
 import os
 import weakref
 
-from ansys.math.core.math import AnsMath
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
@@ -51,7 +50,7 @@ class KrylovSolver:
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)
-        self.mm = AnsMath(self._mapdl)
+        self.mm = self._mapdl.math
         self.jobname = self._mapdl.jobname
         self.logger = self._mapdl._log
 

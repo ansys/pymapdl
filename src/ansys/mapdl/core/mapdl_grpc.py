@@ -2463,10 +2463,33 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def math(self):
-        """Interface to launch PyAnsys Math from PyMAPDL."""
-        import ansys.math.core.math as pymath
+        """Interface to launch PyAnsys Math from PyMAPDL.
 
-        return pymath.AnsMath(self)
+         Returns
+        -------
+        :class:`MapdlMath <ansys.mapdl.core.math.MapdlMath>`
+
+        Examples
+        --------
+        Get the stiffness matrix from MAPDL
+        >>> mm = mapdl.math
+        >>> k = mm.stiff()
+        >>> k.asarray()
+        <60x60 sparse matrix of type '<class 'numpy.float64'>'
+            with 1734 stored elements in Compressed Sparse Row format>
+
+        Get the mass matrix from MAPDL
+        >>> mm = mapdl.math
+        >>> m = mm.stiff()
+        >>> m.asarray()
+        <60x60 sparse matrix of type '<class 'numpy.float64'>'
+            with 1734 stored elements in Compressed Sparse Row format>
+        """
+        if self._math is None:
+            import ansys.math.core.math as pymath
+
+            self._math = pymath.AnsMath(self)
+        return self._math
 
     @property
     def krylov(self):
