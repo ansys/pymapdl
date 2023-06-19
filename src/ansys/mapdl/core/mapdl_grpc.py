@@ -2486,9 +2486,10 @@ class MapdlGrpc(_MapdlCore):
             with 1734 stored elements in Compressed Sparse Row format>
         """
         if self._math is None:
-            import ansys.math.core.math as pymath
+            from ansys.math.core.math import AnsMath
 
-            self._math = pymath.AnsMath(self)
+            self._math = AnsMath(self)
+
         return self._math
 
     @property
