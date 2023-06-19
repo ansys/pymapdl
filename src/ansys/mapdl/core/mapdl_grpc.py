@@ -2239,7 +2239,7 @@ class MapdlGrpc(_MapdlCore):
                     )  # Getting only the name of the file.
                     #  We try to avoid that when the full path is supplied, it will crash when trying
                     # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
-                    # This will produce the file structure to flat out, but it is find, because recursive
+                    # This will produce the file structure to flat out, but it is fine, because recursive
                     # does not work in remote.
                     self._download(
                         each_file,
