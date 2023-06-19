@@ -109,3 +109,7 @@ jobs:
         run: |
           make -C doc linkcheck SPHINXOPTS="-W --keep-going --color"
 
+      - name: "Display linkchecker results"
+        run: |
+          echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
+
