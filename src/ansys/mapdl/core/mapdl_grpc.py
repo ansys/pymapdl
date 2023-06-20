@@ -2178,6 +2178,14 @@ class MapdlGrpc(_MapdlCore):
                     "Only strings, tuple of strings or list of strings are allowed."
                 )
 
+            if target_dir:
+                try:
+                    os.mkdir(target_dir)
+                except FileExistsError:
+                    pass
+            else:
+                target_dir = os.getcwd()
+
             for file in list_files:
                 if os.path.exists(os.path.join(self.directory, file)):
                     if os.path.exists(
@@ -2186,7 +2194,10 @@ class MapdlGrpc(_MapdlCore):
                         warn(
                             f"The file {file} has been updated in the current working directory."
                         )
-                    shutil.copy(os.path.join(self.directory, file), file)
+                    shutil.copy(
+                        os.path.join(self.directory, file),
+                        os.path.join(target_dir, file),
+                    )
                 else:
                     raise FileNotFoundError(
                         f"The file {file} does not exist in the local MAPDL instance."
