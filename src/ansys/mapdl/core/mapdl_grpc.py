@@ -2160,6 +2160,7 @@ class MapdlGrpc(_MapdlCore):
             return self._download_on_local(
                 files, target_dir=target_dir, recursive=False
             )
+
         else:  # remote session
             if recursive:
                 warn(
@@ -2221,7 +2222,7 @@ class MapdlGrpc(_MapdlCore):
         if os.path.exists(file):
             if not os.path.dirname(file):
                 return [os.path.join(os.getcwd(), file)]
-            return [files]
+            return [file]
 
         elif file in self_files:
             return [os.path.join(self.directory, file)]
@@ -2243,15 +2244,6 @@ class MapdlGrpc(_MapdlCore):
                 f"The file '{file}' could not be found. In a local session, you can provide the full path to that file."
             )
 
-    def _validate_remote_file(self, file):
-        base_name = os.path.basename(file)
-        if base_name in self.list_dir():
-            return base_name
-        else:
-            raise FileNotFoundError(
-                f"The file '{file}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
-            )
-
     def _download_from_remote(
         self,
         files,
@@ -2261,6 +2253,24 @@ class MapdlGrpc(_MapdlCore):
         recursive=False,
     ):
         """Download files when we are connected to a remote session."""
+
+        if isinstance(files, str):
+            list_files = self._validate_remote_file(files)
+
+        elif isinstance(files, (list, tuple)):
+            if not all([isinstance(each, str) for each in files]):
+                raise ValueError(
+                    "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                )
+            list_files = []
+            for each in files:
+                list_files.extend(self._validate_remote_file(each))
+
+        else:
+            raise ValueError(
+                f"The `file` parameter type ({type(files)}) is not supported."
+                "Only strings, tuple of strings or list of strings are allowed."
+            )
 
         for each_file in list_files:
             try:
@@ -2284,6 +2294,15 @@ class MapdlGrpc(_MapdlCore):
                 # `mapdl.list_files()` they do exist, so
                 # if there is any error, it means their size is zero.
                 pass  # this is not the best.
+
+    def _validate_remote_file(self, file):
+        base_name = os.path.basename(file)
+        if base_name in self.list_files():
+            return base_name
+        else:
+            raise FileNotFoundError(
+                f"The file '{file}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
+            )
 
     @protect_grpc
     def _download(

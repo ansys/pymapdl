@@ -284,7 +284,7 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
 
     mapdl.download(files_to_download, target_dir=tmpdir)
     for file_to_check in expected_output:
-        assert os.path.exists(tmpdir.join(file_to_check))
+        assert os.path.exists(os.path.join(tmpdir, file_to_check))
 
 
 @pytest.mark.parametrize(
