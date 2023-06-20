@@ -271,19 +271,19 @@ def test__download(mapdl, tmpdir):
 
 
 @pytest.mark.parametrize(
-    "input,expected_return",
+    "files_to_download,expected_output",
     [
         ["myfile0.txt", ["myfile0.txt"]],
         [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
         ["myfile*", ["myfile0.txt", "myfile1.txt"]],
     ],
 )
-def test_download(mapdl, tmpdir, input, expected_return):
+def test_download(mapdl, tmpdir, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    mapdl.download(input, target_dir=tmpdir)
-    for file_to_check in expected_return:
+    mapdl.download(files_to_download, target_dir=tmpdir)
+    for file_to_check in expected_output:
         assert os.path.exists(tmpdir.join(file_to_check))
 
 
