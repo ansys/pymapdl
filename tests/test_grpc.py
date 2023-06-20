@@ -341,17 +341,17 @@ def test_download_project(mapdl, tmpdir):
     mapdl.download_project(target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    expected = {"log", "out", "err"}
+    expected = {"log", "err"}
     assert expected.intersection(files_extensions) == expected
 
 
 def test_download_project_extensions(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
-    mapdl.download_project(extensions=["log", "out"], target_dir=target_dir)
+    mapdl.download_project(extensions=["log", "err"], target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
     expected = {"log", "out", "err", "lock"}
-    assert expected.intersection(files_extensions) == {"log", "out"}
+    assert expected.intersection(files_extensions) == {"log", "err"}
 
 
 def test_download_result(mapdl, cleared, tmpdir):
