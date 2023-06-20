@@ -2,10 +2,12 @@
 import logging
 import os
 
-import appdirs
+import platformdirs
 
 # Setup data directory
-USER_DATA_PATH = appdirs.user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
+USER_DATA_PATH = platformdirs.user_data_dir(
+    appname="ansys_mapdl_core", appauthor="Ansys"
+)
 if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
     os.makedirs(USER_DATA_PATH)
 
