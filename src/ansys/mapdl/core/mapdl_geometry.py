@@ -643,10 +643,10 @@ class Geometry:
 
     def line_select(
         self,
-        items: Optional[Sequence],
+        items: Optional[Sequence[int]],
         sel_type: Optional[str] = "S",
-        return_selected: Optional[bool] = False,
-    ) -> Optional[int]:
+        return_selected: bool = False,
+    ) -> Optional[NDArray[np.int32]]:
         """Select lines using a sequence of items.
 
         Parameters
@@ -728,7 +728,7 @@ class Geometry:
         items: Optional[Sequence],
         sel_type: Optional[str] = "S",
         return_selected: Optional[bool] = False,
-    ) -> Optional[int]:
+    ) -> Optional[NDArray[np.int32]]:
         """Select areas using a sequence of items.
 
         Parameters
