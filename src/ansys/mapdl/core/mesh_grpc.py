@@ -363,18 +363,12 @@ class MeshGrpc:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        # if not self._rdat:
-        #     pass # todo: fix this
-        # return self._rdat
-        raise NotImplementedError()
+        return self._mapdl._parse_rlist()
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        # if not self._rnum:
-        #     pass # todo: to fix
-        # return self._rnum
-        raise NotImplementedError()
+        return list(self._mapdl._parse_rlist().keys())
 
     @property
     def nnum(self) -> np.ndarray:
@@ -500,7 +494,7 @@ class MeshGrpc:
 
     @property
     def nodes(self) -> np.ndarray:
-        """Array of nodes.
+        """Array of nodes in Global Cartesian coordinate system.
 
         Examples
         --------
@@ -517,6 +511,26 @@ class MeshGrpc:
         if self._node_coord is None:
             return np.empty(0)
         return self._node_coord
+
+    @property
+    def nodes_in_current_CS(self) -> np.ndarray:
+        """Returns the nodes array in the current coordinate system."""
+        CS_id = self._mapdl.get_value("active", 0, "CSYS")
+        return self.nodes_in_coordinate_system(CS_id=CS_id)
+
+    def nodes_in_coordinate_system(self, CS_id):
+        """Return nodes in the desired coordinate system."""
+        if CS_id == 0:
+            return self.nodes
+        else:
+            self._mapdl.parameters["__node_loc__"] = self.nodes
+            self._mapdl.vfun("__node_loc_cs__", "local", "__node_loc__", CS_id)
+            return self._mapdl.parameters["__node_loc_cs__"]
+
+    @property
+    def nodes_rotation(self):
+        """Returns an array of node rotations"""
+        return self._mapdl.nlist(kinternal="").to_array()[:, 4:]
 
     def _load_nodes(self, chunk_size=DEFAULT_CHUNKSIZE):
         """Loads nodes from server.

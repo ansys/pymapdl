@@ -23,13 +23,13 @@ help:
 # customized clean due to examples gallery
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf images/auto-generated
 	rm -rf source/examples/gallery_examples
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
 # customized clean due to examples gallery
 clean-except-examples:
 	rm -rf $(BUILDDIR)/*
-	rm -rf images/auto-generated
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
 # customized to build the pdf rather than using latexpdf due to various issues
@@ -40,8 +40,8 @@ pdf:
 	cd $(BUILDDIR)/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
 	(test -f $(BUILDDIR)/latex/pymapdl-Documentation-*.pdf && echo pdf exists) || exit 1
 
-checklinks:
-	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) $(LINKCHECKDIR)
+linkcheck:
+	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" -D nitpicky=1 -d _build/doctrees . $(LINKCHECKDIR)
 	@echo
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 

@@ -9,18 +9,17 @@ from common import Element, Node, get_details_of_elements, get_details_of_nodes
 
 pytest_plugins = ["pytester"]
 
+from ansys.tools.path import find_ansys, get_available_ansys_installations
 import pyvista
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import (
     MAPDL_DEFAULT_PORT,
-    _get_available_base_ansys,
     get_start_instance,
     launch_mapdl,
 )
-from ansys.mapdl.core.misc import get_ansys_bin
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -79,26 +78,26 @@ def pytest_configure(config):
     config.pluginmanager.register(my_reporter, "terminalreporter")
 
 
-# Check if MAPDL is installed
-# NOTE: checks in this order to get the newest installed version
-
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-
-valid_rver = [str(each) for each in SUPPORTED_ANSYS_VERSIONS]
-
-EXEC_FILE = None
-for rver in valid_rver:
-    if os.path.isfile(get_ansys_bin(rver)):
-        EXEC_FILE = get_ansys_bin(rver)
-        break
-
 # Cache if gRPC MAPDL is installed.
 #
 # minimum version on linux.  Windows is v202, but using v211 for consistency
 # Override this if running on CI/CD and PYMAPDL_PORT has been specified
 ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-HAS_GRPC = int(rver) >= 211 or ON_CI
 
+# Check if MAPDL is installed
+# NOTE: checks in this order to get the newest installed version
+
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
+
+valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
+
+EXEC_FILE, rver = find_ansys()
+if rver:
+    rver = int(rver * 10)
+    HAS_GRPC = int(rver) >= 211 or ON_CI
+else:
+    # assuming remote with gRPC
+    HAS_GRPC = True
 
 # determine if we can launch an instance of MAPDL locally
 # start with ``False`` and always assume the remote case
@@ -129,7 +128,7 @@ alexander.kaszynski@ansys.com
 """
 
 if START_INSTANCE and EXEC_FILE is None:
-    raise RuntimeError(ERRMSG)
+    raise MapdlRuntimeError(ERRMSG)
 
 
 def is_exited(mapdl):
@@ -244,20 +243,20 @@ def pytest_collection_modifyitems(config, items):
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.  ' "Only Linux is supported."
         )
-    ansys_base_paths = _get_available_base_ansys()
+    ansys_base_paths = get_available_ansys_installations()
 
     # find a valid version of corba
     console_path = None
     for version in ansys_base_paths:
         version = abs(version)
         if version < 211:
-            console_path = get_ansys_bin(str(version))
+            console_path = find_ansys(str(version))[0]
 
     if console_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"--console" testing option unavailable.'
             "No local console compatible MAPDL installation found. "
             "Valid versions are up to 2020R2."
@@ -282,17 +281,17 @@ def mapdl_console(request):
 
 @pytest.fixture(scope="session")
 def mapdl_corba(request):
-    ansys_base_paths = _get_available_base_ansys()
+    ansys_base_paths = get_available_ansys_installations()
 
     # find a valid version of corba
     corba_path = None
     for version in ansys_base_paths:
         version = abs(version)
         if version >= 170 and version < 202:
-            corba_path = get_ansys_bin(str(version))
+            corba_path = find_ansys(str(version))[0]
 
     if corba_path is None:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             '"-corba" testing option unavailable.'
             "No local CORBA compatible MAPDL installation found.  "
             "Valid versions are ANSYS 17.0 up to 2020R2."
@@ -869,3 +868,82 @@ def contact_solve(mapdl):
     mapdl.allsel()
     mapdl.set("last")
     mapdl.mute = False
+
+
+@pytest.fixture(scope="function")
+def cuadratic_beam_problem(mapdl):
+    mapdl.clear()
+
+    # Enter verification example mode and the pre-processing routine.
+    mapdl.prep7()
+
+    # Type of analysis: static.
+    mapdl.antype("STATIC")
+
+    # Element type: BEAM188.
+    mapdl.et(1, "BEAM188")
+
+    # Special Features are defined by keyoptions of beam element:
+
+    # KEYOPT(3)
+    # Shape functions along the length:
+    # Cubic
+    mapdl.keyopt(1, 3, 3)  # Cubic shape function
+
+    # KEYOPT(9)
+    # Output control for values extrapolated to the element
+    # and section nodes:
+    # Same as KEYOPT(9) = 1 plus stresses and strains at all section nodes
+    mapdl.keyopt(1, 9, 3, mute=True)
+
+    mapdl.mp("EX", 1, 30e6)
+    mapdl.mp("PRXY", 1, 0.3)
+    print(mapdl.mplist())
+
+    w_f = 1.048394965
+    w_w = 0.6856481
+    sec_num = 1
+    mapdl.sectype(sec_num, "BEAM", "I", "ISection")
+    mapdl.secdata(15, 15, 28 + (2 * w_f), w_f, w_f, w_w)
+
+    # Define nodes
+    for node_num in range(1, 6):
+        mapdl.n(node_num, (node_num - 1) * 120, 0, 0)
+
+    # Define one node for the orientation of the beam cross-section.
+    orient_node = mapdl.n(6, 60, 1)
+
+    # Print the list of the created nodes.
+    print(mapdl.nlist())
+
+    for elem_num in range(1, 5):
+        mapdl.e(elem_num, elem_num + 1, orient_node)
+
+    # Print the list of the created elements.
+    print(mapdl.elist())
+
+    # Display elements with their nodes numbers.
+    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+
+    # BC for the beams seats
+    mapdl.d(2, "UX", lab2="UY")
+    mapdl.d(4, "UY")
+
+    # BC for all nodes of the beam
+    mapdl.nsel("S", "LOC", "Y", 0)
+    mapdl.d("ALL", "UZ")
+    mapdl.d("ALL", "ROTX")
+    mapdl.d("ALL", "ROTY")
+    mapdl.nsel("ALL")
+
+    # Parametrization of the distributed load.
+    w = 10000 / 12
+
+    # Application of the surface load to the beam element.
+    mapdl.sfbeam(1, 1, "PRES", w)
+    mapdl.sfbeam(4, 1, "PRES", w)
+    mapdl.finish()
+
+    mapdl.run("/SOLU")
+    mapdl.solve()
+    mapdl.finish()

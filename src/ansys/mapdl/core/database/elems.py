@@ -8,6 +8,8 @@ import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 from . import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
@@ -130,7 +132,9 @@ class DbElems:
 
         """
         if self._itelm == -1:
-            raise RuntimeError("You first have to call the `DbElems.first` method.")
+            raise MapdlRuntimeError(
+                "You first have to call the `DbElems.first` method."
+            )
 
         request = mapdl_db_pb2.ElmRequest(next=self._itelm)
         result = self._db._stub.ElmNext(request)

@@ -241,7 +241,7 @@ def test_read_input_file(mapdl, file_name):
 
 
 def test_no_get_value_non_interactive(mapdl):
-    with pytest.raises((RuntimeError, MapdlCommandIgnoredError)):
+    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
 
@@ -481,3 +481,8 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+def test_launch_pyansys_math(mapdl):
+    mm = mapdl.math
+    assert mm._mapdl == mapdl

@@ -59,18 +59,21 @@ These commands are listed in Table-1_.
 |                |                                                                                                   | * :func:`Mapdl.prrsol() <ansys.mapdl.core.Mapdl.prrsol>`                 |
 |                |                                                                                                   | * :func:`Mapdl.prsect() <ansys.mapdl.core.Mapdl.prsect>`                 |
 |                |                                                                                                   | * :func:`Mapdl.prvect() <ansys.mapdl.core.Mapdl.prvect>`                 |
-|                |                                                                                                   | * :func:`Mapdl.stat() <ansys.mapdl.core.Mapdl.stat>`                     |
 |                |                                                                                                   | * :func:`Mapdl.swlist() <ansys.mapdl.core.Mapdl.swlist>`                 |
 |                |                                                                                                   |                                                                          |
 |                |                                                                                                   |  **Other Listing**                                                       |
 |                |                                                                                                   |                                                                          |
 |                |                                                                                                   | * :func:`Mapdl.set("LIST") <ansys.mapdl.core.Mapdl.set>`                 |
+|                |                                                                                                   | * :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`                   |
 |                |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+  
 | **Boundary**   | * :func:`cmd.to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`               | * :func:`Mapdl.dlist() <ansys.mapdl.core.Mapdl.dlist>`                   |
 | **Conditions** | * :func:`cmd.to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`          | * :func:`Mapdl.flist() <ansys.mapdl.core.Mapdl.flist>`                   |
 | **Listing**    |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
+
+.. warning:: If you use these methods, you might obtain a lower
+   precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
 
 Here's a simple example that demonstrates usage:
 

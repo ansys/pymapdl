@@ -545,3 +545,28 @@ def test_background(mapdl, make_block):
     pl = mapdl.eplot(background="red", return_plotter=True)
     assert pl.background_color != default_color
     assert pl.background_color == "red"
+
+
+def test_plot_nodal_values(mapdl, make_block):
+    assert mapdl.post_processing.plot_nodal_values("U", "X") is None
+    assert mapdl.post_processing.plot_nodal_values("U", "Y") is None
+    assert mapdl.post_processing.plot_nodal_values("U", "Z") is None
+
+
+def test_lsel_iterable(mapdl, make_block):
+    assert np.allclose(
+        mapdl.lsel("S", "line", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
+    )
+
+
+def test_asel_iterable(mapdl, make_block):
+    assert np.allclose(
+        mapdl.asel("S", "area", "", [1, 2, 3], "", ""), np.array([1, 2, 3])
+    )
+
+
+def test_vsel_iterable(mapdl, make_block):
+    mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
+    assert np.allclose(
+        mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
+    )

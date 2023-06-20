@@ -12,7 +12,6 @@ from ansys.mapdl.core.misc import (
     check_valid_port,
     check_valid_routine,
     check_valid_start_instance,
-    get_ansys_bin,
     last_created,
     load_file,
     no_return,
@@ -124,11 +123,6 @@ def test_no_return(mapdl, cleared):
     assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
 
 
-def test_get_ansys_bin(mapdl):
-    rver = mapdl.__str__().splitlines()[1].split(":")[1].strip().replace(".", "")
-    assert isinstance(get_ansys_bin(rver), str)
-
-
 def test_mapdl_info(mapdl, capfd):
     info = mapdl.info
     for attr, value in inspect.getmembers(info):
@@ -156,7 +150,7 @@ def test_info_title(mapdl):
 def test_info_stitle(mapdl):
     info = mapdl.info
 
-    assert not info.stitles
+    assert all([not each for each in info.stitles])
     stitles = ["asfd", "qwer", "zxcv", "jkl"]
     info.stitles = "\n".join(stitles)
 
@@ -168,7 +162,7 @@ def test_info_stitle(mapdl):
     assert stitles == info.stitles
 
     info.stitles = None
-    assert not info.stitles
+    assert all([not each for each in info.stitles])
 
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])

@@ -1,9 +1,13 @@
 """Test MAPDL interface"""
+from datetime import datetime
 import os
 from pathlib import Path
+import re
+import shutil
 import time
 
 from ansys.mapdl.reader import examples
+from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
@@ -276,7 +280,10 @@ def test_str(mapdl):
 
 def test_version(mapdl):
     assert isinstance(mapdl.version, float)  # Checking MAPDL version
-    assert 20.0 < mapdl.version < 24.0  # Some upper bound.
+    expected_version = float(
+        datetime.now().year - 2000 + 1 + 1
+    )  # the second +1 is to give some tolerance.
+    assert 20.0 < mapdl.version < expected_version  # Some upper bound.
 
 
 def test_pymapdl_version():
@@ -321,7 +328,7 @@ def test_allow_ignore(mapdl):
 def test_chaining(mapdl, cleared):
     # test chaining with distributed only
     if mapdl._distributed:
-        with pytest.raises(RuntimeError):
+        with pytest.raises(MapdlRuntimeError):
             with mapdl.chain_commands:
                 mapdl.prep7()
     else:
@@ -539,7 +546,7 @@ def test_apdl_logging(mapdl, tmpdir):
     assert file_name in os.listdir(tmp_dir)
 
     # don't allow double logger:
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.open_apdl_log(file_name, mode="w")
 
     # Testing
@@ -801,7 +808,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl, make_block):
+def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl.mesh._grid.n_cells == 11
@@ -1122,7 +1129,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.run(each_cmd)
 
 
@@ -1159,7 +1166,7 @@ def test_path_with_spaces(mapdl, path_tests):
 
 @skip_in_cloud
 def test_path_with_single_quote(mapdl, path_tests):
-    with pytest.raises(RuntimeError):
+    with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
 
 
@@ -1509,7 +1516,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     mapdl.post1()
     # this file already exists remotely
-    mapdl.file("file.rst")
+    mapdl.file("file", ".rst")
 
     with pytest.raises(FileNotFoundError):
         mapdl.file()
@@ -1618,21 +1625,6 @@ def test_lsread(mapdl, cleared):
     assert "No nodal" in mapdl.flist()
     mapdl.lsread(mute=True)
     assert "No nodal" not in mapdl.flist()
-
-
-def test_get_available_ansys_installations():
-    from ansys.mapdl.core.launcher import (
-        _get_available_base_ansys,
-        get_available_ansys_installations,
-    )
-
-    _get_doc = _get_available_base_ansys.__doc__
-    get_doc = get_available_ansys_installations.__doc__
-
-    assert _get_doc == get_doc.replace(
-        "get_available_ansys_installations", "_get_available_base_ansys"
-    )
-    assert _get_available_base_ansys() == get_available_ansys_installations()
 
 
 def test_get_fallback(mapdl, cleared):
@@ -1871,3 +1863,122 @@ def test_force_output(mapdl):
     with mapdl.force_output:
         assert mapdl.prep7()
     assert mapdl.prep7()
+
+
+def test_igesin_whitespace(mapdl, cleared, tmpdir):
+    bracket_file = pymapdl.examples.download_bracket()
+    assert os.path.isfile(bracket_file)
+
+    # moving to another location
+    tmpdir_ = tmpdir.mkdir("directory with white spaces")
+    fname = os.path.basename(bracket_file)
+    dest = os.path.join(tmpdir_, fname)
+    shutil.copy(bracket_file, dest)
+
+    # Reading file
+    mapdl.aux15()
+    out = mapdl.igesin(dest)
+    n_ent = re.findall(r"TOTAL NUMBER OF ENTITIES \s*=\s*(\d*)", out)
+    assert int(n_ent[0]) > 0
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )
+
+
+@skip_if_not_local
+def test_save_on_exit(mapdl, cleared):
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.parameters["my_par"] = "asdf"
+    db_name = mapdl2.jobname + ".db"
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+
+    mapdl2.save(db_name)
+    assert os.path.exists(db_path)
+
+    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.exit()
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "qwerty"
+
+    mapdl2.parameters["my_par"] = "zxcv"
+    db_name = mapdl2.jobname + ".db"  # reupdating db path
+    db_dir = mapdl2.directory
+    db_path = os.path.join(db_dir, db_name)
+    mapdl2.exit(save=True)
+
+    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2.resume(db_path)
+    assert mapdl2.parameters["my_par"] == "zxcv"
+    mapdl2.exit()
+
+
+def test_input_strings_inside_non_interactive(mapdl, cleared):
+    cmd = """/com General Kenobi. You are a bold one.  Kill him!\n/prep7"""
+    with mapdl.non_interactive:
+        mapdl.com("Hello there")
+        mapdl.input_strings(cmd)
+        mapdl.com("Back away! I will deal with this Jedi slime myself.")
+
+    assert "Hello there" in mapdl._response
+    assert "PREP7" in mapdl._response
+    assert "General Kenobi. You are a bold one.  Kill him!" in mapdl._response
+    assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
+
+
+def test_input_inside_non_interactive(mapdl, cleared):
+    cmd = """/com General Kenobi. You are a bold one.  Kill him!\n/prep7"""
+    with open("myinput.inp", "w") as fid:
+        fid.write(cmd)
+
+    with mapdl.non_interactive:
+        mapdl.com("Hello there")
+        mapdl.input("myinput.inp")
+        mapdl.com("Back away! I will deal with this Jedi slime myself.")
+
+    assert "Hello there" in mapdl._response
+    assert "PREP7" in mapdl._response
+    assert "General Kenobi. You are a bold one.  Kill him!" in mapdl._response
+    assert "Back away! I will deal with this Jedi slime myself." in mapdl._response
+
+    os.remove("myinput.inp")
+
+
+def test_rlblock_rlblock_num(mapdl):
+    def num_():
+        return np.round(np.random.random(), 4)
+
+    comparison = {
+        1: [num_() for _ in range(18)],
+        2: [num_() for _ in range(18)],
+        4: [num_() for _ in range(18)],
+    }
+
+    mapdl.prep7()
+    for i in comparison.keys():
+        mapdl.r(i, *comparison[i][0:6])
+        mapdl.rmore(*comparison[i][6:12])
+        mapdl.rmore(*comparison[i][12:18])
+
+    rlblock = mapdl.mesh.rlblock
+
+    for i in [1, 2, 4]:
+        for j in range(18):
+            assert comparison[i][j] == rlblock[i][j]
+
+    assert [1, 2, 4] == mapdl.mesh.rlblock_num
+
+
+def test_download_results_non_local(mapdl, cube_solve):
+    assert mapdl.result is not None
+    assert isinstance(mapdl.result, Result)

@@ -4,7 +4,6 @@ from ansys.mapdl.reader.elements import ETYPE_MAP
 from ansys.mapdl.reader.misc import unique_rows
 import numpy as np
 import pyvista as pv
-from pyvista._vtk import VTK9
 
 INVALID_ALLOWABLE_TYPES = TypeError(
     "`allowable_types` must be an array " "of ANSYS element types from 1 and 300"
@@ -133,11 +132,11 @@ def _parse_vtk(
                 tshape_label = SHAPE_MAP[tshape_num]
                 type_ref[etype_ind] = TARGE170_MAP.get(tshape_label, 0)
 
-    offset, celltypes, cells = _reader.ans_vtk_convert(
-        mesh._elem, mesh._elem_off, type_ref, mesh.nnum, True
-    )  # for reset_midside
-
     nodes, angles, nnum = mesh.nodes, mesh.node_angles, mesh.nnum
+
+    offset, celltypes, cells = _reader.ans_vtk_convert(
+        mesh._elem, mesh._elem_off, type_ref, nnum, True
+    )  # for reset_midside
 
     # fix missing midside
     if np.any(cells == -1):
@@ -152,13 +151,16 @@ def _parse_vtk(
         cells[cells < 0] = 0
         # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
-    if VTK9:
-        grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
-    else:
-        grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes, deep=True)
+    grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
 
     # Store original ANSYS element and node information
-    grid.point_data["ansys_node_num"] = nnum
+    try:
+        grid.point_data["ansys_node_num"] = nnum
+    except ValueError:
+        grid.point_data["ansys_node_num"] = (
+            mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
+        )
+
     grid.cell_data["ansys_elem_num"] = mesh.enum
     grid.cell_data["ansys_real_constant"] = mesh.elem_real_constant
     grid.cell_data["ansys_material_type"] = mesh.material_type

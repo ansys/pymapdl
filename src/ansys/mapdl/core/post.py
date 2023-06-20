@@ -506,7 +506,7 @@ class PostProcessing:
         ... )
         """
 
-        values = self.nodal_values(self, item, comp="")
+        values = self.nodal_values(item=item, comp=comp)
         kwargs.setdefault(
             "scalar_bar_args", {"title": f"item: {item}\nComponent: {comp}"}
         )
@@ -590,7 +590,7 @@ class PostProcessing:
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
         """Plot point scalars"""
         if not scalars.size:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
@@ -623,7 +623,7 @@ class PostProcessing:
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
         if not scalars.size:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Result unavailable.  Either the result has not been loaded "
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."

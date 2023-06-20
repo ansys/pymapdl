@@ -16,7 +16,7 @@ ENV AWP_ROOT222=/ansys_inc
 
 # LABELS
 LABEL description="MAPDL on Ubuntu"
-LABEL email="pyansys.support@ansys.com"
+LABEL email="pyansys.core@ansys.com"
 
 # OCI LABELS
 LABEL org.opencontainers.image.documentation="https://mapdl.docs.pyansys.com"

@@ -7,11 +7,14 @@ from warnings import warn
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_db_pb2_grpc
+from ansys.tools.versioning import server_meets_version
 import grpc
+
+from ansys.mapdl.core.errors import MapdlConnectionError
 
 from ..mapdl_grpc import MapdlGrpc
 
-VALID_MAPDL_VERSIONS = [21.1, 21.2, 22.1, 22.2]
+MINIMUM_MAPDL_VERSION = "21.1"
 
 
 class WithinBeginLevel:
@@ -215,7 +218,9 @@ class MapdlDb:
 
         ## Checking MAPDL versions
         mapdl_version = self._mapdl.version
-        if mapdl_version not in VALID_MAPDL_VERSIONS:  # pragma: no cover
+        if not server_meets_version(
+            str(mapdl_version), MINIMUM_MAPDL_VERSION
+        ):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 
             raise MapdlVersionError(
@@ -264,7 +269,7 @@ class MapdlDb:
             time.sleep(0.01)
 
         if not self._state._matured:  # pragma: no cover
-            raise RuntimeError(
+            raise MapdlConnectionError(
                 "Unable to establish connection to MAPDL database server"
             )
         self._mapdl._log.debug("Established connection to MAPDL database server")

@@ -55,6 +55,7 @@ tests/cyclic/htmlcov
 .benchmarks/
 test-output.xml
 coverage.xml
+.tox/
 
 \#*
 .\#*

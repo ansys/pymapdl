@@ -1,0 +1,379 @@
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
+/VERIFY,VM291
+/TITLE,VM291,FORCE ON BOUNDARY OF A SEMI-INFINITE BODY (BOUSSINESQ PROBLEM)
+/COM,
+/COM, REFERENCE: "TIMOSHENKO,S.P.,AND J.N.GOODIER,THEORY OF ELASTICITY,
+/COM,            MCGRAW-HILL,NEW YORK, PP 398-402, 1970
+/COM,******************************************
+/COM,  USING PLANE182 AND INFIN257 ELEMENTS
+/COM, *******************************************
+/PREP7
+P=-1                    ! FORCE 
+PI=ACOS(-1)
+Exx=1.0                 ! YOUNG'S MODULUS
+NUxy=0.1                ! POISSON'S RATIO
+
+ET,1,PLANE182           ! 2D 4-NODE STRUCTURAL SOLID
+KEYOPT,1,3,1            ! AXISYMMETRIC
+MP,EX,1,Exx             ! DEFINE MATERIAL MODEL
+MP,PRXY,1,NUxy
+
+N,1,0,0                 ! DEFINE NODES
+N,2,1,0
+N,3,0.75,-0.75
+N,4,0,-1
+N,5,2,0
+N,6,1.75, -0.75             
+N,7,1.5,-1.5               
+N,8,0.75, -1.75             
+N,9,0,-2
+N,10,3,0
+N,11,2.5833, -1.0833        
+N,12,2.1667, -2.1667        
+N,13,1.0833, -2.5833        
+N,14,0,-3
+N,15,4,0
+N,16,3.4167, -1.4167        
+N,17,2.8333, -2.8333        
+N,18,1.4167, -3.4167        
+N,19,0,-4
+
+MAT,1
+TYPE,1
+E,4,3,2,1               ! FORM 2D 4 NODE STRUCTURAL SOLID ELEMENTS
+E,6,5,2,3
+E,7,6,3,8
+E,9,8,3,4
+E,11,10,5,6
+E,12,11,6,7
+E,13,12,7,8
+E,14,13,8,9
+E,16,15,10,11
+E,17,16,11,12
+E,18,17,12,13
+E,19,18,13,14
+
+NPOLE=NODE(0,0,0)
+NSEL,S,,,15,19
+EINFIN,,NPOLE           ! GENERATE SEMI-INFINITE SOLID ELEMENTS
+ALLS
+NSEL,S,LOC,X,0
+D,ALL,UX,0              ! CONSTRAINT UX DOF AT LOCATION X=0
+ALLS
+F,1,FY,P                ! APPLY FORCE ALONG Y DIRECTION AT NODE1
+FINISH
+
+/SOLUTION
+ANTYPE,STATIC
+OUTRES,ALL,ALL
+TIME,1
+/OUT,SCRATCH
+SOLVE                   ! SOLVE STATIC ANALYSIS
+FINISH
+
+/POST1
+SET,LAST
+/OUT,
+R1=1                                       
+Z1=1                                       
+UY1=P*(1-NUxy**2)/(PI*Exx*R1)               ! UY AT NODE (1,0,0)
+UP1=P/(2*PI*Exx*Z1)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,1,0)
+*GET,UYA1,NODE,2,U,Y                        ! MAPDL UY AT NODE(1,0,0)
+*GET,UPA1,NODE,4,U,Y                        ! MADPL UY AT NODE(0,1,0)
+
+R2=2                                        
+Z2=2                                        
+UY2=P*(1-NUxy**2)/(PI*Exx*R2)               ! UY AT NODE (2,0,0)
+UP2=P/(2*PI*Exx*Z2)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,2,0)
+*GET,UYA2,NODE,5,U,Y                        ! MAPDL UY AT NODE(2,0,0)
+*GET,UPA2,NODE,9,U,Y                        ! MADPL UY AT NODE(0,2,0)
+
+R3=3                                        
+Z3=3                                        
+UY3=P*(1-NUxy**2)/(PI*Exx*R3)               ! UY AT NODE (3,0,0)
+UP3=P/(2*PI*Exx*Z3)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,3,0)
+*GET,UYA3,NODE,10,U,Y                       ! MAPDL UY AT NODE(3,0,0)
+*GET,UPA3,NODE,14,U,Y                       ! MADPL UY AT NODE(0,3,0)
+
+R4=4                                        
+Z4=4                                        
+UY4=P*(1-NUxy**2)/(PI*Exx*R4)               ! UY AT NODE (4,0,0)
+UP4=P/(2*PI*Exx*Z4)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,4,0)
+*GET,UYA4,NODE,15,U,Y                       ! MAPDL UY AT NODE(4,0,0)
+*GET,UPA4,NODE,19,U,Y                       ! MADPL UY AT NODE(0,4,0)
+
+
+/OUT,SCRATCH
+*DIM,VALUE,,3,6
+*DIM,LABEL,CHAR,3,2
+
+VALUE(1,1)=UY2
+VALUE(2,1)=UY3
+VALUE(3,1)=UY4
+VALUE(1,2)=UYA2
+VALUE(2,2)=UYA3
+VALUE(3,2)=UYA4
+
+VALUE(1,3)=UP2
+VALUE(2,3)=UP3
+VALUE(3,3)=UP4
+VALUE(1,4)=UPA2
+VALUE(2,4)=UPA3
+VALUE(3,4)=UPA4
+
+
+VALUE(1,5)=UY2/UYA2
+VALUE(2,5)=UY3/UYA3
+VALUE(3,5)=UY4/UYA4
+
+VALUE(1,6)=UP2/UPA2
+VALUE(2,6)=UP3/UPA3
+VALUE(3,6)=UP4/UPA4
+
+
+LABEL(1,1)='NODE5'
+LABEL(2,1)='NODE10'
+LABEL(3,1)='NODE15'
+
+
+LABEL(1,2)='NODE9'
+LABEL(2,2)='NODE14'
+LABEL(3,2)='NODE19'
+
+SAVE,TABLE_1
+FINISH
+/CLEAR,NOSTART
+/OUT,
+/COM, ***************************************
+/COM, USING PLANE183 AND INFIN257 ELEMENTS
+/COM, ***************************************
+/PREP7
+P=-1                    ! FORCE 
+PI=ACOS(-1)
+Exx=1.0                 ! YOUNG'S MODULUS
+NUxy=0.1                ! POISSON'S RATIO
+
+ET,1,PLANE183           ! 2D 8-NODE STRUCTURAL SOLID
+KEYOPT,1,3,1            ! AXISYMMETRIC
+MP,EX,1,Exx             ! DEFINE MATERIAL MODEL
+MP,PRXY,1,NUxy
+
+/COM,  DEFINE NODES
+
+ N,   1,   0.0000,      -1.0000,       0.0000 
+ N,   2,  0.75000,     -0.75000,       0.0000 
+ N,   3,  0.37500,     -0.87500,       0.0000 
+ N,   4,   1.0000,       0.0000,       0.0000 
+ N,   5,  0.87500,     -0.37500,       0.0000 
+ N,   6,   0.0000,       0.0000,       0.0000 
+ N,   7,  0.50000,       0.0000,       0.0000 
+ N,   8,   0.0000,     -0.50000,       0.0000 
+ N,   9,   1.7500,     -0.75000,       0.0000 
+ N,  10,   2.0000,       0.0000,       0.0000 
+ N,  11,   1.8750,     -0.37500,       0.0000 
+ N,  12,   1.5000,       0.0000,       0.0000 
+ N,  13,   1.2500,     -0.75000,       0.0000 
+ N,  14,   1.5000,      -1.5000,       0.0000 
+ N,  15,   1.6250,      -1.1250,       0.0000 
+ N,  16,  0.75000,      -1.7500,       0.0000 
+ N,  17,  0.75000,      -1.2500,       0.0000 
+ N,  18,   1.1250,      -1.6250,       0.0000 
+ N,  19,   0.0000,      -2.0000,       0.0000 
+ N,  20,  0.37500,      -1.8750,       0.0000 
+ N,  21,   0.0000,      -1.5000,       0.0000 
+ N,  22,   2.5833,      -1.0833,       0.0000 
+ N,  23,   3.0000,       0.0000,       0.0000 
+ N,  24,   2.7917,     -0.54165,       0.0000 
+ N,  25,   2.5000,       0.0000,       0.0000 
+ N,  26,   2.1667,     -0.91665,       0.0000 
+ N,  27,   2.1667,      -2.1667,       0.0000 
+ N,  28,   2.3750,      -1.6250,       0.0000 
+ N,  29,   1.8334,      -1.8334,       0.0000 
+ N,  30,   1.0833,      -2.5833,       0.0000 
+ N,  31,   1.6250,      -2.3750,       0.0000 
+ N,  32,  0.91665,      -2.1667,       0.0000 
+ N,  33,   0.0000,      -3.0000,       0.0000 
+ N,  34,  0.54165,      -2.7917,       0.0000 
+ N,  35,   0.0000,      -2.5000,       0.0000 
+ N,  36,   3.4167,      -1.4167,       0.0000 
+ N,  37,   4.0000,       0.0000,       0.0000 
+ N,  38,   3.7083,     -0.70835,       0.0000 
+ N,  39,   3.5000,       0.0000,       0.0000 
+ N,  40,   3.0000,      -1.2500,       0.0000 
+ N,  41,   2.8333,      -2.8333,       0.0000 
+ N,  42,   3.1250,      -2.1250,       0.0000 
+ N,  43,   2.5000,      -2.5000,       0.0000 
+ N,  44,   1.4167,      -3.4167,       0.0000 
+ N,  45,   2.1250,      -3.1250,       0.0000 
+ N,  46,   1.2500,      -3.0000,       0.0000 
+ N,  47,   0.0000,      -4.0000,       0.0000 
+ N,  48,  0.70835,      -3.7083,       0.0000 
+ N,  49,   0.0000,      -3.5000,       0.0000 
+
+
+MAT,1
+TYPE,1
+
+/COM,  DEFINE ELEMENTS
+
+E,  1,     2,     4,     6,     3,     5,     7,     8
+E,  9,    10,     4,     2,    11,    12,     5,    13
+E, 14,     9,     2,    16,    15,    13,    17,    18
+E, 19,    16,     2,     1,    20,    17,     3,    21
+E, 22,    23,    10,     9,    24,    25,    11,    26
+E, 27,    22,     9,    14,    28,    26,    15,    29
+E, 30,    27,    14,    16,    31,    29,    18,    32
+E, 33,    30,    16,    19,    34,    32,    20,    35
+E, 36,    37,    23,    22,    38,    39,    24,    40
+E, 41,    36,    22,    27,    42,    40,    28,    43
+E, 44,    41,    27,    30,    45,    43,    31,    46
+E, 47,    44,    30,    33,    48,    46,    34,    49
+
+
+NPOLE=NODE(0,0,0)
+NSEL,S,NODE,,36,38,1
+NSEL,A,NODE,,41,42,1
+NSEL,A,NODE,,44,45,1
+NSEL,A,NODE,,47,48,1
+EINFIN,,NPOLE           ! GENERATE SEMI-INFINITE SOLID ELEMENTS
+ALLS
+NSEL,S,LOC,X,0
+D,ALL,UX,0              ! CONSTRAINT UX DOF AT LOCATION X=0
+ALLS
+F,6,FY,P                ! APPLY FORCE ALONG Y DIRECTION AT NODE6
+FINISH
+
+/SOLUTION
+ANTYPE,STATIC
+OUTRES,ALL,ALL
+TIME,1
+/OUT,SCRATCH
+SOLVE                   ! SOLVE STATIC ANALYSIS
+FINISH
+
+/POST1
+SET,LAST
+/OUT,
+R1=1                                       
+Z1=1                                       
+UY1=P*(1-NUxy**2)/(PI*Exx*R1)               ! UY AT NODE (1,0,0)
+UP1=P/(2*PI*Exx*Z1)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,1,0)
+*GET,UYA1,NODE,4,U,Y                        ! MAPDL UY AT NODE(1,0,0)
+*GET,UPA1,NODE,1,U,Y                        ! MADPL UY AT NODE(0,1,0)
+
+R2=2                                        
+Z2=2                                        
+UY2=P*(1-NUxy**2)/(PI*Exx*R2)               ! UY AT NODE (2,0,0)
+UP2=P/(2*PI*Exx*Z2)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,2,0)
+*GET,UYA2,NODE,10,U,Y                       ! MAPDL UY AT NODE(2,0,0)
+*GET,UPA2,NODE,19,U,Y                       ! MADPL UY AT NODE(0,2,0)
+
+R3=3                                        
+Z3=3                                        
+UY3=P*(1-NUxy**2)/(PI*Exx*R3)               ! UY AT NODE (3,0,0)
+UP3=P/(2*PI*Exx*Z3)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,3,0)
+*GET,UYA3,NODE,23,U,Y                       ! MAPDL UY AT NODE(3,0,0)
+*GET,UPA3,NODE,33,U,Y                       ! MADPL UY AT NODE(0,3,0)
+
+R4=4                                        
+Z4=4                                        
+UY4=P*(1-NUxy**2)/(PI*Exx*R4)               ! UY AT NODE (4,0,0)
+UP4=P/(2*PI*Exx*Z4)*(1+NUxy+2-2*NUxy**2)    ! UY AT NODE (0,4,0)
+*GET,UYA4,NODE,37,U,Y                       ! MAPDL UY AT NODE(4,0,0)
+*GET,UPA4,NODE,47,U,Y                       ! MADPL UY AT NODE(0,4,0)
+
+
+/OUT,SCRATCH
+*DIM,VALUE1,,3,6
+*DIM,LABEL1,CHAR,3,2
+
+VALUE1(1,1)=UY2
+VALUE1(2,1)=UY3
+VALUE1(3,1)=UY4
+VALUE1(1,2)=UYA2
+VALUE1(2,2)=UYA3
+VALUE1(3,2)=UYA4
+
+VALUE1(1,3)=UP2
+VALUE1(2,3)=UP3
+VALUE1(3,3)=UP4
+VALUE1(1,4)=UPA2
+VALUE1(2,4)=UPA3
+VALUE1(3,4)=UPA4
+
+
+VALUE1(1,5)=UY2/UYA2
+VALUE1(2,5)=UY3/UYA3
+VALUE1(3,5)=UY4/UYA4
+
+VALUE1(1,6)=UP2/UPA2
+VALUE1(2,6)=UP3/UPA3
+VALUE1(3,6)=UP4/UPA4
+
+
+LABEL1(1,1)='NODE10'
+LABEL1(2,1)='NODE23'
+LABEL1(3,1)='NODE37'
+
+
+LABEL1(1,2)='NODE19'
+LABEL1(2,2)='NODE33'
+LABEL1(3,2)='NODE47'
+
+
+SAVE,TABLE_2
+FINISH
+RESUME,TABLE_1
+
+/OUT,vm291,vrt
+/COM,
+/COM,--------------VM291 RESULTS COMPARISON--------------------
+/COM,
+/COM,
+/COM,              |   TARGET   |   Mechanical APDL   | RATIO
+/COM,
+/COM,
+/COM,  **************************************
+/COM,   USING PLANE182 AND INFIN257 ELEMENTS
+/COM,  **************************************
+/COM,
+/COM, VERTICAL DISPLACEMENT(UY) ON THE SURFACE (Y=0)
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,5)
+(4X,A10'  ',F10.4,'       ',F10.4,'        ',1F5.3)
+/COM,
+/COM,
+/COM,
+/COM,VERTICAL DISPLACEMENT(UY) BELOW THE POINT LOAD (X=0)
+/COM,
+*VWRITE,LABEL(1,2),VALUE(1,3),VALUE(1,4),VALUE(1,6)
+(4X,A10'  ',F10.4,'       ',F10.4,'        ',1F5.3)
+/COM,
+/COM,
+/NOPR
+RESUME,TABLE_2
+/GOPR
+/COM,
+/COM,  **************************************
+/COM,   USING PLANE183 AND INFIN257 ELEMENTS
+/COM,  **************************************
+/COM,
+/COM, VERTICAL DISPLACEMENT(UY) ON THE SURFACE (Y=0)
+/COM,
+*VWRITE,LABEL1(1,1),VALUE1(1,1),VALUE1(1,2),VALUE1(1,5)
+(4X,A10'  ',F10.4,'       ',F10.4,'        ',1F5.3)
+/COM,
+/COM,
+/COM,
+/COM,VERTICAL DISPLACEMENT(UY) BELOW THE POINT LOAD (X=0)
+/COM,
+*VWRITE,LABEL1(1,2),VALUE1(1,3),VALUE1(1,4),VALUE1(1,6)
+(4X,A10'  ',F10.4,'       ',F10.4,'        ',1F5.3)
+/COM,
+/COM,
+/COM,
+/COM,----------------------------------------------------------
+/OUT,
+*LIST,vm291,vrt
+FINISH
+/EXIT,NOSAVE

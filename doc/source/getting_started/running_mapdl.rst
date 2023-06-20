@@ -41,7 +41,7 @@ Launch MAPDL
 Launch MAPDL locally
 ~~~~~~~~~~~~~~~~~~~~
 
-You can use the ``launch_mapdl`` method to have Python start MAPDL and
+You can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to have Python start MAPDL and
 automatically connect to it:
 
 .. code:: pycon
@@ -64,15 +64,15 @@ Launch a gRPC MAPDL session
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 You can start MAPDL from the command line and then connect to it.
 
-To launch MAPDL on Windows (assuming a ``C:/Program Files/ANSYS Inc/v211`` installation), use:
+To launch MAPDL on Windows (assuming a :file:`C:/Program Files/ANSYS Inc/v211` installation), use:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
     C:/Program Files/ANSYS Inc/v211/ansys/bin/winx64/ANSYS211.exe -grpc
 
-To launch MAPDL on Linux (assuming a ``/usr/ansys_inc`` installation), use:
+To launch MAPDL on Linux (assuming a :file:`/usr/ansys_inc` installation), use:
 
-.. code:: bash
+.. code:: console
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -grpc
 
@@ -93,7 +93,7 @@ You can configure the port that MAPDL starts on with the ``-port`` argument.
 For example, you can start the server to listen for connections at 
 port 50005 with:
 
-.. code:: bash
+.. code:: console
 
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 

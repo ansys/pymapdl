@@ -7,11 +7,7 @@ import warnings
 
 from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
 from ansys.mapdl.core.errors import VersionError
-from ansys.mapdl.core.launcher import (
-    MAPDL_DEFAULT_PORT,
-    _version_from_path,
-    port_in_use,
-)
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
@@ -30,7 +26,7 @@ def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
         port += 1
 
     if len(ports) < n_ports:
-        raise RuntimeError(
+        raise MapdlRuntimeError(
             f"There are not {n_ports} available ports between {starting_port} and 65536"
         )
 
@@ -141,7 +137,7 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if _version_from_path(exec_file) < 211:
+        if version_from_path("mapdl", exec_file) < 211:
             raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
@@ -197,7 +193,7 @@ class LocalMapdlPool:
 
     def _verify_unique_ports(self):
         if len(self._ports) != len(self):
-            raise RuntimeError("MAPDLPool has overlapping ports")
+            raise MapdlRuntimeError("MAPDLPool has overlapping ports")
 
     def map(
         self,
@@ -280,7 +276,7 @@ class LocalMapdlPool:
         if not len(self):
             # instances could still be spawning...
             if not all(v is None for v in self._instances):
-                raise RuntimeError("No MAPDL instances available.")
+                raise MapdlRuntimeError("No MAPDL instances available.")
 
         results = []
 

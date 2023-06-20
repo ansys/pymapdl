@@ -1,4 +1,4 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+/COM,ANSYS MEDIA REL. 2023R1 (11/04/2022) REF. VERIF. MANUAL: REL. 2023R1
 /verify,vm275
 /title,vm275,Mode lock-in and friction induced vibration on a Pin-Disc Model
 /com,
@@ -102,7 +102,7 @@ et,3,conta175               ! Defining Frictional Contact Pair
 mp,mu,3,0.152               ! Coefficient of Friction
 keyopt,3,2,0                ! Augumented Lagrangian
 keyopt,3,9,2                ! Include penetration or gap with ramped effects
-keyopt,3,10,2               ! Update contact stiffness each iteration
+keyopt,3,10,0               ! Update contact stiffness each iteration
 keyopt,3,12,0               ! Standard Contact
 
 
@@ -188,7 +188,7 @@ fini
     
 /post1  
 file,,rstp  
-set,1,7
+set,1,7,,IMAG
 *get,unstablemode1,active,0,set,freq
 *stat,unstablemode1
 *dim,label,char,1,2
@@ -248,7 +248,7 @@ fini
     
 /post1  
 file,,rstp  
-set,1,7
+set,1,7,,IMAG
 *get,unstablemode2,active,0,set,freq
 *stat,unstablemode2
 *dim,label,char,1,2
@@ -297,7 +297,7 @@ fini
     
 /post1  
 file,,rst  
-set,1,7
+set,1,7,,IMAG
 *get,unstablemode3,active,0,set,freq
 *stat,unstablemode3
 *dim,label,char,1,2
@@ -357,5 +357,6 @@ resume,table_3
 /delete,table_2
 /delete,table_3
 finish
+/exit,nosave
     
 

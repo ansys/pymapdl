@@ -6,7 +6,7 @@ import os
 import re
 import time
 
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 
 # from ansys.mapdl.core.misc import kill_process
 from ansys.mapdl.core.mapdl import _MapdlCore
@@ -186,7 +186,7 @@ class MapdlConsole(_MapdlCore):
                     ready_items[i].decode("utf-8"),
                 )
                 self._log.info(response + ready_items[i].decode("utf-8"))
-                raise RuntimeError(
+                raise MapdlRuntimeError(
                     "User input expected.  " "Try using ``with mapdl.non_interactive``"
                 )
             else:  # continue item
