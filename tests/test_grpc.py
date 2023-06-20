@@ -306,7 +306,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
 
 @skip_in_cloud  # This is going to run only in local
 def test_download_recursive(mapdl, tmpdir):
-    if mapdl._local:  # mapdl._local = True
+    if mapdl._local:
         dir_ = tmpdir.mkdir("temp00")
         file1 = dir_.join("file0.txt")
         file2 = dir_.join("file1.txt")
@@ -315,15 +315,13 @@ def test_download_recursive(mapdl, tmpdir):
         with open(file2, "w") as fid:
             fid.write("dummy")
 
-        mapdl.download(
-            os.path.join(dir_, "*"), recursive=True
-        )  # This is referenced to os.getcwd
+        mapdl.download(str(dir_), recursive=True)  # This is referenced to os.getcwd
         assert os.path.exists("file0.txt")
         assert os.path.exists("file1.txt")
         os.remove("file0.txt")
         os.remove("file1.txt")
 
-        mapdl.download(os.path.join(dir_, "*"), target_dir="new_dir", recursive=True)
+        mapdl.download("*", target_dir="new_dir", recursive=True)
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
         os.remove(os.path.join("new_dir", "file0.txt"))
