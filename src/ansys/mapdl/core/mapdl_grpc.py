@@ -2,7 +2,6 @@
 
 import fnmatch
 from functools import wraps
-import glob
 import io
 import os
 import pathlib
@@ -2151,41 +2150,46 @@ class MapdlGrpc(_MapdlCore):
 
         self_files = self.list_files()  # to avoid calling it too much
 
-        if self._local:
-            if isinstance(files, str):
-                if os.path.exists(os.path.join(self.directory, files)):  # file exist
-                    list_files = [files]
-                elif "*" in files:
-                    list_files = glob.glob(files, recursive=recursive)
-                    if not list_files:
-                        raise ValueError(
-                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client."
-                        )
-                else:
-                    raise ValueError(
-                        f"The files parameter ('{files}') does not match any file or pattern."
+        if isinstance(files, str):
+            if files in self_files:
+                list_files = [files]
+            elif "*" in files:
+                # try filter on the list_files
+                if recursive:
+                    warn(
+                        "The 'recursive' keyword argument does not work with remote instances. So it is ignored."
                     )
-            elif isinstance(files, (list, tuple)):
-                if not all([isinstance(each, str) for each in files]):
+                list_files = fnmatch.filter(self_files, files)
+                if not list_files:
                     raise ValueError(
-                        "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                        f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server."
                     )
-                list_files = files
-
             else:
                 raise ValueError(
-                    f"The `file` parameter type ({type(files)}) is not supported."
-                    "Only strings, tuple of strings or list of strings are allowed."
+                    f"The `'files'` parameter ('{files}') does not match any file or pattern."
                 )
 
-            if target_dir:
-                try:
-                    os.mkdir(target_dir)
-                except FileExistsError:
-                    pass
-            else:
-                target_dir = os.getcwd()
+        elif isinstance(files, (list, tuple)):
+            if not all([isinstance(each, str) for each in files]):
+                raise ValueError(
+                    "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                )
+            list_files = files
+        else:
+            raise ValueError(
+                f"The `file` parameter type ({type(files)}) is not supported."
+                "Only strings, tuple of strings or list of strings are allowed."
+            )
 
+        if target_dir:
+            try:
+                os.mkdir(target_dir)
+            except FileExistsError:
+                pass
+        else:
+            target_dir = os.getcwd()
+
+        if self._local:  # local session
             for file in list_files:
                 if os.path.exists(os.path.join(self.directory, file)):
                     if os.path.exists(
@@ -2202,47 +2206,7 @@ class MapdlGrpc(_MapdlCore):
                     raise FileNotFoundError(
                         f"The file {file} does not exist in the local MAPDL instance."
                     )
-
-        else:  # Remote or looking into MAPDL working directory
-            if isinstance(files, str):
-                if files in self_files:
-                    list_files = [files]
-                elif "*" in files:
-                    # try filter on the list_files
-                    if recursive:
-                        warn(
-                            "The 'recursive' keyword argument does not work with remote instances. So it is ignored."
-                        )
-                    list_files = fnmatch.filter(self_files, files)
-                    if not list_files:
-                        raise ValueError(
-                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server."
-                        )
-                else:
-                    raise ValueError(
-                        f"The `'files'` parameter ('{files}') does not match any file or pattern."
-                    )
-
-            elif isinstance(files, (list, tuple)):
-                if not all([isinstance(each, str) for each in files]):
-                    raise ValueError(
-                        "The parameter `'files'` can be a list or tuple, but it should only contain strings."
-                    )
-                list_files = files
-            else:
-                raise ValueError(
-                    f"The `file` parameter type ({type(files)}) is not supported."
-                    "Only strings, tuple of strings or list of strings are allowed."
-                )
-
-            if target_dir:
-                try:
-                    os.mkdir(target_dir)
-                except FileExistsError:
-                    pass
-            else:
-                target_dir = os.getcwd()
-
+        else:  # remote session
             for each_file in list_files:
                 try:
                     file_name = os.path.basename(
