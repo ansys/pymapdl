@@ -169,6 +169,8 @@ Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.h
 
 Then, add a plotter on the first tab:
 
+.. vale off
+
 .. code:: python
 
     def _setup_tab_preprocessing(self) -> None:
@@ -178,6 +180,8 @@ Then, add a plotter on the first tab:
         # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._preprocessing_plotter, 0, 4, 6, 50)
+
+.. vale on
 
 Add another plotter on the second tab:
 
@@ -213,6 +217,8 @@ Develop the logic
 
 Connect each button to a function that contains the logic:
 
+.. vale off
+
 .. code-block:: python
     :emphasize-lines: 5,14
 
@@ -232,6 +238,8 @@ Connect each button to a function that contains the logic:
         self._solve_button.clicked.connect(self._run_solver)
 
         container_layout.addWidget(self._solve_button)
+
+.. vale on
 
 You can now write the related functions:
 
