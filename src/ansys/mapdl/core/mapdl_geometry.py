@@ -407,7 +407,7 @@ class Geometry:
         return int(self._mapdl.get(entity=entity, item1="COUNT"))
 
     @property
-    def knum(self) -> NDArray[np.integer]:
+    def knum(self) -> NDArray[np.int32]:
         """
         Array of keypoint numbers.
 
@@ -423,7 +423,7 @@ class Geometry:
         return self._mapdl.get_array("KP", item1="KLIST").astype(np.int32)
 
     @property
-    def lnum(self) -> "ndarray[np.integer]":
+    def lnum(self) -> NDArray[np.int32]:
         """Array of line numbers.
 
         Examples
@@ -444,7 +444,7 @@ class Geometry:
         return lnum.astype(np.int32)
 
     @property
-    def anum(self) -> NDArray[np.integer]:
+    def anum(self) -> NDArray[np.int32]:
         """Array of area numbers.
 
         Examples
@@ -460,7 +460,7 @@ class Geometry:
         return self._mapdl.get_array("AREA", item1="ALIST").astype(np.int32)
 
     @property
-    def vnum(self) -> NDArray[np.integer]:
+    def vnum(self) -> NDArray[np.int32]:
         """Array of volume numbers.
 
         Examples
@@ -564,7 +564,7 @@ class Geometry:
 
     def keypoint_select(
         self, items, sel_type="S", return_selected=False
-    ) -> Optional[int]:
+    ) -> Optional[NDArray[np.int32]]:
         """Select keypoints using a sequence of items.
 
         Parameters
