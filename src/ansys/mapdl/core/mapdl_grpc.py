@@ -329,7 +329,7 @@ class MapdlGrpc(_MapdlCore):
 
         self._prioritize_thermal = False
         self._locked = False  # being used within MapdlPool
-        self._stub = None  # type: mapdl_grpc.MapdlServiceStub
+        self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
         self._cleanup = cleanup_on_exit
         self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
         self._jobname = start_parm.get("jobname", "file")
