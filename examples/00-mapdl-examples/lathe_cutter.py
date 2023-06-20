@@ -391,9 +391,8 @@ sbar_kwargs = {
 # Generate a single horizontal slice along the XY plane.
 #
 # .. note::
-#    We're using ``eye_dome_lighting`` here to enhance the plots of our slices.
-#    Read more about it at `Eye Dome Lighting
-#    <pyvista_eye_dome_lighting_>`_
+#    PyVista's ``eye_dome_lighting`` method is used here to enhance the plots of the slices.
+#    For more information, see`Eye Dome Lighting <pyvista_eye_dome_lighting_>`_.
 
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(

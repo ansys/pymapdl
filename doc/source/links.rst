@@ -15,6 +15,8 @@
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 .. _ansys_tools_path: http://path.tools.docs.pyansys.com/
+.. _pyansys_math: https://math.docs.pyansys.com/version/stable/
+.. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/
@@ -22,14 +24,14 @@
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/dev/coding-style/index.html
 
 .. #Other libraries
-.. _pyvista_docs: https://docs.pyvista.org
+.. _pyvista_docs: https://docs.pyvista.org/version/stable/
 .. _jupyter: https://jupyter.org/
 .. _grpc: https://grpc.io/
-.. _pandas_org: https://pandas.pydata.org
-.. _numpy_org: https://numpy.org
+.. _pandas_org: https://pandas.pydata.org/
+.. _numpy_org: https://numpy.org/
 .. _numpy_docs: https://numpy.org/doc/stable/
 .. _matplotlib_docs: https://matplotlib.org/stable/contents.html
-.. _matplotlib_main: https://matplotlib.org
+.. _matplotlib_main: https://matplotlib.org/
 .. _precommit: https://pre-commit.com/
 .. _gmsh: https://gmsh.info/
 .. _scipy_docs: https://docs.scipy.org/doc/scipy/reference/
@@ -92,10 +94,12 @@
 .. _What_is_the_Windows_Subsystem_for_Linux: https://docs.microsoft.com/en-us/windows/wsl/about
 .. _open_port_windows_10: https://answers.microsoft.com/en-us/windows/forum/all/how-to-open-port-in-windows-10-firewall/f38f67c8-23e8-459d-9552-c1b94cca579a/
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
-.. _article_good_unit_test: https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test 
+.. _article_good_unit_test: https://stackoverflow.com/questions/61400/what-makes-a-good-unit-test
 .. _vscode_attach_to_container: https://code.visualstudio.com/docs/devcontainers/attach-container
 .. _ubuntu_firewall: https://ubuntu.com/server/docs/security-firewall
 .. _pyvista_eye_dome_lighting: https://docs.pyvista.org/examples/02-plot/edl.html
+.. _pyinstaller: https://pyinstaller.org
+.. _pyinstaller_spec_files: https://pyinstaller.org/en/stable/spec-files.html
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
