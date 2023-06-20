@@ -2198,10 +2198,15 @@ class MapdlGrpc(_MapdlCore):
                         warn(
                             f"The file {file} has been updated in the current working directory."
                         )
-                    shutil.copy(
-                        os.path.join(self.directory, file),
-                        os.path.join(target_dir, file),
-                    )
+
+                    try:
+                        shutil.copy(
+                            os.path.join(self.directory, file),
+                            os.path.join(target_dir, file),
+                        )
+                    except shutil.SameFileError:
+                        pass
+
                 else:
                     raise FileNotFoundError(
                         f"The file {file} does not exist in the local MAPDL instance."
