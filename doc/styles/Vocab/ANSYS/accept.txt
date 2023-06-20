@@ -17,6 +17,8 @@
 [Ss]uperelements
 3-D
 aadd
+aas
+AAS
 alis
 ALIS
 AMLs
