@@ -2229,10 +2229,10 @@ class MapdlGrpc(_MapdlCore):
 
         elif "*" in file:
             # try filter on the list_files
-            matcher = os.path.basename(file)
+
             directory = os.path.dirname(file)
 
-            list_files = list(glob.iglob(file, recursive=True))
+            list_files = list(glob.iglob(file, root_dir=self.directory, recursive=True))
             if not list_files:
                 raise ValueError(
                     f"The `'files'` parameter ('{file}') does not match any file or pattern."
@@ -2250,7 +2250,6 @@ class MapdlGrpc(_MapdlCore):
         target_dir=None,
         chunk_size=None,
         progress_bar=None,
-        recursive=False,
     ):
         """Download files when we are connected to a remote session."""
 
