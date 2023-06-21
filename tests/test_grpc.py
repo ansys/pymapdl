@@ -282,8 +282,9 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    mapdl.download(files_to_download, target_dir=tmpdir)
+    list_files = mapdl.download(files_to_download, target_dir=tmpdir)
     for file_to_check in expected_output:
+        assert file_to_check in list_files
         assert os.path.exists(os.path.join(tmpdir, file_to_check))
 
 

@@ -1,7 +1,6 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
 
 from functools import wraps
-import glob
 import io
 import os
 import pathlib
@@ -2182,7 +2181,7 @@ class MapdlGrpc(_MapdlCore):
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
-            list_files = self._validate_local_file(files, recursive=recursive)
+            list_files = self._validate_file(files, recursive=recursive)
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2191,7 +2190,7 @@ class MapdlGrpc(_MapdlCore):
                 )
             list_files = []
             for each in files:
-                list_files.extend(self._validate_local_file(each, recursive=recursive))
+                list_files.extend(self._validate_file(each, recursive=recursive))
 
         else:
             raise ValueError(
@@ -2202,7 +2201,8 @@ class MapdlGrpc(_MapdlCore):
         for file in list_files:
             # file is a complete path
             basename = os.path.basename(file)
-            if os.path.exists(os.path.join(target_dir, basename)):
+            if os.path.isfile(os.path.join(target_dir, basename)):
+                os.remove(os.path.join(target_dir, basename))
                 # the file might have been already downloaded.
                 warn(
                     f"The file {file} has been updated in the current working directory."
@@ -2215,34 +2215,47 @@ class MapdlGrpc(_MapdlCore):
 
         return list_files
 
-    def _validate_local_file(self, file, recursive):
-        """Validate a file exists in a local instance."""
-        self_files = self.list_files()
+    # def _validate_local_file(self, file, recursive=False):
+    #     """Validate a file exists in a local instance."""
+    #     self_files = self.list_files()
 
-        if os.path.exists(file):
-            if not os.path.dirname(file):
-                return [os.path.join(os.getcwd(), file)]
-            return [file]
+    #     if os.path.exists(file):
+    #         # if not os.path.dirname(file):
+    #         #     return [os.path.join(os.getcwd(), file)]
+    #         return [file]
 
-        elif file in self_files:
-            return [os.path.join(self.directory, file)]
+    #     elif file in self_files:
+    #         return [file]
 
-        elif "*" in file:
-            # try filter on the list_files
+    #     # elif "*" in file:
+    #     #     # try filter on the list_files
 
-            directory = os.path.dirname(file)
+    #     #     directory = os.path.dirname(file)
 
-            list_files = list(glob.iglob(file, root_dir=self.directory, recursive=True))
-            if not list_files:
-                raise ValueError(
-                    f"The `'files'` parameter ('{file}') does not match any file or pattern."
-                )
-            return [os.path.join(directory, each) for each in list_files]
+    #     #     list_files = list(glob.iglob(file, root_dir=self.directory, recursive=True))
+    #     #     if not list_files:
+    #     #         raise ValueError(
+    #     #             f"The `'files'` parameter ('{file}') does not match any file or pattern."
+    #     #         )
 
-        else:
-            raise FileNotFoundError(
-                f"The file '{file}' could not be found. In a local session, you can provide the full path to that file."
-            )
+    #     elif "*" in file:
+    #         list_files = []
+    #         file_name = file[:-1]
+    #         for remote_file in self_files:
+    #             if remote_file[:len(file_name)] == file_name:
+    #                 list_files.append(remote_file)
+    #         if len(list_files)==0:
+    #             raise ValueError(
+    #                 f"The `'files'` parameter ('{file}') does not match any file or pattern."
+    #             )
+    #         return list_files
+
+    #         # return [os.path.join(directory, each) for each in list_files]
+
+    # else:
+    #     raise FileNotFoundError(
+    #         f"The file '{file}' could not be found. In a local session, you can provide the full path to that file."
+    #     )
 
     def _download_from_remote(
         self,
@@ -2254,16 +2267,16 @@ class MapdlGrpc(_MapdlCore):
         """Download files when we are connected to a remote session."""
 
         if isinstance(files, str):
-            list_files = self._validate_remote_file(files)
+            list_files = self._validate_file(files)
 
-        elif isinstance(files, (list, tuple)):
+        elif isinstance(files, list):
             if not all([isinstance(each, str) for each in files]):
                 raise ValueError(
                     "The parameter `'files'` can be a list or tuple, but it should only contain strings."
                 )
             list_files = []
             for each in files:
-                list_files.extend(self._validate_remote_file(each))
+                list_files.extend(self._validate_file(each))
 
         else:
             raise ValueError(
@@ -2272,32 +2285,30 @@ class MapdlGrpc(_MapdlCore):
             )
 
         for each_file in list_files:
-            try:
-                file_name = self._validate_remote_file(each_file)
-                # Getting only the name of the file.
-                #  We try to avoid that when the full path is supplied, it will crash when trying
-                # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
-                # This will produce the file structure to flat out, but it is fine, because recursive
-                # does not work in remote.
-                self._download(
-                    file_name,
-                    out_file_name=os.path.join(target_dir, file_name),
-                    chunk_size=chunk_size,
-                    progress_bar=progress_bar,
-                )
-            except FileNotFoundError:
-                # So far the grpc interface returns size of the file equal
-                # zero, if the file does not exists or its size is zero,
-                # but they are two different things!
-                # In theory, since we are obtaining the files name from
-                # `mapdl.list_files()` they do exist, so
-                # if there is any error, it means their size is zero.
-                pass  # this is not the best.
+            self._download(
+                each_file,
+                out_file_name=os.path.join(target_dir, each_file),
+                chunk_size=chunk_size,
+                progress_bar=progress_bar,
+            )
 
-    def _validate_remote_file(self, file):
+        return list_files
+
+    def _validate_file(self, file):
         base_name = os.path.basename(file)
+        self_files = self.list_files()
+
         if base_name in self.list_files():
-            return base_name
+            return [base_name]
+
+        elif "*" in base_name:
+            list_files = []
+            file_name = base_name[:-1]
+            for remote_file in self_files:
+                if remote_file[: len(file_name)] == file_name:
+                    list_files.append(remote_file)
+            return list_files
+
         else:
             raise FileNotFoundError(
                 f"The file '{file}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
