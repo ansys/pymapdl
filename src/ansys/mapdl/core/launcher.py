@@ -10,9 +10,8 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import Any, Dict, Iterable, Literal, Optional
 import warnings
-
-from typing import Optional, Literal, Dict, Any, Iterable
 
 try:
     import ansys.platform.instancemanagement as pypim
