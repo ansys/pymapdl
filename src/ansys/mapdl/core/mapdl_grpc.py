@@ -2051,9 +2051,9 @@ class MapdlGrpc(_MapdlCore):
             List of downloaded files.
         """
         if not extensions:
-            files = self.list_files()
+            # files = self.list_files()
             list_of_files = self.download(
-                files, target_dir=target_dir, progress_bar=progress_bar
+                files="*", target_dir=target_dir, progress_bar=progress_bar
             )
 
         else:
@@ -2061,8 +2061,9 @@ class MapdlGrpc(_MapdlCore):
             for each_extension in extensions:
                 list_of_files.extend(
                     self.download(
-                        files=f"*.{each_extension}",
+                        files="*",
                         target_dir=target_dir,
+                        extension=each_extension,
                         progress_bar=progress_bar,
                     )
                 )
@@ -2073,6 +2074,7 @@ class MapdlGrpc(_MapdlCore):
         self,
         files,
         target_dir=None,
+        extension=None,
         chunk_size=None,
         progress_bar=None,
         recursive=False,
@@ -2096,6 +2098,9 @@ class MapdlGrpc(_MapdlCore):
         target_dir : str, optional
             Path where the downloaded files will be located. The default is the current
             working directory.
+
+        extension : str, optional
+            Filename with this extension will be considered. The default is None.
 
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB. The default is 256 kB.
@@ -2157,7 +2162,7 @@ class MapdlGrpc(_MapdlCore):
 
         if self._local:
             return self._download_on_local(
-                files, target_dir=target_dir, recursive=False
+                files, target_dir=target_dir, extension=extension, recursive=False
             )
 
         else:  # remote session
@@ -2168,6 +2173,7 @@ class MapdlGrpc(_MapdlCore):
             return self._download_from_remote(
                 files,
                 target_dir=target_dir,
+                extension=extension,
                 chunk_size=chunk_size,
                 progress_bar=progress_bar,
             )
@@ -2176,12 +2182,15 @@ class MapdlGrpc(_MapdlCore):
         self,
         files,
         target_dir=None,
+        extension=None,
         recursive=False,
     ):
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
-            list_files = self._validate_file(files, recursive=recursive)
+            list_files = self._validate_files(
+                files, extension=extension
+            )  # need to add recursive method
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2190,7 +2199,9 @@ class MapdlGrpc(_MapdlCore):
                 )
             list_files = []
             for each in files:
-                list_files.extend(self._validate_file(each, recursive=recursive))
+                list_files.extend(
+                    self._validate_files(each, extension=extension)
+                )  # need to add recursive method
 
         else:
             raise ValueError(
@@ -2215,59 +2226,18 @@ class MapdlGrpc(_MapdlCore):
 
         return list_files
 
-    # def _validate_local_file(self, file, recursive=False):
-    #     """Validate a file exists in a local instance."""
-    #     self_files = self.list_files()
-
-    #     if os.path.exists(file):
-    #         # if not os.path.dirname(file):
-    #         #     return [os.path.join(os.getcwd(), file)]
-    #         return [file]
-
-    #     elif file in self_files:
-    #         return [file]
-
-    #     # elif "*" in file:
-    #     #     # try filter on the list_files
-
-    #     #     directory = os.path.dirname(file)
-
-    #     #     list_files = list(glob.iglob(file, root_dir=self.directory, recursive=True))
-    #     #     if not list_files:
-    #     #         raise ValueError(
-    #     #             f"The `'files'` parameter ('{file}') does not match any file or pattern."
-    #     #         )
-
-    #     elif "*" in file:
-    #         list_files = []
-    #         file_name = file[:-1]
-    #         for remote_file in self_files:
-    #             if remote_file[:len(file_name)] == file_name:
-    #                 list_files.append(remote_file)
-    #         if len(list_files)==0:
-    #             raise ValueError(
-    #                 f"The `'files'` parameter ('{file}') does not match any file or pattern."
-    #             )
-    #         return list_files
-
-    #         # return [os.path.join(directory, each) for each in list_files]
-
-    # else:
-    #     raise FileNotFoundError(
-    #         f"The file '{file}' could not be found. In a local session, you can provide the full path to that file."
-    #     )
-
     def _download_from_remote(
         self,
         files,
         target_dir=None,
+        extension=None,
         chunk_size=None,
         progress_bar=None,
     ):
         """Download files when we are connected to a remote session."""
 
         if isinstance(files, str):
-            list_files = self._validate_file(files)
+            list_files = self._validate_files(files, extension=extension)
 
         elif isinstance(files, list):
             if not all([isinstance(each, str) for each in files]):
@@ -2276,7 +2246,7 @@ class MapdlGrpc(_MapdlCore):
                 )
             list_files = []
             for each in files:
-                list_files.extend(self._validate_file(each))
+                list_files.extend(self._validate_files(each, extension=extension))
 
         else:
             raise ValueError(
@@ -2294,25 +2264,60 @@ class MapdlGrpc(_MapdlCore):
 
         return list_files
 
-    def _validate_file(self, file):
+    def _validate_files(self, file, extension=None):
         base_name = os.path.basename(file)
         self_files = self.list_files()
 
-        if base_name in self.list_files():
-            return [base_name]
+        if extension is not None:
+            if not isinstance(extension, str):
+                raise TypeError(f"The extension must be a string.")
+            valid_files = []
+            for filename in self_files:
+                if filename[-len(extension) :] == extension:
+                    valid_files.append(filename)
+            if len(valid_files) > 0:
+                self_files = valid_files
+            else:
+                raise FileNotFoundError(
+                    f"Files with the extension '{extension}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
+                )
+            if not "*" in base_name:
+                if extension[0] == ".":
+                    base_name = os.path.splitext(base_name)[0] + extension
+                else:
+                    base_name = os.path.splitext(base_name)[0] + "." + extension
+
+        if base_name in self_files:
+            list_files = [base_name]
+
+        elif base_name == "*":
+            list_files = self_files
 
         elif "*" in base_name:
             list_files = []
-            file_name = base_name[:-1]
-            for remote_file in self_files:
-                if remote_file[: len(file_name)] == file_name:
-                    list_files.append(remote_file)
-            return list_files
+            if base_name[-1] == "*":
+                file_name = base_name[:-1]
+                for remote_file in self_files:
+                    if remote_file[: len(file_name)] == file_name:
+                        list_files.append(remote_file)
+            elif base_name[0] == "*":
+                extension = base_name[:-1]
+                for remote_file in self_files:
+                    if remote_file[: len(file_name)] == file_name:
+                        list_files.append(remote_file)
 
         else:
             raise FileNotFoundError(
-                f"The file '{file}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
+                f"The file '{file}' could not be found in the MAPDL session {self_files}.",
             )
+
+        if len(list_files) == 0:
+            raise FileNotFoundError(
+                f"There is no file {base_name} with the extension {extension} in the MAPDL session."
+                f"{self.list_files()}"
+            )
+
+        return list_files
 
     @protect_grpc
     def _download(
@@ -2370,7 +2375,9 @@ class MapdlGrpc(_MapdlCore):
         )
 
         if not file_size:
-            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist.')
+            warn(
+                f'File "{target_name}" is empty or does not exist in {self.list_files()}.'
+            )
 
     @protect_grpc
     def upload(self, file_name, progress_bar=True):

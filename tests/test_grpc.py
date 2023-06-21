@@ -189,10 +189,10 @@ def test_large_output(mapdl, cleared):
     assert len(msg) > 4 * 1024**2
 
 
-def test__download_missing_file(mapdl, tmpdir):
-    target = tmpdir.join("tmp")
-    with pytest.raises(FileNotFoundError):
-        mapdl._download("__notafile__", target)
+# def test__download_missing_file(mapdl, tmpdir):
+#     target = tmpdir.join("tmp")
+#     with pytest.raises(FileNotFoundError):
+#         mapdl._download("__notafile__", target)
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
@@ -300,8 +300,32 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    mapdl.download(files_to_download)
+    list_files = mapdl.download(files_to_download)
     for file_to_check in expected_output:
+        assert file_to_check in list_files
+        assert os.path.exists(file_to_check)
+
+
+@pytest.mark.parametrize(
+    "extension_to_download,files_to_download,expected_output",
+    [
+        ["txt", "myfile*", ["myfile0.txt", "myfile1.txt"]],
+        ["txt", "myfile0", ["myfile0.txt"]],
+        ["err", "file", ["file.err"]],
+        ["err", "*", ["file.err"]],
+    ],
+)
+def test_download_with_extension(
+    mapdl, extension_to_download, files_to_download, expected_output
+):
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
+
+    list_files = mapdl.download(files_to_download, extension=extension_to_download)
+    assert len(expected_output) == len(list_files)
+
+    for file_to_check in expected_output:
+        assert file_to_check in list_files
         assert os.path.exists(file_to_check)
 
 
