@@ -2219,10 +2219,9 @@ class MapdlGrpc(_MapdlCore):
                     f"The file {file} has been updated in the current working directory."
                 )
 
-            try:
-                shutil.copy(file, os.path.join(target_dir, basename))
-            except shutil.SameFileError:
-                pass
+            shutil.copy(
+                os.path.join(self.directory, file), os.path.join(target_dir, basename)
+            )
 
         return list_files
 
