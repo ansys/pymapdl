@@ -5,7 +5,6 @@ import importlib
 import inspect
 import os
 from pathlib import Path
-import platform
 import random
 import re
 import socket
@@ -13,14 +12,15 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Optional
 from warnings import warn
 import weakref
-from typing import Iterable, Optional, Dict, Any, Callable
-from _typeshed import FileDescriptorOrPath
-from numpy.typing import NDArray
 
+from _typeshed import FileDescriptorOrPath
 from ansys.tools.path import get_available_ansys_installations
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
@@ -33,6 +33,10 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     LOG.debug("The package 'pyansys-tools-report' is not installed.")
     _HAS_PYANSYS_REPORT = False
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -89,7 +93,13 @@ def check_valid_routine(routine: str):
 
 
 class Plain_Report:
-    def __init__(self, core: Iterable[str], optional=None, additional: Optional[Iterable[str]] =None, **kwargs: Any):
+    def __init__(
+        self,
+        core: Iterable[str],
+        optional: Optional[list[str]] = None,
+        additional: Optional[Iterable[str]] = None,
+        **kwargs: Any,
+    ):
         """
         Base class for a plain report.
 
@@ -130,7 +140,7 @@ class Plain_Report:
         else:
             self.kwargs["extra_meta"] = ("GPU Details", "None")
 
-    def get_version(self, package):
+    def get_version(self, package: str):
         try:
             import importlib.metadata as importlib_metadata
         except ModuleNotFoundError:  # pragma: no cover
@@ -232,13 +242,13 @@ class Report(base_report_class):
 
     def __init__(
         self,
-        additional: Optional[list[ModuleType]| list[str]]=None,
-        ncol: int=3,
-        text_width: int=80,
-        sort: bool=False,
-        gpu: bool=True,
-        ansys_vars: Optional[list[str]]=None,
-        ansys_libs: Optional[Dict[str, str]]=None,
+        additional: Optional[list[ModuleType] | list[str]] = None,
+        ncol: int = 3,
+        text_width: int = 80,
+        sort: bool = False,
+        gpu: bool = True,
+        ansys_vars: Optional[list[str]] = None,
+        ansys_libs: Optional[Dict[str, str]] = None,
     ):
         """Generate a :class:`scooby.Report` instance.
 
@@ -326,7 +336,7 @@ def is_float(input_string: str):
         return False
 
 
-def random_string(stringLength: int=10, letters: str=string.ascii_lowercase):
+def random_string(stringLength: int = 10, letters: str = string.ascii_lowercase):
     """Generate a random string of fixed length"""
     return "".join(random.choice(letters) for _ in range(stringLength))
 
@@ -368,12 +378,12 @@ def supress_logging(func: Callable[..., Any]):
     return wrapper
 
 
-def run_as_prep7(func):  # Pragma: no cover
+def run_as_prep7(func: Callable[..., Any]):  # Pragma: no cover
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
-        mapdl = args[0]
+    def wrapper(*args: Any, **kwargs: Any):
+        mapdl: _MapdlCore = args[0]
         if hasattr(mapdl, "_mapdl"):
             mapdl = mapdl._mapdl
         prior_processor = mapdl.parameters.routine
@@ -392,11 +402,11 @@ def run_as_prep7(func):  # Pragma: no cover
     return wrapper
 
 
-def threaded(func):
+def threaded(func: Callable[..., Any]):
     """Decorator to call a function using a thread"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any):
         name = kwargs.get("name", f"Threaded `{func.__name__}` function")
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.start()
@@ -437,13 +447,13 @@ def creation_time(path_to_file: FileDescriptorOrPath):
     it was last modified if that isn't possible.
     See http://stackoverflow.com/a/39501288/1709587 for explanation.
     """
-    if platform.system() == "Windows":
+    if sys.platform == "win32":
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)
-        try:
+        if sys.platform != "linux":
             return stat.st_birthtime
-        except AttributeError:
+        else:
             # We're probably on Linux. No easy way to get creation dates here,
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
@@ -463,7 +473,7 @@ def last_created(filenames: list[FileDescriptorOrPath]):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir: Optional[str]=None):
+def create_temp_dir(tmpdir: Optional[str] = None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -507,7 +517,7 @@ def get_bounding_box(nodes_xyz):
     return max_ - min_
 
 
-def load_file(mapdl, fname: str, priority_mapdl_file: Optional[bool]=None):
+def load_file(mapdl: MapdlGrpc, fname: str, priority_mapdl_file: Optional[bool] = None):
     """
     Provide a file to the MAPDL instance.
 
@@ -589,7 +599,7 @@ def check_valid_ip(ip: str):
         socket.inet_aton(ip)
 
 
-def check_valid_port(port: int, lower_bound: int=1000, high_bound: int=60000):
+def check_valid_port(port: int, lower_bound: int = 1000, high_bound: int = 60000):
     if not isinstance(port, int):
         raise ValueError("The 'port' parameter should be an integer.")
 
@@ -601,7 +611,7 @@ def check_valid_port(port: int, lower_bound: int=1000, high_bound: int=60000):
         )
 
 
-def check_valid_start_instance(start_instance: str|bool):
+def check_valid_start_instance(start_instance: str | bool):
     """
     Checks if the value obtained from the environmental variable is valid.
 
@@ -631,7 +641,7 @@ def check_valid_start_instance(start_instance: str|bool):
     return start_instance.lower() == "true"
 
 
-def update_information_first(update: bool=False):
+def update_information_first(update: bool = False):
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -643,9 +653,9 @@ def update_information_first(update: bool=False):
         before accessing the methods. By default ``False``
     """
 
-    def decorator(function):
+    def decorator(function: Callable[..., Any]):
         @wraps(function)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args: Any, **kwargs: Any):
             if update or not self._stats:
                 self._update()
             return function(self, *args, **kwargs)
@@ -689,7 +699,7 @@ class Information:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: _MapdlCore):
         """Class Initializer"""
         from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
 
@@ -823,7 +833,7 @@ class Information:
 
     @property
     @update_information_first(True)
-    def stitles(self, i: Optional[int]=None):
+    def stitles(self, i: Optional[int] = None):
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
         If 'stitle' includes newline characters (`\\n`), then each line
@@ -841,7 +851,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle: Optional[str|list[str]], i=None):
+    def stitles(self, stitle: Optional[str | list[str]], i=None):
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -932,7 +942,12 @@ class Information:
         """Retrieve the load step options from the MAPDL instance."""
         return self._get_load_step_options()
 
-    def _get_between(self, init_string, end_string=None, string=None):
+    def _get_between(
+        self,
+        init_string: str,
+        end_string: Optional[str] = None,
+        string: Optional[str] = None,
+    ):
         if not string:
             self._update()
             string = self._stats
@@ -940,9 +955,9 @@ class Information:
         st = string.find(init_string) + len(init_string)
 
         if not end_string:
-            en = None
+            en: Optional[int] = None
         else:
-            en = string.find(end_string)
+            en: Optional[int] = string.find(end_string)
         return "\n".join(string[st:en].splitlines()).strip()
 
     def _get_product(self):
@@ -960,7 +975,10 @@ class Information:
     def _get_title(self):
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
-            return match.groups(1)[0].strip()
+            title = match.groups(1)[0]
+            if isinstance(title, int):
+                return title
+            return title.strip()
 
     def _get_stitles(self):
         return [
@@ -1073,7 +1091,7 @@ def write_array(filename: str, array: NDArray):
     np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
 
 
-def requires_package(package_name: str, softerror: bool=False):
+def requires_package(package_name: str, softerror: bool = False):
     """
     Decorator check whether a package is installed or not.
 
@@ -1085,9 +1103,9 @@ def requires_package(package_name: str, softerror: bool=False):
         Name of the package.
     """
 
-    def decorator(function):
+    def decorator(function: Callable[..., Any]):
         @wraps(function)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args: Any, **kwargs: Any):
             try:
                 importlib.import_module(package_name)
                 return function(self, *args, **kwargs)
@@ -1122,7 +1140,7 @@ def _get_args_xsel(*args: Any, **kwargs: Any):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_points(entity: str="node", plot_function: str="nplot"):
+def allow_pickable_points(entity: str = "node", plot_function: str = "nplot"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
@@ -1178,7 +1196,7 @@ def allow_pickable_points(entity: str="node", plot_function: str="nplot"):
     return decorator
 
 
-def wrap_point_SEL(entity: str="node"):
+def wrap_point_SEL(entity: str = "node"):
     def decorator(original_sel_func):
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.

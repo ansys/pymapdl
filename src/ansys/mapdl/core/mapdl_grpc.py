@@ -1217,7 +1217,7 @@ class MapdlGrpc(_MapdlCore):
                         err.decode(),
                     )
 
-    def list_files(self, refresh_cache=True):
+    def list_files(self, refresh_cache: bool = True):
         """List the files in the working directory of MAPDL.
 
         Parameters
