@@ -332,15 +332,14 @@ def test_download_with_extension(
 @skip_in_cloud  # This is going to run only in local
 def test_download_recursive(mapdl, tmpdir):
     if mapdl._local:
-        dir_ = tmpdir.mkdir("temp00")
-        file1 = dir_.join("file0.txt")
-        file2 = dir_.join("file1.txt")
-        with open(file1, "w") as fid:
+        temp_dir = os.path.join(mapdl.directory, "new_folder")
+        os.makedirs(temp_dir)
+        with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
             fid.write("dummy")
-        with open(file2, "w") as fid:
+        with open(os.path.join(temp_dir, "file1.txt"), "a") as fid:
             fid.write("dummy")
 
-        mapdl.download(str(dir_), recursive=True)  # This is referenced to os.getcwd
+        mapdl.download(temp_dir, recursive=True)  # This is referenced to os.getcwd
         assert os.path.exists("file0.txt")
         assert os.path.exists("file1.txt")
         os.remove("file0.txt")

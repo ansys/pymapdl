@@ -173,6 +173,20 @@ def save_chunks_to_file(
     return file_size
 
 
+def copy_files_to_the_root(folder, target_dir, recursive):
+    list_folder = os.listdir(folder)
+    for file in list_folder:
+        if os.path.isdir(file):
+            if recursive is True:
+                copy_files_to_the_root(file, target_dir)
+            else:
+                warn(
+                    f"The copy of the folder {file} is ignored. Recursive needs to be set to True."
+                )
+        else:
+            shutil.copy(os.path.join(folder, file), target_dir)
+
+
 class RepeatingTimer(threading.Timer):
     """Run a function repeately"""
 
@@ -2154,7 +2168,7 @@ class MapdlGrpc(_MapdlCore):
 
         if target_dir:
             try:
-                os.mkdir(target_dir)
+                os.mkdir(os.path.abspath(target_dir))
             except FileExistsError:
                 pass
         else:
@@ -2188,9 +2202,12 @@ class MapdlGrpc(_MapdlCore):
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
-            list_files = self._validate_files(
-                files, extension=extension
-            )  # need to add recursive method
+            if not os.path.isdir(os.path.join(self.directory, files)):
+                list_files = self._validate_files(
+                    files, extension=extension
+                )  # need to add recursive method
+            else:
+                list_files = [files]
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2219,9 +2236,16 @@ class MapdlGrpc(_MapdlCore):
                     f"The file {file} has been updated in the current working directory."
                 )
 
-            shutil.copy(
-                os.path.join(self.directory, file), os.path.join(target_dir, basename)
-            )
+            if os.path.isdir(os.path.join(self.directory, file)):
+                copy_files_to_the_root(
+                    os.path.join(self.directory, file), target_dir, recursive=recursive
+                )
+
+            else:
+                shutil.copy(
+                    os.path.join(self.directory, file),
+                    os.path.join(target_dir, basename),
+                )
 
         return list_files
 
@@ -2265,7 +2289,7 @@ class MapdlGrpc(_MapdlCore):
 
     def _validate_files(self, file, extension=None):
         base_name = os.path.basename(file)
-        self_files = self.list_files()
+        self_files = os.listdir(self.directory)
 
         if extension is not None:
             if not isinstance(extension, str):
