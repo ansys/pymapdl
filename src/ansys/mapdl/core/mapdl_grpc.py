@@ -8,10 +8,11 @@ import os
 import pathlib
 import re
 import shutil
+from subprocess import Popen
 import tempfile
 import threading
 import time
-from typing import Optional
+from typing import TYPE_CHECKING, List, LiteralString, Optional, Union
 import warnings
 from warnings import warn
 import weakref
@@ -70,6 +71,12 @@ try:
     _HAS_TQDM = True
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
+
+if TYPE_CHECKING:
+    from ansys.platform.instancemanagement import Instance as PIM_Instance
+
+    from ansys.mapdl.core.database import MapdlDb
+    from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -195,7 +202,7 @@ class MapdlGrpc(_MapdlCore):
     port : int, optional
         Port to connect to the MAPDL server.  The default is ``50052``.
 
-    timeout : float
+    timeout : float, optional
         Maximum allowable time to connect to the MAPDL server.
 
     loglevel : str, optional
@@ -271,19 +278,19 @@ class MapdlGrpc(_MapdlCore):
 
     def __init__(
         self,
-        ip=None,
-        port=None,
-        timeout=15,
-        loglevel="WARNING",
-        log_file=False,
-        cleanup_on_exit=False,
-        log_apdl=None,
-        set_no_abort=True,
-        remove_temp_files=None,
-        remove_temp_dir_on_exit=False,
-        print_com=False,
-        channel=None,
-        remote_instance=None,
+        ip: Optional[str] = None,
+        port: Optional[Union[int, str]] = None,
+        timeout: int = 15,
+        loglevel: str = "WARNING",
+        log_file: bool = False,
+        cleanup_on_exit: bool = False,
+        log_apdl: Optional[str] = None,
+        set_no_abort: bool = True,
+        remove_temp_files: Optional[bool] = None,
+        remove_temp_dir_on_exit: bool = False,
+        print_com: bool = False,
+        channel: Optional[grpc.Channel] = None,
+        remote_instance: Optional[PIM_Instance] = None,
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
@@ -297,8 +304,8 @@ class MapdlGrpc(_MapdlCore):
             remove_temp_dir_on_exit = remove_temp_files
             remove_temp_files = None
 
-        self.__distributed = None
-        self._remote_instance = remote_instance
+        self.__distributed: Optional[bool] = None
+        self._remote_instance: Optional[PIM_Instance] = remote_instance
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -309,10 +316,16 @@ class MapdlGrpc(_MapdlCore):
             ip = "127.0.0.1"
 
         # port and ip are needed to setup the log
-        self._port = port
+
+        if port is None:
+            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
+
+            port = MAPDL_DEFAULT_PORT
+
+        self._port: int = port
 
         check_valid_ip(ip)
-        self._ip = ip
+        self._ip: str = ip
 
         super().__init__(
             loglevel=loglevel,
@@ -321,52 +334,47 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
-        self._mode = "grpc"
+        self._mode: LiteralString["grpc"] = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
-        self._vget_lock = False
-        self._get_lock = False
+        self._vget_lock: bool = False
+        self._get_lock: bool = False
 
-        self._prioritize_thermal = False
-        self._locked = False  # being used within MapdlPool
+        self._prioritize_thermal: bool = False
+        self._locked: bool = False  # being used within MapdlPool
         self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
-        self._cleanup = cleanup_on_exit
-        self.__remove_temp_dir_on_exit = remove_temp_dir_on_exit
-        self._jobname = start_parm.get("jobname", "file")
-        self._path = start_parm.get("run_location", None)
-        self._busy = False  # used to check if running a command on the server
-        self._local = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
+        self._cleanup: bool = cleanup_on_exit
+        self.__remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
+        self._jobname: str = start_parm.get("jobname", "file")
+        self._path: str = start_parm.get("run_location", None)
+        self._busy: bool = False  # used to check if running a command on the server
+        self._local: bool = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
-            self._local = start_parm["local"]
-        self._health_response_queue = None
-        self._exiting = False
-        self._exited = None
-        self._mute = False
-        self._db = None
-        self.__server_version = None
+            self._local: bool = start_parm["local"]
+        self._health_response_queue: Optional[Queue] = None
+        self._exiting: bool = False
+        self._exited: Optional[bool] = None
+        self._mute: bool = False
+        self._db: Optional[MapdlDb] = None
+        self.__server_version: Optional[str] = None
+        self._state: Optional[grpc.Future] = None
+        self._timeout: int = timeout
+        self._pids: List[Union[int, None]] = []
+
+        if channel is None:
+            self._log.debug("Creating channel to %s:%s", ip, port)
+            self._channel: grpc.Channel = self._create_channel(ip, port)
+        else:
+            self._log.debug("Using provided channel")
+            self._channel: grpc.Channel = channel
+
+        # connect and validate to the channel
+        self._mapdl_process: Popen = start_parm.pop("process", None)
 
         # saving for later use (for example open_gui)
         start_parm["ip"] = ip
         start_parm["port"] = port
         self._start_parm = start_parm
-
-        if port is None:
-            from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
-
-            port = MAPDL_DEFAULT_PORT
-        self._state = None
-        self._timeout = timeout
-        self._pids = []
-
-        if channel is None:
-            self._log.debug("Creating channel to %s:%s", ip, port)
-            self._channel = self._create_channel(ip, port)
-        else:
-            self._log.debug("Using provided channel")
-            self._channel = channel
-
-        # connect and validate to the channel
-        self._mapdl_process = start_parm.pop("process", None)
 
         # Queueing the stds
         if self._mapdl_process:
@@ -390,6 +398,8 @@ class MapdlGrpc(_MapdlCore):
         self._run("/gopr")
 
         # initialize mesh, post processing, and file explorer interfaces
+        self._mesh_rep: Optional[MeshGrpc] = None
+
         try:
             from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
@@ -427,7 +437,7 @@ class MapdlGrpc(_MapdlCore):
         self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
         self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
 
-    def _create_channel(self, ip, port):
+    def _create_channel(self, ip: str, port: int) -> grpc.Channel:
         """Create an insecured grpc channel."""
 
         # open the channel
@@ -853,7 +863,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         return self._mesh_rep
 
-    def _run(self, cmd, verbose=False, mute=None):
+    def _run(self, cmd, verbose=False, mute=None) -> str:
         """Sens a command and return the response as a string.
 
         Parameters

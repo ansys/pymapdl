@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import Tuple
+from typing import TYPE_CHECKING, Tuple, Union
 import warnings
 
 try:
@@ -32,7 +32,6 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
-from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -42,6 +41,14 @@ from ansys.mapdl.core.misc import (
     random_string,
     threaded,
 )
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+    try:
+        from ansys.mapdl.core.mapdl_corba import MapdlCorba
+    except:
+        pass
 
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
@@ -633,7 +640,7 @@ def _create_queue_for_std(std):
 def launch_remote_mapdl(
     version=None,
     cleanup_on_exit=True,
-) -> _MapdlCore:
+) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
 
     When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
@@ -948,7 +955,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> MapdlGrpc:
+) -> Union[MapdlGrpc, MapdlConsole, MapdlCorba]:
     """Start MAPDL locally.
 
     Parameters
@@ -1160,7 +1167,7 @@ def launch_mapdl(
 
     Returns
     -------
-    ansys.mapdl.core.mapdl._MapdlCore
+    Union[MapdlGrpc, MapdlConsole, MapdlCorba]
         An instance of Mapdl.  Type depends on the selected ``mode``.
 
     Notes
