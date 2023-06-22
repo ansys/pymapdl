@@ -6,7 +6,8 @@ SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
-SPHINXOPTS    = -j auto -d $(BUILDDIR)/.doctrees -W --keep-going
+SPHINXOPTS    = -j auto --color
+LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -41,7 +42,7 @@ pdf:
 	(test -f $(BUILDDIR)/latex/pymapdl-Documentation-*.pdf && echo pdf exists) || exit 1
 
 linkcheck:
-	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) 
+	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(LINKCHECKOPTS)
 	@echo
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 

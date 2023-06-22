@@ -107,7 +107,7 @@ jobs:
 
       - name: LinkCheck
         run: |
-          make -C doc linkcheck SPHINXOPTS="-W --keep-going --color"
+          make -C doc linkcheck
 
       - name: "Display linkchecker results"
         run: |
