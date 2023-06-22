@@ -1836,7 +1836,7 @@ class MapdlGrpc(_MapdlCore):
 
         return output
 
-    def _get_file_path(self, fname, progress_bar=False):
+    def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
         """Find files in the Python and MAPDL working directories.
 
         **The priority is for the Python directory.**
@@ -1893,7 +1893,12 @@ class MapdlGrpc(_MapdlCore):
 
         return filename
 
-    def _get_file_name(self, fname, ext=None, default_extension=None):
+    def _get_file_name(
+        self,
+        fname: str,
+        ext: Optional[str] = None,
+        default_extension: Optional[str] = None,
+    ) -> str:
         """Get file name from fname and extension arguments.
 
         fname can be the full path.
@@ -2895,7 +2900,7 @@ class MapdlGrpc(_MapdlCore):
         return self.scalar_param(TMP_VAR)
 
     @wraps(_MapdlCore.file)
-    def file(self, fname="", ext="", **kwargs):
+    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
