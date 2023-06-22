@@ -17,6 +17,8 @@
 [Ss]uperelements
 3-D
 aadd
+aas
+AAS
 alis
 ALIS
 AMLs
@@ -37,6 +39,7 @@ CentOS
 CentOS7
 Chao
 container_layout
+datas
 delet
 docker
 Docker
@@ -63,6 +66,7 @@ hostname
 Imagemagick
 ImageMagick
 imagin
+importlib
 Intro to Ansys Mechanical APDL Scripting
 ist
 Julia
@@ -87,6 +91,7 @@ Newton-Raphson
 nin
 nonlinearities
 NumPy
+onefile
 optiSLang
 parm
 performant
@@ -100,6 +105,7 @@ Pseudotime
 Puri
 py
 PyAnsys
+PyAnsys Math
 PyDPF-Core
 PyDPF-Post
 PyMAPDL
