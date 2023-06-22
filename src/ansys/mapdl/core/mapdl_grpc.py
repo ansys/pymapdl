@@ -2901,7 +2901,7 @@ class MapdlGrpc(_MapdlCore):
         # are unclear
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, path_ = self._decompose_fname(fname)
+        file_, ext_, _ = self._decompose_fname(fname)
         if self._local:
             return self._file(filename=fname, **kwargs)
         else:
