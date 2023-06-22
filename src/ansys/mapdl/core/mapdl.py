@@ -188,15 +188,15 @@ class _MapdlCore(Commands):
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
-        self._exited = False
-        self._ignore_errors = False
+        self._exited: bool = False
+        self._ignore_errors: bool = False
         self._apdl_log = None
-        self._store_commands = False
+        self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched = False
+        self._launched: bool = False
         self._stderr = None
         self._stdout = None
 
@@ -215,8 +215,8 @@ class _MapdlCore(Commands):
 
         self._log_filehandler = None
         self._version = None  # cached version
-        self._local = local
-        self._cleanup = True
+        self._local: bool = local
+        self._cleanup: bool = True
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
@@ -4299,7 +4299,7 @@ class _MapdlCore(Commands):
             File extension (without dot)
         """
         fname = pathlib.Path(fname)
-        return fname.stem, fname.suffix.replace(".", "")
+        return fname.stem, fname.suffix.replace(".", ""), fname.parent
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
