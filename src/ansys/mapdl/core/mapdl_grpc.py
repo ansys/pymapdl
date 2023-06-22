@@ -12,7 +12,7 @@ from subprocess import Popen
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, List, LiteralString, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Union
 import warnings
 from warnings import warn
 import weakref
@@ -334,7 +334,7 @@ class MapdlGrpc(_MapdlCore):
             print_com=print_com,
             **start_parm,
         )
-        self._mode: LiteralString["grpc"] = "grpc"
+        self._mode: Literal["grpc"] = "grpc"
 
         # gRPC request specific locks as these gRPC request are not thread safe
         self._vget_lock: bool = False
