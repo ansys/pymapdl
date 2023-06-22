@@ -178,7 +178,7 @@ def copy_files_to_the_root(folder, target_dir, recursive):
     for file in list_folder:
         if os.path.isdir(file):
             if recursive is True:
-                copy_files_to_the_root(file, target_dir)
+                copy_files_to_the_root(file, target_dir, recursive)
             else:
                 warn(
                     f"The copy of the folder {file} is ignored. Recursive needs to be set to True."
@@ -2293,7 +2293,7 @@ class MapdlGrpc(_MapdlCore):
 
         if extension is not None:
             if not isinstance(extension, str):
-                raise TypeError(f"The extension must be a string.")
+                raise TypeError(f"The extension {extension} must be a string.")
             valid_files = []
             for filename in self_files:
                 if filename[-len(extension) :] == extension:
