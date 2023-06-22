@@ -2316,22 +2316,16 @@ class MapdlGrpc(_MapdlCore):
         elif base_name == "*":
             list_files = self_files
 
-        elif "*" in base_name:
+        elif base_name[-1] == "*":
             list_files = []
-            if base_name[-1] == "*":
-                file_name = base_name[:-1]
-                for remote_file in self_files:
-                    if remote_file[: len(file_name)] == file_name:
-                        list_files.append(remote_file)
-            elif base_name[0] == "*":
-                extension = base_name[:-1]
-                for remote_file in self_files:
-                    if remote_file[: len(file_name)] == file_name:
-                        list_files.append(remote_file)
+            file_name = base_name[:-1]
+            for remote_file in self_files:
+                if remote_file[: len(file_name)] == file_name:
+                    list_files.append(remote_file)
 
         else:
             raise FileNotFoundError(
-                f"The file '{file}' could not be found in the MAPDL session {self_files}.",
+                f"The entity '{file}' could not be found in the MAPDL session {self_files}.",
             )
 
         if len(list_files) == 0:
