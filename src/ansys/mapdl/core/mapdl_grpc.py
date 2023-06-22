@@ -2289,7 +2289,7 @@ class MapdlGrpc(_MapdlCore):
 
     def _validate_files(self, file, extension=None):
         base_name = os.path.basename(file)
-        self_files = os.listdir(self.directory)
+        self_files = self.list_files()
 
         if extension is not None:
             if not isinstance(extension, str):
