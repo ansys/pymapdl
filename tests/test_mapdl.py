@@ -1493,23 +1493,26 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     assert rst_file in mapdl.list_files()
-
     rst_fpath = os.path.join(mapdl.directory, rst_file)
 
     # change directory
-    try:
-        old_path = mapdl.directory
-        tmp_dir = tmpdir.mkdir("asdf")
-        mapdl.directory = str(tmp_dir)
-        assert Path(mapdl.directory) == tmp_dir
+    old_path = mapdl.directory
+    tmp_dir = tmpdir.mkdir("asdf")
+    mapdl.directory = str(tmp_dir)
+    assert Path(mapdl.directory) == tmp_dir
 
-        mapdl.clean()
-        mapdl.post1()
-        mapdl.file(rst_fpath)
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(rst_fpath)
 
-    finally:
-        # always revert to preserve state
-        mapdl.directory = old_path
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(
+        rst_fpath.replace(".rst", ""), "rst"
+    )
+
+    # always revert to preserve state
+    mapdl.directory = old_path
 
 
 def test_file_command_remote(mapdl, cube_solve, tmpdir):
