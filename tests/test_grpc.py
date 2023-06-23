@@ -354,7 +354,7 @@ def test_download_recursive(mapdl):
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
         shutil.rmtree(temp_dir)
-        shutil.rmstree("new_dir")
+        shutil.rmtree("new_dir")
 
 
 def test_download_project(mapdl, tmpdir):
