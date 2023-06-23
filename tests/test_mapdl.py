@@ -2020,3 +2020,12 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     plot_ = os.path.join(tmpdir, "myplot")
     mapdl.eplot(vtk=False, savefig=plot_)
     assert os.path.exists(plot_)
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)
