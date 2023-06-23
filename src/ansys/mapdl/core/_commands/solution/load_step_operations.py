@@ -62,7 +62,7 @@ class LoadStepOperations:
 
         .. warning:: This command can only run in non-interactive mode.
             Please visit `Unsupported "Interactive" Commands
-            <https://mapdl.docs.pyansys.com/user_guide/mapdl.html#unsupported-interactive-commands>`_
+            <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
             for further information.
 
         APDL Command: LSREAD
