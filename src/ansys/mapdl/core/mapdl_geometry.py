@@ -1,6 +1,6 @@
 """Module to support MAPDL CAD geometry"""
 import re
-from typing import List, Optional, Sequence, Union
+from typing import List, Literal, Optional, Sequence, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -12,11 +12,12 @@ if _HAS_PYVISTA:
 
 from ansys.mapdl.core.misc import run_as_prep7, supress_logging
 
-VALID_TYPE_MSG = """- 'S' : Select a new set (default)
-- 'R' : Reselect a set from the current set.
-- 'A' : Additionally select a set and extend the current set.
-- 'U' : Unselect a set from the current set.
-"""
+VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
+VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
+
+Valid_selection_type_tp = Literal["S", "R", "A", "U"]
+Valid_selection_entity_tp = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
+
 
 FLST_LOOKUP = {
     "NODE": 1,  # node numbers
@@ -28,6 +29,12 @@ FLST_LOOKUP = {
     "TRACE": 7,  # trace points
     "COORD": 8,  # coordinate locations
 }
+
+VALID_TYPE_MSG = """- 'S' : Select a new set (default)
+- 'R' : Reselect a set from the current set.
+- 'A' : Additionally select a set and extend the current set.
+- 'U' : Unselect a set from the current set.
+"""
 
 
 def merge_polydata(items: Union[pv.PolyData, pv.UnstructuredGrid]):
@@ -142,7 +149,7 @@ class Geometry:
             points.append(pv.PointSet(each_kp))
         return points
 
-    def get_keypoints(self) -> NDArray:
+    def get_keypoints(self) -> NDArray[int]:
         """Keypoint coordinates entities as a Numpy array"""
         return np.asarray(self._keypoints.points)
 
@@ -164,11 +171,11 @@ class Geometry:
 
     @property
     def areas(self) -> pv.MultiBlock:
-        """List of areas from MAPDL represented as ``pyvista.MultiBlock"""
+        """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`"""
         return self.get_areas()
 
     def get_areas(self, quality: int = 4, merge: bool = False) -> pv.MultiBlock:
-        """List of areas from MAPDL represented as ``pyvista.PolyData``.
+        """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`.
 
         Parameters
         ----------
@@ -183,11 +190,11 @@ class Geometry:
 
         Returns
         -------
-        list of pyvista.UnstructuredGrid
-            List of ``pyvista.UnstructuredGrid`` meshes representing
+        pv.MultiBlock
+            pv.MultiBlock grouping all meshes representing
             the active surface areas selected by ``ASEL``.  If
             ``merge=True``, areas are returned as a single merged
-            UnstructuredGrid.
+            UnstructuredGrid inside the MultiBlock object.
 
         Examples
         --------
@@ -563,7 +570,10 @@ class Geometry:
         return info
 
     def keypoint_select(
-        self, items, sel_type="S", return_selected=False
+        self,
+        items: Optional[Sequence[int]] = None,
+        sel_type: Valid_selection_type_tp = "S",
+        return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select keypoints using a sequence of items.
 
@@ -588,8 +598,8 @@ class Geometry:
 
         Returns
         -------
-        list
-            List of keypoint numbers if ``return_selected=True``.
+        np.array
+            Numpy array of keypoint numbers if ``return_selected=True``.
 
         Examples
         --------
@@ -644,7 +654,7 @@ class Geometry:
     def line_select(
         self,
         items: Optional[Sequence[int]],
-        sel_type: Optional[str] = "S",
+        sel_type: Valid_selection_type_tp = "S",
         return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select lines using a sequence of items.
@@ -670,8 +680,8 @@ class Geometry:
 
         Returns
         -------
-        list
-            List of the selected lines if ``return_selected=True``.
+        np.array
+            Numpy array of keypoint numbers if ``return_selected=True``.
 
         Examples
         --------
@@ -725,9 +735,9 @@ class Geometry:
 
     def area_select(
         self,
-        items: Optional[Sequence],
-        sel_type: Optional[str] = "S",
-        return_selected: Optional[bool] = False,
+        items: Optional[Sequence[int]],
+        sel_type: Valid_selection_type_tp = "S",
+        return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select areas using a sequence of items.
 
@@ -752,8 +762,8 @@ class Geometry:
 
         Returns
         -------
-        list
-            List of the selected areas if ``return_selected=True``.
+        np.array
+            Numpy array of keypoint numbers if ``return_selected=True``.
 
         Examples
         --------
@@ -807,11 +817,13 @@ class Geometry:
 
     @property
     def volumes(self) -> pv.MultiBlock:
-        """Get volumes from MAPDL represented as ``pyvista.MultiBlock``"""
+        """Get volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
         return self.get_volumes(return_as_list=False)
 
-    def get_volumes(self, return_as_list: bool = True) -> Union[list, pv.MultiBlock]:
-        """List of volumes from MAPDL represented as ``pyvista.UnstructuredGrid``"""
+    def get_volumes(
+        self, return_as_list: bool = True
+    ) -> Union[List[int], pv.MultiBlock]:
+        """List of volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
 
         # Cache current selection
         self._mapdl.cm("__temp_volu__", "volu")
@@ -830,9 +842,9 @@ class Geometry:
 
     def volume_select(
         self,
-        items: Optional[Sequence],
-        sel_type: Optional[str] = "S",
-        return_selected: Optional[bool] = False,
+        items: Optional[Union[str, Sequence[int]]],
+        sel_type: Valid_selection_type_tp = "S",
+        return_selected: bool = False,
     ) -> Optional[int]:
         """Select volumes using a sequence of items.
 
@@ -857,8 +869,8 @@ class Geometry:
 
         Returns
         -------
-        list
-            List of the selected volumes if ``return_selected=True``.
+        np.array
+            Numpy array of keypoint numbers if ``return_selected=True``.
 
         Examples
         --------
@@ -910,12 +922,17 @@ class Geometry:
         if return_selected:
             return self.vnum
 
-    def _select_items(self, items: Sequence, item_type: str, sel_type: str) -> None:
+    def _select_items(
+        self,
+        items: Sequence[int],
+        item_type: Valid_selection_entity_tp,
+        sel_type: Valid_selection_type_tp,
+    ) -> None:
         """Select items using FLST
 
         Parameters
         ----------
-        areas : sequence
+        items : sequence
             Sequence of items.
 
         item_type : str
@@ -943,8 +960,7 @@ class Geometry:
             raise KeyError(f'Invalid ``item_type`` "{item_type}"')
 
         sel_type = sel_type.upper()
-        valid_sel_type = ["S", "R", "A", "U"]
-        if sel_type not in valid_sel_type:
+        if sel_type not in VALID_SELECTION_TYPE:
             raise ValueError(
                 f'Invalid ``sel_type`` "{sel_type}"\n\n'
                 f"Use one of the following:\n{VALID_TYPE_MSG}"
