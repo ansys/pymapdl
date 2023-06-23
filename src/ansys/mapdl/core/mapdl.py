@@ -3027,7 +3027,12 @@ class _MapdlCore(Commands):
 
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            return self._display_plot(self._response)
+            plot_path = self._get_plot_name(text)
+            save_fig = kwargs.get("savefig", False)
+            if save_fig:
+                self._download_plot(plot_path, save_fig)
+            else:
+                return self._display_plot(plot_path)
 
         return self._response
 
@@ -3504,8 +3509,30 @@ class _MapdlCore(Commands):
         else:
             return array
 
-    def _display_plot(self, text):
+    def _get_plot_name(self, text: str) -> str:
+        """ "Obtain the plot filename. It also downloads it if in remote session."""
+        self._log.debug(text)
+        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
+
+        if png_found:
+            # flush graphics writer
+            self.show("CLOSE", mute=True)
+            # self.show("PNG", mute=True)
+
+            filename = self._screenshot_path()
+            self._log.debug(f"Screenshot at: {filename}")
+
+            if os.path.isfile(filename):
+                return filename
+            else:  # pragma: no cover
+                self._log.error("Unable to find screenshot at %s", filename)
+        else:
+            self._log.error("Unable to find file in MAPDL command output.")
+
+    def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
+        import matplotlib.image as mpimg
+        import matplotlib.pyplot as plt
 
         def in_ipython():
             # from scooby.in_ipython
@@ -3516,38 +3543,42 @@ class _MapdlCore(Commands):
             except NameError:
                 return False
 
-        self._log.debug(text)
-        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
+        self._log.debug("A screenshot file has been found.")
+        img = mpimg.imread(filename)
+        plt.imshow(img)
+        plt.axis("off")
 
-        if png_found:
-            # flush graphics writer
-            self.show("CLOSE", mute=True)
-            # self.show("PNG", mute=True)
+        if self._show_matplotlib_figures:  # pragma: no cover
+            self._log.debug("Using Matplotlib to plot")
+            plt.show()  # consider in-line plotting
 
-            import matplotlib.image as mpimg
-            import matplotlib.pyplot as plt
+        if in_ipython():
+            self._log.debug("Using ipython")
+            from IPython.display import display
 
-            filename = self._screenshot_path()
-            self._log.debug(f"Screenshot at: {filename}")
+            display(plt.gcf())
 
-            if os.path.isfile(filename):
-                self._log.debug("A screenshot file has been found.")
-                img = mpimg.imread(filename)
-                plt.imshow(img)
-                plt.axis("off")
-                if self._show_matplotlib_figures:  # pragma: no cover
-                    self._log.debug("Using Matplotlib to plot")
-                    plt.show()  # consider in-line plotting
-                if in_ipython():
-                    self._log.debug("Using ipython")
-                    from IPython.display import display
-
-                    display(plt.gcf())
-
-            else:  # pragma: no cover
-                self._log.error("Unable to find screenshot at %s", filename)
+    def _download_plot(self, filename: str, plot_name: str) -> None:
+        """Copy the temporary download plot to the working directory."""
+        if isinstance(plot_name, str):
+            pass
+        elif isinstance(plot_name, bool):
+            plot_name = "plot"
         else:
-            self._log.error("Unable to find file in MAPDL command output.")
+            raise ValueError("Only booleans and str are allowed.")
+
+        id_ = 0
+        plot_path = os.path.join(os.getcwd(), plot_name)
+        while os.path.exists(plot_path):
+            id_ += 1
+            plot_path = os.path.join(os.getcwd(), f"{plot_name}_{id_}")
+
+        else:
+            copyfile(filename, plot_path)
+
+        self._log.debug(
+            f"Copy plot file from temp directory to working directory as: {plot_path}"
+        )
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
