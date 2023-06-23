@@ -1813,7 +1813,7 @@ class _MapdlCore(Commands):
         def __enter__(self) -> None:
             self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
 
-            if not self._parent()._has_matplotlib:
+            if not self._parent()._has_matplotlib:  # pragma: no cover
                 raise ImportError(
                     "Install matplotlib to display plots from MAPDL ,"
                     "from Python.  Otherwise, plot with vtk with:\n"
@@ -3540,7 +3540,7 @@ class _MapdlCore(Commands):
             try:
                 __IPYTHON__
                 return True
-            except NameError:
+            except NameError:  # pragma: no cover
                 return False
 
         self._log.debug("A screenshot file has been found.")
@@ -3576,7 +3576,7 @@ class _MapdlCore(Commands):
             plot_stem = "plot"
             plot_ext = ".png"
             plot_path = os.getcwd()
-        else:
+        else:  # pragma: no cover
             raise ValueError("Only booleans and str are allowed.")
 
         id_ = 0
