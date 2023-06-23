@@ -37,23 +37,6 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 """
 
 
-def merge_polydata(items: Union[pv.PolyData, pv.UnstructuredGrid]):
-    """Merge list of polydata or unstructured grids"""
-
-    # lazy import here for faster module loading
-    try:
-        from pyvista._vtk import vtkAppendPolyData
-    except:
-        from vtk import vtkAppendPolyData
-
-    afilter = vtkAppendPolyData()
-    for item in items:
-        afilter.AddInputData(item)
-        afilter.Update()
-
-    return pv.wrap(afilter.GetOutput())
-
-
 def get_elements_per_area(resp: str) -> List[int]:
     """Get the number of elements meshed for each area given the response
     from ``AMESH``.
