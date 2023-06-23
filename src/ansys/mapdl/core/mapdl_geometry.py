@@ -1,6 +1,6 @@
 """Module to support MAPDL CAD geometry"""
 import re
-from typing import List, Literal, Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -15,9 +15,7 @@ from ansys.mapdl.core.misc import run_as_prep7, supress_logging
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
-Valid_selection_type_tp = Literal["S", "R", "A", "U"]
-Valid_selection_entity_tp = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
-
+from ansys.mapdl.core.mapdl import VALID_SELECTION_ENTITY_TP, VALID_SELECTION_TYPE_TP
 
 FLST_LOOKUP = {
     "NODE": 1,  # node numbers
@@ -555,7 +553,7 @@ class Geometry:
     def keypoint_select(
         self,
         items: Optional[Sequence[int]] = None,
-        sel_type: Valid_selection_type_tp = "S",
+        sel_type: VALID_SELECTION_TYPE_TP = "S",
         return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select keypoints using a sequence of items.
@@ -637,7 +635,7 @@ class Geometry:
     def line_select(
         self,
         items: Optional[Sequence[int]],
-        sel_type: Valid_selection_type_tp = "S",
+        sel_type: VALID_SELECTION_TYPE_TP = "S",
         return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select lines using a sequence of items.
@@ -719,7 +717,7 @@ class Geometry:
     def area_select(
         self,
         items: Optional[Sequence[int]],
-        sel_type: Valid_selection_type_tp = "S",
+        sel_type: VALID_SELECTION_TYPE_TP = "S",
         return_selected: bool = False,
     ) -> Optional[NDArray[np.int32]]:
         """Select areas using a sequence of items.
@@ -826,7 +824,7 @@ class Geometry:
     def volume_select(
         self,
         items: Optional[Union[str, Sequence[int]]],
-        sel_type: Valid_selection_type_tp = "S",
+        sel_type: VALID_SELECTION_TYPE_TP = "S",
         return_selected: bool = False,
     ) -> Optional[int]:
         """Select volumes using a sequence of items.
@@ -908,8 +906,8 @@ class Geometry:
     def _select_items(
         self,
         items: Sequence[int],
-        item_type: Valid_selection_entity_tp,
-        sel_type: Valid_selection_type_tp,
+        item_type: VALID_SELECTION_ENTITY_TP,
+        sel_type: VALID_SELECTION_TYPE_TP,
     ) -> None:
         """Select items using FLST
 

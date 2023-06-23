@@ -11,6 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
+from typing import Literal
 import warnings
 from warnings import warn
 import weakref
@@ -114,6 +115,9 @@ INVAL_COMMANDS_SILENT = {
 
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
+
+VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
+VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 
 def parse_to_short_cmd(command):
@@ -3901,7 +3905,7 @@ class _MapdlCore(Commands):
         self.cmdele(f"__temp_{entity}s_1__")
 
     @wraps(Commands.nsel)
-    def nsel(self, *args, **kwargs):
+    def nsel(self, *args, **kwargs) -> str:
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3918,7 +3922,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.esel)
-    def esel(self, *args, **kwargs):
+    def esel(self, *args, **kwargs) -> str:
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3935,7 +3939,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.ksel)
-    def ksel(self, *args, **kwargs):
+    def ksel(self, *args, **kwargs) -> str:
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3952,7 +3956,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.lsel)
-    def lsel(self, *args, **kwargs):
+    def lsel(self, *args, **kwargs) -> str:
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3969,7 +3973,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.asel)
-    def asel(self, *args, **kwargs):
+    def asel(self, *args, **kwargs) -> str:
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3986,7 +3990,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.vsel)
-    def vsel(self, *args, **kwargs):
+    def vsel(self, *args, **kwargs) -> str:
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
