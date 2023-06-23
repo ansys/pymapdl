@@ -337,7 +337,7 @@ def test_download_with_extension(
 def test_download_recursive(mapdl):
     if mapdl._local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
-        os.makedirs(temp_dir)
+        os.makedirs(temp_dir, exist_ok=True)
         with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
             fid.write("dummy")
         with open(os.path.join(temp_dir, "file1.txt"), "a") as fid:
@@ -352,6 +352,7 @@ def test_download_recursive(mapdl):
         mapdl.download("*", target_dir="new_dir", recursive=True)
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
+        os.rmdir(temp_dir)
         os.rmdir("new_dir")
 
 
