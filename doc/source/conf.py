@@ -168,6 +168,7 @@ exclude_patterns = [
 
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""
+
 # Read link all targets from file
 with open("links.rst") as f:
     rst_epilog += f.read()
@@ -177,6 +178,22 @@ rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
+
+
+# Setting redicts
+redirects = {
+    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
+    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
+}
+
+# Broken anchors:
+linkcheck_anchors_ignore = [
+    # these anchors are picked by linkcheck as broken but thye are not.
+    "firewall-rules",
+    "pyvista.Plotter",
+    "pyvista.UnstructuredGrid",
+    "pyvista.Plotter.show",
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
