@@ -1,6 +1,7 @@
 """gRPC service specific tests"""
 import os
 import re
+import shutil
 
 import pytest
 
@@ -352,8 +353,8 @@ def test_download_recursive(mapdl):
         mapdl.download("*", target_dir="new_dir", recursive=True)
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
-        os.rmdir(temp_dir)
-        os.rmdir("new_dir")
+        shutil.rmtree(temp_dir)
+        shutil.rmstree("new_dir")
 
 
 def test_download_project(mapdl, tmpdir):
