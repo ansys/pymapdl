@@ -2349,8 +2349,8 @@ class MapdlGrpc(_MapdlCore):
         Parameters
         ----------
         target_name : str
-            Target file on the server.  File must be in the same
-            directory as the mapdl instance.  List current files with
+            Target file on the server. File must be in the same
+            directory as the mapdl instance. List current files with
             ``mapdl.list_files()``
 
         out_file_name : str, optional
