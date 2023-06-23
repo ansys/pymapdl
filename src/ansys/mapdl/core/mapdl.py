@@ -63,7 +63,9 @@ _PERMITTED_ERRORS = [
 ]
 
 # test for png file
-PNG_TEST = re.compile("WRITTEN TO FILE")  # getting the file name is buggy.
+PNG_IS_WRITTEN_TO_FILE = re.compile(
+    "WRITTEN TO FILE"
+)  # getting the file name is buggy.
 
 VWRITE_REPLACEMENT = """
 Cannot use *VWRITE directly as a command in MAPDL
@@ -3515,7 +3517,7 @@ class _MapdlCore(Commands):
                 return False
 
         self._log.debug(text)
-        png_found = PNG_TEST.findall(text)
+        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
 
         if png_found:
             # flush graphics writer
