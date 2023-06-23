@@ -1982,3 +1982,12 @@ def test_rlblock_rlblock_num(mapdl):
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)
