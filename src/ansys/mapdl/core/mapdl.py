@@ -3561,20 +3561,31 @@ class _MapdlCore(Commands):
     def _download_plot(self, filename: str, plot_name: str) -> None:
         """Copy the temporary download plot to the working directory."""
         if isinstance(plot_name, str):
-            pass
+            provided = True
+            path_ = pathlib.Path(plot_name)
+            plot_name = path_.name
+            plot_stem = path_.stem
+            plot_ext = path_.suffix
+            plot_path = str(path_.parent)
+            if not plot_path or plot_path == ".":
+                plot_path = os.getcwd()
+
         elif isinstance(plot_name, bool):
-            plot_name = "plot"
+            provided = False
+            plot_name = "plot.png"
+            plot_stem = "plot"
+            plot_ext = ".png"
+            plot_path = os.getcwd()
         else:
             raise ValueError("Only booleans and str are allowed.")
 
         id_ = 0
-        plot_path = os.path.join(os.getcwd(), plot_name)
-        while os.path.exists(plot_path):
+        plot_path_ = os.path.join(plot_path, plot_name)
+        while os.path.exists(plot_path_) and not provided:
             id_ += 1
-            plot_path = os.path.join(os.getcwd(), f"{plot_name}_{id_}")
-
+            plot_path_ = os.path.join(plot_path, f"{plot_stem}_{id_}{plot_ext}")
         else:
-            copyfile(filename, plot_path)
+            copyfile(filename, plot_path_)
 
         self._log.debug(
             f"Copy plot file from temp directory to working directory as: {plot_path}"
