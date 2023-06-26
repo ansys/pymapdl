@@ -1,6 +1,8 @@
 """gRPC specific class and methods for the MAPDL gRPC client """
 
+import fnmatch
 from functools import wraps
+import glob
 import io
 import os
 import pathlib
@@ -10,7 +12,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import Optional
+from typing import List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -1229,7 +1231,7 @@ class MapdlGrpc(_MapdlCore):
                         err.decode(),
                     )
 
-    def list_files(self, refresh_cache=True):
+    def list_files(self, refresh_cache: bool = True) -> List[str]:
         """List the files in the working directory of MAPDL.
 
         Parameters
@@ -1325,7 +1327,12 @@ class MapdlGrpc(_MapdlCore):
         self.slashdelete(tmp_file)
         return obj
 
-    def download_result(self, path=None, progress_bar=False, preference=None):
+    def download_result(
+        self,
+        path: Optional[Union[str, pathlib.Path]] = None,
+        progress_bar: bool = False,
+        preference: Optional[Literal["rst", "rth"]] = None,
+    ) -> str:
         """Download remote result files to a local directory
 
         Parameters
@@ -1353,7 +1360,7 @@ class MapdlGrpc(_MapdlCore):
         if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
 
-        def _download(targets):
+        def _download(targets: List[str]) -> None:
             for target in targets:
                 save_name = os.path.join(path, target)
                 self._download(target, save_name, progress_bar=progress_bar)
@@ -2042,7 +2049,12 @@ class MapdlGrpc(_MapdlCore):
             f"Unsupported type {getresponse.type} response from MAPDL"
         )
 
-    def download_project(self, extensions=None, target_dir=None, progress_bar=False):
+    def download_project(
+        self,
+        extensions: Optional[Union[str, List[str], Tuple[str]]] = None,
+        target_dir: Optional[str] = None,
+        progress_bar: bool = False,
+    ) -> List[str]:
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -2086,13 +2098,13 @@ class MapdlGrpc(_MapdlCore):
 
     def download(
         self,
-        files,
-        target_dir=None,
-        extension=None,
-        chunk_size=None,
-        progress_bar=None,
-        recursive=False,
-    ):
+        files: Union[str, List[str], Tuple[str]],
+        target_dir: Optional[str] = None,
+        extension: Optional[str] = None,
+        chunk_size: Optional[int] = None,
+        progress_bar: Optional[bool] = None,
+        recursive: bool = False,
+    ) -> List[str]:
         """Download files from the gRPC instance working directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
@@ -2194,18 +2206,16 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_on_local(
         self,
-        files,
-        target_dir=None,
-        extension=None,
-        recursive=False,
-    ):
+        files: Union[str, List[str]],
+        target_dir: Optional[str] = None,
+        extension: Optional[str] = None,
+        recursive: bool = False,
+    ) -> List[str]:
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
             if not os.path.isdir(os.path.join(self.directory, files)):
-                list_files = self._validate_files(
-                    files, extension=extension
-                )  # need to add recursive method
+                list_files = self._validate_files(files, extension=extension)
             else:
                 list_files = [files]
 
@@ -2216,9 +2226,7 @@ class MapdlGrpc(_MapdlCore):
                 )
             list_files = []
             for each in files:
-                list_files.extend(
-                    self._validate_files(each, extension=extension)
-                )  # need to add recursive method
+                list_files.extend(self._validate_files(each, extension=extension))
 
         else:
             raise ValueError(
@@ -2251,12 +2259,12 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_from_remote(
         self,
-        files,
-        target_dir=None,
-        extension=None,
-        chunk_size=None,
-        progress_bar=None,
-    ):
+        files: Union[str, List[str]],
+        target_dir: Optional[str] = None,
+        extension: Optional[str] = None,
+        chunk_size: Optional[str] = None,
+        progress_bar: Optional[str] = None,
+    ) -> List[str]:
         """Download files when we are connected to a remote session."""
 
         if isinstance(files, str):
@@ -2287,51 +2295,32 @@ class MapdlGrpc(_MapdlCore):
 
         return list_files
 
-    def _validate_files(self, file, extension=None):
-        base_name = os.path.basename(file)
-        self_files = self.list_files()
-
+    def _validate_files(self, file: str, extension: Optional[str] = None) -> List[str]:
         if extension is not None:
             if not isinstance(extension, str):
                 raise TypeError(f"The extension {extension} must be a string.")
-            valid_files = []
-            for filename in self_files:
-                if filename[-len(extension) :] == extension:
-                    valid_files.append(filename)
-            if len(valid_files) > 0:
-                self_files = valid_files
-            else:
-                raise FileNotFoundError(
-                    f"Files with the extension '{extension}' could not be found in the remote session. In a remote session, only the file basename is considered to find in the MAPDL working directory."
-                )
-            if not "*" in base_name:
-                if extension[0] == ".":
-                    base_name = os.path.splitext(base_name)[0] + extension
-                else:
-                    base_name = os.path.splitext(base_name)[0] + "." + extension
 
-        if base_name in self_files:
-            list_files = [base_name]
-
-        elif base_name == "*":
-            list_files = self_files
-
-        elif base_name[-1] == "*":
-            list_files = []
-            file_name = base_name[:-1]
-            for remote_file in self_files:
-                if remote_file[: len(file_name)] == file_name:
-                    list_files.append(remote_file)
+            if extension[0] != ".":
+                extension = "." + extension
 
         else:
-            raise FileNotFoundError(
-                f"The entity '{file}' could not be found in the MAPDL session {self_files}.",
-            )
+            extension = ""
+
+        if self.is_local:
+            # filtering with glob (accepting *)
+            list_files = glob.glob(file, root_dir=self.directory)
+        else:
+            base_name = os.path.basename(file)
+            self_files = self.list_files()
+
+            list_files = fnmatch.filter(self_files, base_name)
+
+        # filtering by extension
+        list_files = [each for each in list_files if each.endswith(extension)]
 
         if len(list_files) == 0:
             raise FileNotFoundError(
-                f"There is no file {base_name} with the extension {extension} in the MAPDL session."
-                f"{self.list_files()}"
+                f"No file matching '{file}' in the MAPDL session can be found."
             )
 
         return list_files
@@ -2339,11 +2328,11 @@ class MapdlGrpc(_MapdlCore):
     @protect_grpc
     def _download(
         self,
-        target_name,
-        out_file_name=None,
-        chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=False,
-    ):
+        target_name: str,
+        out_file_name: Optional[str] = None,
+        chunk_size: int = DEFAULT_CHUNKSIZE,
+        progress_bar: bool = False,
+    ) -> None:
         """Download a file from the gRPC instance.
 
         Parameters
@@ -2397,7 +2386,7 @@ class MapdlGrpc(_MapdlCore):
             )
 
     @protect_grpc
-    def upload(self, file_name, progress_bar=True):
+    def upload(self, file_name: str, progress_bar: bool = True) -> str:
         """Upload a file to the grpc instance
 
         file_name : str
@@ -2493,7 +2482,7 @@ class MapdlGrpc(_MapdlCore):
         return save_name
 
     @protect_grpc
-    def _download_as_raw(self, target_name):
+    def _download_as_raw(self, target_name: str) -> str:
         """Download a file from the gRPC instance as a binary
         string without saving it to disk.
         """
