@@ -1,5 +1,5 @@
 """Common gRPC functions"""
-from typing import Dict, List, Literal, Optional, Union
+from typing import List, Literal
 
 import numpy as np
 
@@ -9,7 +9,7 @@ from ansys.mapdl.core.errors import MapdlConnectionError
 DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
 DEFAULT_FILE_CHUNK_SIZE = 1024 * 1024  # 1MB
 
-ANSYS_VALUE_TYPE: Dict[int, Optional[Union[int, float, np.char]]] = {
+ANSYS_VALUE_TYPE = {
     0: None,  # UNKNOWN
     1: np.int32,  # INTEGER
     2: np.int64,  # HYPER
