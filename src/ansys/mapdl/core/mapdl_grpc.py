@@ -2308,9 +2308,10 @@ class MapdlGrpc(_MapdlCore):
 
         if self.is_local:
             # filtering with glob (accepting *)
-            list_files = glob.glob(file, root_dir=self.directory)
+            list_files = glob.glob(file + extension)
+
         else:
-            base_name = os.path.basename(file)
+            base_name = os.path.basename(file + extension)
             self_files = self.list_files()
 
             list_files = fnmatch.filter(self_files, base_name)

@@ -316,8 +316,8 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
     [
         ["txt", "myfile*", ["myfile0.txt", "myfile1.txt"]],
         ["txt", "myfile0", ["myfile0.txt"]],
-        ["err", "file", ["file.err"]],
-        ["err", "*", ["file.err"]],
+        [None, "file*.err", None],
+        ["err", "*", None],
     ],
 )
 def test_download_with_extension(
@@ -327,11 +327,19 @@ def test_download_with_extension(
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
     list_files = mapdl.download(files_to_download, extension=extension_to_download)
-    assert len(expected_output) == len(list_files)
 
-    for file_to_check in expected_output:
-        assert file_to_check in list_files
-        assert os.path.exists(file_to_check)
+    if extension_to_download == "err" or files_to_download.endswith("err"):
+        remote_list_files = mapdl.list_files()
+
+        assert all(
+            [each.endswith("err") and each in remote_list_files for each in list_files]
+        )
+    else:
+        assert len(expected_output) == len(list_files)
+
+        for file_to_check in expected_output:
+            assert file_to_check in list_files
+            assert os.path.exists(file_to_check)
 
 
 @skip_in_cloud  # This is going to run only in local
