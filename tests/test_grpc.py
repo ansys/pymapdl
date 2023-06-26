@@ -190,10 +190,10 @@ def test_large_output(mapdl, cleared):
     assert len(msg) > 4 * 1024**2
 
 
-# def test__download_missing_file(mapdl, tmpdir):
-#     target = tmpdir.join("tmp")
-#     with pytest.raises(FileNotFoundError):
-#         mapdl._download("__notafile__", target)
+def test__download_missing_file(mapdl, tmpdir):
+    target = tmpdir.join("tmp")
+    with pytest.raises(FileNotFoundError):
+        mapdl.download("__notafile__", target)
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
