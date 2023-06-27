@@ -1813,13 +1813,20 @@ class _MapdlCore(Commands):
         def __enter__(self) -> None:
             self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
 
-            if not self._parent()._has_matplotlib:
+            if not self._parent()._has_matplotlib:  # pragma: no cover
                 raise ImportError(
                     "Install matplotlib to display plots from MAPDL ,"
                     "from Python.  Otherwise, plot with vtk with:\n"
                     "``vtk=True``"
                 )
 
+            if not self._parent()._png_mode:
+                self._parent().show("PNG", mute=True)
+                self._parent().gfile(self._pixel_res, mute=True)
+
+        def __exit__(self, *args) -> None:
+            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
+            self._parent().show("close", mute=True)
             if not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
@@ -3027,7 +3034,12 @@ class _MapdlCore(Commands):
 
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
-            return self._display_plot(self._response)
+            plot_path = self._get_plot_name(text)
+            save_fig = kwargs.get("savefig", False)
+            if save_fig:
+                self._download_plot(plot_path, save_fig)
+            else:
+                return self._display_plot(plot_path)
 
         return self._response
 
@@ -3504,18 +3516,8 @@ class _MapdlCore(Commands):
         else:
             return array
 
-    def _display_plot(self, text):
-        """Display the last generated plot (*.png) from MAPDL"""
-
-        def in_ipython():
-            # from scooby.in_ipython
-            # to avoid dependency here.
-            try:
-                __IPYTHON__
-                return True
-            except NameError:
-                return False
-
+    def _get_plot_name(self, text: str) -> str:
+        """ "Obtain the plot filename. It also downloads it if in remote session."""
         self._log.debug(text)
         png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
 
@@ -3524,30 +3526,77 @@ class _MapdlCore(Commands):
             self.show("CLOSE", mute=True)
             # self.show("PNG", mute=True)
 
-            import matplotlib.image as mpimg
-            import matplotlib.pyplot as plt
-
             filename = self._screenshot_path()
             self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):
-                self._log.debug("A screenshot file has been found.")
-                img = mpimg.imread(filename)
-                plt.imshow(img)
-                plt.axis("off")
-                if self._show_matplotlib_figures:  # pragma: no cover
-                    self._log.debug("Using Matplotlib to plot")
-                    plt.show()  # consider in-line plotting
-                if in_ipython():
-                    self._log.debug("Using ipython")
-                    from IPython.display import display
-
-                    display(plt.gcf())
-
+                return filename
             else:  # pragma: no cover
                 self._log.error("Unable to find screenshot at %s", filename)
         else:
             self._log.error("Unable to find file in MAPDL command output.")
+
+    def _display_plot(self, filename: str) -> None:
+        """Display the last generated plot (*.png) from MAPDL"""
+        import matplotlib.image as mpimg
+        import matplotlib.pyplot as plt
+
+        def in_ipython():
+            # from scooby.in_ipython
+            # to avoid dependency here.
+            try:
+                __IPYTHON__
+                return True
+            except NameError:  # pragma: no cover
+                return False
+
+        self._log.debug("A screenshot file has been found.")
+        img = mpimg.imread(filename)
+        plt.imshow(img)
+        plt.axis("off")
+
+        if self._show_matplotlib_figures:  # pragma: no cover
+            self._log.debug("Using Matplotlib to plot")
+            plt.show()  # consider in-line plotting
+
+        if in_ipython():
+            self._log.debug("Using ipython")
+            from IPython.display import display
+
+            display(plt.gcf())
+
+    def _download_plot(self, filename: str, plot_name: str) -> None:
+        """Copy the temporary download plot to the working directory."""
+        if isinstance(plot_name, str):
+            provided = True
+            path_ = pathlib.Path(plot_name)
+            plot_name = path_.name
+            plot_stem = path_.stem
+            plot_ext = path_.suffix
+            plot_path = str(path_.parent)
+            if not plot_path or plot_path == ".":
+                plot_path = os.getcwd()
+
+        elif isinstance(plot_name, bool):
+            provided = False
+            plot_name = "plot.png"
+            plot_stem = "plot"
+            plot_ext = ".png"
+            plot_path = os.getcwd()
+        else:  # pragma: no cover
+            raise ValueError("Only booleans and str are allowed.")
+
+        id_ = 0
+        plot_path_ = os.path.join(plot_path, plot_name)
+        while os.path.exists(plot_path_) and not provided:
+            id_ += 1
+            plot_path_ = os.path.join(plot_path, f"{plot_stem}_{id_}{plot_ext}")
+        else:
+            copyfile(filename, plot_path_)
+
+        self._log.debug(
+            f"Copy plot file from temp directory to working directory as: {plot_path}"
+        )
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
