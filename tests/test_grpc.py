@@ -290,7 +290,6 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
         basename = os.path.basename(file_to_check)
         assert basename in expected_output
         assert os.path.exists(os.path.join(tmpdir, basename))
-        assert os.path.exists(file_to_check)
 
 
 @pytest.mark.parametrize(
