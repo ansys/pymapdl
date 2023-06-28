@@ -12,7 +12,7 @@ from subprocess import PIPE, Popen
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref

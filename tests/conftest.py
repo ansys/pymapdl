@@ -15,11 +15,7 @@ import pyvista
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import (
-    MAPDL_DEFAULT_PORT,
-    get_start_instance,
-    launch_mapdl,
-)
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
@@ -57,14 +53,12 @@ class MyReporter(TerminalReporter):
 
         failed = self.stats.get("failed", [])
         for rep in failed:
-            # breakpoint()
             self.write_line(
                 f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
             )
 
         errored = self.stats.get("error", [])
         for rep in errored:
-            # breakpoint()
             self.write_line(
                 f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
             )
@@ -93,10 +87,12 @@ valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
 
 EXEC_FILE, rver = find_ansys()
 if rver:
+    LOCAL = True
     rver = int(rver * 10)
     HAS_GRPC = int(rver) >= 211
 else:
     # assuming remote with gRPC
+    LOCAL = False
     HAS_GRPC = True
 
 # check if the user wants to permit pytest to start MAPDL
@@ -310,18 +306,13 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
+@pytest.fixture(scope="session")
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
 
     # don't allow mapdl to exit upon collection unless mapdl is local
     cleanup = START_INSTANCE
-
-    if request.param:
-        # usage of a just closed channel on same port causes connectivity issues
-        port = MAPDL_DEFAULT_PORT + 10
-    else:
-        port = MAPDL_DEFAULT_PORT
 
     mapdl = launch_mapdl(
         EXEC_FILE,
@@ -335,7 +326,7 @@ def mapdl(request, tmpdir_factory):
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     if HAS_GRPC and not os.environ.get("ON_LOCAL", None):
-        mapdl._local = request.param  # CI: override for testing
+        mapdl._local = False  # CI: override for testing
 
     if mapdl._local:
         assert Path(mapdl.directory) == Path(run_path)

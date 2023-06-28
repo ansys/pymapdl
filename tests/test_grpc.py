@@ -312,6 +312,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         assert basename in expected_output
         assert os.path.exists(os.path.join(os.getcwd(), basename))
         assert os.path.exists(file_to_check)
+        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -348,6 +349,9 @@ def test_download_with_extension(
             assert basename in expected_output
             assert os.path.exists(os.path.join(os.getcwd(), basename))
             assert os.path.exists(file_to_check)
+
+    for each in list_files:
+        os.remove(each)
 
 
 @skip_in_cloud  # This is going to run only in local

@@ -47,7 +47,9 @@ if TYPE_CHECKING:
 
     try:
         from ansys.mapdl.core.mapdl_corba import MapdlCorba
-    except:
+    except ImportError:
+        pass
+    except ModuleNotFoundError:
         pass
 
 # settings directory
@@ -955,7 +957,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> Union[MapdlGrpc, MapdlConsole, MapdlCorba]:
+) -> Union[MapdlGrpc, "MapdlConsole", "MapdlCorba"]:
     """Start MAPDL locally.
 
     Parameters
