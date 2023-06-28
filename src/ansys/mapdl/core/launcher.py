@@ -47,9 +47,9 @@ if TYPE_CHECKING:
 
     try:
         from ansys.mapdl.core.mapdl_corba import MapdlCorba
-    except ImportError:
-        pass
     except ModuleNotFoundError:
+        pass
+    except ImportError:
         pass
 
 # settings directory

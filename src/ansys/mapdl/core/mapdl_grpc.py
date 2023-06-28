@@ -8,7 +8,7 @@ import os
 import pathlib
 import re
 import shutil
-from subprocess import PIPE, Popen
+from subprocess import Popen
 import tempfile
 import threading
 import time
@@ -1206,38 +1206,6 @@ class MapdlGrpc(_MapdlCore):
                         os.remove(lock_file)
                     except OSError:
                         pass
-
-    def _run_cleanup_script(self):
-        """Run the APDL cleanup script.
-
-        On distributed runs MAPDL creates a cleanup script to kill the
-        processes created by the ANSYS spawner.  Normally this file is
-        removed when APDL exits normally, but on a failure, it's
-        necessary to manually close these PIDs.
-        """
-        # run cleanup script when local
-        if self.is_local:
-            for filename in self.list_files():
-                if "cleanup" in filename:
-                    script = os.path.join(self.directory, filename)
-                    if not os.path.isfile(script):
-                        return
-                    if os.name != "nt":
-                        script = ["/bin/bash", script]
-                    process = Popen(
-                        script,
-                        shell=False,
-                        stdin=PIPE,
-                        stdout=PIPE,
-                        stderr=PIPE,
-                    )
-                    # always communicate to allow process to run
-                    output, err = process.communicate()
-                    self._log.debug(
-                        "Cleanup output:\n\n%s\n%s",
-                        output.decode(),
-                        err.decode(),
-                    )
 
     def list_files(self, refresh_cache: bool = True) -> List[str]:
         """List the files in the working directory of MAPDL.
