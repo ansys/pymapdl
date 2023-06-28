@@ -94,14 +94,10 @@ valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
 EXEC_FILE, rver = find_ansys()
 if rver:
     rver = int(rver * 10)
-    HAS_GRPC = int(rver) >= 211 or ON_CI
+    HAS_GRPC = int(rver) >= 211
 else:
     # assuming remote with gRPC
     HAS_GRPC = True
-
-# determine if we can launch an instance of MAPDL locally
-# start with ``False`` and always assume the remote case
-LOCAL = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -314,7 +310,6 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
-@pytest.fixture(scope="session", params=LOCAL)
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
