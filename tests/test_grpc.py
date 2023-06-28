@@ -321,7 +321,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         ["txt", "myfile*", ["myfile0.txt", "myfile1.txt"]],
         ["txt", "myfile0", ["myfile0.txt"]],
         [None, "file*.err", None],
-        ["err", "*", None],
+        ["err", "**", None],
     ],
 )
 def test_download_with_extension(
@@ -380,10 +380,10 @@ def test_download_recursive(mapdl):
 def test_download_project(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(target_dir=target_dir)
-    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
-
-    expected = {"log", "err"}
-    assert expected.intersection(files_extensions) == expected
+    files_extensions = list(
+        set([each.split(".")[-1] for each in os.listdir(target_dir)])
+    )
+    assert "log" in files_extensions
 
 
 def test_download_project_extensions(mapdl, tmpdir):

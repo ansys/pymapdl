@@ -45,13 +45,6 @@ from ansys.mapdl.core.misc import (
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-    try:
-        from ansys.mapdl.core.mapdl_corba import MapdlCorba
-    except ModuleNotFoundError:
-        pass
-    except ImportError:
-        pass
-
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
 if not os.path.isdir(SETTINGS_DIR):
@@ -957,7 +950,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> Union[MapdlGrpc, "MapdlConsole", "MapdlCorba"]:
+) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
     Parameters

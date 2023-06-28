@@ -2055,7 +2055,7 @@ class MapdlGrpc(_MapdlCore):
         if not extensions:
             # files = self.list_files()
             list_of_files = self.download(
-                files="*", target_dir=target_dir, progress_bar=progress_bar
+                files="**", target_dir=target_dir, progress_bar=progress_bar
             )
 
         else:
@@ -2063,7 +2063,7 @@ class MapdlGrpc(_MapdlCore):
             for each_extension in extensions:
                 list_of_files.extend(
                     self.download(
-                        files="*",
+                        files="**",
                         target_dir=target_dir,
                         extension=each_extension,
                         progress_bar=progress_bar,
