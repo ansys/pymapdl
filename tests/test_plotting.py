@@ -3,13 +3,10 @@ import os
 
 import numpy as np
 import pytest
-from pyvista.plotting import Plotter, system_supports_plotting
+from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.plotting import general_plotter
-
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
+from conftest import skip_no_xserver
 
 
 @pytest.fixture

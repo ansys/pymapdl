@@ -1,6 +1,11 @@
 """Shared testing module"""
 from collections import namedtuple
+import os
 from typing import Dict
+
+from ansys.tools.path import find_mapdl
+
+from ansys.mapdl.core.launcher import _is_ubuntu
 
 Node = namedtuple("Node", ["number", "x", "y", "z", "thx", "thy", "thz"])
 Element = namedtuple(
@@ -15,6 +20,51 @@ Element = namedtuple(
         "node_numbers",
     ],
 )
+
+
+# Set if on local
+def is_on_local():
+    if os.environ.get("ON_LOCAL", "").lower() == "true":
+        return True
+
+    if os.environ.get("PYMAPDL_START_INSTANCE", None):
+        return True
+
+    _, rver = find_mapdl()
+
+    if rver:
+        return True
+    else:
+        return False
+
+
+# Set if on CI
+def is_on_ci():
+    return os.environ.get("ON_CI", "").lower() == "true"
+
+
+# Set if on ubuntu
+def is_on_ubuntu():
+    if os.environ.get("ON_UBUNTU", "").lower() == "true":
+        return True
+    return _is_ubuntu()
+
+
+def has_grpc():
+    _, rver = find_mapdl()
+
+    if rver:
+        rver = int(rver * 10)
+        return int(rver) >= 211
+    else:
+        return False
+
+
+def has_dpf():
+    if os.environ.get("DPF_PORT", ""):
+        return True
+    else:
+        return False
 
 
 def is_float(s: str) -> bool:

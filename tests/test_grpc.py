@@ -8,7 +8,6 @@ import pytest
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -16,19 +15,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = pytest.mark.skip_grpc
 
-skip_launch_mapdl = pytest.mark.skipif(
-    not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally",
-)
-
-
-skip_in_cloud = pytest.mark.skipif(
-    not get_start_instance(),
-    reason="""
-Must be able to launch MAPDL locally. Remote execution does not allow for
-directory creation.
-""",
-)
+from conftest import skip_if_not_local
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -354,7 +341,7 @@ def test_download_with_extension(
         os.remove(each)
 
 
-@skip_in_cloud  # This is going to run only in local
+@skip_if_not_local  # This is going to run only in local
 def test_download_recursive(mapdl):
     if mapdl._local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
