@@ -2472,7 +2472,7 @@ class MapdlGrpc(_MapdlCore):
         all_filenames = self.list_files()
         filenames = []
         for filename in all_filenames:
-            if ".png" == filename[-4:]:
+            if filename.endswith(".png"):
                 filenames.append(filename)
         filenames.sort()
         filename = os.path.basename(filenames[-1])
