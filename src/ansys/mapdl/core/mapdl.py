@@ -3030,7 +3030,7 @@ class _MapdlCore(Commands):
             plot_path = self._get_plot_name(text)
             save_fig = kwargs.get("savefig", False)
             if save_fig:
-                self._download_plot(plot_path, save_fig)
+                return self._download_plot(plot_path, save_fig)
             else:
                 return self._display_plot(plot_path)
 
