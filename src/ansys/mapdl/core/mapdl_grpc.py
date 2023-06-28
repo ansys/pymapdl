@@ -2215,7 +2215,9 @@ class MapdlGrpc(_MapdlCore):
 
         if isinstance(files, str):
             if not os.path.isdir(os.path.join(self.directory, files)):
-                list_files = self._validate_files(files, extension=extension)
+                list_files = self._validate_files(
+                    files, extension=extension, recursive=recursive
+                )
             else:
                 list_files = [files]
 
@@ -2226,7 +2228,9 @@ class MapdlGrpc(_MapdlCore):
                 )
             list_files = []
             for each in files:
-                list_files.extend(self._validate_files(each, extension=extension))
+                list_files.extend(
+                    self._validate_files(each, extension=extension, recursive=recursive)
+                )
 
         else:
             raise ValueError(
@@ -2295,7 +2299,9 @@ class MapdlGrpc(_MapdlCore):
 
         return list_files
 
-    def _validate_files(self, file: str, extension: Optional[str] = None) -> List[str]:
+    def _validate_files(
+        self, file: str, extension: Optional[str] = None, recursive: bool = True
+    ) -> List[str]:
         if extension is not None:
             if not isinstance(extension, str):
                 raise TypeError(f"The extension {extension} must be a string.")
@@ -2308,7 +2314,9 @@ class MapdlGrpc(_MapdlCore):
 
         if self.is_local:
             # filtering with glob (accepting *)
-            list_files = glob.glob(file + extension)
+            if not os.path.dirname(file):
+                file = os.path.join(self.directory, file)
+            list_files = glob.glob(file + extension, recursive=recursive)
 
         else:
             base_name = os.path.basename(file + extension)

@@ -286,9 +286,11 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
     list_files = mapdl.download(files_to_download, target_dir=tmpdir)
     assert len(expected_output) == len(list_files)
 
-    for file_to_check in expected_output:
-        assert file_to_check in list_files
-        assert os.path.exists(os.path.join(tmpdir, file_to_check))
+    for file_to_check in list_files:
+        basename = os.path.basename(file_to_check)
+        assert basename in expected_output
+        assert os.path.exists(os.path.join(tmpdir, basename))
+        assert os.path.exists(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -306,8 +308,10 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
     list_files = mapdl.download(files_to_download)
     assert len(expected_output) == len(list_files)
 
-    for file_to_check in expected_output:
-        assert file_to_check in list_files
+    for file_to_check in list_files:
+        basename = os.path.basename(file_to_check)
+        assert basename in expected_output
+        assert os.path.exists(os.path.join(os.getcwd(), basename))
         assert os.path.exists(file_to_check)
 
 
@@ -332,13 +336,18 @@ def test_download_with_extension(
         remote_list_files = mapdl.list_files()
 
         assert all(
-            [each.endswith("err") and each in remote_list_files for each in list_files]
+            [
+                each.endswith("err") and os.path.basename(each) in remote_list_files
+                for each in list_files
+            ]
         )
     else:
         assert len(expected_output) == len(list_files)
 
-        for file_to_check in expected_output:
-            assert file_to_check in list_files
+        for file_to_check in list_files:
+            basename = os.path.basename(file_to_check)
+            assert basename in expected_output
+            assert os.path.exists(os.path.join(os.getcwd(), basename))
             assert os.path.exists(file_to_check)
 
 
@@ -358,7 +367,7 @@ def test_download_recursive(mapdl):
         os.remove("file0.txt")
         os.remove("file1.txt")
 
-        mapdl.download("*", target_dir="new_dir", recursive=True)
+        mapdl.download("**", target_dir="new_dir", recursive=True)
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
         shutil.rmtree(temp_dir)
