@@ -175,7 +175,9 @@ def save_chunks_to_file(
     return file_size
 
 
-def copy_files_to_the_root(folder : pathlib.Path, target_dir : pathlib.Path, recursive : bool):
+def copy_files_to_the_root(
+    folder: pathlib.Path, target_dir: pathlib.Path, recursive: bool
+):
     list_folder = os.listdir(folder)
     for file in list_folder:
         if os.path.isdir(file):
