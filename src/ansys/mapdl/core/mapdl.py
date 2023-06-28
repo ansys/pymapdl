@@ -3375,6 +3375,8 @@ class _MapdlCore(Commands):
                         self._log.error("exit: %s", str(e))
                 except Exception:
                     pass
+            if self.is_grpc:
+                self._run_cleanup_script()
 
     @supress_logging
     def get_array(
