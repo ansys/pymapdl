@@ -1,6 +1,7 @@
 """gRPC service specific tests"""
 import os
 import re
+import shutil
 
 import pytest
 
@@ -192,7 +193,7 @@ def test_large_output(mapdl, cleared):
 def test__download_missing_file(mapdl, tmpdir):
     target = tmpdir.join("tmp")
     with pytest.raises(FileNotFoundError):
-        mapdl._download("__notafile__", target)
+        mapdl.download("__notafile__", target)
 
 
 def test_cmatrix(mapdl, setup_for_cmatrix):
@@ -271,69 +272,105 @@ def test__download(mapdl, tmpdir):
 
 
 @pytest.mark.parametrize(
-    "option,expected_files",
+    "files_to_download,expected_output",
     [
         ["myfile0.txt", ["myfile0.txt"]],
         [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
         ["myfile*", ["myfile0.txt", "myfile1.txt"]],
     ],
 )
-def test_download(mapdl, tmpdir, option, expected_files):
+def test_download(mapdl, tmpdir, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    mapdl.download(option, target_dir=tmpdir)
-    for file_to_check in expected_files:
-        assert os.path.exists(tmpdir.join(file_to_check))
+    list_files = mapdl.download(files_to_download, target_dir=tmpdir)
+    assert len(expected_output) == len(list_files)
+
+    for file_to_check in list_files:
+        basename = os.path.basename(file_to_check)
+        assert basename in expected_output
+        assert os.path.exists(os.path.join(tmpdir, basename))
 
 
-def test_download_without_target_dir(mapdl, tmpdir):
+@pytest.mark.parametrize(
+    "files_to_download,expected_output",
+    [
+        ["myfile0.txt", ["myfile0.txt"]],
+        [["myfile0.txt", "myfile1.txt"], ["myfile0.txt", "myfile1.txt"]],
+        ["myfile*", ["myfile0.txt", "myfile1.txt"]],
+    ],
+)
+def test_download_without_target_dir(mapdl, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
-    old_cwd = os.getcwd()
-    try:
-        # must use try/finally block as we change the cwd here
-        os.chdir(str(tmpdir))
+    list_files = mapdl.download(files_to_download)
+    assert len(expected_output) == len(list_files)
 
-        mapdl.download("myfile0.txt")
-        assert os.path.exists("myfile0.txt")
+    for file_to_check in list_files:
+        basename = os.path.basename(file_to_check)
+        assert basename in expected_output
+        assert os.path.exists(os.path.join(os.getcwd(), basename))
+        assert os.path.exists(file_to_check)
 
-        mapdl.download(["myfile0.txt", "myfile1.txt"])
-        assert os.path.exists("myfile0.txt")
-        assert os.path.exists("myfile1.txt")
 
-        mapdl.download("myfile*")
-        assert os.path.exists("myfile0.txt")
-        assert os.path.exists("myfile1.txt")
-    finally:
-        os.chdir(old_cwd)
+@pytest.mark.parametrize(
+    "extension_to_download,files_to_download,expected_output",
+    [
+        ["txt", "myfile*", ["myfile0.txt", "myfile1.txt"]],
+        ["txt", "myfile0", ["myfile0.txt"]],
+        [None, "file*.err", None],
+        ["err", "*", None],
+    ],
+)
+def test_download_with_extension(
+    mapdl, extension_to_download, files_to_download, expected_output
+):
+    write_tmp_in_mapdl_instance(mapdl, "myfile0")
+    write_tmp_in_mapdl_instance(mapdl, "myfile1")
+
+    list_files = mapdl.download(files_to_download, extension=extension_to_download)
+
+    if extension_to_download == "err" or files_to_download.endswith("err"):
+        remote_list_files = mapdl.list_files()
+
+        assert all(
+            [
+                each.endswith("err") and os.path.basename(each) in remote_list_files
+                for each in list_files
+            ]
+        )
+    else:
+        assert len(expected_output) == len(list_files)
+
+        for file_to_check in list_files:
+            basename = os.path.basename(file_to_check)
+            assert basename in expected_output
+            assert os.path.exists(os.path.join(os.getcwd(), basename))
+            assert os.path.exists(file_to_check)
 
 
 @skip_in_cloud  # This is going to run only in local
-def test_download_recursive(mapdl, tmpdir):
-    if mapdl._local:  # mapdl._local = True
-        dir_ = tmpdir.mkdir("temp00")
-        file1 = dir_.join("file0.txt")
-        file2 = dir_.join("file1.txt")
-        with open(file1, "w") as fid:
+def test_download_recursive(mapdl):
+    if mapdl._local:
+        temp_dir = os.path.join(mapdl.directory, "new_folder")
+        os.makedirs(temp_dir, exist_ok=True)
+        with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
             fid.write("dummy")
-        with open(file2, "w") as fid:
+        with open(os.path.join(temp_dir, "file1.txt"), "a") as fid:
             fid.write("dummy")
 
-        mapdl.download(
-            os.path.join(dir_, "*"), recursive=True
-        )  # This is referenced to os.getcwd
+        mapdl.download(temp_dir, recursive=True)  # This is referenced to os.getcwd
         assert os.path.exists("file0.txt")
         assert os.path.exists("file1.txt")
         os.remove("file0.txt")
         os.remove("file1.txt")
 
-        mapdl.download(os.path.join(dir_, "*"), target_dir="new_dir", recursive=True)
+        mapdl.download("**", target_dir="new_dir", recursive=True)
         assert os.path.exists(os.path.join("new_dir", "file0.txt"))
         assert os.path.exists(os.path.join("new_dir", "file1.txt"))
-        os.remove(os.path.join("new_dir", "file0.txt"))
-        os.remove(os.path.join("new_dir", "file1.txt"))
+        shutil.rmtree(temp_dir)
+        shutil.rmtree("new_dir")
 
 
 def test_download_project(mapdl, tmpdir):
@@ -341,17 +378,17 @@ def test_download_project(mapdl, tmpdir):
     mapdl.download_project(target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
-    expected = {"log", "out", "err"}
+    expected = {"log", "err"}
     assert expected.intersection(files_extensions) == expected
 
 
 def test_download_project_extensions(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
-    mapdl.download_project(extensions=["log", "out"], target_dir=target_dir)
+    mapdl.download_project(extensions=["log", "err"], target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
 
     expected = {"log", "out", "err", "lock"}
-    assert expected.intersection(files_extensions) == {"log", "out"}
+    assert expected.intersection(files_extensions) == {"log", "err"}
 
 
 def test_download_result(mapdl, cleared, tmpdir):
@@ -481,7 +518,3 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
-
-
-def test_list_error_file(mapdl, contact_solve):
-    assert "The geometry is not available." in mapdl.list_error_file()

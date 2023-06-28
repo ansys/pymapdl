@@ -274,7 +274,7 @@ class Report(base_report_class):
         core = [
             "ansys.mapdl.core",
             "numpy",
-            "appdirs",
+            "platformdirs",
             "scipy",
             "grpc",  # grpcio
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
