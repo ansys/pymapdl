@@ -304,7 +304,7 @@ class MapdlGrpc(_MapdlCore):
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
         channel: Optional[grpc.Channel] = None,
-        remote_instance: Optional[PIM_Instance] = None,
+        remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
@@ -319,7 +319,7 @@ class MapdlGrpc(_MapdlCore):
             remove_temp_files = None
 
         self.__distributed: Optional[bool] = None
-        self._remote_instance: Optional[PIM_Instance] = remote_instance
+        self._remote_instance: Optional["PIM_Instance"] = remote_instance
 
         if channel is not None:
             if ip is not None or port is not None:
