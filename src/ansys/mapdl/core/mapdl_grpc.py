@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import Optional
+from typing import List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -173,6 +173,18 @@ def save_chunks_to_file(
         pbar.close()
 
     return file_size
+
+
+def copy_files_to_the_root(
+    folder: Union[pathlib.Path, str], target_dir: pathlib.Path, recursive: bool
+):
+    if recursive:
+        shutil.copytree(folder, target_dir, dirs_exist_ok=True)
+    else:
+        list_folder = os.listdir(folder)
+        for file in list_folder:
+            if not os.path.isdir(file):
+                shutil.copy(os.path.join(folder, file), target_dir)
 
 
 class RepeatingTimer(threading.Timer):
@@ -1217,7 +1229,7 @@ class MapdlGrpc(_MapdlCore):
                         err.decode(),
                     )
 
-    def list_files(self, refresh_cache=True):
+    def list_files(self, refresh_cache: bool = True) -> List[str]:
         """List the files in the working directory of MAPDL.
 
         Parameters
@@ -1313,7 +1325,12 @@ class MapdlGrpc(_MapdlCore):
         self.slashdelete(tmp_file)
         return obj
 
-    def download_result(self, path=None, progress_bar=False, preference=None):
+    def download_result(
+        self,
+        path: Optional[Union[str, pathlib.Path]] = None,
+        progress_bar: bool = False,
+        preference: Optional[Literal["rst", "rth"]] = None,
+    ) -> str:
         """Download remote result files to a local directory
 
         Parameters
@@ -1341,7 +1358,7 @@ class MapdlGrpc(_MapdlCore):
         if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
 
-        def _download(targets):
+        def _download(targets: List[str]) -> None:
             for target in targets:
                 save_name = os.path.join(path, target)
                 self._download(target, save_name, progress_bar=progress_bar)
@@ -2030,7 +2047,12 @@ class MapdlGrpc(_MapdlCore):
             f"Unsupported type {getresponse.type} response from MAPDL"
         )
 
-    def download_project(self, extensions=None, target_dir=None, progress_bar=False):
+    def download_project(
+        self,
+        extensions: Optional[Union[str, List[str], Tuple[str]]] = None,
+        target_dir: Optional[str] = None,
+        progress_bar: bool = False,
+    ) -> List[str]:
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
@@ -2053,9 +2075,8 @@ class MapdlGrpc(_MapdlCore):
             List of downloaded files.
         """
         if not extensions:
-            files = self.list_files()
             list_of_files = self.download(
-                files, target_dir=target_dir, progress_bar=progress_bar
+                files="*", target_dir=target_dir, progress_bar=progress_bar
             )
 
         else:
@@ -2063,8 +2084,9 @@ class MapdlGrpc(_MapdlCore):
             for each_extension in extensions:
                 list_of_files.extend(
                     self.download(
-                        files=f"*.{each_extension}",
+                        files="*",
                         target_dir=target_dir,
+                        extension=each_extension,
                         progress_bar=progress_bar,
                     )
                 )
@@ -2073,13 +2095,14 @@ class MapdlGrpc(_MapdlCore):
 
     def download(
         self,
-        files,
-        target_dir=None,
-        chunk_size=None,
-        progress_bar=None,
-        recursive=False,
-    ):  # pragma: no cover
-        """Download files from the gRPC instance workind directory
+        files: Union[str, List[str], Tuple[str, ...]],
+        target_dir: Optional[str] = None,
+        extension: Optional[str] = None,
+        chunk_size: Optional[int] = None,
+        progress_bar: Optional[bool] = None,
+        recursive: bool = False,
+    ) -> List[str]:
+        """Download files from the gRPC instance working directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
@@ -2098,6 +2121,9 @@ class MapdlGrpc(_MapdlCore):
         target_dir : str, optional
             Path where the downloaded files will be located. The default is the current
             working directory.
+
+        extension : str, optional
+            Filename with this extension will be considered. The default is None.
 
         chunk_size : int, optional
             Chunk size in bytes.  Must be less than 4MB. The default is 256 kB.
@@ -2149,105 +2175,177 @@ class MapdlGrpc(_MapdlCore):
                 "Please decrease ``chunk_size`` value."
             )
 
-        self_files = self.list_files()  # to avoid calling it too much
+        if target_dir:
+            try:
+                os.mkdir(os.path.abspath(target_dir))
+            except FileExistsError:
+                pass
+        else:
+            target_dir = os.getcwd()
+
+        if self._local:
+            return self._download_on_local(
+                files, target_dir=target_dir, extension=extension, recursive=False
+            )
+
+        else:  # remote session
+            if recursive:
+                warn(
+                    "The 'recursive' parameter is ignored if the session is non-local."
+                )
+            return self._download_from_remote(
+                files,
+                target_dir=target_dir,
+                extension=extension,
+                chunk_size=chunk_size,
+                progress_bar=progress_bar,
+            )
+
+    def _download_on_local(
+        self,
+        files: Union[str, List[str], Tuple[str, ...]],
+        target_dir: str,
+        extension: Optional[str] = None,
+        recursive: bool = False,
+    ) -> List[str]:
+        """Download files when we are on a local session."""
 
         if isinstance(files, str):
-            if self._local:  # pragma: no cover
-                # in local mode
-                if os.path.exists(files):
-                    # file exist
-                    list_files = [files]
-                elif "*" in files:
-                    list_files = glob.glob(files, recursive=recursive)  # using filter
-                    if not list_files:
-                        raise ValueError(
-                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the local client."
-                        )
-                else:
-                    raise ValueError(
-                        f"The files parameter ('{files}') does not match any file or pattern."
-                    )
-
-            else:  # Remote or looking into MAPDL working directory
-                if files in self_files:
-                    list_files = [files]
-                elif "*" in files:
-                    # try filter on the list_files
-                    if recursive:
-                        warn(
-                            "The 'recursive' keyword argument does not work with remote instances. So it is ignored."
-                        )
-                    list_files = fnmatch.filter(self_files, files)
-                    if not list_files:
-                        raise ValueError(
-                            f"The `'files'` parameter ({files}) didn't match any file using glob expressions in the remote server."
-                        )
-                else:
-                    raise ValueError(
-                        f"The `'files'` parameter ('{files}') does not match any file or pattern."
-                    )
+            if not os.path.isdir(os.path.join(self.directory, files)):
+                list_files = self._validate_files(
+                    files, extension=extension, recursive=recursive
+                )
+            else:
+                list_files = [files]
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
                 raise ValueError(
                     "The parameter `'files'` can be a list or tuple, but it should only contain strings."
                 )
-            list_files = files
+            list_files = []
+            for each in files:
+                list_files.extend(
+                    self._validate_files(each, extension=extension, recursive=recursive)
+                )
+
         else:
             raise ValueError(
                 f"The `file` parameter type ({type(files)}) is not supported."
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
-        if target_dir:
-            try:
-                os.mkdir(target_dir)
-            except FileExistsError:
-                pass
+        for file in list_files:
+            # file is a complete path
+            basename = os.path.basename(file)
+            if os.path.isfile(os.path.join(target_dir, basename)):
+                os.remove(os.path.join(target_dir, basename))
+                # the file might have been already downloaded.
+                warn(
+                    f"The file {file} has been updated in the current working directory."
+                )
+
+            if os.path.isdir(os.path.join(self.directory, file)):
+                copy_files_to_the_root(
+                    os.path.join(self.directory, file), target_dir, recursive=recursive
+                )
+
+            else:
+                shutil.copy(
+                    os.path.join(self.directory, file),
+                    os.path.join(target_dir, basename),
+                )
+
+        return list_files
+
+    def _download_from_remote(
+        self,
+        files: Union[str, List[str], Tuple[str, ...]],
+        target_dir: str,
+        extension: Optional[str] = None,
+        chunk_size: Optional[str] = None,
+        progress_bar: Optional[str] = None,
+    ) -> List[str]:
+        """Download files when we are connected to a remote session."""
+
+        if isinstance(files, str):
+            list_files = self._validate_files(files, extension=extension)
+
+        elif isinstance(files, list):
+            if not all([isinstance(each, str) for each in files]):
+                raise ValueError(
+                    "The parameter `'files'` can be a list or tuple, but it should only contain strings."
+                )
+            list_files = []
+            for each in files:
+                list_files.extend(self._validate_files(each, extension=extension))
+
         else:
-            target_dir = os.getcwd()
+            raise ValueError(
+                f"The `file` parameter type ({type(files)}) is not supported."
+                "Only strings, tuple of strings or list of strings are allowed."
+            )
 
         for each_file in list_files:
-            try:
-                file_name = os.path.basename(
-                    each_file
-                )  # Getting only the name of the file.
-                #  We try to avoid that when the full path is supplied, it will crash when trying
-                # to do `os.path.join(target_dir"os.getcwd()", file_name "full filename path"`
-                # This will produce the file structure to flat out, but it is find, because recursive
-                # does not work in remote.
-                self._download(
-                    each_file,
-                    out_file_name=os.path.join(target_dir, file_name),
-                    chunk_size=chunk_size,
-                    progress_bar=progress_bar,
-                )
-            except FileNotFoundError:
-                # So far the grpc interface returns size of the file equal
-                # zero, if the file does not exists or its size is zero,
-                # but they are two different things!
-                # In theory, since we are obtaining the files name from
-                # `mapdl.list_files()` they do exist, so
-                # if there is any error, it means their size is zero.
-                pass  # this is not the best.
+            self._download(
+                each_file,
+                out_file_name=os.path.join(target_dir, each_file),
+                chunk_size=chunk_size,
+                progress_bar=progress_bar,
+            )
+
+        return list_files
+
+    def _validate_files(
+        self, file: str, extension: Optional[str] = None, recursive: bool = True
+    ) -> List[str]:
+        if extension is not None:
+            if not isinstance(extension, str):
+                raise TypeError(f"The extension {extension} must be a string.")
+
+            if not extension.startswith("."):
+                extension = "." + extension
+
+        else:
+            extension = ""
+
+        if self.is_local:
+            # filtering with glob (accepting *)
+            if not os.path.dirname(file):
+                file = os.path.join(self.directory, file)
+            list_files = glob.glob(file + extension, recursive=recursive)
+
+        else:
+            base_name = os.path.basename(file + extension)
+            self_files = self.list_files()
+
+            list_files = fnmatch.filter(self_files, base_name)
+
+        # filtering by extension
+        list_files = [file for file in list_files if file.endswith(extension)]
+
+        if len(list_files) == 0:
+            raise FileNotFoundError(
+                f"No file matching '{file}' in the MAPDL session can be found."
+            )
 
         return list_files
 
     @protect_grpc
     def _download(
         self,
-        target_name,
-        out_file_name=None,
-        chunk_size=DEFAULT_CHUNKSIZE,
-        progress_bar=False,
-    ):
+        target_name: str,
+        out_file_name: Optional[str] = None,
+        chunk_size: int = DEFAULT_CHUNKSIZE,
+        progress_bar: bool = False,
+    ) -> None:
         """Download a file from the gRPC instance.
 
         Parameters
         ----------
         target_name : str
-            Target file on the server.  File must be in the same
-            directory as the mapdl instance.  List current files with
+            Target file on the server. File must be in the same
+            directory as the mapdl instance. List current files with
             ``mapdl.list_files()``
 
         out_file_name : str, optional
@@ -2289,10 +2387,12 @@ class MapdlGrpc(_MapdlCore):
         )
 
         if not file_size:
-            raise FileNotFoundError(f'File "{target_name}" is empty or does not exist.')
+            warn(
+                f'File "{target_name}" is empty or does not exist in {self.list_files()}.'
+            )
 
     @protect_grpc
-    def upload(self, file_name, progress_bar=True):
+    def upload(self, file_name: str, progress_bar: bool = True) -> str:
         """Upload a file to the grpc instance
 
         file_name : str
@@ -2388,7 +2488,7 @@ class MapdlGrpc(_MapdlCore):
         return save_name
 
     @protect_grpc
-    def _download_as_raw(self, target_name):
+    def _download_as_raw(self, target_name: str) -> str:
         """Download a file from the gRPC instance as a binary
         string without saving it to disk.
         """
@@ -2698,7 +2798,7 @@ class MapdlGrpc(_MapdlCore):
         if not error_file:
             return None
 
-        if self.local:
+        if self._local:
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(
