@@ -10,14 +10,10 @@ from ansys.mapdl.reader import examples
 import numpy as np
 import pytest
 import pyvista
-from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
+from conftest import skip_no_xserver
 
 # skip entire module unless --console is enabled
 pytestmark = pytest.mark.console

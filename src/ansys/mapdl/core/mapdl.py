@@ -410,11 +410,11 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_xsel_function(method))
 
     @property
-    def name(self):  # pragma: no cover
+    def name(self):
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, name):  # pragma: no cover
+    def name(self, name):
         raise AttributeError("The name of an instance cannot be changed.")
 
     @property
@@ -851,7 +851,7 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self):  # pragma: no cover
+    def _create_geometry(self):
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
 
@@ -1726,7 +1726,7 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:  # pragma: no cover
+            if color_areas:
                 if isinstance(color_areas, bool):
                     anum = surf["entity_num"]
                     size_ = max(anum) + 1
@@ -2153,7 +2153,7 @@ class _MapdlCore(Commands):
         except Exception:  # pragma: no cover
             ext = "rst"
 
-        if self._local:  # pragma: no cover
+        if self._local:
             if ext == "":
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
@@ -2251,7 +2251,7 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):  # pragma: no cover
+    def _flush_stored(self):
         """Writes stored commands to an input file and runs the input file.
 
         Used with ``non_interactive``.
@@ -2287,7 +2287,7 @@ class _MapdlCore(Commands):
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
 
-        if self._response is None:
+        if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
             self._log.info(self._response)
@@ -3030,7 +3030,7 @@ class _MapdlCore(Commands):
             plot_path = self._get_plot_name(text)
             save_fig = kwargs.get("savefig", False)
             if save_fig:
-                self._download_plot(plot_path, save_fig)
+                return self._download_plot(plot_path, save_fig)
             else:
                 return self._display_plot(plot_path)
 
@@ -3364,7 +3364,7 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
-    def __del__(self):  # pragma: no cover
+    def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
             try:
@@ -3804,7 +3804,7 @@ class _MapdlCore(Commands):
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
 
-    def _get_selected_(self, entity):  # pragma: no cover
+    def _get_selected_(self, entity):
         """Get list of selected entities."""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
         if entity.upper() not in allowed_values:
@@ -4330,7 +4330,7 @@ class _MapdlCore(Commands):
         if not self.is_local:
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
-        else:  # pragma: no cover
+        else:
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
                 sys_output = f.read().strip()

@@ -22,17 +22,6 @@ ANSYS_VALUE_TYPE = {
 }
 
 
-VGET_ENTITY_TYPES: List[str] = [
-    "NODE",
-    "ELEM",
-    "KP",
-    "LINE",
-    "AREA",
-    "VOLU",
-    "CDSY",
-    "RCON",
-    "TLAB",
-]
 VGET_ENTITY_TYPES_TYPING = Literal[
     "NODE",
     "ELEM",

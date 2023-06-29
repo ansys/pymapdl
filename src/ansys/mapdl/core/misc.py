@@ -193,7 +193,7 @@ class Plain_Report:
         mapdl_install = get_available_ansys_installations()
         if not mapdl_install:
             lines.append("Unable to locate any Ansys installations")
-        else:  # pragma: no cover
+        else:
             lines.append("Version   Location")
             lines.append("------------------")
             for key in sorted(mapdl_install.keys()):
@@ -365,7 +365,7 @@ def supress_logging(func):
     return wrapper
 
 
-def run_as_prep7(func):  # Pragma: no cover
+def run_as_prep7(func):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
@@ -553,7 +553,7 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
             f"nor in the MAPDL working directory ('{mapdl.directory}')."
         )
 
-    elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():
         if priority_mapdl_file is None:
             warn(
                 f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}') "
@@ -570,9 +570,7 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
         mapdl._log.debug("File is in the Python working directory, uploading.")
         mapdl.upload(fname)
 
-    elif (
-        not os.path.exists(fname) and base_fname in mapdl.list_files()
-    ):  # pragma: no cover
+    elif not os.path.exists(fname) and base_fname in mapdl.list_files():
         mapdl._log.debug("File is already in the MAPDL working directory")
 
     # Simplifying name for MAPDL reads it.
@@ -723,7 +721,7 @@ class Information:
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self):
-        if not self._stats:  # pragma: no cover
+        if not self._stats:
             self._update()
 
         return "\n".join(
@@ -1067,7 +1065,7 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
-    np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
+    np.savetxt(filename, array, fmt="%20.12f")
 
 
 def requires_package(package_name, softerror=False):

@@ -1,111 +1,82 @@
 from collections import namedtuple
 import os
 from pathlib import Path
-import signal
+from sys import platform
 
+from _pytest.terminal import TerminalReporter  # for terminal customization
+from ansys.tools.path import get_available_ansys_installations
 import pytest
-
-from common import Element, Node, get_details_of_elements, get_details_of_nodes
-
-pytest_plugins = ["pytester"]
-
-from ansys.tools.path import find_ansys, get_available_ansys_installations
 import pyvista
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import (
-    MAPDL_DEFAULT_PORT,
-    get_start_instance,
-    launch_mapdl,
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from common import (
+    Element,
+    Node,
+    get_details_of_elements,
+    get_details_of_nodes,
+    has_dpf,
+    has_grpc,
+    is_on_ci,
+    is_on_local,
+    is_on_ubuntu,
 )
 
+################################################################
+#
+# Setting testing environment
+# ---------------------------
+#
 # Necessary for CI plotting
 pyvista.OFF_SCREEN = True
 
-SpacedPaths = namedtuple(
-    "SpacedPaths",
-    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
-)
+ON_LOCAL = is_on_local()
+ON_CI = is_on_ci()
 
+ON_UBUNTU = is_on_ubuntu()
+ON_WINDOWS = platform == "win32"
+ON_LINUX = platform == "linux" or platform == "linux2"
+ON_MACOS = platform == "darwin"
 
-class Running_test:
-    def __init__(self) -> None:
-        pass
+HAS_GRPC = has_grpc()
+HAS_DPF = has_dpf()
+SUPPORT_PLOTTING = pyvista.system_supports_plotting()
 
-    def __enter__(self):
-        pymapdl.RUNNING_TESTS = True
-
-    def __exit__(self, *args):
-        pymapdl.RUNNING_TESTS = False
-
-
-@pytest.fixture(scope="session")
-def running_test():
-    return Running_test()
-
-
-from _pytest.terminal import TerminalReporter
-
-
-## Changing report line length
-class MyReporter(TerminalReporter):
-    def short_test_summary(self):
-        # your own impl goes here, for example:
-        self.write_sep("=", "PyMAPDL Pytest short summary")
-
-        failed = self.stats.get("failed", [])
-        for rep in failed:
-            # breakpoint()
-            self.write_line(
-                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
-
-        errored = self.stats.get("error", [])
-        for rep in errored:
-            # breakpoint()
-            self.write_line(
-                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
-
-
-@pytest.mark.trylast
-def pytest_configure(config):
-    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
-    my_reporter = MyReporter(config)
-    config.pluginmanager.unregister(vanilla_reporter)
-    config.pluginmanager.register(my_reporter, "terminalreporter")
-
-
-# Cache if gRPC MAPDL is installed.
-#
-# minimum version on linux.  Windows is v202, but using v211 for consistency
-# Override this if running on CI/CD and PYMAPDL_PORT has been specified
-ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-
-# Check if MAPDL is installed
-# NOTE: checks in this order to get the newest installed version
-
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-
-valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
-
-EXEC_FILE, rver = find_ansys()
-if rver:
-    rver = int(rver * 10)
-    HAS_GRPC = int(rver) >= 211 or ON_CI
-else:
-    # assuming remote with gRPC
-    HAS_GRPC = True
-
-# determine if we can launch an instance of MAPDL locally
-# start with ``False`` and always assume the remote case
-LOCAL = [False]
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
 
+## Skip ifs
+skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
+skip_on_linux = pytest.mark.skipif(ON_LINUX, reason="Skip on Linux")
+
+skip_no_xserver = pytest.mark.skipif(
+    not SUPPORT_PLOTTING, reason="Requires active X Server"
+)
+
+skip_if_not_local = pytest.mark.skipif(
+    not ON_LOCAL,
+    reason="Skipping because not on local. ",
+)
+
+skip_if_on_cicd = pytest.mark.skipif(
+    ON_CI,
+    reason="""Skip if on CI/CD.""",
+)
+
+skip_if_no_has_grpc = pytest.mark.skipif(
+    not HAS_GRPC,
+    reason="""Requires gRPC.""",
+)
+
+skip_if_no_has_dpf = pytest.mark.skipif(
+    not HAS_DPF,
+    reason="""Requires DPF.""",
+)
+
+################
 if os.name == "nt":
     os_msg = """SET PYMAPDL_START_INSTANCE=False
 SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -127,61 +98,35 @@ alexander.kaszynski@ansys.com
 
 """
 
-if START_INSTANCE and EXEC_FILE is None:
+if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
 
 
-def is_exited(mapdl):
-    try:
-        _ = mapdl._ctrl("VERSION")
-        return False
-    except MapdlExitedError:
-        return True
+## Changing report line length
+class MyReporter(TerminalReporter):
+    def short_test_summary(self):
+        # your own impl goes here, for example:
+        self.write_sep("=", "PyMAPDL Pytest short summary")
+
+        failed = self.stats.get("failed", [])
+        for rep in failed:
+            self.write_line(
+                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
+
+        errored = self.stats.get("error", [])
+        for rep in errored:
+            self.write_line(
+                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests(request, mapdl):
-    """Fixture to execute asserts before and after a test is run"""
-    # Setup: fill with any logic you want
-    if START_INSTANCE and is_exited(mapdl):
-        # Backing up the current local configuration
-        local_ = mapdl._local
-
-        # Relaunching MAPDL
-        mapdl_ = launch_mapdl(
-            EXEC_FILE,
-            port=mapdl._port,
-            override=True,
-            run_location=mapdl._path,
-            cleanup_on_exit=mapdl._cleanup,
-        )
-
-        # Cloning the new mapdl instance channel into the old one.
-        mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
-
-        # Restoring the local configuration
-        mapdl._local = local_
-
-    yield  # this is where the testing happens
-
-    # Teardown : fill with any logic you want
-    if mapdl._local and mapdl._exited:
-        # The test exited MAPDL, so it is fail.
-        assert False  # this will fail the test
-
-
-def check_pid(pid):
-    """Check For the existence of a pid."""
-    try:
-        # There are two main options:
-        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
-        # - Kill signal (KILLTER). int=9. Hard termination
-        os.kill(pid, signal.SIGTERM)
-    except OSError:
-        return False
-    else:
-        return True
+@pytest.mark.trylast
+def pytest_configure(config):
+    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
+    my_reporter = MyReporter(config)
+    config.pluginmanager.unregister(vanilla_reporter)
+    config.pluginmanager.register(my_reporter, "terminalreporter")
 
 
 def pytest_addoption(parser):
@@ -238,6 +183,68 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "requires_gui" in item.keywords:
                 item.add_marker(skip_gui)
+
+
+################################################################
+#
+# Setting fixtures
+# ---------------------------
+#
+
+
+class Running_test:
+    def __init__(self) -> None:
+        pass
+
+    def __enter__(self):
+        pymapdl.RUNNING_TESTS = True
+
+    def __exit__(self, *args):
+        pymapdl.RUNNING_TESTS = False
+
+
+@pytest.fixture(scope="session")
+def running_test():
+    return Running_test()
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request, mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+
+    # Setup: fill with any logic you want
+    def is_exited(mapdl):
+        try:
+            _ = mapdl._ctrl("VERSION")
+            return False
+        except MapdlExitedError:
+            return True
+
+    if START_INSTANCE and is_exited(mapdl):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+
+        # Relaunching MAPDL
+        mapdl_ = launch_mapdl(
+            port=mapdl._port,
+            override=True,
+            run_location=mapdl._path,
+            cleanup_on_exit=mapdl._cleanup,
+        )
+
+        # Cloning the new mapdl instance channel into the old one.
+        mapdl._channel = mapdl_._channel
+        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+
+        # Restoring the local configuration
+        mapdl._local = local_
+
+    yield  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    if mapdl._local and mapdl._exited:
+        # The test exited MAPDL, so it is fail.
+        assert False  # this will fail the test
 
 
 @pytest.fixture(scope="session")
@@ -314,7 +321,7 @@ def mapdl_corba(request):
         mapdl.prep7()
 
 
-@pytest.fixture(scope="session", params=LOCAL)
+@pytest.fixture(scope="session")
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
@@ -322,14 +329,7 @@ def mapdl(request, tmpdir_factory):
     # don't allow mapdl to exit upon collection unless mapdl is local
     cleanup = START_INSTANCE
 
-    if request.param:
-        # usage of a just closed channel on same port causes connectivity issues
-        port = MAPDL_DEFAULT_PORT + 10
-    else:
-        port = MAPDL_DEFAULT_PORT
-
     mapdl = launch_mapdl(
-        EXEC_FILE,
         override=True,
         run_location=run_path,
         cleanup_on_exit=cleanup,
@@ -339,8 +339,8 @@ def mapdl(request, tmpdir_factory):
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
-    if HAS_GRPC and not os.environ.get("ON_LOCAL", None):
-        mapdl._local = request.param  # CI: override for testing
+    if ON_CI:
+        mapdl._local = ON_LOCAL  # CI: override for testing
 
     if mapdl._local:
         assert Path(mapdl.directory) == Path(run_path)
@@ -367,6 +367,12 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
+
+
+SpacedPaths = namedtuple(
+    "SpacedPaths",
+    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
+)
 
 
 @pytest.fixture

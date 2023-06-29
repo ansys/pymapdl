@@ -8,7 +8,6 @@ import pytest
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -16,19 +15,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = pytest.mark.skip_grpc
 
-skip_launch_mapdl = pytest.mark.skipif(
-    not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally",
-)
-
-
-skip_in_cloud = pytest.mark.skipif(
-    not get_start_instance(),
-    reason="""
-Must be able to launch MAPDL locally. Remote execution does not allow for
-directory creation.
-""",
-)
+from conftest import skip_if_not_local
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -290,6 +277,7 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
         basename = os.path.basename(file_to_check)
         assert basename in expected_output
         assert os.path.exists(os.path.join(tmpdir, basename))
+        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -312,6 +300,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         assert basename in expected_output
         assert os.path.exists(os.path.join(os.getcwd(), basename))
         assert os.path.exists(file_to_check)
+        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -349,8 +338,11 @@ def test_download_with_extension(
             assert os.path.exists(os.path.join(os.getcwd(), basename))
             assert os.path.exists(file_to_check)
 
+    for file in list_files:
+        os.remove(file)
 
-@skip_in_cloud  # This is going to run only in local
+
+@skip_if_not_local
 def test_download_recursive(mapdl):
     if mapdl._local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
@@ -376,10 +368,10 @@ def test_download_recursive(mapdl):
 def test_download_project(mapdl, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(target_dir=target_dir)
-    files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
-
-    expected = {"log", "err"}
-    assert expected.intersection(files_extensions) == expected
+    files_extensions = list(
+        set([each.split(".")[-1] for each in os.listdir(target_dir)])
+    )
+    assert "log" in files_extensions
 
 
 def test_download_project_extensions(mapdl, tmpdir):

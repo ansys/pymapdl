@@ -17,7 +17,7 @@ def check_directory_exist(directory):
         @wraps(func)
         def inner_wrapper(*args, **kwargs):
             # Check if folder exists
-            if not os.path.exists(directory):  # pragma: no cover
+            if not os.path.exists(directory):
                 os.makedirs(directory)
 
             return func(*args, **kwargs)
