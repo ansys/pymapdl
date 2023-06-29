@@ -183,18 +183,6 @@ def save_chunks_to_file(
     return file_size
 
 
-def copy_files_to_the_root(
-    folder: Union[pathlib.Path, str], target_dir: pathlib.Path, recursive: bool
-):
-    if recursive:
-        shutil.copytree(folder, target_dir, dirs_exist_ok=True)
-    else:
-        list_folder = os.listdir(folder)
-        for file in list_folder:
-            if not os.path.isdir(file):
-                shutil.copy(os.path.join(folder, file), target_dir)
-
-
 class RepeatingTimer(threading.Timer):
     """Run a function repeately"""
 
@@ -2227,10 +2215,10 @@ class MapdlGrpc(_MapdlCore):
 
             if os.path.isdir(os.path.join(self.directory, file)):
                 if recursive:  # only copy the directory if recursive is true.
-                    copy_files_to_the_root(
+                    shutil.copytree(
                         os.path.join(self.directory, file),
                         target_dir,
-                        recursive=recursive,
+                        dirs_exist_ok=True,
                     )
                     return_list_files.extend(
                         glob.iglob(target_dir + "/**/*", recursive=recursive)
