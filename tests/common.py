@@ -66,10 +66,7 @@ def has_grpc():
 
 
 def has_dpf():
-    if os.environ.get("DPF_PORT", ""):
-        return True
-    else:
-        return False
+    return os.environ.get("DPF_PORT", "")
 
 
 def is_float(s: str) -> bool:

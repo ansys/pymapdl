@@ -338,7 +338,7 @@ class MapdlGrpc(_MapdlCore):
 
             port = MAPDL_DEFAULT_PORT
 
-        self._port: int = port
+        self._port: int = int(port)
 
         check_valid_ip(ip)
         self._ip: str = ip
@@ -414,7 +414,7 @@ class MapdlGrpc(_MapdlCore):
         self._run("/gopr")
 
         # initialize mesh, post processing, and file explorer interfaces
-        self._mesh_rep: Optional[MeshGrpc] = None
+        self._mesh_rep: Optional["MeshGrpc"] = None
 
         try:
             from ansys.mapdl.core.mesh_grpc import MeshGrpc
