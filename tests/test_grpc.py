@@ -337,7 +337,10 @@ def test_download_with_extension(
             assert os.path.exists(file_to_check)
 
     for each in list_files:
-        os.remove(each)
+        try:
+            os.remove(each)
+        except PermissionError:
+            pass
 
 
 @skip_if_not_local
