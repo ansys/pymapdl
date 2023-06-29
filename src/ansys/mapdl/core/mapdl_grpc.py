@@ -176,19 +176,15 @@ def save_chunks_to_file(
 
 
 def copy_files_to_the_root(
-    folder: pathlib.Path, target_dir: pathlib.Path, recursive: bool
+    folder: Union[pathlib.Path, str], target_dir: pathlib.Path, recursive: bool
 ):
-    list_folder = os.listdir(folder)
-    for file in list_folder:
-        if os.path.isdir(file):
-            if recursive is True:
-                copy_files_to_the_root(file, target_dir, recursive)
-            else:
-                warn(
-                    f"The copy of the folder {file} is ignored. Recursive needs to be set to True."
-                )
-        else:
-            shutil.copy(os.path.join(folder, file), target_dir)
+    if recursive:
+        shutil.copytree(folder, target_dir, dirs_exist_ok=True)
+    else:
+        list_folder = os.listdir(folder)
+        for file in list_folder:
+            if not os.path.isdir(file):
+                shutil.copy(os.path.join(folder, file), target_dir)
 
 
 class RepeatingTimer(threading.Timer):
@@ -2079,7 +2075,6 @@ class MapdlGrpc(_MapdlCore):
             List of downloaded files.
         """
         if not extensions:
-            # files = self.list_files()
             list_of_files = self.download(
                 files="*", target_dir=target_dir, progress_bar=progress_bar
             )
@@ -2100,7 +2095,7 @@ class MapdlGrpc(_MapdlCore):
 
     def download(
         self,
-        files: Union[str, List[str], Tuple[str]],
+        files: Union[str, List[str], Tuple[str, ...]],
         target_dir: Optional[str] = None,
         extension: Optional[str] = None,
         chunk_size: Optional[int] = None,
@@ -2208,8 +2203,8 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_on_local(
         self,
-        files: Union[str, List[str]],
-        target_dir: Optional[str] = None,
+        files: Union[str, List[str], Tuple[str, ...]],
+        target_dir: str,
         extension: Optional[str] = None,
         recursive: bool = False,
     ) -> List[str]:
@@ -2265,8 +2260,8 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_from_remote(
         self,
-        files: Union[str, List[str]],
-        target_dir: Optional[str] = None,
+        files: Union[str, List[str], Tuple[str, ...],
+        target_dir: str,
         extension: Optional[str] = None,
         chunk_size: Optional[str] = None,
         progress_bar: Optional[str] = None,
@@ -2308,7 +2303,7 @@ class MapdlGrpc(_MapdlCore):
             if not isinstance(extension, str):
                 raise TypeError(f"The extension {extension} must be a string.")
 
-            if extension[0] != ".":
+            if not extension.startswith("."):
                 extension = "." + extension
 
         else:
@@ -2327,7 +2322,7 @@ class MapdlGrpc(_MapdlCore):
             list_files = fnmatch.filter(self_files, base_name)
 
         # filtering by extension
-        list_files = [each for each in list_files if each.endswith(extension)]
+        list_files = [file for file in list_files if file.endswith(extension)]
 
         if len(list_files) == 0:
             raise FileNotFoundError(

@@ -33,7 +33,19 @@ VGET_ENTITY_TYPES: List[str] = [
     "RCON",
     "TLAB",
 ]
-VGET_ENTITY_TYPES_TYPING = Literal[tuple(VGET_ENTITY_TYPES)]
+VGET_ENTITY_TYPES_TYPING = Literal[
+    "NODE",
+    "ELEM",
+    "KP",
+    "LINE",
+    "AREA",
+    "VOLU",
+    "CDSY",
+    "RCON",
+    "TLAB",
+]
+
+VGET_ENTITY_TYPES: List[str] = list(typing.get_args(VGET_ENTITY_TYPES_TYPING))
 
 STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
 COMP_TYPE = ["X", "Y", "Z", "SUM"]
