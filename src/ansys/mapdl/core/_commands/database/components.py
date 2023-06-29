@@ -74,7 +74,7 @@ class Components:
         >>> mapdl.asel('S', 'LOC', 'Y', loc)
         >>> mapdl.cm('PRES_A', 'AREA')
         """
-        command = f"CM,{str(cname)}, {str(entity)}"
+        command = f"CM,{cname}, {entity}"
         return self.run(command, **kwargs)
 
     def cmdele(self, name="", **kwargs):
@@ -98,7 +98,7 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = f"CMDELE, {str(name)}"
+        command = f"CMDELE, {name}"
         return self.run(command, **kwargs)
 
     def cmedit(
@@ -139,7 +139,7 @@ class Components:
         -----
         This command is valid in any processor.
         """
-        command = f"CMEDIT,{str(aname)},{str(oper)},{str(cnam1)},{str(cnam2)},{str(cnam3)},{str(cnam4)},{str(cnam5)},{str(cnam6)},{str(cnam7)}"  # noqa : E501
+        command = f"CMEDIT,{aname},{oper},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7}"  # noqa : E501
         return self.run(command, **kwargs)
 
     def cmgrp(
@@ -192,7 +192,7 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = f"CMEDIT,{str(aname)},{str(oper)},{str(cnam1)},{str(cnam2)},{str(cnam3)},{str(cnam4)},{str(cnam5)},{str(cnam6)},{str(cnam7)},{str(cnam8)}"  # noqa : E501
+        command = f"CMGRP,{aname},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7},{cnam8}"  # noqa : E501
         return self.run(command, **kwargs)
 
     def cmlist(self, name="", key="", entity="", **kwargs):
@@ -237,7 +237,7 @@ class Components:
 
         Examples of possible usage:
         """
-        command = f"CMLIST,{str(name)},{str(key)},{str(entity)}"
+        command = f"CMLIST,{name},{key},{entity}"
         return self.run(command, **kwargs)
 
     def cmmod(self, cname="", keyword="", value="", **kwargs):
@@ -269,7 +269,7 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = f"CMMOD,{str(cname)},{str(keyword)},{str(value)}"
+        command = f"CMMOD,{cname},{keyword},{value}"
         return self.run(command, **kwargs)
 
     def cmplot(self, label="", entity="", keyword="", **kwargs):
@@ -332,7 +332,7 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = f"CMPLOT,{str(label)},{str(entity)},{str(keyword)}"
+        command = f"CMPLOT,{label},{entity},{keyword}"
         return self.run(command, **kwargs)
 
     def cmsel(self, type_="", name="", entity="", **kwargs):
@@ -397,7 +397,7 @@ class Components:
 
         This command is valid in any processor.
         """
-        command = f"CMSEL,{str(type_)},{str(name)},{str(entity)}"
+        command = f"CMSEL,{type_},{name},{entity}"
         return self.run(command, **kwargs)
 
     def cmwrite(
