@@ -2163,7 +2163,7 @@ class MapdlGrpc(_MapdlCore):
 
         if self._local:
             return self._download_on_local(
-                files, target_dir=target_dir, extension=extension, recursive=False
+                files, target_dir=target_dir, extension=extension, recursive=recursive
             )
 
         else:  # remote session
@@ -2213,28 +2213,37 @@ class MapdlGrpc(_MapdlCore):
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
+        return_list_files = []
         for file in list_files:
             # file is a complete path
             basename = os.path.basename(file)
-            if os.path.isfile(os.path.join(target_dir, basename)):
-                os.remove(os.path.join(target_dir, basename))
+            destination = os.path.join(target_dir, basename)
+            if os.path.isfile(destination):
+                os.remove(destination)
                 # the file might have been already downloaded.
                 warn(
                     f"The file {file} has been updated in the current working directory."
                 )
 
             if os.path.isdir(os.path.join(self.directory, file)):
-                copy_files_to_the_root(
-                    os.path.join(self.directory, file), target_dir, recursive=recursive
-                )
+                if recursive:  # only copy the directory if recursive is true.
+                    copy_files_to_the_root(
+                        os.path.join(self.directory, file),
+                        target_dir,
+                        recursive=recursive,
+                    )
+                    return_list_files.extend(
+                        glob.iglob(target_dir + "/**/*", recursive=recursive)
+                    )
 
             else:
+                return_list_files.append(destination)
                 shutil.copy(
                     os.path.join(self.directory, file),
-                    os.path.join(target_dir, basename),
+                    destination,
                 )
 
-        return list_files
+        return return_list_files
 
     def _download_from_remote(
         self,

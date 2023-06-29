@@ -277,6 +277,7 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
         basename = os.path.basename(file_to_check)
         assert basename in expected_output
         assert os.path.exists(os.path.join(tmpdir, basename))
+        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -299,6 +300,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         assert basename in expected_output
         assert os.path.exists(os.path.join(os.getcwd(), basename))
         assert os.path.exists(file_to_check)
+        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -336,11 +338,8 @@ def test_download_with_extension(
             assert os.path.exists(os.path.join(os.getcwd(), basename))
             assert os.path.exists(file_to_check)
 
-    for each in list_files:
-        try:
-            os.remove(each)
-        except PermissionError:
-            pass
+    for file in list_files:
+        os.remove(file)
 
 
 @skip_if_not_local
