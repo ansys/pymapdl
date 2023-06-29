@@ -2260,7 +2260,7 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_from_remote(
         self,
-        files: Union[str, List[str], Tuple[str, ...],
+        files: Union[str, List[str], Tuple[str, ...]],
         target_dir: str,
         extension: Optional[str] = None,
         chunk_size: Optional[str] = None,
