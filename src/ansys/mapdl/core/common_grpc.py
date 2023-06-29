@@ -1,5 +1,5 @@
 """Common gRPC functions"""
-from typing import List, Literal
+from typing import List, Literal, get_args
 
 import numpy as np
 
@@ -45,7 +45,7 @@ VGET_ENTITY_TYPES_TYPING = Literal[
     "TLAB",
 ]
 
-VGET_ENTITY_TYPES: List[str] = list(typing.get_args(VGET_ENTITY_TYPES_TYPING))
+VGET_ENTITY_TYPES: List[str] = list(get_args(VGET_ENTITY_TYPES_TYPING))
 
 STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
 COMP_TYPE = ["X", "Y", "Z", "SUM"]
