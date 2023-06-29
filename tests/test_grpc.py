@@ -299,7 +299,6 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         assert basename in expected_output
         assert os.path.exists(os.path.join(os.getcwd(), basename))
         assert os.path.exists(file_to_check)
-        os.remove(file_to_check)
 
 
 @pytest.mark.parametrize(
@@ -308,7 +307,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
         ["txt", "myfile*", ["myfile0.txt", "myfile1.txt"]],
         ["txt", "myfile0", ["myfile0.txt"]],
         [None, "file*.err", None],
-        ["err", "**", None],
+        ["err", "*", None],
     ],
 )
 def test_download_with_extension(
@@ -341,7 +340,7 @@ def test_download_with_extension(
         os.remove(each)
 
 
-@skip_if_not_local  # This is going to run only in local
+@skip_if_not_local
 def test_download_recursive(mapdl):
     if mapdl._local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
