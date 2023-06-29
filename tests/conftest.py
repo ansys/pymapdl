@@ -49,7 +49,8 @@ SUPPORT_PLOTTING = pyvista.system_supports_plotting()
 START_INSTANCE = get_start_instance()
 
 ## Skip ifs
-skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on windows")
+skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
+skip_on_linux = pytest.mark.skipif(ON_LINUX, reason="Skip on Linux")
 
 skip_no_xserver = pytest.mark.skipif(
     not SUPPORT_PLOTTING, reason="Requires active X Server"
@@ -338,8 +339,8 @@ def mapdl(request, tmpdir_factory):
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
-    if HAS_GRPC and not os.environ.get("ON_LOCAL", None):
-        mapdl._local = False  # CI: override for testing
+    if ON_CI:
+        mapdl._local = ON_LOCAL  # CI: override for testing
 
     if mapdl._local:
         assert Path(mapdl.directory) == Path(run_path)

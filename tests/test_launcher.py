@@ -21,7 +21,7 @@ from ansys.mapdl.core.launcher import (
     version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import skip_if_not_local, skip_on_windows
+from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
 
 try:
     import ansys_corba  # noqa: F401
@@ -64,7 +64,7 @@ def fake_local_mapdl(mapdl):
 
 
 @skip_if_not_local
-@skip_on_windows
+@skip_on_linux
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
