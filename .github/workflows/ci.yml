@@ -270,7 +270,7 @@ jobs:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
-      ON_REMOTE: TRUE
+      ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
 
     steps:

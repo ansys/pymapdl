@@ -27,6 +27,9 @@ def is_on_local():
     if os.environ.get("ON_LOCAL", "").lower() == "true":
         return True
 
+    if os.environ.get("ON_REMOTE", "").lower() == "true":
+        return False
+
     if os.environ.get("PYMAPDL_START_INSTANCE", None):
         return True
 
