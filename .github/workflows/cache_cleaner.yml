@@ -1,4 +1,4 @@
-name: cleanup caches by a branch
+name: cleanup caches
 on:
   workflow_dispatch:
   pull_request:
@@ -40,6 +40,7 @@ jobs:
             gh extension install actions/gh-actions-cache
             
             REPO=${{ github.repository }}
+            echo $REPO
 
             echo "Fetching list of cache key"
             cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
@@ -49,7 +50,7 @@ jobs:
             echo "Deleting caches..."
             for cacheKey in $cacheKeysForPR
             do
-                gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm && echo "Deleting cache with key: $cacheKey"
+                gh actions-cache delete $cacheKey -R $REPO --confirm && echo "Deleting cache with key: $cacheKey"
             done
             echo "Done"
         env:

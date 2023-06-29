@@ -32,10 +32,7 @@ def merge_polydata(items):
     """Merge list of polydata or unstructured grids"""
 
     # lazy import here for faster module loading
-    try:
-        from pyvista._vtk import vtkAppendPolyData
-    except:
-        from vtk import vtkAppendPolyData
+    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
     afilter = vtkAppendPolyData()
     for item in items:

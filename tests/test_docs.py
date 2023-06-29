@@ -1,13 +1,6 @@
-import os
-
 import pytest
 
 from ansys.mapdl.core.docs import linkcode_resolve
-
-skip_if_not_on_ci = pytest.mark.skipif(
-    not (os.environ.get("ON_CI", "").upper() == "TRUE"),
-    reason="Skipping if not in CI",
-)
 
 
 @pytest.mark.parametrize("edit", [True, False])

@@ -1,5 +1,5 @@
 PyMAPDL
-=======
+========
 |pyansys| |pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black| |pre-commit|
 
 .. |pyansys| image:: https://img.shields.io/badge/Py-Ansys-ffc107.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAABDklEQVQ4jWNgoDfg5mD8vE7q/3bpVyskbW0sMRUwofHD7Dh5OBkZGBgW7/3W2tZpa2tLQEOyOzeEsfumlK2tbVpaGj4N6jIs1lpsDAwMJ278sveMY2BgCA0NFRISwqkhyQ1q/Nyd3zg4OBgYGNjZ2ePi4rB5loGBhZnhxTLJ/9ulv26Q4uVk1NXV/f///////69du4Zdg78lx//t0v+3S88rFISInD59GqIH2esIJ8G9O2/XVwhjzpw5EAam1xkkBJn/bJX+v1365hxxuCAfH9+3b9/+////48cPuNehNsS7cDEzMTAwMMzb+Q2u4dOnT2vWrMHu9ZtzxP9vl/69RVpCkBlZ3N7enoDXBwEAAA+YYitOilMVAAAAAElFTkSuQmCC
@@ -57,7 +57,7 @@ or in batch mode on Windows, Linux, and even Mac OS.
 Documentation and issues
 ------------------------
 For more information, see the `Documentation <https://mapdl.docs.pyansys.com>`_ page.
-For some examples, see the `Examples gallery <https://mapdl.docs.pyansys.com/examples/index.html>`_.
+For some examples, see the `Examples gallery <https://mapdl.docs.pyansys.com/version/stable/examples/index.html>`_.
 
 Feel free to post issues and other questions at `PyMAPDL Issues
 <https://github.com/pyansys/pymapdl/issues>`_.  This is the best place
@@ -128,14 +128,15 @@ Each wheelhouse archive contains all the python wheels necessary to install
 PyMAPDL from scratch on Windows and Linux for Python 3.8 and 3.11. You can install
 this on an isolated system with a fresh python or on a virtual environment.
 
-For example, on Linux with Python 3.8, unzip it and install it with the following:
+For example, on Linux Ubuntu with Python 3.10, unzip it and install it with the following:
 
 .. code:: console
 
-   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.8.zip wheelhouse
+   unzip ansys-mapdl-core-v0.65.0-wheelhouse-ubuntu-latest-3.10.zip
+ wheelhouse
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
-If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
+If you're on Windows with Python 3.10, unzip manually to a ``wheelhouse`` directory and
 install using the same command as above.
 
 Consider installing using a `virtual environment

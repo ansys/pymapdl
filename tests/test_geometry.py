@@ -3,6 +3,8 @@ import math
 
 import numpy as np
 
+from ansys.mapdl.core.mapdl_geometry import Geometry
+
 
 def test_keypoint_selection(mapdl, cleared):
     def generate_random_kp():
@@ -493,3 +495,7 @@ def test_empty_model(mapdl):
     assert mapdl.geometry.lnum.size == 0
     assert mapdl.geometry.anum.size == 0
     assert mapdl.geometry.vnum.size == 0
+
+
+def test_create_geometry(mapdl):
+    assert isinstance(mapdl._create_geometry(), Geometry)
