@@ -73,6 +73,8 @@ except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
 
 if TYPE_CHECKING:
+    from queue import Queue
+
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
@@ -365,7 +367,7 @@ class MapdlGrpc(_MapdlCore):
         self._local: bool = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
             self._local: bool = start_parm["local"]
-        self._health_response_queue: Optional[Queue] = None
+        self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
         self._mute: bool = False
