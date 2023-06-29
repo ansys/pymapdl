@@ -24,14 +24,16 @@ Element = namedtuple(
 
 # Set if on local
 def is_on_local():
-    if os.environ.get("ON_LOCAL", "").lower() == "true":
-        return True
+    if "ON_LOCAL" in os.environ:
+        return os.environ.get("ON_LOCAL", "").lower() == "true"
 
-    if os.environ.get("ON_REMOTE", "").lower() == "true":
-        return False
+    if "ON_REMOTE" in os.environ:
+        return os.environ.get("ON_REMOTE", "").lower() == "true"
 
     if os.environ.get("PYMAPDL_START_INSTANCE", None):
-        return True
+        return (
+            os.environ.get("PYMAPDL_START_INSTANCE", "").lower() != "false"
+        )  # default is false
 
     _, rver = find_mapdl()
 
