@@ -865,7 +865,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         return self._mesh_rep
 
-    def _run(self, cmd, verbose=False, mute=None) -> str:
+    def _run(self, cmd: str, verbose: bool = False, mute: Optional[bool] = None) -> str:
         """Sens a command and return the response as a string.
 
         Parameters
@@ -2833,7 +2833,7 @@ class MapdlGrpc(_MapdlCore):
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Instance unique identifier."""
         if not self._name:
             if self._ip or self._port:

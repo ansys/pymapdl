@@ -11,6 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 import warnings
 from warnings import warn
 import weakref
@@ -56,6 +57,12 @@ if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting import general_plotter
 
 from ansys.mapdl.core.post import PostProcessing
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl import _MapdlCore
+
+    DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -178,12 +185,12 @@ class _MapdlCore(Commands):
 
     def __init__(
         self,
-        loglevel="DEBUG",
-        use_vtk=None,
-        log_apdl=None,
-        log_file=False,
-        local=True,
-        print_com=False,
+        loglevel: DEBUG_LEVELS = "DEBUG",
+        use_vtk: Optional[bool] = None,
+        log_apdl: Optional[str] = None,
+        log_file: Union[bool, str] = False,
+        local: bool = True,
+        print_com: bool = False,
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -229,13 +236,13 @@ class _MapdlCore(Commands):
         self._platform = None
 
         _sanitize_start_parm(start_parm)
-        self._start_parm = start_parm
-        self._jobname = start_parm.get("jobname", "file")
-        self._path = start_parm.get("run_location", None)
+        self._start_parm: Dict[str, Any] = start_parm
+        self._jobname: str = start_parm.get("jobname", "file")
+        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
         self._print_com = print_com  # print the command /COM input.
 
         # Setting up loggers
-        self._log = logger.add_instance_logger(
+        self._log: logging.Logger = logger.add_instance_logger(
             self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
@@ -415,12 +422,16 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_xsel_function(method))
 
     @property
-    def name(self):
+    def name(self) -> str:
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, name):
+    def name(self, name) -> None:
         raise AttributeError("The name of an instance cannot be changed.")
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self._log
 
     @property
     def queries(self):
@@ -1025,7 +1036,9 @@ class _MapdlCore(Commands):
         )
         self._ignore_errors = bool(value)
 
-    def open_apdl_log(self, filename, mode="w"):
+    def open_apdl_log(
+        self, filename: Union[str, pathlib.Path], mode: Literal["w", "a", "x"] = "w"
+    ) -> None:
         """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
@@ -1865,7 +1878,7 @@ class _MapdlCore(Commands):
         """Returns True when MAPDL is set to write plots as png to file."""
         return "PNG" in self.show(mute=False)
 
-    def set_log_level(self, loglevel):
+    def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
 
         Parameters
@@ -4409,8 +4422,8 @@ class _MapdlCore(Commands):
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
 
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
+        def __init__(self, parent: "_MapdlCore"):
+            self._parent: "_MapdlCore" = weakref.ref(parent)
 
         def __enter__(self):
             self._parent()._log.debug("Entering force-output mode")
@@ -4429,7 +4442,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self):
+    def _parse_rlist(self) -> Dict[int, Union[float, ...]]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
@@ -4463,7 +4476,7 @@ class _MapdlCore(Commands):
 
         return const_
 
-    def _parse_cmlist(self, cmlist=None):
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
         if not cmlist:
             cmlist = self.cmlist()
 
@@ -4484,7 +4497,9 @@ class _MapdlCore(Commands):
             if each_line
         }
 
-    def _parse_cmlist_indiv(self, cmname, cmtype, cmlist=None):
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
         if not cmlist:
             cmlist = self.cmlist(cmname, 1)
         # Capturing blocks

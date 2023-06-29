@@ -1,10 +1,14 @@
-from typing import Any
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 import warnings
 import weakref
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl.core.mapdl import _MapdlCore
+
+if TYPE_CHECKING:
+    import logging
 
 ENTITIES_MAPPING = {
     "NODE": "NSEL",
@@ -20,8 +24,10 @@ ENTITIES_MAPPING = {
 
 VALID_ENTITIES = list(ENTITIES_MAPPING.keys())
 
+UNDERLYING_DICT = Dict[str, Union[str, int, List[int], NDArray[Any]]]
 
-def _check_valid_pyobj_to_entities(items):
+
+def _check_valid_pyobj_to_entities(items: Union[List[int], NDArray[Any]]):
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.
     """
@@ -47,11 +53,10 @@ class Component(dict):
         return super().__setitem__(key, value)
 
     @property
-    def type(self):
+    def type(self) -> str:
         return super().__getitem__("type")
 
-    @property
-    def items(self):
+    def items(self) -> Any:
         return super().__getitem__("items")
 
 
@@ -60,24 +65,24 @@ class ComponentManager(dict):
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
 
-        self._mapdl_weakref = weakref.ref(mapdl)
-        self.__comp = None
-        self._update_always = True
+        self._mapdl_weakref: weakref.ReferenceType[_MapdlCore] = weakref.ref(mapdl)
+        self.__comp: UNDERLYING_DICT = {}
+        self._update_always: bool = True
 
     @property
     def _mapdl(self) -> _MapdlCore:
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
-    def _set_log_level(self, level):
-        self._mapdl.set_log_level(level)
+    def _log(self) -> logging.Logger:
+        return self._mapdl.logger
 
     @property
-    def _log(self):
-        return self._mapdl._log
+    def logger(self) -> logging.Logger:
+        return self._log()
 
     @property
-    def _comp(self):
+    def _comp(self) -> UNDERLYING_DICT:
         if self.__comp is None or self._update_always:
             self.__comp = self._mapdl._parse_cmlist()
         return self.__comp
@@ -168,7 +173,7 @@ class ComponentManager(dict):
 
         return "\n".join(lines)
 
-    def __contains__(self, key) -> bool:
+    def __contains__(self, key: str) -> bool:
         """
         Check if a given key is present in the dictionary.
 
