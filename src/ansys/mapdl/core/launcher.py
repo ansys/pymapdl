@@ -42,7 +42,7 @@ from ansys.mapdl.core.misc import (
     threaded,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
 # settings directory

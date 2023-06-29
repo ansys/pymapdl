@@ -72,7 +72,7 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_TQDM = False
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from queue import Queue
 
     from ansys.platform.instancemanagement import Instance as PIM_Instance
