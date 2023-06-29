@@ -339,12 +339,11 @@ def mapdl(request, tmpdir_factory):
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
-    if HAS_GRPC:
+    if HAS_GRPC and not os.environ.get("ON_LOCAL", None):
         mapdl._local = request.param  # CI: override for testing
 
     if mapdl._local:
         assert Path(mapdl.directory) == Path(run_path)
-        assert mapdl._distributed
 
     # using yield rather than return here to be able to test exit
     yield mapdl

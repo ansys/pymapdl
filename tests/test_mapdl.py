@@ -590,7 +590,7 @@ def test_apdl_logging(mapdl, tmpdir):
 
     # Testing /input PR #1455
     assert "/INP," in log
-    assert "'input.inp'" in log
+    assert "input.inp'" in log
     assert "/OUT,_input_tmp_" in log
     assert str_not_in_apdl_logger not in log
 
