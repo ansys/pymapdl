@@ -236,3 +236,17 @@ class ComponentNoData(MapdlException):
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)
+
+
+class ComponentIsNotSelected(MapdlException):
+    """Raised when the component is not selected"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
+
+
+class ComponentDoesNotExits(MapdlException):
+    """Raised when the component does not exist"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
