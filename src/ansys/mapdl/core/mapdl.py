@@ -4452,7 +4452,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self) -> dict[int, Union[float, ...]]:
+    def _parse_rlist(self) -> dict[int, float]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
