@@ -133,8 +133,6 @@ class ComponentManager:
     :attr:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>` before
     being listed in :attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>`
 
-    See :ref:`ref_components` for additional notes.
-
     Examples
     --------
     Simply list all the *selected* components:

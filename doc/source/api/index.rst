@@ -19,6 +19,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    :hidden:
 
    commands
+   components
    database
    geometry
    helper
