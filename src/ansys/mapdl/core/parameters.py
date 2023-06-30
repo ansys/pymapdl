@@ -56,6 +56,8 @@ class Parameters:
     Simply list all parameters except for MAPDL MATH parameters.
 
     >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
     ARR                              : ARRAY DIM (3, 1, 1)
     PARM_FLOAT                       : 20.0
     PARM_INT                         : 10.0

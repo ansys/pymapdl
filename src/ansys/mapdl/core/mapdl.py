@@ -11,12 +11,14 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Union
 import warnings
 from warnings import warn
 import weakref
 
 import numpy as np
+from numpy._typing import DTypeLike
+from numpy.typing import NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
@@ -53,6 +55,15 @@ from ansys.mapdl.core.misc import (
     wrap_point_SEL,
 )
 
+if TYPE_CHECKING:
+    from ansys.mapdl.reader import Archive
+
+    from ansys.mapdl.core.component import ComponentManager
+    from ansys.mapdl.core.mapdl_geometry import Geometry
+    from ansys.mapdl.core.parameters import Parameters
+    from ansys.mapdl.core.solution import Solution
+    from ansys.mapdl.core.xpl import ansXpl
+
 if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting import general_plotter
 
@@ -61,7 +72,7 @@ from ansys.mapdl.core.post import PostProcessing
 if TYPE_CHECKING:
     from ansys.mapdl.core.mapdl import _MapdlCore
 
-    DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 
 _PERMITTED_ERRORS = [
@@ -236,10 +247,10 @@ class _MapdlCore(Commands):
         self._platform = None
 
         _sanitize_start_parm(start_parm)
-        self._start_parm: Dict[str, Any] = start_parm
+        self._start_parm: dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._print_com = print_com  # print the command /COM input.
+        self._print_com: bool = print_com  # print the command /COM input.
 
         # Setting up loggers
         self._log: logging.Logger = logger.add_instance_logger(
@@ -253,21 +264,20 @@ class _MapdlCore(Commands):
 
         self._log.debug("Logging set to %s", loglevel)
 
+        # Modules
         from ansys.mapdl.core.parameters import Parameters
 
-        self._parameters = Parameters(self)
+        self._parameters: Parameters = Parameters(self)
 
         from ansys.mapdl.core.solution import Solution
 
-        self._solution = Solution(self)
+        self._solution: Solution = Solution(self)
 
-        from ansys.mapdl.core.xpl import ansXpl
-
-        self._xpl = ansXpl(self)
+        self._xpl: Optional[ansXpl] = None  # Initialized in mapdl_grpc
 
         from ansys.mapdl.core.component import ComponentManager
 
-        self._componentmanager = ComponentManager(self)
+        self._componentmanager: ComponentManager = ComponentManager(self)
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -552,7 +562,7 @@ class _MapdlCore(Commands):
         return self._force_output(self)
 
     @property
-    def solution(self):
+    def solution(self) -> "Solution":
         """Solution parameters of MAPDL.
 
         Returns
@@ -570,7 +580,7 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
-    def components(self):
+    def components(self) -> "ComponentManager":
         """MAPDL Component manager.
 
         Returns
@@ -593,7 +603,7 @@ class _MapdlCore(Commands):
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
-    def post_processing(self):
+    def post_processing(self) -> "PostProcessing":
         """Post-process an active MAPDL session.
 
         Examples
@@ -672,7 +682,7 @@ class _MapdlCore(Commands):
         self._response = "\n".join(responses)
 
     @property
-    def parameters(self):
+    def parameters(self) -> "Parameters":
         """Collection of MAPDL parameters.
 
         Notes
@@ -842,7 +852,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("pyvista", softerror=True)
-    def geometry(self):
+    def geometry(self) -> "Geometry":
         """Geometry information.
 
         See :class:`ansys.mapdl.core.mapdl_geometry.Geometry`
@@ -885,7 +895,7 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self):
+    def _create_geometry(self) -> "Geometry":
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
 
@@ -941,7 +951,7 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
-    def _mesh(self):
+    def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
         # lazy import here to avoid loading pyvista and vtk
@@ -1290,7 +1300,7 @@ class _MapdlCore(Commands):
             Shows the boundary conditions label per node.
             Defaults to ``False``.
 
-        bc_labels : List[str], Tuple(str), optional
+        bc_labels : list[str], Tuple(str), optional
             List or tuple of strings with the boundary conditions
             to plot, i.e. ``["UX", "UZ"]``.
             You can obtain the allowed boundary conditions by
@@ -1314,7 +1324,7 @@ class _MapdlCore(Commands):
             in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
             and :func:`ansys.mapdl.core.Mapdl.flist()`.
 
-        bc_target : List[str], Tuple(str), optional
+        bc_target : list[str], Tuple(str), optional
             Specify the boundary conditions target
             to plot, i.e. "Nodes", "Elements".
             You can obtain the allowed boundary conditions target by
@@ -1434,7 +1444,7 @@ class _MapdlCore(Commands):
             Shows the boundary conditions label per node.
             Defaults to ``False``.
 
-        bc_labels : List[str], Tuple(str), optional
+        bc_labels : list[str], Tuple(str), optional
             List or tuple of strings with the boundary conditions
             to plot, i.e. ``["UX", "UZ"]``.
             You can obtain the allowed boundary conditions by
@@ -1458,7 +1468,7 @@ class _MapdlCore(Commands):
             in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
             and :func:`ansys.mapdl.core.Mapdl.flist()`.
 
-        bc_target : List[str], Tuple(str), optional
+        bc_target : list[str], Tuple(str), optional
             Specify the boundary conditions target
             to plot, i.e. "Nodes", "Elements".
             You can obtain the allowed boundary conditions target by
@@ -2330,17 +2340,17 @@ class _MapdlCore(Commands):
 
     def get_value(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: Union[str, int, float] = "",
+        item2: str = "",
+        it2num: Union[str, int, float] = "",
+        item3: Union[str, int, float] = "",
+        it3num: Union[str, int, float] = "",
+        item4: Union[str, int, float] = "",
+        it4num: Union[str, int, float] = "",
+        **kwargs: dict[Any, Any],
     ):
         """Runs the MAPDL GET command and returns a Python value.
 
@@ -2437,19 +2447,19 @@ class _MapdlCore(Commands):
 
     def get(
         self,
-        par="__floatparameter__",
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
-    ):
+        par: str = "__floatparameter__",
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: Union[str, int, float] = "",
+        item2: str = "",
+        it2num: Union[str, int, float] = "",
+        item3: Union[str, int, float] = "",
+        it3num: Union[str, int, float] = "",
+        item4: Union[str, int, float] = "",
+        it4num: Union[str, int, float] = "",
+        **kwargs: dict[Any, Any],
+    ) -> Union[float, str]:
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
@@ -3205,7 +3215,7 @@ class _MapdlCore(Commands):
             containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
-        array : numpy.ndarray or List
+        array : numpy.ndarray or list
             List as a table or :class:`numpy.ndarray` array.
 
         var1 : str, optional
@@ -3385,7 +3395,7 @@ class _MapdlCore(Commands):
 
     @directory.setter
     @supress_logging
-    def directory(self, path):
+    def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
 
@@ -3415,15 +3425,15 @@ class _MapdlCore(Commands):
     @supress_logging
     def get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        **kwargs,
-    ):
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: Union[str, int, float] = "",
+        item2: str = "",
+        it2num: Union[str, int, float] = "",
+        kloop: Union[str, int, float] = "",
+        **kwargs: dict[Any, Any],
+    ) -> NDArray:
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
@@ -3502,16 +3512,16 @@ class _MapdlCore(Commands):
 
     def _get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        dtype=None,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: Union[str, int, float] = "",
+        item2: str = "",
+        it2num: Union[str, int, float] = "",
+        kloop: Union[str, int, float] = "",
+        dtype: DTypeLike = None,
         **kwargs,
-    ):
+    ) -> NDArray:
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
@@ -3690,7 +3700,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        List[List[Str]] or numpy.array
+        list[list[Str]] or numpy.array
             If parameter ``label`` is give, the output is converted to a
             numpy array instead of a list of list of strings.
         """
@@ -3715,7 +3725,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        List[List[Str]] or numpy.array
+        list[list[Str]] or numpy.array
             If parameter ``label`` is give, the output is converted to a
             numpy array instead of a list of list of strings.
         """
@@ -4442,7 +4452,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self) -> Dict[int, Union[float, ...]]:
+    def _parse_rlist(self) -> dict[int, Union[float, ...]]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
@@ -4476,7 +4486,7 @@ class _MapdlCore(Commands):
 
         return const_
 
-    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> dict[str, Any]:
         if not cmlist:
             cmlist = self.cmlist()
 
@@ -4488,11 +4498,11 @@ class _MapdlCore(Commands):
         )
         cmlist = "\n".join(blocks)
 
-        def extr(each_line, ind):
+        def extract(each_line, ind):
             return each_line.split()[ind].strip()
 
         return {
-            extr(each_line, 0): extr(each_line, 1)
+            extract(each_line, 0): extract(each_line, 1)
             for each_line in cmlist.splitlines()
             if each_line
         }

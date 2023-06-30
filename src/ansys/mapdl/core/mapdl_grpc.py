@@ -12,8 +12,7 @@ from subprocess import Popen
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
-import warnings
+from typing import TYPE_CHECKING, Literal, Optional, Union
 from warnings import warn
 import weakref
 
@@ -79,6 +78,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.mesh_grpc import MeshGrpc
+    from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -297,7 +297,7 @@ class MapdlGrpc(_MapdlCore):
     ):
         """Initialize connection to the mapdl server"""
         if remove_temp_files is not None:  # pragma: no cover
-            warnings.warn(
+            warn(
                 "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
                 "Please use ``remove_temp_dir_on_exit`` instead.",
                 DeprecationWarning,
@@ -361,7 +361,7 @@ class MapdlGrpc(_MapdlCore):
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
-        self._pids: List[Union[int, None]] = []
+        self._pids: list[Union[int, None]] = []
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -1195,7 +1195,7 @@ class MapdlGrpc(_MapdlCore):
                     except OSError:
                         pass
 
-    def list_files(self, refresh_cache: bool = True) -> List[str]:
+    def list_files(self, refresh_cache: bool = True) -> list[str]:
         """List the files in the working directory of MAPDL.
 
         Parameters
@@ -1207,7 +1207,7 @@ class MapdlGrpc(_MapdlCore):
         Returns
         -------
         list
-            List of files in the working directory of MAPDL.
+            list of files in the working directory of MAPDL.
 
         Examples
         --------
@@ -1324,7 +1324,7 @@ class MapdlGrpc(_MapdlCore):
         if path is None:  # if not path seems to not work in same cases.
             path = os.getcwd()
 
-        def _download(targets: List[str]) -> None:
+        def _download(targets: list[str]) -> None:
             for target in targets:
                 save_name = os.path.join(path, target)
                 self._download(target, save_name, progress_bar=progress_bar)
@@ -2015,16 +2015,16 @@ class MapdlGrpc(_MapdlCore):
 
     def download_project(
         self,
-        extensions: Optional[Union[str, List[str], Tuple[str]]] = None,
+        extensions: Optional[Union[str, list[str], tuple[str]]] = None,
         target_dir: Optional[str] = None,
         progress_bar: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Download all the project files located in the MAPDL working directory.
 
         Parameters
         ----------
         extensions : list[str], tuple[str], optional
-            List of extensions to filter the files before downloading,
+            list of extensions to filter the files before downloading,
             by default None.
 
         target_dir : str, optional
@@ -2037,8 +2037,8 @@ class MapdlGrpc(_MapdlCore):
 
         Returns
         -------
-        List[Str]
-            List of downloaded files.
+        list[Str]
+            list of downloaded files.
         """
         if not extensions:
             list_of_files = self.download(
@@ -2061,24 +2061,24 @@ class MapdlGrpc(_MapdlCore):
 
     def download(
         self,
-        files: Union[str, List[str], Tuple[str, ...]],
+        files: Union[str, list[str], tuple[str, ...]],
         target_dir: Optional[str] = None,
         extension: Optional[str] = None,
         chunk_size: Optional[int] = None,
         progress_bar: Optional[bool] = None,
         recursive: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Download files from the gRPC instance working directory
 
         .. warning:: This feature is only available for MAPDL 2021R1 or newer.
 
         Parameters
         ----------
-        files : str or List[str] or Tuple(str)
+        files : str or list[str] or tuple(str)
             Name of the file on the server. File must be in the same
             directory as the mapdl instance. A list of string names or
             tuples of string names can also be used.
-            List current files with :meth:`Mapdl.list_files <MapdlGrpc.list_files>`.
+            list current files with :meth:`Mapdl.list_files <MapdlGrpc.list_files>`.
 
             Alternatively, you can also specify **glob expressions** to
             match file names. For example: `'file*'` to match every file whose
@@ -2169,11 +2169,11 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_on_local(
         self,
-        files: Union[str, List[str], Tuple[str, ...]],
+        files: Union[str, list[str], tuple[str, ...]],
         target_dir: str,
         extension: Optional[str] = None,
         recursive: bool = False,
-    ) -> List[str]:
+    ) -> list[str]:
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
@@ -2235,12 +2235,12 @@ class MapdlGrpc(_MapdlCore):
 
     def _download_from_remote(
         self,
-        files: Union[str, List[str], Tuple[str, ...]],
+        files: Union[str, list[str], tuple[str, ...]],
         target_dir: str,
         extension: Optional[str] = None,
         chunk_size: Optional[str] = None,
         progress_bar: Optional[str] = None,
-    ) -> List[str]:
+    ) -> list[str]:
         """Download files when we are connected to a remote session."""
 
         if isinstance(files, str):
@@ -2273,7 +2273,7 @@ class MapdlGrpc(_MapdlCore):
 
     def _validate_files(
         self, file: str, extension: Optional[str] = None, recursive: bool = True
-    ) -> List[str]:
+    ) -> list[str]:
         if extension is not None:
             if not isinstance(extension, str):
                 raise TypeError(f"The extension {extension} must be a string.")
@@ -2320,7 +2320,7 @@ class MapdlGrpc(_MapdlCore):
         ----------
         target_name : str
             Target file on the server. File must be in the same
-            directory as the mapdl instance. List current files with
+            directory as the mapdl instance. list current files with
             ``mapdl.list_files()``
 
         out_file_name : str, optional
@@ -2484,7 +2484,7 @@ class MapdlGrpc(_MapdlCore):
             return False
 
     @property
-    def xpl(self):
+    def xpl(self) -> "ansXpl":
         """MAPDL file explorer
 
         Iteratively navigate through MAPDL files.
@@ -2502,10 +2502,14 @@ class MapdlGrpc(_MapdlCore):
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
                55, 58,  1], dtype=int32)
         """
+        if self._xpl is None:
+            from ansys.mapdl.core.xpl import ansXpl
+
+            self._xpl = ansXpl(self)
         return self._xpl
 
     @protect_grpc
-    def scalar_param(self, pname):
+    def scalar_param(self, pname: str) -> float:
         """Return a scalar parameter as a float.
 
         If parameter does not exist, returns ``None``.

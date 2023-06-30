@@ -146,7 +146,7 @@ class Geometry:
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-    def areas(self, quality=4, merge=False):
+    def areas(self, quality=1, merge=False):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
