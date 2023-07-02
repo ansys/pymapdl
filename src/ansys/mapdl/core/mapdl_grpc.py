@@ -1207,7 +1207,7 @@ class MapdlGrpc(_MapdlCore):
         Returns
         -------
         list
-            list of files in the working directory of MAPDL.
+            List of files in the working directory of MAPDL.
 
         Examples
         --------
@@ -2024,7 +2024,7 @@ class MapdlGrpc(_MapdlCore):
         Parameters
         ----------
         extensions : list[str], tuple[str], optional
-            list of extensions to filter the files before downloading,
+            List of extensions to filter the files before downloading,
             by default None.
 
         target_dir : str, optional
@@ -2038,7 +2038,7 @@ class MapdlGrpc(_MapdlCore):
         Returns
         -------
         list[Str]
-            list of downloaded files.
+            List of downloaded files.
         """
         if not extensions:
             list_of_files = self.download(
@@ -2078,7 +2078,7 @@ class MapdlGrpc(_MapdlCore):
             Name of the file on the server. File must be in the same
             directory as the mapdl instance. A list of string names or
             tuples of string names can also be used.
-            list current files with :meth:`Mapdl.list_files <MapdlGrpc.list_files>`.
+            List current files with :meth:`Mapdl.list_files <MapdlGrpc.list_files>`.
 
             Alternatively, you can also specify **glob expressions** to
             match file names. For example: `'file*'` to match every file whose
@@ -2320,7 +2320,7 @@ class MapdlGrpc(_MapdlCore):
         ----------
         target_name : str
             Target file on the server. File must be in the same
-            directory as the mapdl instance. list current files with
+            directory as the mapdl instance. List current files with
             ``mapdl.list_files()``
 
         out_file_name : str, optional
