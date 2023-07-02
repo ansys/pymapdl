@@ -719,7 +719,9 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "no parameters defined" in status or (not "NAME" in status and not "VALUE" in status):
+    if "no parameters defined" in status or (
+        not "NAME" in status and not "VALUE" in status
+    ):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
