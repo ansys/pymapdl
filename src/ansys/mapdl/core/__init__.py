@@ -2,17 +2,16 @@
 import logging
 import os
 
-import appdirs
+import platformdirs
 
 # Setup data directory
-USER_DATA_PATH = appdirs.user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
+USER_DATA_PATH = platformdirs.user_data_dir(
+    appname="ansys_mapdl_core", appauthor="Ansys"
+)
 if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
     os.makedirs(USER_DATA_PATH)
 
 EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
-if not os.path.exists(EXAMPLES_PATH):  # pragma: no cover
-    os.makedirs(EXAMPLES_PATH)
-
 
 from ansys.mapdl.core.logging import Logger
 
@@ -24,7 +23,7 @@ _LOCAL_PORTS = []
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
 try:
-    from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+    import pyvista
 
     _HAS_PYVISTA = True
 except ModuleNotFoundError:  # pragma: no cover

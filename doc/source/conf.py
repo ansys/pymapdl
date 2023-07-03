@@ -86,7 +86,7 @@ extensions = [
 
 # Intersphinx mapping
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
+    "python": ("https://docs.python.org/3/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
@@ -94,7 +94,8 @@ intersphinx_mapping = {
     "pyvista": ("https://docs.pyvista.org/version/stable/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/", None),
-    "dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
+    "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*"]
@@ -167,6 +168,7 @@ exclude_patterns = [
 
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""
+
 # Read link all targets from file
 with open("links.rst") as f:
     rst_epilog += f.read()
@@ -176,6 +178,22 @@ rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
+
+
+# Setting redicts
+redirects = {
+    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
+    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
+}
+
+# Broken anchors:
+linkcheck_anchors_ignore = [
+    # these anchors are picked by linkcheck as broken but thye are not.
+    "firewall-rules",
+    "pyvista.Plotter",
+    "pyvista.UnstructuredGrid",
+    "pyvista.Plotter.show",
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

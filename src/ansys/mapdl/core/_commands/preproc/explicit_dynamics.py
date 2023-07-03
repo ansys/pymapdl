@@ -3624,7 +3624,7 @@ class ExplicitDynamics:
         value1: MapdlInt = "",
         value2: MapdlFloat = "",
         **kwargs,
-    ) -> Optional[str]:  # pragma: no cover
+    ) -> Optional[str]:
         """Plots explicit elements based on their time step size.
 
         APDL Command: EDTP

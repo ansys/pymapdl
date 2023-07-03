@@ -27,12 +27,12 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    launcher
    logging
    mapdl
-   math
    mesh
    parameters
    plotting
    pool
    post
+   Pyansys Math <https://math.docs.pyansys.com/version/stable/>
    solution
    xpl
    building_example

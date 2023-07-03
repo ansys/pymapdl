@@ -16,12 +16,12 @@ from ansys.mapdl.core.launcher import (
     _verify_version,
     find_ansys,
     get_default_ansys,
-    get_start_instance,
     launch_mapdl,
     update_env_vars,
     version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
+from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
 
 try:
     import ansys_corba  # noqa: F401
@@ -48,15 +48,6 @@ paths = [
     ("/usr/ansys_inc/v211/ansys/bin/mapdl", 211),
 ]
 
-skip_on_ci = pytest.mark.skipif(
-    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
-)
-
-skip_on_not_local = pytest.mark.skipif(
-    not os.environ.get("RUN_LOCAL", "").upper() == "TRUE",
-    reason="Skipping because not on local",
-)
-
 start_timeout = 30  # Seconds
 
 
@@ -72,12 +63,8 @@ def fake_local_mapdl(mapdl):
     mapdl._local = False
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.skipif(os.name != "nt", reason="Requires Windows")
+@skip_if_not_local
+@skip_on_linux
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
@@ -89,33 +76,21 @@ def test_validate_sw():
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
     assert version_from_path("mapdl", exec_file) == version
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.skipif(os.name != "posix", reason="Requires Linux")
+@skip_if_not_local
+@skip_on_windows
 def test_find_ansys_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
@@ -124,22 +99,14 @@ def test_find_ansys_linux():
     assert isinstance(ver, float)
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_invalid_mode():
     with pytest.raises(ValueError):
         exec_file = find_ansys(valid_versions[0])[0]
         pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
     exec_file = find_ansys("150")[0]
@@ -147,12 +114,8 @@ def test_old_version():
         pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@pytest.mark.skipif(not os.name == "nt", reason="Requires windows")
+@skip_if_not_local
+@skip_on_windows
 @pytest.mark.console
 def test_failed_console():
     exec_file = find_ansys(valid_versions[0])[0]
@@ -160,25 +123,17 @@ def test_failed_console():
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 @pytest.mark.parametrize("version", valid_versions)
 @pytest.mark.console
-@pytest.mark.skipif(os.name != "posix", reason="Only supported on Linux")
+@skip_on_windows
 def test_launch_console(version):
     exec_file = find_ansys(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 @pytest.mark.corba
 @pytest.mark.parametrize("version", valid_versions)
 def test_launch_corba(version):
@@ -194,11 +149,7 @@ def test_launch_corba(version):
     assert mapdl_ref() is None
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
@@ -207,15 +158,12 @@ def test_license_type_keyword():
         # Using first line to ensure not picking up other stuff.
         checks.append(license_description in mapdl.__str__().split("\n")[0])
         mapdl.exit()
+        del mapdl
 
     assert any(checks)
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -233,11 +181,7 @@ def test_license_type_keyword_names():
     assert successful_check  # if at least one license is ok, this should be true.
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -255,11 +199,7 @@ def test_license_type_additional_switch():
     assert successful_check  # if at least one license is ok, this should be true.
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
+@skip_if_not_local
 def test_license_type_dummy():
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
@@ -268,8 +208,7 @@ def test_license_type_dummy():
         )
 
 
-@pytest.mark.skipif(not valid_versions, reason="Requires MAPDL installed.")
-@skip_on_not_local
+@skip_if_not_local
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
@@ -286,7 +225,7 @@ def test_remove_temp_files():
         assert os.path.isdir(path)
 
 
-@skip_on_not_local
+@skip_if_not_local
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
@@ -423,10 +362,7 @@ def test__verify_version_pass(version):
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
+@skip_if_not_local
 def test_find_ansys(mapdl):
     assert find_ansys() is not None
 
@@ -442,40 +378,26 @@ def test_find_ansys(mapdl):
         assert find_ansys(version="11")
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
+@skip_if_not_local
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(version=version, start_timeout=start_timeout)
     mapdl_.exit()
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
+@skip_if_not_local
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
 
 
-@pytest.mark.skipif(
-    not (
-        os.environ.get("ON_LOCAL", "false").lower() == "true"
-        and os.environ.get("ON_UBUNTU", "false").lower() == "true"
-    ),
-    reason="Skip when start instance is disabled",
-)
+@skip_on_windows
+@skip_if_not_local
 def test_is_ubuntu():
     assert _is_ubuntu()
 
 
-@pytest.mark.skipif(
-    get_start_instance() is False,
-    reason="Skip when start instance is disabled",
-)
+@skip_if_not_local
 def test_get_default_ansys():
     assert get_default_ansys() is not None
 

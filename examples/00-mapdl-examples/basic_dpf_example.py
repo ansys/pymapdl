@@ -5,7 +5,7 @@ Basic DPF-Core Usage with PyMAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This example is adapted from
-`Basic DPF-Core Usage Example <https://dpf.docs.pyansys.com/examples/00-basic/00-basic_example.html>`_
+`Basic DPF-Core Usage Example <https://dpf.docs.pyansys.com/version/stable/examples/00-basic/00-basic_example.html>`_
 and it shows how to open a result file in `DPF <https://dpf.docs.pyansys.com/>`_ and do some
 basic postprocessing.
 

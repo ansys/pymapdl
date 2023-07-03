@@ -77,7 +77,7 @@ class KrylovSolver:
             self.full_file = full_file
 
         # Checking if the full file exists.
-        if self._mapdl._local:  # pragma: no cover
+        if self._mapdl._local:
             if not os.path.exists(os.path.join(current_dir, self.full_file)):
                 raise FileNotFoundError(
                     f"The file '{self.full_file}' could not be found in local directory '{current_dir}'."
@@ -271,7 +271,7 @@ class KrylovSolver:
         # Get matrices from full file
         self._get_data_from_full_file()
 
-        # Get the force vector from the defined Ansvec
+        # Get the force vector from the defined AnsVec
         fz = self.mm.vec(name="fz")
 
         # Create subspace

@@ -31,9 +31,9 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_EXAMPLES_CACHE: 0
-  RESET_DOC_BUILD_CACHE: 0
-  RESET_AUTOSUMMARY_CACHE: 0
+  RESET_EXAMPLES_CACHE: 2
+  RESET_DOC_BUILD_CACHE: 2
+  RESET_AUTOSUMMARY_CACHE: 2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -64,7 +64,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -270,7 +270,7 @@ jobs:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
-      ON_REMOTE: TRUE
+      ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
 
     steps:
@@ -423,7 +423,7 @@ jobs:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main'
-    timeout-minutes: 20
+    timeout-minutes: 40
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
@@ -625,6 +625,7 @@ jobs:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          render-last: '5'
 
   upload-dev-docs:
     name: Upload dev documentation
