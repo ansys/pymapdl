@@ -35,6 +35,20 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 """
 
 
+def merge_polydata(items):
+    """Merge list of polydata or unstructured grids"""
+
+    # lazy import here for faster module loading
+    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
+
+    afilter = vtkAppendPolyData()
+    for item in items:
+        afilter.AddInputData(item)
+        afilter.Update()
+
+    return pv.wrap(afilter.GetOutput())
+
+
 def get_elements_per_area(resp: str) -> List[int]:
     """Get the number of elements meshed for each area given the response
     from ``AMESH``.
@@ -148,7 +162,8 @@ class Geometry:
 
     def get_lines(self) -> pv.MultiBlock:
         """Active lines as a pyvista.MultiBlock"""
-        return self.lines
+        lines = self.lines.as_polydata_blocks()
+        return merge_polydata(list(lines))
 
     @property
     def areas(self) -> pv.MultiBlock:

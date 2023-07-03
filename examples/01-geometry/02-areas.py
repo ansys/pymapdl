@@ -98,7 +98,7 @@ anum
 # Note that this is a method so you can select the quality of the
 # areas (mesh density), and if you would like a merged output or
 # individual meshes.
-areas = mapdl.geometry.areas(quality=3)
+areas = mapdl.geometry.areas
 areas
 
 

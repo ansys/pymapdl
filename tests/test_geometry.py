@@ -517,3 +517,7 @@ def test_entities_multiple_bodies(mapdl, contact_solve, entity, number):
 
 def test_create_geometry(mapdl):
     assert isinstance(mapdl._create_geometry(), Geometry)
+
+
+def test_get_lines(mapdl, contact_solve):
+    assert isinstance(mapdl.geometry.get_lines(), pv.PolyData)

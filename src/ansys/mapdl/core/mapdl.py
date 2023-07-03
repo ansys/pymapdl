@@ -1955,7 +1955,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.lines
+            lines = self.geometry.get_lines()
             meshes = [{"mesh": lines}]
             if color_lines:
                 meshes[0]["scalars"] = np.random.random(lines.n_cells)
@@ -1972,7 +1972,7 @@ class _MapdlCore(Commands):
             if show_keypoint_numbering:
                 labels.append(
                     {
-                        "points": self.geometry.keypoints,
+                        "points": self.geometry.get_keypoints(),
                         "labels": self.geometry.knum,
                     }
                 )
