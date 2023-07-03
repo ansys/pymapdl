@@ -189,7 +189,7 @@ class ComponentManager:
 
     @default_entity.setter
     def default_entity(self, value: ENTITIES_TYP):
-        if not isinstance(value, str) and value.upper() not in VALID_ENTITIES:
+        if not isinstance(value, str) or value.upper() not in VALID_ENTITIES:
             raise ValueError(
                 f"Only the following entities are allowed:\n{', '.join(VALID_ENTITIES)}"
             )
