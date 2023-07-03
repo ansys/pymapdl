@@ -54,10 +54,6 @@ def _check_valid_pyobj_to_entities(
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.
     """
-    if not isinstance(items, (tuple, list, np.ndarray)):
-        raise TypeError(
-            "Only list or numpy arrays are allowed for component definitions."
-        )
 
     if not all([isinstance(each, (int, np.integer)) for each in items]):
         raise ValueError("Only integers are allowed for component definition.")
@@ -416,17 +412,6 @@ class ComponentManager:
         """
         return self._comp.values()
 
-    def copy(self):
-        """
-        Return a shallow copy of the dictionary.
-
-        Returns
-        -------
-        dict
-            A shallow copy of the dictionary.
-
-        """
-        return self._comp.copy()
 
     def items(self):
         """

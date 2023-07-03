@@ -55,10 +55,11 @@ from ansys.mapdl.core.misc import (
     wrap_point_SEL,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
 
     from ansys.mapdl.core.component import ComponentManager
+    from ansys.mapdl.core.mapdl import _MapdlCore
     from ansys.mapdl.core.mapdl_geometry import Geometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
@@ -68,9 +69,6 @@ if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting import general_plotter
 
 from ansys.mapdl.core.post import PostProcessing
-
-if TYPE_CHECKING:
-    from ansys.mapdl.core.mapdl import _MapdlCore
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
@@ -593,7 +591,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self._exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
