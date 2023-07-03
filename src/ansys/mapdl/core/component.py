@@ -191,7 +191,7 @@ class ComponentManager:
         self._mapdl_weakref: weakref.ReferenceType[_MapdlCore] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
-        self._lose_mode: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
 
         self._default_entity: ENTITIES_TYP = "NODES"
         self._default_entity_warning: bool = True
@@ -247,7 +247,7 @@ class ComponentManager:
         self._comp = self._mapdl._parse_cmlist()
         forced_to_select = False
 
-        if key.upper() not in self._comp and self._lose_mode:
+        if key.upper() not in self._comp and self._autoselect_components:
             # the component will not appear in "cmlist" if it has not been selected
             # previously using "cmsel". This behaviour is a bit different than with
             # parameters for example. However it is consistent with geometry definition.

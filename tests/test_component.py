@@ -81,10 +81,10 @@ def test_get_item(mapdl, cube_geom_and_mesh):
     assert comp.type == "NODE"
 
 
-def test_get_item_lose_mode(mapdl, cube_geom_and_mesh):
+def test_get_item_autoselect_components(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
 
-    mapdl.components._lose_mode = True
+    mapdl.components._autoselect_components = True
     cm_ = mapdl.run("cmlist").upper()
     assert "MYCOMP" not in cm_
     assert "NODE" not in cm_
