@@ -122,6 +122,7 @@ class Component(tuple):
 
     @property
     def type(self) -> str:
+        """Return the type of the component. For instance "NODES", "KP", etc."""
         return self._type
 
 

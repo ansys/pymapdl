@@ -1,4 +1,4 @@
-.. _ref_components_api:
+.. _ref_componentmanager_api:
 
 Components
 ==========
