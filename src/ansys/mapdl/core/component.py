@@ -10,7 +10,7 @@ from numpy.typing import NDArray
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
 from ansys.mapdl.core.mapdl import _MapdlCore
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     import logging
 
 ENTITIES_TYP = Literal[
