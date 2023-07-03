@@ -412,7 +412,6 @@ class ComponentManager:
         """
         return self._comp.values()
 
-
     def items(self):
         """
         Return a view object that contains the key-value pairs in the dictionary.
