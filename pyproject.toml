@@ -68,7 +68,7 @@ tests = [
     "pytest-rerunfailures==11.1.2",
 ]
 doc = [
-    "sphinx==6.2.1",
+    "sphinx==7.0.1",
     "ansys-dpf-core==0.8.1",
     "ansys-mapdl-reader==0.52.16",
     "ansys-sphinx-theme==0.9.9",
