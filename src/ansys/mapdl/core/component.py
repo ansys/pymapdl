@@ -274,7 +274,7 @@ class ComponentManager:
         elif isinstance(value, tuple):
             if len(value) == 2:
                 if not isinstance(value[0], str) or not isinstance(
-                    value[1], (list, np.ndarray)
+                    value[1], (list, tuple, np.ndarray)
                 ):
                     raise ValueError(
                         "Only strings are allowed for the first argument, and a list or numpy array for the second."
