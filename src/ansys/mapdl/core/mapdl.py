@@ -55,7 +55,8 @@ from ansys.mapdl.core.misc import (
     wrap_point_SEL,
 )
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl import _MapdlCore
     from ansys.mapdl.reader import Archive
 
     from ansys.mapdl.core.component import ComponentManager
@@ -590,7 +591,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self._exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
