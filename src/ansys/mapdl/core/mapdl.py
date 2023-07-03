@@ -795,6 +795,8 @@ class _MapdlCore(Commands):
         >>> mapdl.clear()
 
         """
+        if self.is_grpc:
+            self._create_session()
         self.run("/CLE,NOSTART", mute=True)
 
     @supress_logging
