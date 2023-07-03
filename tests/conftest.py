@@ -847,6 +847,7 @@ def contact_geom_and_mesh(mapdl):
     mapdl.d(1, "all")
     mapdl.ddele(1, "temp")
     mapdl.allsel("all")
+    mapdl.mute = False
 
 
 @pytest.fixture(scope="function")
@@ -854,6 +855,7 @@ def contact_solve(mapdl, contact_geom_and_mesh):
     # ==========================================================
     # * Solution
     # ==========================================================
+    mapdl.mute = False
     mapdl.run("/solu")
     mapdl.antype(4)  # Transient analysis
     mapdl.lnsrch("on")
