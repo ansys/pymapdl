@@ -10,14 +10,10 @@ from ansys.mapdl.reader import examples
 import numpy as np
 import pytest
 import pyvista
-from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
+from conftest import skip_no_xserver
 
 # skip entire module unless --console is enabled
 pytestmark = pytest.mark.console
@@ -337,11 +333,8 @@ def test_nodes(tmpdir, cleared, mapdl_console):
 
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
-    if mapdl_console._local:
-        mapdl_console.nwrite(filename)
-    else:
-        mapdl_console.nwrite(basename)
-        mapdl_console.download(basename, filename)
+    mapdl_console.nwrite(filename)
+    mapdl_console.download(basename, filename)
 
     assert np.allclose(mapdl_console.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_console.mesh.n_node == 11
