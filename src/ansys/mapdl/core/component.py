@@ -70,7 +70,7 @@ class Component(tuple):
 
     Parameters
     ----------
-    type_ : _type_
+    type_ : str
         The entity type. For instance "NODES", "KP", "VOLU", etc
 
     items_ : Optional[Union[str, int, list[int], NDArray[Any]]]

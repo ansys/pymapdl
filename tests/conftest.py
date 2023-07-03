@@ -164,7 +164,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
+        skip_grpc = pytest.mark.skip(
+            reason="Requires gRPC connection (at least v211 to run)"
+        )
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
