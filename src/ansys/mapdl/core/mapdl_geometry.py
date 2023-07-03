@@ -155,7 +155,7 @@ class Geometry:
         """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`"""
         return self.get_areas()
 
-    def get_areas(self, quality: int = 4, merge: bool = False) -> pv.MultiBlock:
+    def get_areas(self, quality: int = 1, merge: bool = False) -> pv.MultiBlock:
         """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`.
 
         Parameters

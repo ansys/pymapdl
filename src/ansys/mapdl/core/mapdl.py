@@ -2045,7 +2045,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            keypoints = self.geometry.keypoints
+            keypoints = self.geometry.get_keypoints()
             points = [{"points": keypoints}]
 
             labels = []
