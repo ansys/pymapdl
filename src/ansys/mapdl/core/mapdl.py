@@ -69,8 +69,6 @@ if _HAS_PYVISTA:
 
 from ansys.mapdl.core.post import PostProcessing
 
-if TYPE_CHECKING:
-    from ansys.mapdl.core.mapdl import _MapdlCore
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
