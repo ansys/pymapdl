@@ -3,6 +3,8 @@ import numpy as np
 import pytest
 import pyvista as pv
 
+from ansys.mapdl.core.mapdl_geometry import Geometry
+
 
 def test_keypoint_selection(mapdl, cleared):
     def generate_random_kp():
@@ -511,3 +513,7 @@ def test_entities_multiple_bodies(mapdl, contact_solve, entity, number):
     entity = getattr(mapdl.geometry, entity)
     assert len(entity) == number
     assert isinstance(entity, pv.MultiBlock)
+
+
+def test_create_geometry(mapdl):
+    assert isinstance(mapdl._create_geometry(), Geometry)
