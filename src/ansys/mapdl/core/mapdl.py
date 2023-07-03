@@ -2940,6 +2940,10 @@ class _MapdlCore(Commands):
         """
         if self._session_id is not None:
             self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            if self.is_grpc:
+                self._create_session()
 
         if mute is None:
             if hasattr(self, "mute"):
