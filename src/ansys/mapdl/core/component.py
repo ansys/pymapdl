@@ -69,7 +69,7 @@ class Component(tuple):
     type_ : str
         The entity type. For instance "NODES", "KP", "VOLU", etc
 
-    items_ : Optional[Union[str, int, list[int], NDArray[Any]]]
+    items_ : None, str, int, list[int], np.array[int]]
         Item ids contained in the component.
 
     Examples
