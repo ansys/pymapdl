@@ -270,7 +270,7 @@ def test_dunder_methods_iter(mapdl, basic_components):
 
 
 def test_dunder_methods_keys(mapdl, basic_components):
-    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.keys())
+    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
 
 
 def test_dunder_methods_values(mapdl, basic_components):

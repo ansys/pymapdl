@@ -383,65 +383,66 @@ class ComponentManager:
 
     def __contains__(self, key: str) -> bool:
         """
-        Check if a given key is present in the dictionary.
+        Check if a given component name is present in
+        :class:`Mapdl.components <ansys.mapdl.core.Mapdl.components.ComponentManager>`.
 
         Parameters
         ----------
-        key : hashable
-            The key to search for in the dictionary.
+        name : str
+            The name of the component to search for.
 
         Returns
         -------
         bool
-            True if the key is in the dictionary, False otherwise.
+            True if the component name exists *and it is selected*, False otherwise.
 
         """
         return key.upper() in self._comp.keys()
 
     def __iter__(self):
         """
-        Return an iterator over the keys in the dictionary.
+        Return an iterator over the component names.
 
         Returns
         -------
         iterator
-            An iterator over the keys in the dictionary.
+            Return an iterator over the component names.
 
         """
         yield from self._comp.keys()
 
-    def components(self):
+    def list(self):
         """
-        Return a view object that contains the keys in the dictionary.
+        Return a tuple that contains the components.
 
         Returns
         -------
-        dict_keys
-            A view object that contains the keys in the dictionary.
+        tuple
+            Return a tuple that contains the component names.
 
         """
-        return self._comp.keys()
+        return tuple(self._comp.keys())
 
     def types(self):
         """
-        Return a view object that contains the values in the dictionary.
+        Return the types of the components.
 
         Returns
         -------
-        dict_values
-            A view object that contains the values in the dictionary.
+        tuple
+            Return a tuple that contains the types of the components.
 
         """
-        return self._comp.values()
+        return tuple(self._comp.values())
 
     def items(self):
         """
-        Return a view object that contains the key-value pairs in the dictionary.
+        Return a view object that contains the name-type pairs for each component.
 
         Returns
         -------
         dict_items
-            A view object that contains the key-value pairs in the dictionary.
+            Return a view object that contains the name-type pairs for each component.
 
         """
         return self._comp.items()
