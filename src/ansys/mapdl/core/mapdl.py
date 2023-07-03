@@ -56,10 +56,10 @@ from ansys.mapdl.core.misc import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover
-    from ansys.mapdl.core.mapdl import _MapdlCore
     from ansys.mapdl.reader import Archive
 
     from ansys.mapdl.core.component import ComponentManager
+    from ansys.mapdl.core.mapdl import _MapdlCore
     from ansys.mapdl.core.mapdl_geometry import Geometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
