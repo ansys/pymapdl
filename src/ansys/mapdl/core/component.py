@@ -109,11 +109,6 @@ class Component(tuple):
 
         return obj
 
-    @property
-    def _mapdl(self) -> _MapdlCore:
-        """Return the weakly referenced instance of mapdl"""
-        return self._mapdl_weakref()
-
     def __str__(self):
         tup_str = super().__str__()
         return f"Component(type='{self.type}', items={tup_str})"
@@ -267,14 +262,14 @@ class ComponentManager:
         return Component(cmtype, output)
 
     def __setitem__(self, key: str, value: ITEMS_VALUES) -> None:
-        if not isinstance(key, (str, Component)):
+        if not isinstance(key, str):
             raise ValueError("Only strings are allowed for component names.")
 
         if isinstance(value, Component):
             # Allowing to use a component object to be set.
             cmname = key
             cmtype = value.type
-            cmitems = value.items
+            cmitems = value
 
         elif isinstance(value, tuple):
             if len(value) == 2:
@@ -312,6 +307,11 @@ class ComponentManager:
 
         elif isinstance(value, str):
             # create a component with the already selected elements
+            if value.upper() not in VALID_ENTITIES:
+                raise ValueError(
+                    f"The value '{value}' is not allowed for 'type' definition."
+                )
+
             cmname = key
             cmtype = value
 

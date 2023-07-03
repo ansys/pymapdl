@@ -4,11 +4,13 @@ import warnings
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.errors import (
+from ansys.mapdl.core.component import (
+    Component,
     ComponentDoesNotExits,
     ComponentIsNotSelected,
-    ComponentNoData,
+    ComponentManager,
 )
+from ansys.mapdl.core.errors import ComponentNoData
 
 
 def test_str_rep(mapdl, cleared):
@@ -24,7 +26,7 @@ def test_str_rep(mapdl, cleared):
 
 
 @pytest.mark.parametrize("type_", ("node", "elem", "kp", "line", "area", "volu"))
-def test_set_item(mapdl, cube_solve, type_):
+def test_set_item(mapdl, cube_geom_and_mesh, type_):
     mapdl.prep7()
     mapdl.vgen(3, "all")  # creating more volumes
 
@@ -45,7 +47,7 @@ def test_set_item(mapdl, cube_solve, type_):
     assert re.search(r"1\s*2\s*3", cm_) is not None
 
 
-def test_set_item_no_type(mapdl, cube_solve):
+def test_set_item_no_type(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = (1, 2, 3)
 
     mapdl.cmsel("S", "MYCOMP")
@@ -54,7 +56,7 @@ def test_set_item_no_type(mapdl, cube_solve):
     assert "NODE" in cm_
 
 
-def test_get_item(mapdl, cube_solve):
+def test_get_item(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
 
     with pytest.raises(ComponentIsNotSelected):
@@ -70,7 +72,7 @@ def test_get_item(mapdl, cube_solve):
     assert comp.type == "NODE"
 
 
-def test_get_item_lose_mode(mapdl, cube_solve):
+def test_get_item_lose_mode(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
 
     mapdl.components._lose_mode = True
@@ -86,7 +88,7 @@ def test_raise_empty_comp(mapdl, cleared):
         mapdl.cm("cm1", "nodes")
 
 
-def test_contains_all(mapdl, cube_solve):
+def test_contains_all(mapdl, cube_geom_and_mesh):
     mapdl.allsel()
     mapdl.cm("allnodes", "nodes")
     assert "allnodes" in mapdl.components
@@ -104,7 +106,7 @@ def test_contains_all(mapdl, cube_solve):
         ["vsel", "volu", "vnum", 1],
     ),
 )
-def test_contains_entities(mapdl, cube_solve, func, entity, selector, imax):
+def test_contains_entities(mapdl, cube_geom_and_mesh, func, entity, selector, imax):
     func_ = getattr(mapdl, func)
     func_("S", vmin=1, vmax=imax)
 
@@ -128,7 +130,7 @@ def test_contains_entities(mapdl, cube_solve, func, entity, selector, imax):
     assert np.allclose(mapdl.components["mycomp"], list(range(1, imax + 1)))
 
 
-def test_defaul_entity_warning(mapdl, cube_solve):
+def test_defaul_entity_warning(mapdl, cube_geom_and_mesh):
     mapdl.allsel()
     with pytest.warns(UserWarning):
         mapdl.components["mycomp"] = (1, 2, 3)
@@ -141,7 +143,7 @@ def test_defaul_entity_warning(mapdl, cube_solve):
 
 
 @pytest.mark.parametrize("type_", ("node", "elem", "kp", "line", "area", "volu"))
-def test_default_entity(mapdl, cube_solve, type_):
+def test_default_entity(mapdl, cube_geom_and_mesh, type_):
     mapdl.prep7()
     mapdl.vgen(3, "all")  # creating more volumes
     mapdl.allsel()
@@ -167,7 +169,7 @@ def test_default_entity(mapdl, cube_solve, type_):
         ["vsel", "volu", "vnum", 1],
     ),
 )
-def test_set_only_type(mapdl, cube_solve, func, entity, selector, imax):
+def test_set_only_type(mapdl, cube_geom_and_mesh, func, entity, selector, imax):
     func_ = getattr(mapdl, func)
     func_("S", vmin=1, vmax=imax)  # selecting
 
@@ -176,3 +178,61 @@ def test_set_only_type(mapdl, cube_solve, func, entity, selector, imax):
     comp = mapdl.components["mycomp"]
     assert len(comp) == imax
     assert comp.type == entity.upper()
+
+
+def test_set_using_a_component(mapdl, cube_geom_and_mesh):
+    comp = Component("AREA", [1, 2])
+    mapdl.components["myareacomp"] = comp
+
+    mapdl.cmsel("s", "MYAREACOMP")
+    assert "MYAREACOMP" in mapdl.components
+    comp2 = mapdl.components["myareacomp"]
+    assert comp2 == (1, 2)
+    assert comp2.type == "AREA"
+
+
+def test_componentmanager_wrong_object():
+    with pytest.raises(TypeError):
+        ComponentManager("asdf")
+
+
+def test_component():
+    cm = Component("NODE", [1, 2, 3])
+
+    assert "NODE" in str(cm)
+    assert all([str(each) in str(cm) for each in [1, 2, 3]])
+
+
+def test_component_attributes():
+    cm = Component("AREA", [1, 2, 3])
+
+    assert "AREA" == cm.type
+    assert 1 in cm
+    assert 3 in cm
+
+
+def test_component_wrong_init():
+    with pytest.raises(ValueError, match="is not allowed for 'type' definition."):
+        Component(1, 1)
+
+    with pytest.raises(ValueError, match="is not allowed for 'type' definition."):
+        Component("asdf", [1, 2, 3])
+
+
+def test_set_assign_wrong_objects(mapdl, cube_geom_and_mesh):
+    with pytest.raises(ValueError, match="Only strings are allowed for "):
+        mapdl.components[1] = [1, 2]
+
+    with pytest.raises(ValueError, match="is not allowed for 'type' definition."):
+        mapdl.components["asdf"] = "asdf"
+
+    with pytest.raises(
+        ValueError, match="Only strings or tuples are allowed for assignment"
+    ):
+        mapdl.components["asdf"] = {"a": 1}
+
+    with pytest.raises(ValueError, match="Only integers are allowed for component"):
+        mapdl.components["asdf"] = [1, 2.2]
+
+    with pytest.raises(ValueError, match="Only integers are allowed for component"):
+        mapdl.components["asdf"] = [1, "asdf"]
