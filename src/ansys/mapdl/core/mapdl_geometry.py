@@ -160,8 +160,8 @@ class Geometry:
         """Active lines as a pyvista.MultiBlock"""
         return self._lines
 
-    def get_lines(self) -> pv.MultiBlock:
-        """Active lines as a pyvista.MultiBlock"""
+    def get_lines(self) -> pv.PolyData:
+        """Active lines as a pyvista.Polydata"""
         lines = self.lines.as_polydata_blocks()
         return merge_polydata(list(lines))
 
