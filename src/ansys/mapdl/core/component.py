@@ -81,37 +81,48 @@ class Component(tuple):
     Component(type='NODES', items=(1, 2, 3))
 
     To index the content of the component object:
+
     >>> mycomp[0]
     1
     >>> mycomp[1]
     2
 
     To access the type of the entities:
+
     >>> mycomp.type
     "NODES"
 
     Convert to list:
+
     >>> list(mycomp)
     [1, 2, 3]
     """
 
-    def __new__(cls, type_: ENTITIES_TYP, items_: tuple):
+    def __new__(
+        cls,
+        type_: ENTITIES_TYP,
+        items_: tuple[str, Union[tuple[int], list[int], NDArray[np.int_]]],
+    ):
         if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
             raise ValueError(
                 f"The value '{type_}' is not allowed for 'type' definition."
             )
         obj = super().__new__(cls, items_)
-        obj.type = type_
+        obj._type: ENTITIES_TYP = type_
 
         return obj
 
     def __str__(self):
         tup_str = super().__str__()
-        return f"Component(type='{self.type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str})"
 
     def __repr__(self) -> str:
         tup_str = super().__repr__()
-        return f"Component(type='{self.type}', items={tup_str})"
+        return f"Component(type='{self._type}', items={tup_str})"
+
+    @property
+    def type(self) -> str:
+        return self._type
 
 
 class ComponentManager:
@@ -135,17 +146,21 @@ class ComponentManager:
     MYCOMP2                          : ELEM
 
     Get a component:
+
     >>> mapdl.components["mycomp1"]
     Component(type='NODE', items=(1, 3, 6))
 
     Set a component specifying the type and items:
+
     >>> mapdl.components["mycomp3] = "KP", [1,2,3]
 
     Set a component without specifying the type, by default it is ``NODE``:
+
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
+
     >>> mapdl.component.default_entity = "KP"
         /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
         It is recommended you use the following notation to avoid this warning:
@@ -156,12 +171,14 @@ class ComponentManager:
     'KP'
 
     You can also create a component from the already selected entities:
+
     >>> mapdl.lsel("S",1, 2)
     >>> mapdl.components["mylinecomp"] = "LINE"
     >>> mapdl.components["mylinecomp"]
     (1, 2)
 
     Selecting a component and retrieving it:
+
     >>> mapdl.cmsel("s", "mycomp3")
     >>> mapdl.components["mycomp3"]
     Component(type='KP', items=(1, 2, 3))
@@ -181,6 +198,7 @@ class ComponentManager:
 
     @property
     def default_entity(self):
+        """Default entity for component creation."""
         return self._default_entity
 
     @default_entity.setter
@@ -193,6 +211,7 @@ class ComponentManager:
 
     @property
     def default_entity_warning(self):
+        """Enables the warning when creating components other than node components without specifying its type."""
         return self._default_entity_warning
 
     @default_entity_warning.setter
@@ -205,14 +224,17 @@ class ComponentManager:
         return self._mapdl_weakref()
 
     def _log(self) -> "logging.Logger":
+        """MAPDL logger."""
         return self._mapdl.logger
 
     @property
     def logger(self) -> "logging.Logger":
+        """Access to the logger."""
         return self._log()
 
     @property
     def _comp(self) -> UNDERLYING_DICT:
+        """Dictionary with components names and types."""
         if self.__comp is None or self._update_always:
             self.__comp = self._mapdl._parse_cmlist()
         return self.__comp
@@ -388,7 +410,7 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
-    def keys(self):
+    def components(self):
         """
         Return a view object that contains the keys in the dictionary.
 
@@ -400,7 +422,7 @@ class ComponentManager:
         """
         return self._comp.keys()
 
-    def values(self):
+    def types(self):
         """
         Return a view object that contains the values in the dictionary.
 
@@ -411,7 +433,6 @@ class ComponentManager:
 
         """
         return self._comp.values()
-
 
     def items(self):
         """
