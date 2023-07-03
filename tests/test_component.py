@@ -13,6 +13,15 @@ from ansys.mapdl.core.component import (
 from ansys.mapdl.core.errors import ComponentNoData
 
 
+@pytest.fixture(scope="function")
+def basic_components(mapdl, cube_geom_and_mesh):
+    mapdl.components["mycomp1"] = "NODE", [1, 2, 3]
+    mapdl.components["mycomp2"] = "KP", [1, 3]
+
+    mapdl.cmsel("s", "mycomp1")
+    mapdl.cmsel("a", "mycomp2")
+
+
 def test_str_rep(mapdl, cleared):
     assert "Components" in str(mapdl.components)
     assert "CM1" not in str(mapdl.components)
@@ -236,3 +245,37 @@ def test_set_assign_wrong_objects(mapdl, cube_geom_and_mesh):
 
     with pytest.raises(ValueError, match="Only integers are allowed for component"):
         mapdl.components["asdf"] = [1, "asdf"]
+
+    with pytest.raises(ValueError):
+        mapdl.components["asdf"] = (1, "asdf")
+
+    with pytest.raises(ValueError):
+        mapdl.components["asdf"] = "asdf", [1, 1.1]
+
+
+def test_default_entity_error(mapdl, cube_geom_and_mesh):
+    with pytest.raises(ValueError, match="Only the following entities are allowed:"):
+        mapdl.components.default_entity = "asdf"
+
+
+def test_logger(mapdl):
+    assert mapdl.components.logger == mapdl.logger
+
+
+def test_dunder_methods_iter(mapdl, basic_components):
+    for each1, each2 in zip(mapdl.components, (["NODE", [1, 2, 3]], ["KP", [1, 3]])):
+        comp = mapdl.components[each1]
+        assert comp.type == each2[0]
+        assert comp == tuple(each2[1])
+
+
+def test_dunder_methods_keys(mapdl, basic_components):
+    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.keys())
+
+
+def test_dunder_methods_values(mapdl, basic_components):
+    assert ["NODE", "KP"] == list(mapdl.components.values())
+
+
+def test_dunder_methods_items(mapdl, basic_components):
+    assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(mapdl.components.items())
