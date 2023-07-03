@@ -719,8 +719,11 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
+    in_math_mode = "APDLMATH PARAMETER STATUS" in status
     if "no parameters defined" in status or (
-        not "NAME" in status and not "VALUE" in status
+        not "NAME" in status
+        and not "VALUE" in status
+        and not in_math_mode  # this check is valid only for normal parameter check. It does not work with math
     ):
         return {}
 
