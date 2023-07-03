@@ -32,6 +32,7 @@ Please make sure you have the latest updated version using:
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
+from ansys.mapdl import core as pymapdl
 
 try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -40,7 +41,7 @@ try:
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-from ansys.mapdl.core import _LOCAL_PORTS, _RUNNING_ON_PYTEST, __version__
+from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -316,6 +317,9 @@ class MapdlGrpc(_MapdlCore):
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
         self._remote_instance: Optional["PIM_Instance"] = remote_instance
+        self._strict_session_id_check: bool = (
+            False  # bool to force to check the session id matches in client and server
+        )
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -3281,7 +3285,7 @@ class MapdlGrpc(_MapdlCore):
 
         if pymapdl_session_id is None:
             return
-        elif _RUNNING_ON_PYTEST:
+        elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
                 raise DifferentSessionConnectionError(

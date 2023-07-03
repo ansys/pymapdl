@@ -18,9 +18,11 @@ from ansys.mapdl.core.logging import Logger
 LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
-_RUNNING_ON_PYTEST = False
 
-if _RUNNING_ON_PYTEST:
+BUILDING_GALLERY = False
+RUNNING_TESTS = False
+
+if RUNNING_TESTS:  # pragma: no cover
     LOG.debug("Running tests on Pytest")
 
 _LOCAL_PORTS = []
@@ -68,9 +70,6 @@ from ansys.mapdl.core.pool import LocalMapdlPool
 from ansys.mapdl.core.theme import MapdlTheme
 
 _HAS_ANSYS = _check_has_ansys()
-
-BUILDING_GALLERY = False
-RUNNING_TESTS = False
 
 VERSION_MAP = {
     (0, 0, 0): "2020R2",

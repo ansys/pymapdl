@@ -10,7 +10,7 @@ import pyvista
 
 import ansys.mapdl.core as pymapdl
 
-pymapdl._RUNNING_ON_PYTEST = True
+pymapdl.RUNNING_TESTS = True
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
