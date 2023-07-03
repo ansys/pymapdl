@@ -237,7 +237,7 @@ def run_before_and_after_tests(request, mapdl):
 
         # Cloning the new mapdl instance channel into the old one.
         mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+        mapdl._multi_connect(timeout=mapdl._timeout)
 
         # Restoring the local configuration
         mapdl._local = local_
