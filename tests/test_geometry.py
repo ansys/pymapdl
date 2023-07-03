@@ -509,7 +509,7 @@ def test_entities_simple_cube(mapdl, cube_solve, entity, number):
 @pytest.mark.parametrize(
     "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
 )
-def test_entities_multiple_bodies(mapdl, contact_solve, entity, number):
+def test_entities_multiple_bodies(mapdl, contact_geom_and_mesh, entity, number):
     entity = getattr(mapdl.geometry, entity)
     assert len(entity) == number
     assert isinstance(entity, pv.MultiBlock)
@@ -519,5 +519,5 @@ def test_create_geometry(mapdl):
     assert isinstance(mapdl._create_geometry(), Geometry)
 
 
-def test_get_lines(mapdl, contact_solve):
+def test_get_lines(mapdl, contact_geom_and_mesh):
     assert isinstance(mapdl.geometry.get_lines(), pv.PolyData)

@@ -570,7 +570,7 @@ def coupled_example(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def contact_solve(mapdl):
+def contact_geom_and_mesh(mapdl):
     mapdl.mute = True
     mapdl.finish()
     mapdl.clear()
@@ -848,7 +848,9 @@ def contact_solve(mapdl):
     mapdl.ddele(1, "temp")
     mapdl.allsel("all")
 
-    # mapdl.eplot()
+
+@pytest.fixture(scope="function")
+def contact_solve(mapdl, contact_geom_and_mesh):
     # ==========================================================
     # * Solution
     # ==========================================================
