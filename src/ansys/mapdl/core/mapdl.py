@@ -1771,7 +1771,7 @@ class _MapdlCore(Commands):
                 self.cm("__area__", "AREA", mute=True)
                 self.lsla("S", mute=True)
 
-                lines = self.geometry.lines
+                lines = self.geometry.get_lines()
                 self.cmsel("S", "__area__", "AREA", mute=True)
 
                 if show_lines:
