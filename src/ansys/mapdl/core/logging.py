@@ -203,7 +203,9 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         ] = self.extra.name  # here self.extra is the argument pass to the log records.
         return msg, kwargs
 
-    def log_to_file(self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL):
+    def log_to_file(
+        self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL
+    ) -> None:
         """Add file handler to logger.
 
         Parameters
@@ -217,7 +219,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
         addfile_handler(self.logger, filename=filename, level=level, write_headers=True)
         self.file_handler = self.logger.file_handler
 
-    def log_to_stdout(self, level: LOG_LEVEL_TYPE = LOG_LEVEL):
+    def log_to_stdout(self, level: LOG_LEVEL_TYPE = LOG_LEVEL) -> None:
         """Add standard output handler to the logger.
 
         Parameters
@@ -363,7 +365,7 @@ class Logger:
         """
 
         # create default main logger
-        self.logger = logging.getLogger("pymapdl_global")
+        self.logger: logging.Logger = logging.getLogger("pymapdl_global")
         self.logger.addFilter(InstanceFilter())
         if isinstance(level, str):
             level = cast(LOG_LEVEL_STRING_TYPE, level.upper())
@@ -390,7 +392,9 @@ class Logger:
         # Using logger to record unhandled exceptions
         self.add_handling_uncaught_expections(self.logger)
 
-    def log_to_file(self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL):
+    def log_to_file(
+        self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL
+    ) -> None:
         """Add file handler to logger.
 
         Parameters
@@ -511,7 +515,7 @@ class Logger:
         name: Optional[str],
         mapdl_instance: "_MapdlCore",
         level: Optional[LOG_LEVEL_TYPE],
-    ):
+    ) -> logging.Logger:
         if isinstance(name, str):
             instance_logger = PymapdlCustomAdapter(
                 self._make_child_logger(name, level), mapdl_instance
@@ -530,7 +534,7 @@ class Logger:
         name: str,
         mapdl_instance: "_MapdlCore",
         level: Optional[LOG_LEVEL_TYPE] = None,
-    ) -> PymapdlCustomAdapter:
+    ) -> logging.Logger:
         """Create a logger for a MAPDL instance.
 
         The MAPDL instance logger is a logger with an adapter which add the
