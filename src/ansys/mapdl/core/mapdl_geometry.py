@@ -520,12 +520,9 @@ class Geometry:
                     line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
-        if lines:
-            lines_ = pv.MultiBlock()
-            for line in lines:
-                lines_.append(line)
-        else:
-            lines_ = pv.MultiBlock()
+        lines_ = pv.MultiBlock()
+        for line in lines:
+            lines_.append(line)
 
         return lines_
 
@@ -817,12 +814,15 @@ class Geometry:
         return self.get_volumes(return_as_list=False)
 
     def get_volumes(
-        self, return_as_list: bool = True
+        self, return_as_list: bool = True, quality=4
     ) -> Union[List[int], pv.MultiBlock]:
         """List of volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
 
         # Cache current selection
         self._mapdl.cm("__temp_volu__", "volu")
+        # try:
+        self._mapdl.cm("__temp_area__", "node")
+        # except Component
 
         if return_as_list:
             volumes_ = []
@@ -831,10 +831,16 @@ class Geometry:
 
         for each_volu in self.vnum:
             self._mapdl.vsel("S", vmin=each_volu)
-            volumes_.append(self._mapdl.mesh.grid.copy())
+            self._mapdl.aslv("S")
+
+            surf = self.generate_surface(11 - quality)
+            volumes_.append(surf)
 
         self._mapdl.cmsel("S", "__temp_volu__")
+        self._mapdl.cmsel("S", "__temp_area__")
+
         return volumes_
+
 
     def volume_select(
         self,
