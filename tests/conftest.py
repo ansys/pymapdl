@@ -196,19 +196,19 @@ def pytest_collection_modifyitems(config, items):
 
 
 class Running_test:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, active: bool = True) -> None:
+        self._state = active
 
-    def __enter__(self):
-        pymapdl.RUNNING_TESTS = True
+    def __enter__(self) -> None:
+        pymapdl.RUNNING_TESTS = self._state
 
-    def __exit__(self, *args):
-        pymapdl.RUNNING_TESTS = False
+    def __exit__(self, *args) -> None:
+        pymapdl.RUNNING_TESTS = not self._state
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def running_test():
-    return Running_test()
+    return Running_test
 
 
 @pytest.fixture(autouse=True, scope="function")

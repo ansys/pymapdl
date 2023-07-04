@@ -1863,7 +1863,7 @@ def test_session_id(mapdl, running_test):
 
     # Checking real case
     mapdl._session_id_ = copy_
-    with running_test:
+    with running_test():
         assert isinstance(mapdl._check_session_id(), bool)
 
     id_ = "123412341234"
@@ -1879,12 +1879,12 @@ def test_session_id(mapdl, running_test):
 
 def test_session_id_different(mapdl, running_test):
     # Assert it works
-    with running_test:
+    with running_test():
         assert mapdl.prep7()
 
     mapdl._run(f"{SESSION_ID_NAME}='1234'")
 
-    with running_test:
+    with running_test():
         with pytest.raises(DifferentSessionConnectionError):
             mapdl.prep7()
 
