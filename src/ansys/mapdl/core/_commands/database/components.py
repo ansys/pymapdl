@@ -1,11 +1,11 @@
 """These DATABASE commands allow selected subsets of entities to be
 named as components for easy selection later on.
 """
-from typing import Any, Dict
+from typing import Any, Dict, Union, Literal
 
 
 class Components:
-    def cm(self, cname: str = "", entity: str = "", **kwargs: Dict[Any, Any]) -> None:
+    def cm(self, cname: str = "", entity: Union[Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]] = "", **kwargs: Dict[Any, Any]) -> None:
         """Groups geometry items into a component.
 
         APDL Command: CM

@@ -121,7 +121,7 @@ class Component(tuple):
         return f"Component(type='{self._type}', items={tup_str})"
 
     @property
-    def type(self) -> str:
+    def type(self) -> ENTITIES_TYP:
         """Return the type of the component. For instance "NODES", "KP", etc."""
         return self._type
 
