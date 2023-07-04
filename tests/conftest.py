@@ -164,7 +164,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
+        skip_grpc = pytest.mark.skip(
+            reason="Requires gRPC connection (at least v211 to run)"
+        )
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
@@ -394,7 +396,7 @@ def cleared(mapdl):
 
 
 @pytest.fixture(scope="function")
-def cube_solve(cleared, mapdl):
+def cube_geom_and_mesh(cleared, mapdl):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
@@ -406,6 +408,9 @@ def cube_solve(cleared, mapdl):
     mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
     mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
+
+@pytest.fixture(scope="function")
+def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 

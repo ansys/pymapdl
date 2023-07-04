@@ -1,4 +1,5 @@
 """Module to support MAPDL CAD geometry"""
+import contextlib
 import re
 from typing import List, Optional, Sequence, Union
 
@@ -6,6 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core.errors import ComponentNoData
 
 if _HAS_PYVISTA:
     import pyvista as pv
@@ -274,9 +276,12 @@ class Geometry:
             Steps to between amin and amax.
         """
         # store initially selected areas and elements
-        with self._mapdl.non_interactive:
-            self._mapdl.cm("__tmp_elem__", "ELEM")
-            self._mapdl.cm("__tmp_area__", "AREA")
+        with contextlib.suppress(ComponentNoData):
+            # avoiding empty components exceptions
+            with self._mapdl.non_interactive:
+                self._mapdl.cm("__tmp_elem__", "ELEM")
+                self._mapdl.cm("__tmp_area__", "AREA")
+
         orig_anum = self.anum
 
         # reselect from existing selection to mimic APDL behavior
