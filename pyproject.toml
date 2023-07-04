@@ -60,7 +60,7 @@ tests = [
     "matplotlib==3.7.1",
     "scipy==1.11.1",
     "pandas==2.0.3",
-    "pyiges[full]" == "0.3.0",
+    "pyiges" ==  {extras = ["full"], version = "0.3.0"}
     "pytest==7.4.0",
     "pytest-cov==4.1.0",
     "pyvista==0.40.0",
@@ -83,7 +83,7 @@ doc = [
     "numpydoc==1.5.0",
     "pandas==2.0.3",
     "plotly==5.15.0",
-    "pyiges[full]" == "0.3.0",
+    "pyiges" ==  {extras = ["full"], version = "0.3.0"}
     "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
