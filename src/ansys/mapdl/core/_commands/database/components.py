@@ -5,7 +5,12 @@ from typing import Any, Dict, Literal, Union
 
 
 class Components:
-    def cm(self, cname: str = "", entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "", **kwargs: Dict[Any, Any]) -> None:
+    def cm(
+        self,
+        cname: str = "",
+        entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Groups geometry items into a component.
 
         APDL Command: CM
@@ -197,7 +202,11 @@ class Components:
         return self.run(command, **kwargs)
 
     def cmlist(
-        self, name: str = "", key: str = "", entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "", **kwargs: Dict[Any, Any]
+        self,
+        name: str = "",
+        key: str = "",
+        entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "",
+        **kwargs: Dict[Any, Any],
     ) -> None:
         """Lists the contents of a component or assembly.
 
