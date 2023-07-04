@@ -841,7 +841,6 @@ class Geometry:
 
         return volumes_
 
-
     def volume_select(
         self,
         items: Optional[Union[str, Sequence[int]]],
