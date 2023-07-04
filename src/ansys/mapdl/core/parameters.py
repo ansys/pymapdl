@@ -56,6 +56,8 @@ class Parameters:
     Simply list all parameters except for MAPDL MATH parameters.
 
     >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
     ARR                              : ARRAY DIM (3, 1, 1)
     PARM_FLOAT                       : 20.0
     PARM_INT                         : 10.0
@@ -716,7 +718,7 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "There are no parameters defined." in status:
+    if "no parameters defined" in status:
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra

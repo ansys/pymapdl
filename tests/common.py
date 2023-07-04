@@ -62,7 +62,7 @@ def has_grpc():
         rver = int(rver * 10)
         return int(rver) >= 211
     else:
-        return False
+        return True  # In remote mode, assume gRPC by default.
 
 
 def has_dpf():
