@@ -275,9 +275,10 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
 
     for file_to_check in list_files:
         basename = os.path.basename(file_to_check)
+        file_ = os.path.join(tmpdir, basename)
         assert basename in expected_output
-        assert os.path.exists(os.path.join(tmpdir, basename))
-        os.remove(file_to_check)
+        assert os.path.exists(file_)
+        os.remove(file_)
 
 
 @pytest.mark.parametrize(
@@ -297,10 +298,10 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
 
     for file_to_check in list_files:
         basename = os.path.basename(file_to_check)
+        file_ = os.path.join(os.getcwd(), basename)
         assert basename in expected_output
-        assert os.path.exists(os.path.join(os.getcwd(), basename))
-        assert os.path.exists(file_to_check)
-        os.remove(file_to_check)
+        assert os.path.exists(file_)
+        os.remove(file_)
 
 
 @pytest.mark.parametrize(
