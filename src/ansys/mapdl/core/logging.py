@@ -121,9 +121,9 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Type,
     Union,
     cast,
-    Type,
 )
 import weakref
 
