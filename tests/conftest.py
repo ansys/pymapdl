@@ -242,8 +242,6 @@ def run_before_and_after_tests(request, mapdl):
         # Restoring the local configuration
         mapdl._local = local_
 
-    mapdl.clear()
-
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
