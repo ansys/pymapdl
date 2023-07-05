@@ -827,10 +827,10 @@ class Geometry:
         """List of volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
 
         # Cache current selection
-        self._mapdl.cm("__temp_volu__", "volu")
-        # try:
-        self._mapdl.cm("__temp_area__", "node")
-        # except Component
+        with contextlib.suppress(ComponentNoData):
+            # avoiding empty components exceptions
+            self._mapdl.cm("__temp_volu__", "volu")
+            self._mapdl.cm("__temp_area__", "node")
 
         if return_as_list:
             volumes_ = []
