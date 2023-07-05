@@ -1,6 +1,16 @@
 """Component related module"""
 
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, get_args, Dict, List, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    get_args,
+)
 import warnings
 import weakref
 
