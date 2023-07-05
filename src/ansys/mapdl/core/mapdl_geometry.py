@@ -1,7 +1,7 @@
 """Module to support MAPDL CAD geometry"""
 import contextlib
 import re
-from typing import List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -11,6 +11,9 @@ from ansys.mapdl.core.errors import ComponentNoData
 
 if _HAS_PYVISTA:
     import pyvista as pv
+
+if TYPE_CHECKING:  # pragma: no cover
+    from pyiges import Iges
 
 from ansys.mapdl.core.misc import run_as_prep7, supress_logging
 
