@@ -43,6 +43,7 @@ def db(mapdl):
             f"This version of MAPDL gRPC API version ('ansys.api.mapdl' == {ver_}) is not compatible with 'database' module."
         )
 
+    mapdl.clear()
     return mapdl.db
 
 
