@@ -108,7 +108,7 @@ areas
 # areas (mesh density), and if you would like a merged output or
 # individual meshes.
 
-area = mapdl.geometry.get_areas(quality=3, merge=True)
+area = mapdl.geometry.get_areas(quality=3)
 area
 
 # optionally save the area, or plot it

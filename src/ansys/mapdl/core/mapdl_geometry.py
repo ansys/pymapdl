@@ -1,7 +1,7 @@
 """Module to support MAPDL CAD geometry"""
 import contextlib
 import re
-from typing import TYPE_CHECKING, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -40,7 +40,7 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 """
 
 
-def merge_polydata(items):
+def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
     """Merge list of polydata or unstructured grids"""
 
     # lazy import here for faster module loading
@@ -135,7 +135,7 @@ class Geometry:
         self._lines_cache = None
 
     @property
-    def _keypoints(self) -> pv.PolyData:
+    def _keypoints(self) -> Tuple[NDArray, NDArray]:
         """Returns keypoints cache"""
         if self._keypoints_cache is None:
             self._keypoints_cache = self._load_keypoints()
@@ -144,17 +144,36 @@ class Geometry:
     @property
     def keypoints(self) -> pv.MultiBlock:
         """Keypoint entities as Pyvista MultiBlock"""
-        points = pv.MultiBlock()
-        for each_kp in self._keypoints.points:
-            points.append(pv.PointSet(each_kp))
-        return points
+        return pv.MultiBlock(self.get_keypoints(return_as_list=True))
 
-    def get_keypoints(self) -> NDArray[int]:
+    def get_keypoints(
+        self, return_as_list: bool = False, return_as_array: bool = False
+    ) -> Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]:
         """Keypoint coordinates entities as a Numpy array"""
-        return np.asarray(self._keypoints.points)
+        if return_as_array:
+            keyp = np.array(self._keypoints[0])
+            keyp_num = np.array(self._keypoints[0])
+            return np.concatenate((keyp, keyp_num))
+
+        keypoints, kp_num = self._keypoints
+
+        if return_as_list:
+            keypoints_ = []
+
+            for each_point, each_id in zip(keypoints, kp_num):
+                keypoints_ps = pv.PolyData([each_point])
+                keypoints_ps["entity_num"] = np.array(each_id).reshape((1))
+                keypoints_.append(keypoints_ps)
+
+            return keypoints_
+
+        else:
+            keypoints_pd = pv.PolyData(keypoints)
+            keypoints_pd["entity_num"] = kp_num
+            return keypoints_pd
 
     @property
-    def _lines(self) -> pv.MultiBlock:
+    def _lines(self) -> list[pv.PolyData]:
         """Returns lines cache"""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
@@ -163,20 +182,26 @@ class Geometry:
     @property
     def lines(self) -> pv.MultiBlock:
         """Active lines as a pyvista.MultiBlock"""
-        return self._lines
+        return pv.MultiBlock(self._lines)
 
-    def get_lines(self) -> pv.PolyData:
+    def get_lines(
+        self, return_as_list: bool = False
+    ) -> Union[pv.PolyData, list[pv.PolyData]]:
         """Active lines as a pyvista.Polydata"""
-        lines = self.lines.as_polydata_blocks()
-        return merge_polydata(list(lines))
+        if return_as_list:
+            return self._lines
+        else:
+            return merge_polydata(self._lines)
 
     @property
     def areas(self) -> pv.MultiBlock:
         """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`"""
-        return self.get_areas()
+        return pv.MultiBlock(self.get_areas(return_as_list=True))
 
-    def get_areas(self, quality: int = 1, merge: bool = False) -> pv.MultiBlock:
-        """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`.
+    def get_areas(
+        self, quality: int = 1, return_as_list: Optional[bool] = False
+    ) -> Union[list[pv.UnstructuredGrid], pv.PolyData]:
+        """Active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
 
         Parameters
         ----------
@@ -184,24 +209,31 @@ class Geometry:
             quality of the mesh to display.  Varies between 1 (worst)
             to 10 (best).
 
-        merge : bool, optional
-            Option to merge areas into a single mesh. Default
-            ``False`` to return a list of areas.  When ``True``,
-            output will be a single mesh.
-
         Returns
         -------
-        pv.MultiBlock
-            pv.MultiBlock grouping all meshes representing
+        pv.PolyData or List[pv.UnstructuredGrid]
+            pv.PolyData grouping all meshes representing
             the active surface areas selected by ``ASEL``.  If
-            ``merge=True``, areas are returned as a single merged
-            UnstructuredGrid inside the MultiBlock object.
+            ``return_as_list=True``, areas are returned as a
+            list of ``pv.UnstructuredGrid``.
 
         Examples
         --------
         Return a list of areas as indiviudal grids
 
-        >>> areas = mapdl.areas(quality=3)
+        Return a single merged mesh.
+
+        >>> area_mesh = mapdl.areas(quality=3)
+        >>> area_mesh
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	24
+          N Points:	30
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4
+
+        >>> areas = mapdl.areas(quality=3, return_as_list=True)
         >>> areas
         [UnstructuredGrid (0x7f14add95040)
           N Cells:	12
@@ -219,30 +251,19 @@ class Geometry:
           N Arrays:	4,
         ...
 
-        Return a single merged mesh.
-
-        >>> area_mesh = mapdl.areas(quality=3)
-        >>> area_mesh
-        UnstructuredGrid (0x7f14add95ca0)
-          N Cells:	24
-          N Points:	30
-          X Bounds:	-2.000e+00, 2.000e+00
-          Y Bounds:	0.000e+00, 1.974e+00
-          Z Bounds:	5.500e-01, 5.500e-01
-          N Arrays:	4
-
-
         """
         quality = int(quality)
         if quality > 10:
             raise ValueError("``quality`` parameter must be a value between 0 and 10")
+
         surf = self.generate_surface(11 - quality)
-        if merge:
+
+        if not return_as_list:
             return surf
 
         entity_num = surf["entity_num"]
 
-        areas = pv.MultiBlock()
+        areas = []
         anums = np.unique(entity_num)
         for anum in anums:
             areas.append(surf.extract_cells(entity_num == anum))
@@ -486,7 +507,7 @@ class Geometry:
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
-    def _load_lines(self) -> pv.MultiBlock:
+    def _load_lines(self) -> list[pv.PolyData]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
@@ -528,13 +549,13 @@ class Geometry:
                     line.cell_data["entity_num"] = entity_num
                     lines.append(line)
 
-        lines_ = pv.MultiBlock()
+        lines_ = []
         for line in lines:
             lines_.append(line)
 
         return lines_
 
-    def _load_keypoints(self) -> pv.PolyData:
+    def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES"""
         # write only keypoints
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
@@ -556,10 +577,7 @@ class Geometry:
             keypoints.append([kp.x, kp.y, kp.z])
             kp_num.append(int(kp.d["entity_subs_num"]))
 
-        # self._kp_num = np.array(self._kp_num)
-        keypoints_pd = pv.PolyData(keypoints)
-        keypoints_pd["entity_num"] = kp_num
-        return keypoints_pd
+        return keypoints, kp_num
 
     def __str__(self) -> str:
         """Current geometry info"""
@@ -819,30 +837,34 @@ class Geometry:
     @property
     def volumes(self) -> pv.MultiBlock:
         """Get volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
-        return self.get_volumes(return_as_list=False)
+        return pv.MultiBlock(self.get_volumes(return_as_list=True))
 
     def get_volumes(
-        self, return_as_list: bool = True, quality=4
-    ) -> Union[List[int], pv.MultiBlock]:
+        self, return_as_list: bool = False, quality=4
+    ) -> Union[List[pv.PolyData], pv.PolyData]:
         """List of volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
+        quality = int(quality)
+        if quality > 10:
+            raise ValueError("``quality`` parameter must be a value between 0 and 10")
+
+        volumes_ = []
+        surf = self.generate_surface(11 - quality)
+
+        if not return_as_list:
+            return surf
 
         # Cache current selection
         with contextlib.suppress(ComponentNoData):
             # avoiding empty components exceptions
             self._mapdl.cm("__temp_volu__", "volu")
-            self._mapdl.cm("__temp_area__", "node")
+            self._mapdl.cm("__temp_area__", "area")
 
-        if return_as_list:
-            volumes_ = []
-        else:
-            volumes_ = pv.MultiBlock()
+        area_num = surf["entity_num"]
 
         for each_volu in self.vnum:
             self._mapdl.vsel("S", vmin=each_volu)
             self._mapdl.aslv("S")
-
-            surf = self.generate_surface(11 - quality)
-            volumes_.append(surf)
+            volumes_.append(surf.extract_cells(np.in1d(area_num, self.anum)))
 
         self._mapdl.cmsel("S", "__temp_volu__")
         self._mapdl.cmsel("S", "__temp_area__")

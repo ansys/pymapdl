@@ -521,3 +521,28 @@ def test_create_geometry(mapdl):
 
 def test_get_lines(mapdl, contact_geom_and_mesh):
     assert isinstance(mapdl.geometry.get_lines(), pv.PolyData)
+
+
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
+)
+def test_geometry_get_apis(mapdl, contact_geom_and_mesh, entity, number):
+    func = getattr(mapdl.geometry, f"get_{entity}")
+
+    default = func()
+    assert isinstance(default, pv.PolyData)
+
+    if entity in ["areas", "volumes"]:
+        type_ = pv.UnstructuredGrid
+    else:
+        type_ = pv.PolyData
+
+    as_a_list = func(return_as_list=True)
+    assert isinstance(as_a_list, list)
+    assert all([isinstance(each, type_) for each in as_a_list])
+    assert len(as_a_list) == number
+
+    if "entity" == "keypoints":
+        as_an_array = func(return_as_array=True)
+        assert isinstance(as_an_array, np.ndarray)
+        assert len(as_an_array) == number
