@@ -121,6 +121,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Type,
     Union,
     cast,
 )
@@ -582,7 +583,7 @@ class Logger:
         """This just redirect the output of an exception to the logger."""
 
         def handle_exception(
-            exc_type: type[BaseException],
+            exc_type: Type[BaseException],
             exc_value: BaseException,
             exc_traceback: Optional[TracebackType],
         ):
