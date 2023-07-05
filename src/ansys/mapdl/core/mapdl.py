@@ -11,7 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Union, Dict
 import warnings
 from warnings import warn
 import weakref
@@ -245,7 +245,7 @@ class _MapdlCore(Commands):
         self._platform = None
 
         _sanitize_start_parm(start_parm)
-        self._start_parm: dict[str, Any] = start_parm
+        self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
         self._print_com: bool = print_com  # print the command /COM input.
@@ -1298,7 +1298,7 @@ class _MapdlCore(Commands):
             Shows the boundary conditions label per node.
             Defaults to ``False``.
 
-        bc_labels : list[str], Tuple(str), optional
+        bc_labels : List[str], Tuple(str), optional
             List or tuple of strings with the boundary conditions
             to plot, i.e. ``["UX", "UZ"]``.
             You can obtain the allowed boundary conditions by
@@ -1322,7 +1322,7 @@ class _MapdlCore(Commands):
             in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
             and :func:`ansys.mapdl.core.Mapdl.flist()`.
 
-        bc_target : list[str], Tuple(str), optional
+        bc_target : List[str], Tuple(str), optional
             Specify the boundary conditions target
             to plot, i.e. "Nodes", "Elements".
             You can obtain the allowed boundary conditions target by
@@ -1442,7 +1442,7 @@ class _MapdlCore(Commands):
             Shows the boundary conditions label per node.
             Defaults to ``False``.
 
-        bc_labels : list[str], Tuple(str), optional
+        bc_labels : List[str], Tuple(str), optional
             List or tuple of strings with the boundary conditions
             to plot, i.e. ``["UX", "UZ"]``.
             You can obtain the allowed boundary conditions by
@@ -1466,7 +1466,7 @@ class _MapdlCore(Commands):
             in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
             and :func:`ansys.mapdl.core.Mapdl.flist()`.
 
-        bc_target : list[str], Tuple(str), optional
+        bc_target : List[str], Tuple(str), optional
             Specify the boundary conditions target
             to plot, i.e. "Nodes", "Elements".
             You can obtain the allowed boundary conditions target by
@@ -2348,7 +2348,7 @@ class _MapdlCore(Commands):
         it3num: Union[str, int, float] = "",
         item4: Union[str, int, float] = "",
         it4num: Union[str, int, float] = "",
-        **kwargs: dict[Any, Any],
+        **kwargs: Dict[Any, Any],
     ):
         """Runs the MAPDL GET command and returns a Python value.
 
@@ -2456,7 +2456,7 @@ class _MapdlCore(Commands):
         it3num: Union[str, int, float] = "",
         item4: Union[str, int, float] = "",
         it4num: Union[str, int, float] = "",
-        **kwargs: dict[Any, Any],
+        **kwargs: Dict[Any, Any],
     ) -> Union[float, str]:
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
@@ -3430,7 +3430,7 @@ class _MapdlCore(Commands):
         item2: str = "",
         it2num: Union[str, int, float] = "",
         kloop: Union[str, int, float] = "",
-        **kwargs: dict[Any, Any],
+        **kwargs: Dict[Any, Any],
     ) -> NDArray:
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
@@ -3698,7 +3698,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        list[list[Str]] or numpy.array
+        List[List[Str]] or numpy.array
             If parameter ``label`` is give, the output is converted to a
             numpy array instead of a list of list of strings.
         """
@@ -3723,7 +3723,7 @@ class _MapdlCore(Commands):
 
         Returns
         -------
-        list[list[Str]] or numpy.array
+        List[List[Str]] or numpy.array
             If parameter ``label`` is give, the output is converted to a
             numpy array instead of a list of list of strings.
         """
@@ -4450,7 +4450,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self) -> dict[int, float]:
+    def _parse_rlist(self) -> Dict[int, float]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
@@ -4484,7 +4484,7 @@ class _MapdlCore(Commands):
 
         return const_
 
-    def _parse_cmlist(self, cmlist: Optional[str] = None) -> dict[str, Any]:
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
         if not cmlist:
             cmlist = self.cmlist()
 
