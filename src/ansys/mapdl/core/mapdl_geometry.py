@@ -202,7 +202,10 @@ class Geometry:
         return mb
 
     def get_keypoints(
-        self, return_as_list: bool = False, return_as_array: bool = False
+        self,
+        return_as_list: bool = False,
+        return_as_array: bool = False,
+        return_ids_in_array: bool = False,
     ) -> Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]:
         """get_keypoints Obtain the keypoints geometry
 
@@ -215,6 +218,9 @@ class Geometry:
             Return the data as a list, by default False
         return_as_array : bool, optional
             Return the data as a numpy array, by default False
+        return_ids_in_array : bool, optional
+            Return the keypoints ids in the array. Only valid when
+            `return_as_array` is True. By default False
 
         Returns
         -------
@@ -236,15 +242,15 @@ class Geometry:
           Z Bounds:   -3.180e-03, 1.524e-02
           N Arrays:   1
 
-        Return a list of lines as indiviudal grids
+        Return a list of keypoints as indiviudal grids
 
-        >>> lines = mapdl.geometry.get_keypoints(return_as_list=True)
-        >>> lines
+        >>> keypoints = mapdl.geometry.get_keypoints(return_as_list=True)
+        >>> keypoints
         [PolyData (0x147ca4be...rrays:   1, PolyData (0x147d5b8e...rrays:   1, PolyData (0x1491a42e...rrays:   1, PolyData (0x1491a440...rrays:   1, PolyData (0x1491a47c...rrays:   1, PolyData (0x1491a470...rrays:   1, PolyData (0x1491a4b2...rrays:   1, PolyData (0x1491a4e2...rrays:   1, PolyData (0x1491a49a...rrays:   1, PolyData (0x1491a4f4...rrays:   1, PolyData (0x1491a458...rrays:   1, PolyData (0x1491a4b8...rrays:   1, PolyData (0x1491a4dc...rrays:   1, PolyData (0x1491a506...rrays:   1, ...]
 
         Return the keypoints coordinates as a numpy array:
 
-        >>> lines = mapdl.geometry.get_keypoints(return_as_array=True)
+        >>> keypoints = mapdl.geometry.get_keypoints(return_as_array=True)
         array([[ 0.00000000e+00,  1.77800000e-02, -3.18000000e-03],
                [ 0.00000000e+00, -7.62000000e-03, -3.18000000e-03],
                [ 1.58750000e-02,  1.77800000e-02, -3.18000000e-03],
@@ -252,11 +258,31 @@ class Geometry:
                [ 0.00000000e+00, -7.62000000e-03,  0.00000000e+00],
         ...
 
+        When returning an array, you can also choose to output the keypoint
+        ids as the first column:
+
+        >>> keypoints = mapdl.geometry.get_keypoints(return_ids_in_array=True)
+        array([[ 1.00000000e+00,  0.00000000e+00,  1.77800000e-02,
+                -3.18000000e-03],
+               [ 2.00000000e+00,  0.00000000e+00, -7.62000000e-03,
+                -3.18000000e-03],
+               [ 3.00000000e+00,  1.58750000e-02,  1.77800000e-02,
+                -3.18000000e-03],
+               [ 4.00000000e+00,  1.58750000e-02, -7.62000000e-03,
+                -3.18000000e-03],
+               [ 5.00000000e+00,  0.00000000e+00, -7.62000000e-03,
+                 0.00000000e+00],
+               [ 6.00000000e+00,  1.58750000e-02, -7.62000000e-03,
+        ...
+
         """
-        if return_as_array:
-            keyp = np.array(self._keypoints[0])
-            keyp_num = np.array(self._keypoints[0])
-            return np.concatenate((keyp, keyp_num))
+        if return_as_array or return_ids_in_array:
+            if return_ids_in_array:
+                keyp = np.array(self._keypoints[0])
+                keyp_num = np.array(self._keypoints[1])
+                return np.hstack((keyp_num.reshape((-1, 1)), keyp))
+            else:
+                return np.array(self._keypoints[0])
 
         keypoints, kp_num = self._keypoints
 

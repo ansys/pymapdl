@@ -410,14 +410,14 @@ def test_keypoints(cleared, mapdl):
 
     i = 1
     knum = []
-    for x, y, z in kps:
+    for i, (x, y, z) in enumerate(kps):
+        print(x, y, z)
         mapdl.k(i, x, y, z)
         knum.append(i)
-        i += 1
 
     assert mapdl.geometry.n_keypoint == 4
     assert isinstance(mapdl.geometry.keypoints, MultiBlock)
-    assert np.allclose(kps, mapdl.geometry.get_keypoints())
+    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
