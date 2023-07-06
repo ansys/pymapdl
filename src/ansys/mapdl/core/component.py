@@ -1,6 +1,16 @@
 """Component related module"""
 
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, get_args
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    get_args,
+)
 import warnings
 import weakref
 
@@ -36,8 +46,8 @@ ENTITIES_MAPPING = {
 }
 
 
-ITEMS_VALUES = Optional[Union[str, int, list[int], NDArray[Any]]]
-UNDERLYING_DICT = dict[str, ITEMS_VALUES]
+ITEMS_VALUES = Optional[Union[str, int, List[int], NDArray[Any]]]
+UNDERLYING_DICT = Dict[str, ITEMS_VALUES]
 
 warning_entity = (
     "Assuming a {default_entity} selection.\n"
@@ -49,7 +59,7 @@ warning_entity = (
 
 
 def _check_valid_pyobj_to_entities(
-    items: Union[tuple[int, ...], list[int], NDArray[Any]]
+    items: Union[Tuple[int, ...], List[int], NDArray[Any]]
 ):
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.
@@ -69,7 +79,7 @@ class Component(tuple):
     type_ : str
         The entity type. For instance "NODES", "KP", "VOLU", etc
 
-    items_ : None, str, int, list[int], np.array[int]]
+    items_ : None, str, int, List[int], np.array[int]]
         Item ids contained in the component.
 
     Examples
@@ -101,7 +111,7 @@ class Component(tuple):
     def __new__(
         cls,
         type_: ENTITIES_TYP,
-        items_: tuple[str, Union[tuple[int], list[int], NDArray[np.int_]]],
+        items_: Tuple[str, Union[Tuple[int], List[int], NDArray[np.int_]]],
     ):
         if not isinstance(type_, str) or type_.upper() not in VALID_ENTITIES:
             raise ValueError(

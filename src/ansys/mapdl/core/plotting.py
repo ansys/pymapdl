@@ -714,21 +714,21 @@ def general_plotter(
         since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
-    add_points_kwargs : list[dict]
+    add_points_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_points` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot nodes for example.
         See examples section to learn more about its usage.
 
-    add_mesh_kwargs : list[dict]
+    add_mesh_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_mesh` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot elements for example.
         See examples section to learn more about its usage.
 
-    add_point_labels_kwargs : list[dict]
+    add_point_labels_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_point_labels` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
