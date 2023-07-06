@@ -58,7 +58,8 @@ tests = [
     "ansys-dpf-core==0.8.1",
     "autopep8==2.0.2",
     "matplotlib==3.7.1",
-    "scipy==1.11.1",
+    "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
+    "scipy==1.11.1; python_version > '3.8'",
     "pandas==2.0.3",
     "pytest==7.4.0",
     "pytest-cov==4.1.0",
