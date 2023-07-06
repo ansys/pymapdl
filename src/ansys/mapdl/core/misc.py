@@ -118,7 +118,14 @@ class Plain_Report:
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
-            from pyvista.utilities.errors import GPUInfo
+            from pyvista import PyVistaDeprecationWarning
+
+            try:
+                from pyvista.utilities.errors import (
+                    GPUInfo,  # deprecated in pyvista 0.40.0
+                )
+            except (PyVistaDeprecationWarning, ImportError):
+                from pyvista.report import GPUInfo
 
             try:
                 self.kwargs["extra_meta"] = [(t[1], t[0]) for t in GPUInfo().get_info()]
