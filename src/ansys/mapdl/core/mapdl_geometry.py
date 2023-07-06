@@ -143,13 +143,105 @@ class Geometry:
 
     @property
     def keypoints(self) -> pv.MultiBlock:
-        """Keypoint entities as Pyvista MultiBlock"""
+        """keypoints Obtain the keypoints geometry
+
+        Obtain the selected keypoints as a :class:`pyvista.MultiBlock` object.
+
+        Returns
+        -------
+        pv.MultiBlock
+
+        Examples
+        --------
+
+        >>> mapdl.geometry.keypoints
+        MultiBlock (0x147a78220)
+          N Blocks    26
+          X Bounds    -0.016, 0.016
+          Y Bounds    -0.008, 0.018
+          Z Bounds    -0.003, 0.015
+
+        You can plot the entities:
+
+        >>> mapdl.geometry.keypoints.plot()
+
+        You can access the individual keypoints using indexing:
+
+        >>> keypoint0 = mapdl.geometry.keypoints[0]
+        >>> keypoint0
+        pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
+
+        You can use this to iterate over the different elements:
+
+        >>> points = mapdl.geometry.keypoints
+        >>> for each_point in points:
+                print(each_point.points[0])
+        pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
+        ...
+
+        Alternatively, to iterate you can use :meth:`Mapdl.geometry.get_keypoints`.
+
+        >>> points = mapdl.geometry.get_keypoints(return_as_array=True)
+        >>> for each_point in points:
+                print(each_point)
+        [ 0.     ,  0.01778, -0.00318]
+        ...
+
+        """
         return pv.MultiBlock(self.get_keypoints(return_as_list=True))
 
     def get_keypoints(
         self, return_as_list: bool = False, return_as_array: bool = False
     ) -> Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]:
-        """Keypoint coordinates entities as a Numpy array"""
+        """get_keypoints Obtain the keypoints geometry
+
+        Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
+        a list of :class:`pyvista.PolyData`
+
+        Parameters
+        ----------
+        return_as_list : bool, optional
+            Return the data as a list, by default False
+        return_as_array : bool, optional
+            Return the data as a numpy array, by default False
+
+        Returns
+        -------
+        Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]
+
+        Examples
+        --------
+
+        Return a single merged mesh.
+
+        >>> kps = mapdl.geometry.get_keypoints()
+        >>> kps
+        PolyData (0x147d5b580)
+          N Cells:    26
+          N Points:   26
+          N Strips:   0
+          X Bounds:   -1.588e-02, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, 1.524e-02
+          N Arrays:   1
+
+        Return a list of lines as indiviudal grids
+
+        >>> lines = mapdl.geometry.get_keypoints(return_as_list=True)
+        >>> lines
+        [PolyData (0x147ca4be...rrays:   1, PolyData (0x147d5b8e...rrays:   1, PolyData (0x1491a42e...rrays:   1, PolyData (0x1491a440...rrays:   1, PolyData (0x1491a47c...rrays:   1, PolyData (0x1491a470...rrays:   1, PolyData (0x1491a4b2...rrays:   1, PolyData (0x1491a4e2...rrays:   1, PolyData (0x1491a49a...rrays:   1, PolyData (0x1491a4f4...rrays:   1, PolyData (0x1491a458...rrays:   1, PolyData (0x1491a4b8...rrays:   1, PolyData (0x1491a4dc...rrays:   1, PolyData (0x1491a506...rrays:   1, ...]
+
+        Return the keypoints coordinates as a numpy array:
+
+        >>> lines = mapdl.geometry.get_keypoints(return_as_array=True)
+        array([[ 0.00000000e+00,  1.77800000e-02, -3.18000000e-03],
+               [ 0.00000000e+00, -7.62000000e-03, -3.18000000e-03],
+               [ 1.58750000e-02,  1.77800000e-02, -3.18000000e-03],
+               [ 1.58750000e-02, -7.62000000e-03, -3.18000000e-03],
+               [ 0.00000000e+00, -7.62000000e-03,  0.00000000e+00],
+        ...
+
+        """
         if return_as_array:
             keyp = np.array(self._keypoints[0])
             keyp_num = np.array(self._keypoints[0])
@@ -181,13 +273,99 @@ class Geometry:
 
     @property
     def lines(self) -> pv.MultiBlock:
-        """Active lines as a pyvista.MultiBlock"""
+        """lines Obtain the lines geometry
+
+        Obtain the selected lines as a :class:`pyvista.MultiBlock` object.
+
+        Returns
+        -------
+        pv.MultiBlock
+
+        Examples
+        --------
+
+        >>> mapdl.geometry.lines
+        MultiBlock (0x147b77e20)
+          N Blocks    45
+          X Bounds    -0.016, 0.016
+          Y Bounds    -0.008, 0.018
+          Z Bounds    -0.003, 0.015
+
+        You can plot the entities:
+
+        >>> mapdl.geometry.lines.plot()
+
+        You can access the individual lines using indexing:
+
+        >>> line0 = mapdl.geometry.lines[0]
+        >>> line0
+        PolyData (0x147d5b220)
+          N Cells:    1
+          N Points:   100
+          N Strips:   0
+          X Bounds:   0.000e+00, 0.000e+00
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   1
+
+        You can use this to iterate over the different elements:
+
+        >>> points = mapdl.geometry.lines
+        >>> for each_line in points:
+                print(each_line)
+        PolyData (0x147d5b220)
+          N Cells:    1
+          N Points:   100
+          N Strips:   0
+          X Bounds:   0.000e+00, 0.000e+00
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   1
+        ...
+
+        """
         return pv.MultiBlock(self._lines)
 
     def get_lines(
         self, return_as_list: bool = False
     ) -> Union[pv.PolyData, list[pv.PolyData]]:
-        """Active lines as a pyvista.Polydata"""
+        """get_lines Obtain line geometry
+
+        Obtain the active lines as a :class:`pyvista.PolyData` object or
+        a list of :class:`pyvista.PolyData`
+
+        Parameters
+        ----------
+        return_as_list : bool, optional
+            Return the lines in a list, by default False
+
+        Returns
+        -------
+        Union[pv.PolyData, list[pv.PolyData]]
+
+        Examples
+        --------
+
+        Return a single merged mesh.
+
+        >>> line_mesh = mapdl.geometry.get_lines()
+        >>> line_mesh
+        PolyData (0x14917e740)
+          N Cells:    45
+          N Points:   4500
+          N Strips:   0
+          X Bounds:   -1.588e-02, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, 1.524e-02
+          N Arrays:   1
+
+        Return a list of lines as indiviudal grids
+
+        >>> lines = mapdl.geometry.get_lines(return_as_list=True)
+        >>> lines
+        [PolyData (0x1492ee7a...rrays:   1, PolyData (0x1491a404...rrays:   1, PolyData (0x1491068c...rrays:   1, PolyData (0x14910662...rrays:   1, PolyData (0x14910632...rrays:   1, PolyData (0x1492eeb0...rrays:   1, PolyData (0x1492eec8...rrays:   1, PolyData (0x1492eee0...rrays:   1, PolyData (0x1492eef8...rrays:   1, PolyData (0x1492ef10...rrays:   1, PolyData (0x1492ef28...rrays:   1, PolyData (0x1492ef40...rrays:   1, PolyData (0x1492ef58...rrays:   1, PolyData (0x1492ef70...rrays:   1, ...]
+
+        """
         if return_as_list:
             return self._lines
         else:
@@ -195,13 +373,61 @@ class Geometry:
 
     @property
     def areas(self) -> pv.MultiBlock:
-        """Active areas from MAPDL represented as :class:`pyvista.MultiBlock`"""
+        """areas Obtain the areas geometry
+
+        Obtain the selected areas as a :class:`pyvista.MultiBlock` object.
+
+        Returns
+        -------
+        pv.MultiBlock
+
+        Examples
+        --------
+
+        >>> mapdl.geometry.areas
+        MultiBlock (0x147ca7640)
+          N Blocks    28
+          X Bounds    -0.016, 0.016
+          Y Bounds    -0.008, 0.018
+          Z Bounds    -0.003, 0.015
+
+        You can plot the entities:
+
+        >>> mapdl.geometry.areas.plot()
+
+        You can access the individual areas using indexing:
+
+        >>> area0 = mapdl.geometry.areas[0]
+        >>> area0
+        UnstructuredGrid (0x147ca4340)
+          N Cells:    10
+          N Points:   18
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   3
+
+        You can use this to iterate over the different elements:
+
+        >>> points = mapdl.geometry.areas
+        >>> for each_line in points:
+                print(each_line)
+        UnstructuredGrid (0x147ca4340)
+          N Cells:    10
+          N Points:   18
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   3
+        ...
+
+        """
         return pv.MultiBlock(self.get_areas(return_as_list=True))
 
     def get_areas(
         self, quality: int = 1, return_as_list: Optional[bool] = False
     ) -> Union[list[pv.UnstructuredGrid], pv.PolyData]:
-        """Active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
+        """Get active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
 
         Parameters
         ----------
@@ -219,11 +445,10 @@ class Geometry:
 
         Examples
         --------
-        Return a list of areas as indiviudal grids
 
         Return a single merged mesh.
 
-        >>> area_mesh = mapdl.areas(quality=3)
+        >>> area_mesh = mapdl.geometry.get_areas(quality=3)
         >>> area_mesh
         UnstructuredGrid (0x7f14add95ca0)
           N Cells:	24
@@ -233,7 +458,9 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4
 
-        >>> areas = mapdl.areas(quality=3, return_as_list=True)
+        Return a list of areas as indiviudal grids
+
+        >>> areas = mapdl.geometry.get_areas(quality=3, return_as_list=True)
         >>> areas
         [UnstructuredGrid (0x7f14add95040)
           N Cells:	12
@@ -836,13 +1063,113 @@ class Geometry:
 
     @property
     def volumes(self) -> pv.MultiBlock:
-        """Get volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
+        """volumes Obtain the volumes geometry
+
+        Obtain the selected volumes as a :class:`pyvista.MultiBlock` object.
+
+        Returns
+        -------
+        pv.MultiBlock
+
+        Examples
+        --------
+
+        >>> mapdl.geometry.volumes
+        MultiBlock (0x147ca4100)
+          N Blocks    6
+          X Bounds    -0.016, 0.016
+          Y Bounds    -0.008, 0.018
+          Z Bounds    -0.003, 0.015
+
+        You can plot the entities:
+
+        >>> mapdl.geometry.volumes.plot()
+
+        You can access the individual volumes using indexing:
+
+        >>> volume0 = mapdl.geometry.volumes[0]
+        >>> volume0
+        UnstructuredGrid (0x149107340)
+          N Cells:    34
+          N Points:   36
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, 0.000e+00
+          N Arrays:   3
+
+        You can use this to iterate over the different elements:
+
+        >>> points = mapdl.geometry.volumes
+        >>> for each_line in points:
+                print(each_line)
+        UnstructuredGrid (0x149107340)
+          N Cells:    34
+          N Points:   36
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, 0.000e+00
+          N Arrays:   3
+        ...
+
+        """
         return pv.MultiBlock(self.get_volumes(return_as_list=True))
 
     def get_volumes(
         self, return_as_list: bool = False, quality=4
     ) -> Union[List[pv.PolyData], pv.PolyData]:
-        """List of volumes from MAPDL represented as :class:`pyvista.MultiBlock`"""
+        """Get active volumes from MAPDL represented as :class:`pyvista.PolyData` or
+        a list of :class:`pyvista.UnstructuredGrid`.
+
+        Parameters
+        ----------
+        quality : int, optional
+            quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best).
+
+        Returns
+        -------
+        pv.PolyData or List[pv.UnstructuredGrid]
+            pv.PolyData grouping all meshes representing
+            the active surface volumes selected by ``VSEL``.  If
+            ``return_as_list=True``, volumes are returned as a
+            list of ``pv.UnstructuredGrid``.
+
+        Examples
+        --------
+
+        Return a single merged mesh.
+
+        >>> volume_mesh = mapdl.geometry.get_volumes(quality=3)
+        >>> volume_mesh
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	24
+          N Points:	30
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4
+
+        Return a list of volumes as indiviudal grids
+
+        >>> volumes = mapdl.geometry.get_volumes(quality=3, return_as_list=True)
+        >>> volumes
+        [UnstructuredGrid (0x7f14add95040)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	0.000e+00, 0.000e+00
+          N Arrays:	4,
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4,
+        ...
+
+        """
         quality = int(quality)
         if quality > 10:
             raise ValueError("``quality`` parameter must be a value between 0 and 10")
