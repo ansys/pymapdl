@@ -571,3 +571,30 @@ def test_geometry_names(mapdl, contact_geom_and_mesh, entity, entity_name, numbe
     names.sort()
 
     assert mb_names == names
+
+
+def test_geometry_get_item(mapdl, contact_geom_and_mesh):
+    assert isinstance(mapdl.geometry["kp 2"], pv.PolyData)
+    assert mapdl.geometry["kp 2"].n_points > 0
+
+    assert isinstance(mapdl.geometry["line 1"], pv.PolyData)
+    assert mapdl.geometry["line 1"].n_cells > 0
+
+    assert isinstance(mapdl.geometry["area 1"], pv.UnstructuredGrid)
+    assert mapdl.geometry["area 1"].n_cells > 0
+
+    assert isinstance(mapdl.geometry["volume 1"], pv.UnstructuredGrid)
+    assert mapdl.geometry["volume 1"].n_cells > 0
+
+
+def test_geometry_get_item_error(mapdl, contact_geom_and_mesh):
+    with pytest.raises(ValueError):
+        mapdl.geometry["l 0"]
+
+    with pytest.raises(ValueError):
+        mapdl.geometry["kip 0"]
+
+
+def test_geometry_get_block_error(mapdl, contact_geom_and_mesh):
+    with pytest.raises(KeyError):
+        mapdl.geometry["kp 0"]

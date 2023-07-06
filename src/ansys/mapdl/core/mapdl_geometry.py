@@ -134,6 +134,24 @@ class Geometry:
         self._keypoints_cache = None
         self._lines_cache = None
 
+    def __setitem__(self, key: Any, value: Any):
+        raise NotImplementedError("This method has not been implemented yet")
+
+    def __getitem__(self, name: str):
+        name = name.lower()
+        if "kp" in name:
+            return self.keypoints[name]
+        elif "line" in name:
+            return self.lines[name]
+        elif "area" in name:
+            return self.areas[name]
+        elif "volume" in name:
+            return self.volumes[name]
+        else:
+            raise ValueError(
+                f"The entity named '{name}' does not exist as a geometry entity."
+            )
+
     @property
     def _keypoints(self) -> Tuple[NDArray, NDArray]:
         """Returns keypoints cache"""
