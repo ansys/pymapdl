@@ -1,13 +1,15 @@
 """Module to support MAPDL CAD geometry"""
 import contextlib
+from functools import wraps
 import re
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
+import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.errors import ComponentNoData
+from ansys.mapdl.core.errors import ComponentNoData, VersionError
 
 if _HAS_PYVISTA:
     import pyvista as pv
@@ -16,6 +18,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
 from ansys.mapdl.core.misc import run_as_prep7, supress_logging
+from ansys.mapdl.core.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
@@ -38,6 +41,26 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 - 'A' : Additionally select a set and extend the current set.
 - 'U' : Unselect a set from the current set.
 """
+
+VERSION_ERROR = """
+From 0.66.0 the new PyMAPDL geometry module does not allow calls on
+`geometry.keypoints`, `geometry.lines`, or `geometry.areas`.
+
+You can activate the old API by doing:
+>>> mapdl.legacy_geometry = True
+
+For more information visit https://mapdl.docs.pyansys.com/version/stable/user_guide/mesh_geometry.html
+"""
+
+
+class Multiblock(pv.MultiBlock):
+    def __call__(self, *args, **kwargs):
+        raise VersionError(VERSION_ERROR)
+
+    @wraps(pv.MultiBlock.plot)
+    def plot(self, *args, **kwargs):
+        color = kwargs.pop("color", "white")
+        return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
 
 
 def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
@@ -161,7 +184,7 @@ class Geometry:
 
     @property
     def keypoints(self) -> pv.MultiBlock:
-        """keypoints Obtain the keypoints geometry
+        """Obtain the keypoints geometry
 
         Obtain the selected keypoints as a :class:`pyvista.MultiBlock` object.
 
@@ -212,7 +235,7 @@ class Geometry:
         ...
 
         """
-        mb = pv.MultiBlock(self.get_keypoints(return_as_list=True))
+        mb = Multiblock(self.get_keypoints(return_as_list=True))
         # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
@@ -225,7 +248,7 @@ class Geometry:
         return_as_array: bool = False,
         return_ids_in_array: bool = False,
     ) -> Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]:
-        """get_keypoints Obtain the keypoints geometry
+        """Obtain the keypoints geometry
 
         Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
         a list of :class:`pyvista.PolyData`
@@ -328,7 +351,7 @@ class Geometry:
 
     @property
     def lines(self) -> pv.MultiBlock:
-        """lines Obtain the lines geometry
+        """Obtain the lines geometry
 
         Obtain the selected lines as a :class:`pyvista.MultiBlock` object.
 
@@ -392,7 +415,7 @@ class Geometry:
         ...
 
         """
-        mb = pv.MultiBlock(self._lines)
+        mb = Multiblock(self._lines)
         # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
@@ -402,7 +425,7 @@ class Geometry:
     def get_lines(
         self, return_as_list: bool = False
     ) -> Union[pv.PolyData, list[pv.PolyData]]:
-        """get_lines Obtain line geometry
+        """Obtain line geometry
 
         Obtain the active lines as a :class:`pyvista.PolyData` object or
         a list of :class:`pyvista.PolyData`
@@ -446,7 +469,7 @@ class Geometry:
 
     @property
     def areas(self) -> pv.MultiBlock:
-        """areas Obtain the areas geometry
+        """Obtain the areas geometry
 
         Obtain the selected areas as a :class:`pyvista.MultiBlock` object.
 
@@ -507,7 +530,7 @@ class Geometry:
         ...
 
         """
-        mb = pv.MultiBlock(self.get_areas(return_as_list=True))
+        mb = Multiblock(self.get_areas(return_as_list=True))
         # Setting names
         for ind, each_block in enumerate(mb):
             mapdl_index = int(each_block["entity_num"][0])
@@ -1153,7 +1176,7 @@ class Geometry:
 
     @property
     def volumes(self) -> pv.MultiBlock:
-        """volumes Obtain the volumes geometry
+        """Obtain the volumes geometry
 
         Obtain the selected volumes as a :class:`pyvista.MultiBlock` object.
 
@@ -1214,7 +1237,7 @@ class Geometry:
         ...
 
         """
-        mb = pv.MultiBlock(self.get_volumes(return_as_list=True))
+        mb = Multiblock(self.get_volumes(return_as_list=True))
         # Setting names
         # Because the volume mapping is made through the areas, the default
         # "entity_num" field is not applicable here.
@@ -1456,3 +1479,77 @@ class Geometry:
             self._mapdl.vsel(sel_type, vmin=items, return_mapdl_output=True)
         else:
             raise ValueError(f'Unable to select "{item_type}"')
+
+
+class LegacyGeometry(Geometry):
+    """Legacy pythonic representation of MAPDL CAD geometry
+
+    Contains advanced methods to extend geometry building and
+    selection within MAPDL.
+    """
+
+    def keypoints(self) -> np.array:  # type: ignore
+        """Keypoint coordinates"""
+        return super().get_keypoints(return_as_array=True)
+
+    def lines(self) -> pv.PolyData:
+        """Active lines as a pyvista.PolyData"""
+        return super().get_lines()  # type: ignore
+
+    def areas(self, quality=1, merge=False) -> pv.PolyData:
+        """List of areas from MAPDL represented as ``pyvista.PolyData``.
+
+        Parameters
+        ----------
+        quality : int, optional
+            quality of the mesh to display.  Varies between 1 (worst)
+            to 10 (best).
+
+        merge : bool, optional
+            Option to merge areas into a single mesh. Default
+            ``False`` to return a list of areas.  When ``True``,
+            output will be a single mesh.
+
+        Returns
+        -------
+        list of pyvista.UnstructuredGrid
+            List of ``pyvista.UnstructuredGrid`` meshes representing
+            the active surface areas selected by ``ASEL``.  If
+            ``merge=True``, areas are returned as a single merged
+            UnstructuredGrid.
+
+        Examples
+        --------
+        Return a list of areas as indiviudal grids
+
+        >>> areas = mapdl.areas(quality=3)
+        >>> areab
+        [UnstructuredGrid (0x7f14add95040)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	0.000e+00, 0.000e+00
+          N Arrays:	4,
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	12
+          N Points:	20
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4,
+        ...
+
+        Return a single merged mesh.
+
+        >>> area_mesh = mapdl.areas(quality=3)
+        >>> area_mesh
+        UnstructuredGrid (0x7f14add95ca0)
+          N Cells:	24
+          N Points:	30
+          X Bounds:	-2.000e+00, 2.000e+00
+          Y Bounds:	0.000e+00, 1.974e+00
+          Z Bounds:	5.500e-01, 5.500e-01
+          N Arrays:	4
+        """
+        return super().get_areas(quality=quality, return_as_list=not merge)  # type: ignore

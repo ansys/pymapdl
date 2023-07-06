@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import pyvista as pv
 
-from ansys.mapdl.core.mapdl_geometry import Geometry
+from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
 
 def test_keypoint_selection(mapdl, cleared):
@@ -598,3 +598,21 @@ def test_geometry_get_item_error(mapdl, contact_geom_and_mesh):
 def test_geometry_get_block_error(mapdl, contact_geom_and_mesh):
     with pytest.raises(KeyError):
         mapdl.geometry["kp 0"]
+
+
+def test_build_legacy_geometry(mapdl, contact_geom_and_mesh):
+    leg_geo = LegacyGeometry(mapdl)
+
+    assert np.allclose(
+        leg_geo.keypoints(), mapdl.geometry.get_keypoints(return_as_array=True)
+    )
+    assert isinstance(leg_geo.keypoints(), np.ndarray)
+
+    assert leg_geo.lines() == mapdl.geometry.get_lines()
+    assert isinstance(leg_geo.lines(), pv.PolyData)
+
+    assert leg_geo.areas() == mapdl.geometry.get_areas(return_as_list=True)
+    assert isinstance(leg_geo.areas(), list)
+
+    assert leg_geo.areas(merge=True) == mapdl.geometry.get_areas()
+    assert isinstance(leg_geo.areas(merge=True), pv.PolyData)

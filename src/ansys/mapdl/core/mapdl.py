@@ -60,7 +60,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.component import ComponentManager
     from ansys.mapdl.core.mapdl import _MapdlCore
-    from ansys.mapdl.core.mapdl_geometry import Geometry
+    from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
@@ -242,6 +242,7 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
+        self.legacy_geometry: bool = False
         self._math = None
         self._krylov = None
         self._on_docker = None
@@ -896,11 +897,14 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self) -> "Geometry":
+    def _create_geometry(self) -> Union["Geometry", "LegacyGeometry"]:
         """Return geometry cache"""
-        from ansys.mapdl.core.mapdl_geometry import Geometry
+        from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
-        return Geometry(self)
+        if self.legacy_geometry:
+            return LegacyGeometry
+        else:
+            return Geometry(self)
 
     @property
     @requires_package("pyvista", softerror=True)
@@ -2015,7 +2019,7 @@ class _MapdlCore(Commands):
             if show_keypoint_numbering:
                 labels.append(
                     {
-                        "points": self.geometry.get_keypoints(),
+                        "points": self.geometry.get_keypoints(return_as_array=True),
                         "labels": self.geometry.knum,
                     }
                 )
@@ -2088,7 +2092,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            keypoints = self.geometry.get_keypoints()
+            keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
 
             labels = []

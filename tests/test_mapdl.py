@@ -411,9 +411,8 @@ def test_keypoints(cleared, mapdl):
     i = 1
     knum = []
     for i, (x, y, z) in enumerate(kps):
-        print(x, y, z)
-        mapdl.k(i, x, y, z)
-        knum.append(i)
+        mapdl.k(i + 1, x, y, z)
+        knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
     assert isinstance(mapdl.geometry.keypoints, MultiBlock)
