@@ -546,3 +546,28 @@ def test_geometry_get_apis(mapdl, contact_geom_and_mesh, entity, number):
         as_an_array = func(return_as_array=True)
         assert isinstance(as_an_array, np.ndarray)
         assert len(as_an_array) == number
+
+
+@pytest.mark.parametrize(
+    "entity,entity_name,number",
+    (
+        ["keypoints", "kp", 26],
+        ["lines", "line", 45],
+        ["areas", "area", 28],
+        ["volumes", "volume", 6],
+    ),
+)
+def test_geometry_names(mapdl, contact_geom_and_mesh, entity, entity_name, number):
+    func = getattr(mapdl.geometry, entity)
+
+    mb_names = list(func.keys())
+    assert len(mb_names) == number
+
+    func1 = getattr(mapdl.geometry, f"{entity[0]}num")
+    names = [f"{entity_name} {int(each)}" for each in func1]
+
+    # sorting because the Xnum return this sorted, but the underlying IGES doesn't have to.
+    mb_names.sort()
+    names.sort()
+
+    assert mb_names == names

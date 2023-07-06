@@ -171,6 +171,12 @@ class Geometry:
         >>> keypoint0
         pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
 
+        Or using the entity name:
+
+        >>> kp1 = mapdl.geometry.keypoints["kp 1"]
+        >>> kp1
+        pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
+
         You can use this to iterate over the different elements:
 
         >>> points = mapdl.geometry.keypoints
@@ -188,7 +194,12 @@ class Geometry:
         ...
 
         """
-        return pv.MultiBlock(self.get_keypoints(return_as_list=True))
+        mb = pv.MultiBlock(self.get_keypoints(return_as_list=True))
+        # Setting names
+        for ind, each_block in enumerate(mb):
+            mapdl_index = int(each_block["entity_num"][0])
+            mb.set_block_name(index=ind, name=f"kp {mapdl_index}")
+        return mb
 
     def get_keypoints(
         self, return_as_list: bool = False, return_as_array: bool = False
@@ -308,6 +319,19 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   1
 
+        Or using the entity name:
+
+        >>> line1 = mapdl.geometry.lines["line 1"]
+        >>> line1
+        PolyData (0x147d5b220)
+          N Cells:    1
+          N Points:   100
+          N Strips:   0
+          X Bounds:   0.000e+00, 0.000e+00
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   1
+
         You can use this to iterate over the different elements:
 
         >>> points = mapdl.geometry.lines
@@ -324,7 +348,12 @@ class Geometry:
         ...
 
         """
-        return pv.MultiBlock(self._lines)
+        mb = pv.MultiBlock(self._lines)
+        # Setting names
+        for ind, each_block in enumerate(mb):
+            mapdl_index = int(each_block["entity_num"][0])
+            mb.set_block_name(index=ind, name=f"line {mapdl_index}")
+        return mb
 
     def get_lines(
         self, return_as_list: bool = False
@@ -407,6 +436,18 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   3
 
+        Or using the entity name:
+
+        >>> area1 = mapdl.geometry.areas["area 1"]
+        >>> area1
+        UnstructuredGrid (0x147ca4340)
+          N Cells:    10
+          N Points:   18
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, -3.180e-03
+          N Arrays:   3
+
         You can use this to iterate over the different elements:
 
         >>> points = mapdl.geometry.areas
@@ -422,7 +463,12 @@ class Geometry:
         ...
 
         """
-        return pv.MultiBlock(self.get_areas(return_as_list=True))
+        mb = pv.MultiBlock(self.get_areas(return_as_list=True))
+        # Setting names
+        for ind, each_block in enumerate(mb):
+            mapdl_index = int(each_block["entity_num"][0])
+            mb.set_block_name(index=ind, name=f"area {mapdl_index}")
+        return mb
 
     def get_areas(
         self, quality: int = 1, return_as_list: Optional[bool] = False
@@ -1097,6 +1143,18 @@ class Geometry:
           Z Bounds:   -3.180e-03, 0.000e+00
           N Arrays:   3
 
+        Or using the entity name:
+
+        >>> volume1 = mapdl.geometry.volumes["volume 1"]
+        >>> volume1
+        UnstructuredGrid (0x149107340)
+          N Cells:    34
+          N Points:   36
+          X Bounds:   0.000e+00, 1.588e-02
+          Y Bounds:   -7.620e-03, 1.778e-02
+          Z Bounds:   -3.180e-03, 0.000e+00
+          N Arrays:   3
+
         You can use this to iterate over the different elements:
 
         >>> points = mapdl.geometry.volumes
@@ -1112,10 +1170,17 @@ class Geometry:
         ...
 
         """
-        return pv.MultiBlock(self.get_volumes(return_as_list=True))
+        mb = pv.MultiBlock(self.get_volumes(return_as_list=True))
+        # Setting names
+        # Because the volume mapping is made through the areas, the default
+        # "entity_num" field is not applicable here.
+        for ind, each_block in enumerate(mb):
+            mapdl_index = int(each_block.entity_num)
+            mb.set_block_name(index=ind, name=f"volume {mapdl_index}")
+        return mb
 
     def get_volumes(
-        self, return_as_list: bool = False, quality=4
+        self, return_as_list: bool = False, quality: int = 4
     ) -> Union[List[pv.PolyData], pv.PolyData]:
         """Get active volumes from MAPDL represented as :class:`pyvista.PolyData` or
         a list of :class:`pyvista.UnstructuredGrid`.
@@ -1191,7 +1256,9 @@ class Geometry:
         for each_volu in self.vnum:
             self._mapdl.vsel("S", vmin=each_volu)
             self._mapdl.aslv("S")
-            volumes_.append(surf.extract_cells(np.in1d(area_num, self.anum)))
+            unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
+            unstruct.entity_num = each_volu
+            volumes_.append(unstruct)
 
         self._mapdl.cmsel("S", "__temp_volu__")
         self._mapdl.cmsel("S", "__temp_area__")
