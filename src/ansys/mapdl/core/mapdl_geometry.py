@@ -77,7 +77,7 @@ def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
     return pv.wrap(afilter.GetOutput())
 
 
-def get_elements_per_area(resp: str) -> List[int]:
+def get_elements_per_area(resp: str) -> List[List[int]]:
     """Get the number of elements meshed for each area given the response
     from ``AMESH``.
 
@@ -114,7 +114,7 @@ def get_elements_per_area(resp: str) -> List[int]:
     else:
         reg = re.compile(r"AREA\s*(\d*).*?(\d*)\s*QUADRILATERALS,\s*(\d*) TRIANGLES")
         groups = reg.findall(resp)
-        groups = [(int(anum), int(nquad) + int(ntri)) for anum, nquad, ntri in groups]
+        groups = [[int(anum), int(nquad) + int(ntri)] for anum, nquad, ntri in groups]
 
     return groups
 
@@ -247,7 +247,7 @@ class Geometry:
         return_as_list: bool = False,
         return_as_array: bool = False,
         return_ids_in_array: bool = False,
-    ) -> Union[NDArray[Any], pv.PolyData, list[pv.PolyData]]:
+    ) -> Union[NDArray[Any], pv.PolyData, List[pv.PolyData]]:
         """Obtain the keypoints geometry
 
         Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
@@ -343,7 +343,7 @@ class Geometry:
             return keypoints_pd
 
     @property
-    def _lines(self) -> list[pv.PolyData]:
+    def _lines(self) -> List[pv.PolyData]:
         """Returns lines cache"""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
@@ -424,7 +424,7 @@ class Geometry:
 
     def get_lines(
         self, return_as_list: bool = False
-    ) -> Union[pv.PolyData, list[pv.PolyData]]:
+    ) -> Union[pv.PolyData, List[pv.PolyData]]:
         """Obtain line geometry
 
         Obtain the active lines as a :class:`pyvista.PolyData` object or
@@ -437,7 +437,7 @@ class Geometry:
 
         Returns
         -------
-        Union[pv.PolyData, list[pv.PolyData]]
+        Union[pv.PolyData, List[pv.PolyData]]
 
         Examples
         --------
@@ -539,7 +539,7 @@ class Geometry:
 
     def get_areas(
         self, quality: int = 1, return_as_list: Optional[bool] = False
-    ) -> Union[list[pv.UnstructuredGrid], pv.PolyData]:
+    ) -> Union[List[pv.UnstructuredGrid], pv.PolyData]:
         """Get active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
 
         Parameters
@@ -847,7 +847,7 @@ class Geometry:
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
-    def _load_lines(self) -> list[pv.PolyData]:
+    def _load_lines(self) -> List[pv.PolyData]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
@@ -1498,7 +1498,7 @@ class LegacyGeometry(Geometry):
 
     def areas(
         self, quality=1, merge=False
-    ) -> Union[pv.PolyData, list[pv.UnstructuredGrid]]:
+    ) -> Union[pv.PolyData, List[pv.UnstructuredGrid]]:
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
