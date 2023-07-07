@@ -138,7 +138,7 @@ class Geometry:
         self._lines_cache = None
         self._log = self._mapdl._log
 
-    def _set_log_level(self, level: str) -> None:
+    def _set_log_level(self, level: DEBUG_LEVELS) -> None:
         return self._mapdl.set_log_level(level)
 
     def _load_iges(self) -> "Iges":
@@ -1496,7 +1496,7 @@ class LegacyGeometry(Geometry):
         """Active lines as a pyvista.PolyData"""
         return super().get_lines()  # type: ignore
 
-    def areas(self, quality=1, merge=False) -> pv.PolyData:
+    def areas(self, quality=1, merge=False) -> Union[pv.PolyData, list[pv.UnstructuredGrid]]:
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
@@ -1552,4 +1552,4 @@ class LegacyGeometry(Geometry):
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4
         """
-        return super().get_areas(quality=quality, return_as_list=not merge)  # type: ignore
+        return super().get_areas(quality=quality, return_as_list=not merge)
