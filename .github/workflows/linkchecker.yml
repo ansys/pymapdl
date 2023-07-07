@@ -17,6 +17,7 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
+  DISPLAY: ':99.0'
 
 jobs:
   linkchecker:
