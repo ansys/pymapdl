@@ -1,8 +1,7 @@
 """pymapdl examples"""
 import os
 
-from matplotlib.colors import ListedColormap
-import numpy as np
+from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 # get location of this folder and the example files
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -18,21 +17,4 @@ wing_model = os.path.join(dir_path, "wing.dat")
 
 def ansys_colormap():
     """Return the default ansys color map made of 9 colours (blue-green-red)."""
-    colors = (
-        np.array(
-            [
-                [0, 0, 255],
-                [0, 178, 255],
-                [0, 255, 255],
-                [0, 255, 178],
-                [0, 255, 0],
-                [178, 255, 0],
-                [255, 255, 0],
-                [255, 178, 0],
-                [255, 0, 0],
-            ],
-            dtype=float,
-        )
-        / 255
-    )
-    return ListedColormap(colors)
+    return PyMAPDL_cmap
