@@ -6,16 +6,20 @@ from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
     from pyvista.plotting.colors import get_cycler
-    from pyvista.themes import Theme
+
+    try:  # new in pyvista 0.40
+        from pyvista.themes import Theme
+    except ImportError:
+        from pyvista.themes import DefaultTheme as Theme
 
     base_class = Theme
 
-# else:  # pragma: no cover
+else:  # pragma: no cover
 
-#     class myEmptyClass:
-#         pass
+    class myEmptyClass:
+        pass
 
-#     base_class = myEmptyClass
+    base_class = myEmptyClass
 
 
 MAPDL_colorbar = (
