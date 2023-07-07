@@ -1,4 +1,4 @@
-name: cleanup caches
+name: Cleanup caches 🧹
 on:
   workflow_dispatch:
   pull_request:
