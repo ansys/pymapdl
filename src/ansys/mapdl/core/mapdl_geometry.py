@@ -23,7 +23,11 @@ from ansys.mapdl.core.theme import MapdlTheme
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
-from ansys.mapdl.core.mapdl import VALID_SELECTION_ENTITY_TP, VALID_SELECTION_TYPE_TP
+from ansys.mapdl.core.mapdl import (
+    DEBUG_LEVELS,
+    VALID_SELECTION_ENTITY_TP,
+    VALID_SELECTION_TYPE_TP,
+)
 
 FLST_LOOKUP = {
     "NODE": 1,  # node numbers
