@@ -23,7 +23,6 @@ jobs:
     name: Check Links
     runs-on: ubuntu-latest
     env:
-      PYANSYS_OFF_SCREEN: "True"
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
@@ -83,9 +82,15 @@ jobs:
 
       - name: LinkCheck
         run: |
-          make -C doc linkcheck
+          make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Display linkchecker results"
         run: |
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
+      - name: "Upload artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: output
+          path: doc/**/output.txt
+          retention-days: 30
