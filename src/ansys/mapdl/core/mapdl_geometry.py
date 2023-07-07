@@ -1496,7 +1496,9 @@ class LegacyGeometry(Geometry):
         """Active lines as a pyvista.PolyData"""
         return super().get_lines()  # type: ignore
 
-    def areas(self, quality=1, merge=False) -> Union[pv.PolyData, list[pv.UnstructuredGrid]]:
+    def areas(
+        self, quality=1, merge=False
+    ) -> Union[pv.PolyData, list[pv.UnstructuredGrid]]:
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
