@@ -183,7 +183,7 @@ Or multiple entities using slices:
 .. figure:: ../images/multiblock_pic3.png
 
 
-Futhermode, the following methods are provided to return the geometry entities as other Python objects:
+Furthermore, the following methods are provided to return the geometry entities as other Python objects:
 
 .. _Table-1:
 
