@@ -283,7 +283,7 @@ For equivalence between the new and old geometry API, the following table is pro
 +-------------------------------+--------------------------------------+
 
 
-MAPDL Geometry commands
+MAPDL geometry commands
 ~~~~~~~~~~~~~~~~~~~~~~~
 For additional MAPDL commands for creating geometries, see the
 :ref:`ref_prep_commands` commands.
