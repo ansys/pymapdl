@@ -98,8 +98,6 @@ class MapdlTheme(base_class):
         self.axes.y_color = "seagreen"
         self.axes.z_color = "blue"
 
-        self.anti_aliasing = "msaa"
-        self.antialiasing = self.anti_aliasing
         self.color_cycler = get_cycler(MAPDL_colorbar.tolist())
         self.render_points_as_spheres = True
 
