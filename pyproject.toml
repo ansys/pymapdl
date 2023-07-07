@@ -95,6 +95,7 @@ doc = [
     "sphinx-notfound-page==0.8.3",
     "sphinxcontrib-websupport==1.2.4",
     "sphinxemoji==0.2.0",
+    "sphinx-reredirects==0.1.2",
     "vtk==9.2.6",
 ]
 
