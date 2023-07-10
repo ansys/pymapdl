@@ -9,13 +9,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  ON_CI: True
+  DOCKER_PACKAGE: ghcr.io/ansys/mapdl
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
+  MAIN_PYTHON_VERSION: '3.9'
+  PYANSYS_OFF_SCREEN: True
+  DPF_START_SERVER: False
+  DPF_PORT: 21002
+  DISPLAY: ':99.0'
 
 jobs:
   linkchecker:
     name: Check Links
     runs-on: ubuntu-latest
     env:
-      PYANSYS_OFF_SCREEN: "True"
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
@@ -34,14 +42,6 @@ jobs:
         run: |
           sudo apt update 
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
-
-      - name: "Cache pip"
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            Python-v${{ env.RESET_PIP_CACHE }}-Linux-${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Test virtual framebuffer"
         run: |
@@ -72,30 +72,6 @@ jobs:
           echo "PYMAPDL_VERSION=$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
-      - name: "Cache examples"
-        uses: actions/cache@v3
-        with:
-          path: doc/source/examples
-          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
-
-      - name: "Cache docs build directory"
-        uses: actions/cache@v3
-        with:
-          path: doc/_build
-          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
-
-      - name: "Cache autosummary"
-        uses: actions/cache@v3
-        with:
-          path: doc/source/**/_autosummary/*.rst
-          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
-          restore-keys: |
-            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
-
       - name: "Install docs build requirements"
         run: |
           pip install .[doc]
@@ -107,9 +83,15 @@ jobs:
 
       - name: LinkCheck
         run: |
-          make -C doc linkcheck
+          make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Display linkchecker results"
         run: |
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
+      - name: "Upload artifacts"
+        uses: actions/upload-artifact@v3
+        with:
+          name: output
+          path: doc/**/output.txt
+          retention-days: 30
