@@ -3,15 +3,15 @@
 .. The substitution for the actual value is made on conf.py file.
 
 .. #Pyansys
-.. _pyansys: https://docs.pyansys.com/dev/
+.. _pyansys: https://docs.pyansys.com/version/dev/
 .. _pyansys_support: pyansys.core@ansys.com
 .. _pyansys_core: pyansys.core@ansys.com
 
 .. #Other projects
 .. _dpf_core_gh: https://github.com/pyansys/DPF-Core
 .. _dpf_post_gh: https://github.com/pyansys/DPF-Post
-.. _dpf_core_docs: https://dpf.docs.pyansys.com/dev/
-.. _dpf_post_docs: https://post.docs.pyansys.com/dev/
+.. _dpf_core_docs: https://dpf.docs.pyansys.com
+.. _dpf_post_docs: https://post.docs.pyansys.com
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
 .. _example_data_repo: https://github.com/pyansys/example-data
 .. _ansys_tools_path: http://path.tools.docs.pyansys.com/
@@ -19,9 +19,9 @@
 .. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
 
 .. #PyAnsys Developer Guide
-.. _dev_guide_pyansys: https://dev.docs.pyansys.com/dev/
-.. _dev_guide_contributing: https://dev.docs.pyansys.com/dev/how-to/contributing.html
-.. _dev_guide_coding_style: https://dev.docs.pyansys.com/dev/coding-style/index.html
+.. _dev_guide_pyansys: https://dev.docs.pyansys.com
+.. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
+.. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
@@ -106,6 +106,8 @@
 .. _gh_centos_wsl_1: https://github.com/wsldl-pg/CentWSL/
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
 .. _codecov: https://github.com/codecov
+.. _WSL_Windows_Toolbar_Launcher: https://github.com/cascadium/wsl-windows-toolbar-launcher
+.. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
 
 .. #PyMAPDL related
 .. _pymapdl_main: pymapdl_docs_
@@ -124,11 +126,11 @@
 .. _pymapdl_examples: https://github.com/pyansys/pymapdl/tree/main/examples
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
 .. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
-.. _pymapdl_doc_krylov_example: https://dev.mapdl.docs.pyansys.com/version/stable/examples/extended_examples/Krylov/krylov_example.html
+.. _pymapdl_doc_krylov_example: https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/Krylov/krylov_example.html
 .. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/pyansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/pyansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/pyansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
-.. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/version/stable/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
+.. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
 .. _pymapdl_docker_dir: https://github.com/pyansys/pymapdl/blob/main/docker
 .. _pymapdl_docker_compose_base: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.yml
 .. _pymapdl_docker_compose_local: https://github.com/pyansys/pymapdl/blob/main/docker/docker-compose.local.yml

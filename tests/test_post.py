@@ -15,13 +15,6 @@ from ansys.mapdl.core.post import (
     PostProcessing,
 )
 
-# must be run first before loading a result
-# since MAPDL may be on a remote windows machine, cannot test
-# @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
-# def test_nodal_eqv_stress_fail(mapdl, static_solve):
-#     with pytest.raises(MapdlRuntimeError):
-#         mapdl.post_processing.nodal_eqv_stress
-
 
 @pytest.fixture(scope="module")
 def static_solve(mapdl):

@@ -1,9 +1,11 @@
 """Module to support MAPDL CAD geometry"""
+import contextlib
 import re
 
 import numpy as np
 
 from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core.errors import ComponentNoData
 
 if _HAS_PYVISTA:
     import pyvista as pv
@@ -32,10 +34,7 @@ def merge_polydata(items):
     """Merge list of polydata or unstructured grids"""
 
     # lazy import here for faster module loading
-    try:
-        from pyvista._vtk import vtkAppendPolyData
-    except:
-        from vtk import vtkAppendPolyData
+    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
     afilter = vtkAppendPolyData()
     for item in items:
@@ -149,7 +148,7 @@ class Geometry:
         """Active lines as a pyvista.PolyData"""
         return self._lines
 
-    def areas(self, quality=4, merge=False):
+    def areas(self, quality=1, merge=False):
         """List of areas from MAPDL represented as ``pyvista.PolyData``.
 
         Parameters
@@ -246,9 +245,12 @@ class Geometry:
             Steps to between amin and amax.
         """
         # store initially selected areas and elements
-        with self._mapdl.non_interactive:
-            self._mapdl.cm("__tmp_elem__", "ELEM")
-            self._mapdl.cm("__tmp_area__", "AREA")
+        with contextlib.suppress(ComponentNoData):
+            # avoiding empty components exceptions
+            with self._mapdl.non_interactive:
+                self._mapdl.cm("__tmp_elem__", "ELEM")
+                self._mapdl.cm("__tmp_area__", "AREA")
+
         orig_anum = self.anum
 
         # reselect from existing selection to mimic APDL behavior
