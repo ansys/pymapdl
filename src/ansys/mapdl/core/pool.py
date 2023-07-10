@@ -556,6 +556,16 @@ class LocalMapdlPool:
 
     def __getitem__(self, key):
         """Return an instance by an index"""
+
+        # Regarding issue 2173.
+        # there are two options here:
+        # * the MAPDL instance hasn't be created yet. It is threaded.
+        # * it died and it hasn't been relaunched.
+        # Because we are seeing some random errors, I would bet on the first
+        time0 = time.time()
+        timeout = 5  # seconds
+        while self._instances[key] is None and time.time() < (time0 + timeout):
+            time.sleep(0.1)
         return self._instances[key]
 
     def __iter__(self):
