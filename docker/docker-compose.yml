@@ -56,7 +56,7 @@ services:
     ports:
       - '50052:50052'
       - '50055:50055'
-    image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
+    image: 'ghcr.io/ansys/mapdl:v22.2-ubuntu'
     user: "0:0"
     entrypoint: "/bin/bash ansys -grpc"
   
