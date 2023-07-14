@@ -71,8 +71,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
-    # sphinx.ext.linkcode
-    # This add the button ``[Source]`` to each website.
+    # sphinx.ext.linkcode add the button ``[Source]`` to each website.
     # The link of that button is created by calling ``linkcode_resolve``
     # function which we overwrite in ansys.mapdl.core.docs
     "sphinx.ext.linkcode",
@@ -82,6 +81,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
+    "sphinx_reredirects",
 ]
 
 # Intersphinx mapping
