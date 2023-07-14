@@ -125,7 +125,7 @@ def test_invalid_get_bug(mapdl):
 
 def test_invalid_get(mapdl):
     with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
-        mapdl.get_value("ACTIVE", item1="SET")
+        mapdl.get_value("ACTIVE")
 
 
 def test_stream(mapdl):

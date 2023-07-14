@@ -3533,7 +3533,7 @@ class _MapdlCore(Commands):
         kloop: MapdlFloat = "",
         dtype: DTypeLike = None,
         **kwargs,
-    ) -> NDArray[np.float]:
+    ) -> NDArray[np.float64]:
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
