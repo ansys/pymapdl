@@ -21,6 +21,7 @@ from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
+from numpy.typing import NDArray
 import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
@@ -55,7 +56,7 @@ from ansys.mapdl.core.errors import (
     protect_grpc,
 )
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_types import MapdlInt
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
@@ -288,7 +289,7 @@ class MapdlGrpc(_MapdlCore):
     def __init__(
         self,
         ip: Optional[str] = None,
-        port: Optional[Union[int, str]] = None,
+        port: Optional[MapdlInt] = None,
         timeout: int = 15,
         loglevel: str = "WARNING",
         log_file: bool = False,
@@ -1979,8 +1980,19 @@ class MapdlGrpc(_MapdlCore):
 
     @protect_grpc
     def _get(
-        self, entity, entnum, item1, it1num, item2, it2num, item3, it3num, item4, it4num
-    ):
+        self,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Sends gRPC *Get request.
 
         .. warning::
@@ -3002,12 +3014,25 @@ class MapdlGrpc(_MapdlCore):
         return self._file(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.vget)
-    def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
+    def vget(
+        self,
+        par: str = "",
+        ir: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         return self.parameters[par]
 
-    def get_variable(self, ir, tstrt="", kcplx="", **kwargs):
+    def get_variable(
+        self,
+        ir: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """
         Obtain the variable values.
 
@@ -3040,13 +3065,13 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.nsol)
     def nsol(
         self,
-        nvar=VAR_IR,
-        node="",
-        item="",
-        comp="",
-        name="",
-        sector="",
-        **kwargs,
+        nvar: MapdlInt = VAR_IR,
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        **kwargs: KwargDict,
     ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
@@ -3069,8 +3094,8 @@ class MapdlGrpc(_MapdlCore):
         item: str = "",
         comp: str = "",
         name: str = "",
-        **kwargs,
-    ) -> Optional[str]:
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Wraps ESOL to return the variable as an array."""
         super().esol(
             nvar=nvar,
@@ -3083,7 +3108,15 @@ class MapdlGrpc(_MapdlCore):
         )
         return self.vget("_temp", nvar)
 
-    def get_nsol(self, node, item, comp, name="", sector="", **kwargs):
+    def get_nsol(
+        self,
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """
         Get NSOL solutions
 
@@ -3146,16 +3179,16 @@ class MapdlGrpc(_MapdlCore):
 
     def get_esol(
         self,
-        elem,
-        node,
-        item,
-        comp,
-        name="",
-        sector="",
-        tstrt="",
-        kcplx="",
-        **kwargs,
-    ):
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Get ESOL data.
 
         /POST26 APDL Command: ESOL
