@@ -1441,6 +1441,7 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
+            log_apdl=log_apdl,
         )
         if clear_on_connect:
             mapdl.clear()

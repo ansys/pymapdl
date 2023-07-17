@@ -13,7 +13,7 @@ import tempfile
 import threading
 import time
 from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
-import warnings
+from uuid import uuid4
 from warnings import warn
 import weakref
 
@@ -21,6 +21,7 @@ from ansys.tools.versioning.utils import version_string_as_tuple
 import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 import numpy as np
+from numpy.typing import NDArray
 import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
@@ -31,6 +32,7 @@ Please make sure you have the latest updated version using:
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
 
+from ansys.mapdl import core as pymapdl
 
 try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -47,13 +49,14 @@ from ansys.mapdl.core.common_grpc import (
     parse_chunks,
 )
 from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
     protect_grpc,
 )
 from ansys.mapdl.core.mapdl import _MapdlCore
-from ansys.mapdl.core.mapdl_types import MapdlInt
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
@@ -62,6 +65,7 @@ from ansys.mapdl.core.misc import (
     run_as_prep7,
     supress_logging,
 )
+from ansys.mapdl.core.parameters import interp_star_status
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
@@ -79,6 +83,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.mesh_grpc import MeshGrpc
+    from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -87,6 +92,9 @@ VOID_REQUEST = anskernel.EmptyRequest()
 MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024**2))
 
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
+
+
+SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 
 def chunk_raw(raw, save_as):
@@ -281,7 +289,7 @@ class MapdlGrpc(_MapdlCore):
     def __init__(
         self,
         ip: Optional[str] = None,
-        port: Optional[Union[int, str]] = None,
+        port: Optional[MapdlInt] = None,
         timeout: int = 15,
         loglevel: str = "WARNING",
         log_file: bool = False,
@@ -297,7 +305,7 @@ class MapdlGrpc(_MapdlCore):
     ):
         """Initialize connection to the mapdl server"""
         if remove_temp_files is not None:  # pragma: no cover
-            warnings.warn(
+            warn(
                 "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
                 "Please use ``remove_temp_dir_on_exit`` instead.",
                 DeprecationWarning,
@@ -306,8 +314,13 @@ class MapdlGrpc(_MapdlCore):
             remove_temp_dir_on_exit = remove_temp_files
             remove_temp_files = None
 
+        self._session_id_: Optional[str] = None
+        self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
         self._remote_instance: Optional["PIM_Instance"] = remote_instance
+        self._strict_session_id_check: bool = (
+            False  # bool to force to check the session id matches in client and server
+        )
 
         if channel is not None:
             if ip is not None or port is not None:
@@ -427,6 +440,8 @@ class MapdlGrpc(_MapdlCore):
         # only cache process IDs if launched locally
         if self._local and "exec_file" in start_parm:
             self._cache_pids()
+
+        self._create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -865,7 +880,7 @@ class MapdlGrpc(_MapdlCore):
     def _mesh(self):
         return self._mesh_rep
 
-    def _run(self, cmd, verbose=False, mute=None) -> str:
+    def _run(self, cmd: str, verbose: bool = False, mute: Optional[bool] = None) -> str:
         """Sens a command and return the response as a string.
 
         Parameters
@@ -1965,14 +1980,28 @@ class MapdlGrpc(_MapdlCore):
 
     @protect_grpc
     def _get(
-        self, entity, entnum, item1, it1num, item2, it2num, item3, it3num, item4, it4num
-    ):
+        self,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Sends gRPC *Get request.
 
         .. warning::
            Not thread safe.  Uses ``_get_lock`` to ensure multiple
            request are not evaluated simultaneously.
         """
+        if self._session_id is not None:
+            self._check_session_id()
+
         if self._store_commands:
             raise MapdlRuntimeError(
                 "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
@@ -2023,7 +2052,7 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        extensions : list[str], tuple[str], optional
+        extensions : List[str], Tuple[str], optional
             List of extensions to filter the files before downloading,
             by default None.
 
@@ -2074,7 +2103,7 @@ class MapdlGrpc(_MapdlCore):
 
         Parameters
         ----------
-        files : str or List[str] or Tuple(str)
+        files : str or List[str] or tuple(str)
             Name of the file on the server. File must be in the same
             directory as the mapdl instance. A list of string names or
             tuples of string names can also be used.
@@ -2484,7 +2513,7 @@ class MapdlGrpc(_MapdlCore):
             return False
 
     @property
-    def xpl(self):
+    def xpl(self) -> "ansXpl":
         """MAPDL file explorer
 
         Iteratively navigate through MAPDL files.
@@ -2502,10 +2531,14 @@ class MapdlGrpc(_MapdlCore):
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
                55, 58,  1], dtype=int32)
         """
+        if self._xpl is None:
+            from ansys.mapdl.core.xpl import ansXpl
+
+            self._xpl = ansXpl(self)
         return self._xpl
 
     @protect_grpc
-    def scalar_param(self, pname):
+    def scalar_param(self, pname: str) -> float:
         """Return a scalar parameter as a float.
 
         If parameter does not exist, returns ``None``.
@@ -2833,7 +2866,7 @@ class MapdlGrpc(_MapdlCore):
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
     @property
-    def name(self):
+    def name(self) -> str:
         """Instance unique identifier."""
         if not self._name:
             if self._ip or self._port:
@@ -2981,12 +3014,25 @@ class MapdlGrpc(_MapdlCore):
         return self._file(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.vget)
-    def vget(self, par="", ir="", tstrt="", kcplx="", **kwargs):
+    def vget(
+        self,
+        par: str = "",
+        ir: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
         return self.parameters[par]
 
-    def get_variable(self, ir, tstrt="", kcplx="", **kwargs):
+    def get_variable(
+        self,
+        ir: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """
         Obtain the variable values.
 
@@ -3019,13 +3065,13 @@ class MapdlGrpc(_MapdlCore):
     @wraps(_MapdlCore.nsol)
     def nsol(
         self,
-        nvar=VAR_IR,
-        node="",
-        item="",
-        comp="",
-        name="",
-        sector="",
-        **kwargs,
+        nvar: MapdlInt = VAR_IR,
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        **kwargs: KwargDict,
     ):
         """Wraps NSOL to return the variable as an array."""
         super().nsol(
@@ -3048,8 +3094,8 @@ class MapdlGrpc(_MapdlCore):
         item: str = "",
         comp: str = "",
         name: str = "",
-        **kwargs,
-    ) -> Optional[str]:
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Wraps ESOL to return the variable as an array."""
         super().esol(
             nvar=nvar,
@@ -3062,7 +3108,15 @@ class MapdlGrpc(_MapdlCore):
         )
         return self.vget("_temp", nvar)
 
-    def get_nsol(self, node, item, comp, name="", sector="", **kwargs):
+    def get_nsol(
+        self,
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """
         Get NSOL solutions
 
@@ -3125,16 +3179,16 @@ class MapdlGrpc(_MapdlCore):
 
     def get_esol(
         self,
-        elem,
-        node,
-        item,
-        comp,
-        name="",
-        sector="",
-        tstrt="",
-        kcplx="",
-        **kwargs,
-    ):
+        elem: MapdlInt = "",
+        node: MapdlInt = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        sector: MapdlInt = "",
+        tstrt: MapdlFloat = "",
+        kcplx: MapdlInt = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Get ESOL data.
 
         /POST26 APDL Command: ESOL
@@ -3238,3 +3292,59 @@ class MapdlGrpc(_MapdlCore):
         )
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
+
+    def _create_session(self):
+        """Generate a session ID."""
+        id_ = uuid4()
+        id_ = str(id_)[:31].replace("-", "")
+        self._session_id_ = id_
+        self._run(f"{SESSION_ID_NAME}='{id_}'")
+
+    @property
+    def _session_id(self):
+        """Return the session ID."""
+        return self._session_id_
+
+    def _check_session_id(self):
+        """Verify that the local session ID matches the remote MAPDL session ID."""
+        if self._checking_session_id_:
+            # To avoid recursion error
+            return
+
+        pymapdl_session_id = self._session_id
+        if not pymapdl_session_id:
+            # We return early if pymapdl_session is not fixed yet.
+            return
+
+        self._checking_session_id_ = True
+        self._mapdl_session_id = self._get_mapdl_session_id()
+
+        self._checking_session_id_ = False
+
+        if pymapdl_session_id is None or self._mapdl_session_id is None:
+            return
+        elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
+            if pymapdl_session_id != self._mapdl_session_id:
+                self._log.error("The session ids do not match")
+                raise DifferentSessionConnectionError(
+                    f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
+                )
+
+            else:
+                self._log.debug("The session ids match")
+                return True
+        else:
+            return pymapdl_session_id == self._mapdl_session_id
+
+    def _get_mapdl_session_id(self):
+        """Retrieve MAPDL session ID."""
+        try:
+            parameter = interp_star_status(
+                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
+            )
+        except AttributeError:
+            return None
+
+        if parameter:
+            return parameter[SESSION_ID_NAME]["value"]
+        return None

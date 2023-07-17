@@ -1,10 +1,16 @@
 """These DATABASE commands allow selected subsets of entities to be
 named as components for easy selection later on.
 """
+from typing import Any, Dict, Literal
 
 
 class Components:
-    def cm(self, cname="", entity="", **kwargs):
+    def cm(
+        self,
+        cname: str = "",
+        entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Groups geometry items into a component.
 
         APDL Command: CM
@@ -77,7 +83,7 @@ class Components:
         command = f"CM,{cname}, {entity}"
         return self.run(command, **kwargs)
 
-    def cmdele(self, name="", **kwargs):
+    def cmdele(self, name: str = "", **kwargs: Dict[Any, Any]) -> None:
         """Deletes a component or assembly definition.
 
         APDL Command: CMDELE
@@ -103,17 +109,17 @@ class Components:
 
     def cmedit(
         self,
-        aname="",
-        oper="",
-        cnam1="",
-        cnam2="",
-        cnam3="",
-        cnam4="",
-        cnam5="",
-        cnam6="",
-        cnam7="",
-        **kwargs,
-    ):
+        aname: str = "",
+        oper: str = "",
+        cnam1: str = "",
+        cnam2: str = "",
+        cnam3: str = "",
+        cnam4: str = "",
+        cnam5: str = "",
+        cnam6: str = "",
+        cnam7: str = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Edits an existing assembly.
 
         APDL Command: CMEDIT
@@ -144,17 +150,17 @@ class Components:
 
     def cmgrp(
         self,
-        aname="",
-        cnam1="",
-        cnam2="",
-        cnam3="",
-        cnam4="",
-        cnam5="",
-        cnam6="",
-        cnam7="",
-        cnam8="",
-        **kwargs,
-    ):
+        aname: str = "",
+        cnam1: str = "",
+        cnam2: str = "",
+        cnam3: str = "",
+        cnam4: str = "",
+        cnam5: str = "",
+        cnam6: str = "",
+        cnam7: str = "",
+        cnam8: str = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Groups components and assemblies into an assembly.
 
         APDL Command: CMGRP
@@ -195,7 +201,13 @@ class Components:
         command = f"CMGRP,{aname},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7},{cnam8}"  # noqa : E501
         return self.run(command, **kwargs)
 
-    def cmlist(self, name="", key="", entity="", **kwargs):
+    def cmlist(
+        self,
+        name: str = "",
+        key: str = "",
+        entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Lists the contents of a component or assembly.
 
         APDL Command: CMLIST
@@ -240,7 +252,13 @@ class Components:
         command = f"CMLIST,{name},{key},{entity}"
         return self.run(command, **kwargs)
 
-    def cmmod(self, cname="", keyword="", value="", **kwargs):
+    def cmmod(
+        self,
+        cname: str = "",
+        keyword: str = "",
+        value: str = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Modifies the specification of a component.
 
         APDL Command: CMMOD
@@ -272,7 +290,13 @@ class Components:
         command = f"CMMOD,{cname},{keyword},{value}"
         return self.run(command, **kwargs)
 
-    def cmplot(self, label="", entity="", keyword="", **kwargs):
+    def cmplot(
+        self,
+        label: str = "",
+        entity: str = "",
+        keyword: str = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Plots the entities contained in a component or assembly.
 
         APDL Command: CMPLOT
@@ -335,7 +359,13 @@ class Components:
         command = f"CMPLOT,{label},{entity},{keyword}"
         return self.run(command, **kwargs)
 
-    def cmsel(self, type_="", name="", entity="", **kwargs):
+    def cmsel(
+        self,
+        type_: str = "",
+        name: str = "",
+        entity: Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE", ""] = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Selects a subset of components and assemblies.
 
         APDL Command: CMSEL
@@ -401,8 +431,15 @@ class Components:
         return self.run(command, **kwargs)
 
     def cmwrite(
-        self, option="", fname="", ext="", fnamei="", exti="", fmat="", **kwargs
-    ):
+        self,
+        option: str = "",
+        fname: str = "",
+        ext: str = "",
+        fnamei: str = "",
+        exti: str = "",
+        fmat: str = "",
+        **kwargs: Dict[Any, Any],
+    ) -> None:
         """Writes node and element components and assemblies to a file.
 
         APDL Command: CMWRITE

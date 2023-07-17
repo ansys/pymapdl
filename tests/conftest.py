@@ -8,7 +8,10 @@ from ansys.tools.path import get_available_ansys_installations
 import pytest
 import pyvista
 
-from ansys.mapdl import core as pymapdl
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -164,7 +167,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
+        skip_grpc = pytest.mark.skip(
+            reason="Requires gRPC connection (at least v211 to run)"
+        )
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
@@ -193,19 +198,19 @@ def pytest_collection_modifyitems(config, items):
 
 
 class Running_test:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, active: bool = True) -> None:
+        self._state = active
 
-    def __enter__(self):
-        pymapdl.RUNNING_TESTS = True
+    def __enter__(self) -> None:
+        pymapdl.RUNNING_TESTS = self._state
 
-    def __exit__(self, *args):
-        pymapdl.RUNNING_TESTS = False
+    def __exit__(self, *args) -> None:
+        pymapdl.RUNNING_TESTS = not self._state
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def running_test():
-    return Running_test()
+    return Running_test
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -234,7 +239,7 @@ def run_before_and_after_tests(request, mapdl):
 
         # Cloning the new mapdl instance channel into the old one.
         mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+        mapdl._multi_connect(timeout=mapdl._timeout)
 
         # Restoring the local configuration
         mapdl._local = local_
@@ -394,7 +399,7 @@ def cleared(mapdl):
 
 
 @pytest.fixture(scope="function")
-def cube_solve(cleared, mapdl):
+def cube_geom_and_mesh(cleared, mapdl):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
@@ -406,6 +411,9 @@ def cube_solve(cleared, mapdl):
     mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
     mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
+
+@pytest.fixture(scope="function")
+def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 

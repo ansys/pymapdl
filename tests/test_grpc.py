@@ -7,7 +7,11 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
-from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -111,9 +115,17 @@ def test_clear_multiple(mapdl):
         mapdl.run("/CLEAR")
 
 
-def test_invalid_get(mapdl):
+@pytest.mark.xfail(
+    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
+)
+def test_invalid_get_bug(mapdl):
     with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
+
+
+def test_invalid_get(mapdl):
+    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+        mapdl.get_value("ACTIVE")
 
 
 def test_stream(mapdl):
@@ -275,9 +287,10 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
 
     for file_to_check in list_files:
         basename = os.path.basename(file_to_check)
+        file_ = os.path.join(tmpdir, basename)
         assert basename in expected_output
-        assert os.path.exists(os.path.join(tmpdir, basename))
-        os.remove(file_to_check)
+        assert os.path.exists(file_)
+        os.remove(file_)
 
 
 @pytest.mark.parametrize(
@@ -297,10 +310,10 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
 
     for file_to_check in list_files:
         basename = os.path.basename(file_to_check)
+        file_ = os.path.join(os.getcwd(), basename)
         assert basename in expected_output
-        assert os.path.exists(os.path.join(os.getcwd(), basename))
-        assert os.path.exists(file_to_check)
-        os.remove(file_to_check)
+        assert os.path.exists(file_)
+        os.remove(file_)
 
 
 @pytest.mark.parametrize(
