@@ -17,12 +17,14 @@ from pyvista import PolyData
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
 from conftest import (
     skip_if_not_local,
@@ -1843,6 +1845,55 @@ def test_force_output(mapdl):
 
     with mapdl.force_output:
         assert mapdl.prep7()
+    assert mapdl.prep7()
+
+
+def test_session_id(mapdl, running_test):
+    assert mapdl._session_id is not None
+
+    # already checking version
+    mapdl._checking_session_id_ = True
+    assert mapdl._check_session_id() is None
+
+    # Not having pymapdl session id
+    mapdl._checking_session_id_ = False
+    copy_ = mapdl._session_id_
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    # Checking real case
+    mapdl._session_id_ = copy_
+    with running_test():
+        assert isinstance(mapdl._check_session_id(), bool)
+
+    id_ = "123412341234"
+    mapdl._session_id_ = id_
+    mapdl._run(f"{SESSION_ID_NAME}='{id_}'")
+    assert mapdl._check_session_id()
+
+    mapdl._session_id_ = "qwerqwerqwer"
+    assert not mapdl._check_session_id()
+
+    mapdl._session_id_ = id_
+
+
+def test_session_id_different(mapdl, running_test):
+    # Assert it works
+    with running_test():
+        assert mapdl.prep7()
+
+    mapdl._run(f"{SESSION_ID_NAME}='1234'")
+
+    with running_test():
+        with pytest.raises(DifferentSessionConnectionError):
+            mapdl.prep7()
+
+
+def test_check_empty_session_id(mapdl):
+    # it should run normal
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
     assert mapdl.prep7()
 
 

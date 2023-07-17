@@ -7,7 +7,11 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
-from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -111,9 +115,17 @@ def test_clear_multiple(mapdl):
         mapdl.run("/CLEAR")
 
 
-def test_invalid_get(mapdl):
+@pytest.mark.xfail(
+    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
+)
+def test_invalid_get_bug(mapdl):
     with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
+
+
+def test_invalid_get(mapdl):
+    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+        mapdl.get_value("ACTIVE")
 
 
 def test_stream(mapdl):

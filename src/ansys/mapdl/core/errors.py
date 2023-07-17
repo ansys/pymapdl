@@ -112,6 +112,13 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
         MapdlRuntimeError.__init__(self, msg)
 
 
+class DifferentSessionConnectionError(RuntimeError):
+    """Provides the error when connecting to the MAPDL instance fails."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""

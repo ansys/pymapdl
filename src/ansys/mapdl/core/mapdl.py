@@ -42,6 +42,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     Information,
     allow_pickable_points,
@@ -837,6 +838,8 @@ class _MapdlCore(Commands):
         >>> mapdl.clear()
 
         """
+        if self.is_grpc:
+            self._create_session()
         self.run("/CLE,NOSTART", mute=True)
 
     @supress_logging
@@ -2247,7 +2250,7 @@ class _MapdlCore(Commands):
         elif os.path.isfile(rst_file):
             return rst_file
 
-    def _get(self, *args, **kwargs):
+    def _get(self, *args, **kwargs) -> MapdlFloat:
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
 
@@ -2341,15 +2344,15 @@ class _MapdlCore(Commands):
         entity: str = "",
         entnum: str = "",
         item1: str = "",
-        it1num: Union[str, int, float] = "",
+        it1num: MapdlFloat = "",
         item2: str = "",
-        it2num: Union[str, int, float] = "",
-        item3: Union[str, int, float] = "",
-        it3num: Union[str, int, float] = "",
-        item4: Union[str, int, float] = "",
-        it4num: Union[str, int, float] = "",
-        **kwargs: Dict[Any, Any],
-    ):
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Runs the MAPDL GET command and returns a Python value.
 
         This method uses :func:`Mapdl.get`.
@@ -2449,14 +2452,14 @@ class _MapdlCore(Commands):
         entity: str = "",
         entnum: str = "",
         item1: str = "",
-        it1num: Union[str, int, float] = "",
+        it1num: MapdlFloat = "",
         item2: str = "",
-        it2num: Union[str, int, float] = "",
-        item3: Union[str, int, float] = "",
-        it3num: Union[str, int, float] = "",
-        item4: Union[str, int, float] = "",
-        it4num: Union[str, int, float] = "",
-        **kwargs: Dict[Any, Any],
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
     ) -> Union[float, str]:
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
@@ -2980,6 +2983,13 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            if self.is_grpc:
+                self._create_session()
+
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -3051,6 +3061,10 @@ class _MapdlCore(Commands):
 
         verbose = kwargs.get("verbose", False)
         text = self._run(command, verbose=verbose, mute=mute)
+
+        if command[:4].upper() == "/CLE" and self.is_grpc:
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
 
         if mute:
             return
@@ -3426,12 +3440,12 @@ class _MapdlCore(Commands):
         entity: str = "",
         entnum: str = "",
         item1: str = "",
-        it1num: Union[str, int, float] = "",
+        it1num: MapdlFloat = "",
         item2: str = "",
-        it2num: Union[str, int, float] = "",
-        kloop: Union[str, int, float] = "",
-        **kwargs: Dict[Any, Any],
-    ) -> NDArray:
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
@@ -3513,13 +3527,13 @@ class _MapdlCore(Commands):
         entity: str = "",
         entnum: str = "",
         item1: str = "",
-        it1num: Union[str, int, float] = "",
+        it1num: MapdlFloat = "",
         item2: str = "",
-        it2num: Union[str, int, float] = "",
-        kloop: Union[str, int, float] = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
         dtype: DTypeLike = None,
         **kwargs,
-    ) -> NDArray:
+    ) -> NDArray[np.float64]:
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
@@ -4192,6 +4206,11 @@ class _MapdlCore(Commands):
                 else:
                     # Catching only the first error.
                     error_message = error_message.group(0)
+
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
 
                 # Trimming empty lines
                 error_message = "\n".join(

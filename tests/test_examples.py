@@ -65,9 +65,11 @@ def test_load_verif():
         assert os.path.isfile(filename)
 
 
-def test_bracket(mapdl, cleared):
+def test_bracket(mapdl, cleared, running_test):
     # note that this method just returns a file path
-    bracket_file = examples.download_bracket()
+    with running_test(False):  # To force downloading the file
+        bracket_file = examples.download_bracket()
+
     assert os.path.isfile(bracket_file)
 
     # load the bracket and then print out the geometry
@@ -82,44 +84,45 @@ def test_download_example_data_true_download():
     assert os.path.exists(path)
 
 
-def test_failed_download():
+def test_failed_download(running_test):
     filename = "non_existing_file"
     with pytest.raises(RuntimeError):
-        _download_file(filename, directory=None)
+        with running_test(active=False):  # To force downloading the file
+            _download_file(filename, directory=None)
 
 
 def test_download_cfx_mapping_example_data(running_test):
-    with running_test:
+    with running_test():
         assert all(download_cfx_mapping_example_data().values())
 
 
 def test_download_manifold_example_data(running_test):
-    with running_test:
+    with running_test():
         assert all(download_manifold_example_data().values())
 
 
 def test_download_bracket(running_test):
-    with running_test:
+    with running_test():
         assert download_bracket() is True
 
 
 def test_download_vtk_rotor(running_test):
-    with running_test:
+    with running_test():
         assert download_vtk_rotor() is True
 
 
 def test__download_rotor_tech_demo_plot(running_test):
-    with running_test:
+    with running_test():
         assert _download_rotor_tech_demo_plot() is True
 
 
 def test_download_example_data(running_test):
-    with running_test:
+    with running_test():
         assert download_example_data("LatheCutter.anf", "geometry") is True
 
 
 def test_download_tech_demo_data(running_test):
-    with running_test:
+    with running_test():
         assert (
             download_tech_demo_data("td-21", "ring_stiffened_cylinder_mesh_file.cdb")
             is True

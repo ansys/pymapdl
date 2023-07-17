@@ -18,6 +18,13 @@ from ansys.mapdl.core.logging import Logger
 LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
+
+BUILDING_GALLERY = False
+RUNNING_TESTS = False
+
+if RUNNING_TESTS:  # pragma: no cover
+    LOG.debug("Running tests on Pytest")
+
 _LOCAL_PORTS = []
 
 
@@ -68,6 +75,7 @@ _apply_default_theme()
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False
+
 
 VERSION_MAP = {
     (0, 0, 0): "2020R2",
