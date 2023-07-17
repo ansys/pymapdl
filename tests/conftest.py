@@ -8,7 +8,10 @@ from ansys.tools.path import get_available_ansys_installations
 import pytest
 import pyvista
 
-from ansys.mapdl import core as pymapdl
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
@@ -195,19 +198,19 @@ def pytest_collection_modifyitems(config, items):
 
 
 class Running_test:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, active: bool = True) -> None:
+        self._state = active
 
-    def __enter__(self):
-        pymapdl.RUNNING_TESTS = True
+    def __enter__(self) -> None:
+        pymapdl.RUNNING_TESTS = self._state
 
-    def __exit__(self, *args):
-        pymapdl.RUNNING_TESTS = False
+    def __exit__(self, *args) -> None:
+        pymapdl.RUNNING_TESTS = not self._state
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def running_test():
-    return Running_test()
+    return Running_test
 
 
 @pytest.fixture(autouse=True, scope="function")
@@ -236,7 +239,7 @@ def run_before_and_after_tests(request, mapdl):
 
         # Cloning the new mapdl instance channel into the old one.
         mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
+        mapdl._multi_connect(timeout=mapdl._timeout)
 
         # Restoring the local configuration
         mapdl._local = local_
