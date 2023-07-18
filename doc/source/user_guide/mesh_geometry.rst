@@ -118,7 +118,7 @@ as a |pv-multiblock|  object.
      Y Bounds    -0.008, 0.018
      Z Bounds    -0.003, 0.015
 
-As you can see, you do not need to call the entitities in the new API.
+As you can see, you do not need to call the entities in the new API.
 
 For more differences between the new Geometry API and the old one, see
 :ref:`migration_geometry_api_066`. 

@@ -222,7 +222,7 @@ class Geometry:
         >>> kp1
         pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
 
-        You can use this to iterate over the different elements:
+        You can iterate the different elements:
 
         >>> points = mapdl.geometry.keypoints
         >>> for each_point in points:
