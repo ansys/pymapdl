@@ -282,14 +282,16 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        params = interp_star_status(self._mapdl.starstatus(avoid_non_interactive=True))
+        params = interp_star_status(
+            self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
+        )
 
         if self.show_leading_underscore_parameters:
-            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            _params = interp_star_status(self._mapdl.starstatus("_PRM", mute=False))
             params.update(_params)
 
         if self.show_trailing_underscore_parameters:
-            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_", mute=False))
             params.update(params_)
 
         return params
@@ -325,11 +327,8 @@ class Parameters:
             try:
                 val_ = interp_star_status(self._mapdl.starstatus(key))
                 val_ = val_[list(val_.keys())[0]]["value"]
-                if len(val_) == 1:
-                    return val_[0]
-                else:
-                    return val_
-                return
+                return val_[0] if len(val_) == 1 else val_
+
             except MapdlRuntimeError:
                 raise IndexError("%s not a valid parameter_name" % key)
 
@@ -723,7 +722,7 @@ def interp_star_status(status):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
-    # parameters that we don't want to include in the analysis.
+    # text that we don't want to include in the output.
     ind = find_parameter_listing_line(status)
     status = "\n".join(status.splitlines()[ind:])
 
