@@ -47,13 +47,13 @@ VALID_TYPE_MSG = """- 'S' : Select a new set (default)
 """
 
 VERSION_ERROR = """
-From 0.66.0 the new PyMAPDL geometry module does not allow calls on
-`geometry.keypoints`, `geometry.lines`, or `geometry.areas`.
+In PyMAPDL 0.66.0 and later, the new geometry module does not allow calls on
+``geometry.keypoints``, ``geometry.lines``, or ```geometry.areas```.
 
-You can activate the old API by doing:
+You can activate the old API like this:
 >>> mapdl.legacy_geometry = True
 
-For more information visit https://mapdl.docs.pyansys.com/version/stable/user_guide/mesh_geometry.html
+For more information, see `Mesh and geometry <https://mapdl.docs.pyansys.com/version/stable/user_guide/mesh_geometry.html>`_.
 """
 
 
@@ -188,7 +188,7 @@ class Geometry:
 
     @property
     def keypoints(self) -> pv.MultiBlock:
-        """Obtain the keypoints geometry
+        """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.MultiBlock` object.
 
@@ -216,7 +216,7 @@ class Geometry:
         >>> keypoint0
         pyvista_ndarray([ 0.     ,  0.01778, -0.00318])
 
-        Or using the entity name:
+        You can use the entity name:
 
         >>> kp1 = mapdl.geometry.keypoints["kp 1"]
         >>> kp1
@@ -252,10 +252,10 @@ class Geometry:
         return_as_array: bool = False,
         return_ids_in_array: bool = False,
     ) -> Union[NDArray[Any], pv.PolyData, List[pv.PolyData]]:
-        """Obtain the keypoints geometry
+        """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
-        a list of :class:`pyvista.PolyData`
+        a list of :class:`pyvista.PolyData`.
 
         Parameters
         ----------
@@ -348,7 +348,7 @@ class Geometry:
 
     @property
     def _lines(self) -> List[pv.PolyData]:
-        """Returns lines cache"""
+        """Cache of the lines."""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
         return self._lines_cache
@@ -390,7 +390,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   1
 
-        Or using the entity name:
+        You can use the entity name:
 
         >>> line1 = mapdl.geometry.lines["line 1"]
         >>> line1
@@ -403,7 +403,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   1
 
-        You can use this to iterate over the different elements:
+        You can iterate the different elements:
 
         >>> points = mapdl.geometry.lines
         >>> for each_line in points:
@@ -432,12 +432,12 @@ class Geometry:
         """Obtain line geometry
 
         Obtain the active lines as a :class:`pyvista.PolyData` object or
-        a list of :class:`pyvista.PolyData`
+        a list of :class:`pyvista.PolyData` objects.
 
         Parameters
         ----------
         return_as_list : bool, optional
-            Return the lines in a list, by default False
+            Whether to return the lines in a list. The default is ``False``.
 
         Returns
         -------
@@ -473,7 +473,7 @@ class Geometry:
 
     @property
     def areas(self) -> pv.MultiBlock:
-        """Obtain the areas geometry
+        """Geometry of the areas.
 
         Obtain the selected areas as a :class:`pyvista.MultiBlock` object.
 
@@ -507,7 +507,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   3
 
-        Or using the entity name:
+        You can use the entity name:
 
         >>> area1 = mapdl.geometry.areas["area 1"]
         >>> area1
@@ -519,7 +519,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, -3.180e-03
           N Arrays:   3
 
-        You can use this to iterate over the different elements:
+        You can iterate the different elements:
 
         >>> points = mapdl.geometry.areas
         >>> for each_line in points:
@@ -549,8 +549,8 @@ class Geometry:
         Parameters
         ----------
         quality : int, optional
-            quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).
+            Quality of the mesh to display.  Values are between 1 (worst)
+            and10 (best).
 
         Returns
         -------
@@ -598,7 +598,7 @@ class Geometry:
         """
         quality = int(quality)
         if quality > 10:
-            raise ValueError("``quality`` parameter must be a value between 0 and 10")
+            raise ValueError("The ``quality`` parameter must be a value between 0 and 10.")
 
         surf = self.generate_surface(11 - quality)
 
@@ -900,7 +900,7 @@ class Geometry:
         return lines_
 
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
-        """Load keypoints from MAPDL using IGES"""
+        """Load keypoints from MAPDL using IGES."""
         # write only keypoints
         self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
         self._mapdl.cm("__tmp_area__", "AREA", mute=True)
@@ -1214,7 +1214,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, 0.000e+00
           N Arrays:   3
 
-        Or using the entity name:
+        You can use the entity name:
 
         >>> volume1 = mapdl.geometry.volumes["volume 1"]
         >>> volume1
@@ -1226,7 +1226,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, 0.000e+00
           N Arrays:   3
 
-        You can use this to iterate over the different elements:
+        You can iterate the different elements:
 
         >>> points = mapdl.geometry.volumes
         >>> for each_line in points:
@@ -1253,13 +1253,13 @@ class Geometry:
     def get_volumes(
         self, return_as_list: bool = False, quality: int = 4
     ) -> Union[List[pv.PolyData], pv.PolyData]:
-        """Get active volumes from MAPDL represented as :class:`pyvista.PolyData` or
-        a list of :class:`pyvista.UnstructuredGrid`.
+        """Get active volumes from MAPDL represented as a :class:`pyvista.PolyData` object
+        or a list of :class:`pyvista.UnstructuredGrid` objects.
 
         Parameters
         ----------
         quality : int, optional
-            quality of the mesh to display.  Varies between 1 (worst)
+            Quality of the mesh to display.  Values are 1 (worst)
             to 10 (best).
 
         Returns
@@ -1285,7 +1285,7 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4
 
-        Return a list of volumes as indiviudal grids
+        Return a list of volumes as indiviudal grids.
 
         >>> volumes = mapdl.geometry.get_volumes(quality=3, return_as_list=True)
         >>> volumes
@@ -1424,7 +1424,7 @@ class Geometry:
         item_type: VALID_SELECTION_ENTITY_TP,
         sel_type: VALID_SELECTION_TYPE_TP,
     ) -> None:
-        """Select items using FLST
+        """Select items using FLST.
 
         Parameters
         ----------
@@ -1486,9 +1486,9 @@ class Geometry:
 
 
 class LegacyGeometry(Geometry):
-    """Legacy pythonic representation of MAPDL CAD geometry
+    """Legacy Pythonic representation of the MAPDL CAD geometry.
 
-    Contains advanced methods to extend geometry building and
+    This class contains advanced methods for extending geometry building and
     selection within MAPDL.
     """
 
@@ -1497,36 +1497,36 @@ class LegacyGeometry(Geometry):
         return super().get_keypoints(return_as_array=True)
 
     def lines(self) -> pv.PolyData:
-        """Active lines as a pyvista.PolyData"""
+        """Active lines as a ``pyvista.PolyData`` object."""
         return super().get_lines()  # type: ignore
 
     def areas(
         self, quality=1, merge=False
     ) -> Union[pv.PolyData, List[pv.UnstructuredGrid]]:
-        """List of areas from MAPDL represented as ``pyvista.PolyData``.
+        """List of areas from MAPDL represented as a ``pyvista.PolyData`` object.
 
         Parameters
         ----------
         quality : int, optional
-            quality of the mesh to display.  Varies between 1 (worst)
+            Quality of the mesh to display.  Values are 1 (worst)
             to 10 (best).
 
         merge : bool, optional
-            Option to merge areas into a single mesh. Default
-            ``False`` to return a list of areas.  When ``True``,
-            output will be a single mesh.
+            Whether to merge areas into a single mesh. The default
+            is ``False``, in which case a list of areas is returned.  When ``True``,
+            the output is a single mesh.
 
         Returns
         -------
         list of pyvista.UnstructuredGrid
-            List of ``pyvista.UnstructuredGrid`` meshes representing
+            List of :class:`pyvista.UnstructuredGrid <pyvista.UnstructuredGrid>` meshes representing
             the active surface areas selected by ``ASEL``.  If
             ``merge=True``, areas are returned as a single merged
-            UnstructuredGrid.
+            :class:`pyvista.UnstructuredGrid <pyvista.UnstructuredGrid>`.
 
         Examples
         --------
-        Return a list of areas as indiviudal grids
+        Return a list of areas as indiviudal grids.
 
         >>> areas = mapdl.areas(quality=3)
         >>> areab

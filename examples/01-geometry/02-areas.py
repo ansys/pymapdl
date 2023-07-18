@@ -92,8 +92,8 @@ anum
 ###############################################################################
 # Area Geometry
 # ~~~~~~~~~~~~~
-# Get the VTK ``Multiblock`` containing lines.  This VTK mesh can be
-# saved or plotted.  For more details, visit `Pyvista documentation <pyvista_docs_>`_
+# Get the VTK ``Multiblock`` containing lines. This VTK mesh can be
+# saved or plotted.  For more information, see the `Pyvista documentation <pyvista_docs_>`_
 #
 areas = mapdl.geometry.areas
 areas
@@ -104,8 +104,8 @@ areas
 # ~~~~~~~~~~~~~~~~~~~~
 # You can also obtain the areas as ``pyvista.PolyData`` objects.
 #
-# Note that this is a method so you can select the quality of the
-# areas (mesh density), and if you would like a merged output or
+# Note that this is a method. You can select the quality of the
+# areas (mesh density) and whether you want a merged output or
 # individual meshes.
 
 area = mapdl.geometry.get_areas(quality=3)
