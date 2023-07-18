@@ -287,7 +287,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, 1.524e-02
           N Arrays:   1
 
-        Return a list of keypoints as indiviudal grids
+        Return a list of keypoints as individual grids
 
         >>> keypoints = mapdl.geometry.get_keypoints(return_as_list=True)
         >>> keypoints
@@ -459,7 +459,7 @@ class Geometry:
           Z Bounds:   -3.180e-03, 1.524e-02
           N Arrays:   1
 
-        Return a list of lines as indiviudal grids
+        Return a list of lines as individual grids
 
         >>> lines = mapdl.geometry.get_lines(return_as_list=True)
         >>> lines
@@ -575,7 +575,7 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4
 
-        Return a list of areas as indiviudal grids
+        Return a list of areas as individual grids
 
         >>> areas = mapdl.geometry.get_areas(quality=3, return_as_list=True)
         >>> areas
@@ -1287,7 +1287,7 @@ class Geometry:
           Z Bounds:	5.500e-01, 5.500e-01
           N Arrays:	4
 
-        Return a list of volumes as indiviudal grids.
+        Return a list of volumes as individual grids.
 
         >>> volumes = mapdl.geometry.get_volumes(quality=3, return_as_list=True)
         >>> volumes
@@ -1528,7 +1528,7 @@ class LegacyGeometry(Geometry):
 
         Examples
         --------
-        Return a list of areas as indiviudal grids.
+        Return a list of areas as individual grids.
 
         >>> areas = mapdl.areas(quality=3)
         >>> areab
