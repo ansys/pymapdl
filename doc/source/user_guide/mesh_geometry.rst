@@ -93,8 +93,10 @@ To view the current mesh status, you can use this code:
 Geometry
 --------
 
-Starting from PyMAPDL v0.66.0, by default, all the geometry entities are returned
-as a |pv-multiblock|  object. For instance:
+In PyMAPDL 0.66.0 and later, by default, all geometry entities are returned
+as a |pv-multiblock|  object.
+
+**Example 1**
 
 .. code:: pycon
 
@@ -105,7 +107,7 @@ as a |pv-multiblock|  object. For instance:
      Y Bounds    -0.008, 0.018
      Z Bounds    -0.003, 0.015
 
-Or for example:
+**Example 2**:
 
 .. code:: pycon
 
@@ -116,13 +118,15 @@ Or for example:
      Y Bounds    -0.008, 0.018
      Z Bounds    -0.003, 0.015
 
-As you can see, in the new API it is not needed to call the entities.
+As you can see, you do not need to call the entitities in the new API.
 
 For more differences between the new Geometry API and the old one, see
 :ref:`migration_geometry_api_066`. 
 
 
-The selection now is easier, allowing you to use indexing:
+The selection now is easier.
+
+You can use indexing:
 
 .. code:: pycon
 
@@ -137,7 +141,7 @@ The selection now is easier, allowing you to use indexing:
      N Arrays:   3
 
 
-Or using the entity name:
+You can use the entity name:
 
 .. code:: pycon
 
@@ -152,7 +156,7 @@ Or using the entity name:
      N Arrays:   3
 
 
-You can now plot the different entities by just issuing plot after them:
+You can plot different entities by calling the :meth:`plot() <ansys.mapdl.core.mapdl_geometry.Geometry.keypoints.plot>` method:
 
 .. code:: pycon
 
@@ -162,7 +166,7 @@ You can now plot the different entities by just issuing plot after them:
 .. figure:: ../images/multiblock_pic1.png
 
 
-Or you can just plot a single entity:
+You can plot a single entity:
 
 .. code:: pycon
 
@@ -172,7 +176,7 @@ Or you can just plot a single entity:
 .. figure:: ../images/multiblock_pic2.png
 
 
-Or multiple entities using slices:
+You can plot multiple entities using slices:
 
 
 .. code:: pycon
@@ -206,10 +210,12 @@ Furthermore, the following methods are provided to return the geometry entities 
 Migration to the new Geometry API
 ---------------------------------
 
-Several changes need to be addressed in older to update your script
+Several changes must be addressed in older scripts to update them
 from the old API to the new API.
 
-One of the most important is that now, you don't need to call the entities like in the old API:
+One of the most important is that you no longer need to call the entities like you did in the old API.
+
+**Old API**
 
 .. code:: pycon
 
@@ -231,7 +237,7 @@ One of the most important is that now, you don't need to call the entities like 
      N Arrays:	4,
    ...
 
-Whereas in the new API:
+**New API**
 
 .. code:: pycon
 
@@ -243,15 +249,15 @@ Whereas in the new API:
      Z Bounds    -0.003, 0.015
 
 In addition, the type of entities returned by those methods are different.
-For comparison between the new and old geometry API, the following table is provided.
+This table compares the objects returned by the old and new APIs:
 
 .. _Table-2:
 
-**Table 2. Comparison between objects returned by both geometry APIs.**
+**Table 2. Comparison between objects returned by both APIs.**
 
 +--------------------+------------------------------------------+--------------------------------------------------+
 | **Function**       | **Old API**                              | **New API**                                      |
-|                    | (Function based - Needs to called)       | (Property based - Doesn't need to be called)     |
+|                    | (Function based - Must be called)        | (Property based - Doesn't need to be called)     |
 +====================+==========================================+==================================================+
 |  |geo-key|         | |np-array|                               | |pv-multiblock|                                  |
 +--------------------+------------------------------------------+--------------------------------------------------+
@@ -263,7 +269,7 @@ For comparison between the new and old geometry API, the following table is prov
 +--------------------+------------------------------------------+--------------------------------------------------+
 
 
-For equivalence between the new and old geometry API, the following table is provided.
+This table shows the equivalence between the old and new APIs:
 
 
 .. _Table-3:
