@@ -11,11 +11,14 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 import warnings
 from warnings import warn
 import weakref
 
 import numpy as np
+from numpy._typing import DTypeLike
+from numpy.typing import NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
@@ -32,12 +35,14 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    ComponentNoData,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     Information,
     allow_pickable_points,
@@ -51,10 +56,23 @@ from ansys.mapdl.core.misc import (
     wrap_point_SEL,
 )
 
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.reader import Archive
+
+    from ansys.mapdl.core.component import ComponentManager
+    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl_geometry import Geometry
+    from ansys.mapdl.core.parameters import Parameters
+    from ansys.mapdl.core.solution import Solution
+    from ansys.mapdl.core.xpl import ansXpl
+
 if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting import general_plotter
 
 from ansys.mapdl.core.post import PostProcessing
+
+DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -177,12 +195,12 @@ class _MapdlCore(Commands):
 
     def __init__(
         self,
-        loglevel="DEBUG",
-        use_vtk=None,
-        log_apdl=None,
-        log_file=False,
-        local=True,
-        print_com=False,
+        loglevel: DEBUG_LEVELS = "DEBUG",
+        use_vtk: Optional[bool] = None,
+        log_apdl: Optional[str] = None,
+        log_file: Union[bool, str] = False,
+        local: bool = True,
+        print_com: bool = False,
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -228,13 +246,13 @@ class _MapdlCore(Commands):
         self._platform = None
 
         _sanitize_start_parm(start_parm)
-        self._start_parm = start_parm
-        self._jobname = start_parm.get("jobname", "file")
-        self._path = start_parm.get("run_location", None)
-        self._print_com = print_com  # print the command /COM input.
+        self._start_parm: Dict[str, Any] = start_parm
+        self._jobname: str = start_parm.get("jobname", "file")
+        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
+        self._print_com: bool = print_com  # print the command /COM input.
 
         # Setting up loggers
-        self._log = logger.add_instance_logger(
+        self._log: logging.Logger = logger.add_instance_logger(
             self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
@@ -245,17 +263,20 @@ class _MapdlCore(Commands):
 
         self._log.debug("Logging set to %s", loglevel)
 
+        # Modules
         from ansys.mapdl.core.parameters import Parameters
 
-        self._parameters = Parameters(self)
+        self._parameters: Parameters = Parameters(self)
 
         from ansys.mapdl.core.solution import Solution
 
-        self._solution = Solution(self)
+        self._solution: Solution = Solution(self)
 
-        from ansys.mapdl.core.xpl import ansXpl
+        self._xpl: Optional[ansXpl] = None  # Initialized in mapdl_grpc
 
-        self._xpl = ansXpl(self)
+        from ansys.mapdl.core.component import ComponentManager
+
+        self._componentmanager: ComponentManager = ComponentManager(self)
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -410,12 +431,16 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_xsel_function(method))
 
     @property
-    def name(self):  # pragma: no cover
+    def name(self) -> str:
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, name):  # pragma: no cover
+    def name(self, name) -> None:
         raise AttributeError("The name of an instance cannot be changed.")
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self._log
 
     @property
     def queries(self):
@@ -536,7 +561,7 @@ class _MapdlCore(Commands):
         return self._force_output(self)
 
     @property
-    def solution(self):
+    def solution(self) -> "Solution":
         """Solution parameters of MAPDL.
 
         Returns
@@ -554,12 +579,30 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
+    def components(self) -> "ComponentManager":
+        """MAPDL Component manager.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.core.component.ComponentManager`
+
+        Examples
+        --------
+        Check if a solution has converged.
+
+        >>> mapdl.solution.converged
+        """
+        if self._exited:  # pragma: no cover
+            raise MapdlRuntimeError("MAPDL exited.")
+        return self._componentmanager
+
+    @property
     def _distributed(self):
         """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
-    def post_processing(self):
+    def post_processing(self) -> "PostProcessing":
         """Post-process an active MAPDL session.
 
         Examples
@@ -638,7 +681,7 @@ class _MapdlCore(Commands):
         self._response = "\n".join(responses)
 
     @property
-    def parameters(self):
+    def parameters(self) -> "Parameters":
         """Collection of MAPDL parameters.
 
         Notes
@@ -795,6 +838,8 @@ class _MapdlCore(Commands):
         >>> mapdl.clear()
 
         """
+        if self.is_grpc:
+            self._create_session()
         self.run("/CLE,NOSTART", mute=True)
 
     @supress_logging
@@ -808,7 +853,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("pyvista", softerror=True)
-    def geometry(self):
+    def geometry(self) -> "Geometry":
         """Geometry information.
 
         See :class:`ansys.mapdl.core.mapdl_geometry.Geometry`
@@ -851,7 +896,7 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self):  # pragma: no cover
+    def _create_geometry(self) -> "Geometry":
         """Return geometry cache"""
         from ansys.mapdl.core.mapdl_geometry import Geometry
 
@@ -907,7 +952,7 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
-    def _mesh(self):
+    def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
         # lazy import here to avoid loading pyvista and vtk
@@ -1002,7 +1047,9 @@ class _MapdlCore(Commands):
         )
         self._ignore_errors = bool(value)
 
-    def open_apdl_log(self, filename, mode="w"):
+    def open_apdl_log(
+        self, filename: Union[str, pathlib.Path], mode: Literal["w", "a", "x"] = "w"
+    ) -> None:
         """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
@@ -1726,7 +1773,7 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:  # pragma: no cover
+            if color_areas:
                 if isinstance(color_areas, bool):
                     anum = surf["entity_num"]
                     size_ = max(anum) + 1
@@ -1849,7 +1896,7 @@ class _MapdlCore(Commands):
         """Returns True when MAPDL is set to write plots as png to file."""
         return "PNG" in self.show(mute=False)
 
-    def set_log_level(self, loglevel):
+    def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
 
         Parameters
@@ -2160,7 +2207,7 @@ class _MapdlCore(Commands):
         except Exception:  # pragma: no cover
             ext = "rst"
 
-        if self._local:  # pragma: no cover
+        if self._local:
             if ext == "":
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
@@ -2210,7 +2257,7 @@ class _MapdlCore(Commands):
         elif os.path.isfile(rst_file):
             return rst_file
 
-    def _get(self, *args, **kwargs):
+    def _get(self, *args, **kwargs) -> MapdlFloat:
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
 
@@ -2258,7 +2305,7 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):  # pragma: no cover
+    def _flush_stored(self):
         """Writes stored commands to an input file and runs the input file.
 
         Used with ``non_interactive``.
@@ -2294,25 +2341,25 @@ class _MapdlCore(Commands):
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
 
-        if self._response is None:
+        if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
             self._log.info(self._response)
 
     def get_value(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
-    ):
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Runs the MAPDL GET command and returns a Python value.
 
         This method uses :func:`Mapdl.get`.
@@ -2408,19 +2455,19 @@ class _MapdlCore(Commands):
 
     def get(
         self,
-        par="__floatparameter__",
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
-    ):
+        par: str = "__floatparameter__",
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
@@ -2943,6 +2990,13 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            if self.is_grpc:
+                self._create_session()
+
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -3015,6 +3069,10 @@ class _MapdlCore(Commands):
         verbose = kwargs.get("verbose", False)
         text = self._run(command, verbose=verbose, mute=mute)
 
+        if command[:4].upper() == "/CLE" and self.is_grpc:
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
+
         if mute:
             return
 
@@ -3037,7 +3095,7 @@ class _MapdlCore(Commands):
             plot_path = self._get_plot_name(text)
             save_fig = kwargs.get("savefig", False)
             if save_fig:
-                self._download_plot(plot_path, save_fig)
+                return self._download_plot(plot_path, save_fig)
             else:
                 return self._display_plot(plot_path)
 
@@ -3176,7 +3234,7 @@ class _MapdlCore(Commands):
             containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
-        array : numpy.ndarray or List
+        array : numpy.ndarray or list
             List as a table or :class:`numpy.ndarray` array.
 
         var1 : str, optional
@@ -3356,7 +3414,7 @@ class _MapdlCore(Commands):
 
     @directory.setter
     @supress_logging
-    def directory(self, path):
+    def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
 
@@ -3371,7 +3429,7 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
-    def __del__(self):  # pragma: no cover
+    def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
             try:
@@ -3386,15 +3444,15 @@ class _MapdlCore(Commands):
     @supress_logging
     def get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        **kwargs,
-    ):
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
@@ -3473,16 +3531,16 @@ class _MapdlCore(Commands):
 
     def _get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        dtype=None,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        dtype: DTypeLike = None,
         **kwargs,
-    ):
+    ) -> NDArray[np.float64]:
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
@@ -3811,7 +3869,7 @@ class _MapdlCore(Commands):
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
 
-    def _get_selected_(self, entity):  # pragma: no cover
+    def _get_selected_(self, entity):
         """Get list of selected entities."""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
         if entity.upper() not in allowed_values:
@@ -4086,15 +4144,23 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlInvalidRoutineError(text)
 
         if "command is ignored" in flat_text:
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlCommandIgnoredError(text)
+
+        if (
+            "The component definition of" in flat_text
+            and "contains no data." in flat_text
+        ):
+            text += base_error_msg
+            raise ComponentNoData(text)
 
         # flag errors
         if "*** ERROR ***" in flat_text:
@@ -4147,6 +4213,11 @@ class _MapdlCore(Commands):
                 else:
                     # Catching only the first error.
                     error_message = error_message.group(0)
+
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
 
                 # Trimming empty lines
                 error_message = "\n".join(
@@ -4337,7 +4408,7 @@ class _MapdlCore(Commands):
         if not self.is_local:
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
-        else:  # pragma: no cover
+        else:
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
                 sys_output = f.read().strip()
@@ -4385,8 +4456,8 @@ class _MapdlCore(Commands):
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
 
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
+        def __init__(self, parent: "_MapdlCore"):
+            self._parent: "_MapdlCore" = weakref.ref(parent)
 
         def __enter__(self):
             self._parent()._log.debug("Entering force-output mode")
@@ -4405,7 +4476,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self):
+    def _parse_rlist(self) -> Dict[int, float]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
@@ -4438,3 +4509,48 @@ class _MapdlCore(Commands):
                 const_[set_][jlimit] = values_[i]
 
         return const_
+
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        header = "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+        cmlist = "\n".join(blocks)
+
+        def extract(each_line, ind):
+            return each_line.split()[ind].strip()
+
+        return {
+            extract(each_line, 0): extract(each_line, 1)
+            for each_line in cmlist.splitlines()
+            if each_line
+        }
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+        # Capturing blocks
+        cmlist = "\n\n".join(
+            re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        )
+
+        # Capturing items in each block
+        rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+        items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+        # Joining them together and giving them format.
+        items = items.replace("\n", "  ").split()
+        items = [int(each) for each in items]
+
+        return items

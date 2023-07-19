@@ -13,41 +13,24 @@ import numpy as np
 import psutil
 import pytest
 from pyvista import PolyData
-from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlRuntimeError,
 )
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-
-skip_in_cloud = pytest.mark.skipif(
-    not get_start_instance(),
-    reason="""
-Must be able to launch MAPDL locally. Remote execution does not allow for
-directory creation.
-""",
-)
-
-skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
-
-
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
-
-skip_on_ci = pytest.mark.skipif(
-    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
-)
-
-skip_if_not_local = pytest.mark.skipif(
-    not (os.environ.get("ON_LOCAL", "").upper() == "TRUE"),
-    reason="Skipping if not in local",
+from conftest import (
+    skip_if_not_local,
+    skip_if_on_cicd,
+    skip_no_xserver,
+    skip_on_windows,
 )
 
 CMD_BLOCK = """/prep7
@@ -590,7 +573,7 @@ def test_apdl_logging(mapdl, tmpdir):
 
     # Testing /input PR #1455
     assert "/INP," in log
-    assert "'input.inp'" in log
+    assert "input.inp'" in log
     assert "/OUT,_input_tmp_" in log
     assert str_not_in_apdl_logger not in log
 
@@ -998,7 +981,7 @@ def test_cdread(mapdl, cleared):
         mapdl.cdread("test", "model2", "cdb")
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split("/")[0][-3:0]
     dirname = "tt" + random_letters
@@ -1144,7 +1127,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     mapdl._run("/gopr")  # getting settings back
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_without_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1154,7 +1137,7 @@ def test_path_without_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_with_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1164,7 +1147,7 @@ def test_path_with_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
@@ -1194,7 +1177,7 @@ def test_cwd(mapdl, tmpdir):
         mapdl.cwd(old_path)
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1484,7 +1467,7 @@ def test_result_file(mapdl, solved_box):
     assert isinstance(mapdl.result_file, str)
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl.result_file
 
@@ -1531,7 +1514,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@skip_windows
+@skip_on_windows
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
@@ -1865,6 +1848,55 @@ def test_force_output(mapdl):
     assert mapdl.prep7()
 
 
+def test_session_id(mapdl, running_test):
+    assert mapdl._session_id is not None
+
+    # already checking version
+    mapdl._checking_session_id_ = True
+    assert mapdl._check_session_id() is None
+
+    # Not having pymapdl session id
+    mapdl._checking_session_id_ = False
+    copy_ = mapdl._session_id_
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    # Checking real case
+    mapdl._session_id_ = copy_
+    with running_test():
+        assert isinstance(mapdl._check_session_id(), bool)
+
+    id_ = "123412341234"
+    mapdl._session_id_ = id_
+    mapdl._run(f"{SESSION_ID_NAME}='{id_}'")
+    assert mapdl._check_session_id()
+
+    mapdl._session_id_ = "qwerqwerqwer"
+    assert not mapdl._check_session_id()
+
+    mapdl._session_id_ = id_
+
+
+def test_session_id_different(mapdl, running_test):
+    # Assert it works
+    with running_test():
+        assert mapdl.prep7()
+
+    mapdl._run(f"{SESSION_ID_NAME}='1234'")
+
+    with running_test():
+        with pytest.raises(DifferentSessionConnectionError):
+            mapdl.prep7()
+
+
+def test_check_empty_session_id(mapdl):
+    # it should run normal
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    assert mapdl.prep7()
+
+
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1982,6 +2014,17 @@ def test_rlblock_rlblock_num(mapdl):
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
+
+
+def test__flush_stored(mapdl):
+    with mapdl.non_interactive:
+        mapdl.com("mycomment")
+        mapdl.com("another comment")
+
+        assert any(["mycomment" in each for each in mapdl._stored_commands])
+        assert len(mapdl._stored_commands) >= 2
+
+    assert not mapdl._stored_commands
 
 
 def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):

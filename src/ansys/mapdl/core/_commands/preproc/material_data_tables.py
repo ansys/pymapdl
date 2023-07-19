@@ -365,7 +365,7 @@ class MaterialDataTables:
         )
         return self.run(command, **kwargs)
 
-    def tbdele(self, lab="", mat1="", mat2="", inc="", **kwargs):
+    def tbdele(self, lab="", mat1="", mat2="", inc="", tbopt="", **kwargs):
         """APDL Command: TBDELE
 
         Deletes previously defined material data tables.
@@ -381,12 +381,22 @@ class MaterialDataTables:
             steps of INC (defaults to 1).  If MAT1= ALL, ignore MAT2 and INC
             and delete data tables for all materials.
 
+        tbopt
+            Material data table option. Visit :meth:`Mapdl.tb <ansys.mapdl.core.Mapdl.tb>` for valid ``tbopt`` values for a given Lab.
+
         **kwargs
             Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
-        This command is also valid in SOLUTION.
+
+        If ``lab = "ALL"``, delete all material data tables.
+
+        If ``mat1= "ALL"``, ``mat2`` and ``inc`` are ignored and all material data tables are deleted.
+
+        If ``tbopt`` is specified, the material data table corresponding to ``Lab`` is deleted if it also has the specified table option. If ``tbopt`` is not specified, all material data tables corresponding to ``Lab`` are deleted. ``tbopt`` is ignored when ``Lab = "ALL"``.
+
+        This command is also valid in the solution processor (:meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`), but is not intended for changing material behaviors between load steps.
         """
         command = "TBDELE,%s,%s,%s,%s" % (
             str(lab),
