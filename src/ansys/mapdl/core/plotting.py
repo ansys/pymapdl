@@ -442,6 +442,7 @@ def _general_plotter(
             cmap=cmap,
             render_points_as_spheres=render_points_as_spheres,
             render_lines_as_tubes=render_lines_as_tubes,
+            rgb=True,
             **add_mesh_kwargs,
         )
 

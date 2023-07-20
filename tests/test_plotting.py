@@ -567,3 +567,35 @@ def test_vsel_iterable(mapdl, make_block):
     assert np.allclose(
         mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
     )
+
+
+@pytest.mark.parametrize(
+    "color_areas",
+    [
+        True,
+        "red",
+        ["red", "green", "blue", "yellow", "white", "purple"],
+        [
+            [255, 255, 255],
+            [255, 255, 0],
+            [255, 0, 0],
+            [0, 255, 0],
+            [0, 255, 255],
+            [0, 0, 0],
+        ],
+        255
+        * np.array([[1, 1, 1], [1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 0]]),
+    ],
+)
+def test_color_areas(mapdl, make_block, color_areas):
+    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
+
+    if isinstance(color_areas, bool):
+        num_colors = mapdl.geometry.n_area
+    elif isinstance(color_areas, str):
+        num_colors = 1
+    else:
+        num_colors = len(color_areas)
+
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == num_colors
+    pl.show()
