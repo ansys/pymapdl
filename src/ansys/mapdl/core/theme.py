@@ -7,10 +7,16 @@ from ansys.mapdl.core import _HAS_PYVISTA
 if _HAS_PYVISTA:
     from pyvista.plotting.colors import get_cycler
 
-    try:  # new in pyvista 0.40
-        from pyvista.themes import Theme
+    try:
+        from pyvista.plotting.themes import Theme
+
     except ImportError:
-        from pyvista.themes import DefaultTheme as Theme
+        from pyvista import __version__ as pyvista_version
+
+        if "0.40" in pyvista_version:
+            from pyvista.themes import Theme
+        else:  # older versions
+            from pyvista.themes import DefaultTheme as Theme
 
     base_class = Theme
 
