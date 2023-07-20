@@ -1804,7 +1804,6 @@ class _MapdlCore(Commands):
                 elif isinstance(color_areas, str):
                     # A color is provided as a string
                     colors = np.atleast_2d(np.array(to_rgba(color_areas)))
-                    colors = np.repeat(colors, repeats=len(anums), axis=0)
 
                 else:
                     if len(anums) != len(color_areas):
@@ -1820,6 +1819,9 @@ class _MapdlCore(Commands):
 
                 # mapping mapdl areas to pyvista mesh cells
                 def mapper(each):
+                    if len(colors) == 1:
+                        # for the case colors comes from string.
+                        return colors[0]
                     return colors[each - 1]
 
                 colors_map = np.array(list(map(mapper, surf["entity_num"])))
