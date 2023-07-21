@@ -260,12 +260,12 @@ class Geometry:
         Parameters
         ----------
         return_as_list : bool, optional
-            Return the data as a list, by default False
+            Whether to return the data as a list. The default is ``False``, in which case the data is returned as a PyVista :class:`PolyData<pyvista.PolyData>` object.
         return_as_array : bool, optional
-            Return the data as a numpy array, by default False
+            Whether to return the data as a :class:`numpy array <numpy.ndarray>`. The default  is ``False``, in which case the data is returned as a PyVista :class:`PolyData <pyvista.PolyData>` object.
         return_ids_in_array : bool, optional
-            Return the keypoints ids in the array. Only valid when
-            `return_as_array` is True. By default False
+            Whether to return the keypoint IDs in the output array. The default is
+            ``False``, in which case the data is as a :class:`numpy array <numpy.ndarray>` object with only the coordinates. This parameter is only valid when ``return_as_array=True``.
 
         Returns
         -------
@@ -355,7 +355,7 @@ class Geometry:
 
     @property
     def lines(self) -> pv.MultiBlock:
-        """Obtain the lines geometry
+        """Geometry of the lines.
 
         Obtain the selected lines as a :class:`pyvista.MultiBlock` object.
 
