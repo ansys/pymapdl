@@ -1475,22 +1475,27 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     with pytest.raises(FileNotFoundError):
         mapdl.file("potato")
 
+    assert rst_file in mapdl.list_files()
+    rst_fpath = os.path.join(mapdl.directory, rst_file)
+
     # change directory
-    try:
-        old_path = mapdl.directory
-        tmp_dir = tmpdir.mkdir("asdf")
-        mapdl.directory = str(tmp_dir)
-        assert Path(mapdl.directory) == tmp_dir
+    old_path = mapdl.directory
+    tmp_dir = tmpdir.mkdir("asdf")
+    mapdl.directory = str(tmp_dir)
+    assert Path(mapdl.directory) == tmp_dir
 
-        mapdl.slashsolu()
-        mapdl.solve()
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(rst_fpath)
 
-        mapdl.post1()
-        mapdl.file(rst_file)
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(
+        rst_fpath.replace(".rst", ""), "rst"
+    )
 
-    finally:
-        # always revert to preserve state
-        mapdl.directory = old_path
+    # always revert to preserve state
+    mapdl.directory = old_path
 
 
 def test_file_command_remote(mapdl, cube_solve, tmpdir):
@@ -1498,19 +1503,30 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     mapdl.post1()
-    # this file already exists remotely
-    mapdl.file("file", ".rst")
+    # this file should exist remotely
+    rst_file_name = "file.rst"
+    assert rst_file_name in mapdl.list_files()
+
+    mapdl.file(rst_file_name)  # checking we can read it.
 
     with pytest.raises(FileNotFoundError):
         mapdl.file()
 
+    # We are going to download the rst, rename it and
+    # tell PyMAPDL to read (it will upload it then)
     tmpdir = str(tmpdir)
-    mapdl.download("file.rst", tmpdir)
-    local_file = os.path.join(tmpdir, "file.rst")
+    mapdl.download(rst_file_name, tmpdir)
+    local_file = os.path.join(tmpdir, rst_file_name)
     new_local_file = os.path.join(tmpdir, "myrst.rst")
     os.rename(local_file, new_local_file)
-
+    assert os.path.exists(new_local_file)
     output = mapdl.file(new_local_file)
+    assert "DATA FILE CHANGED TO FILE" in output
+
+    new_local_file2 = os.path.join(tmpdir, "myrst2.rst")
+    os.rename(new_local_file, new_local_file2)
+    assert os.path.exists(new_local_file2)
+    output = mapdl.file(new_local_file2.replace(".rst", ""), "rst")
     assert "DATA FILE CHANGED TO FILE" in output
 
 

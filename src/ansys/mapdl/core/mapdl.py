@@ -11,7 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -211,15 +211,15 @@ class _MapdlCore(Commands):
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
-        self._exited = False
-        self._ignore_errors = False
+        self._exited: bool = False
+        self._ignore_errors: bool = False
         self._apdl_log = None
-        self._store_commands = False
+        self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched = False
+        self._launched: bool = False
         self._stderr = None
         self._stdout = None
 
@@ -238,8 +238,8 @@ class _MapdlCore(Commands):
 
         self._log_filehandler = None
         self._version = None  # cached version
-        self._local = local
-        self._cleanup = True
+        self._local: bool = local
+        self._cleanup: bool = True
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
@@ -2930,7 +2930,13 @@ class _MapdlCore(Commands):
             self._flush_stored()
             return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+    def run(
+        self,
+        command: str,
+        write_to_log: bool = True,
+        mute: Optional[bool] = None,
+        **kwargs,
+    ) -> str:
         """
         Run single APDL command.
 
@@ -4253,7 +4259,7 @@ class _MapdlCore(Commands):
             super().lsread(*args, **kwargs)
         return self._response.strip()
 
-    def file(self, fname="", ext="", **kwargs):
+    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Specifies the data file where results are to be found.
 
         APDL Command: FILE
@@ -4290,7 +4296,7 @@ class _MapdlCore(Commands):
         file_, ext_ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename, extension, **kwargs):
+    def _file(self, filename: str, extension: str, **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
@@ -4434,7 +4440,7 @@ class _MapdlCore(Commands):
         """Check if the MAPDL instance has been launched by PyMAPDL."""
         return self._launched
 
-    def _decompose_fname(self, fname):
+    def _decompose_fname(self, fname: str) -> Tuple[str, str, str]:
         """Decompose a file name (with or without path) into filename and extension.
 
         Parameters
@@ -4451,7 +4457,7 @@ class _MapdlCore(Commands):
             File extension (without dot)
         """
         fname = pathlib.Path(fname)
-        return fname.stem, fname.suffix.replace(".", "")
+        return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
