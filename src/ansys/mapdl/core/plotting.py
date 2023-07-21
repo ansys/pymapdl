@@ -1,7 +1,9 @@
 """Plotting helper for MAPDL using pyvista"""
+from typing import Any, Optional
 from warnings import warn
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
@@ -420,9 +422,21 @@ def _general_plotter(
         )
 
     for mesh in meshes:
+        scalars: Optional[NDArray[Any]] = mesh.get("scalars")
+
+        if (
+            "scalars" in mesh
+            and scalars.ndim == 2
+            and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
+        ):
+            # for the case we are using scalars for plotting
+            rgb = True
+        else:
+            rgb = False
+
         plotter.add_mesh(
             mesh["mesh"],
-            scalars=mesh.get("scalars"),
+            scalars=scalars,
             scalar_bar_args=scalar_bar_args,
             color=mesh.get("color", color),
             style=mesh.get("style", style),
@@ -442,7 +456,7 @@ def _general_plotter(
             cmap=cmap,
             render_points_as_spheres=render_points_as_spheres,
             render_lines_as_tubes=render_lines_as_tubes,
-            rgb=True,
+            rgb=rgb,
             **add_mesh_kwargs,
         )
 
