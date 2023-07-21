@@ -1810,6 +1810,8 @@ class _MapdlCore(Commands):
                         raise ValueError(
                             "The length of the parameter array 'color_areas' "
                             "should be the same as the number of areas."
+                            f"\nanums: {anums}"
+                            f"\ncolor_areas: {color_areas}"
                         )
 
                     if isinstance(color_areas[0], str):
