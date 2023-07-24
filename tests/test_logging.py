@@ -4,10 +4,10 @@ import os
 import re
 
 import pytest
-from conftest import skip_if_no_has_grpc
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
+from conftest import skip_if_no_has_grpc
 
 ## Notes
 # Use the next fixtures for:

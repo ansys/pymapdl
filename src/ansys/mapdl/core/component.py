@@ -1,15 +1,23 @@
 """Component related module"""
 
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    get_args,
+)
 import warnings
 import weakref
-from typing import (TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple,
-                    Union, get_args)
 
 import numpy as np
 from numpy.typing import NDArray
 
-from ansys.mapdl.core.errors import (ComponentDoesNotExits,
-                                     ComponentIsNotSelected)
+from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
 from ansys.mapdl.core.mapdl import _MapdlCore
 
 if TYPE_CHECKING:  # pragma: no cover

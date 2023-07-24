@@ -7,6 +7,7 @@ import re
 import time
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+
 # from ansys.mapdl.core.misc import kill_process
 from ansys.mapdl.core.mapdl import _MapdlCore
 

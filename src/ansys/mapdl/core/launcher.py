@@ -3,15 +3,15 @@
 import atexit
 import os
 import platform
+from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
 import threading
 import time
-import warnings
-from queue import Empty, Queue
 from typing import TYPE_CHECKING, Tuple, Union
+import warnings
 
 try:
     import ansys.platform.instancemanagement as pypim
@@ -25,13 +25,22 @@ from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-from ansys.mapdl.core.errors import (LockFileException, MapdlDidNotStart,
-                                     MapdlRuntimeError, VersionError)
+from ansys.mapdl.core.errors import (
+    LockFileException,
+    MapdlDidNotStart,
+    MapdlRuntimeError,
+    VersionError,
+)
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-from ansys.mapdl.core.misc import (check_valid_ip, check_valid_port,
-                                   check_valid_start_instance, create_temp_dir,
-                                   random_string, threaded)
+from ansys.mapdl.core.misc import (
+    check_valid_ip,
+    check_valid_port,
+    check_valid_start_instance,
+    create_temp_dir,
+    random_string,
+    threaded,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole

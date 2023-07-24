@@ -1,6 +1,6 @@
 """Shared testing module"""
-import os
 from collections import namedtuple
+import os
 from typing import Dict
 
 from ansys.tools.path import find_mapdl

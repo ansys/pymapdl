@@ -1,30 +1,37 @@
 """Test MAPDL interface"""
+from datetime import datetime
 import os
+from pathlib import Path
 import re
 import shutil
 import time
-from datetime import datetime
-from pathlib import Path
 
+from ansys.mapdl.reader import examples
+from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
 import pytest
-from ansys.mapdl.reader import examples
-from ansys.mapdl.reader.rst import Result
-from conftest import (skip_if_not_local, skip_if_on_cicd, skip_no_xserver,
-                      skip_on_windows)
 from pyvista import PolyData
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.errors import (DifferentSessionConnectionError,
-                                     IncorrectWorkingDirectory,
-                                     MapdlCommandIgnoredError,
-                                     MapdlConnectionError, MapdlRuntimeError)
+from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
+    IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
+    MapdlConnectionError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
+from conftest import (
+    skip_if_not_local,
+    skip_if_on_cicd,
+    skip_no_xserver,
+    skip_on_windows,
+)
 
 CMD_BLOCK = """/prep7
 ! Mat

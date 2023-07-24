@@ -1,6 +1,6 @@
-import warnings
 from enum import IntEnum
 from typing import Union
+import warnings
 
 QUERY_NAME = "__QUERY_PARM__"
 

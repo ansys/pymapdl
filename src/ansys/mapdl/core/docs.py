@@ -70,8 +70,7 @@ def linkcode_resolve(domain, info, edit=False):
     from ansys.mapdl.core.examples import examples  # noqa: F401
     from ansys.mapdl.core.examples import verif_files  # noqa: F401
     from ansys.mapdl.core.inline_functions import core  # noqa: F401
-    from ansys.mapdl.core.inline_functions import \
-        inline_functions  # noqa: F401
+    from ansys.mapdl.core.inline_functions import inline_functions  # noqa: F401
 
     if domain != "py":  # pragma: no cover
         return None

@@ -5,17 +5,23 @@ import tempfile
 import weakref
 
 import pytest
-from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import LicenseServerConnectionError
-from ansys.mapdl.core.launcher import (_check_license_argument,
-                                       _force_smp_student_version, _is_ubuntu,
-                                       _validate_MPI, _verify_version,
-                                       find_ansys, get_default_ansys,
-                                       launch_mapdl, update_env_vars,
-                                       version_from_path)
+from ansys.mapdl.core.launcher import (
+    _check_license_argument,
+    _force_smp_student_version,
+    _is_ubuntu,
+    _validate_MPI,
+    _verify_version,
+    find_ansys,
+    get_default_ansys,
+    launch_mapdl,
+    update_env_vars,
+    version_from_path,
+)
 from ansys.mapdl.core.licensing import LICENSES
+from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
 
 try:
     import ansys_corba  # noqa: F401

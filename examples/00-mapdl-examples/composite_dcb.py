@@ -48,11 +48,11 @@ These additional packages are imported for use:
 import os
 import tempfile
 
+from ansys.dpf import core as dpf
+from ansys.dpf.core import Model
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
-from ansys.dpf import core as dpf
-from ansys.dpf.core import Model
 
 from ansys.mapdl import core as pymapdl
 
