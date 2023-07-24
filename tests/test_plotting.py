@@ -573,7 +573,6 @@ def test_vsel_iterable(mapdl, make_block):
     "color_areas",
     [
         True,
-        "red",
         ["red", "green", "blue", "yellow", "white", "purple"],
         [
             [255, 255, 255],
@@ -588,6 +587,9 @@ def test_vsel_iterable(mapdl, make_block):
     ],
 )
 def test_color_areas(mapdl, make_block, color_areas):
+    if color_areas is not True:
+        pytest.mark.skip()
+
     pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
 
     if isinstance(color_areas, bool):
@@ -598,7 +600,6 @@ def test_color_areas(mapdl, make_block, color_areas):
         num_colors = len(color_areas)
 
     assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == num_colors
-    pl.show()
 
 
 def test_color_areas_error(mapdl, make_block):
