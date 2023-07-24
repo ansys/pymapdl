@@ -605,3 +605,29 @@ def test_color_areas_error(mapdl, make_block):
     color_areas = ["red", "green", "blue"]
     with pytest.raises(ValueError):
         mapdl.aplot(vtk=True, color_areas=color_areas)
+
+
+def test_WithInterativePlotting(mapdl, make_block):
+    mapdl.eplot(vtk=False)
+    jobname = mapdl.jobname.upper()
+
+    def filtering(file_name):
+        file_name = file_name.upper()
+        if file_name.startswith(jobname) and file_name.endswith(".PNG"):
+            return True
+        else:
+            return False
+
+    list_files = sorted([each for each in mapdl.list_files() if filtering(each)])
+    last_png = list_files[0]
+
+    if mapdl.is_local:
+        last_png = os.path.join(mapdl.directory, last_png)
+    else:
+        mapdl.download(last_png)
+
+    # the file size will be 3kb if the image is empty.
+    assert os.path.getsize(last_png) // 1024 > 4  # kbs
+
+    # cleaning
+    os.remove(last_png)
