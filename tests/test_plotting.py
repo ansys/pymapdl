@@ -6,7 +6,7 @@ import pytest
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.plotting import general_plotter
-from conftest import SUPPORT_PLOTTING, skip_no_xserver
+from conftest import skip_no_xserver
 
 
 @pytest.fixture
@@ -569,10 +569,15 @@ def test_vsel_iterable(mapdl, make_block):
     )
 
 
+def test_color_areas(mapdl, make_block):
+    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
+
+
+@skip_no_xserver
 @pytest.mark.parametrize(
     "color_areas",
     [
-        True,
         ["red", "green", "blue", "yellow", "white", "purple"],
         [
             [255, 255, 255],
@@ -586,20 +591,9 @@ def test_vsel_iterable(mapdl, make_block):
         * np.array([[1, 1, 1], [1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 0]]),
     ],
 )
-def test_color_areas(mapdl, make_block, color_areas):
-    if color_areas is not True:
-        pytest.mark.skipif(not SUPPORT_PLOTTING)
-
+def test_color_areas_individual(mapdl, make_block, color_areas):
     pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
-
-    if isinstance(color_areas, bool):
-        num_colors = mapdl.geometry.n_area
-    elif isinstance(color_areas, str):
-        num_colors = 1
-    else:
-        num_colors = len(color_areas)
-
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == num_colors
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
 
 
 def test_color_areas_error(mapdl, make_block):
