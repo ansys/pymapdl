@@ -1561,6 +1561,7 @@ class _MapdlCore(Commands):
         scale="",
         vtk=None,
         quality=4,
+        show_volume_numbering=False,
         show_area_numbering=False,
         show_line_numbering=False,
         color_areas=False,
@@ -1635,20 +1636,36 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            cm_name = "__tmp_area2__"
-            self.cm(cm_name, "AREA", mute=True)
-            self.aslv("S", mute=True)  # select areas attached to active volumes
-            out = self.aplot(
-                vtk=vtk,
-                color_areas=color_areas,
-                quality=quality,
-                show_area_numbering=show_area_numbering,
-                show_line_numbering=show_line_numbering,
-                show_lines=show_lines,
-                **kwargs,
-            )
-            self.cmsel("S", cm_name, "AREA", mute=True)
-            return out
+            cm_name_area = "__tmp_area2__"
+            cm_name_volu = "__tmp_volu2__"
+            self.cm(cm_name_area, "AREA", mute=True)
+            self.cm(cm_name_volu, "VOLU", mute=True)
+
+            volumes = self.geometry.vnum
+            meshes = []
+            points = []
+            labels = []
+
+            for each_volu in volumes:
+                self.vsel("S", vmin=each_volu)
+                self.aslv("S", mute=True)  # select areas attached to active volumes
+
+                pl = self.aplot(
+                    vtk=True,
+                    color_areas=color_areas,
+                    quality=quality,
+                    show_area_numbering=show_area_numbering,
+                    show_line_numbering=show_line_numbering,
+                    show_lines=show_lines,
+                    return_plotter=True**kwargs,
+                )
+                meshes.append({"mesh": pl.mesh, "color": "white"})
+
+            self.cmsel("S", cm_name_area, "AREA", mute=True)
+            self.cmsel("S", cm_name_volu, "VOLU", mute=True)
+
+            return general_plotter(meshes, points, labels, **kwargs)
+
         else:
             with self._enable_interactive_plotting():
                 return super().vplot(
@@ -1779,11 +1796,13 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
+            # surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
+            surfs = self.geometry.get_areas(return_as_list=True)
             meshes = []
             labels = []
 
-            anums = np.unique(surf["entity_num"])
+            # anums = np.unique(surf["entity_num"])
+            anums = self.geometry.anum  # This might need double check
 
             # individual surface isolation is quite slow, so just
             # color individual areas
@@ -1824,23 +1843,18 @@ class _MapdlCore(Commands):
                     else:
                         colors = color_areas
 
-                # mapping mapdl areas to pyvista mesh cells
-                def mapper(each):
-                    if len(colors) == 1:
-                        # for the case colors comes from string.
-                        return colors[0]
-                    return colors[each - 1]
-
-                colors_map = np.array(list(map(mapper, surf["entity_num"])))
-                meshes.append({"mesh": surf, "scalars": colors_map})
+                for surf, color in zip(surfs, color_areas):
+                    meshes.append({"mesh": surf, "color": color})
 
             else:
-                meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
+                for surf in surfs:
+                    meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 
             if show_area_numbering:
                 centers = []
-                for anum in anums:
-                    area = surf.extract_cells(surf["entity_num"] == anum)
+
+                for surf in surfs:
+                    area = surf.extract_cells()
                     centers.append(area.center)
 
                 labels.append({"points": np.array(centers), "labels": anums})
