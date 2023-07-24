@@ -6,7 +6,7 @@ import pytest
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.plotting import general_plotter
-from conftest import skip_no_xserver
+from conftest import SUPPORT_PLOTTING, skip_no_xserver
 
 
 @pytest.fixture
@@ -588,7 +588,7 @@ def test_vsel_iterable(mapdl, make_block):
 )
 def test_color_areas(mapdl, make_block, color_areas):
     if color_areas is not True:
-        pytest.mark.skip()
+        pytest.mark.skipif(not SUPPORT_PLOTTING)
 
     pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
 
