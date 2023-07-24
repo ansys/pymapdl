@@ -171,13 +171,14 @@ jobs:
 
       - name: "Run example GIF"
         run: |
-          xvfb-run python examples/00-mapdl-examples/composite_dcb.py
+          xvfb-run python ./examples/00-mapdl-examples/composite_dcb.py
   
       - name: "Upload GIF"
         uses: actions/upload-artifact@v3
         with:
           name: dcb_gif
           path: dcb.gif
+
       - name: "Build documentation"
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
