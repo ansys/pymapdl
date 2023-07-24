@@ -176,7 +176,8 @@ jobs:
       - name: "Substitute defective GIF"
         run: |
           cd doc/_build/html/examples/gallery_examples/00-mapdl-examples
-          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../../../source/images/dcb.gif+g' composite_dcb.html
+          cp ../../../../../source/images/dcb.gif ../../../_images/
+          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../_images/dcb.gif+g' composite_dcb.html
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
