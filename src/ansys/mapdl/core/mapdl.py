@@ -11,7 +11,17 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Union,
+    get_args,
+)
 import warnings
 from warnings import warn
 import weakref
@@ -72,7 +82,8 @@ if _HAS_PYVISTA:
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-
+LITERAL_PLOT_FILE = Literal["PNG", "TIFF", "PNG", "VRML", "TERM"]
+LITERAL_PLOT_FILE_LIST = get_args(LITERAL_PLOT_FILE)
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -201,6 +212,7 @@ class _MapdlCore(Commands):
         log_file: Union[bool, str] = False,
         local: bool = True,
         print_com: bool = False,
+        file_type_for_plots: LITERAL_PLOT_FILE = "PNG",
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -219,6 +231,7 @@ class _MapdlCore(Commands):
         self._launched: bool = False
         self._stderr = None
         self._stdout = None
+        self._file_type_for_plots = file_type_for_plots
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -326,6 +339,28 @@ class _MapdlCore(Commands):
     def is_console(self):
         """Return true if using console to connect to the MAPDL instance."""
         return self._mode == "console"
+
+    @property
+    def file_type_for_plots(self):
+        """Returns the default file type for plotting."""
+        return self._file_type_for_plots
+
+    @file_type_for_plots.setter
+    def file_type_for_plots(self, value: LITERAL_PLOT_FILE):
+        """Modify the default file type for plotting."""
+        if value not in LITERAL_PLOT_FILE_LIST:
+            raise ValueError(f"'{value}' is not allowed as file for plots output.")
+        self._file_type_for_plots = value
+
+    @property
+    def use_vtk(self):
+        """Returns if using VTK by default or not."""
+        return self._use_vtk
+
+    @use_vtk.setter
+    def use_vtk(self, value: bool):
+        """Set VTK to be used by default or not."""
+        self._use_vtk = value
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -3031,6 +3066,10 @@ class _MapdlCore(Commands):
             # Address gRPC issue
             # https://github.com/pyansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
+
+        # Tracking output device
+        if command[:4].upper() == "/SHO":
+            self._file_type_for_plots = command.split(",")[1].upper()
 
         # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()

@@ -251,6 +251,11 @@ class MapdlGrpc(_MapdlCore):
         PyPIM. This instance will be deleted when calling
         :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
 
+    file_type_for_plots: ["PNG", "TIFF", "PNG", "VRML", "TERM"], Optional
+        Change the default file type for plots using ``/SHOW``, by
+        default it is ``PNG``.
+
+
     Examples
     --------
     Connect to an instance of MAPDL already running on locally on the
@@ -866,6 +871,8 @@ class MapdlGrpc(_MapdlCore):
         # increase the number of variables allowed in POST26 to the maximum
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
+
+        self.show(self._file_type_for_plots)
 
     def _reset_cache(self):
         """Reset cached items."""
