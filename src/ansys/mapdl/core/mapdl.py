@@ -342,12 +342,12 @@ class _MapdlCore(Commands):
 
     @property
     def file_type_for_plots(self):
-        """Returns the default file type for plotting."""
+        """Returns the current file type for plotting."""
         return self._file_type_for_plots
 
     @file_type_for_plots.setter
     def file_type_for_plots(self, value: LITERAL_PLOT_FILE):
-        """Modify the default file type for plotting."""
+        """Modify the current file type for plotting."""
         if value not in LITERAL_PLOT_FILE_LIST:
             raise ValueError(f"'{value}' is not allowed as file for plots output.")
         self._file_type_for_plots = value
