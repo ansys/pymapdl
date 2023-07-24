@@ -169,19 +169,14 @@ jobs:
           docker pull ghcr.io/ansys/dpf-core:22.2dev
           docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
-      - name: "Run example GIF"
-        run: |
-          xvfb-run python ./examples/00-mapdl-examples/composite_dcb.py
-  
-      - name: "Upload GIF"
-        uses: actions/upload-artifact@v3
-        with:
-          name: dcb_gif
-          path: dcb.gif
-
       - name: "Build documentation"
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+
+      - name: "Substitute defective GIF"
+        run: |
+          cd doc/_build/html/examples/gallery_examples/00-mapdl-examples
+          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../../../source/images/dcb.gif+g' composite_dcb.html
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
