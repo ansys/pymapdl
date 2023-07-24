@@ -1,60 +1,46 @@
 """Module to control interaction with MAPDL through Python"""
 
 import atexit
-from functools import wraps
 import glob
 import logging
 import os
 import pathlib
 import re
-from shutil import copyfile, rmtree
-from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
-from warnings import warn
 import weakref
+from functools import wraps
+from shutil import copyfile, rmtree
+from subprocess import DEVNULL, call
+from typing import (TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple,
+                    Union)
+from warnings import warn
 
 import numpy as np
 from numpy._typing import DTypeLike
 from numpy.typing import NDArray
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.commands import (
-    CMD_BC_LISTING,
-    CMD_LISTING,
-    CMD_XSEL,
-    XSEL_DOCSTRING_INJECTION,
-    BoundaryConditionsListingOutput,
-    CommandListingOutput,
-    Commands,
-    StringWithLiteralRepr,
-    inject_docs,
-)
-from ansys.mapdl.core.errors import (
-    ComponentNoData,
-    IncorrectWorkingDirectory,
-    MapdlCommandIgnoredError,
-    MapdlInvalidRoutineError,
-    MapdlRuntimeError,
-)
+from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core.commands import (CMD_BC_LISTING, CMD_LISTING, CMD_XSEL,
+                                       XSEL_DOCSTRING_INJECTION,
+                                       BoundaryConditionsListingOutput,
+                                       CommandListingOutput, Commands,
+                                       StringWithLiteralRepr, inject_docs)
+from ansys.mapdl.core.errors import (ComponentNoData,
+                                     IncorrectWorkingDirectory,
+                                     MapdlCommandIgnoredError,
+                                     MapdlInvalidRoutineError,
+                                     MapdlRuntimeError)
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
-from ansys.mapdl.core.misc import (
-    Information,
-    allow_pickable_points,
-    check_valid_routine,
-    last_created,
-    load_file,
-    random_string,
-    requires_package,
-    run_as_prep7,
-    supress_logging,
-    wrap_point_SEL,
-)
+from ansys.mapdl.core.misc import (Information, allow_pickable_points,
+                                   check_valid_routine, last_created,
+                                   load_file, random_string, requires_package,
+                                   run_as_prep7, supress_logging,
+                                   wrap_point_SEL)
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive

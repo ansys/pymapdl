@@ -1,7 +1,7 @@
 """Test xpl functionality"""
-from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
+from ansys.tools.versioning.utils import SemanticVersion
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
 

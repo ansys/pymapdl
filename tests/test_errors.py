@@ -1,17 +1,11 @@
 import pytest
 
-from ansys.mapdl.core.errors import (
-    MapdlCommandIgnoredError,
-    MapdlDidNotStart,
-    MapdlError,
-    MapdlException,
-    MapdlInfo,
-    MapdlInvalidRoutineError,
-    MapdlNote,
-    MapdlRuntimeError,
-    MapdlVersionError,
-    MapdlWarning,
-)
+from ansys.mapdl.core.errors import (MapdlCommandIgnoredError,
+                                     MapdlDidNotStart, MapdlError,
+                                     MapdlException, MapdlInfo,
+                                     MapdlInvalidRoutineError, MapdlNote,
+                                     MapdlRuntimeError, MapdlVersionError,
+                                     MapdlWarning)
 
 error_shape_error_limits = """
 

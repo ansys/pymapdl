@@ -1,5 +1,5 @@
-from typing import Optional, Union
 import warnings
+from typing import Optional, Union
 
 from ansys.mapdl.core.mapdl_types import MapdlInt
 

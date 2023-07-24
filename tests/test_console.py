@@ -6,14 +6,14 @@ This has been copied from test_mapdl.py
 import os
 import time
 
-from ansys.mapdl.reader import examples
 import numpy as np
 import pytest
 import pyvista
+from ansys.mapdl.reader import examples
+from conftest import skip_no_xserver
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import skip_no_xserver
 
 # skip entire module unless --console is enabled
 pytestmark = pytest.mark.console

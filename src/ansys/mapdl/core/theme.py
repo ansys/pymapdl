@@ -1,6 +1,6 @@
 """Store parameters for a PyMAPDL-specific theme for pyvista"""
-from matplotlib.colors import ListedColormap
 import numpy as np
+from matplotlib.colors import ListedColormap
 
 from ansys.mapdl.core import _HAS_PYVISTA
 

@@ -5,18 +5,10 @@ import pytest
 
 from ansys.mapdl.core import EXAMPLES_PATH, examples
 from ansys.mapdl.core.examples.downloads import (
-    _download_file,
-    _download_rotor_tech_demo_plot,
-    check_directory_exist,
-    delete_downloads,
-    download_bracket,
-    download_cfx_mapping_example_data,
-    download_example_data,
-    download_manifold_example_data,
-    download_tech_demo_data,
-    download_vtk_rotor,
-    get_ext,
-)
+    _download_file, _download_rotor_tech_demo_plot, check_directory_exist,
+    delete_downloads, download_bracket, download_cfx_mapping_example_data,
+    download_example_data, download_manifold_example_data,
+    download_tech_demo_data, download_vtk_rotor, get_ext)
 
 
 def test_check_directory_exist(tmpdir):

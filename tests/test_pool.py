@@ -1,14 +1,14 @@
 import os
-from pathlib import Path
 import time
+from pathlib import Path
 
-from ansys.tools.path import find_ansys
 import numpy as np
 import pytest
+from ansys.tools.path import find_ansys
+from conftest import skip_if_not_local
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from conftest import skip_if_not_local
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc

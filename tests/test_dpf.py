@@ -3,7 +3,6 @@ import os
 
 from ansys.dpf import core as dpf
 from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
-
 from conftest import skip_if_no_has_dpf
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml

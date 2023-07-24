@@ -4,15 +4,10 @@ import numpy as np
 import pytest
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.commands import (
-    CMD_BC_LISTING,
-    CMD_LISTING,
-    BoundaryConditionsListingOutput,
-    CommandListingOutput,
-    CommandOutput,
-    Commands,
-    StringWithLiteralRepr,
-)
+from ansys.mapdl.core.commands import (CMD_BC_LISTING, CMD_LISTING,
+                                       BoundaryConditionsListingOutput,
+                                       CommandListingOutput, CommandOutput,
+                                       Commands, StringWithLiteralRepr)
 from ansys.mapdl.core.examples import verif_files
 
 try:

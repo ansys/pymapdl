@@ -1,9 +1,9 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 import os
 
-from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
+from ansys.tools.versioning.utils import server_meets_version
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 

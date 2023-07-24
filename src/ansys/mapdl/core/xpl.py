@@ -5,9 +5,9 @@ import random
 import string
 import weakref
 
+import numpy as np
 from ansys.api.mapdl.v0 import mapdl_pb2
 from ansys.math.core.math import AnsMath
-import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError

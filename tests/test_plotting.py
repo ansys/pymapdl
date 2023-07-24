@@ -3,10 +3,10 @@ import os
 
 import numpy as np
 import pytest
+from conftest import skip_no_xserver
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.plotting import general_plotter
-from conftest import skip_no_xserver
 
 
 @pytest.fixture

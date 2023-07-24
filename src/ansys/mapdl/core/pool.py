@@ -3,12 +3,13 @@
 import os
 import shutil
 import time
-from typing import Any, Dict, List, Optional
 import warnings
+from typing import Any, Dict, List, Optional
 
 from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
+from ansys.mapdl.core.launcher import (MAPDL_DEFAULT_PORT, port_in_use,
+                                       version_from_path)
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
