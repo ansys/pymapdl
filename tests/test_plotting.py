@@ -599,3 +599,9 @@ def test_color_areas(mapdl, make_block, color_areas):
 
     assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == num_colors
     pl.show()
+
+
+def test_color_areas_error(mapdl, make_block):
+    color_areas = ["red", "green", "blue"]
+    with pytest.raises(ValueError):
+        mapdl.aplot(vtk=True, color_areas=color_areas)

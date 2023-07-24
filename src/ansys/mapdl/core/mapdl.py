@@ -1806,11 +1806,13 @@ class _MapdlCore(Commands):
                     colors = np.atleast_2d(np.array(to_rgba(color_areas)))
 
                 else:
-                    if len(anums) != len(color_areas):
-                        raise ValueError(
-                            "The length of the parameter array 'color_areas' "
-                            "should be the same as the number of areas."
-                        )
+                    # if len(anums) != len(color_areas):
+                    #     raise ValueError(
+                    #         "The length of the parameter array 'color_areas' "
+                    #         "should be the same as the number of areas."
+                    #         f"\nanums: {anums}"
+                    #         f"\ncolor_areas: {color_areas}"
+                    #     )
 
                     if isinstance(color_areas[0], str):
                         colors = np.array([to_rgba(each) for each in color_areas])
