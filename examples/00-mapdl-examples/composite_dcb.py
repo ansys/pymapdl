@@ -56,6 +56,7 @@ import pyvista as pv
 
 from ansys.mapdl import core as pymapdl
 
+pv.OFF_SCREEN = True
 # Start MAPDL as a service
 mapdl = pymapdl.launch_mapdl()
 print(mapdl)
