@@ -382,12 +382,20 @@ plotter.add_mesh(
     scalars=np.zeros((mesh_contact.n_cells)),
 )
 
+
+disp_result_ = []
+disp_cohesive_ = []
+cohesive_damage_ = []
+
+
 for i in range(1, 100):
     # Get displacements
     disp = model.results.displacement(time_scoping=i).eval()
+
     # Getting the updated coordinates
     add_op.inputs.fieldB.connect(disp[0])
     disp_result = add_op.outputs.field()
+
     # Get displacements for the cohesive layer
     disp = model.results.displacement(
         time_scoping=i, mesh_scoping=mesh_scoping_cohesive
@@ -395,15 +403,24 @@ for i in range(1, 100):
     # Get the updated coordinates for the cohesive layer
     add_op_cohesive.inputs.fieldB.connect(disp[0])
     disp_cohesive = add_op_cohesive.outputs.field()
+
     # Get the damage field
     dam_op.inputs.time_scoping([i])
     cohesive_damage = dam_op.outputs.fields_container()[0]
+
     # Update coordinates and scalars
     plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=False)
     plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=False)
     plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=False)
 
     plotter.write_frame()
+
+# To get same camera position
+plotter.camera_position = [
+    (130.7778719828933, 91.33342753844886, 80.53342753844886),
+    (51.944444444444436, 12.5, 1.7000000000000002),
+    (0.0, 0.0, 1.0),
+]
 
 plotter.show()
 
