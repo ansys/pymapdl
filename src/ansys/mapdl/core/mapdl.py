@@ -349,7 +349,7 @@ class _MapdlCore(Commands):
     def file_type_for_plots(self, value: LITERAL_PLOT_FILE):
         """Modify the current file type for plotting."""
         if value not in LITERAL_PLOT_FILE_LIST:
-            raise ValueError(f"'{value}' is not allowed as file for plots output.")
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
         self._file_type_for_plots = value
 
     @property
