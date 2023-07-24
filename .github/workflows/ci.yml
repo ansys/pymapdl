@@ -171,7 +171,7 @@ jobs:
 
       - name: "Run example GIF"
         run: |
-          python examples/00-mapdl-examples/composite_dcb.py
+          xvfb-run python examples/00-mapdl-examples/composite_dcb.py
   
       - name: "Upload GIF"
         uses: actions/upload-artifact@v3
