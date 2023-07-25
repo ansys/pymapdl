@@ -124,13 +124,7 @@ def test_contains_entities(mapdl, cube_geom_and_mesh, func, entity, selector, im
     else:
         count = getattr(mapdl.geometry, selector)
 
-    if entity == "line":
-        # it is a pyvista.polydata
-        assert count.n_cells == imax
-    elif entity == "area":
-        assert len(count()) == imax
-    else:
-        assert len(count) == imax
+    assert len(count) == imax
 
     mapdl.cm("mycomp", entity)
 
