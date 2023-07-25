@@ -27,7 +27,8 @@ dependencies = [
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
-    "numpy>=1.14.0",
+    "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
+    "numpy>=1.14.0; python_version >= '3.9'",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
@@ -72,7 +73,7 @@ tests = [
 doc = [
     "sphinx==6.2.1",
     "ansys-dpf-core==0.8.1",
-    "ansys-mapdl-reader==0.52.18",
+    "ansys-mapdl-reader==0.52.19",
     "ansys-sphinx-theme==0.9.9",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",

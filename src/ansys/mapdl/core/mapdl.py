@@ -1836,6 +1836,8 @@ class _MapdlCore(Commands):
                         raise ValueError(
                             "The length of the parameter array 'color_areas' "
                             "should be the same as the number of areas."
+                            f"\nanums: {anums}"
+                            f"\ncolor_areas: {color_areas}"
                         )
 
                     if isinstance(color_areas[0], str):
@@ -1918,6 +1920,13 @@ class _MapdlCore(Commands):
                     "``vtk=True``"
                 )
 
+            if not self._parent()._png_mode:
+                self._parent().show("PNG", mute=True)
+                self._parent().gfile(self._pixel_res, mute=True)
+
+        def __exit__(self, *args) -> None:
+            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
+            self._parent().show("close", mute=True)
             if not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
