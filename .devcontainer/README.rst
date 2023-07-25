@@ -50,10 +50,10 @@ with your custom image:
       - '50055:50055'
    image: 'ghcr.io/myaccount/mapdlimage:mytag'
    user: "0:0"
-   volumes:
 
 
 .. warning:: Also you might need to change some environment variables or Docker options to adjust to your image configuration.
+   For example you might need to change the :envvar:`AWP_ROOT222` if you MAPDL container does not have the installation in the default directory.
    Be careful to not commit those changes in your PRs.
 
 You can now open the current folder (or PyMAPDL repository) using
