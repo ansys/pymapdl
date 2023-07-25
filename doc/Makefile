@@ -46,3 +46,7 @@ linkcheck:
 	@echo
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
+html-noexamples:
+	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)."

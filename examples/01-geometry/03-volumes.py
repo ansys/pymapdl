@@ -200,8 +200,8 @@ vnum
 ###############################################################################
 # Volume Geometry
 # ~~~~~~~~~~~~~~~
-# Volume geometry can be accessed from the ``geometry.areas`` method.
-volume_mesh = mapdl.geometry.areas(merge=True)
+# Volume geometry can be accessed from the ``geometry.volumes`` method.
+volume_mesh = mapdl.geometry.volumes
 volume_mesh
 
 

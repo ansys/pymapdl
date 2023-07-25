@@ -11,7 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -61,7 +61,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.component import ComponentManager
     from ansys.mapdl.core.mapdl import _MapdlCore
-    from ansys.mapdl.core.mapdl_geometry import Geometry
+    from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
@@ -134,6 +134,9 @@ INVAL_COMMANDS_SILENT = {
 
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
+
+VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
+VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 
 def parse_to_short_cmd(command):
@@ -208,15 +211,15 @@ class _MapdlCore(Commands):
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
-        self._exited = False
-        self._ignore_errors = False
+        self._exited: bool = False
+        self._ignore_errors: bool = False
         self._apdl_log = None
-        self._store_commands = False
+        self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched = False
+        self._launched: bool = False
         self._stderr = None
         self._stdout = None
 
@@ -235,11 +238,12 @@ class _MapdlCore(Commands):
 
         self._log_filehandler = None
         self._version = None  # cached version
-        self._local = local
-        self._cleanup = True
+        self._local: bool = local
+        self._cleanup: bool = True
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
+        self.legacy_geometry: bool = False
         self._math = None
         self._krylov = None
         self._on_docker = None
@@ -896,11 +900,14 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self) -> "Geometry":
+    def _create_geometry(self) -> Union["Geometry", "LegacyGeometry"]:
         """Return geometry cache"""
-        from ansys.mapdl.core.mapdl_geometry import Geometry
+        from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
-        return Geometry(self)
+        if self.legacy_geometry:
+            return LegacyGeometry
+        else:
+            return Geometry(self)
 
     @property
     @requires_package("pyvista", softerror=True)
@@ -1814,7 +1821,7 @@ class _MapdlCore(Commands):
                 self.cm("__area__", "AREA", mute=True)
                 self.lsla("S", mute=True)
 
-                lines = self.geometry.lines
+                lines = self.geometry.get_lines()
                 self.cmsel("S", "__area__", "AREA", mute=True)
 
                 if show_lines:
@@ -1867,6 +1874,13 @@ class _MapdlCore(Commands):
                     "``vtk=True``"
                 )
 
+            if not self._parent()._png_mode:
+                self._parent().show("PNG", mute=True)
+                self._parent().gfile(self._pixel_res, mute=True)
+
+        def __exit__(self, *args) -> None:
+            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
+            self._parent().show("close", mute=True)
             if not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
@@ -1998,7 +2012,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.lines
+            lines = self.geometry.get_lines()
             meshes = [{"mesh": lines}]
             if color_lines:
                 meshes[0]["scalars"] = np.random.random(lines.n_cells)
@@ -2015,7 +2029,7 @@ class _MapdlCore(Commands):
             if show_keypoint_numbering:
                 labels.append(
                     {
-                        "points": self.geometry.keypoints,
+                        "points": self.geometry.get_keypoints(return_as_array=True),
                         "labels": self.geometry.knum,
                     }
                 )
@@ -2088,7 +2102,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            keypoints = self.geometry.keypoints
+            keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
 
             labels = []
@@ -2923,7 +2937,13 @@ class _MapdlCore(Commands):
             self._flush_stored()
             return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+    def run(
+        self,
+        command: str,
+        write_to_log: bool = True,
+        mute: Optional[bool] = None,
+        **kwargs,
+    ) -> str:
         """
         Run single APDL command.
 
@@ -4033,7 +4053,7 @@ class _MapdlCore(Commands):
         self.cmdele(f"__temp_{entity}s_1__")
 
     @wraps(Commands.nsel)
-    def nsel(self, *args, **kwargs):
+    def nsel(self, *args, **kwargs) -> str:
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4050,7 +4070,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.esel)
-    def esel(self, *args, **kwargs):
+    def esel(self, *args, **kwargs) -> str:
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4067,7 +4087,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.ksel)
-    def ksel(self, *args, **kwargs):
+    def ksel(self, *args, **kwargs) -> str:
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4084,7 +4104,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.lsel)
-    def lsel(self, *args, **kwargs):
+    def lsel(self, *args, **kwargs) -> str:
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4101,7 +4121,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.asel)
-    def asel(self, *args, **kwargs):
+    def asel(self, *args, **kwargs) -> str:
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4118,7 +4138,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.vsel)
-    def vsel(self, *args, **kwargs):
+    def vsel(self, *args, **kwargs) -> str:
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4246,7 +4266,7 @@ class _MapdlCore(Commands):
             super().lsread(*args, **kwargs)
         return self._response.strip()
 
-    def file(self, fname="", ext="", **kwargs):
+    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Specifies the data file where results are to be found.
 
         APDL Command: FILE
@@ -4283,7 +4303,7 @@ class _MapdlCore(Commands):
         file_, ext_ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename, extension, **kwargs):
+    def _file(self, filename: str, extension: str, **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
@@ -4427,7 +4447,7 @@ class _MapdlCore(Commands):
         """Check if the MAPDL instance has been launched by PyMAPDL."""
         return self._launched
 
-    def _decompose_fname(self, fname):
+    def _decompose_fname(self, fname: str) -> Tuple[str, str, str]:
         """Decompose a file name (with or without path) into filename and extension.
 
         Parameters
@@ -4444,7 +4464,7 @@ class _MapdlCore(Commands):
             File extension (without dot)
         """
         fname = pathlib.Path(fname)
-        return fname.stem, fname.suffix.replace(".", "")
+        return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
