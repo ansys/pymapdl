@@ -53,7 +53,6 @@ from ansys.tools.path.path import (
     save_ansys_path,
 )
 
-from ansys.mapdl.core import examples
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import close_all_local_instances

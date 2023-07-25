@@ -98,7 +98,7 @@ def test_empty_mesh(mapdl, cleared):
         mapdl.mesh.save("file.vtk")
 
 
-def test_non_empty_mesh(mapdl, contact_solve):
+def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
     assert mapdl.mesh.n_node > 0
     assert mapdl.mesh.n_elem > 0
     assert mapdl.mesh.nnum_all.size > 0
@@ -141,7 +141,7 @@ def test_non_empty_mesh(mapdl, contact_solve):
     assert mapdl.mesh.grid.n_points > 0
 
 
-def test_tshape_key(mapdl, contact_solve):
+def test_tshape_key(mapdl, contact_geom_and_mesh):
     tshape = mapdl.mesh.tshape_key
     assert isinstance(tshape, dict)
     assert len(tshape.keys()) > 0
@@ -161,7 +161,7 @@ def test_save(mapdl, cube_geom_and_mesh):
         os.remove(fname)
 
 
-def test_key_option(mapdl, contact_solve):
+def test_key_option(mapdl, contact_geom_and_mesh):
     assert mapdl.mesh.key_option is not None
     assert isinstance(mapdl.mesh.key_option, dict)
     assert len(mapdl.mesh.key_option.keys()) > 0
