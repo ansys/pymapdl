@@ -569,13 +569,13 @@ def test_vsel_iterable(mapdl, make_block):
     )
 
 
-@skip_no_xserver
 def test_color_areas(mapdl, make_block):
     pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
 
 
+# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
 @pytest.mark.xfail
-def test_color_areas(mapdl, make_block):
+def test_color_areas_fail(mapdl, make_block):
     pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
     assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
 
