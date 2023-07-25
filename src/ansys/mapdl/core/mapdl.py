@@ -61,7 +61,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from ansys.mapdl.core.component import ComponentManager
     from ansys.mapdl.core.mapdl import _MapdlCore
-    from ansys.mapdl.core.mapdl_geometry import Geometry
+    from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
@@ -134,6 +134,9 @@ INVAL_COMMANDS_SILENT = {
 
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
+
+VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
+VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 
 def parse_to_short_cmd(command):
@@ -240,6 +243,7 @@ class _MapdlCore(Commands):
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
+        self.legacy_geometry: bool = False
         self._math = None
         self._krylov = None
         self._on_docker = None
@@ -896,11 +900,14 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self) -> "Geometry":
+    def _create_geometry(self) -> Union["Geometry", "LegacyGeometry"]:
         """Return geometry cache"""
-        from ansys.mapdl.core.mapdl_geometry import Geometry
+        from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
-        return Geometry(self)
+        if self.legacy_geometry:
+            return LegacyGeometry
+        else:
+            return Geometry(self)
 
     @property
     @requires_package("pyvista", softerror=True)
@@ -1814,7 +1821,7 @@ class _MapdlCore(Commands):
                 self.cm("__area__", "AREA", mute=True)
                 self.lsla("S", mute=True)
 
-                lines = self.geometry.lines
+                lines = self.geometry.get_lines()
                 self.cmsel("S", "__area__", "AREA", mute=True)
 
                 if show_lines:
@@ -2005,7 +2012,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.lines
+            lines = self.geometry.get_lines()
             meshes = [{"mesh": lines}]
             if color_lines:
                 meshes[0]["scalars"] = np.random.random(lines.n_cells)
@@ -2022,7 +2029,7 @@ class _MapdlCore(Commands):
             if show_keypoint_numbering:
                 labels.append(
                     {
-                        "points": self.geometry.keypoints,
+                        "points": self.geometry.get_keypoints(return_as_array=True),
                         "labels": self.geometry.knum,
                     }
                 )
@@ -2095,7 +2102,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            keypoints = self.geometry.keypoints
+            keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
 
             labels = []
@@ -4046,7 +4053,7 @@ class _MapdlCore(Commands):
         self.cmdele(f"__temp_{entity}s_1__")
 
     @wraps(Commands.nsel)
-    def nsel(self, *args, **kwargs):
+    def nsel(self, *args, **kwargs) -> str:
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4063,7 +4070,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.esel)
-    def esel(self, *args, **kwargs):
+    def esel(self, *args, **kwargs) -> str:
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4080,7 +4087,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.ksel)
-    def ksel(self, *args, **kwargs):
+    def ksel(self, *args, **kwargs) -> str:
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4097,7 +4104,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.lsel)
-    def lsel(self, *args, **kwargs):
+    def lsel(self, *args, **kwargs) -> str:
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4114,7 +4121,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.asel)
-    def asel(self, *args, **kwargs):
+    def asel(self, *args, **kwargs) -> str:
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -4131,7 +4138,7 @@ class _MapdlCore(Commands):
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.vsel)
-    def vsel(self, *args, **kwargs):
+    def vsel(self, *args, **kwargs) -> str:
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.

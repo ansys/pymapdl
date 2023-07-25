@@ -578,7 +578,7 @@ def coupled_example(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def contact_solve(mapdl):
+def contact_geom_and_mesh(mapdl):
     mapdl.mute = True
     mapdl.finish()
     mapdl.clear()
@@ -599,7 +599,10 @@ def contact_solve(mapdl):
     fwgt = 0.95  # weight factor for distribution of heat b/w tool
     # & workpiece
     fplw = 0.8  # Fraction of plastic work converted to heat
+
+    # this is also modified in the dependent fixture
     uz1 = t / 4000  # Depth of penetration,m
+
     # ==========================================================
     # * Material properties
     # ==========================================================
@@ -855,11 +858,18 @@ def contact_solve(mapdl):
     mapdl.d(1, "all")
     mapdl.ddele(1, "temp")
     mapdl.allsel("all")
+    mapdl.mute = False
 
-    # mapdl.eplot()
+
+@pytest.fixture(scope="function")
+def contact_solve(mapdl, contact_geom_and_mesh):
     # ==========================================================
     # * Solution
     # ==========================================================
+    # from precedent fixture
+    uz1 = 3.18e-03 / 4000
+
+    mapdl.mute = False
     mapdl.run("/solu")
     mapdl.antype(4)  # Transient analysis
     mapdl.lnsrch("on")
