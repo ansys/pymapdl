@@ -595,8 +595,8 @@ def test_WithInterativePlotting(mapdl, make_block):
     os.remove(last_png)
 
 
-def test_default_plot_file_type(mapdl):
-    assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM"]
+def test_file_type_for_plots(mapdl):
+    assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
 
     mapdl.file_type_for_plots = "TIFF"
     assert mapdl.file_type_for_plots == "TIFF"

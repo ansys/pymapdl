@@ -11,17 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Union,
-    get_args,
-)
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -82,8 +72,13 @@ if _HAS_PYVISTA:
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
-LITERAL_PLOT_FILE = Literal["PNG", "TIFF", "PNG", "VRML", "TERM"]
-LITERAL_PLOT_FILE_LIST = get_args(LITERAL_PLOT_FILE)
+
+VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
+VALID_DEVICES_LITERAL = Literal[tuple(["PNG", "TIFF", "VRML", "TERM", "CLOSE"])]
+
+VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
+VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
+VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal[tuple(VALID_FILE_TYPE_FOR_PLOT)]
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -212,7 +207,7 @@ class _MapdlCore(Commands):
         log_file: Union[bool, str] = False,
         local: bool = True,
         print_com: bool = False,
-        file_type_for_plots: LITERAL_PLOT_FILE = "PNG",
+        file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -232,6 +227,7 @@ class _MapdlCore(Commands):
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
+        self._default_file_type_for_plots = file_type_for_plots
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -346,11 +342,31 @@ class _MapdlCore(Commands):
         return self._file_type_for_plots
 
     @file_type_for_plots.setter
-    def file_type_for_plots(self, value: LITERAL_PLOT_FILE):
+    def file_type_for_plots(self, value: VALID_DEVICES_LITERAL):
         """Modify the current file type for plotting."""
-        if value not in LITERAL_PLOT_FILE_LIST:
+        if isinstance(value, str) and value.upper() in VALID_DEVICES:
+            self._run(
+                f"/show, {value.upper()}"
+            )  # To avoid recursion we need to use _run.
+            self._file_type_for_plots = value.upper()
+        else:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
-        self._file_type_for_plots = value
+
+    @property
+    def default_file_type_for_plots(self):
+        """Default file type for plots.
+
+        Use when device is not properly set, for instance when the device is closed."""
+        return self._default_file_type_for_plots
+
+    @default_file_type_for_plots.setter
+    def default_file_type_for_plots(self, value: VALID_FILE_TYPE_FOR_PLOT_LITERAL):
+        """Set default file type for plots.
+
+        Used when device is not properly set, for instance when the device is closed."""
+        if not isinstance(value, str) and value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
+        return self._default_file_type_for_plots
 
     @property
     def use_vtk(self):
@@ -1906,12 +1922,19 @@ class _MapdlCore(Commands):
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
 
+            self.previous_device = self._parent().file_type_for_plots
+
+            if self._parent().file_type_for_plots not in ["PNG", "TIFF", "PNG", "VRML"]:
+                self._parent().show(self._parent().default_file_type_for_plots)
+
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
             self._parent().show("close", mute=True)
             if not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
+
+            self._parent().file_type_for_plots = self.previous_device
 
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
