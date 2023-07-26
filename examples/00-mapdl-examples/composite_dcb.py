@@ -56,7 +56,6 @@ import pyvista as pv
 
 from ansys.mapdl import core as pymapdl
 
-pv.OFF_SCREEN = True
 # Start MAPDL as a service
 mapdl = pymapdl.launch_mapdl()
 print(mapdl)
@@ -359,7 +358,7 @@ add_op = dpf.operators.math.add(fieldA=mesh_field)
 add_op_cohesive = dpf.operators.math.add(fieldA=mesh_field_cohesive)
 
 # Instantiate a PyVista plotter and start the creation of a GIF
-plotter = pv.Plotter(window_size=[640, 480])
+plotter = pv.Plotter(notebook=False, off_screen=True)
 plotter.open_gif("dcb.gif")
 
 # Add the beam mesh to the scene
