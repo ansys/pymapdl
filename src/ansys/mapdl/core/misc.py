@@ -1124,14 +1124,14 @@ def _get_args_xsel(*args, **kwargs):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_points(entity="node", plot_function="nplot"):
+def allow_pickable_entities(entity="node", plot_function="nplot"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
     """
 
-    def decorator(orig_nsel):
-        @wraps(orig_nsel)
+    def decorator(orig_entity_sel_function):
+        @wraps(orig_entity_sel_function)
         def wrapper(self, *args, **kwargs):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
@@ -1143,35 +1143,37 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
                         f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
                     )
 
-                previous_picked_points = set(self._get_selected_(entity))
+                previous_picked_entity = set(self._get_selected_(entity))
 
                 if type_ in ["S", "A"]:  # selecting all the entities
-                    orig_nsel(self, "all")
+                    orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
                 pl = plotting_function(return_plotter=True)
 
-                vmin = self._pick_points(
-                    entity, pl, type_, previous_picked_points, **kwargs
+                vmin = self._enable_picking_entities(
+                    entity, pl, type_, previous_picked_entity, **kwargs
                 )
 
                 if len(vmin) == 0:
                     # aborted picking
-                    orig_nsel(self, "S", entity, "", previous_picked_points, **kwargs)
+                    orig_entity_sel_function(
+                        self, "S", entity, "", previous_picked_entity, **kwargs
+                    )
                     return []
 
                 item = entity
                 comp = ""
 
-                # to make return the array of points when using P
+                # to make return the array of entity when using P
                 kwargs["Used_P"] = True
 
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, "S", item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 
             else:
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 

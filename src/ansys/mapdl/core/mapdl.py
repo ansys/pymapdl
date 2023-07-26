@@ -46,7 +46,7 @@ from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     Information,
-    allow_pickable_points,
+    allow_pickable_entities,
     check_valid_routine,
     last_created,
     load_file,
@@ -1845,7 +1845,7 @@ class _MapdlCore(Commands):
                     else:
                         colors = color_areas
 
-                for surf, color in zip(surfs, color_areas):
+                for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
 
             else:
@@ -3952,13 +3952,15 @@ class _MapdlCore(Commands):
         elif entity == "VOLU":
             return self.geometry.vnum
 
-    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
-        """Show a plot and get the selected points."""
+    def _enable_picking_entities(
+        self, entity, pl, type_, previous_picked_entity, **kwargs
+    ):
+        """Show a plot and get the selected entity."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
-        previous_picked_points = set(previous_picked_points)
+        previous_picked_entity = set(previous_picked_entity)
 
         q = self.queries
-        picked_points = []
+        picked_entities = []
         picked_ids = []
 
         selector = getattr(q, entity.lower())
@@ -3973,7 +3975,7 @@ class _MapdlCore(Commands):
             "U": "Unselecting",
         }
 
-        def gen_text(picked_points=None):
+        def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
@@ -3984,75 +3986,116 @@ class _MapdlCore(Commands):
                 f"Mouse selection: {sel_}\n"
             )
 
-            picked_points_str = ""
-            if picked_points:
+            picked_entities_str = ""
+            if picked_entities:
                 # reverse picked point order, exclude the brackets, and limit
                 # to 40 characters
-                picked_points_str = str(picked_points[::-1])[1:-1]
-                if len(picked_points_str) > 40:
-                    picked_points_str = picked_points_str[:40]
-                    idx = picked_points_str.rfind(",") + 2
-                    picked_points_str = picked_points_str[:idx] + "..."
+                picked_entities_str = str(picked_entities[::-1])[1:-1]
+                if len(picked_entities_str) > 40:
+                    picked_entities_str = picked_entities_str[:40]
+                    idx = picked_entities_str.rfind(",") + 2
+                    picked_entities_str = picked_entities_str[:idx] + "..."
 
-            return text + f"Current {entity} selection: {picked_points_str}"
+            return text + f"Current {entity} selection: {picked_entities_str}"
 
-        def callback_(mesh, id_):
-            point = mesh.points[id_]
+        def callback_points(mesh, id_):
+            point = mesh.entity[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
             if not pl._inver_mouse_click_selection:
-                # Updating MAPDL points mapping
-                if node_id not in picked_points:
-                    picked_points.append(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id not in picked_entities:
+                    picked_entities.append(node_id)
+                # Updating pyvista entity mapping
                 if id_ not in picked_ids:
                     picked_ids.append(id_)
             else:
-                # Updating MAPDL points mapping
-                if node_id in picked_points:
-                    picked_points.remove(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id in picked_entities:
+                    picked_entities.remove(node_id)
+                # Updating pyvista entity mapping
                 if id_ in picked_ids:
                     picked_ids.remove(id_)
 
             # remov etitle and update text
             pl.remove_actor("title")
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
+                gen_text(picked_entities),
                 font_size=10,
-                name="_point_picking_message",
+                name="_entity_picking_message",
             )
             if picked_ids:
                 pl.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=10,
-                    name="_picked_points",
+                    name="_picked_entities",
                     pickable=False,
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_points")
+                pl.remove_actor("_picked_entities")
 
-        pl.enable_point_picking(
-            callback=callback_,
-            use_mesh=True,
-            show_message=gen_text(),
-            show_point=True,
-            left_clicking=True,
-            font_size=10,
-            tolerance=kwargs.get("tolerance", 0.025),
-        )
+        def callback_mesh(mesh):
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL entity mapping
+                if mesh not in picked_entities:
+                    picked_entities.append(mesh)
+            else:
+                # Updating MAPDL entity mapping
+                if mesh in picked_entities:
+                    picked_entities.remove(mesh)
+
+            # remov etitle and update text
+            pl.remove_actor("title")
+            pl._picking_text = pl.add_text(
+                gen_text(picked_entities),
+                font_size=10,
+                name="_entity_picking_message",
+            )
+            if picked_ids:
+                pl.add_mesh(
+                    mesh,
+                    color="red",
+                    point_size=10,
+                    name="_picked_entities",
+                    pickable=False,
+                    reset_camera=False,
+                )
+            else:
+                pl.remove_actor("_picked_entities")
+
+        if entity in ["KP", "NODE"]:
+            # Picking points
+            pl.enable_point_picking(
+                callback=callback_points,
+                use_mesh=True,
+                show_message=gen_text(),
+                show_point=True,
+                left_clicking=True,
+                font_size=10,
+                tolerance=kwargs.get("tolerance", 0.025),
+            )
+        else:
+            # Picking meshes
+            pl.enable_mesh_picking(
+                callback=callback_mesh,
+                use_mesh=True,
+                show=True,
+                show_message=gen_text(),
+                left_clicking=True,
+                font_size=10,
+            )
 
         def callback_u():
             # inverting bool
             pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
+                gen_text(picked_entities),
                 font_size=10,
-                name="_point_picking_message",
+                name="_entity_picking_message",
             )
 
         pl.add_key_event("u", callback_u)
@@ -4062,20 +4105,20 @@ class _MapdlCore(Commands):
         else:
             _debug(pl)
 
-        picked_points = set(
-            picked_points
+        picked_entities = set(
+            picked_entities
         )  # removing duplicates (although there should be none)
 
         if type_ == "S":
             pass
         elif type_ == "R":
-            picked_points = previous_picked_points.intersection(picked_points)
+            picked_entities = previous_picked_entities.intersection(picked_entities)
         elif type_ == "A":
-            picked_points = previous_picked_points.union(picked_points)
+            picked_entities = previous_picked_entities.union(picked_entities)
         elif type_ == "U":
-            picked_points = previous_picked_points.difference(picked_points)
+            picked_entities = previous_picked_entities.difference(picked_entities)
 
-        return list(picked_points)
+        return list(picked_entities)
 
     def _perform_entity_list_selection(
         self, entity, selection_function, type_, item, comp, vmin, kabs
@@ -4108,7 +4151,7 @@ class _MapdlCore(Commands):
             super().nsel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points()
+        @allow_pickable_entities()
         @wrap_point_SEL(entity="node")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -4125,7 +4168,7 @@ class _MapdlCore(Commands):
             super().esel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points()
+        # @allow_pickable_entities()
         @wrap_point_SEL(entity="elem")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -4142,7 +4185,7 @@ class _MapdlCore(Commands):
             super().ksel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points(entity="kp", plot_function="kplot")
+        @allow_pickable_entities(entity="kp", plot_function="kplot")
         @wrap_point_SEL(entity="kp")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -4159,7 +4202,7 @@ class _MapdlCore(Commands):
             super().lsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="line", plot_function="lplot")
+        # @allow_pickable_entities(entity="line", plot_function="lplot")
         @wrap_point_SEL(entity="line")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -4176,7 +4219,7 @@ class _MapdlCore(Commands):
             super().asel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="area", plot_function="aplot")
+        @allow_pickable_entities(entity="area", plot_function="aplot")
         @wrap_point_SEL(entity="area")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
@@ -4193,7 +4236,7 @@ class _MapdlCore(Commands):
             super().vsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="volume", plot_function="vplot")
+        # @allow_pickable_entities(entity="volume", plot_function="vplot")
         @wrap_point_SEL(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
