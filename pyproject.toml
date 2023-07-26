@@ -69,6 +69,7 @@ tests = [
     "pyansys-tools-report==0.6.0",
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
+    "pytest-xvfb==3.0.0",
 ]
 doc = [
     "sphinx==6.2.1",

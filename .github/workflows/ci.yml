@@ -110,12 +110,12 @@ jobs:
       - name: "Test virtual framebuffer"
         run: |
           pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
+          python .ci/display_test.py
 
       - name: "Install ansys-mapdl-core"
         run: |
           pip install .
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v2.1.0
@@ -171,7 +171,7 @@ jobs:
 
       - name: "Build documentation"
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+          make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Substitute defective GIF"
         run: |
@@ -298,14 +298,14 @@ jobs:
       - name: "Test virtual framebuffer"
         run: |
           pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
+          python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
         run: |
           python -m pip install build
           python -m build
           python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v2.1.0
@@ -340,7 +340,7 @@ jobs:
       - name: "Unit testing"
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
-          xvfb-run pytest \
+          pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
@@ -464,14 +464,14 @@ jobs:
       - name: "Test virtual framebuffer"
         run: |
           python -m pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
+          python .ci/display_test.py
 
       - name: "Install ansys-mapdl-core"
         run: |
           python -m pip install build
           python -m build
           python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Unit testing requirements installation"
         run: |
@@ -488,7 +488,7 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
+          pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
