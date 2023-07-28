@@ -90,7 +90,7 @@ doc = [
     "pythreejs==2.4.2",
     "pyvista[trame]==0.40.1",
     "sphinx-autobuild==2021.3.14",
-    "sphinx-autodoc-typehints==1.23.0",
+    "sphinx-autodoc-typehints==1.24.0",
     "sphinx-copybutton==0.5.2",
     "sphinx-gallery==0.13.0",
     "sphinx-notfound-page==0.8.3",
