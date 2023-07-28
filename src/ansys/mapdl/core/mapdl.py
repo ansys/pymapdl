@@ -16,6 +16,7 @@ import warnings
 from warnings import warn
 import weakref
 
+from matplotlib.colors import to_rgba
 import numpy as np
 from numpy._typing import DTypeLike
 from numpy.typing import NDArray
@@ -55,6 +56,7 @@ from ansys.mapdl.core.misc import (
     supress_logging,
     wrap_point_SEL,
 )
+from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -1765,11 +1767,14 @@ class _MapdlCore(Commands):
         show_line_numbering : bool, optional
             Display line numbers when ``vtk=True``.
 
-        color_areas : np.array, optional
+        color_areas : Union[bool, str, np.array], optional
             Only used when ``vtk=True``.
-            If ``color_areas`` is a bool, randomly color areas when ``True`` .
-            If ``color_areas`` is an array or list, it colors each area with
-            the RGB colors, specified in that array or list.
+            If ``color_areas`` is a bool, randomly color areas when ``True``.
+            If ``color_areas`` is a string, it must be a valid color string
+            which will be applied to all areas.
+            If ``color_areas`` is an array or list made of color names (str) or
+            the RGBa numbers ([R, G, B, transparency]), it colors each area with
+            the colors, specified in that array or list.
 
         show_lines : bool, optional
             Plot lines and areas.  Change the thickness of the lines
@@ -1829,36 +1834,63 @@ class _MapdlCore(Commands):
             meshes = []
             labels = []
 
+            anums = np.unique(surf["entity_num"])
+
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:
+            # if isinstance(color_areas, np.ndarray) and len(or len(color_areas):
+            if (isinstance(color_areas, np.ndarray) and len(color_areas) > 1) or (
+                not isinstance(color_areas, np.ndarray) and color_areas
+            ):
                 if isinstance(color_areas, bool):
-                    anum = surf["entity_num"]
-                    size_ = max(anum) + 1
-                    # Because this is only going to be used for plotting purpuses, we don't need to allocate
+                    size_ = len(anums)
+                    # Because this is only going to be used for plotting
+                    # purposes, we don't need to allocate
                     # a huge vector with random numbers (colours).
-                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors` argument is set to 256, so let
-                    # do here the same.
-                    # We will limit the number of randoms values (colours) to 256
+                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
+                    # argument is set to 256, so let do here the same.
+                    # We will limit the number of randoms values (colours)
+                    # to 256.
                     #
                     # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
                     size_ = min([256, size_])
                     # Generating a colour array,
                     # Size = number of areas.
                     # Values are random between 0 and min(256, number_areas)
-                    area_color = np.random.choice(range(size_), size=(len(anum), 3))
+                    colors = PyMAPDL_cmap(anums)
+
+                elif isinstance(color_areas, str):
+                    # A color is provided as a string
+                    colors = np.atleast_2d(np.array(to_rgba(color_areas)))
+
                 else:
-                    if len(surf["entity_num"]) != len(color_areas):
+                    if len(anums) != len(color_areas):
                         raise ValueError(
-                            f"The length of the parameter array 'color_areas' should be the same as the number of areas."
+                            "The length of the parameter array 'color_areas' "
+                            "should be the same as the number of areas."
+                            f"\nanums: {anums}"
+                            f"\ncolor_areas: {color_areas}"
                         )
-                    area_color = color_areas
-                meshes.append({"mesh": surf, "scalars": area_color})
+
+                    if isinstance(color_areas[0], str):
+                        colors = np.array([to_rgba(each) for each in color_areas])
+                    else:
+                        colors = color_areas
+
+                # mapping mapdl areas to pyvista mesh cells
+                def mapper(each):
+                    if len(colors) == 1:
+                        # for the case colors comes from string.
+                        return colors[0]
+                    return colors[each - 1]
+
+                colors_map = np.array(list(map(mapper, surf["entity_num"])))
+                meshes.append({"mesh": surf, "scalars": colors_map})
+
             else:
                 meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 
             if show_area_numbering:
-                anums = np.unique(surf["entity_num"])
                 centers = []
                 for anum in anums:
                     area = surf.extract_cells(surf["entity_num"] == anum)

@@ -569,6 +569,45 @@ def test_vsel_iterable(mapdl, make_block):
     )
 
 
+def test_color_areas(mapdl, make_block):
+    mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+
+
+# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
+@pytest.mark.xfail
+def test_color_areas_fail(mapdl, make_block):
+    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "color_areas",
+    [
+        ["red", "green", "blue", "yellow", "white", "purple"],
+        [
+            [255, 255, 255],
+            [255, 255, 0],
+            [255, 0, 0],
+            [0, 255, 0],
+            [0, 255, 255],
+            [0, 0, 0],
+        ],
+        255
+        * np.array([[1, 1, 1], [1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 0]]),
+    ],
+)
+def test_color_areas_individual(mapdl, make_block, color_areas):
+    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
+
+
+def test_color_areas_error(mapdl, make_block):
+    color_areas = ["red", "green", "blue"]
+    with pytest.raises(ValueError):
+        mapdl.aplot(vtk=True, color_areas=color_areas)
+
+
 def test_WithInterativePlotting(mapdl, make_block):
     mapdl.eplot(vtk=False)
     jobname = mapdl.jobname.upper()
