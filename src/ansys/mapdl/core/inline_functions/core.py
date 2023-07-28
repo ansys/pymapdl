@@ -2,6 +2,8 @@ from enum import IntEnum
 from typing import Union
 import warnings
 
+# from ansys.mapdl.core.errors import MapdlRuntimeError
+
 QUERY_NAME = "__QUERY_PARM__"
 
 
