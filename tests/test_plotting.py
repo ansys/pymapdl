@@ -593,3 +593,25 @@ def test_WithInterativePlotting(mapdl, make_block):
 
     # cleaning
     os.remove(last_png)
+
+
+def test_file_type_for_plots(mapdl):
+    assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
+
+    mapdl.file_type_for_plots = "TIFF"
+    assert mapdl.file_type_for_plots == "TIFF"
+
+    with pytest.raises(ValueError):
+        mapdl.file_type_for_plots = "asdf"
+
+    mapdl.default_plot_file_type = "PNG"
+    n_files_ending_png_before = len(
+        [each for each in mapdl.list_files() if each.endswith(".png")]
+    )
+
+    mapdl.eplot(vtk=False)
+    n_files_ending_png_after = len(
+        [each for each in mapdl.list_files() if each.endswith(".png")]
+    )
+
+    assert n_files_ending_png_before + 1 == n_files_ending_png_after
