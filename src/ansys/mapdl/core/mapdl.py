@@ -36,6 +36,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    ComponentDoesNotExits,
     ComponentNoData,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
@@ -4661,3 +4662,65 @@ class _MapdlCore(Commands):
         items = [int(each) for each in items]
 
         return items
+
+    @wraps(Commands.cmplot)
+    def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
+        """Wraps cmplot"""
+
+        label = label.upper()
+        entity = entity.upper()
+
+        if label in ["N", "P"]:
+            raise ValueError(f"The label '{label}' is not supported.")
+
+        if (not label or label == "ALL") and not entity:
+            raise ValueError(
+                f"If not using label or label =='ALL', then you "
+                "need to provide a valid entity."
+            )
+
+        if label != "ALL":
+            if label not in self.components:
+                raise ComponentDoesNotExits(f"The component '{label}' does not exist.")
+
+            if not entity:
+                entity = self.components[label].type
+            else:
+                entity_ = self.components[label].type
+                if entity_.upper() != entity.upper():
+                    raise ValueError(
+                        f"The component entity supplied '{entity}' "
+                        "does not seems to match the component "
+                        f"type '{entity_}' with name '{label}' "
+                        "in MAPDL."
+                    )
+
+        if label and not entity:
+            # supposing entity
+            entity = self.components[label].type
+
+        if entity[:4] not in ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]:
+            raise ValueError(f"The entity '{entity}' is not allowed.")
+
+        self.cm("__tmp_cm__", entity=entity)
+        if label == "ALL":
+            self.cmsel("ALL", entity=entity)
+        else:
+            self.cmsel("S", name=label, entity=entity)
+
+        mapping = {
+            "NODE": self.nplot,
+            "ELEM": self.eplot,
+            "KP": self.kplot,
+            "LINE": self.lplot,
+            "AREA": self.aplot,
+            "VOLU": self.vplot,
+        }
+        func = mapping[entity]
+
+        kwargs.setdefault("title", f"PyMAPDL CMPLOT")
+        output = func(**kwargs)
+
+        # returning to previous selection
+        self.cmsel("s", "__tmp_cm__", entity=entity)
+        return output
