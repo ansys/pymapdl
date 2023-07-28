@@ -50,10 +50,10 @@ with your custom image:
       - '50055:50055'
    image: 'ghcr.io/myaccount/mapdlimage:mytag'
    user: "0:0"
-   volumes:
 
 
 .. warning:: Also you might need to change some environment variables or Docker options to adjust to your image configuration.
+   For example you might need to change the :envvar:`AWP_ROOT222` if you MAPDL container does not have the installation in the default directory.
    Be careful to not commit those changes in your PRs.
 
 You can now open the current folder (or PyMAPDL repository) using
@@ -76,20 +76,28 @@ License
 -------
 
 As mentioned before, you must have a valid license to run MAPDL.
-When you launch the container, the file :file:`script.sh` automatically checks if the environment
-variable :envvar:`ANSYSLMD_LICENSE_FILE` exists.
+When you launch the container, the file :file:`script.sh` automatically
+checks if the environment variable :envvar:`ANSYSLMD_LICENSE_FILE` exists.
 This environment variable sets the port and IP address of the license server.
+If you do not have set this environment variable before launching the
+container, you are prompt to enter your license server port and address.
 
-If you do not have set this environment variable before launching the container, you are prompt to enter
-your license server port and address.
-
-You can set your license using the environment variable :envvar:`ANSYSLMD_LICENSE_FILE` from the terminal before launching
-VS Code. This is recommended if you are using Windows OS.
-For example, if you have a license server at the address ``123.45.67.89``, you can set the license using:
+You can set the environment variable :envvar:`ANSYSLMD_LICENSE_FILE`
+from the terminal before launching VS Code.
+This is recommended if you are using Windows OS.
+For example, if you have a license server at the address ``123.45.67.89``,
+you can set the license using:
 
 .. code:: pwsh-session
   
    $env:ANSYSLMD_LICENSE_FILE = '1055@123.45.65.89'
+   code . # launch VS Code
+
+On Linux
+
+.. code:: bash
+
+   $ export ANSYSLMD_LICENSE_FILE =1055@123.45.65.89
    code . # launch VS Code
 
 And then open the folder in the container using the *Command palette*.

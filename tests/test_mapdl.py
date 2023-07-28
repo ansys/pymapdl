@@ -12,7 +12,7 @@ import grpc
 import numpy as np
 import psutil
 import pytest
-from pyvista import PolyData
+from pyvista import MultiBlock
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
@@ -412,13 +412,13 @@ def test_keypoints(cleared, mapdl):
 
     i = 1
     knum = []
-    for x, y, z in kps:
-        mapdl.k(i, x, y, z)
-        knum.append(i)
-        i += 1
+    for i, (x, y, z) in enumerate(kps):
+        mapdl.k(i + 1, x, y, z)
+        knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
-    assert np.allclose(kps, mapdl.geometry.keypoints)
+    assert isinstance(mapdl.geometry.keypoints, MultiBlock)
+    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
@@ -435,7 +435,7 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, PolyData)
+    assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
 
@@ -1601,7 +1601,7 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
-    assert mapdl.geometry.keypoints.shape == (2, 3)
+    assert len(mapdl.geometry.keypoints) == 2
 
 
 def test_ignored_command(mapdl, cleared):
