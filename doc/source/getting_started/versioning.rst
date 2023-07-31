@@ -56,8 +56,9 @@ This decision is driven by the CORBA library's lack of support
 for Python versions above 3.8.
 
 **Action Required:** If you currently rely on the CORBA interface,
-swe recommend planning for its replacement as you migrate to
-PyMAPDL v0.67 or later versions. We understand that this change
+we recommend planning for its replacement as you migrate to
+PyMAPDL v0.67 or later versions. Specifying a different mode when
+launching MAPDL should suffice. We understand that this change
 may impact some users, and we apologize for any inconvenience it
 may cause.
 
