@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from pyvista.plotting import Plotter
 
+from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting import general_plotter
 from conftest import skip_no_xserver
 
@@ -686,3 +687,55 @@ def test_file_type_for_plots(mapdl):
     )
 
     assert n_files_ending_png_before + 1 == n_files_ending_png_after
+
+
+@pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
+def test_cmplot_individual(mapdl, make_block, entity):
+    mapdl.allsel()
+    mapdl.cm("tmp_cm", entity=entity)
+    pl = mapdl.cmplot("tmp_cm", return_plotter=True)
+
+
+@pytest.mark.parametrize("label", ["N", "P"])
+def test_cmplot_label_error(mapdl, make_block, label):
+    with pytest.raises(ValueError):
+        mapdl.cmplot(label)
+
+
+def test_cmplot_entity_error(mapdl, make_block):
+    with pytest.raises(ValueError):
+        mapdl.cmplot("all", "non_valid_entity")
+
+
+def test_cmplot_incorrect_entity(mapdl, make_block):
+    mapdl.allsel()
+    mapdl.cm("tmp_cm", entity="NODE")
+    with pytest.raises(ValueError):
+        mapdl.cmplot("tmp_cm", "KP")
+
+
+def test_cmplot_component_not_exist(mapdl, make_block):
+    with pytest.raises(ComponentDoesNotExits):
+        mapdl.cmplot("not_exist")
+
+
+@pytest.mark.parametrize("entity", ["KP", "NODE"])
+def test_cmplot_all(mapdl, make_block, entity):
+    mapdl.allsel()
+    ids = np.array([1, 2, 3, 4])
+    if entity == "KP":
+        ent = mapdl.geometry.get_keypoints(return_as_array=True)
+        func_sel = mapdl.ksel
+    else:
+        ent = mapdl.mesh.nodes
+        func_sel = mapdl.nsel
+
+    func_sel("S", vmin=ids[:2])
+    mapdl.cm("tmp_cm1", entity=entity)
+
+    func_sel("S", vmin=ids[2:])
+    mapdl.cm("tmp_cm2", entity=entity)
+
+    pl = mapdl.cmplot("all", entity, return_plotter=True)
+
+    assert np.allclose(pl.mesh.points, ent[ids - 1])
