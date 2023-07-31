@@ -168,8 +168,6 @@ def test_bc_plot_options(
         "ux",
         "UX",
         ["UX", "UY"],
-        pytest.param("error", marks=pytest.mark.xfail),
-        pytest.param(["UX", "error"], marks=pytest.mark.xfail),
         "CSGZ",
     ],
 )
@@ -185,14 +183,28 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 
 @skip_no_xserver
 @pytest.mark.parametrize(
+    "bc_labels",
+    [
+        "error",
+        ["UX", "error"],
+    ],
+)
+def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
+    with pytest.raises(ValueError):
+        p = mapdl.nplot(
+            return_plotter=True,
+            plot_bc=True,
+            plot_bc_labels=True,
+            bc_labels=bc_labels,
+        )
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
     "bc_target",
     [
         "Nodes",
         "NOdes",
-        pytest.param(["NOdes"], marks=pytest.mark.xfail),
-        pytest.param("error", marks=pytest.mark.xfail),
-        pytest.param(["error"], marks=pytest.mark.xfail),
-        pytest.param({"error": "Not accepting dicts"}, marks=pytest.mark.xfail),
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
@@ -203,6 +215,26 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         bc_target=bc_target,
     )
     assert isinstance(p, Plotter)
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "bc_target",
+    [
+        ["NOdes"],
+        "error",
+        ["error"],
+        {"error": "Not accepting dicts"},
+    ],
+)
+def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
+    with pytest.raises(ValueError):
+        p = mapdl.nplot(
+            return_plotter=True,
+            plot_bc=True,
+            plot_bc_labels=True,
+            bc_target=bc_target,
+        )
 
 
 def test_bc_no_mapdl(mapdl):
