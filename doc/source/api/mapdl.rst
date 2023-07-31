@@ -35,6 +35,8 @@
    Mapdl.input_strings
    Mapdl.set_log_level
    Mapdl.version
+   Mapdl.use_vtk
+   Mapdl.file_type_for_plots
 
 
 Constants

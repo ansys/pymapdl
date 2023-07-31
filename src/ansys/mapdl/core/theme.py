@@ -46,7 +46,7 @@ MAPDL_colorbar = (
     / 255
 )
 
-PyMAPDL_cmap = ListedColormap(MAPDL_colorbar)
+PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
 
 
 class MapdlTheme(base_class):

@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from pyvista.plotting import Plotter
 
+from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting import general_plotter
 from conftest import skip_no_xserver
 
@@ -167,8 +168,6 @@ def test_bc_plot_options(
         "ux",
         "UX",
         ["UX", "UY"],
-        pytest.param("error", marks=pytest.mark.xfail),
-        pytest.param(["UX", "error"], marks=pytest.mark.xfail),
         "CSGZ",
     ],
 )
@@ -184,14 +183,28 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 
 @skip_no_xserver
 @pytest.mark.parametrize(
+    "bc_labels",
+    [
+        "error",
+        ["UX", "error"],
+    ],
+)
+def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
+    with pytest.raises(ValueError):
+        p = mapdl.nplot(
+            return_plotter=True,
+            plot_bc=True,
+            plot_bc_labels=True,
+            bc_labels=bc_labels,
+        )
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
     "bc_target",
     [
         "Nodes",
         "NOdes",
-        pytest.param(["NOdes"], marks=pytest.mark.xfail),
-        pytest.param("error", marks=pytest.mark.xfail),
-        pytest.param(["error"], marks=pytest.mark.xfail),
-        pytest.param({"error": "Not accepting dicts"}, marks=pytest.mark.xfail),
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
@@ -202,6 +215,26 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         bc_target=bc_target,
     )
     assert isinstance(p, Plotter)
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "bc_target",
+    [
+        ["NOdes"],
+        "error",
+        ["error"],
+        {"error": "Not accepting dicts"},
+    ],
+)
+def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
+    with pytest.raises(ValueError):
+        p = mapdl.nplot(
+            return_plotter=True,
+            plot_bc=True,
+            plot_bc_labels=True,
+            bc_target=bc_target,
+        )
 
 
 def test_bc_no_mapdl(mapdl):
@@ -569,6 +602,45 @@ def test_vsel_iterable(mapdl, make_block):
     )
 
 
+def test_color_areas(mapdl, make_block):
+    mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+
+
+# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
+@pytest.mark.xfail
+def test_color_areas_fail(mapdl, make_block):
+    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
+
+
+@skip_no_xserver
+@pytest.mark.parametrize(
+    "color_areas",
+    [
+        ["red", "green", "blue", "yellow", "white", "purple"],
+        [
+            [255, 255, 255],
+            [255, 255, 0],
+            [255, 0, 0],
+            [0, 255, 0],
+            [0, 255, 255],
+            [0, 0, 0],
+        ],
+        255
+        * np.array([[1, 1, 1], [1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 1, 1], [0, 0, 0]]),
+    ],
+)
+def test_color_areas_individual(mapdl, make_block, color_areas):
+    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
+    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
+
+
+def test_color_areas_error(mapdl, make_block):
+    color_areas = ["red", "green", "blue"]
+    with pytest.raises(ValueError):
+        mapdl.aplot(vtk=True, color_areas=color_areas)
+
+
 def test_WithInterativePlotting(mapdl, make_block):
     mapdl.eplot(vtk=False)
     jobname = mapdl.jobname.upper()
@@ -593,3 +665,77 @@ def test_WithInterativePlotting(mapdl, make_block):
 
     # cleaning
     os.remove(last_png)
+
+
+def test_file_type_for_plots(mapdl):
+    assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
+
+    mapdl.file_type_for_plots = "TIFF"
+    assert mapdl.file_type_for_plots == "TIFF"
+
+    with pytest.raises(ValueError):
+        mapdl.file_type_for_plots = "asdf"
+
+    mapdl.default_plot_file_type = "PNG"
+    n_files_ending_png_before = len(
+        [each for each in mapdl.list_files() if each.endswith(".png")]
+    )
+
+    mapdl.eplot(vtk=False)
+    n_files_ending_png_after = len(
+        [each for each in mapdl.list_files() if each.endswith(".png")]
+    )
+
+    assert n_files_ending_png_before + 1 == n_files_ending_png_after
+
+
+@pytest.mark.parametrize("entity", ["KP", "LINE", "AREA", "VOLU", "NODE", "ELEM"])
+def test_cmplot_individual(mapdl, make_block, entity):
+    mapdl.allsel()
+    mapdl.cm("tmp_cm", entity=entity)
+    pl = mapdl.cmplot("tmp_cm", return_plotter=True)
+
+
+@pytest.mark.parametrize("label", ["N", "P"])
+def test_cmplot_label_error(mapdl, make_block, label):
+    with pytest.raises(ValueError):
+        mapdl.cmplot(label)
+
+
+def test_cmplot_entity_error(mapdl, make_block):
+    with pytest.raises(ValueError):
+        mapdl.cmplot("all", "non_valid_entity")
+
+
+def test_cmplot_incorrect_entity(mapdl, make_block):
+    mapdl.allsel()
+    mapdl.cm("tmp_cm", entity="NODE")
+    with pytest.raises(ValueError):
+        mapdl.cmplot("tmp_cm", "KP")
+
+
+def test_cmplot_component_not_exist(mapdl, make_block):
+    with pytest.raises(ComponentDoesNotExits):
+        mapdl.cmplot("not_exist")
+
+
+@pytest.mark.parametrize("entity", ["KP", "NODE"])
+def test_cmplot_all(mapdl, make_block, entity):
+    mapdl.allsel()
+    ids = np.array([1, 2, 3, 4])
+    if entity == "KP":
+        ent = mapdl.geometry.get_keypoints(return_as_array=True)
+        func_sel = mapdl.ksel
+    else:
+        ent = mapdl.mesh.nodes
+        func_sel = mapdl.nsel
+
+    func_sel("S", vmin=ids[:2])
+    mapdl.cm("tmp_cm1", entity=entity)
+
+    func_sel("S", vmin=ids[2:])
+    mapdl.cm("tmp_cm2", entity=entity)
+
+    pl = mapdl.cmplot("all", entity, return_plotter=True)
+
+    assert np.allclose(pl.mesh.points, ent[ids - 1])
