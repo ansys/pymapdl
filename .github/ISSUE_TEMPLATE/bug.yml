@@ -40,34 +40,19 @@ body:
     attributes:
       label: 🕵️ Steps To Reproduce
       description: |
-        Please write the steps in a list form e.g.:
-        * Install this package...
-        * Run this input file (Please attach it) and/or
-        * Run the following commands:
+        Please write the python commands you used:
         ```py
+        from ansys.mapdl.core import launch_mapdl
+        mapdl = launch_mapdl()
+
         mapdl.command1()
         mapdl.command2()
         ...
         ```
-        * Check obtained error...
-
         Use the following text box:
 
-      value: |
-        Steps:
-          * First I did...
-          * ...
-
-        And I ran the following code:
-
-        ```py
-
-        from ansys.mapdl.core import launch_mapdl
-        mapdl = launch_mapdl()
-
-        # Insert your code here
-
-        ```
+      value: The log will automatically be formatted as Python code! No need to type backticks.
+      render: Python
 
     validations:
       required: true
