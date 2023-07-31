@@ -8,7 +8,7 @@ from conftest import skip_if_no_has_dpf
 try:
     from ansys.dpf import core as dpf
     from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
-except:
+except ImportError:
     skip_if_no_has_dpf = pytest.mark.skipif(
         True,
         reason="""DPF couldn't be imported.""",
