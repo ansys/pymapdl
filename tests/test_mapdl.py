@@ -860,7 +860,6 @@ def test_load_array(mapdl, dimx, dimy):
 @pytest.mark.parametrize(
     "array",
     [
-        pytest.param([1, 3, 10], marks=pytest.mark.xfail),
         np.zeros(
             3,
         ),

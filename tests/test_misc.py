@@ -38,12 +38,16 @@ def test_report():
         "LOCALhost",
         "192.1.1.1",
         "127.0.0.01",
-        pytest.param("asdf", marks=pytest.mark.xfail),
-        pytest.param("300.2.2.2", marks=pytest.mark.xfail),
     ],
 )
 def test_check_valid_ip(ip):
     check_valid_ip(ip)
+
+
+@pytest.mark.parametrize("ip", ["asdf", "300.2.2.2"])
+def test_check_valid_ip_error(ip):
+    with pytest.raises(OSError):
+        check_valid_ip(ip)
 
 
 @pytest.mark.parametrize(
@@ -52,14 +56,24 @@ def test_check_valid_ip(ip):
         5000,
         50053,
         10000,
-        pytest.param("asdf", marks=pytest.mark.xfail),
-        pytest.param("2323", marks=pytest.mark.xfail),
-        pytest.param(1, marks=pytest.mark.xfail),
-        pytest.param(1e9, marks=pytest.mark.xfail),
     ],
 )
 def test_check_valid_port(port):
     check_valid_port(port)
+
+
+@pytest.mark.parametrize(
+    "port",
+    [
+        "asdf",
+        "2323",
+        1,
+        1e9,
+    ],
+)
+def test_check_valid_port_error(port):
+    with pytest.raises(ValueError):
+        check_valid_port(port)
 
 
 @pytest.mark.parametrize(
@@ -70,14 +84,24 @@ def test_check_valid_port(port):
         "False",
         True,
         False,
-        pytest.param("asdf", marks=pytest.mark.xfail),
-        pytest.param("2323", marks=pytest.mark.xfail),
-        pytest.param(1, marks=pytest.mark.xfail),
-        pytest.param(1e9, marks=pytest.mark.xfail),
     ],
 )
 def test_check_valid_start_instance(start_instance):
     check_valid_start_instance(start_instance)
+
+
+@pytest.mark.parametrize(
+    "start_instance",
+    [
+        "asdf",
+        "2323",
+        1,
+        1e9,
+    ],
+)
+def test_check_valid_start_instance_error(start_instance):
+    with pytest.raises(ValueError):
+        check_valid_start_instance(start_instance)
 
 
 def test_creation_time(tmpdir):
