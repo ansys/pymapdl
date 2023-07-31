@@ -993,8 +993,9 @@ def launch_mapdl(
         The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
         provides the best performance and stability.  The ``'corba'``
         mode is available from v17.0 and newer and is given legacy
-        support.  This mode requires the additional
-        ``ansys_corba`` module.  Finally, the ``'console'`` mode
+        support. However only Python up to 3.8 is supported.
+        This mode requires the additional ``ansys_corba`` module.
+        Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
         Visit :ref:`versions_and_interfaces` for more information.
@@ -1297,11 +1298,11 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
     ...                      port=50001)
 
-    Force the usage of the CORBA protocol.
+    Force the usage of the CORBA protocol (not recommended).
 
     >>> mapdl = launch_mapdl(mode='corba')
 
-    Run MAPDL using the console mode (available only on Linux).
+    Run MAPDL using the console mode (not recommended, and available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
     ...                       mode='console')
@@ -1617,6 +1618,12 @@ def check_mode(mode, version):
                 elif os.name == "posix":
                     raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
         elif mode == "corba":
+            warnings.warn(
+                "The CORBA interface is going to be deprecated with the version"
+                " v0.67 release. Please use the gRPC interface instead.\n"
+                "For more information visit: "
+                "https://mapdl.docs.pyansys.com/version/0.66/getting_started/versioning.html#corba-interface"
+            )
             if version < 170:
                 raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
             if version >= 211:
