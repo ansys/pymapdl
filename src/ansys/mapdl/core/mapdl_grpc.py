@@ -82,7 +82,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
-    from ansys.mapdl.core.mesh_grpc import MeshGrpc
     from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
