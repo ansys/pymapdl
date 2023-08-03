@@ -34,32 +34,31 @@ def pool():
     mapdl_pool = LocalMapdlPool(
         4, license_server_check=False, start_timeout=30, exec_file=EXEC_FILE
     )
-    yield mapdl_pool
+    return mapdl_pool
 
-    ##########################################################################
-    # test exit
-    mapdl_pool.exit()
+def test_exit_pool(pool):
+    pool.exit()
 
     timeout = time.time() + TWAIT
 
-    while len(mapdl_pool) != 0:
+    while len(pool) != 0:
         time.sleep(0.1)
         if time.time() > timeout:
             raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
 
-    assert len(mapdl_pool) == 0
+    assert len(pool) == 0
 
     # check it's been cleaned up
-    if mapdl_pool[0] is not None:
-        pth = mapdl_pool[0].directory
-        if mapdl_pool._spawn_kwargs["remove_temp_files"]:
+    if pool[0] is not None:
+        pth = pool[0].directory
+        if pool._spawn_kwargs["remove_temp_files"]:
             assert not list(Path(pth).rglob("*.page*"))
 
 
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
-        mapdl_pool = LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
+        LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
 
 
 @skip_if_not_local
