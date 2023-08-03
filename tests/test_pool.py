@@ -36,6 +36,7 @@ def pool():
     )
     return mapdl_pool
 
+
 def test_exit_pool(pool):
     pool.exit()
 
