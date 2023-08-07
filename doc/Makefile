@@ -2,11 +2,12 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    = -j auto
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
+SPHINXOPTS    = -j auto --color
+LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -41,24 +42,11 @@ pdf:
 	(test -f $(BUILDDIR)/latex/pymapdl-Documentation-*.pdf && echo pdf exists) || exit 1
 
 linkcheck:
-	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" -D nitpicky=1 -d _build/doctrees . $(LINKCHECKDIR)
+	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(LINKCHECKOPTS)
 	@echo
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
-# manually deploy to https://github.com/pyansys/pymapdl-docs
-# WARNING: Use with care as this overwrites history of gh-pages
-deploy: 
-	@echo "*** Warning ***"
-	@echo "You are about to deploy to 'PyMAPDL docs'."
-	@echo "This overwrites the history of gh-pages."
-	@echo "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
-	@echo "Deploying..."
-	touch $(BUILDDIR)/html/.nojekyll
-	echo "mapdl.docs.pyansys.com" >> build/html/CNAME
-	cd $(BUILDDIR)/html && git init
-	cd $(BUILDDIR)/html && git add .
-	cd $(BUILDDIR)/html && git checkout -b gh-pages
-	cd $(BUILDDIR)/html && git commit -am "manual build"
-	cd $(BUILDDIR)/html && git remote add origin https://github.com/pyansys/pymapdl-docs
-	cd $(BUILDDIR)/html && git push -u origin gh-pages --force
-	rm -rf $(BUILDDIR)/html/.git
+html-noexamples:
+	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)."

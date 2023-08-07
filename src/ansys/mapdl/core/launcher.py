@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import TYPE_CHECKING, Tuple, Union
 import warnings
 
 try:
@@ -31,7 +32,6 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
-from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -41,6 +41,9 @@ from ansys.mapdl.core.misc import (
     random_string,
     threaded,
 )
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
 
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
@@ -196,7 +199,7 @@ def launch_grpc(
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
-) -> tuple:  # pragma: no cover
+) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -632,7 +635,7 @@ def _create_queue_for_std(std):
 def launch_remote_mapdl(
     version=None,
     cleanup_on_exit=True,
-) -> _MapdlCore:
+) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
 
     When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
@@ -947,7 +950,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> _MapdlCore:
+) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
     Parameters
@@ -990,8 +993,9 @@ def launch_mapdl(
         The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
         provides the best performance and stability.  The ``'corba'``
         mode is available from v17.0 and newer and is given legacy
-        support.  This mode requires the additional
-        ``ansys_corba`` module.  Finally, the ``'console'`` mode
+        support. However only Python up to 3.8 is supported.
+        This mode requires the additional ``ansys_corba`` module.
+        Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
         Visit :ref:`versions_and_interfaces` for more information.
@@ -1159,7 +1163,7 @@ def launch_mapdl(
 
     Returns
     -------
-    ansys.mapdl.core.mapdl._MapdlCore
+    Union[MapdlGrpc, MapdlConsole, MapdlCorba]
         An instance of Mapdl.  Type depends on the selected ``mode``.
 
     Notes
@@ -1294,17 +1298,17 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
     ...                      port=50001)
 
-    Force the usage of the CORBA protocol.
+    Force the usage of the CORBA protocol (not recommended).
 
     >>> mapdl = launch_mapdl(mode='corba')
 
-    Run MAPDL using the console mode (available only on Linux).
+    Run MAPDL using the console mode (not recommended, and available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
     ...                       mode='console')
 
     """
-    if remove_temp_files is not None:  # pragma: no cover
+    if remove_temp_files is not None:
         warnings.warn(
             "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
             "Please use ``remove_temp_dir_on_exit`` instead.",
@@ -1336,7 +1340,7 @@ def launch_mapdl(
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-    else:  # pragma: no cover
+    else:
         LOG.debug(
             "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
         )
@@ -1431,8 +1435,6 @@ def launch_mapdl(
 
     if not start_instance:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
-        if clear_on_connect is None:  # pragma: no cover
-            clear_on_connect = False
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1440,6 +1442,7 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
+            log_apdl=log_apdl,
         )
         if clear_on_connect:
             mapdl.clear()
@@ -1615,6 +1618,12 @@ def check_mode(mode, version):
                 elif os.name == "posix":
                     raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
         elif mode == "corba":
+            warnings.warn(
+                "The CORBA interface is going to be deprecated with the version"
+                " v0.67 release. Please use the gRPC interface instead.\n"
+                "For more information visit: "
+                "https://mapdl.docs.pyansys.com/version/0.66/getting_started/versioning.html#corba-interface"
+            )
             if version < 170:
                 raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
             if version >= 211:

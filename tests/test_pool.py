@@ -8,27 +8,17 @@ import pytest
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from ansys.mapdl.core.launcher import get_start_instance
+from conftest import skip_if_not_local
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
 
-IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
-skip_launch_mapdl = pytest.mark.skipif(
-    get_start_instance() is False or IGNORE_POOL,
-    reason="Must be able to launch MAPDL locally",
+skip_if_ignore_pool = pytest.mark.skipif(
+    os.environ.get("IGNORE_POOL", "").upper() == "TRUE",
+    reason="Ignoring Pool tests.",
 )
 
-skip_on_ci = pytest.mark.skipif(
-    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
-)
-
-
-skip_if_not_local = pytest.mark.skipif(
-    not (os.environ.get("RUN_LOCAL", "").upper() == "TRUE"),
-    reason="Skipping if not in local",
-)
 
 MAPDL194PATH = "/usr/ansys_inc/v194/ansys/bin/mapdl"
 skip_requires_194 = pytest.mark.skipif(
@@ -37,11 +27,10 @@ skip_requires_194 = pytest.mark.skipif(
 
 TWAIT = 90
 
-EXEC_FILE = find_ansys()[0]
-
 
 @pytest.fixture(scope="module")
 def pool():
+    EXEC_FILE = find_ansys()[0]
     mapdl_pool = LocalMapdlPool(
         4, license_server_check=False, start_timeout=30, exec_file=EXEC_FILE
     )
@@ -70,7 +59,7 @@ def pool():
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
-        mapdl_pool = LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
+        LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
 
 
 @skip_if_not_local
@@ -91,14 +80,16 @@ def test_heal(pool):
     pool._verify_unique_ports()
 
 
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_simple_map(pool):
     pool_sz = len(pool)
     _ = pool.map(lambda mapdl: mapdl.prep7())
     assert len(pool) == pool_sz
 
 
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_map_timeout(pool):
     pool_sz = len(pool)
 
@@ -124,7 +115,8 @@ def test_map_timeout(pool):
     assert len(pool) == pool_sz
 
 
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_simple(pool):
     pool_sz = len(pool)
 
@@ -137,7 +129,8 @@ def test_simple(pool):
 
 
 # fails intermittently
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_batch(pool):
     input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
     outputs = pool.run_batch(input_files)
@@ -145,7 +138,8 @@ def test_batch(pool):
 
 
 # fails intermittently
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_map(pool):
     completed_indices = []
 
@@ -163,7 +157,8 @@ def test_map(pool):
     assert len(outputs) == len(inputs)
 
 
-@skip_launch_mapdl
+@skip_if_not_local
+@skip_if_ignore_pool
 def test_abort(pool, tmpdir):
     pool_sz = len(pool)  # initial pool size
 

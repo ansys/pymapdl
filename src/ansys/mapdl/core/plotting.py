@@ -1,7 +1,9 @@
 """Plotting helper for MAPDL using pyvista"""
+from typing import Any, Optional
 from warnings import warn
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
@@ -420,9 +422,21 @@ def _general_plotter(
         )
 
     for mesh in meshes:
+        scalars: Optional[NDArray[Any]] = mesh.get("scalars")
+
+        if (
+            "scalars" in mesh
+            and scalars.ndim == 2
+            and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
+        ):
+            # for the case we are using scalars for plotting
+            rgb = True
+        else:
+            rgb = False
+
         plotter.add_mesh(
             mesh["mesh"],
-            scalars=mesh.get("scalars"),
+            scalars=scalars,
             scalar_bar_args=scalar_bar_args,
             color=mesh.get("color", color),
             style=mesh.get("style", style),
@@ -442,6 +456,7 @@ def _general_plotter(
             cmap=cmap,
             render_points_as_spheres=render_points_as_spheres,
             render_lines_as_tubes=render_lines_as_tubes,
+            rgb=rgb,
             **add_mesh_kwargs,
         )
 
@@ -714,21 +729,21 @@ def general_plotter(
         since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
-    add_points_kwargs : list[dict]
+    add_points_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_points` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot nodes for example.
         See examples section to learn more about its usage.
 
-    add_mesh_kwargs : list[dict]
+    add_mesh_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_mesh` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot elements for example.
         See examples section to learn more about its usage.
 
-    add_point_labels_kwargs : list[dict]
+    add_point_labels_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_point_labels` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.

@@ -173,6 +173,13 @@ jobs:
         run: |
           xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
+      - name: "Substitute defective GIF"
+        run: |
+          cd doc/_build/html/examples/gallery_examples/00-mapdl-examples
+          cp ../../../../../source/images/dcb.gif ../../../_images/
+          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../_images/dcb.gif+g' composite_dcb.html
+          cd ../../../../../../
+
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
         with:
@@ -252,7 +259,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
           - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -270,7 +277,7 @@ jobs:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
-      ON_REMOTE: TRUE
+      ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
 
     steps:
@@ -423,7 +430,7 @@ jobs:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main'
-    timeout-minutes: 20
+    timeout-minutes: 40
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"

@@ -142,7 +142,7 @@ MAPDL installation can communicate with the Windows hosts. If you are having
 problems after setting the firewall rules, you might have to turn off the Windows
 firewall for the WSL ethernet virtual interface. This might pose some unknown
 side effects and security risk so use it with caution. For more information, see
-`Disabling Firewall on WSL Ethernet <disabling_firewall_on_wsl_>`_.
+:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 Set up an environmental variable in WSL that points to Windows host license server
@@ -324,6 +324,7 @@ install. When you do so, you must use the ``-productfile`` argument to specify t
 full path to the ``options`` file.
 
 
+.. _disable_firewall_on_wsl_ethernet_section:
 
 Disable firewall on WSL ethernet
 ================================
@@ -348,7 +349,9 @@ This method does not show a notification:
     powershell.exe -Command "Set-NetFirewallProfile -DisabledInterfaceAliases \"vEthernet (WSL)\""
 
 
-Link: `Disable firewall on WSL ethernet <disabling_firewall_on_wsl_>`_
+**Reference:** 
+The information has been obtained from `WSL Windows Toolbar Launcher repository <WSL_Windows_Toolbar_Launcher_>`_.
+More specifically from the *Troubleshooting* section `Firewall rules <disabling_firewall_on_wsl_>`_
 
 Port forwarding on Windows 10
 =============================

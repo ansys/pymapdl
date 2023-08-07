@@ -68,10 +68,19 @@ knum = mapdl.geometry.knum
 knum
 
 ###############################################################################
+# Keypoints geometry
+# ~~~~~~~~~~~~~~~~~~
+# Get the VTK ``MultiBlock`` containing keypoints. This VTK mesh can be
+# saved or plotted.  For more information, visit `Pyvista documentation <pyvista_docs_>`_
+keypoints = mapdl.geometry.keypoints
+keypoints
+
+
+###############################################################################
 # Keypoint Coordinates
 # ~~~~~~~~~~~~~~~~~~~~
 # Return an array of the keypoint locations
-kloc = mapdl.geometry.keypoints
+kloc = mapdl.geometry.get_keypoints()
 kloc
 
 

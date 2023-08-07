@@ -12,42 +12,25 @@ import grpc
 import numpy as np
 import psutil
 import pytest
-from pyvista import PolyData
-from pyvista.plotting import system_supports_plotting
+from pyvista import MultiBlock
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
     MapdlRuntimeError,
 )
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-
-skip_in_cloud = pytest.mark.skipif(
-    not get_start_instance(),
-    reason="""
-Must be able to launch MAPDL locally. Remote execution does not allow for
-directory creation.
-""",
-)
-
-skip_windows = pytest.mark.skipif(os.name == "nt", reason="Flaky on windows")
-
-
-skip_no_xserver = pytest.mark.skipif(
-    not system_supports_plotting(), reason="Requires active X Server"
-)
-
-skip_on_ci = pytest.mark.skipif(
-    os.environ.get("ON_CI", "").upper() == "TRUE", reason="Skipping on CI"
-)
-
-skip_if_not_local = pytest.mark.skipif(
-    not (os.environ.get("ON_LOCAL", "").upper() == "TRUE"),
-    reason="Skipping if not in local",
+from conftest import (
+    skip_if_not_local,
+    skip_if_on_cicd,
+    skip_no_xserver,
+    skip_on_windows,
 )
 
 CMD_BLOCK = """/prep7
@@ -429,13 +412,13 @@ def test_keypoints(cleared, mapdl):
 
     i = 1
     knum = []
-    for x, y, z in kps:
-        mapdl.k(i, x, y, z)
-        knum.append(i)
-        i += 1
+    for i, (x, y, z) in enumerate(kps):
+        mapdl.k(i + 1, x, y, z)
+        knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
-    assert np.allclose(kps, mapdl.geometry.keypoints)
+    assert isinstance(mapdl.geometry.keypoints, MultiBlock)
+    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
@@ -452,7 +435,7 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, PolyData)
+    assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
 
@@ -590,7 +573,7 @@ def test_apdl_logging(mapdl, tmpdir):
 
     # Testing /input PR #1455
     assert "/INP," in log
-    assert "'input.inp'" in log
+    assert "input.inp'" in log
     assert "/OUT,_input_tmp_" in log
     assert str_not_in_apdl_logger not in log
 
@@ -877,7 +860,6 @@ def test_load_array(mapdl, dimx, dimy):
 @pytest.mark.parametrize(
     "array",
     [
-        pytest.param([1, 3, 10], marks=pytest.mark.xfail),
         np.zeros(
             3,
         ),
@@ -998,7 +980,7 @@ def test_cdread(mapdl, cleared):
         mapdl.cdread("test", "model2", "cdb")
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split("/")[0][-3:0]
     dirname = "tt" + random_letters
@@ -1144,7 +1126,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     mapdl._run("/gopr")  # getting settings back
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_without_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1154,7 +1136,7 @@ def test_path_without_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_with_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1164,7 +1146,7 @@ def test_path_with_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
@@ -1194,7 +1176,7 @@ def test_cwd(mapdl, tmpdir):
         mapdl.cwd(old_path)
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1484,7 +1466,7 @@ def test_result_file(mapdl, solved_box):
     assert isinstance(mapdl.result_file, str)
 
 
-@skip_in_cloud
+@skip_if_on_cicd
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl.result_file
 
@@ -1492,22 +1474,27 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     with pytest.raises(FileNotFoundError):
         mapdl.file("potato")
 
+    assert rst_file in mapdl.list_files()
+    rst_fpath = os.path.join(mapdl.directory, rst_file)
+
     # change directory
-    try:
-        old_path = mapdl.directory
-        tmp_dir = tmpdir.mkdir("asdf")
-        mapdl.directory = str(tmp_dir)
-        assert Path(mapdl.directory) == tmp_dir
+    old_path = mapdl.directory
+    tmp_dir = tmpdir.mkdir("asdf")
+    mapdl.directory = str(tmp_dir)
+    assert Path(mapdl.directory) == tmp_dir
 
-        mapdl.slashsolu()
-        mapdl.solve()
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(rst_fpath)
 
-        mapdl.post1()
-        mapdl.file(rst_file)
+    mapdl.clear()
+    mapdl.post1()
+    assert "DATA FILE CHANGED TO FILE" in mapdl.file(
+        rst_fpath.replace(".rst", ""), "rst"
+    )
 
-    finally:
-        # always revert to preserve state
-        mapdl.directory = old_path
+    # always revert to preserve state
+    mapdl.directory = old_path
 
 
 def test_file_command_remote(mapdl, cube_solve, tmpdir):
@@ -1515,23 +1502,34 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     mapdl.post1()
-    # this file already exists remotely
-    mapdl.file("file", ".rst")
+    # this file should exist remotely
+    rst_file_name = "file.rst"
+    assert rst_file_name in mapdl.list_files()
+
+    mapdl.file(rst_file_name)  # checking we can read it.
 
     with pytest.raises(FileNotFoundError):
         mapdl.file()
 
+    # We are going to download the rst, rename it and
+    # tell PyMAPDL to read (it will upload it then)
     tmpdir = str(tmpdir)
-    mapdl.download("file.rst", tmpdir)
-    local_file = os.path.join(tmpdir, "file.rst")
+    mapdl.download(rst_file_name, tmpdir)
+    local_file = os.path.join(tmpdir, rst_file_name)
     new_local_file = os.path.join(tmpdir, "myrst.rst")
     os.rename(local_file, new_local_file)
-
+    assert os.path.exists(new_local_file)
     output = mapdl.file(new_local_file)
     assert "DATA FILE CHANGED TO FILE" in output
 
+    new_local_file2 = os.path.join(tmpdir, "myrst2.rst")
+    os.rename(new_local_file, new_local_file2)
+    assert os.path.exists(new_local_file2)
+    output = mapdl.file(new_local_file2.replace(".rst", ""), "rst")
+    assert "DATA FILE CHANGED TO FILE" in output
 
-@skip_windows
+
+@skip_on_windows
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
@@ -1602,7 +1600,7 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
-    assert mapdl.geometry.keypoints.shape == (2, 3)
+    assert len(mapdl.geometry.keypoints) == 2
 
 
 def test_ignored_command(mapdl, cleared):
@@ -1865,6 +1863,55 @@ def test_force_output(mapdl):
     assert mapdl.prep7()
 
 
+def test_session_id(mapdl, running_test):
+    assert mapdl._session_id is not None
+
+    # already checking version
+    mapdl._checking_session_id_ = True
+    assert mapdl._check_session_id() is None
+
+    # Not having pymapdl session id
+    mapdl._checking_session_id_ = False
+    copy_ = mapdl._session_id_
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    # Checking real case
+    mapdl._session_id_ = copy_
+    with running_test():
+        assert isinstance(mapdl._check_session_id(), bool)
+
+    id_ = "123412341234"
+    mapdl._session_id_ = id_
+    mapdl._run(f"{SESSION_ID_NAME}='{id_}'")
+    assert mapdl._check_session_id()
+
+    mapdl._session_id_ = "qwerqwerqwer"
+    assert not mapdl._check_session_id()
+
+    mapdl._session_id_ = id_
+
+
+def test_session_id_different(mapdl, running_test):
+    # Assert it works
+    with running_test():
+        assert mapdl.prep7()
+
+    mapdl._run(f"{SESSION_ID_NAME}='1234'")
+
+    with running_test():
+        with pytest.raises(DifferentSessionConnectionError):
+            mapdl.prep7()
+
+
+def test_check_empty_session_id(mapdl):
+    # it should run normal
+    mapdl._session_id_ = None
+    assert mapdl._check_session_id() is None
+
+    assert mapdl.prep7()
+
+
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1982,3 +2029,61 @@ def test_rlblock_rlblock_num(mapdl):
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
+
+
+def test__flush_stored(mapdl):
+    with mapdl.non_interactive:
+        mapdl.com("mycomment")
+        mapdl.com("another comment")
+
+        assert any(["mycomment" in each for each in mapdl._stored_commands])
+        assert len(mapdl._stored_commands) >= 2
+
+    assert not mapdl._stored_commands
+
+
+def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
+    # Testing basic behaviour
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert os.path.exists("myfile.png")
+    ti_m = os.path.getmtime("myfile.png")
+
+    # Testing overwriting
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert not os.path.exists("myfile_1.png")
+    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
+
+    os.remove("myfile.png")
+
+    # Testing no extension
+    mapdl.eplot(vtk=False, savefig="myfile")
+    assert os.path.exists("myfile")
+    os.remove("myfile")
+
+    # Testing update name when file exists.
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot.png")
+
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot_1.png")
+
+    os.remove("plot.png")
+    os.remove("plot_1.png")
+
+    # Testing full path for downloading
+    plot_ = os.path.join(tmpdir, "myplot.png")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+    plot_ = os.path.join(tmpdir, "myplot")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)

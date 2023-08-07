@@ -9,3 +9,4 @@ Geometry
    :toctree: _autosummary
 
    mapdl_geometry.Geometry
+   mapdl_geometry.LegacyGeometry

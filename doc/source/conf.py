@@ -20,7 +20,11 @@ pyvista.set_error_output_file("errors.txt")
 pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
-pyvista.rcParams["window_size"] = np.array([1024, 768])
+try:
+    pyvista.global_theme.window_size = np.array([1024, 768])
+except AttributeError:
+    # for compatibility with pyvista < 0.40
+    pyvista.rcParams["window_size"] = np.array([1024, 768])
 
 # Save figures in specified directory
 pyvista.FIGURE_PATH = os.path.join(os.path.abspath("./images/"), "auto-generated/")
@@ -71,8 +75,7 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
-    # sphinx.ext.linkcode
-    # This add the button ``[Source]`` to each website.
+    # sphinx.ext.linkcode add the button ``[Source]`` to each website.
     # The link of that button is created by calling ``linkcode_resolve``
     # function which we overwrite in ansys.mapdl.core.docs
     "sphinx.ext.linkcode",
@@ -82,6 +85,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
+    "sphinx_reredirects",
 ]
 
 # Intersphinx mapping
@@ -168,6 +172,7 @@ exclude_patterns = [
 
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""
+
 # Read link all targets from file
 with open("links.rst") as f:
     rst_epilog += f.read()
@@ -177,6 +182,22 @@ rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
+
+
+# Setting redicts
+redirects = {
+    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
+    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
+}
+
+# Broken anchors:
+linkcheck_anchors_ignore = [
+    # these anchors are picked by linkcheck as broken but thye are not.
+    "firewall-rules",
+    "pyvista.Plotter",
+    "pyvista.UnstructuredGrid",
+    "pyvista.Plotter.show",
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
