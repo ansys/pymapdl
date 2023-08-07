@@ -73,7 +73,7 @@ tests = [
 doc = [
     "sphinx==7.1.1",
     "ansys-dpf-core==0.9.0",
-    "ansys-mapdl-reader==0.52.19",
+    "ansys-mapdl-reader==0.52.20",
     "ansys-sphinx-theme==0.10.2",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.8",
