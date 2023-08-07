@@ -1,8 +1,9 @@
 .. _pymapdl_docker:
 
-*****************
-Docker containers
-*****************
+****************
+MAPDL and Docker
+****************
+
 You can run MAPDL within a container on any OS using Docker and
 connect to it via PyMAPDL.
 
@@ -14,46 +15,8 @@ in a containerized environment such as Docker or Singularity:
 - Large-scale cluster deployment using Kubernetes
 - Genuine app isolation through containerization
 
-Configure the Docker registry
-=============================
-
-**Only for images in private repositories.**
-
-There are several Docker images hosted on the 
-`PyMAPDL GitHub <pymapdl_repo_>`_ repository that you
-can download using your GitHub credentials.
-
-Assuming that you have Docker installed, you can get started by
-authorizing Docker to access this repository using a personal access
-token. Create a GitHub personal access token with ``packages read`` permissions
-according to `Creating a personal access token <gh_creating_pat_>`_
-
-Save that token to a file with:
-
-.. code::
-
-   echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > GH_TOKEN.txt
-
-
-This lets you send the token to Docker without leaving the token value
-in your history. Next, authorize Docker to access this repository
-with:
-
-.. code::
-
-    GH_USERNAME=<my-github-username>
-    cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
-
-
-.. _run_an_mapdl_image:
-
-Run an MAPDL image
-===================
-
-You can now launch MAPDL directly from Docker with a short script or
-directly from the command line.
-You can then use your host Python environment to connect to that MAPDL
-instance.
+In this case, you use your local Python installation to
+connect to this instance.
 
 .. graphviz::
 
@@ -71,55 +34,147 @@ instance.
       MAPDL -> Python
     }
 
-Because this image does not contain a license server, you must enter your
-license server IP address in the ``ANSYSLMD_LICENSE_FILE`` environment variable. 
+Requirements
+============
 
-Additionally, you run a Docker image of PyMAPDL with:
+You need to have access to a Docker image with MAPDL in it.
+Visit :ref:`ref_make_container` for more information on how
+to create your own MAPDL docker image.
 
-.. code:: pwsh
+Once you have created and uploaded your Docker image to a registry,
+you can start to pull and use the image in other devices.
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+.. warning::
 
-First time you run it, Docker logins into the *ghcr.io* registry and
-pulls the image, which can take some time.
-There are several images in the registry, each corresponding to a different
-version of MAPDL. For Ubuntu systems (any image tagged as ``Ubuntu``), you should
-use the latest version of MAPDL.
+   MAPDL Docker images are not allowed to be shared in
+   public or free-to-access repositories or registries.
+   Doing this you will be violating Ansys policy.
 
-To rerun it, you should restart the container or just delete it and run it again using:
 
-.. code:: pwsh
 
-    docker stop mapdl
-    docker container prune
+Configure Docker to access a private GitHub registry
+----------------------------------------------------
 
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp > log.txt
+In case you have created a Docker image and upload it to a GitHub
+private repository, you must authorise your docker installation
+to access this private package by using a personal access
+token.
+Create a GitHub personal access token with ``packages read`` permissions
+according to `Creating a personal access token <gh_creating_pat_>`_
 
-You can use the Docker flag ``--rm`` to automatically clean up the container
-and remove the file system when the container exits.
+Save that token to a file with:
 
-This creates a log file (``log.txt``) in your current directory location.
+.. code::
 
-Notice that the WSL internal gRPC port (``50052``) is being mapped to a
-different Windows host port (``50053``) to avoid port conflicts with local
-MAPDL instances running on the host.
+   echo MY_GITHUB_TOKEN_WITH_PACKAGE_READ_PERMISSION > GH_TOKEN.txt
+
+
+This lets you send the token to Docker without leaving the token value
+in your history. Next, authorize Docker to access this repository
+with:
+
+.. code::
+
+    GH_USERNAME=<my-github-username>
+    cat GH_TOKEN.txt | docker login ghcr.io -u $GH_USERNAME --password-stdin
+
+
+.. _run_an_mapdl_image:
+
+Run an MAPDL Docker image
+=========================
+
+You can now launch MAPDL from Docker using the command line, a
+`docker compose file <run_an_mapdl_image_using_docker_compose_>`_ 
+or a script that gather the commands given to the command line.
+
+Your Docker image should have a valid MAPDL license configuration.
+The easiest way is to have an environment variable :env:`ANSYSLMD_LICENSE_FILE`
+pointing to a valid license server. This environment variable can be already
+included in the Docker image. However this is not recommended because it could
+expose the license server if the Docker image get leaked.
+The recommended approach is to set that environment variable when running the
+container. 
+
+To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage`` use:
+
+.. code:: bash
+
+  ANSYSLMD_LICENSE_FILE=1055@MY_LICENSE_SERVER_IP
+  LOCAL_MAPDL_PORT=50053
+  MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
+  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
+
+For Windows use:
+
+.. code:: pwsh-session
+
+    $env:ANSYSLMD_LICENSE_FILE="1055@MY_LICENSE_SERVER_IP"
+    $env:LOCAL_MAPDL_PORT=50053
+    $env:MAPDL_DOCKER_REGISTRY_URL="ghcr.io/myuser/myrepo/mymapdldockerimage"
+
+    docker run -e ANSYSLMD_LICENSE_FILE=$env:ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $env:LOCAL_MAPDL_PORT`:50052   $env:MAPDL_DOCKER_REGISTRY_URL -smp
+
+
+First time you run it, Docker logins into the registry and
+pulls the required image.
+This can take some time depending on the size of the image.
+
+To rerun it, you should restart the container:
+
+.. code:: bash
+
+   docker start mapdl
+
+Or just delete it and run it again using:
+
+.. code:: bash
+
+    docker rm -f mapdl
+
+    docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052   $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
+
+
+You can append the Docker flag ``--rm`` to automatically clean up the container
+when it exits.
+
+The above commands create a log file (``log.txt``) in your current directory location, you can
+remove the following part ``> log.txt `` to avoid this. In that case the command
+output is redirected to the console which is kept blocked until the Docker image exits.
+You can detach the console from the Docker container output by appending ``-d`` to the
+`docker run <docker_run_>`_  command (always add this before the Docker image url).
+If you don't want to block the console, the best approach is to pipe the output to a file
+as mentioned before so you can inspect the output of that file.
+
+Notice that the MAPDL Docker image gRPC port (``50052``) is being mapped to a
+different host port (``50053``) to avoid port conflicts with local
+MAPDL instances running on the host or other Docker images.
 You could additionally launch more Docker containers in different ports if
 you want to run multiple simulations at the same time.
-The module ``ansys-mapdl-core-pool`` does not work when you are connecting
-to an MAPDL Docker image.
+The module :ref:`ref_pymapdl_pool`` does not work when you are connecting
+to a remote MAPDL Docker image so it does not work when connected to Docker
+containers either. If you decide to launch multiple MAPDL instance, you must
+manage these instances by yourself.
 
-.. note:: Ensure that your port ``50053`` is open in your firewall.
+.. note:: Ensure that your port ``50053`` is open in your local firewall.
 
-You can provide additional command line parameters to MAPDL by simply
-appending to the Docker command. 
+You can provide additional MAPDL command line parameters to MAPDL by simply
+appending them to the end of the command.
 For example, you can increase the number of processors (up to the
-number available on the host machine) with the ``-np`` switch.
+number available on the host machine) with the ``-np`` switch:
 
-You should use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
+.. code:: bash
+
+  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
+
+
+For additional command line arguments visit the *Notes* section
+within :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
+
+You can use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
 to run the preceding commands all at once.
 
-
-Once you have launched MAPDL you should see:
+Once you have launched MAPDL you should see in your console (or output file):
 
 .. code::
 
@@ -133,54 +188,28 @@ Once you have launched MAPDL you should see:
     Server listening on : 0.0.0.0:50052
 
 
+.. warning:: 
+  
+   You should notice that the port specified in the console is the internal Docker container port.
+   This port has been mapped to the value specified in :env:`LOCAL_MAPDL_PORT`.
+
+
+.. _run_an_mapdl_image_using_docker_compose:
 
 Using ``docker-compose`` to launch MAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also use ``docker-compose`` command to launch MAPDL configured in
-a ``docker-compose`` file.
+You can also use `docker-compose <docker_compose_>`_ command to launch MAPDL configured in
+a `docker-compose <docker_compose_>`_ file.
 This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
 For you convenience, the directory `docker <pymapdl_docker_dir_>`_ 
-contains pre-configured ``docker-compose`` files that you can
-use:
-
-* `docker-compose.yml <pymapdl_docker_compose_base_>`_: the **base** 
-  configuration file which launch a remote instance of MAPDL which you
-  can connect to.
-
-* `docker-compose.local.yml <pymapdl_docker_compose_base_>`_: 
-  This file is an extension of the base configuration file which launch
-  an Ubuntu Docker image with MAPDL installed in it. 
-  This is useful if you want to run MAPDL locally inside this container
-  for example for debugging purposes.
-  You can connect your Visual Code instance to this container by selecting
-  ``Attach to a running container`` option from the command palette.
-  For more details visit `Attach to a running container <vscode_attach_to_container_>`_.
-
-* `docker-compose.license_server.yml <pymapdl_docker_compose_license_server_>`_:
-  This file is an extension of the base configuration file which launch
-  a license server. 
-  This is useful if you want to run MAPDL remotely and you don't have 
-  access to a license server.
-  You need a valid license file to run the license server.
-  You can use it together with ``docker-compose.local.yml`` hence you
-  can connect to it the same way.
-  The call to this docker file should be always the last one in the
-  ``docker-compose`` command. For instance:
-
-  .. code:: bash
-
-     docker-compose -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.license_server.yml up
-  
-
-.. warning::
-   The license server is not intended to be used in production. 
-   It is only intended for testing/debugging purposes.
-   Its access is limited to collaborators of the PyAnsys project.
-   If you would like to have access to the license server, contact PyAnsys support at
-   `pyansys.support@ansys.com <pyansys_support_>`_.
+contains pre-configured `docker-compose <docker_compose_>`_ files that you can
+use.
+It is recommended to use this `docker-compose.yml <pymapdl_docker_compose_base_>`_ file.
+This is the **base** configuration file which launches an instance of MAPDL which you
+can connect to as remote.
 
 
 .. _pymapdl_connect_to_MAPDL_container:
@@ -188,116 +217,12 @@ use:
 Connect to the MAPDL container from Python
 ==========================================
 
-You can now connect to the instance with:
-
-.. code:: pycon
-
-    >>> from ansys.mapdl.core import Mapdl
-    >>> mapdl = Mapdl()
-
-If you mapped to any other port other than 50052, you should specify
-that port when connecting to MAPDL with:
-
-.. code:: pycon
-
-    >>> mapdl = Mapdl(port="<my-port>")
-
-Verify your connection with:
-
-.. code:: pycon
-
-    >>> print(mapdl)
-
-    Product:             ANSYS Mechanical Enterprise
-    MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
-    PyMAPDL Version:     Version: 0.57.0
-
-
-To connect to an existing MAPDL instance, you can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method with the argument ``start_instance=False``:
-
-.. code:: pycon
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl(port=50053, start_instance=False)
-
-
-Because of the linking between host ports and Docker ports (``-p`` argument),
-you do not need to specify the IP address when connecting to a local container.
-However, if you are trying to connect to a WSL local distribution, you must
-specify the IP address of the WSL instance (normally ``127.0.0.1``) because
-no port mapping is done between both.
-
-Here is an example:
-
-.. code:: pycon 
-
-    >>> from ansys.mapdl.core import Mapdl
-    >>> mapdl = Mapdl(ip='127.0.0.1', port=50053)
-
-
-You can also specify the port and IP address using environment variables that are read when
-launching the MAPDL instance:
-
-.. code:: bash
-
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=50053
-    export PYMAPDL_IP=127.0.0.1
-
-
-
-Launch Docker with UPF capabilities
-===================================
-
-If you want to specify a custom Python UPF routine, you must have the
-environment variables ``ANS_USER_PATH`` and ``ANS_USE_UPF`` defined. The
-former should be equal to the path where the UPF routines are located, and the
-latter should be equal to ``TRUE``.
-
-In WSL, you can do this using:
-
-.. code:: bash
-
-    export ANS_USER_PATH=/home/user/UPFs # Use your own path to your UPF files.
-    export ANS_USE_UPF=TRUE
-
-You can then run the Docker image with:
-
-.. code:: bash
-
-    docker run -e ANSYSLMD_LICENSE_FILE=1055@host.docker.internal -e ANS_USER_PATH='/ansys_jobs/upf' -e ANS_USE_UPF='TRUE' --restart always --name mapdl -p 50053:50052 ghcr.io/pyansys/pymapdl/mapdl -smp  1>log.txt
-
-.. warning:: The use of UPFs with Docker images or PyMAPDL is still in the alpha state.
-
+You can connect to the MAPDL instance following :ref:`connect_grpc_madpl_session`.
+You do not need to specify an IP since Docker maps the ports to the local host.
 
 
 Additional considerations
 =========================
-
-Append MAPDL options to the container
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In the command:
-
-.. code::
-
-    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
-    docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -smp
-
-You can provide additional command line parameters to MAPDL by simply
-appending to the Docker command. For example, you can increase the
-number of processors (up to the number available on the host machine)
-with the ``-np`` switch:
-
-.. code::
-
-    IMAGE=ghcr.io/pyansys/pymapdl/mapdl:$VERSION
-    docker run -e ANSYSLMD_LICENSE_FILE=$LICENSE_SERVER -p 50052:50052 $IMAGE -np 4
-
-
-For additional command line arguments please see the *Notes* section
-within :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
-Also, be sure to have the appropriate license for additional HPC features.
 
 Use ``--restart`` policy with MAPDL products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -307,18 +232,23 @@ and deletes this file if it exits normally. The file is used to avoid overwritin
 such as database (DB) files or result (RST) files when starting MAPDL after an
 abnormal termination.
 
-Because of this behavior, when using the Docker ``--restart`` flag in the ``docker run``
-command, you might enter into an infinite loop if you specify the Docker image to
-reboot after an abnormal termination. For example, ``--restart always``. 
-Because of the presence of the ``LOCK`` file, MAPDL exits, attempting to not overwrite
-the files from the previous crash, while the Docker process keeps attempting to
-restart the MAPDL container (and the MAPDL process with it).
+Because of this behavior, when using the Docker ``--restart`` flag in the `docker run <docker_run_>`_ 
+command, you might enter into an infinite loop after crashing if you specify the Docker image to
+reboot after an abnormal termination.
+When there is an abnormal termination (MAPDL crashes) the file :file:`LOCK` is kept on the
+working directory. Since MAPDL has exited, the container also exit.
+This trigger Docker ``restart`` policy, which attempts to restart MAPDL container and the MAPDL
+process with it. 
+But because of the presence of the ``LOCK`` file, MAPDL exits in an attempt to not overwrite
+the files from the previous crash. 
+This is the start of an infinite loop where Docker keep restarting the MAPDL container and MAPDL keeps
+exiting to avoid overwrite the previous files.
 
 In such cases, you should not use the ``--restart`` option. If you really need to use
 this option, you can avoid MAPDL checks and create the ``LOCK`` file by starting
 the process with the environment variable ``ANSYS_LOCK`` set to ``"OFF"``. 
 
-You can do this in your ``docker run`` command:
+You can do this in your `docker run <docker_run_>`_ command:
 
 .. code:: bash
 
@@ -334,35 +264,34 @@ Get useful files after abnormal termination
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In some cases, the MAPDL container might crash after the MAPDL process experiences an
-abnormal termination. In these cases, you can retrieve log files and output files using 
+abnormal termination. In these cases, you can retrieve log files and output files using the
 tools that Docker provides.
 
 First, get the Docker container name:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
-  PS docker ps
+  PS docker ps -a
   CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
-  c14560bff70f   ghcr.io/pyansys/pymapdl/mapdl:v22.2.0   "/ansys_inc/ansys/bi…"   9 seconds ago    Up 8 seconds    0.0.0.0:50053->50052/tcp   mapdl
+  c14560bff70f   my.registry/myuser/mypackage/mapdl   "/ansys_inc/ansys/bi…"   9 seconds ago    Exited(137)    0.0.0.0:50053->50052/tcp   mapdl
 
-To appear in ``docker ps``, the container should be running.
 
 You can then use the ``name`` in the following command:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   PS docker exec -it mapdl /bin/bash
 
 This command executes the command shell (``/bin/bash``) of the container and attaches your current terminal to it (interactive ``-it``).
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   PS C:\Users\user> docker exec -it mapdl /bin/bash
   [root@c14560bff70f /]#
 
 Now you can enter commands inside the Docker container and navigate inside it.
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   PS C:\Users\user> docker exec -it mapdl /bin/bash
   [root@c14560bff70f /]# ls
@@ -374,30 +303,31 @@ You can then take note of the files you want to retrieve. For example, the error
 
 Exit the container terminal using ``exit``:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   [root@c14560bff70f /]# exit
   exit
   (base) PS C:\Users\user>
 
-You can copy the noted files using this script:
+Then you can copy the noted files using the `docker cp <docker_cp_>`_ command:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   docker cp mapdl:/file0.err .
-  docker cp mapdl:/file1.err .
-  docker cp mapdl:/file1.out .
+
+This command copies the files in the current directory. You can specify a different destination using
+the second argument.
 
 If you want to retrieve multiple files, the most efficient approach is to get back inside the Docker container:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   PS C:\Users\user> docker exec -it mapdl /bin/bash
   [root@c14560bff70f /]#
 
 Create a folder where you are going to copy all the desired files:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   [root@c14560bff70f /]# mkdir -p /mapdl_logs
   [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
@@ -407,7 +337,7 @@ Create a folder where you are going to copy all the desired files:
 
 Then copy the entire folder content at once:
 
-.. code:: pwsh
+.. code:: pwsh-session
 
   docker cp mapdl:/mapdl_logs/. .
 

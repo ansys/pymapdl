@@ -17,6 +17,7 @@ For more information on getting a licensed copy of Ansys, visit
    versioning
    running_mapdl
    docker
+   macos
    wsl
    using_julia
    faq

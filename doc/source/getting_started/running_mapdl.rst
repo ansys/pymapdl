@@ -140,19 +140,6 @@ can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to bot
 
 If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`.
 
-Connect to a dockerized MAPDL session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you work with Docker, for example you use the
-`docker-compose.yml <pymapdl_docker_compose_base_>`_ file provided in the
-directory `docker <pymapdl_docker_dir_>`_, then you must connect to the
-MAPDL instance running on the Docker container as if it was a remote MAPDL
-instance. However, because the ports are exposed to the host via the ``ports`` field
-in the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file, you can connect
-to this MAPDL instance without specifying the IP address of the Docker container.
-
-If you are using the local configuration specified in the
-`docker-compose.local.yml <pymapdl_docker_compose_local_>`_ file,
-after attaching your Visual Code instance, you can work with MAPDL as if it were local.
-This means that you can launch MAPDL instances using :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
-
+If you are connecting to an MAPDL docker image, the procedure is the same.
+Just make sure you specifying the mapped port instead of the internal docker image port.
+Visit :ref:`pymapdl_docker:` for more information.
