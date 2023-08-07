@@ -51,35 +51,36 @@ Deprecation of CORBA Interface in PyMAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Starting from version v0.67 of PyMAPDL library, the CORBA interface
-will be deprecated and eventually removed.
+is set to be deprecated and eventually removed.
 This decision is driven by the CORBA library's lack of support
-for Python versions above 3.8.
+for Python versions superior to 3.8.
 
 **Action Required:** If you currently rely on the CORBA interface,
-we recommend planning for its replacement as you migrate to
+it is recommend planning for its replacement as you migrate to
 PyMAPDL v0.67 or later versions. Specifying a different mode when
-launching MAPDL should suffice. We understand that this change
-may impact some users, and we apologize for any inconvenience it
+launching MAPDL should suffice. PyMAPDL maintainers understand that
+this change may impact some users, and apologize for any inconvenience it
 may cause.
 
 **Why is this happening?** As the Python ecosystem evolves,
 maintaining compatibility with outdated libraries becomes
 increasingly challenging. By removing the CORBA interface,
-we can ensure PyMAPDL remains compatible with modern Python
-environments, enabling us to provide better functionality and
-support in the future.
+PyMAPDL remains compatible with modern Python
+environments, enabling the maintainers to provide better
+features and support in the future.
 
-**When will this happen?** The deprecation process will start
-with version v0.66 and it will be completed with version v0.67.
+**When this happen?** The deprecation process is set to start
+with version v0.66 and it should be completed with version v0.67.
 While the exact timeline for the removal is yet to be determined,
 it is essential to prepare for its eventual deprecation.
 
-**Alternative Solutions:** For users requiring similar functionality,
-we recommend exploring alternative interfaces available in PyMAPDL.
+**Alternative Solutions:** For users requiring a similar feature,
+it is recommended exploring alternative interfaces available in PyMAPDL.
 
-We greatly appreciate your support and understanding during this transition.
+PyMAPDL maintainers greatly appreciate your support and understanding
+during this transition.
 If you have any questions or concerns regarding this change, please
-feel free to reach out to our support team in
+feel free to reach out to the support team in
 `PyMAPDL discussions <pymapdl_discussions_>`_ or by email |pyansys_contact|.
 
 Console interface
