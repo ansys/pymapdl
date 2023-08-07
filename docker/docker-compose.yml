@@ -40,10 +40,10 @@ version: '3.3'
 #
 
 services:
-  mapdl2:
+  mapdl:
     restart: always
     shm_size: '8gb'
-    container_name: mapdl2
+    container_name: mapdl
     mem_reservation: 8g
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
