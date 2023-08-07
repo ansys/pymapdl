@@ -31,7 +31,7 @@ in a Windows or Linux machine following :ref:`connect_grpc_madpl_session`.
 Launch MAPDL on MacOS
 =====================
 
-If you do not have an MAPDL docker image, you can create one in a linux
+If you do not have an MAPDL docker image, you can create one in a Linux
 machine using the instructions given in :ref:`ref_make_container`.
 
 

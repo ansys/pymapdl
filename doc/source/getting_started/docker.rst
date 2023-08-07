@@ -48,7 +48,7 @@ you can start to pull and use the image in other devices.
 
    MAPDL Docker images are not allowed to be shared in
    public or free-to-access repositories or registries.
-   Doing this you will be violating Ansys policy.
+   Doing this you violate Ansys policy.
 
 
 
@@ -138,11 +138,11 @@ Or just delete it and run it again using:
 You can append the Docker flag ``--rm`` to automatically clean up the container
 when it exits.
 
-The above commands create a log file (``log.txt``) in your current directory location, you can
+The preceding commands create a log file (``log.txt``) in your current directory location, you can
 remove the following part ``> log.txt `` to avoid this. In that case the command
 output is redirected to the console which is kept blocked until the Docker image exits.
 You can detach the console from the Docker container output by appending ``-d`` to the
-`docker run <docker_run_>`_  command (always add this before the Docker image url).
+`docker run <docker_run_>`_  command (always add this before the Docker image URL).
 If you don't want to block the console, the best approach is to pipe the output to a file
 as mentioned before so you can inspect the output of that file.
 
