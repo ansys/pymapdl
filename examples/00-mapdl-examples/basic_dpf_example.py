@@ -40,6 +40,7 @@ print(output)
 
 # If you are working locally, you don't need to perform the following steps
 temp_directory = tempfile.gettempdir()
+
 # Downloading RST file to the current folder
 rst_path = mapdl.download_result(temp_directory)
 
@@ -57,6 +58,16 @@ rst_path = mapdl.download_result(temp_directory)
 # - Available results
 # - Size of the mesh
 # - Number of results
+
+###############################################################################
+# If you are working with a remote server, you might need to upload the ``RST``
+# file before working with it.
+
+server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+
+###############################################################################
+# Then you can create the :class:`DPF Model <ansys.dpf.core.model.Model>`.
+#
 
 model = dpf.Model(rst_path)
 print(model)
