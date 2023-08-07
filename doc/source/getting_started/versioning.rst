@@ -67,20 +67,20 @@ maintaining compatibility with outdated libraries becomes
 increasingly challenging. By removing the CORBA interface,
 PyMAPDL remains compatible with modern Python
 environments, enabling the maintainers to provide better
-functionality and support in the future.
+features and support in the future.
 
 **When this happen?** The deprecation process is set to start
 with version v0.66 and it should be completed with version v0.67.
 While the exact timeline for the removal is yet to be determined,
 it is essential to prepare for its eventual deprecation.
 
-**Alternative Solutions:** For users requiring similar functionality,
+**Alternative Solutions:** For users requiring a similar feature,
 it is recommended exploring alternative interfaces available in PyMAPDL.
 
 PyMAPDL maintainers greatly appreciate your support and understanding
 during this transition.
 If you have any questions or concerns regarding this change, please
-feel free to reach out to our support team in
+feel free to reach out to the support team in
 `PyMAPDL discussions <pymapdl_discussions_>`_ or by email |pyansys_contact|.
 
 Console interface
