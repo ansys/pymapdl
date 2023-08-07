@@ -49,7 +49,6 @@ import os
 import tempfile
 
 from ansys.dpf import core as dpf
-from ansys.dpf.core import Model
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
@@ -313,17 +312,13 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
-try:
-    # ONLY IF DPF SERVER DEPLOYED WITH gRPC COMMUNICATION
-    # Upload file to DPF server
-    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
-    data_src = dpf.DataSources(server_file_path)
-except:
-    # Using DPF locally
-    data_src = dpf.DataSources(rst_path)
+dpf.core.make_tmp_dir_server(dpf.SERVER)
 
-# Generate the DPF model
-model = Model(data_src)
+if dpf.SERVER.local_server:
+    model = dpf.Model(rst_path)
+else:
+    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+    model = dpf.Model(server_file_path)
 
 # Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
