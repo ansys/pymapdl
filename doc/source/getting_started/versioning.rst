@@ -164,3 +164,12 @@ Where:
 * |:heavy_check_mark:| means that the interface is supported and recommended.
 * |:heavy_minus_sign:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
 * |:x:| means that the interface is not supported.
+
+
+MAPDL supported operative systems
+=================================
+
+You can obtain the list of the MAPDL supported operative systems in the
+`Ansys Platform Support website <ansys_platform_support_>`_.
+
+For the current release, the link is :ref:`ansys_current_supported_os` 
