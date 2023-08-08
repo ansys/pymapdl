@@ -7,7 +7,7 @@ Analysis of a 2D Magnetostatic Solenoid
 
 This example shows how to gather and plot results with material discontinuities
 across elements (Power graphics style) versus the default full average results
-(Power graphics style).
+(Full graphics style).
 
 
 Description
@@ -18,7 +18,7 @@ presenting results:
 
 * **Full graphics** presents the entire selected model with node averaged results.
   In the case of an node shared by two or more elements that have differing
-  materials, the stress field is discontinuous across the element boundary
+  materials, the stress field is continuous across the element material boundary
   (the shared nodes).
 
 * **Power graphics** presents the entire selected model with averaged results
