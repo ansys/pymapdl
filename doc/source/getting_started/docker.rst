@@ -4,18 +4,18 @@
 MAPDL and Docker
 ****************
 
-You can run MAPDL within a container on any OS using Docker and
+You can run MAPDL within a Docker container on any OS and
 connect to it via PyMAPDL.
 
-There are several situations in which it is advantageous to run MAPDL
+There are several advantages to running MAPDL
 in a containerized environment such as Docker or Singularity:
 
-- Run in a consistent environment regardless of the host OS.
-- Portability and ease of install.
+- Consistent environment regardless of the host OS
+- Portability and ease of install
 - Large-scale cluster deployment using Kubernetes
 - Genuine app isolation through containerization
 
-In this case, you use your local Python installation to
+When running MAPDL in a Docker container, you use your local Python installation to
 connect to this instance.
 
 .. graphviz::
@@ -37,32 +37,33 @@ connect to this instance.
 Requirements
 ============
 
-You need to have access to a Docker image with MAPDL in it.
-Visit :ref:`ref_make_container` for more information on how
-to create your own MAPDL docker image.
+You must have access to a Docker image with MAPDL in it.
+For more information on how to create your own Docker image,
+see :ref:`ref_make_container` .
 
 Once you have created and uploaded your Docker image to a registry,
-you can start to pull and use the image in other devices.
+you can start to pull and use the image on other devices.
 
 .. warning::
 
    MAPDL Docker images are not allowed to be shared in
    public or free-to-access repositories or registries.
-   Doing this you violate Ansys policy.
+   Doing so violates Ansys policy.
 
 
 
 Configure Docker to access a private GitHub registry
 ----------------------------------------------------
 
-In case you have created a Docker image and upload it to a GitHub
-private repository, you must authorise your docker installation
+If you have created a Docker image and uploaded it to a GitHub
+private repository, you must authorize your Docker installation
 to access this private package by using a personal access
 token.
-Create a GitHub personal access token with ``packages read`` permissions
-according to `Creating a personal access token <gh_creating_pat_>`_
 
-Save that token to a file with:
+For information on creating a GitHub personal access token with
+``packages read`` permissions, see GitHub's `Creating a personal access token <gh_creating_pat_>`_.
+
+Save that token to a file with this command:
 
 .. code::
 
@@ -71,7 +72,7 @@ Save that token to a file with:
 
 This lets you send the token to Docker without leaving the token value
 in your history. Next, authorize Docker to access this repository
-with:
+with code like this:
 
 .. code::
 
@@ -85,18 +86,19 @@ Run an MAPDL Docker image
 =========================
 
 You can now launch MAPDL from Docker using the command line, a
-`docker compose file <run_an_mapdl_image_using_docker_compose_>`_ 
+`docker compose file <run_an_mapdl_image_using_docker_compose_>`_,
 or a script that gather the commands given to the command line.
 
 Your Docker image should have a valid MAPDL license configuration.
-The easiest way is to have an environment variable :env:`ANSYSLMD_LICENSE_FILE`
+The easiest way is to have an environment variable, :envvar:`ANSYSLMD_LICENSE_FILE`,
 pointing to a valid license server. This environment variable can be already
-included in the Docker image. However this is not recommended because it could
-expose the license server if the Docker image get leaked.
+included in the Docker image. However, this is not recommended because it could
+expose the license server if the Docker image is leaked.
 The recommended approach is to set that environment variable when running the
 container. 
 
-To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage`` use:
+To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage``,
+use code like this:
 
 .. code:: bash
 
@@ -116,17 +118,16 @@ For Windows use:
     docker run -e ANSYSLMD_LICENSE_FILE=$env:ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $env:LOCAL_MAPDL_PORT`:50052   $env:MAPDL_DOCKER_REGISTRY_URL -smp
 
 
-First time you run it, Docker logins into the registry and
-pulls the required image.
-This can take some time depending on the size of the image.
+The first time you instantiate the container, Docker logins into the registry and
+pulls the required image. This can take some time, depending on the size of the image.
 
-To rerun it, you should restart the container:
+To rerun it, you should restart the container with this command:
 
 .. code:: bash
 
    docker start mapdl
 
-Or just delete it and run it again using:
+Or you can delete the container and run it again using these commands:
 
 .. code:: bash
 
@@ -138,43 +139,49 @@ Or just delete it and run it again using:
 You can append the Docker flag ``--rm`` to automatically clean up the container
 when it exits.
 
-The preceding commands create a log file (``log.txt``) in your current directory location, you can
-remove the following part ``> log.txt `` to avoid this. In that case the command
-output is redirected to the console which is kept blocked until the Docker image exits.
-You can detach the console from the Docker container output by appending ``-d`` to the
-`docker run <docker_run_>`_  command (always add this before the Docker image URL).
+The preceding commands create a log file (``log.txt``) in your current directory location.
+However, you can remove ``> log.txt `` if you don't want to create this file. In this case,
+the command output is redirected to the console, which is kept blocked until the Docker
+image exits. You can detach the console from the Docker container output by appending
+``-d`` to the `docker run <docker_run_>`_  command. (Always add this before the Docker
+image URL.)
+
 If you don't want to block the console, the best approach is to pipe the output to a file
-as mentioned before so you can inspect the output of that file.
+as mentioned earlier so that you can inspect the output of that file.
 
 Notice that the MAPDL Docker image gRPC port (``50052``) is being mapped to a
 different host port (``50053``) to avoid port conflicts with local
 MAPDL instances running on the host or other Docker images.
 You could additionally launch more Docker containers in different ports if
 you want to run multiple simulations at the same time.
-The module :ref:`ref_pymapdl_pool`` does not work when you are connecting
-to a remote MAPDL Docker image so it does not work when connected to Docker
-containers either. If you decide to launch multiple MAPDL instance, you must
-manage these instances by yourself.
 
-.. note:: Ensure that your port ``50053`` is open in your local firewall.
+The :ref:`ref_pymapdl_pool`` module does not work when you are connecting
+to a remote MAPDL Docker image. It does not work when connected to Docker
+containers either. If you decide to launch multiple MAPDL instances, you must
+manage these instances yourself.
+
+.. note:: Ensure that port ``50053`` is open in your local firewall.
 
 You can provide additional MAPDL command line parameters to MAPDL by simply
 appending them to the end of the command.
+
 For example, you can increase the number of processors (up to the
 number available on the host machine) with the ``-np`` switch:
 
 .. code:: bash
 
-  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
+  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always -d --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
 
 
-For additional command line arguments visit the *Notes* section
-within :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
+For additional command line arguments, see the *Notes* section in the
+description for the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
+function.
 
 You can use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
 to run the preceding commands all at once.
 
-Once you have launched MAPDL you should see in your console (or output file):
+Once you have launched MAPDL, you should see the following content
+in your console (or the output file):
 
 .. code::
 
@@ -190,8 +197,9 @@ Once you have launched MAPDL you should see in your console (or output file):
 
 .. warning:: 
   
-   You should notice that the port specified in the console is the internal Docker container port.
-   This port has been mapped to the value specified in :env:`LOCAL_MAPDL_PORT`.
+   Notice that the port specified in the console is the internal Docker container port.
+   This port has been mapped to the value specified for the :envvar:`LOCAL_MAPDL_PORT`
+   environment variable.
 
 
 .. _run_an_mapdl_image_using_docker_compose:
