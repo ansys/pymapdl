@@ -197,7 +197,7 @@ Once you have launched MAPDL you should see in your console (or output file):
 .. _run_an_mapdl_image_using_docker_compose:
 
 Using ``docker-compose`` to launch MAPDL
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------
 
 You can also use `docker-compose <docker_compose_>`_ command to launch MAPDL configured in
 a `docker-compose <docker_compose_>`_ file.
@@ -225,7 +225,7 @@ Additional considerations
 =========================
 
 Use ``--restart`` policy with MAPDL products
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------
 
 By default, MAPDL creates a ``LOCK`` file in the working directory when it starts
 and deletes this file if it exits normally. The file is used to avoid overwriting files
@@ -261,7 +261,7 @@ You can do this in your `docker run <docker_run_>`_ command:
 
 
 Get useful files after abnormal termination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
 In some cases, the MAPDL container might crash after the MAPDL process experiences an
 abnormal termination. In these cases, you can retrieve log files and output files using the
