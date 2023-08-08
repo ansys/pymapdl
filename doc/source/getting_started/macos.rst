@@ -21,7 +21,7 @@ However MAPDL is not compatible with MacOS.
 There are two options then:
 
 * **Connect to a remote instance**: You can connect to a remote instance running
-in a Windows or Linux machine following :ref:`connect_grpc_madpl_session`.
+  in a Windows or Linux machine following :ref:`connect_grpc_madpl_session`.
 
 * **Launch MAPDL locally using docker**: You can run MAPDL in a MacOS machine following
 
