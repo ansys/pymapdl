@@ -8,7 +8,7 @@ You can run MAPDL within a Docker container on any OS and
 connect to it via PyMAPDL.
 
 There are several advantages to running MAPDL
-in a containerized environment such as Docker or Singularity:
+in a containerized environment such as Docker (or Singularity):
 
 - Consistent environment regardless of the host OS
 - Portability and ease of install
@@ -39,7 +39,7 @@ Requirements
 
 You must have access to a Docker image with MAPDL in it.
 For more information on how to create your own Docker image,
-see :ref:`ref_make_container` .
+see :ref:`ref_make_container`.
 
 Once you have created and uploaded your Docker image to a registry,
 you can start to pull and use the image on other devices.
@@ -98,7 +98,9 @@ The recommended approach is to set that environment variable when running the
 container. 
 
 To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage``,
-use code like this:
+use code like in the following examples.
+
+**On Linux**
 
 .. code:: bash
 
@@ -107,7 +109,7 @@ use code like this:
   MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
   docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
 
-For Windows use:
+**On Windows**
 
 .. code:: pwsh-session
 
@@ -140,10 +142,10 @@ You can append the Docker flag ``--rm`` to automatically clean up the container
 when it exits.
 
 The preceding commands create a log file (``log.txt``) in your current directory location.
-However, you can remove ``> log.txt `` if you don't want to create this file. In this case,
+However, you can remove ``> log.txt`` if you don't want to create this file. In this case,
 the command output is redirected to the console, which is kept blocked until the Docker
 image exits. You can detach the console from the Docker container output by appending
-``-d`` to the `docker run <docker_run_>`_  command. (Always add this before the Docker
+``-d`` to the `docker run <docker_run_>`_ command. (Always add this before the Docker
 image URL.)
 
 If you don't want to block the console, the best approach is to pipe the output to a file
@@ -196,7 +198,7 @@ in your console (or the output file):
     Server listening on : 0.0.0.0:50052
 
 
-.. warning:: 
+.. note:: 
   
    Notice that the port specified in the console is the internal Docker container port.
    This port has been mapped to the value specified for the :envvar:`LOCAL_MAPDL_PORT`
@@ -208,17 +210,18 @@ in your console (or the output file):
 Using ``docker-compose`` to launch MAPDL
 ----------------------------------------
 
-You can also use `docker-compose <docker_compose_>`_ command to launch MAPDL configured in
+You can also use the `docker-compose <docker_compose_>`_ command to launch MAPDL configured in
 a `docker-compose <docker_compose_>`_ file.
 This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
-For you convenience, the directory `docker <pymapdl_docker_dir_>`_ 
-contains pre-configured `docker-compose <docker_compose_>`_ files that you can
+For your convenience, the `docker <pymapdl_docker_dir_>`_ directory 
+contains preconfigured `docker-compose <docker_compose_>`_ files that you can
 use.
-It is recommended to use this `docker-compose.yml <pymapdl_docker_compose_base_>`_ file.
-This is the **base** configuration file which launches an instance of MAPDL which you
-can connect to as remote.
+
+Using the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file is recommended.
+This is the *base* configuration file for launching an instance of MAPDL that you can connect
+to remotely.
 
 
 .. _pymapdl_connect_to_MAPDL_container:
@@ -226,8 +229,8 @@ can connect to as remote.
 Connect to the MAPDL container from Python
 ==========================================
 
-You can connect to the MAPDL instance following :ref:`connect_grpc_madpl_session`.
-You do not need to specify an IP since Docker maps the ports to the local host.
+You can connect to an MAPDL instance as indicated in :ref:`connect_grpc_madpl_session`.
+You do not need to specify an IP address because Docker maps the ports to the local host.
 
 
 Additional considerations
@@ -236,28 +239,29 @@ Additional considerations
 Use ``--restart`` policy with MAPDL products
 --------------------------------------------
 
-By default, MAPDL creates a ``LOCK`` file in the working directory when it starts
-and deletes this file if it exits normally. The file is used to avoid overwriting files
+By default, MAPDL creates a ``LOCK`` file in the working directory when it starts,
+and it deletes this file if it exits normally. The file is used to avoid overwriting files
 such as database (DB) files or result (RST) files when starting MAPDL after an
 abnormal termination.
 
 Because of this behavior, when using the Docker ``--restart`` flag in the `docker run <docker_run_>`_ 
 command, you might enter into an infinite loop after crashing if you specify the Docker image to
 reboot after an abnormal termination.
-When there is an abnormal termination (MAPDL crashes) the file :file:`LOCK` is kept on the
-working directory. Since MAPDL has exited, the container also exit.
-This trigger Docker ``restart`` policy, which attempts to restart MAPDL container and the MAPDL
-process with it. 
+When there is an abnormal termination (MAPDL crashes), the :file:`LOCK` file is kept on the
+working directory. Since MAPDL has exited, the container also exits.
+
+This triggers the Docker ``restart`` policy, which attempts to restart MAPDL container and
+the MAPDL process with it.
 But because of the presence of the ``LOCK`` file, MAPDL exits in an attempt to not overwrite
 the files from the previous crash. 
-This is the start of an infinite loop where Docker keep restarting the MAPDL container and MAPDL keeps
-exiting to avoid overwrite the previous files.
+This is the start of an infinite loop, where Docker keeps restarting the MAPDL container and
+MAPDL keeps exiting to avoid overwrite the previous files.
 
 In such cases, you should not use the ``--restart`` option. If you really need to use
 this option, you can avoid MAPDL checks and create the ``LOCK`` file by starting
-the process with the environment variable ``ANSYS_LOCK`` set to ``"OFF"``. 
+the process with the ``ANSYS_LOCK`` environment variable set to ``"OFF"``. 
 
-You can do this in your `docker run <docker_run_>`_ command:
+This code shows how to do this in your `docker run <docker_run_>`_ command:
 
 .. code:: bash
 
@@ -285,7 +289,7 @@ First, get the Docker container name:
   c14560bff70f   my.registry/myuser/mypackage/mapdl   "/ansys_inc/ansys/bi…"   9 seconds ago    Exited(137)    0.0.0.0:50053->50052/tcp   mapdl
 
 
-You can then use the ``name`` in the following command:
+Then use the ``name`` in this command:
 
 .. code:: pwsh-session
 
@@ -308,9 +312,9 @@ Now you can enter commands inside the Docker container and navigate inside it.
   ansys_inc          dev                                file0.log   file1.log  file2.err   file2.page  file3.out   lib    mnt    root  srv   usr
   bin                etc                                file0.page  file1.out  file2.log   file3.err   file3.page  lib64  opt    run   sys   var
 
-You can then take note of the files you want to retrieve. For example, the error and output files (``file*.err`` and ``file*.out``).
+You can then take note of the files you want to retrieve. For example, you would likely want to retrieve the error and output files (``file*.err`` and ``file*.out``).
 
-Exit the container terminal using ``exit``:
+Exit the container terminal using the ``exit`` command:
 
 .. code:: pwsh-session
 
@@ -318,7 +322,7 @@ Exit the container terminal using ``exit``:
   exit
   (base) PS C:\Users\user>
 
-Then you can copy the noted files using the `docker cp <docker_cp_>`_ command:
+You can then copy the noted files using the `docker cp <docker_cp_>`_ command:
 
 .. code:: pwsh-session
 

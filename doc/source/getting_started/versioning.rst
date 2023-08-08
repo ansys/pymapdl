@@ -21,11 +21,11 @@ Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
 
-This interface also allows to work with a Docker image.
+This interface also works with a Docker image.
 If you have the applicable license, you can install and use 
 MAPDL within Docker, enabling you
 to run and solve even on officially unsupported platforms like Mac
-OS. For more information visit :ref:`pymapdl_docker`.
+OS. For more information, see :ref:`pymapdl_docker`.
 
 
 Legacy interfaces
@@ -166,10 +166,10 @@ Where:
 * |:x:| means that the interface is not supported.
 
 
-MAPDL supported operative systems
+MAPDL-supported operative systems
 =================================
 
-You can obtain the list of the MAPDL supported operative systems in the
-`Ansys Platform Support website <ansys_platform_support_>`_.
+You can obtain the list of MAPDL-supported operative systems on the
+`Platform Support <ansys_platform_support_>`_ page of the Ansys website.
 
-For the current release, the link is :ref:`ansys_current_supported_os` 
+Or, you can download :ref:`ansys_current_supported_os` the list for the current release.

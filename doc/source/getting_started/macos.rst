@@ -7,23 +7,24 @@ PyMAPDL and MacOS
 Install PyMAPDL
 ===============
 
-PyMAPDL can be installed normally in a MacOS system which fulfill PyMAPDL
-requirements using:
+You can install PyMAPDL normally on a MacOS that fulfill PyMAPDL
+requirements using this command:
 
 .. code:: zsh
 
     pip install ansys-mapdl-core
 
 
-PyMAPDL requires to connect an MAPDL live instance to function.
-However MAPDL is not compatible with MacOS.
+While PyMAPDL requires a connection to an MAPDL live instance to function,
+MAPDL is not compatible with a MacOS.
 
-There are two options then:
+There are two options:
 
 * **Connect to a remote instance**: You can connect to a remote instance running
-  in a Windows or Linux machine following :ref:`connect_grpc_madpl_session`.
+  on a Windows or Linux machine as indicated in :ref:`connect_grpc_madpl_session`.
 
-* **Launch MAPDL locally using docker**: You can run MAPDL in a MacOS machine following
+* **Launch MAPDL locally using Docker**: You can run MAPDL on a MacOS machine as
+indicated in :ref:`launch_mapdl_on_macos`.
 
 
 .. _launch_mapdl_on_macos:
@@ -31,12 +32,12 @@ There are two options then:
 Launch MAPDL on MacOS
 =====================
 
-If you do not have an MAPDL docker image, you can create one in a Linux
-machine using the instructions given in :ref:`ref_make_container`.
+If you do not have an MAPDL Docker image, you can create one on a Linux
+machine as indicated in  :ref:`ref_make_container`.
 
 
-If you have already an MAPDL docker image you can launch MAPDL following
-the procedure specified in :ref:`run_an_mapdl_image`.
+If you already have an MAPDL Docker image, you can launch MAPDL as
+indicated in :ref:`run_an_mapdl_image`.
 
 Apple Silicon compatibility
 ---------------------------
@@ -48,8 +49,9 @@ warning:
 
     WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
 
-This is because the docker image has not been build to run on Apple Silicon architecture (arm64). You add the
-following argument ``--platform linux/amd64`` to the `docker run <docker_run_>`_ command:
+This is because the Docker image has not been built to run on the Apple Silicon architecture (arm64).
+You must add the ``--platform linux/amd64`` argument to the `docker run <docker_run_>`_ command
+as shown in this code example:
 
 .. code:: zsh
 
@@ -62,6 +64,6 @@ following argument ``--platform linux/amd64`` to the `docker run <docker_run_>`_
 Connect to an MAPDL container
 =============================
 
-You can connect to the MAPDL instance following :ref:`connect_grpc_madpl_session`.
+You can connect to an MAPDL instance as indicated in :ref:`connect_grpc_madpl_session`.
 
 
