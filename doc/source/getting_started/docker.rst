@@ -158,8 +158,8 @@ You could additionally launch more Docker containers in different ports if
 you want to run multiple simulations at the same time.
 
 The :ref:`ref_pymapdl_pool` module does not
-work when you are connecting to a remote MAPDL Docker image. It does not
-work when connected to Docker containers either. 
+work when you are connecting to a remote MAPDL Docker image.
+It also does not work when connected to Docker containers. 
 If you decide to launch multiple MAPDL instances, you must manage these
 instances yourself.
 
