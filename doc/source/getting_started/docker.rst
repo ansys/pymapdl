@@ -216,7 +216,7 @@ This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
 For your convenience, the `docker <pymapdl_docker_dir_>`_ directory 
-contains preconfigured `docker-compose <docker_compose_>`_ files that you can
+contains configured `docker-compose <docker_compose_>`_ files that you can
 use.
 
 Using the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file is recommended.
