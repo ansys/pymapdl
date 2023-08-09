@@ -24,7 +24,7 @@ There are two options:
   on a Windows or Linux machine as indicated in :ref:`connect_grpc_madpl_session`.
 
 * **Launch MAPDL locally using Docker**: You can run MAPDL on a MacOS machine as
-indicated in :ref:`launch_mapdl_on_macos`.
+  indicated in :ref:`launch_mapdl_on_macos`.
 
 
 .. _launch_mapdl_on_macos:
