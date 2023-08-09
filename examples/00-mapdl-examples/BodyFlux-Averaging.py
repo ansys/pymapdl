@@ -2,7 +2,7 @@
 .. _ref_solenoid_magnetostatic_2d:
 
 =======================================
-Analysis of a 2D Magnetostatic Solenoid
+Analysis of a 2D magnetostatic solenoid
 =======================================
 
 This example shows how to gather and plot results with material discontinuities
@@ -13,22 +13,22 @@ across elements (Power graphics style) versus the default full average results
 Description
 ===========
 
-Mechanical APDL has two averaging methods depending the method used for
-presenting results:
+Mechanical APDL has two averaging methods for presenting results. The following
+descriptions indicate the primary differences, although other differences exist.
 
-* **Full graphics** presents the entire selected model with node averaged results.
-  In the case of an node shared by two or more elements that have differing
+* **Full graphics**: Presents the entire selected model with node averaged results.
+  In the case of a node shared by two or more elements that have differing
   materials, the stress field is continuous across the element material boundary
   (the shared nodes).
 
-* **Power graphics** presents the entire selected model with averaged results
-  within elements of the same material, and discontinuous across material
+* **Power graphics**: Presents the entire selected model with averaged results
+  within elements of the same material and discontinuous across material
   boundaries.
 
 There are other differences between the two methods; this example concentrates
 on material boundaries.
 
-The native PyMAPDL post-processing is like Full graphics with respect to
+Native PyMAPDL postprocessing is like MAPDL's Full graphics method with respect to
 material boundaries.
 
 Axisymmetric solenoid magnetostatic example
@@ -44,16 +44,16 @@ The geometry of the solenoid is given in Figure 1.
 
     **Figure 1: Solenoid geometry description.**
 
-Load and boundary condition
----------------------------
+Loads and boundary conditions
+-----------------------------
 
-The coil have an current density applied equal to 650 turns at 1 amp
+The coil has a current density applied equal to 650 turns at 1 amp
 per turn.
 All exterior nodes have their Z magnetic vector potential set to zero,
-enforcing an flux parallel condition.
+enforcing a flux parallel condition.
 
-Importing modules
-=================
+Import modules
+==========
 
 In addition to the usual libraries, Matplotlib and PyVista are imported.
 The MAPDL default contour color style is used so Matplotlib is imported.
@@ -80,7 +80,7 @@ mapdl.title("2-D Solenoid Actuator Static Analysis")
 # ===================
 #
 # Define parameter values for geometry, loading, and mesh sizing.
-# The model is built in centimeters and will be scaled to meters.
+# The model is built in centimeters and is then scaled to meters.
 #
 # The element type 'Plane233' is used for 2D magnetostatic analysis.
 
@@ -100,10 +100,10 @@ mapdl.mp("MURX", 3, 1)  # Permeability of coil
 mapdl.mp("MURX", 4, 2000)  # Permeability of armature
 
 ###############################################################################
-# Setting parameters
-# ------------------
+# Set parameters
+# --------------
 #
-# Setting parameters for geometry design.
+# Set parameters for geometry design.
 
 n_turns = 650  # Number of coil turns
 i_current = 1.0  # Current per turn
@@ -126,8 +126,8 @@ jdens = n_turns * i_current / acoil  # Current density (A/cm**2)
 smart_size = 4  # Smart Size Level for Meshing
 
 ###############################################################################
-# Create the geometry
-# -------------------
+# Create geometry
+# ---------------
 #
 # Create the model geometry.
 
@@ -143,10 +143,10 @@ mapdl.numcmp("AREA")  # Compress out unused area numbers
 
 
 ###############################################################################
-# Meshing
-# -------
+# Mesh
+# ----
 #
-# Setting the model mesh.
+# Set the model mesh.
 
 mapdl.asel("S", "AREA", "", 2)  # Assign attributes to coil
 mapdl.aatt(3, 1, 1, 0)
@@ -165,17 +165,17 @@ mapdl.allsel("ALL")
 mapdl.aplot(vtk=False)
 
 ###############################################################################
-# Meshing
+# Mesh
 #
 
 mapdl.smrtsize(smart_size)  # Set smart size meshing
 mapdl.amesh("ALL")  # Mesh all areas
 
 ###############################################################################
-# Scaling meshing to meter
-# ------------------------
+# Scale mesh to meters
+# --------------------
 #
-# Scaling the model to be one meter size.
+# Scale the model to be one meter in size.
 
 mapdl.esel("S", "MAT", "", 4)  # Select armature elements
 mapdl.cm("ARM", "ELEM")  # Define armature as a component
@@ -184,8 +184,8 @@ mapdl.arscale(na1="all", rx=0.01, ry=0.01, rz=1, imove=1)  # Scale model to MKS 
 mapdl.finish()
 
 ###############################################################################
-# Load and Boundary Condition
-# ---------------------------
+# Loads and boundary conditions
+# ------------------------------
 #
 # Define loads and boundary conditions.
 
@@ -210,8 +210,8 @@ mapdl.solve()
 mapdl.finish()
 
 ###############################################################################
-# Post-processing
-# ===============
+# Postprocessing
+# ==============
 #
 # Open the result file and read in the last set of results
 
@@ -221,16 +221,16 @@ mapdl.set("last")
 
 ###############################################################################
 #
-# Printing the nodal values
+# Print the nodal values
 #
 
 print(mapdl.post_processing.nodal_values("b", "x"))
 
 ###############################################################################
-# Create an MAPDL Power Graphics plot of the X direction Magnetic Flux
+# Create an MAPDL Power Graphics plot of the X-direction magnetic flux
 # --------------------------------------------------------------------
 #
-# The MAPDL colors are reversed via the rgb command so that the background is
+# The MAPDL colors are reversed via the ``rgb`` command so that the background is
 # white with black text and element edges.
 
 mapdl.graphics("power")
@@ -247,7 +247,7 @@ mapdl.plnsol("b", "x")
 mapdl.show("")
 
 ###############################################################################
-# Obtain Grid and Scalar Data
+# Obtain grid and scalar data
 # ---------------------------
 #
 # First, obtain the set of unique material IDs in the model
@@ -256,10 +256,9 @@ elem_mats = mapdl.mesh.material_type
 np.unique(elem_mats)
 
 ###############################################################################
-# For each unique material ID the elements are selected, and so are their
-# nodes.
-# The 'grids' list is appended with the mesh information of just those
-# elements, and the scalars list appended with the nodal X direction magnetic
+# For each unique material ID, the elements and their nodes are selected.
+# The ``grids`` list is appended with the mesh information of just those
+# elements, and the ``scalars`` list is appended with the nodal X-direction magnetic
 # flux.
 
 grids = []
@@ -280,11 +279,11 @@ print(grids)
 
 
 ###############################################################################
-# Color Map and Result Plot
+# Color map and result plot
 # -------------------------
 #
-# Some of the MAPDL contour colors did not have an exact match in the standard
-# Matplotlib color library so an attempt was made to match the color and use
+# Because some of the MAPDL contour colors do not have an exact match in the
+# standard Matplotlib color library, an attempt is made to match the color and use
 # the Hex RGBA number value.
 #
 # For each item in the grids list the grid is added to the plot and 9 contour
