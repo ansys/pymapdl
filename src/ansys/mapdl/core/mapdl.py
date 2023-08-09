@@ -1881,6 +1881,10 @@ class _MapdlCore(Commands):
                 # Creating a mapping of colors
                 ent_num = list(set(surf["entity_num"]))
                 ent_num.sort()
+
+                # expand color array until matching the number of areas.
+                # In this case we start to repeat colors in the same order.
+                colors = np.resize(colors, len(ent_num))
                 color_dict = {i: color for i, color in zip(ent_num, colors)}
 
                 # mapping mapdl areas to pyvista mesh cells
@@ -1888,9 +1892,7 @@ class _MapdlCore(Commands):
                     if len(colors) == 1:
                         # for the case colors comes from string.
                         return colors[0]
-
-                    id_adjust = each % len(color_dict)  # To avoid indexerror
-                    return color_dict[id_adjust]
+                    return color_dict[each]
 
                 colors_map = np.array(list(map(mapper, surf["entity_num"])))
                 meshes.append({"mesh": surf, "scalars": colors_map})
