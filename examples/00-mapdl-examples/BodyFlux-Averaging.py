@@ -49,7 +49,7 @@ All exterior nodes have their Z magnetic vector potential set to zero,
 enforcing a flux parallel condition.
 
 Import modules
-==========
+==============
 
 In addition to the usual libraries, Matplotlib and PyVista are imported.
 The MAPDL default contour color style is used so Matplotlib is imported.
