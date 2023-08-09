@@ -180,7 +180,7 @@ mapdl.amesh("ALL")  # Mesh all areas
 mapdl.esel("S", "MAT", "", 4)  # Select armature elements
 mapdl.cm("ARM", "ELEM")  # Define armature as a component
 mapdl.allsel("ALL")
-mapdl.arscale(na1='all', rx=0.01, ry=0.01, rz=1, imove=1)  # Scale model to MKS (meters)
+mapdl.arscale(na1="all", rx=0.01, ry=0.01, rz=1, imove=1)  # Scale model to MKS (meters)
 mapdl.finish()
 
 ###############################################################################
