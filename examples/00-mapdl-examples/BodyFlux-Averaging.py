@@ -30,7 +30,6 @@ This example focuses on material boundaries.
 Native PyMAPDL postprocessing is like MAPDL's Full graphics method with respect to
 material boundaries.
 
-
 The geometry of the solenoid is given in Figure 1.
 
 .. figure:: ../../../_static/model_solenoid_2d.png
