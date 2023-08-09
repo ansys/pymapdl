@@ -24,7 +24,7 @@ _LOCAL_PORTS = []
 
 # Per contract with Sphinx-Gallery, this method must be available at top level
 try:
-    from pyvista.utilities.sphinx_gallery import _get_sg_image_scraper
+    import pyvista
 
     _HAS_PYVISTA = True
 except ModuleNotFoundError:  # pragma: no cover
