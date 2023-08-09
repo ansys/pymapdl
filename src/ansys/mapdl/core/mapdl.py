@@ -1893,12 +1893,8 @@ class _MapdlCore(Commands):
                         # for the case colors comes from string.
                         return colors[0]
 
-                    try:
-                        return color_dict[each]
-                    except IndexError as e:
-                        raise Exception(
-                            f"each: {each}\nshape colors: {colors.shape}"
-                        ) from e
+                    id_adjust = each % len(color_dict)  # To avoid indexerror
+                    return color_dict[id_adjust]
 
                 colors_map = np.array(list(map(mapper, surf["entity_num"])))
                 meshes.append({"mesh": surf, "scalars": colors_map})
