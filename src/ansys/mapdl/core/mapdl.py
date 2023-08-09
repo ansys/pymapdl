@@ -1883,7 +1883,12 @@ class _MapdlCore(Commands):
                     if len(colors) == 1:
                         # for the case colors comes from string.
                         return colors[0]
-                    return colors[each - 1]
+                    try:
+                        return colors[each - 1]
+                    except IndexError as e:
+                        raise Exception(
+                            f"each: {each}\nshape colors: {colors.shape}"
+                        ) from e
 
                 colors_map = np.array(list(map(mapper, surf["entity_num"])))
                 meshes.append({"mesh": surf, "scalars": colors_map})
