@@ -164,7 +164,7 @@ You can even plot directly from the Python environment with:
 
 Documentation and issues
 ------------------------
-Documentation for the latest stable release of PyMAPDL is hosted at `PyMechanical documentation
+Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL documentation
 <https://mapdl.docs.pyansys.com/version/stable/>`_.
 
 In the upper right corner of the documentation's title bar, there is an option for switching from
@@ -177,8 +177,9 @@ PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
 for using PyMAPDL. 
 
 On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
-you can create issues to submit questions, report bugs, and request new features.
-This is the best place to post questions and code.
+you can create issues to report bugs and request new features. On the `PyMAPDL Discussions
+<https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
+page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
 
 To reach the project support team, email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_.
 
