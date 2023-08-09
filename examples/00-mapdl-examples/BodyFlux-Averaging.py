@@ -25,14 +25,11 @@ descriptions indicate the primary differences, although other differences exist.
   within elements of the same material and discontinuous across material
   boundaries.
 
-There are other differences between the two methods; this example concentrates
-on material boundaries.
+This example focuses on material boundaries.
 
 Native PyMAPDL postprocessing is like MAPDL's Full graphics method with respect to
 material boundaries.
 
-Axisymmetric solenoid magnetostatic example
--------------------------------------------
 
 The geometry of the solenoid is given in Figure 1.
 
