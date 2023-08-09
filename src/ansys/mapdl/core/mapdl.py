@@ -1858,7 +1858,7 @@ class _MapdlCore(Commands):
                     # Generating a colour array,
                     # Size = number of areas.
                     # Values are random between 0 and min(256, number_areas)
-                    colors = PyMAPDL_cmap(anums)
+                    colors = PyMAPDL_cmap(size_)
 
                 elif isinstance(color_areas, str):
                     # A color is provided as a string
@@ -1878,13 +1878,19 @@ class _MapdlCore(Commands):
                     else:
                         colors = color_areas
 
+                # Creating a mapping of colors
+                ent_num = list(set(surf["entity_num"]))
+                ent_num.sort()
+                color_dict = {i: color for i, color in zip(ent_num, colors)}
+
                 # mapping mapdl areas to pyvista mesh cells
                 def mapper(each):
                     if len(colors) == 1:
                         # for the case colors comes from string.
                         return colors[0]
+
                     try:
-                        return colors[each - 1]
+                        return color_dict[each]
                     except IndexError as e:
                         raise Exception(
                             f"each: {each}\nshape colors: {colors.shape}"
