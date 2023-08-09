@@ -315,5 +315,5 @@ plotter.show()
 ###############################################################################
 # Exiting MAPDL
 # =============
-
+mapdl.graphics("FULL")  # Returning to default mode.
 mapdl.exit()
