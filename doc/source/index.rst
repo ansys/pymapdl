@@ -162,9 +162,25 @@ You can even plot directly from the Python environment with:
 
     Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
-For a full listing of PyMAPDL features, see the
-:ref:`ref_user_guide`.
+Documentation and issues
+------------------------
+Documentation for the latest stable release of PyMAPDL is hosted at `PyMechanical documentation
+<https://mapdl.docs.pyansys.com/version/stable/>`_.
 
+In the upper right corner of the documentation's title bar, there is an option for switching from
+viewing the documentation for the latest stable release to viewing the documentation for the
+development version or previously released versions.
+
+You can also `view <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png>`_ or
+`download <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf>`_ the
+PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
+for using PyMAPDL. 
+
+On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
+you can create issues to submit questions, report bugs, and request new features.
+This is the best place to post questions and code.
+
+To reach the project support team, email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_.
 
 Project index
 *************
