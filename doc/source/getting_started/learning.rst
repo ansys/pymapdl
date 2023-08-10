@@ -156,4 +156,4 @@ Recommended articles
 * `Access the Power of Ansys from the Python World <ansys_python_power_article_>`_
 * PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
 
-Feel free to email any educational or learning resource to |pyansys_contact|.
+Feel free to email any educational or learning resource to |pyansyscontact|.
