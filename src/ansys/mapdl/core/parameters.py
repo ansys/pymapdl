@@ -326,6 +326,9 @@ class Parameters:
         if key not in parameters:
             try:
                 val_ = interp_star_status(self._mapdl.starstatus(key))
+                if not val_:
+                    raise KeyError(f"The parameter '{key}' does not exist.")
+
                 val_ = val_[list(val_.keys())[0]]["value"]
                 return val_[0] if len(val_) == 1 else val_
 
@@ -718,7 +721,9 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "no parameters defined" in status:
+    if "no parameters defined" in status or (
+        "Parameter name" in status and "command is undefined" in status
+    ):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
