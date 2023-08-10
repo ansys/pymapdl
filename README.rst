@@ -56,8 +56,8 @@ or in batch mode on Windows, Linux, and even Mac OS.
 
 Documentation and issues
 ------------------------
-Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL documentation
-<https://mapdl.docs.pyansys.com/version/stable/>`_.
+Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL Documentation
+<https://mapdl.docs.pyansys.com>`_.
 
 In the upper right corner of the documentation's title bar, there is an option for switching from
 viewing the documentation for the latest stable release to viewing the documentation for the
