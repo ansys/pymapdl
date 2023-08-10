@@ -87,7 +87,7 @@ PyMAPDL maintainers greatly appreciate your support and understanding
 during this transition.
 If you have any questions or concerns regarding this change, please
 feel free to reach out to the support team in
-`PyMAPDL discussions <pymapdl_discussions_>`_ or by email |pyansys_contact|.
+`PyMAPDL discussions <pymapdl_discussions_>`_.
 
 Console interface
 -----------------
@@ -98,7 +98,6 @@ and from the Ansys instance.
 
 Because console-specific support is to be depreciated at some point, you should
 shift to a modern version of Ansys to continue to use PyMAPDL.
-
 
 
 Compatibility between MAPDL and interfaces
