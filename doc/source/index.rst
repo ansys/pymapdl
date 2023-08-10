@@ -184,6 +184,6 @@ page on the Ansys Developer portal, you can post questions, share ideas, and get
 To reach the project support team, email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_.
 
 Project index
-*************
+-------------
 
 * :ref:`genindex`
