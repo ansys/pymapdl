@@ -55,4 +55,4 @@ These links refers to the following GitHub repository where you can find all of 
 
 If you find a missing or broken link, open an issue in
 GitHub (`PyMAPDL Issues <pymapdl_issues_>`_)
-or send an email to |pyansyscontact|.
+or send an email to `PyAnsys Core team <pyansys_core_>`_.
