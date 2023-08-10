@@ -98,7 +98,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "pyvista": ("https://docs.pyvista.org/version/stable/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
-    "pypim": ("https://pypim.docs.pyansys.com/", None),
+    "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
