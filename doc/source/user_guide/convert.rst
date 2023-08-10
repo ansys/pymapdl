@@ -135,7 +135,8 @@ function:
 Or, you can convert code in form of strings for later processing using the
 :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` function:
 
-.. code:: pycon
+
+.. code:: python
 
     from ansys.mapdl.core.convert import convert_apdl_block
 

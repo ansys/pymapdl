@@ -1,10 +1,20 @@
 """Test the DPF implementation"""
 import os
 
-from ansys.dpf import core as dpf
-from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+import pytest
 
 from conftest import skip_if_no_has_dpf
+
+try:
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+except ImportError:
+    skip_if_no_has_dpf = pytest.mark.skipif(
+        True,
+        reason="""DPF couldn't be imported.""",
+    )
+    DPF_DEFAULT_PORT = None
+
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 

@@ -49,7 +49,6 @@ import os
 import tempfile
 
 from ansys.dpf import core as dpf
-from ansys.dpf.core import Model
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
@@ -313,18 +312,13 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
-try:
-    # ONLY IF DPF SERVER DEPLOYED WITH gRPC COMMUNICATION
-    # Upload file to DPF server
-    dpf.connect_to_server()
-    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
-    data_src = dpf.DataSources(server_file_path)
-except:
-    # Using DPF locally
-    data_src = dpf.DataSources(rst_path)
+dpf.core.make_tmp_dir_server(dpf.SERVER)
 
-# Generate the DPF model
-model = Model(data_src)
+if dpf.SERVER.local_server:
+    model = dpf.Model(rst_path)
+else:
+    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+    model = dpf.Model(server_file_path)
 
 # Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
@@ -348,6 +342,7 @@ mesh_field_cohesive = result_mesh.field_of_properties(
 nmisc_index = 70
 
 # Generate the damage result operator
+data_src = dpf.DataSources(server_file_path)
 dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
 # Generate the displacement operator
@@ -372,6 +367,7 @@ plotter.add_mesh(
     opacity=0.3,
 )
 
+
 # Add the contact mesh to the scene
 mesh_contact = result_mesh.grid
 plotter.add_mesh(
@@ -381,7 +377,6 @@ plotter.add_mesh(
     clim=[0, 1],
     scalars=np.zeros((mesh_contact.n_cells)),
 )
-
 for i in range(1, 100):
     # Get displacements
     disp = model.results.displacement(time_scoping=i).eval()
@@ -402,10 +397,9 @@ for i in range(1, 100):
     plotter.update_coordinates(disp_result.data, mesh=mesh_beam, render=False)
     plotter.update_coordinates(disp_cohesive.data, mesh=mesh_contact, render=False)
     plotter.update_scalars(cohesive_damage.data, mesh=mesh_contact, render=False)
-
     plotter.write_frame()
 
-plotter.show()
+plotter.close()
 
 
 ###############################################################################

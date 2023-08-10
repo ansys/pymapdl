@@ -42,11 +42,46 @@ allows you to control a local instance of MAPDL. These versions of
 MAPDL support specific versions of Windows and Linux.
 For more information on supported platforms, see 
 `Ansys Platform Support <ansys_platform_support_>`_.
-
+    
 The CORBA interface is likely to be phased out from MAPDL at some
 point. The gRPC interface is faster, more stable, and can run in
 both local and remote connection configurations.
 
+Deprecation of CORBA Interface in PyMAPDL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Starting from version v0.67 of PyMAPDL library, the CORBA interface
+is set to be deprecated and eventually removed.
+This decision is driven by the CORBA library's lack of support
+for Python versions superior to 3.8.
+
+**Action Required:** If you currently rely on the CORBA interface,
+it is recommend planning for its replacement as you migrate to
+PyMAPDL v0.67 or later versions. Specifying a different mode when
+launching MAPDL should suffice. PyMAPDL maintainers understand that
+this change may impact some users, and apologize for any inconvenience it
+may cause.
+
+**Why is this happening?** As the Python ecosystem evolves,
+maintaining compatibility with outdated libraries becomes
+increasingly challenging. By removing the CORBA interface,
+PyMAPDL remains compatible with modern Python
+environments, enabling the maintainers to provide better
+features and support in the future.
+
+**When this happen?** The deprecation process is set to start
+with version v0.66 and it should be completed with version v0.67.
+While the exact timeline for the removal is yet to be determined,
+it is essential to prepare for its eventual deprecation.
+
+**Alternative Solutions:** For users requiring a similar feature,
+it is recommended exploring alternative interfaces available in PyMAPDL.
+
+PyMAPDL maintainers greatly appreciate your support and understanding
+during this transition.
+If you have any questions or concerns regarding this change, please
+feel free to reach out to the support team in
+`PyMAPDL discussions <pymapdl_discussions_>`_ or by email |pyansys_contact|.
 
 Console interface
 -----------------

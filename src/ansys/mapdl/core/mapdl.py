@@ -36,6 +36,7 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    ComponentDoesNotExits,
     ComponentNoData,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
@@ -75,6 +76,12 @@ from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
+VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
+VALID_DEVICES_LITERAL = Literal[tuple(["PNG", "TIFF", "VRML", "TERM", "CLOSE"])]
+
+VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
+VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
+VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal[tuple(VALID_FILE_TYPE_FOR_PLOT)]
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -206,6 +213,7 @@ class _MapdlCore(Commands):
         log_file: Union[bool, str] = False,
         local: bool = True,
         print_com: bool = False,
+        file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -224,6 +232,8 @@ class _MapdlCore(Commands):
         self._launched: bool = False
         self._stderr = None
         self._stdout = None
+        self._file_type_for_plots = file_type_for_plots
+        self._default_file_type_for_plots = file_type_for_plots
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -332,6 +342,48 @@ class _MapdlCore(Commands):
     def is_console(self):
         """Return true if using console to connect to the MAPDL instance."""
         return self._mode == "console"
+
+    @property
+    def file_type_for_plots(self):
+        """Returns the current file type for plotting."""
+        return self._file_type_for_plots
+
+    @file_type_for_plots.setter
+    def file_type_for_plots(self, value: VALID_DEVICES_LITERAL):
+        """Modify the current file type for plotting."""
+        if isinstance(value, str) and value.upper() in VALID_DEVICES:
+            self._run(
+                f"/show, {value.upper()}"
+            )  # To avoid recursion we need to use _run.
+            self._file_type_for_plots = value.upper()
+        else:
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
+
+    @property
+    def default_file_type_for_plots(self):
+        """Default file type for plots.
+
+        Use when device is not properly set, for instance when the device is closed."""
+        return self._default_file_type_for_plots
+
+    @default_file_type_for_plots.setter
+    def default_file_type_for_plots(self, value: VALID_FILE_TYPE_FOR_PLOT_LITERAL):
+        """Set default file type for plots.
+
+        Used when device is not properly set, for instance when the device is closed."""
+        if not isinstance(value, str) and value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
+        return self._default_file_type_for_plots
+
+    @property
+    def use_vtk(self):
+        """Returns if using VTK by default or not."""
+        return self._use_vtk
+
+    @use_vtk.setter
+    def use_vtk(self, value: bool):
+        """Set VTK to be used by default or not."""
+        self._use_vtk = value
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -1845,7 +1897,15 @@ class _MapdlCore(Commands):
                     else:
                         colors = color_areas
 
-                for surf, color in zip(surfs, colors):
+                # mapping mapdl areas to pyvista mesh cells
+                def mapper(each):
+                    if len(colors) == 1:
+                        # for the case colors comes from string.
+                        return colors[0]
+                    return colors[each - 1]
+
+                colors_map = np.array(map(mapper, surf["entity_num"]))
+                for surf, color in zip(surfs, colors_map):
                     meshes.append({"mesh": surf, "color": color})
 
             else:
@@ -1924,12 +1984,19 @@ class _MapdlCore(Commands):
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
 
+            self.previous_device = self._parent().file_type_for_plots
+
+            if self._parent().file_type_for_plots not in ["PNG", "TIFF", "PNG", "VRML"]:
+                self._parent().show(self._parent().default_file_type_for_plots)
+
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
             self._parent().show("close", mute=True)
             if not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
+
+            self._parent().file_type_for_plots = self.previous_device
 
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
@@ -3084,6 +3151,10 @@ class _MapdlCore(Commands):
             # Address gRPC issue
             # https://github.com/pyansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
+
+        # Tracking output device
+        if command[:4].upper() == "/SHO":
+            self._file_type_for_plots = command.split(",")[1].upper()
 
         # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()
@@ -4656,3 +4727,65 @@ class _MapdlCore(Commands):
         items = [int(each) for each in items]
 
         return items
+
+    @wraps(Commands.cmplot)
+    def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
+        """Wraps cmplot"""
+
+        label = label.upper()
+        entity = entity.upper()
+
+        if label in ["N", "P"]:
+            raise ValueError(f"The label '{label}' is not supported.")
+
+        if (not label or label == "ALL") and not entity:
+            raise ValueError(
+                f"If not using label or label =='ALL', then you "
+                "need to provide a valid entity."
+            )
+
+        if label != "ALL":
+            if label not in self.components:
+                raise ComponentDoesNotExits(f"The component '{label}' does not exist.")
+
+            if not entity:
+                entity = self.components[label].type
+            else:
+                entity_ = self.components[label].type
+                if entity_.upper() != entity.upper():
+                    raise ValueError(
+                        f"The component entity supplied '{entity}' "
+                        "does not seems to match the component "
+                        f"type '{entity_}' with name '{label}' "
+                        "in MAPDL."
+                    )
+
+        if label and not entity:
+            # supposing entity
+            entity = self.components[label].type
+
+        if entity[:4] not in ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]:
+            raise ValueError(f"The entity '{entity}' is not allowed.")
+
+        self.cm("__tmp_cm__", entity=entity)
+        if label == "ALL":
+            self.cmsel("ALL", entity=entity)
+        else:
+            self.cmsel("S", name=label, entity=entity)
+
+        mapping = {
+            "NODE": self.nplot,
+            "ELEM": self.eplot,
+            "KP": self.kplot,
+            "LINE": self.lplot,
+            "AREA": self.aplot,
+            "VOLU": self.vplot,
+        }
+        func = mapping[entity]
+
+        kwargs.setdefault("title", f"PyMAPDL CMPLOT")
+        output = func(**kwargs)
+
+        # returning to previous selection
+        self.cmsel("s", "__tmp_cm__", entity=entity)
+        return output

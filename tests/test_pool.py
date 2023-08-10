@@ -59,7 +59,7 @@ def pool():
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
-        mapdl_pool = LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
+        LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
 
 
 @skip_if_not_local

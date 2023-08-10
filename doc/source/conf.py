@@ -20,7 +20,11 @@ pyvista.set_error_output_file("errors.txt")
 pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
-pyvista.rcParams["window_size"] = np.array([1024, 768])
+try:
+    pyvista.global_theme.window_size = np.array([1024, 768])
+except AttributeError:
+    # for compatibility with pyvista < 0.40
+    pyvista.rcParams["window_size"] = np.array([1024, 768])
 
 # Save figures in specified directory
 pyvista.FIGURE_PATH = os.path.join(os.path.abspath("./images/"), "auto-generated/")

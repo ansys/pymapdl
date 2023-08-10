@@ -82,7 +82,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
-    from ansys.mapdl.core.mesh_grpc import MeshGrpc
     from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
@@ -250,6 +249,11 @@ class MapdlGrpc(_MapdlCore):
         The corresponding remote instance when MAPDL is launched through
         PyPIM. This instance will be deleted when calling
         :func:`Mapdl.exit <ansys.mapdl.core.Mapdl.exit>`.
+
+    file_type_for_plots: ["PNG", "TIFF", "PNG", "VRML", "TERM"], Optional
+        Change the default file type for plots using ``/SHOW``, by
+        default it is ``PNG``.
+
 
     Examples
     --------
@@ -866,6 +870,8 @@ class MapdlGrpc(_MapdlCore):
         # increase the number of variables allowed in POST26 to the maximum
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
+
+        self.show(self._file_type_for_plots)
 
     def _reset_cache(self):
         """Reset cached items."""
