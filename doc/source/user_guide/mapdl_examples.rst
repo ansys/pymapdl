@@ -21,6 +21,34 @@ This Ansys APDL script builds a bar and applies torque to it using
 SURF154 elements. This is a static analysis example.
 
 
+
+.. tab-set::
+
+  .. tab-item:: MAPDL
+
+    .. code:: apdl
+
+      !----------------------------------------
+      ! Input torque applied (moment)
+      ! Input radius, height, element size...
+      !----------------------------------------
+      TORQUE = 100
+      RADIUS = 2
+      H_TIP = 2
+      HEIGHT = 20
+      ELEMSIZE = 1
+      PI = acos(-1)
+      FORCE = 100/RADIUS
+      PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
+
+  .. tab-item:: PyMAPDL
+
+    ::
+
+      python -m venv .venv
+      source .venv/bin/activate
+
+
 Script initialization
 ~~~~~~~~~~~~~~~~~~~~~
 Here is the beginning of the MAPDL script:
