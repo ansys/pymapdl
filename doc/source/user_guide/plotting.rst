@@ -88,7 +88,7 @@ some element types, performs meshing, and then displays the mesh:
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`_
+    Element Plot from MAPDL using PyMAPDL and `PyVista <pyvista_docs_>`_
 
 
 Plotting non-interactively using MAPDL

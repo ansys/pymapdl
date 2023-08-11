@@ -243,7 +243,7 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'use_vtk' requires having PyVista installed."
                 )
             else:
                 self._use_vtk = False
@@ -1444,7 +1444,7 @@ class _MapdlCore(Commands):
                 import pyvista as pv
             else:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if "knum" in kwargs:
@@ -1574,7 +1574,7 @@ class _MapdlCore(Commands):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if vtk:
@@ -1676,7 +1676,7 @@ class _MapdlCore(Commands):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if vtk:
@@ -1813,7 +1813,7 @@ class _MapdlCore(Commands):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if vtk:
@@ -2100,7 +2100,7 @@ class _MapdlCore(Commands):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if vtk:
@@ -2189,7 +2189,7 @@ class _MapdlCore(Commands):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    f"Using the keyword argument 'vtk' requires having PyVista installed."
                 )
 
         if vtk:
