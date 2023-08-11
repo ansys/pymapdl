@@ -18,34 +18,6 @@ in a containerized environment such as Docker (or Singularity):
 When running MAPDL in a Docker container, you use your local Python installation to
 connect to this instance.
 
-.. graphviz::
-   :caption: Communication between PyMAPDL and MAPDL on docker.
-   :alt: Communication between PyMAPDL and MAPDL on docker.
-   :align: center
-
-   digraph "sphinx-ext-graphviz" {
-     size="8,6";
-     bgcolor="white"
-     rankdir="LR";
-     graph [
-       fontname="Verdana", fontsize="10", color="black",  fillcolor="white"
-     ];
-     node [
-       fontname="Verdana", fontsize="10", style="filled",  color="black", fillcolor="#ffc107"
-     ]
-     subgraph cluster_frontend {
-       label=< <B>Host</B> >;
-       Python;
-     subgraph cluster_backend {
-       label=< <B>Docker</B> >;
-       labelloc="b";
-       MAPDL;
-       }
-     }
-     Python -> MAPDL
-     MAPDL -> Python
-    }
-
 
 Requirements
 ============
