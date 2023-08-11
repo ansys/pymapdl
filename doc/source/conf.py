@@ -194,8 +194,8 @@ redirects = {
 linkcheck_exclude_documents = ["index"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
-    # "https://github.com/ansys/pymapdl/*",
-    "https://mapdl.docs.pyansys.com/*"
+    "https://github.com/ansys/pymapdl/*",
+    "https://mapdl.docs.pyansys.com/*",
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
