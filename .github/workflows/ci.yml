@@ -84,7 +84,7 @@ jobs:
     name: "Build documentation"
     runs-on: ubuntu-latest
     needs: doc-style
-    timeout-minutes: 35
+    timeout-minutes: 45
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
     env:
