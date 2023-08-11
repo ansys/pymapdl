@@ -21,19 +21,21 @@ connect to this instance.
 .. graphviz::
    :caption: Communication between PyMAPDL and MAPDL on docker.
 
-    digraph "sphinx-ext-graphviz" {
-      node [];
-      subgraph cluster_frontend {
-        label="*HOST*";
-        Python;
-      subgraph cluster_backend {
-        MAPDL;
-        label="*DOCKER*";
-        }
-      }
-      Python -> MAPDL
-      MAPDL -> Python
+   digraph "sphinx-ext-graphviz" {
+     node [];
+     subgraph cluster_frontend {
+       label=< <B>Host</B> >;
+       Python;
+     subgraph cluster_backend {
+       label=< <B>Docker</B> >;
+       labelloc="b";
+       MAPDL;
+       }
+     }
+     Python -> MAPDL
+     MAPDL -> Python
     }
+
 
 Requirements
 ============
