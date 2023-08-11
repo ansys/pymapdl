@@ -3022,7 +3022,7 @@ class MapdlGrpc(_MapdlCore):
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, _ = self._decompose_fname(fname)
         if self._local:
-            return self._file(filename=fname, **kwargs)
+            return self._file(filename=file_, extension=ext_, **kwargs)
         else:
             return self._file(filename=file_, extension=ext_)
 

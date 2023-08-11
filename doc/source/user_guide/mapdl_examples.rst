@@ -7,12 +7,13 @@ use the built-in :func:`convert_script()
 `ansys-mapdl-core <pymapdl_main_>`_ to convert an existing
 input file.
 
-.. code:: pycon
+.. code:: python
 
-    >>> from ansys.mapdl.core import convert_script
-    >>> inputfile = "ansys_inputfile.inp"
-    >>> pyscript = "pyscript.py"
-    >>> convert_script(inputfile, pyscript)
+    from ansys.mapdl.core import convert_script
+
+    inputfile = "ansys_inputfile.inp"
+    pyscript = "pyscript.py"
+    convert_script(inputfile, pyscript)
 
 
 Torsional load on a bar using SURF154 elements
@@ -514,28 +515,27 @@ the PyMAPDL interface.
 
   .. tab-item:: PyMAPDL
     
-      .. code:: pycon
+      .. code:: python
       
-      >>> from ansys.mapdl.core import launch_mapdl
-      >>> mapdl = launch_mapdl()
-      >>> mapdl.input("spot_weld.inp")
+      from ansys.mapdl.core import launch_mapdl
+      mapdl = launch_mapdl()
+      mapdl.input("spot_weld.inp")
 
 
 Here is the Python script using 
 `ansys-mapdl-reader <legacy_reader_docs_>`_ package to access the results
 after running the MAPDL analysis.
 
-.. code:: pycon
-    
-    >>> from ansys.mapdl import reader as pymapdl_reader
+.. code:: python
+    from ansys.mapdl import reader as pymapdl_reader
 
 Open the result file and plot the displacement of time step 3
 
-.. code:: pycon
+.. code:: python
 
-    >>> resultfile = os.path.join(mapdl.directory, "file.rst")
-    >>> result = pymapdl_reader.read_binary(resultfile)
-    >>> result.plot_nodal_solution(2)
+    resultfile = os.path.join(mapdl.directory, "file.rst")
+    result = pymapdl_reader.read_binary(resultfile)
+    result.plot_nodal_solution(2)
 
 .. figure:: ../images/spot_disp.png
     :width: 300pt
@@ -545,15 +545,15 @@ Open the result file and plot the displacement of time step 3
 Get the nodal and element component stress at time step 0. Plot the
 stress in the Z direction.
 
-.. code:: pycon
+.. code:: python
 
-    >>> nodenum, stress = result.nodal_stress(0)
-    >>> element_stress, elemnum, enode = result.element_stress(0)
+    nodenum, stress = result.nodal_stress(0)
+    element_stress, elemnum, enode = result.element_stress(0)
 
-    Plot the Z direction stress:
-    The stress at the contact element simulating the spot weld
+    # Plot the Z direction stress:
+    # The stress at the contact element simulating the spot weld
 
-    >>> result.plot_nodal_stress(0, "Sz")
+    result.plot_nodal_stress(0, "Sz")
 
 .. figure:: ../images/spot_sz.png
     :width: 300pt
@@ -562,10 +562,10 @@ stress in the Z direction.
 
 Get the principal nodal stress and plot the von Mises stress
 
-.. code:: pycon
+.. code:: python
 
-    >>> nnum, pstress = result.principal_nodal_stress(0)
-    >>> result.plot_principal_nodal_stress(0, "SEQV")
+    nnum, pstress = result.principal_nodal_stress(0)
+    result.plot_principal_nodal_stress(0, "SEQV")
 
 .. figure:: ../images/spot_seqv.png
     :width: 300pt
