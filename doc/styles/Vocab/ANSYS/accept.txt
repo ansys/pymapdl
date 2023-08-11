@@ -78,6 +78,7 @@ LDHI
 levl
 Linux
 MAPDL
+mapdl
 mater
 MATLAB
 mesher
