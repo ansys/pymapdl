@@ -71,7 +71,7 @@ extensions = [
     "jupyter_sphinx",
     "notfound.extension",
     "numpydoc",
-    'pyvista.ext.viewer_directive',
+    "pyvista.ext.viewer_directive",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
