@@ -20,9 +20,19 @@ connect to this instance.
 
 .. graphviz::
    :caption: Communication between PyMAPDL and MAPDL on docker.
+   :alt: Communication between PyMAPDL and MAPDL on docker.
+   :align: center
 
    digraph "sphinx-ext-graphviz" {
-     node [];
+     size="8,6";
+     bgcolor="white"
+     rankdir="LR";
+     graph [
+       fontname="Verdana", fontsize="10", color="black",  fillcolor="white"
+     ];
+     node [
+       fontname="Verdana", fontsize="10", style="filled",  color="black", fillcolor="#ffc107"
+     ]
      subgraph cluster_frontend {
        label=< <B>Host</B> >;
        Python;
