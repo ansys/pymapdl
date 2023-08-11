@@ -105,6 +105,8 @@ intersphinx_mapping = {
 suppress_warnings = ["label.*"]
 # supress_warnings = ["ref.option"]
 
+# Graphviz diagrams configuration
+graphviz_output_format = "png"
 
 # numpydoc configuration
 numpydoc_use_plots = True

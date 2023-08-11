@@ -19,8 +19,9 @@ When running MAPDL in a Docker container, you use your local Python installation
 connect to this instance.
 
 .. graphviz::
+   :caption: Communication between PyMAPDL and MAPDL on docker.
 
-    digraph {
+    digraph "sphinx-ext-graphviz" {
       node [];
       subgraph cluster_frontend {
         label="*HOST*";
