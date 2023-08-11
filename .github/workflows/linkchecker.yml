@@ -17,7 +17,6 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
-  DISPLAY: ':99.0'
 
 jobs:
   linkchecker:
@@ -84,11 +83,26 @@ jobs:
       - name: LinkCheck
         run: |
           make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
+          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
+      - name: "Substitute defective GIF"
+        run: |
+          cd doc/_build/html/examples/gallery_examples/00-mapdl-examples
+          cp ../../../../../source/images/dcb.gif ../../../_images/
+          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../_images/dcb.gif+g' composite_dcb.html
+          cd ../../../../../../
+  
       - name: "Display linkchecker results"
         run: |
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
+      - name: "Upload HTML Documentation"
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation-html
+          path: doc/_build/html
+          retention-days: 7
+          
       - name: "Upload artifacts"
         uses: actions/upload-artifact@v3
         with:
