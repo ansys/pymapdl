@@ -196,7 +196,8 @@ linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
-    "https://answers.microsoft.com/en-us/windows/forum/all/*",
+    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
+    "https://ansyshelp.ansys.com/*",  # behind payfirewall
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
