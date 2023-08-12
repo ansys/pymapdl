@@ -83,7 +83,6 @@ jobs:
       - name: LinkCheck
         run: |
           xvfb-run make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Substitute defective GIF"
         run: |
@@ -93,11 +92,13 @@ jobs:
           cd ../../../../../../
   
       - name: "Display linkchecker results"
+        if: always()
         run: |
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: documentation-html
           path: doc/_build/html
@@ -105,6 +106,7 @@ jobs:
           
       - name: "Upload artifacts"
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: output
           path: doc/**/output.txt
