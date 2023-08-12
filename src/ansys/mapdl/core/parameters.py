@@ -14,7 +14,6 @@ except ModuleNotFoundError:  # pragma: no cover
 
 import numpy as np
 
-from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import _MapdlCore
 from ansys.mapdl.core.misc import supress_logging
@@ -78,7 +77,7 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl: Mapdl):
+    def __init__(self, mapdl: _MapdlCore):
         """Parameters manager
 
         Class to help to manage parameters in an
