@@ -120,8 +120,7 @@
 .. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/version/dev/
 .. _pymapdl_discussions: https://github.com/pyansys/PyMAPDL/discussions
 .. _pymapdl_tests: https://github.com/pyansys/pymapdl/tree/main/tests
-.. _pymapdl_test_math: https://github.com/pyansys/pymapdl/blob/main/tests/test_math.py
-.. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/version/dev/user_guide/math.html
+.. _pymapdl_test_component: https://github.com/pyansys/pymapdl/blob/main/tests/test_component.py
 .. _mapdl_fixture: https://github.com/pyansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 .. _pymapdl_examples: https://github.com/pyansys/pymapdl/tree/main/examples
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/pyansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
