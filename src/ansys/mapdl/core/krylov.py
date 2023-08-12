@@ -47,6 +47,16 @@ class KrylovSolver:
     """
 
     def __init__(self, mapdl):
+        """Krylov analysis
+
+        Abstract mapdl krylov class.  Created from an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
         if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
             raise TypeError("``mapdl`` must be a MapdlGrpc instance")
         self._mapdl_weakref = weakref.ref(mapdl)

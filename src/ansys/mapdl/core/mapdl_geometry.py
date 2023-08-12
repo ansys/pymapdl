@@ -132,6 +132,16 @@ class Geometry:
     """
 
     def __init__(self, mapdl):
+        """Geometry manager
+
+        Class to help to manage geometry representations in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
         from ansys.mapdl.core.mapdl import _MapdlCore
 
         if not isinstance(mapdl, _MapdlCore):
@@ -1493,6 +1503,19 @@ class LegacyGeometry(Geometry):
     This class contains advanced methods for extending geometry building and
     selection within MAPDL.
     """
+
+    def __init__(self, mapdl):
+        """Legacy geometry manager
+
+        Class to help to manage geometry representations in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
         """Keypoint coordinates"""
