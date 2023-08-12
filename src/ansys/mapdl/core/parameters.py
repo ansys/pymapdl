@@ -77,7 +77,7 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
         """Parameters manager
 
         Class to help to manage parameters in an

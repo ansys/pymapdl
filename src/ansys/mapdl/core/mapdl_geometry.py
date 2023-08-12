@@ -8,7 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pyvista as pv
 
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
 from ansys.mapdl.core.errors import ComponentNoData, VersionError
 
 if _HAS_PYVISTA:
@@ -131,7 +131,7 @@ class Geometry:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
         """Geometry manager
 
         Class to help to manage geometry representations in an
@@ -1504,7 +1504,7 @@ class LegacyGeometry(Geometry):
     selection within MAPDL.
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
         """Legacy geometry manager
 
         Class to help to manage geometry representations in an

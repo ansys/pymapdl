@@ -3,9 +3,8 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-from .mapdl_grpc import MapdlGrpc
 
 
 class KrylovSolver:
@@ -46,7 +45,7 @@ class KrylovSolver:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
         """Krylov analysis
 
         Abstract mapdl krylov class.  Created from an
@@ -57,8 +56,8 @@ class KrylovSolver:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
-            raise TypeError("``mapdl`` must be a MapdlGrpc instance")
+        if not isinstance(mapdl, Mapdl):  # pragma: no cover
+            raise TypeError("``mapdl`` must be an Mapdl class instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.mm = self._mapdl.math
         self.jobname = self._mapdl.jobname
