@@ -171,4 +171,4 @@ MAPDL-supported operative systems
 You can obtain the list of MAPDL-supported operative systems on the
 `Platform Support <ansys_platform_support_>`_ page of the Ansys website.
 
-Or, you can `download <ansys_current_supported_os_>` the list for the current release. 
+Or, you can `download <ansys_current_supported_os_>`_ the list for the current release. 
