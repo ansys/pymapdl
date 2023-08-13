@@ -105,6 +105,8 @@ intersphinx_mapping = {
 suppress_warnings = ["label.*"]
 # supress_warnings = ["ref.option"]
 
+# Graphviz diagrams configuration
+graphviz_output_format = "png"
 
 # numpydoc configuration
 numpydoc_use_plots = True
@@ -284,6 +286,8 @@ htmlhelp_basename = "pymapdldoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 latex_elements = {}
+
+latex_engine = "xelatex"
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
