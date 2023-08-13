@@ -24,7 +24,7 @@ If you want to build your own docker image, visit the following link
 Develop on a remote container
 =============================
 
-.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email |pyansys_contact|.
+.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email `PyAnsys Core team <pyansys_core_>`_.
 
 To use a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_, you must install:
 
@@ -111,5 +111,5 @@ You can launch a container which all the required tools and start to work in cou
 This is an easy way to get started with PyMAPDL development.
 
 .. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
-   If you are an Ansys employee and wants use this development method, please email |pyansys_contact|.
+   If you are an Ansys employee and wants use this development method, please email `PyAnsys Core team <pyansys_core_>`_.
 

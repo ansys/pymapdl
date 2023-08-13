@@ -27,8 +27,9 @@ installer options can change, see the following figure for reference.
 If you want to avoid having to install MAPDL locally, you can use Docker.
 This is especially convenient if you are using a non-supported platform such
 as MacOS.
+For more information, see :ref:`ref_pymapdl_and_macos`.
 
-You can also download and try `Ansys Student Versions <ansys_student_version_>`_.
+You can also download and try the `Ansys Student Versions <ansys_student_version_>`_.
 A Student Version is valid during a calendar year with limited capabilities. For
 example, there is a limit on the number of nodes and elements.
 
@@ -98,6 +99,8 @@ port 50005 with:
     /usr/ansys_inc/v211/ansys/bin/ansys211 -port 50005 -grpc
 
 
+.. _connect_grpc_madpl_session:
+
 Connect to a gRPC MAPDL session
 -------------------------------
 
@@ -136,3 +139,7 @@ If you have MAPDL installed on your local host, you
 can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to both start and connect to MAPDL.
 
 If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`.
+
+If you are connecting to an MAPDL Docker image, the procedure is the same.
+Just make sure that you specify the mapped port instead of the internal Docker image port.
+For more information, see :ref:`pymapdl_docker`.
