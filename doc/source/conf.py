@@ -23,6 +23,18 @@ pyvista.OFF_SCREEN = True
 # must be less than or equal to the XVFB window size
 try:
     pyvista.global_theme.window_size = np.array([1024, 768])
+    # Manage errors
+    pyvista.set_error_output_file("errors.txt")
+    # Ensure that offscreen rendering is used for docs generation
+    pyvista.OFF_SCREEN = True  # Not necessary - simply an insurance policy
+    # Preferred plotting style for documentation
+    pyvista.set_plot_theme("document")
+    pyvista.global_theme.font.size = 22
+    pyvista.global_theme.font.label_size = 22
+    pyvista.global_theme.font.title_size = 22
+    pyvista.global_theme.return_cpos = False
+    pyvista.set_jupyter_backend(None)
+
 except AttributeError:
     # for compatibility with pyvista < 0.40
     pyvista.rcParams["window_size"] = np.array([1024, 768])
@@ -31,10 +43,6 @@ except AttributeError:
 pyvista.FIGURE_PATH = os.path.join(os.path.abspath("./images/"), "auto-generated/")
 if not os.path.exists(pyvista.FIGURE_PATH):
     os.makedirs(pyvista.FIGURE_PATH)
-
-# necessary when building the sphinx gallery
-pyvista.BUILDING_GALLERY = True
-pymapdl.BUILDING_GALLERY = True
 
 # suppress annoying matplotlib bug
 warnings.filterwarnings(
@@ -231,8 +239,9 @@ sphinx_gallery_conf = {
     # Modules for which function level galleries are created.  In
     "doc_module": "ansys-mapdl-core",
     "image_scrapers": (DynamicScraper(), "matplotlib"),
-    "ignore_pattern": "flycheck*",
-    "thumbnail_size": (350, 350),
+    # "ignore_pattern": "flycheck*",
+    # "thumbnail_size": (350, 350),
+    "reset_modules_order": "both",
 }
 # ---
 
@@ -277,6 +286,10 @@ html_context = {
     "doc_path": DOC_PATH,
 }
 html_show_sourcelink = False
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = False
+
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
