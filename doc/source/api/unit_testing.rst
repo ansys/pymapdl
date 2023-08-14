@@ -137,7 +137,7 @@ Example
 
 The `test_component.py <pymapdl_test_component_>`_ file contains
 the unit tests and integration tests of the
-`ansys.math.core.ComponentManager module <ansys.mapdl.core.component.ComponentManager>`_.
+:class:`ComponentManager <ansys.mapdl.core.component.ComponentManager>`.
 These are just some of the many tests that you can find in the
 `test directory <pymapdl_tests_>`_.
 

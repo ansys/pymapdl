@@ -8,8 +8,8 @@
 .. _pyansys_core: pyansys.core@ansys.com
 
 .. #Other projects
-.. _dpf_core_gh: https://github.com/ansys/DPF-Core
-.. _dpf_post_gh: https://github.com/ansys/DPF-Post
+.. _dpf_core_gh: https://github.com/ansys/pydpf-core
+.. _dpf_post_gh: https://github.com/ansys/pydpf-post
 .. _dpf_core_docs: https://dpf.docs.pyansys.com
 .. _dpf_post_docs: https://post.docs.pyansys.com
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
