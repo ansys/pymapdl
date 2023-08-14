@@ -1881,7 +1881,7 @@ class _MapdlCore(Commands):
 
                 elif isinstance(color_areas, str):
                     # A color is provided as a string
-                    colors = np.atleast_2d(np.array(to_rgba(color_areas)))
+                    colors = np.atleast_2d(to_rgba(color_areas))
 
                 else:
                     if len(anums) != len(color_areas):
@@ -1893,7 +1893,7 @@ class _MapdlCore(Commands):
                         )
 
                     if isinstance(color_areas[0], str):
-                        colors = np.array([to_rgba(each) for each in color_areas])
+                        colors = [to_rgba(each) for each in color_areas]
                     else:
                         colors = color_areas
 
@@ -1904,7 +1904,7 @@ class _MapdlCore(Commands):
                         return colors[0]
                     return colors[each - 1]
 
-                colors_map = np.array(map(mapper, surf["entity_num"]))
+                colors_map = list(map(mapper, anums))
                 for surf, color in zip(surfs, colors_map):
                     meshes.append({"mesh": surf, "color": color})
 
