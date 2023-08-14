@@ -1324,13 +1324,13 @@ class Geometry:
             self._mapdl.cm("__temp_volu__", "volu")
             self._mapdl.cm("__temp_area__", "area")
 
-        area_num = surf["entity_num"]
+        area_num = surf["entity_num"].astype(int)
 
         for each_volu in self.vnum:
             self._mapdl.vsel("S", vmin=each_volu)
             self._mapdl.aslv("S")
             unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-            unstruct.entity_num = each_volu
+            unstruct.entity_num = int(each_volu)
             volumes_.append(unstruct)
 
         self._mapdl.cmsel("S", "__temp_volu__")
