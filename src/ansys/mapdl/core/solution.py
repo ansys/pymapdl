@@ -23,7 +23,7 @@ class Solution:
     1.0
     """
 
-    def __init__(self, mapdl: Mapdl):
+    def __init__(self, mapdl: _MapdlCore):
         """Solution manager
 
         Class to help to manage the solution configuration in an
