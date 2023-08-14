@@ -110,7 +110,10 @@ class Component(tuple):
 
     def __init__(self, *args, **kwargs):
         """Component object"""
-        super().__init__(*args, **kwargs)
+        # Using tuple init because using object.__init__
+        # For more information visit:
+        # https://stackoverflow.com/questions/47627298/how-is-tuple-init-different-from-super-init-in-a-subclass-of-tuple
+        tuple.__init__(*args, **kwargs)
 
     def __new__(
         cls,
