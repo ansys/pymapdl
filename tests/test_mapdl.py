@@ -2087,3 +2087,37 @@ def test_plots_no_vtk(mapdl):
     mapdl.vplot(vtk=False)
     mapdl.nplot(vtk=False)
     mapdl.eplot(vtk=False)
+
+
+def test_exited(mapdl):
+    assert mapdl.exited == mapdl._exited
+    assert isinstance(mapdl.exited, bool)
+
+
+def test_exiting(mapdl):
+    assert mapdl.exiting == mapdl._exiting
+    assert isinstance(mapdl.exiting, bool)
+
+
+def test_check_status(mapdl):
+    assert mapdl.check_status == "OK"
+
+    mapdl._exited = True
+    assert mapdl.exited
+    assert mapdl.check_status == "exited"
+    mapdl._exited = False
+
+    mapdl._exiting = True
+    assert mapdl.exiting
+    assert mapdl.check_status == "exiting"
+    mapdl._exiting = False
+
+
+def test_ip(mapdl):
+    assert mapdl._ip == mapdl.ip
+    assert isinstance(mapdl.ip, str)
+
+
+def test_port(mapdl):
+    assert mapdl.port == mapdl._port
+    assert isinstance(mapdl.port, int)
