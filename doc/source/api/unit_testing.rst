@@ -135,8 +135,11 @@ Example
 
 .. TO BE MODIFIED
 
-The `test_component.py <pymapdl_test_component_>`_ file contains the unit tests and integration tests of the `ansys.math.core.ComponentManager module <ansys.mapdl.core.component.ComponentManager>`_. These are just some of the many
-tests that you can find in the `test directory <pymapdl_tests_>`_.
+The `test_component.py <pymapdl_test_component_>`_ file contains
+the unit tests and integration tests of the
+`ansys.math.core.ComponentManager module <ansys.mapdl.core.component.ComponentManager>`_.
+These are just some of the many tests that you can find in the
+`test directory <pymapdl_tests_>`_.
 
 Here are some examples of how you use ``pytest``:
 
