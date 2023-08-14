@@ -99,6 +99,11 @@ doc = [
     "sphinxemoji==0.2.0",
     "sphinx-reredirects==0.1.2",
     "vtk==9.2.6",
+    "sphinx-toolbox"
+    "sphinxcontrib-asciinema"
+    "sphinxcontrib-websupport"
+    "typed-ast"
+    "pydata-sphinx-theme"
 ]
 
 [tool.flit.module]
