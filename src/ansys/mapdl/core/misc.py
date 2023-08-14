@@ -1182,7 +1182,7 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
     return decorator
 
 
-def wrap_point_SEL(entity="node"):
+def allow_iterables_vmin(entity="node"):
     def decorator(original_sel_func):
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
