@@ -14,7 +14,7 @@ on:
 
 env:
   PROJECT_NAME: 'PyMAPDL'
-  MAIN_PYTHON_VERSION: '3.9'
+  MAIN_PYTHON_VERSION: '3.10'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
@@ -84,7 +84,7 @@ jobs:
     name: "Build documentation"
     runs-on: ubuntu-latest
     needs: doc-style
-    timeout-minutes: 35
+    timeout-minutes: 45
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
     env:
@@ -105,7 +105,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           sudo apt update 
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex
 
       - name: "Test virtual framebuffer"
         run: |
