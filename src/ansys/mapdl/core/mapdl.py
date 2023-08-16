@@ -4117,7 +4117,7 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            point = mesh.entity[id_]
+            point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
