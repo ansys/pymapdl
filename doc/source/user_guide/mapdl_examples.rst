@@ -475,6 +475,7 @@ commands:
 .. code:: python
 
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
     mapdl.input("spot_weld.inp")
 
