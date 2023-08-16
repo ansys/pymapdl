@@ -21,6 +21,12 @@ Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
 
+This interface also works with a Docker image.
+If you have the applicable license, you can install and use 
+MAPDL within Docker, enabling you
+to run and solve even on officially unsupported platforms like Mac
+OS. For more information, see :ref:`pymapdl_docker`.
+
 
 Legacy interfaces
 =================
@@ -79,9 +85,9 @@ it is recommended exploring alternative interfaces available in PyMAPDL.
 
 PyMAPDL maintainers greatly appreciate your support and understanding
 during this transition.
-If you have any questions or concerns regarding this change, please
-feel free to reach out to the support team in
-`PyMAPDL discussions <pymapdl_discussions_>`_ or by email |pyansys_contact|.
+If you have any questions or concerns regarding this change,
+email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_ or
+post them on the `PyMAPDL Discussions <https://github.com/ansys/pymapdl>`_ page.
 
 Console interface
 -----------------
@@ -92,7 +98,6 @@ and from the Ansys instance.
 
 Because console-specific support is to be depreciated at some point, you should
 shift to a modern version of Ansys to continue to use PyMAPDL.
-
 
 
 Compatibility between MAPDL and interfaces
@@ -158,3 +163,12 @@ Where:
 * |:heavy_check_mark:| means that the interface is supported and recommended.
 * |:heavy_minus_sign:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
 * |:x:| means that the interface is not supported.
+
+
+MAPDL-supported operative systems
+=================================
+
+You can obtain the list of MAPDL-supported operative systems on the
+`Platform Support <ansys_platform_support_>`_ page of the Ansys website.
+
+Or, you can `download <ansys_current_supported_os_>`_ the list for the current release. 

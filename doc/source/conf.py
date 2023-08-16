@@ -97,7 +97,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/docs/", None),
     "pyvista": ("https://docs.pyvista.org/version/stable/", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
-    "pypim": ("https://pypim.docs.pyansys.com/", None),
+    "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
@@ -105,6 +105,8 @@ intersphinx_mapping = {
 suppress_warnings = ["label.*"]
 # supress_warnings = ["ref.option"]
 
+# Graphviz diagrams configuration
+graphviz_output_format = "png"
 
 # numpydoc configuration
 numpydoc_use_plots = True
@@ -191,8 +193,16 @@ redirects = {
 }
 
 # Broken anchors:
+linkcheck_exclude_documents = ["index"]
+linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
+linkcheck_ignore = [
+    "https://github.com/ansys/pymapdl/*",
+    "https://mapdl.docs.pyansys.com/*",
+    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
+    "https://ansyshelp.ansys.com/*",  # behind payfirewall
+]
 linkcheck_anchors_ignore = [
-    # these anchors are picked by linkcheck as broken but thye are not.
+    # these anchors are picked by linkcheck as broken but they are not.
     "firewall-rules",
     "pyvista.Plotter",
     "pyvista.UnstructuredGrid",
@@ -284,6 +294,8 @@ htmlhelp_basename = "pymapdldoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 latex_elements = {}
+
+latex_engine = "xelatex"
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,

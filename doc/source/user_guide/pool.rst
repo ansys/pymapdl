@@ -1,3 +1,5 @@
+.. _ref_pymapdl_pool:
+
 Create a pool of MAPDL instances
 ================================
 PyMAPDL contains the :class:`MapdlLocalPool
