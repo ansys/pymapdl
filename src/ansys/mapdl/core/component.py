@@ -17,8 +17,8 @@ import weakref
 import numpy as np
 from numpy.typing import NDArray
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
-from ansys.mapdl.core.mapdl import _MapdlCore
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
@@ -108,6 +108,13 @@ class Component(tuple):
     [1, 2, 3]
     """
 
+    def __init__(self, *args, **kwargs):
+        """Component object"""
+        # Using tuple init because using object.__init__
+        # For more information visit:
+        # https://stackoverflow.com/questions/47627298/how-is-tuple-init-different-from-super-init-in-a-subclass-of-tuple
+        tuple.__init__(*args, **kwargs)
+
     def __new__(
         cls,
         type_: ENTITIES_TYP,
@@ -195,11 +202,23 @@ class ComponentManager:
     Component(type='KP', items=(1, 2, 3))
     """
 
-    def __init__(self, mapdl: _MapdlCore) -> None:
+    def __init__(self, mapdl: Mapdl) -> None:
+        """Component Manager.
+
+        Component manager of an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        from ansys.mapdl.core.mapdl import _MapdlCore
+
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
 
-        self._mapdl_weakref: weakref.ReferenceType[_MapdlCore] = weakref.ref(mapdl)
+        self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
         self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
@@ -230,7 +249,7 @@ class ComponentManager:
         self._default_entity_warning = value
 
     @property
-    def _mapdl(self) -> _MapdlCore:
+    def _mapdl(self) -> Mapdl:
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
