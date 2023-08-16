@@ -44,6 +44,10 @@ pyvista.FIGURE_PATH = os.path.join(os.path.abspath("./images/"), "auto-generated
 if not os.path.exists(pyvista.FIGURE_PATH):
     os.makedirs(pyvista.FIGURE_PATH)
 
+# necessary when building the sphinx gallery
+pyvista.BUILDING_GALLERY = True
+pymapdl.BUILDING_GALLERY = True
+
 # suppress annoying matplotlib bug
 warnings.filterwarnings(
     "ignore",
