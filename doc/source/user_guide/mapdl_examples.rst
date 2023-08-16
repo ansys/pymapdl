@@ -517,9 +517,9 @@ the PyMAPDL interface.
     
       .. code:: python
       
-      from ansys.mapdl.core import launch_mapdl
-      mapdl = launch_mapdl()
-      mapdl.input("spot_weld.inp")
+          from ansys.mapdl.core import launch_mapdl
+          mapdl = launch_mapdl()
+          mapdl.input("spot_weld.inp")
 
 
 Here is the Python script using 
@@ -527,6 +527,7 @@ Here is the Python script using
 after running the MAPDL analysis.
 
 .. code:: python
+
     from ansys.mapdl import reader as pymapdl_reader
 
 Open the result file and plot the displacement of time step 3
