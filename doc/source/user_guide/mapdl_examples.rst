@@ -22,47 +22,6 @@ This Ansys APDL script builds a bar and applies torque to it using
 SURF154 elements. This is a static analysis example.
 
 
-.. tab-set::
-
-  .. tab-item:: APDL
-
-    .. code:: apdl
-
-      !----------------------------------------
-      ! Input torque applied (moment)
-      ! Input radius, height, element size...
-      !----------------------------------------
-      TORQUE = 100
-      RADIUS = 2
-      H_TIP = 2
-      HEIGHT = 20
-      ELEMSIZE = 1
-      PI = acos(-1)
-      FORCE = 100/RADIUS
-      PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
-
-  .. tab-item:: PyMAPDL
-
-    .. code:: python
-
-      import os
-      import numpy as np
-      from ansys.mapdl.core import launch_mapdl
-  
-      # start Ansys in the current working directory with default jobname "file"
-      mapdl = launch_mapdl(run_location=os.getcwd())
-  
-      # define cylinder and mesh parameters
-      torque = 100
-      radius = 2
-      h_tip = 2
-      height = 20
-      elemsize = 0.5
-      pi = np.arccos(-1)
-      force = 100 / radius
-      pressure = force / (h_tip * 2 * np.pi * radius)
-
-
 Script initialization
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -372,159 +331,156 @@ thin sheets of metal. Here, the full input file is simply run using
 the PyMAPDL interface.
 
 
-.. tab-set::
+.. code:: apdl
 
-  .. tab-item:: APDL
-
-      .. code:: apdl
-      
-          !----------------------------------------
-          ! Example problem for demonstrating 
-          ! Spotweld technology 
-          !----------------------------------------
-          ! 
-          !----------------------------------------
-          ! Originated in 9.0 JJDoyle 2004/09/01
-          !----------------------------------------
-          /prep7
-          /num,0
-          /pnum,area,1
-          
-          k,1,2,10,
-          k,2,10,10
-          k,3,10,0.15
-          k,4,14,0.15
-          !
-          l,1,2
-          l,2,3
-          l,3,4
-          lfillt,1,2,3
-          lfillt,2,3,2
-          !
-          k,9,,
-          k,10,11,
-          k,11,15,
-          l,9,10
-          l,10,11
-          
-          k,12,,10
-          lsel,s,,,6,7
-          AROTAT,all,,,,,,9,12,12,1,
-          
-          lsel,s,,,1,5
-          AROTAT,all,,,,,,9,12,12,1,
-          areverse,1
-          areverse,2
-          
-          asel,s,,,3,7
-          ARSYM,Y,all, , , ,0,0 
-          allsel
-          
-          !********
-          !define weld location with hardpoint
-          !********
-          HPTCREATE,AREA,7,0,COORD,12.9,0.15,-1.36,  
-          
-          /view,1,1,1,1
-          gplo
-          !
-          et,1,181
-          r,1,0.15
-          r,2,0.1
-          !
-          mp,ex,1,30e6
-          mp,prxy,1,0.3
-          !
-          esize,0.25
-          real,1
-          amesh,1
-          amesh,2
-          real,2
-          asel,s,,,3,12
-          amesh,all
-          !
-          lsel,s,,,1,9
-          lsel,a,,,12,17
-          lsel,a,,,26,38,3
-          lsel,a,,,24,36,3
-          nsll,s,1
-          wpstyle,0.05,0.1,-1,1,0.003,0,0,,5  
-          WPSTYLE,,,,,,,,1
-          wpro,,-90.000000,
-          CSWPLA,11,1,1,1, 
-          csys,11 
-          nrotat,all
-          d,all,uy
-          d,all,rotx
-          
-          csys,0
-          
-          lsel,s,,,23
-          nsll,s,1
-          d,all,uz
-          
-          lsel,s,,,17
-          nsll,s,1
-          d,all,uz,4
-          
-          ALLSEL
-          /view,1,1,1,1
-          /eshape,1
-          ksel,s,,,33
-          nslk,s,1
-          *get,sw_node,node,,num,max
-          
-          /solu
-          allsel
-          nlgeom,on
-          time,4
-          nsubst,10,25,5
-          outres,all,all
-          fini
-          
-          !------------------------------------
-          !build flex spotweld with BEAM188, run the solution,
-          !and post process results
-          !------------------------------------
-          fini
-          allsel
-          /prep7
-          mp,ex,2,28e6
-          mp,prxy,2,0.3
-          !
-          SECTYPE,2,beam,csolid
-          SECDATA,0.25
-          !
-          et,2,188
-          type,2
-          mat,2
-          secnum,2
-          
-          SWGEN,sweld1,0.50,7,2,sw_node,,	
-          SWADD,sweld1,,12
-          
-          /solu
-          allsel
-          nlgeom,on
-          time,4
-          nsubst,10,25,5
-          outres,all,all
-          solve
-          FINISH
-
-
-  .. tab-item:: PyMAPDL
+    !----------------------------------------
+    ! Example problem for demonstrating 
+    ! Spotweld technology 
+    !----------------------------------------
+    ! 
+    !----------------------------------------
+    ! Originated in 9.0 JJDoyle 2004/09/01
+    !----------------------------------------
+    /prep7
+    /num,0
+    /pnum,area,1
     
-      .. code:: python
-      
-          from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl()
-          mapdl.input("spot_weld.inp")
+    k,1,2,10,
+    k,2,10,10
+    k,3,10,0.15
+    k,4,14,0.15
+    !
+    l,1,2
+    l,2,3
+    l,3,4
+    lfillt,1,2,3
+    lfillt,2,3,2
+    !
+    k,9,,
+    k,10,11,
+    k,11,15,
+    l,9,10
+    l,10,11
+    
+    k,12,,10
+    lsel,s,,,6,7
+    AROTAT,all,,,,,,9,12,12,1,
+    
+    lsel,s,,,1,5
+    AROTAT,all,,,,,,9,12,12,1,
+    areverse,1
+    areverse,2
+    
+    asel,s,,,3,7
+    ARSYM,Y,all, , , ,0,0 
+    allsel
+    
+    !********
+    !define weld location with hardpoint
+    !********
+    HPTCREATE,AREA,7,0,COORD,12.9,0.15,-1.36,  
+    
+    /view,1,1,1,1
+    gplo
+    !
+    et,1,181
+    r,1,0.15
+    r,2,0.1
+    !
+    mp,ex,1,30e6
+    mp,prxy,1,0.3
+    !
+    esize,0.25
+    real,1
+    amesh,1
+    amesh,2
+    real,2
+    asel,s,,,3,12
+    amesh,all
+    !
+    lsel,s,,,1,9
+    lsel,a,,,12,17
+    lsel,a,,,26,38,3
+    lsel,a,,,24,36,3
+    nsll,s,1
+    wpstyle,0.05,0.1,-1,1,0.003,0,0,,5  
+    WPSTYLE,,,,,,,,1
+    wpro,,-90.000000,
+    CSWPLA,11,1,1,1, 
+    csys,11 
+    nrotat,all
+    d,all,uy
+    d,all,rotx
+    
+    csys,0
+    
+    lsel,s,,,23
+    nsll,s,1
+    d,all,uz
+    
+    lsel,s,,,17
+    nsll,s,1
+    d,all,uz,4
+    
+    ALLSEL
+    /view,1,1,1,1
+    /eshape,1
+    ksel,s,,,33
+    nslk,s,1
+    *get,sw_node,node,,num,max
+    
+    /solu
+    allsel
+    nlgeom,on
+    time,4
+    nsubst,10,25,5
+    outres,all,all
+    fini
+    
+    !------------------------------------
+    !build flex spotweld with BEAM188, run the solution,
+    !and post process results
+    !------------------------------------
+    fini
+    allsel
+    /prep7
+    mp,ex,2,28e6
+    mp,prxy,2,0.3
+    !
+    SECTYPE,2,beam,csolid
+    SECDATA,0.25
+    !
+    et,2,188
+    type,2
+    mat,2
+    secnum,2
+    
+    SWGEN,sweld1,0.50,7,2,sw_node,,	
+    SWADD,sweld1,,12
+    
+    /solu
+    allsel
+    nlgeom,on
+    time,4
+    nsubst,10,25,5
+    outres,all,all
+    solve
+    FINISH
 
+
+Using the following commands, you can directly use an APDL
+script within a PyMAPDL session with the following
+commands: 
+    
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+    mapdl = launch_mapdl()
+    mapdl.input("spot_weld.inp")
 
 Here is the Python script using 
-`ansys-mapdl-reader <legacy_reader_docs_>`_ package to access the results
-after running the MAPDL analysis.
+`ansys-mapdl-reader <legacy_reader_docs_>`_ package to access
+the results after running the MAPDL analysis.
 
 .. code:: python
 
