@@ -70,7 +70,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import general_plotter
+    from ansys.mapdl.core.plotting import general_plotter, get_meshes_from_plotter
 
 from ansys.mapdl.core.post import PostProcessing
 
@@ -1717,9 +1717,15 @@ class _MapdlCore(Commands):
                     show_lines=False,
                     **kwargs,
                 )
-                pl.mesh.cell_data["entity_num"] = int(each_volu)
 
-                meshes.append({"mesh": pl.mesh})
+                meshes_ = get_meshes_from_plotter(pl)
+
+                for each_mesh in meshes_:
+                    each_mesh.cell_data["entity_num"] = int(each_volu)
+
+                meshes.extend(meshes_)
+
+            meshes = [{"mesh": meshes}]
 
             self.cmsel("S", cm_name_area, "AREA", mute=True)
             self.cmsel("S", cm_name_volu, "VOLU", mute=True)
@@ -4124,28 +4130,37 @@ class _MapdlCore(Commands):
                 pl.remove_actor("_picked_entities")
 
         def callback_mesh(mesh):
-            mesh_id = int(np.unique(mesh.cell_data["entity_num"])[0])
+            def get_entnum(mesh):
+                return int(np.unique(mesh.cell_data["entity_num"])[0])
+
+            mesh_id = get_entnum(mesh)
+
+            # Getting meshes with that entity_num.
+            meshes = get_meshes_from_plotter(pl)
+
+            meshes = [each for each in meshes if get_entnum(each) == mesh_id]
 
             if not pl._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if mesh_id not in picked_entities:
                     picked_entities.append(mesh_id)
-
-                    pl.add_mesh(
-                        mesh,
-                        color="red",
-                        point_size=10,
-                        name=f"_picked_entity_{mesh_id}",
-                        pickable=False,
-                        reset_camera=False,
-                    )
+                    for i, each in enumerate(meshes):
+                        pl.add_mesh(
+                            each,
+                            color="red",
+                            point_size=10,
+                            name=f"_picked_entity_{mesh_id}_{i}",
+                            pickable=False,
+                            reset_camera=False,
+                        )
 
             else:
                 # Updating MAPDL entity mapping
                 if mesh_id in picked_entities:
                     picked_entities.remove(mesh_id)
 
-                    pl.remove_actor(f"_picked_entity_{mesh_id}")
+                    for i, each in enumerate(meshes):
+                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
 
             # Removing only-first time actors
             pl.remove_actor("title")
