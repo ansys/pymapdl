@@ -452,8 +452,6 @@ camera_pos = disp.animate(
 # Exit MAPDL
 try:
     os.remove(rst_path)
-except FileNotFoundError:
-    pass
-except PermissionError:
+except (FileNotFoundError, PermissionError) as e:
     pass
 mapdl.exit()
