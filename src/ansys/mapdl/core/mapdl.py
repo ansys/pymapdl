@@ -1881,7 +1881,6 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            # surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
             surfs = self.geometry.get_areas(return_as_list=True)
             meshes = []
             labels = []
@@ -1931,7 +1930,9 @@ class _MapdlCore(Commands):
                         colors = color_areas
 
                 # Creating a mapping of colors
-                ent_num = list(set(surf["entity_num"]))
+                ent_num = []
+                for each_surf in surfs:
+                    ent_num.append(int(np.unique(each_surf["entity_num"])[0]))
                 ent_num.sort()
 
                 # expand color array until matching the number of areas.
@@ -1945,8 +1946,6 @@ class _MapdlCore(Commands):
                         # for the case colors comes from string.
                         return colors[0]
                     return color_dict[each]
-
-                # colors_map = list(map(mapper, anums))
 
                 for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
