@@ -13,9 +13,8 @@ To help you resolve any problems that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
 
-*****************
 Debug in PyMAPDL
-*****************
+----------------
 
 If you are having trouble with PyMAPDL, you can record some internal
 logs into a file using a logger. 
@@ -45,9 +44,8 @@ If you believe you have found a bug, open an issue on the
 
 .. _debugging_launch_mapdl:
 
-****************
 Launching issues
-****************
+----------------
 
 There are several issues that can cause MAPDL not to launch, including:
 

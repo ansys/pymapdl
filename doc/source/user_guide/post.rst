@@ -26,7 +26,7 @@ streamed back to the client for review or visualization.
 
 
 Enriched command output
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands output
 a string object that can be parsed to obtain specific data from it.
 
@@ -112,7 +112,7 @@ Here's a simple example that demonstrates usage:
     1      2.0
 
 Examples
-~~~~~~~~
+--------
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 

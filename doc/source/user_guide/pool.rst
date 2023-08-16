@@ -42,7 +42,7 @@ creating the pool.
 
 
 Run a set of input files
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 You can use the pool to run a set of pre-generated input files using the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` method. For
 example, this code would run the first set of 20 verification files:
@@ -57,7 +57,7 @@ example, this code would run the first set of 20 verification files:
 
 
 Run a user function
-~~~~~~~~~~~~~~~~~~~
+-------------------
 You can use the pool to run a custom user function on each MAPDL
 instance over a set of inputs. As in the example for the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` function,
@@ -94,5 +94,5 @@ output from MAPDL.
 
 
 API description
-~~~~~~~~~~~~~~~
+---------------
 For a comprehensive description, see :ref:`ref_pool_api`.

@@ -1,5 +1,6 @@
 Initial setup and launch of MAPDL locally
------------------------------------------
+=========================================
+
 To run, ``ansys.mapdl.core`` must know the location of the MAPDL
 binary. Most of the time this can be automatically determined, but
 the location of MAPDL must be provided for non-standard installations.
@@ -79,6 +80,7 @@ keyword argument:
 
 
 API reference
-~~~~~~~~~~~~~
+-------------
+
 For more information on controlling how MAPDL launches locally, see the
 description of the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function.

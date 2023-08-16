@@ -1,8 +1,8 @@
 .. _ref_mapdl_user_guide:
 
-**************************
+==========================
 PyMAPDL language and usage
-**************************
+==========================
 This page gives you an overview of the PyMAPDL API for the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class.
 For more information, see :ref:`ref_mapdl_api`.

@@ -1,4 +1,4 @@
-ANSYS APDL interactive control examples
+Convert an APDL script to a PyMAPDL one
 =======================================
 These examples demonstrate how to convert an existing
 ANSYS APDL script to a Python PyMAPDL script. You could also simply
