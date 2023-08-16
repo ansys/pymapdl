@@ -135,32 +135,40 @@ Example
 
 .. TO BE MODIFIED
 
-The `test_math.py <pymapdl_test_math_>`_ file contains the unit tests and integration tests of the `ansys.math.core.math module <pymapdl_user_guide_math_>`_. These are just some of the many
-tests that you can find in the `test directory <pymapdl_tests_>`_.
+The `test_component.py <pymapdl_test_component_>`_ file contains
+the unit tests and integration tests of the
+:class:`ComponentManager <ansys.mapdl.core.component.ComponentManager>`.
+These are just some of the many tests that you can find in the
+`test directory <pymapdl_tests_>`_.
 
 Here are some examples of how you use ``pytest``:
 
 .. code:: python
 
-    import numpy as np
-    from ansys.math.core.math import AnsMath
+    import pytest
 
 
-    @fixture
-    def mm():
-        return AnsMath()
+    # 'cube_geom_and_mesh' is another fixture defined in 'conftest.py'
+    @pytest.fixture(scope="function")
+    def basic_components(mapdl, cube_geom_and_mesh):
+        """Given a model in 'cube_geom_and_mesh', let's define some components to work with later."""
+        mapdl.components["mycomp1"] = "NODE", [1, 2, 3]
+        mapdl.components["mycomp2"] = "KP", [1, 3]
+
+        mapdl.cmsel("s", "mycomp1")
+        mapdl.cmsel("a", "mycomp2")
 
 
-    def test_rand(mm):  # pass the 'mm' fixture as an argument.
-        w = mm.rand(10)
-        assert w.size == 10  # if it is False, AssertionError is raised
+    def test_dunder_methods_keys(mapdl, basic_components):
+        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
 
 
-    def test_matrix_addition(mm):
-        m1 = mm.rand(10, 10)
-        m2 = mm.rand(10, 10)
-        m3 = m1 + m2
-        assert np.allclose(m1.asarray() + m2.asarray(), m3.asarray())
-        # if it is False, AssertionError is raised
+    def test_dunder_methods_types(mapdl, basic_components):
+        assert ["NODE", "KP"] == list(mapdl.components.types())
+
+
+    def test_dunder_methods_items(mapdl, basic_components):
+        assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(mapdl.components.items())
+
 
 For further explanations, see the `pytest documentation <pytest_>`_.
