@@ -28,6 +28,7 @@ APDL Math
 APDLMath
 APIs
 appen
+Apple Silicon
 argparse
 Arruda-Boyce
 BCs
@@ -77,6 +78,7 @@ larg
 LDHI
 levl
 Linux
+MacOS
 MAPDL
 mapdl
 mater

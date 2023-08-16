@@ -344,6 +344,25 @@ class _MapdlCore(Commands):
         return self._mode == "console"
 
     @property
+    def exited(self):
+        """Return true if the MAPDL session exited"""
+        return self._exited
+
+    @property
+    def check_status(self):
+        """Return MAPDL status.
+        * 'exited' if MAPDL is exited
+        * 'exiting' if MAPDL is exiting
+        * Otherwise returns 'OK'.
+        """
+        if self.exited:
+            return "exited"
+        elif self.exiting:
+            return "exiting"
+        else:
+            return "OK"
+
+    @property
     def file_type_for_plots(self):
         """Returns the current file type for plotting."""
         return self._file_type_for_plots

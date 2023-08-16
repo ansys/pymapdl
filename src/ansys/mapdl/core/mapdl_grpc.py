@@ -941,8 +941,23 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def busy(self):
-        """True when MAPDL gRPC server is executing a command"""
+        """True when MAPDL gRPC server is executing a command."""
         return self._busy
+
+    @property
+    def exiting(self):
+        """Returns true if the MAPDL instance is exiting."""
+        return self._exiting
+
+    @property
+    def port(self):
+        """Returns the MAPDL gRPC instance port."""
+        return self._port
+
+    @property
+    def ip(self):
+        """Return the MAPDL gRPC instance IP."""
+        return self._ip
 
     @protect_grpc
     def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
