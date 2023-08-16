@@ -1143,7 +1143,7 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                         f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
                     )
 
-                previous_picked_entity = set(self._get_selected_(entity))
+                previous_picked_entities = set(self._get_selected_(entity))
 
                 if type_ in ["S", "A"]:  # selecting all the entities
                     orig_entity_sel_function(self, "all")
@@ -1152,13 +1152,13 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                 pl = plotting_function(return_plotter=True)
 
                 vmin = self._enable_picking_entities(
-                    entity, pl, type_, previous_picked_entity, **kwargs
+                    entity, pl, type_, previous_picked_entities, **kwargs
                 )
 
                 if len(vmin) == 0:
                     # aborted picking
                     orig_entity_sel_function(
-                        self, "S", entity, "", previous_picked_entity, **kwargs
+                        self, "S", entity, "", previous_picked_entities, **kwargs
                     )
                     return []
 

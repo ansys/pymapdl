@@ -4039,11 +4039,11 @@ class _MapdlCore(Commands):
             return self.geometry.vnum
 
     def _enable_picking_entities(
-        self, entity, pl, type_, previous_picked_entity, **kwargs
+        self, entity, pl, type_, previous_picked_entities, **kwargs
     ):
         """Show a plot and get the selected entity."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
-        previous_picked_entity = set(previous_picked_entity)
+        previous_picked_entities = set(previous_picked_entities)
 
         q = self.queries
         picked_entities = []
