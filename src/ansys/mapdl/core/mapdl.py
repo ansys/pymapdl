@@ -4072,6 +4072,8 @@ class _MapdlCore(Commands):
         _debug = kwargs.pop("_debug", False)  # for testing purposes
         previous_picked_entities = set(previous_picked_entities)
 
+        PICKING_USING_LEFT_CLICKING = False
+
         q = self.queries
         picked_entities = []
         picked_ids = []
@@ -4097,8 +4099,9 @@ class _MapdlCore(Commands):
             """Generate helpful text for the render window."""
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
+            button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
-                f"Please use the right mouse button to pick the {entity}s.\n"
+                f"Please use the {button_} mouse button to pick the {entity}s.\n"
                 f"Press the key 'u' to change between mouse selecting and unselecting.\n"
                 f"Type: {type_} - {type_text}\n"
                 f"Mouse selection: {sel_}\n"
@@ -4209,7 +4212,7 @@ class _MapdlCore(Commands):
                 use_mesh=True,
                 show_message=gen_text(),
                 show_point=True,
-                left_clicking=False,
+                left_clicking=PICKING_USING_LEFT_CLICKING,
                 font_size=GUI_FONT_SIZE,
                 tolerance=kwargs.get("tolerance", 0.025),
             )
@@ -4220,7 +4223,7 @@ class _MapdlCore(Commands):
                 use_mesh=True,
                 show=True,
                 show_message=gen_text(),
-                left_clicking=False,
+                left_clicking=PICKING_USING_LEFT_CLICKING,
                 font_size=GUI_FONT_SIZE,
             )
 
