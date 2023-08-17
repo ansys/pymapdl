@@ -16,7 +16,6 @@ This section provides a general overview of PyMAPDL and how you use it.
 
    launcher
    mapdl
-   mapdl_examples
    plotting
    mesh_geometry
    post

@@ -1,11 +1,16 @@
-# Torsional load on a bar using SURF154 elements
-# ==============================================
-# This Ansys PyMAPDL script builds a bar and applies torque to it using
-# SURF154 elements. This is a static analysis example.
+"""
+.. _ref_tors_load:
 
+==============================================
+Torsional load on a bar using SURF154 elements
+==============================================
+
+This Ansys PyMAPDL script builds a bar and applies torque to it using
+SURF154 elements. This is a static analysis example.
+"""
 
 # Script initialization
-# ~~~~~~~~~~~~~~~~~~~~~
+# ---------------------
 
 import os
 
@@ -28,8 +33,7 @@ pressure = force / (h_tip * 2 * np.pi * radius)
 
 
 # Model creation
-# ~~~~~~~~~~~~~~
-      
+# --------------
 
 # Define higher-order SOLID186
 # Define surface effect elements SURF154 to apply torque
@@ -79,7 +83,7 @@ mapdl.eplot()
 
 
 # Solution
-# ~~~~~~~~
+# --------
 
 # new solution
 mapdl.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
@@ -103,7 +107,7 @@ mapdl.solve()
 
 
 # Post-processing
-# ~~~~~~~~~~~~~~~
+# ---------------
 
 # You can access and plot the results within Python using PyMAPDL
 # with the following commands:
@@ -150,7 +154,7 @@ result.plot_nodal_stress(
     screenshot="cylinder_sx.png",
 )
 
-    
+
 result.plot_principal_nodal_stress(
     0,
     "SEQV",
@@ -158,7 +162,7 @@ result.plot_principal_nodal_stress(
     cpos=cpos,
     screenshot="cylinder_vonmises.png",
 )
-    
+
 
 # Alternatively, you can access the same results directly from MAPDL
 # using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
@@ -171,5 +175,3 @@ mapdl.set(1, 1)
 mapdl.post_processing.plot_nodal_displacement()
 mapdl.post_processing.plot_nodal_component_stress("x")
 mapdl.post_processing.plot_nodal_eqv_stress()
-
-
