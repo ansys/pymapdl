@@ -362,8 +362,17 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
-        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
-        pl.iren._mouse_left_button_release(width, height)
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_left_button_release(width, height)
+        else:
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_right_button_release(width, height)
+
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.ksel("S", "KP", "", 1)
