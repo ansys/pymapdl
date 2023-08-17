@@ -4098,7 +4098,7 @@ class _MapdlCore(Commands):
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
             text = (
-                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Please use the right mouse button to pick the {entity}s.\n"
                 f"Press the key 'u' to change between mouse selecting and unselecting.\n"
                 f"Type: {type_} - {type_text}\n"
                 f"Mouse selection: {sel_}\n"
@@ -4209,7 +4209,7 @@ class _MapdlCore(Commands):
                 use_mesh=True,
                 show_message=gen_text(),
                 show_point=True,
-                left_clicking=True,
+                left_clicking=False,
                 font_size=GUI_FONT_SIZE,
                 tolerance=kwargs.get("tolerance", 0.025),
             )
