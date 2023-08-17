@@ -9,6 +9,7 @@ This Ansys PyMAPDL script builds a bar and applies torque to it using
 SURF154 elements. This is a static analysis example.
 """
 
+##############################################################################
 # Script initialization
 # ---------------------
 
@@ -21,7 +22,10 @@ from ansys.mapdl.core import launch_mapdl
 # start Ansys in the current working directory with default jobname "file"
 mapdl = launch_mapdl(run_location=os.getcwd())
 
-# define cylinder and mesh parameters
+
+##############################################################################
+# Define cylinder and mesh parameters
+
 torque = 100
 radius = 2
 h_tip = 2
@@ -31,7 +35,7 @@ pi = np.arccos(-1)
 force = 100 / radius
 pressure = force / (h_tip * 2 * np.pi * radius)
 
-
+##############################################################################
 # Model creation
 # --------------
 
@@ -44,6 +48,7 @@ mapdl.et(2, 154)
 mapdl.r(1)
 mapdl.r(2)
 
+##############################################################################
 # Aluminum properties (or something)
 mapdl.mp("ex", 1, 10e6)
 mapdl.mp("nuxy", 1, 0.3)
@@ -59,7 +64,9 @@ mapdl.nummrg("kp")
 # interactive volume plot (optional)
 mapdl.vplot()
 
-# mesh cylinder
+
+##############################################################################
+# Mesh cylinder
 mapdl.lsel("s", "loc", "x", 0)
 mapdl.lsel("r", "loc", "y", 0)
 mapdl.lsel("r", "loc", "z", 0, height - h_tip)
@@ -81,13 +88,11 @@ mapdl.finish()
 # plot elements
 mapdl.eplot()
 
-
+##############################################################################
 # Solution
 # --------
 
-# new solution
 mapdl.slashsolu()  # Using Slash instead of / due to duplicate SOLU command
-# ansys('/solu')  # could also use this line
 mapdl.antype("static", "new")
 mapdl.eqslv("pcg", 1e-8)
 
@@ -106,6 +111,7 @@ mapdl.pbc("u", 1)
 mapdl.solve()
 
 
+##############################################################################
 # Post-processing
 # ---------------
 
@@ -115,29 +121,38 @@ mapdl.solve()
 # access the result from the mapdl result
 result = mapdl.result
 
-# alternatively, open the result file using the path used in MAPDL
+# Alternatively, open the result file using the path used in MAPDL
 # from ansys.mapdl import reader as pymapdl_reader
 # resultfile = os.path.join(mapdl.path, 'file.rst')
 # result = pymapdl_reader.read_binary(resultfile)
 
-# access element results as arrays
+##############################################################################
+# Access element results as arrays
 nnum, stress = result.nodal_stress(0)
 element_stress, elemnum, enode = result.element_stress(0)
 nodenum, stress = result.nodal_stress(0)
 
-# plot interactively
+##############################################################################
+# Plot interactively
+# ~~~~~~~~~~~~~~~~~~~
 result.plot_nodal_solution(0, cmap="bwr")
 result.plot_nodal_stress(0, "x", cmap="bwr")
 result.plot_principal_nodal_stress(0, "SEQV", cmap="bwr")
 
-# plot and save non-interactively
-# (cpos was output from ``cpos = result.plot()`` and setting up
-# the correct camera angle)
+
+##############################################################################
+# Plot non-interactively
+# ~~~~~~~~~~~~~~~~~~~~~~
+
+# Setting up the correct camera angle
 cpos = [
     (20.992831318277517, 9.78629316586435, 31.905115108541928),
     (0.35955395443745797, -1.4198191001571547, 10.346158032932495),
     (-0.10547549888485548, 0.9200673323892437, -0.377294345312956),
 ]
+
+##############################################################################
+# Plot the nodal displacement
 
 result.plot_nodal_displacement(
     0,
@@ -145,7 +160,8 @@ result.plot_nodal_displacement(
     screenshot="cylinder_disp.png",
 )
 
-
+##############################################################################
+# Plot the nodal displacement
 result.plot_nodal_stress(
     0,
     "x",
