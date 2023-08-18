@@ -8,8 +8,8 @@
 .. _pyansys_core: pyansys.core@ansys.com
 
 .. #Other projects
-.. _dpf_core_gh: https://github.com/ansys/DPF-Core
-.. _dpf_post_gh: https://github.com/ansys/DPF-Post
+.. _dpf_core_gh: https://github.com/ansys/pydpf-core
+.. _dpf_post_gh: https://github.com/ansys/pydpf-post
 .. _dpf_core_docs: https://dpf.docs.pyansys.com
 .. _dpf_post_docs: https://post.docs.pyansys.com
 .. _legacy_reader_docs: https://reader.docs.pyansys.com/
@@ -121,7 +121,7 @@
 .. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/version/dev/
 .. _pymapdl_discussions: https://github.com/ansys/PyMAPDL/discussions
 .. _pymapdl_tests: https://github.com/ansys/pymapdl/tree/main/tests
-.. _pymapdl_test_math: https://github.com/ansys/pymapdl/blob/main/tests/test_math.py
+.. _pymapdl_test_component: https://github.com/ansys/pymapdl/blob/main/tests/test_component.py
 .. _pymapdl_user_guide_math: https://mapdl.docs.pyansys.com/version/dev/user_guide/math.html
 .. _mapdl_fixture: https://github.com/ansys/pymapdl/blob/fb5fb8b6201253f1bd56bdabee60a29abee8c7d8/tests/conftest.py#L254
 .. _pymapdl_examples: https://github.com/ansys/pymapdl/tree/main/examples

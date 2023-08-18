@@ -195,13 +195,13 @@ in your console (or the output file):
 Using ``docker-compose`` to launch MAPDL
 ----------------------------------------
 
-You can also use the `docker-compose <docker_compose_>`_ command to launch MAPDL configured in
-a `docker-compose <docker_compose_>`_ file.
+You can also use the ``docker-compose`` command to launch MAPDL configured in
+a ``docker-compose`` file.
 This is useful if you want to load an already configured environment, or
 if you want to launch multiple instances of MAPDL or services.
 
 For your convenience, the `docker <pymapdl_docker_dir_>`_ directory 
-contains configured `docker-compose <docker_compose_>`_ files that you can
+contains configured ``docker-compose`` files that you can
 use.
 
 Using the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file is recommended.

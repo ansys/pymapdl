@@ -243,14 +243,7 @@ jobs:
         if: always()
         run: cat log.txt
 
-      - name: "List main files"
-        if: always()
-        run: |
-          if compgen -G 'doc/_build/latex/*.log' > /dev/null ;then for f in doc/_build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Output latex log files"
-          if compgen -G './logs-build-docs/*.err' > /dev/null ;then for f in ./logs-build-docs/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Error files"
-          if compgen -G './logs-build-docs/*.log' > /dev/null ;then for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Log files"
-          if compgen -G './logs-build-docs/*.out' > /dev/null ;then for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Output files"
-
+        
   build-test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest

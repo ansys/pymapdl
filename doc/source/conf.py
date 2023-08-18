@@ -193,8 +193,16 @@ redirects = {
 }
 
 # Broken anchors:
+linkcheck_exclude_documents = ["index"]
+linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
+linkcheck_ignore = [
+    "https://github.com/ansys/pymapdl/*",
+    "https://mapdl.docs.pyansys.com/*",
+    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
+    "https://ansyshelp.ansys.com/*",  # behind payfirewall
+]
 linkcheck_anchors_ignore = [
-    # these anchors are picked by linkcheck as broken but thye are not.
+    # these anchors are picked by linkcheck as broken but they are not.
     "firewall-rules",
     "pyvista.Plotter",
     "pyvista.UnstructuredGrid",
