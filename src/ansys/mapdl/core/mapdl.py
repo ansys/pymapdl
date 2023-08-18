@@ -57,7 +57,7 @@ from ansys.mapdl.core.misc import (
     run_as_prep7,
     supress_logging,
 )
-from ansys.mapdl.core.theme import PyMAPDL_cmap
+from ansys.mapdl.core.theme import get_ansys_colors
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -1890,7 +1890,6 @@ class _MapdlCore(Commands):
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            # if isinstance(color_areas, np.ndarray) and len(or len(color_areas):
             if (isinstance(color_areas, np.ndarray) and len(color_areas) > 1) or (
                 not isinstance(color_areas, np.ndarray) and color_areas
             ):
@@ -1909,7 +1908,7 @@ class _MapdlCore(Commands):
                     # Generating a colour array,
                     # Size = number of areas.
                     # Values are random between 0 and min(256, number_areas)
-                    colors = PyMAPDL_cmap(size_)
+                    colors = get_ansys_colors(size_)
 
                 elif isinstance(color_areas, str):
                     # A color is provided as a string
@@ -1938,14 +1937,6 @@ class _MapdlCore(Commands):
                 # expand color array until matching the number of areas.
                 # In this case we start to repeat colors in the same order.
                 colors = np.resize(colors, len(ent_num))
-                color_dict = {i: color for i, color in zip(ent_num, colors)}
-
-                # mapping mapdl areas to pyvista mesh cells
-                def mapper(each):
-                    if len(colors) == 1:
-                        # for the case colors comes from string.
-                        return colors[0]
-                    return color_dict[each]
 
                 for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
@@ -2167,19 +2158,52 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.get_lines()
-            meshes = [{"mesh": lines}]
+            lines = self.geometry.get_lines(return_as_list=True)
+            meshes = []
+
             if color_lines:
-                meshes[0]["scalars"] = np.random.random(lines.n_cells)
+                size_ = len(lines)
+                # Because this is only going to be used for plotting
+                # purposes, we don't need to allocate
+                # a huge vector with random numbers (colours).
+                # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
+                # argument is set to 256, so let do here the same.
+                # We will limit the number of randoms values (colours)
+                # to 256.
+                #
+                # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+                size_ = min([256, size_])
+                # Generating a colour array,
+                # Size = number of areas.
+                # Values are random between 0 and min(256, number_areas)
+                colors = get_ansys_colors(size_)
+
+                # Creating a mapping of colors
+                ent_num = []
+                for line in lines:
+                    ent_num.append(int(np.unique(line["entity_num"])[0]))
+                ent_num.sort()
+
+                # expand color array until matching the number of areas.
+                # In this case we start to repeat colors in the same order.
+                colors = np.resize(colors, (len(ent_num), 4))
+
+                for line, color in zip(lines, colors):
+                    meshes.append({"mesh": line, "color": color})
+
+            else:
+                for line in lines:
+                    meshes.append({"mesh": line, "color": kwargs.get("color", "white")})
 
             labels = []
             if show_line_numbering:
-                labels.append(
-                    {
-                        "points": lines.points[50::101],
-                        "labels": lines["entity_num"],
-                    }
-                )
+                for line in lines:
+                    labels.append(
+                        {
+                            "points": line.points[len(line.points) // 2],
+                            "labels": line["entity_num"],
+                        }
+                    )
 
             if show_keypoint_numbering:
                 labels.append(
@@ -4221,7 +4245,7 @@ class _MapdlCore(Commands):
             pl.enable_mesh_picking(
                 callback=callback_mesh,
                 use_mesh=True,
-                show=True,
+                show=False,  # This should be false to avoid a warning.
                 show_message=gen_text(),
                 left_clicking=PICKING_USING_LEFT_CLICKING,
                 font_size=GUI_FONT_SIZE,

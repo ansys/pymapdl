@@ -468,8 +468,8 @@ def _general_plotter(
 
     for label in labels:
         # verify points are not duplicates
-        points, idx, _ = unique_rows(np.array(label["points"]))
-        labels = np.array(label["labels"])[idx].tolist()
+        points, idx, _ = unique_rows(np.atleast_2d(np.array(label["points"])))
+        labels = np.array(label["labels"])[idx - 1].tolist()
 
         plotter.add_point_labels(
             points,
