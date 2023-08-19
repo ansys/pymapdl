@@ -27,6 +27,7 @@ from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
 from conftest import (
+    ON_LOCAL,
     skip_if_not_local,
     skip_if_on_cicd,
     skip_no_xserver,
@@ -2121,3 +2122,10 @@ def test_ip(mapdl):
 def test_port(mapdl):
     assert mapdl.port == mapdl._port
     assert isinstance(mapdl.port, int)
+
+
+def test_distributed(mapdl):
+    if ON_LOCAL:
+        assert mapdl._distributed
+    else:
+        assert not mapdl._distributed  # assuming remote is using -smp
