@@ -60,7 +60,7 @@ tests = [
     "autopep8==2.0.2",
     "matplotlib==3.7.2",
     "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
-    "scipy==1.11.1; python_version > '3.8'",
+    "scipy==1.11.2; python_version > '3.8'",
     "pandas==2.0.3",
     "pyiges[full]==0.3.1",
     "pytest==7.4.0",
@@ -83,7 +83,7 @@ doc = [
     "matplotlib==3.7.2",
     "numpydoc==1.5.0",
     "pandas==2.0.3",
-    "plotly==5.16.0",
+    "plotly==5.16.1",
     "pyiges[full]==0.3.1",
     "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
