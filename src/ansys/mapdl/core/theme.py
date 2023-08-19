@@ -49,6 +49,10 @@ MAPDL_colorbar = (
 PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
 
 
+def get_ansys_colors(N=9):
+    return np.array([PyMAPDL_cmap(i) for i in range(N)])
+
+
 class MapdlTheme(base_class):
     """PyMAPDL-specific theme for pyvista.
 
