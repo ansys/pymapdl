@@ -1949,7 +1949,12 @@ class _MapdlCore(Commands):
                 centers = []
 
                 for surf in surfs:
-                    area = surf.extract_cells()
+                    anum = np.unique(surf["entity_num"])
+                    assert (
+                        len(anum) == 1
+                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+
+                    area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
                 labels.append({"points": np.array(centers), "labels": anums})
