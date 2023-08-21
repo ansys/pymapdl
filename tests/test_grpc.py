@@ -110,7 +110,7 @@ def test_clear(mapdl):
 
 def test_clear_multiple(mapdl):
     # simply should not fail.  See:
-    # https://github.com/pyansys/pymapdl/issues/380
+    # https://github.com/ansys/pymapdl/issues/380
     for i in range(20):
         mapdl.run("/CLEAR")
 

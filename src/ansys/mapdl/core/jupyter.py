@@ -58,7 +58,7 @@ def launch_mapdl_on_cluster(
         Maximum allowable time to connect to the MAPDL server.
     tag : str, optional
         Docker image tag from `PyAnsys MAPDL Image
-        <https://github.com/orgs/pyansys/packages/container/package/pymapdl%2Fmapdl>`. Defaults
+        <https://github.com/orgs/ansys/packages/container/package/pymapdl%2Fmapdl>`. Defaults
         to ``"latest"``. For example "v22.1.0".
 
     Returns

@@ -30,7 +30,7 @@ Please make sure you have the latest updated version using:
 'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
-or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+or contact Technical Support at 'https://github.com/ansys/pymapdl'."""
 
 from ansys.mapdl import core as pymapdl
 
@@ -2850,7 +2850,7 @@ class MapdlGrpc(_MapdlCore):
 
         if " " in fname:
             # Bug in reading file paths with whitespaces.
-            # https://github.com/pyansys/pymapdl/issues/1601
+            # https://github.com/ansys/pymapdl/issues/1601
 
             msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
             self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
