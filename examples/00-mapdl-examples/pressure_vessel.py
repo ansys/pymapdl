@@ -129,7 +129,7 @@ mapdl.post_processing.plot_nodal_eqv_stress(cpos="zy")
 ###############################################################################
 # We could, alternatively, get the exact same results by directly
 # accessing the result file using the legacy file reader
-# `ansys-mapdl-reader <https://github.com/pyansys/pymapdl-reader>`_.
+# `ansys-mapdl-reader <https://github.com/ansys/pymapdl-reader>`_.
 
 # access the result
 result = mapdl.result

@@ -37,7 +37,7 @@ CORBA interface
 .. vale off
 
 Ansys 17.0 supports the legacy CORBA interface, enabled with the
-`ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_ module.
+`ansys.mapdl.corba <https://github.com/ansys/pymapdl-corba>`_ module.
 
 .. vale on
 

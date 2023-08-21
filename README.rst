@@ -12,11 +12,11 @@ PyMAPDL
 .. |PyPIact| image:: https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
    :target: https://pypi.org/project/ansys-mapdl-core/
 
-.. |codecov| image:: https://codecov.io/gh/pyansys/pymapdl/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/pyansys/pymapdl
+.. |codecov| image:: https://codecov.io/gh/ansys/pymapdl/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/ansys/pymapdl
 
-.. |GH-CI| image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml
+.. |GH-CI| image:: https://github.com/ansys/pymapdl/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/ansys/pymapdl/actions/workflows/ci.yml
 
 .. |zenodo| image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
@@ -28,8 +28,8 @@ PyMAPDL
   :target: https://github.com/psf/black
   :alt: black
 
-.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/pyansys/pymapdl/main.svg
-   :target: https://results.pre-commit.ci/latest/github/pyansys/pymapdl/main
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/ansys/pymapdl/main.svg
+   :target: https://results.pre-commit.ci/latest/github/ansys/pymapdl/main
    :alt: pre-commit.ci status
 
 Overview
@@ -49,7 +49,7 @@ MAPDL and supports:
 
 Here's a quick demo of PyMAPDL within Visual Studio Code:
 
-.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/landing_page_demo.gif
+.. image:: https://github.com/ansys/pymapdl/raw/main/doc/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
@@ -91,9 +91,9 @@ many steps have been taken to ensure compatibility with legacy code
 while supporting new features.  The original python module has been
 split up into the following projects and modules:
 
-- `ansys.mapdl.core <https://github.com/pyansys/pymapdl>`_
-- `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
-- `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
+- `ansys.mapdl.core <https://github.com/ansys/pymapdl>`_
+- `ansys.mapdl.reader <https://github.com/ansys/pymapdl-reader>`_
+- `ansys.mapdl.corba <https://github.com/ansys/pymapdl-corba>`_
 
 For more information on each project, visit their GitHub pages.
 
@@ -111,18 +111,18 @@ Install the latest release from `PyPi
    pip install ansys-mapdl-core
 
 Alternatively, install the latest from `PyMAPDL GitHub
-<https://github.com/pyansys/pymapdl/issues>`_ via:
+<https://github.com/ansys/pymapdl/issues>`_ via:
 
 .. code:: console
 
-   pip install git+https://github.com/pyansys/pymapdl.git
+   pip install git+https://github.com/ansys/pymapdl.git
 
 
 For a local "development" version, install with (requires pip >= 22.0):
 
 .. code:: console
 
-   git clone https://github.com/pyansys/pymapdl.git
+   git clone https://github.com/ansys/pymapdl.git
    cd pymapdl
    pip install -e .
 
@@ -131,7 +131,7 @@ Offline installation
 ~~~~~~~~~~~~~~~~~~~~
 If you lack an internet connection on your install machine, the recommended way
 of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
-Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
+Page <https://github.com/ansys/pymapdl/releases>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
@@ -280,7 +280,7 @@ the most recent citation.
 License and acknowledgments
 ---------------------------
 ``PyMAPDL`` is licensed under
-`the MIT license <https://github.com/pyansys/pymapdl/blob/main/LICENSE>`_.
+`the MIT license <https://github.com/ansys/pymapdl/blob/main/LICENSE>`_.
 
 ``ansys-mapdl-core`` package makes no commercial claim over Ansys
 whatsoever.  This tool extends the functionality of ``MAPDL`` by

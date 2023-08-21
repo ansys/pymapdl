@@ -134,7 +134,7 @@ def linkcode_resolve(domain, info, edit=False):
     kind = get_active_branch_name()
     blob_or_edit = "edit" if edit else "blob"
 
-    url = f"http://github.com/pyansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"
+    url = f"http://github.com/ansys/pymapdl/{blob_or_edit}/{kind}/{fn}{linespec}"
     url = url.replace("\\", "/")  # For windows case
 
     return url

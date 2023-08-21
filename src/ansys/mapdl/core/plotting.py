@@ -304,7 +304,7 @@ def _general_plotter(
 
     theme : pyvista.DefaultTheme, optional
         PyVista theme. Defaults to `PyMAPDL theme <https://github
-        .com/pyansys/pyansys-sphinx-theme>`_.
+        .com/ansys/ansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
         If a :class:`pyvista.Plotter` not is provided, then creates its
@@ -771,7 +771,7 @@ def general_plotter(
     Notes
     -----
     Plotting boundary conditions is still under-development, so feel free to share feedback
-    or suggestion in `PyMAPDL <https://github.com/pyansys/pymapdl>`_.
+    or suggestion in `PyMAPDL <https://github.com/ansys/pymapdl>`_.
     At the moment only nodal boundary conditions can be shown (``bc_target='Nodes'``), and only
     the following types of boundary conditions:
 
