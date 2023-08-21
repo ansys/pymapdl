@@ -2177,7 +2177,7 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
-        Download every single file in the MAPDL workind directory:
+        Download every single file in the MAPDL working directory:
 
         >>> mapdl.download('*.*')
 
