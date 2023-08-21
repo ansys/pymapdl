@@ -304,7 +304,7 @@ def _general_plotter(
 
     theme : pyvista.DefaultTheme, optional
         PyVista theme. Defaults to `PyMAPDL theme <https://github
-        .com/pyansys/pyansys-sphinx-theme>`_.
+        .com/ansys/ansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
         If a :class:`pyvista.Plotter` not is provided, then creates its
