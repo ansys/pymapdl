@@ -2129,3 +2129,15 @@ def test_distributed(mapdl):
         assert mapdl._distributed
     else:
         assert not mapdl._distributed  # assuming remote is using -smp
+
+
+def test_non_used_args(mapdl):
+    with pytest.raises(ValueError):
+        mapdl.prep7(non_valid_argument=2)
+
+    with pytest.raises(ValueError):
+        mapdl.run("/prep7", True, False, unvalid_argument=2)
+
+    kwarg = {"unvalid_argument": 2}
+    with pytest.raises(ValueError):
+        mapdl.run("/prep7", True, None, **kwarg)
