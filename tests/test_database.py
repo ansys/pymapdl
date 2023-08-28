@@ -1,4 +1,3 @@
-import os
 import re
 
 from ansys.tools.versioning import server_meets_version
@@ -10,9 +9,7 @@ from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 
-ON_CI = "ON_CI" in os.environ or (
-    "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-)
+from .conftest import ON_CI
 
 
 @pytest.fixture(scope="session")
