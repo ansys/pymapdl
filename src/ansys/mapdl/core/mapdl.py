@@ -3204,8 +3204,21 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
+        # Checking kwargs
+        verbose = kwargs.pop("verbose", False)
+        save_fig = kwargs.pop("savefig", False)
+
         # check if we want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
+
+        # Checking if there is any non-used keyword argument. If there is, it
+        # might be because we wrote a wrong argument name.
+        if kwargs:
+            raise ValueError(
+                "The following keyword arguments are not used by 'mapdl.run':\n"
+                f"{', '.join(kwargs.keys())}\n"
+                "Make sure you are using the intended keyword arguments."
+            )
 
         if self._store_commands and not avoid_non_interactive:
             # If we are using NBLOCK on input, we should not strip the string
@@ -3267,7 +3280,6 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
-        verbose = kwargs.get("verbose", False)
         text = self._run(command, verbose=verbose, mute=mute)
 
         if command[:4].upper() == "/CLE" and self.is_grpc:
@@ -3294,7 +3306,6 @@ class _MapdlCore(Commands):
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             plot_path = self._get_plot_name(text)
-            save_fig = kwargs.get("savefig", False)
             if save_fig:
                 return self._download_plot(plot_path, save_fig)
             else:
