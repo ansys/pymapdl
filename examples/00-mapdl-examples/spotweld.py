@@ -60,3 +60,9 @@ result.plot_nodal_stress(0, "z")
 
 nnum, pstress = result.principal_nodal_stress(0)
 result.plot_principal_nodal_stress(0, "SEQV")
+
+###############################################################################
+# Stop MAPDL
+#
+mapdl.finish()
+mapdl.exit()

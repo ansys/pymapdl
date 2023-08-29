@@ -156,6 +156,7 @@ cpos = [
 
 result.plot_nodal_displacement(
     0,
+    cmap="bwr",
     cpos=cpos,
     screenshot="cylinder_disp.png",
 )
@@ -180,6 +181,7 @@ result.plot_principal_nodal_stress(
 )
 
 
+##############################################################################
 # Alternatively, you can access the same results directly from MAPDL
 # using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
 # attribute:
@@ -188,6 +190,12 @@ result.plot_principal_nodal_stress(
 mapdl.post1()
 
 mapdl.set(1, 1)
-mapdl.post_processing.plot_nodal_displacement()
-mapdl.post_processing.plot_nodal_component_stress("x")
-mapdl.post_processing.plot_nodal_eqv_stress()
+mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
+mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
+mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
+
+###############################################################################
+# Stop MAPDL
+#
+mapdl.finish()
+mapdl.exit()
