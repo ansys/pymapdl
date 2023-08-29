@@ -49,14 +49,14 @@ Alternatively, install the latest from
 
 .. code:: console
 
-   pip install git+https://github.com/pyansys/pymapdl.git
+   pip install git+https://github.com/ansys/pymapdl.git
 
 
 For a local *development* version, install with:
 
 .. code:: console
 
-   git clone https://github.com/pyansys/pymapdl.git
+   git clone https://github.com/ansys/pymapdl.git
    cd pymapdl
    pip install -e .
 

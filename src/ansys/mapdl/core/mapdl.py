@@ -47,7 +47,8 @@ from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     Information,
-    allow_pickable_points,
+    allow_iterables_vmin,
+    allow_pickable_entities,
     check_valid_routine,
     last_created,
     load_file,
@@ -55,9 +56,8 @@ from ansys.mapdl.core.misc import (
     requires_package,
     run_as_prep7,
     supress_logging,
-    wrap_point_SEL,
 )
-from ansys.mapdl.core.theme import PyMAPDL_cmap
+from ansys.mapdl.core.theme import get_ansys_colors
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -70,7 +70,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import general_plotter
+    from ansys.mapdl.core.plotting import general_plotter, get_meshes_from_plotter
 
 from ansys.mapdl.core.post import PostProcessing
 
@@ -146,6 +146,8 @@ MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
+
+GUI_FONT_SIZE = 15
 
 
 def parse_to_short_cmd(command):
@@ -1632,6 +1634,7 @@ class _MapdlCore(Commands):
         scale="",
         vtk=None,
         quality=4,
+        show_volume_numbering=False,
         show_area_numbering=False,
         show_line_numbering=False,
         color_areas=False,
@@ -1706,20 +1709,48 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            cm_name = "__tmp_area2__"
-            self.cm(cm_name, "AREA", mute=True)
-            self.aslv("S", mute=True)  # select areas attached to active volumes
-            out = self.aplot(
-                vtk=vtk,
-                color_areas=color_areas,
-                quality=quality,
-                show_area_numbering=show_area_numbering,
-                show_line_numbering=show_line_numbering,
-                show_lines=show_lines,
-                **kwargs,
-            )
-            self.cmsel("S", cm_name, "AREA", mute=True)
-            return out
+            cm_name_area = "__tmp_area2__"
+            cm_name_volu = "__tmp_volu2__"
+            self.cm(cm_name_area, "AREA", mute=True)
+            self.cm(cm_name_volu, "VOLU", mute=True)
+
+            volumes = self.geometry.vnum
+            meshes = []
+            points = []
+            labels = []
+
+            # kwargs.setdefault("return_plotter", True)
+            kwargs["return_plotter"] = True
+            color_areas = True
+
+            for each_volu in volumes:
+                self.vsel("S", vmin=each_volu)
+                self.aslv("S", mute=True)  # select areas attached to active volumes
+
+                pl = self.aplot(
+                    vtk=True,
+                    color_areas=color_areas,
+                    quality=quality,
+                    show_area_numbering=show_area_numbering,
+                    show_line_numbering=show_line_numbering,
+                    show_lines=False,
+                    **kwargs,
+                )
+
+                meshes_ = get_meshes_from_plotter(pl)
+
+                for each_mesh in meshes_:
+                    each_mesh.cell_data["entity_num"] = int(each_volu)
+
+                meshes.extend(meshes_)
+
+            meshes = [{"mesh": meshes}]
+
+            self.cmsel("S", cm_name_area, "AREA", mute=True)
+            self.cmsel("S", cm_name_volu, "VOLU", mute=True)
+
+            return general_plotter(meshes, points, labels, **kwargs)
+
         else:
             with self._enable_interactive_plotting():
                 return super().vplot(
@@ -1850,15 +1881,15 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
+            surfs = self.geometry.get_areas(return_as_list=True)
             meshes = []
             labels = []
 
-            anums = np.unique(surf["entity_num"])
+            # anums = np.unique(surf["entity_num"])
+            anums = self.geometry.anum  # This might need double check
 
             # individual surface isolation is quite slow, so just
             # color individual areas
-            # if isinstance(color_areas, np.ndarray) and len(or len(color_areas):
             if (isinstance(color_areas, np.ndarray) and len(color_areas) > 1) or (
                 not isinstance(color_areas, np.ndarray) and color_areas
             ):
@@ -1877,11 +1908,11 @@ class _MapdlCore(Commands):
                     # Generating a colour array,
                     # Size = number of areas.
                     # Values are random between 0 and min(256, number_areas)
-                    colors = PyMAPDL_cmap(size_)
+                    colors = get_ansys_colors(size_)
 
                 elif isinstance(color_areas, str):
                     # A color is provided as a string
-                    colors = np.atleast_2d(np.array(to_rgba(color_areas)))
+                    colors = np.atleast_2d(to_rgba(color_areas))
 
                 else:
                     if len(anums) != len(color_areas):
@@ -1893,35 +1924,36 @@ class _MapdlCore(Commands):
                         )
 
                     if isinstance(color_areas[0], str):
-                        colors = np.array([to_rgba(each) for each in color_areas])
+                        colors = [to_rgba(each) for each in color_areas]
                     else:
                         colors = color_areas
 
                 # Creating a mapping of colors
-                ent_num = list(set(surf["entity_num"]))
+                ent_num = []
+                for each_surf in surfs:
+                    ent_num.append(int(np.unique(each_surf["entity_num"])[0]))
                 ent_num.sort()
 
                 # expand color array until matching the number of areas.
                 # In this case we start to repeat colors in the same order.
                 colors = np.resize(colors, len(ent_num))
-                color_dict = {i: color for i, color in zip(ent_num, colors)}
 
-                # mapping mapdl areas to pyvista mesh cells
-                def mapper(each):
-                    if len(colors) == 1:
-                        # for the case colors comes from string.
-                        return colors[0]
-                    return color_dict[each]
-
-                colors_map = np.array(list(map(mapper, surf["entity_num"])))
-                meshes.append({"mesh": surf, "scalars": colors_map})
+                for surf, color in zip(surfs, colors):
+                    meshes.append({"mesh": surf, "color": color})
 
             else:
-                meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
+                for surf in surfs:
+                    meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 
             if show_area_numbering:
                 centers = []
-                for anum in anums:
+
+                for surf in surfs:
+                    anum = np.unique(surf["entity_num"])
+                    assert (
+                        len(anum) == 1
+                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
@@ -2131,19 +2163,52 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.get_lines()
-            meshes = [{"mesh": lines}]
+            lines = self.geometry.get_lines(return_as_list=True)
+            meshes = []
+
             if color_lines:
-                meshes[0]["scalars"] = np.random.random(lines.n_cells)
+                size_ = len(lines)
+                # Because this is only going to be used for plotting
+                # purposes, we don't need to allocate
+                # a huge vector with random numbers (colours).
+                # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
+                # argument is set to 256, so let do here the same.
+                # We will limit the number of randoms values (colours)
+                # to 256.
+                #
+                # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+                size_ = min([256, size_])
+                # Generating a colour array,
+                # Size = number of areas.
+                # Values are random between 0 and min(256, number_areas)
+                colors = get_ansys_colors(size_)
+
+                # Creating a mapping of colors
+                ent_num = []
+                for line in lines:
+                    ent_num.append(int(np.unique(line["entity_num"])[0]))
+                ent_num.sort()
+
+                # expand color array until matching the number of areas.
+                # In this case we start to repeat colors in the same order.
+                colors = np.resize(colors, (len(ent_num), 4))
+
+                for line, color in zip(lines, colors):
+                    meshes.append({"mesh": line, "color": color})
+
+            else:
+                for line in lines:
+                    meshes.append({"mesh": line, "color": kwargs.get("color", "white")})
 
             labels = []
             if show_line_numbering:
-                labels.append(
-                    {
-                        "points": lines.points[50::101],
-                        "labels": lines["entity_num"],
-                    }
-                )
+                for line in lines:
+                    labels.append(
+                        {
+                            "points": line.points[len(line.points) // 2],
+                            "labels": line["entity_num"],
+                        }
+                    )
 
             if show_keypoint_numbering:
                 labels.append(
@@ -3155,7 +3220,7 @@ class _MapdlCore(Commands):
         # address MAPDL /INPUT level issue
         if command[:4].upper() == "/CLE":
             # Address gRPC issue
-            # https://github.com/pyansys/pymapdl/issues/380
+            # https://github.com/ansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
 
         # Tracking output device
@@ -4029,16 +4094,25 @@ class _MapdlCore(Commands):
         elif entity == "VOLU":
             return self.geometry.vnum
 
-    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
-        """Show a plot and get the selected points."""
+    def _enable_picking_entities(
+        self, entity, pl, type_, previous_picked_entities, **kwargs
+    ):
+        """Show a plot and get the selected entity."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
-        previous_picked_points = set(previous_picked_points)
+        previous_picked_entities = set(previous_picked_entities)
+
+        PICKING_USING_LEFT_CLICKING = False
 
         q = self.queries
-        picked_points = []
+        picked_entities = []
         picked_ids = []
+        entity = entity.lower()
 
-        selector = getattr(q, entity.lower())
+        if entity in ["kp", "node"]:
+            selector = getattr(q, entity)
+        else:
+            # We need to come out with a different thing.
+            pass
 
         # adding selection inversor
         pl._inver_mouse_click_selection = False
@@ -4050,86 +4124,147 @@ class _MapdlCore(Commands):
             "U": "Unselecting",
         }
 
-        def gen_text(picked_points=None):
+        def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
+            button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
-                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Please use the {button_} mouse button to pick the {entity}s.\n"
                 f"Press the key 'u' to change between mouse selecting and unselecting.\n"
                 f"Type: {type_} - {type_text}\n"
                 f"Mouse selection: {sel_}\n"
             )
 
-            picked_points_str = ""
-            if picked_points:
+            picked_entities_str = ""
+            if picked_entities:
                 # reverse picked point order, exclude the brackets, and limit
                 # to 40 characters
-                picked_points_str = str(picked_points[::-1])[1:-1]
-                if len(picked_points_str) > 40:
-                    picked_points_str = picked_points_str[:40]
-                    idx = picked_points_str.rfind(",") + 2
-                    picked_points_str = picked_points_str[:idx] + "..."
+                picked_entities_str = str(picked_entities[::-1])[1:-1]
+                if len(picked_entities_str) > 40:
+                    picked_entities_str = picked_entities_str[:40]
+                    idx = picked_entities_str.rfind(",") + 2
+                    picked_entities_str = picked_entities_str[:idx] + "..."
 
-            return text + f"Current {entity} selection: {picked_points_str}"
+            return text + f"Current {entity} selection: {picked_entities_str}"
 
-        def callback_(mesh, id_):
+        def callback_points(mesh, id_):
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
             if not pl._inver_mouse_click_selection:
-                # Updating MAPDL points mapping
-                if node_id not in picked_points:
-                    picked_points.append(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id not in picked_entities:
+                    picked_entities.append(node_id)
+                # Updating pyvista entity mapping
                 if id_ not in picked_ids:
                     picked_ids.append(id_)
             else:
-                # Updating MAPDL points mapping
-                if node_id in picked_points:
-                    picked_points.remove(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id in picked_entities:
+                    picked_entities.remove(node_id)
+                # Updating pyvista entity mapping
                 if id_ in picked_ids:
                     picked_ids.remove(id_)
 
             # remov etitle and update text
             pl.remove_actor("title")
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
-                font_size=10,
-                name="_point_picking_message",
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
             )
             if picked_ids:
                 pl.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=10,
-                    name="_picked_points",
+                    name="_picked_entities",
                     pickable=False,
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_points")
+                pl.remove_actor("_picked_entities")
 
-        pl.enable_point_picking(
-            callback=callback_,
-            use_mesh=True,
-            show_message=gen_text(),
-            show_point=True,
-            left_clicking=True,
-            font_size=10,
-            tolerance=kwargs.get("tolerance", 0.025),
-        )
+        def callback_mesh(mesh):
+            def get_entnum(mesh):
+                return int(np.unique(mesh.cell_data["entity_num"])[0])
+
+            mesh_id = get_entnum(mesh)
+
+            # Getting meshes with that entity_num.
+            meshes = get_meshes_from_plotter(pl)
+
+            meshes = [each for each in meshes if get_entnum(each) == mesh_id]
+
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL entity mapping
+                if mesh_id not in picked_entities:
+                    picked_entities.append(mesh_id)
+                    for i, each in enumerate(meshes):
+                        pl.add_mesh(
+                            each,
+                            color="red",
+                            point_size=10,
+                            name=f"_picked_entity_{mesh_id}_{i}",
+                            pickable=False,
+                            reset_camera=False,
+                        )
+
+            else:
+                # Updating MAPDL entity mapping
+                if mesh_id in picked_entities:
+                    picked_entities.remove(mesh_id)
+
+                    for i, each in enumerate(meshes):
+                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
+
+            # Removing only-first time actors
+            pl.remove_actor("title")
+            pl.remove_actor("_point_picking_message")
+
+            if "_entity_picking_message" in pl.actors:
+                pl.remove_actor("_entity_picking_message")
+
+            pl._picking_text = pl.add_text(
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
+            )
+
+        if entity in ["kp", "node"]:
+            # Picking points
+            pl.enable_point_picking(
+                callback=callback_points,
+                use_mesh=True,
+                show_message=gen_text(),
+                show_point=True,
+                left_clicking=PICKING_USING_LEFT_CLICKING,
+                font_size=GUI_FONT_SIZE,
+                tolerance=kwargs.get("tolerance", 0.025),
+            )
+        else:
+            # Picking meshes
+            pl.enable_mesh_picking(
+                callback=callback_mesh,
+                use_mesh=True,
+                show=False,  # This should be false to avoid a warning.
+                show_message=gen_text(),
+                left_clicking=PICKING_USING_LEFT_CLICKING,
+                font_size=GUI_FONT_SIZE,
+            )
 
         def callback_u():
             # inverting bool
             pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.remove_actor("_entity_picking_message")
+
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
-                font_size=10,
-                name="_point_picking_message",
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
             )
 
         pl.add_key_event("u", callback_u)
@@ -4139,20 +4274,20 @@ class _MapdlCore(Commands):
         else:
             _debug(pl)
 
-        picked_points = set(
-            picked_points
+        picked_entities = set(
+            picked_entities
         )  # removing duplicates (although there should be none)
 
         if type_ == "S":
             pass
         elif type_ == "R":
-            picked_points = previous_picked_points.intersection(picked_points)
+            picked_entities = previous_picked_entities.intersection(picked_entities)
         elif type_ == "A":
-            picked_points = previous_picked_points.union(picked_points)
+            picked_entities = previous_picked_entities.union(picked_entities)
         elif type_ == "U":
-            picked_points = previous_picked_points.difference(picked_points)
+            picked_entities = previous_picked_entities.difference(picked_entities)
 
-        return list(picked_points)
+        return list(picked_entities)
 
     def _perform_entity_list_selection(
         self, entity, selection_function, type_, item, comp, vmin, kabs
@@ -4185,8 +4320,8 @@ class _MapdlCore(Commands):
             super().nsel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points()
-        @wrap_point_SEL(entity="node")
+        @allow_pickable_entities()
+        @allow_iterables_vmin(entity="node")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4202,8 +4337,8 @@ class _MapdlCore(Commands):
             super().esel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points()
-        @wrap_point_SEL(entity="elem")
+        @allow_pickable_entities(entity="elem", plot_function="eplot")
+        @allow_iterables_vmin(entity="elem")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4219,8 +4354,8 @@ class _MapdlCore(Commands):
             super().ksel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points(entity="kp", plot_function="kplot")
-        @wrap_point_SEL(entity="kp")
+        @allow_pickable_entities(entity="kp", plot_function="kplot")
+        @allow_iterables_vmin(entity="kp")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4236,8 +4371,8 @@ class _MapdlCore(Commands):
             super().lsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="line", plot_function="lplot")
-        @wrap_point_SEL(entity="line")
+        @allow_pickable_entities(entity="line", plot_function="lplot")
+        @allow_iterables_vmin(entity="line")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4253,8 +4388,8 @@ class _MapdlCore(Commands):
             super().asel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="area", plot_function="aplot")
-        @wrap_point_SEL(entity="area")
+        @allow_pickable_entities(entity="area", plot_function="aplot")
+        @allow_iterables_vmin(entity="area")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4270,8 +4405,8 @@ class _MapdlCore(Commands):
             super().vsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="volume", plot_function="vplot")
-        @wrap_point_SEL(entity="volume")
+        @allow_pickable_entities(entity="volu", plot_function="vplot")
+        @allow_iterables_vmin(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 

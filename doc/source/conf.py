@@ -68,7 +68,6 @@ SEARCH_HINTS = ["def", "class"]
 # -- General configuration ---------------------------------------------------
 extensions = [
     "jupyter_sphinx",
-    "notfound.extension",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
