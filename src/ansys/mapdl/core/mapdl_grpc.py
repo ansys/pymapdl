@@ -3133,7 +3133,7 @@ class MapdlGrpc(_MapdlCore):
             item=item,
             comp=comp,
             name=name,
-            kwargs=kwargs,
+            **kwargs,
         )
         return self.vget("_temp", nvar)
 

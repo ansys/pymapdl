@@ -3213,6 +3213,12 @@ class _MapdlCore(Commands):
 
         # Checking if there is any non-used keyword argument. If there is, it
         # might be because we wrote a wrong argument name.
+        #
+        # Removing empty string kwargs
+        for key, value in list(kwargs.items()):
+            if value == "":
+                kwargs.pop(key)
+
         if kwargs:
             raise ValueError(
                 "The following keyword arguments are not used by 'mapdl.run':\n"
