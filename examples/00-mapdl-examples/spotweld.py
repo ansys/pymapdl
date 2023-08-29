@@ -25,7 +25,7 @@ else:
     mapdl.input("./spotweld/spot_weld.inp")
 
 ######################################################################
-# Open the result file 
+# Open the result file
 # --------------------
 
 # access the result from the mapdl result
@@ -57,7 +57,7 @@ element_stress, elemnum, enode = result.element_stress(0)
 
 ######################################################################
 # The stress at the contact element simulating the spot weld.
-# 
+#
 # Plot the nodal stress in the Z direction.
 result.plot_nodal_stress(0, "z")
 
