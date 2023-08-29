@@ -15,8 +15,6 @@ commands:
 
 """
 
-import os
-
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
@@ -27,36 +25,45 @@ else:
     mapdl.input("./spotweld/spot_weld.inp")
 
 ######################################################################
-# Here is the Python script using
-# `ansys-mapdl-reader <legacy_reader_docs_>`_ package to access
-# the results after running the MAPDL analysis.
+# Open the result file 
+# --------------------
 
-from ansys.mapdl import reader as pymapdl_reader
+# access the result from the mapdl result
+result = mapdl.result
+
+# Alternatively, open the result file using the path used in MAPDL
+# from ansys.mapdl import reader as pymapdl_reader
+# import os
+# resultfile = os.path.join(mapdl.directory, "file.rst")
+# result = pymapdl_reader.read_binary(resultfile)
 
 ######################################################################
-# Open the result file and plot the displacement of time step 3
+# Displacements
+# -------------
+# Plot the time step 1 and 3.
 
-resultfile = os.path.join(mapdl.directory, "file.rst")
-result = pymapdl_reader.read_binary(resultfile)
+result.plot_nodal_solution(0)
 result.plot_nodal_solution(2)
 
-
 ######################################################################
-# Get the nodal and element component stress at time step 0. Plot the
-# stress in the Z direction.
+# Stress
+# ------
 
+# Get the nodal and element component stress at time step 1.
 nodenum, stress = result.nodal_stress(0)
+
+# Plot the element stress.
 element_stress, elemnum, enode = result.element_stress(0)
 
-
 ######################################################################
-# Plot the Z direction stress:
-# The stress at the contact element simulating the spot weld
+# The stress at the contact element simulating the spot weld.
+# 
+# Plot the nodal stress in the Z direction.
 result.plot_nodal_stress(0, "z")
 
 
 ######################################################################
-# Get the principal nodal stress and plot the von Mises stress
+# Get the principal nodal stress and plot the von Mises stress.
 
 nnum, pstress = result.principal_nodal_stress(0)
 result.plot_principal_nodal_stress(0, "SEQV")
