@@ -20,7 +20,7 @@ import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
 # start Ansys in the current working directory with default jobname "file"
-mapdl = launch_mapdl(run_location=os.getcwd())
+mapdl = launch_mapdl(run_location=os.getcwd(), version=23.1)
 
 
 ##############################################################################
