@@ -288,7 +288,7 @@ def test_non_valid_inputs_expand(
 
 def test_check_full_file_exist(mapdl, cleared):
     # deleting previous full file.
-    if mapdl._local:
+    if mapdl._islocal:
         full_file = os.path.join(mapdl.directory, mapdl.jobname + ".full")
         if os.path.exists(full_file):
             os.remove(full_file)

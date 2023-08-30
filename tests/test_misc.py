@@ -219,7 +219,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     assert os.path.exists(file_path)
 
-    if mapdl._local:
+    if mapdl._islocal:
         pth = os.path.join(mapdl.directory, file_)
         assert not os.path.exists(pth)
     else:
@@ -230,7 +230,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     # File is in both, the python working directory and MAPDL directory
     assert os.path.exists(file_path)
 
-    if mapdl._local:
+    if mapdl._islocal:
         pth = os.path.join(mapdl.directory, file_)
         assert os.path.exists(pth)
 
@@ -255,7 +255,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     load_file(mapdl, file_path, priority_mapdl_file=False)
 
-    if mapdl._local:
+    if mapdl._islocal:
         with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
         os.remove(file_)

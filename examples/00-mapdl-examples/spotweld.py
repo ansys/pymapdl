@@ -18,7 +18,7 @@ commands:
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
-if mapdl._local:
+if mapdl._islocal:
     mapdl.upload("./spotweld/spot_weld.inp")
     mapdl.input("spot_weld.inp")
 else:

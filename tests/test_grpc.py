@@ -357,7 +357,7 @@ def test_download_with_extension(
 
 @skip_if_not_local
 def test_download_recursive(mapdl):
-    if mapdl._local:
+    if mapdl._islocal:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
         os.makedirs(temp_dir, exist_ok=True)
         with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
