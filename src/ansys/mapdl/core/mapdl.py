@@ -3223,7 +3223,8 @@ class _MapdlCore(Commands):
             raise ValueError(
                 "The following keyword arguments are not used by 'mapdl.run':\n"
                 f"{', '.join(kwargs.keys())}\n"
-                "Make sure you are using the intended keyword arguments."
+                "Make sure you are using the intended keyword arguments in all\n"
+                "your mapdl method calls (for instance 'mapdl.something')."
             )
 
         if self._store_commands and not avoid_non_interactive:
