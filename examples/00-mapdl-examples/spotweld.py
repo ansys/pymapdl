@@ -31,11 +31,6 @@ else:
 # access the result from the mapdl result
 result = mapdl.result
 
-# Alternatively, open the result file using the path used in MAPDL
-# from ansys.mapdl import reader as pymapdl_reader
-# import os
-# resultfile = os.path.join(mapdl.directory, "file.rst")
-# result = pymapdl_reader.read_binary(resultfile)
 
 ######################################################################
 # Displacements
