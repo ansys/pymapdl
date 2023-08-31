@@ -3204,17 +3204,17 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        # Checking kwargs
+        # Check kwargs
         verbose = kwargs.pop("verbose", False)
         save_fig = kwargs.pop("savefig", False)
 
-        # check if we want to avoid the current non-interactive context.
+        # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
 
-        # Checking if there is any non-used keyword argument. If there is, it
-        # might be because we wrote a wrong argument name.
+        # Check if there is an unused keyword argument. If there is, it
+        # might be because you wrote a wrong argument name.
         #
-        # Removing empty string kwargs
+        # Remove empty string kwargs
         for key, value in list(kwargs.items()):
             if value == "":
                 kwargs.pop(key)
@@ -3224,11 +3224,11 @@ class _MapdlCore(Commands):
                 "The following keyword arguments are not used by 'mapdl.run':\n"
                 f"{', '.join(kwargs.keys())}\n"
                 "Make sure you are using the intended keyword arguments in all\n"
-                "your mapdl method calls (for instance 'mapdl.something')."
+                "your mapdl method calls (for example, 'mapdl.something')."
             )
 
         if self._store_commands and not avoid_non_interactive:
-            # If we are using NBLOCK on input, we should not strip the string
+            # If you are using NBLOCK on input, you should not strip the string
             self._stored_commands.append(command)
             return
 
