@@ -123,7 +123,7 @@ def asserting_cdread_cdwrite_tests(mapdl):
 def warns_in_cdread_error_log(mapdl, tmpdir):
     """Check for specific warns in the error log associated with using /INPUT with CDB files
     instead of CDREAD command."""
-    if mapdl._islocal:
+    if mapdl.is_local:
         pth = mapdl.directory
 
     else:
@@ -597,7 +597,7 @@ def test_nodes(tmpdir, cleared, mapdl):
     basename = "tmp.nodes"
     target_dir = tmpdir.mkdir("tmpdir")
     filename = str(target_dir.join(basename))
-    if mapdl._islocal:
+    if mapdl.is_local:
         mapdl.nwrite(filename)
     else:
         mapdl.nwrite(basename)
@@ -1155,7 +1155,7 @@ def test_path_with_single_quote(mapdl, path_tests):
 
 def test_cwd(mapdl, tmpdir):
     old_path = mapdl.directory
-    if mapdl._islocal:
+    if mapdl.is_local:
         tempdir_ = tmpdir
     else:
         if mapdl.platform == "linux":
