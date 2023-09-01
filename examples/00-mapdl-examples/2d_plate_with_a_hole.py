@@ -286,7 +286,6 @@ def compute_stress_con(ratio):
     mapdl.esize(plate_esize)
     mapdl.amesh(plate_with_hole_anum)
 
-    ###############################################################################
     # Boundary Conditions
     # ~~~~~~~~~~~~~~~~~~~
     # Fix the left-hand side of the plate in the X direction
