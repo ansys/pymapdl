@@ -2132,14 +2132,14 @@ def test_distributed(mapdl):
 
 
 def test_non_used_kwargs(mapdl):
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         mapdl.prep7(non_valid_argument=2)
 
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         mapdl.run("/prep7", True, False, unvalid_argument=2)
 
     kwarg = {"unvalid_argument": 2}
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         mapdl.run("/prep7", True, None, **kwarg)
 
 
@@ -2147,5 +2147,5 @@ def test_non_valid_kwarg(mapdl):
     mapdl.prep7()
     mapdl.blc4(0, 0, 1, 1, 1)
 
-    with pytest.raises(ValueError):
+    with pytest.warns(UserWarning):
         mapdl.cdwrite(options="DB", fname="test1", ext="cdb")
