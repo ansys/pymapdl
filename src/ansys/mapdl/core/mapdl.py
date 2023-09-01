@@ -3220,10 +3220,11 @@ class _MapdlCore(Commands):
                 kwargs.pop(key)
 
         if kwargs:
-            raise ValueError(
-                "The following keyword arguments are not used by 'mapdl.run':\n"
+            warn(
+                "The following keyword arguments are not used:\n"
                 f"{', '.join(kwargs.keys())}\n"
-                "Make sure you are using the intended keyword arguments."
+                "Make sure you are using the intended keyword arguments.",
+                UserWarning,
             )
 
         if self._store_commands and not avoid_non_interactive:
