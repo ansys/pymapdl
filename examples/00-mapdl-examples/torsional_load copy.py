@@ -1,10 +1,8 @@
 """
 .. _ref_tors_load:
-
 ==============================================
 Torsional load on a bar using SURF154 elements
 ==============================================
-
 This Ansys PyMAPDL script builds a bar and applies torque to it using
 SURF154 elements. This is a static analysis example.
 """
@@ -20,7 +18,7 @@ import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
 # start Ansys in the current working directory with default jobname "file"
-mapdl = launch_mapdl(run_location=os.getcwd(), version=23.1)
+mapdl = launch_mapdl(run_location=os.getcwd())
 
 
 ##############################################################################
@@ -114,39 +112,30 @@ mapdl.solve()
 ##############################################################################
 # Post-processing
 # ---------------
+
+# You can access and plot the results within Python using PyMAPDL
+# with the following commands:
+
+# access the result from the mapdl result
 result = mapdl.result
 
-# Enter post-processor
-mapdl.post1()
-# Select the step you want to analyse
-mapdl.set(1, 1)
-
+# Alternatively, open the result file using the path used in MAPDL
+# from ansys.mapdl import reader as pymapdl_reader
+# resultfile = os.path.join(mapdl.path, 'file.rst')
+# result = pymapdl_reader.read_binary(resultfile)
 
 ##############################################################################
 # Access element results as arrays
-nodal_stress = mapdl.post_processing.nodal_stress_intensity()
-elem_stress = mapdl.post_processing.element_stress("int")
-
-print("Nodal stress : ", nodal_stress)
-print("Element stress : ", elem_stress)
+nnum, stress = result.nodal_stress(0)
+element_stress, elemnum, enode = result.element_stress(0)
+nodenum, stress = result.nodal_stress(0)
 
 ##############################################################################
 # Plot interactively
 # ~~~~~~~~~~~~~~~~~~~
-
-mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
-mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
-mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
-
-# # Select the step you want to analyse
-# mapdl.set(1)
-
-# # Plot nodal displacements
-# mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
-# # Plot nodal component stress
-# mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
-# # Plot nodal equivalent stress
-# mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
+result.plot_nodal_solution(0, cmap="bwr")
+result.plot_nodal_stress(0, "x", cmap="bwr")
+result.plot_principal_nodal_stress(0, "SEQV", cmap="bwr")
 
 
 ##############################################################################
@@ -160,34 +149,34 @@ cpos = [
     (-0.10547549888485548, 0.9200673323892437, -0.377294345312956),
 ]
 
-mapdl.post_processing.plot_nodal_displacement(
-    cmap="bwr", cpos=cpos, savefig="cylinder_disp.png"
-)
-mapdl.post_processing.plot_nodal_component_stress(
-    "x", cmap="bwr", cpos=cpos, savefig="cylinder_comp_stx.png"
-)
-mapdl.post_processing.plot_nodal_eqv_stress(
-    cmap="bwr", cpos=cpos, savefig="cylinder_eqv_st.png"
+##############################################################################
+# Plot the nodal displacement
+
+result.plot_nodal_displacement(
+    0,
+    cmap="bwr",
+    cpos=cpos,
+    screenshot="cylinder_disp.png",
 )
 
-# ##############################################################################
-# # Plot the nodal displacement
-# result.plot_nodal_stress(
-#     0,
-#     "x",
-#     cmap="bwr",
-#     cpos=cpos,
-#     screenshot="cylinder_sx.png",
-# )
+##############################################################################
+# Plot the nodal displacement
+result.plot_nodal_stress(
+    0,
+    "x",
+    cmap="bwr",
+    cpos=cpos,
+    screenshot="cylinder_sx.png",
+)
 
 
-# result.plot_principal_nodal_stress(
-#     0,
-#     "SEQV",
-#     cmap="bwr",
-#     cpos=cpos,
-#     screenshot="cylinder_vonmises.png",
-# )
+result.plot_principal_nodal_stress(
+    0,
+    "SEQV",
+    cmap="bwr",
+    cpos=cpos,
+    screenshot="cylinder_vonmises.png",
+)
 
 
 ##############################################################################
@@ -195,16 +184,13 @@ mapdl.post_processing.plot_nodal_eqv_stress(
 # using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
 # attribute:
 
-# You can access and plot the results within Python using PyMAPDL
-# with the following commands:
+# Enter post-processor
+mapdl.post1()
 
-# access the result from the mapdl result
-result = mapdl.result
-
-
-result.plot_nodal_solution(0, cmap="bwr")
-result.plot_nodal_stress(0, "x", cmap="bwr")
-result.plot_principal_nodal_stress(0, "SEQV", cmap="bwr")
+mapdl.set(1, 1)
+mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
+mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
+mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
 
 ###############################################################################
 # Stop MAPDL

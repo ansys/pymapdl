@@ -35,17 +35,30 @@ result = mapdl.result
 ######################################################################
 # Displacements
 # -------------
-# Plot the time step 1 and 3.
 
-result.plot_nodal_solution(0)
-result.plot_nodal_solution(2)
+# Enter post-processor
+mapdl.post1()
+
+# Plot the time step 1.
+mapdl.set(1, 1)
+mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
+
+# Plot the time step 3.
+mapdl.set(1, 3)
+mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
+
 
 ######################################################################
 # Stress
 # ------
 
 # Get the nodal and element component stress at time step 1.
-nodenum, stress = result.nodal_stress(0)
+nodenum, stress_res = result.nodal_stress(0)
+print("result.nodal_stress : ", stress_res)
+
+mapdl.set(1, 1)
+stress_post = mapdl.post_processing.nodal_stress_intensity()
+print("mapdl.post_processing.nodal_stress_intensity : ", stress_post)
 
 # Plot the element stress.
 element_stress, elemnum, enode = result.element_stress(0)
