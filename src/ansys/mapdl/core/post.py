@@ -602,8 +602,7 @@ class PostProcessing:
 
         # we can directly the node numbers as the array of selected
         # nodes will be a mask sized to the highest node index - 1
-        # surf = self._mapdl.mesh._surf
-        surf = self._mapdl.mesh.grid
+        surf = self._mapdl.mesh._surf
         node_id = surf["ansys_node_num"].astype(np.int32) - 1
         all_scalars = all_scalars[node_id]
 
