@@ -1,6 +1,4 @@
 """This module is for threaded implementations of the mapdl interface"""
-
-from collections.abc import Callable
 import os
 import shutil
 import time
@@ -126,7 +124,7 @@ class LocalMapdlPool:
         progress_bar: bool = True,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
-        names: Optional[str, Callable] = None,
+        names: Optional[str] = None,
         override=True,
         **kwargs,
     ) -> None:
