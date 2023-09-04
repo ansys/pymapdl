@@ -154,6 +154,6 @@ Recommended articles
 
 * `Ansys Gets Into Open Source With GitHub <ansys_open_source_article_>`_
 * `Access the Power of Ansys from the Python World <ansys_python_power_article_>`_
-* PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
+* PADT Inc.'s `Using Ansys Scripting with PyMAPDL, PyDPF-Post, and more - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
 
 Feel free to email any educational or learning resource to `PyAnsys Core team <pyansys_core_>`_.

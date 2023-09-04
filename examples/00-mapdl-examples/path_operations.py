@@ -1,7 +1,7 @@
 """
 .. _ref_path_operation:
 
-Path Operations within pyMAPDL and MAPDL
+Path Operations within PyMAPDL and MAPDL
 ----------------------------------------
 
 This tutorial shows how you can use pyansys and MAPDL to interpolate

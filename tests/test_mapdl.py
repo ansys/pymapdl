@@ -554,7 +554,7 @@ def test_apdl_logging(mapdl, tmpdir):
 
     assert "APDL" in log
     assert "ansys.mapdl.core" in log
-    assert "PyMapdl" in log
+    assert "PyMAPDL" in log
     assert "/COM" in log
     assert "This is a comment" in log
     assert "This is a non-interactive command" in log
