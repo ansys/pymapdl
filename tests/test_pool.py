@@ -194,7 +194,7 @@ def test_abort(pool, tmpdir):
 
 @skip_if_not_local
 @skip_if_ignore_pool
-def test_directory_names(pool):
+def test_directory_names_default(pool):
     dirs_path_pool = os.listdir(pool._root_dir)
     assert "Instance 0" in dirs_path_pool
     assert "Instance 1" in dirs_path_pool
@@ -204,7 +204,7 @@ def test_directory_names(pool):
 
 @skip_if_not_local
 @skip_if_ignore_pool
-def test_directory_names():
+def test_directory_names_custom_string():
     pool = LocalMapdlPool(2, names="my_instance")
 
     dirs_path_pool = os.listdir(pool._root_dir)
@@ -216,7 +216,7 @@ def test_directory_names():
 
 @skip_if_not_local
 @skip_if_ignore_pool
-def test_directory_names():
+def test_directory_names_function():
     def myfun(i):
         if i == 0:
             return "instance_zero"
