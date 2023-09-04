@@ -114,7 +114,6 @@ mapdl.solve()
 ##############################################################################
 # Post-processing
 # ---------------
-result = mapdl.result
 
 # Enter post-processor
 mapdl.post1()
@@ -138,16 +137,6 @@ mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
 mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
 mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
 
-# # Select the step you want to analyse
-# mapdl.set(1)
-
-# # Plot nodal displacements
-# mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
-# # Plot nodal component stress
-# mapdl.post_processing.plot_nodal_component_stress("x", cmap="bwr")
-# # Plot nodal equivalent stress
-# mapdl.post_processing.plot_nodal_eqv_stress(cmap="bwr")
-
 
 ##############################################################################
 # Plot non-interactively
@@ -169,42 +158,6 @@ mapdl.post_processing.plot_nodal_component_stress(
 mapdl.post_processing.plot_nodal_eqv_stress(
     cmap="bwr", cpos=cpos, savefig="cylinder_eqv_st.png"
 )
-
-# ##############################################################################
-# # Plot the nodal displacement
-# result.plot_nodal_stress(
-#     0,
-#     "x",
-#     cmap="bwr",
-#     cpos=cpos,
-#     screenshot="cylinder_sx.png",
-# )
-
-
-# result.plot_principal_nodal_stress(
-#     0,
-#     "SEQV",
-#     cmap="bwr",
-#     cpos=cpos,
-#     screenshot="cylinder_vonmises.png",
-# )
-
-
-##############################################################################
-# Alternatively, you can access the same results directly from MAPDL
-# using the :attr:`Mapdl.post_processing <ansys.mapdl.core.Mapdl.post_processing>`
-# attribute:
-
-# You can access and plot the results within Python using PyMAPDL
-# with the following commands:
-
-# access the result from the mapdl result
-result = mapdl.result
-
-
-result.plot_nodal_solution(0, cmap="bwr")
-result.plot_nodal_stress(0, "x", cmap="bwr")
-result.plot_principal_nodal_stress(0, "SEQV", cmap="bwr")
 
 ###############################################################################
 # Stop MAPDL

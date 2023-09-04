@@ -15,22 +15,22 @@ commands:
 
 """
 
+##############################################################################
+# Script initialization
+# ---------------------
+
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
+
+##############################################################################
+# Upload and run an MAPDL script.
+
 if mapdl.is_local:
     mapdl.upload("./spotweld/spot_weld.inp")
     mapdl.input("spot_weld.inp")
 else:
     mapdl.input("./spotweld/spot_weld.inp")
-
-######################################################################
-# Open the result file
-# --------------------
-
-# access the result from the mapdl result
-result = mapdl.result
-
 
 ######################################################################
 # Displacements
@@ -53,28 +53,27 @@ mapdl.post_processing.plot_nodal_displacement(cmap="bwr")
 # ------
 
 # Get the nodal and element component stress at time step 1.
-nodenum, stress_res = result.nodal_stress(0)
-print("result.nodal_stress : ", stress_res)
-
 mapdl.set(1, 1)
-stress_post = mapdl.post_processing.nodal_stress_intensity()
-print("mapdl.post_processing.nodal_stress_intensity : ", stress_post)
+nodal_stress = mapdl.post_processing.nodal_stress_intensity()
+print("Nodal stress : ", nodal_stress)
 
 # Plot the element stress.
-element_stress, elemnum, enode = result.element_stress(0)
+element_stress = mapdl.post_processing.element_stress("int")
+print("Element stress : ", element_stress)
 
 ######################################################################
 # The stress at the contact element simulating the spot weld.
 #
 # Plot the nodal stress in the Z direction.
-result.plot_nodal_stress(0, "z")
+mapdl.post_processing.plot_nodal_component_stress("z")
 
 
 ######################################################################
-# Get the principal nodal stress and plot the von Mises stress.
+# Get the cumulative equivalent stress and plot the von Mises stress.
 
-nnum, pstress = result.principal_nodal_stress(0)
-result.plot_principal_nodal_stress(0, "SEQV")
+eqv_stress = mapdl.post_processing.nodal_eqv_stress()
+print("Cumulative equivalent stress : ", eqv_stress)
+mapdl.post_processing.plot_nodal_eqv_stress()
 
 ###############################################################################
 # Stop MAPDL
