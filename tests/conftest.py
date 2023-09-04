@@ -574,6 +574,7 @@ def coupled_example(mapdl, cleared):
     mapdl_code = mapdl_code.replace(
         "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
     )
+    mapdl.finish()
     mapdl.input_strings(mapdl_code)
 
 

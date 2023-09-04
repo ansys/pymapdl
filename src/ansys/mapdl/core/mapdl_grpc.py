@@ -3115,7 +3115,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
         return self.vget("_temp", nvar)
 
@@ -3138,7 +3138,7 @@ class MapdlGrpc(_MapdlCore):
             item=item,
             comp=comp,
             name=name,
-            kwargs=kwargs,
+            **kwargs,
         )
         return self.vget("_temp", nvar)
 
@@ -3208,7 +3208,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
 
     def get_esol(
@@ -3322,7 +3322,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
