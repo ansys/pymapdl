@@ -248,7 +248,7 @@ jobs:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main'
-    timeout-minutes: 20
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
