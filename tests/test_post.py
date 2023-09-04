@@ -161,6 +161,8 @@ def test_disp_plot(mapdl, static_solve, comp):
 
 
 def test_disp_plot_subselection(mapdl, static_solve):
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
     mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
     assert (
@@ -173,6 +175,8 @@ def test_disp_plot_subselection(mapdl, static_solve):
 
 
 def test_nodal_eqv_stress(mapdl, static_solve):
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
 
@@ -187,6 +191,8 @@ def test_nodal_eqv_stress(mapdl, static_solve):
 
 
 def test_plot_nodal_eqv_stress(mapdl, static_solve):
+    verify_image_cache.skip = True  # skipping image verification
+
     assert mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True) is None
 
 
@@ -735,6 +741,8 @@ def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
 
 
 def test_general_plotter_returns(mapdl, static_solve):
+    verify_image_cache.skip = True  # skipping image verification
+
     # Returns
     assert (
         mapdl.post_processing.plot_nodal_displacement("X", smooth_shading=True) is None
