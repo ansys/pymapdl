@@ -16,6 +16,7 @@ This code creates a pool:
     >>> from ansys.mapdl.core import LocalMapdlPool
     >>> pool = LocalMapdlPool(10)
     'MAPDL Pool with 10 active instances'
+    >>> pool.exit(block=True)
 
 You can supply additional keyword arguments when creating the
 pool. This code creates several instances with one CPU each running
@@ -40,9 +41,9 @@ during a batch process, that instance is automatically restarted.
 You can turn off this behavior by setting ``restart_failed=False`` when
 creating the pool.
 
-
 Run a set of input files
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
+
 You can use the pool to run a set of pre-generated input files using the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` method. For
 example, this code would run the first set of 20 verification files:
@@ -57,7 +58,8 @@ example, this code would run the first set of 20 verification files:
 
 
 Run a user function
-~~~~~~~~~~~~~~~~~~~
+-------------------
+
 You can use the pool to run a custom user function on each MAPDL
 instance over a set of inputs. As in the example for the
 :func:`run_batch <ansys.mapdl.core.MapdlLocalPool.run_batch>` function,
@@ -92,8 +94,21 @@ output from MAPDL.
         "Begin level",
     ]
 
+    # Close the PyMAPDL pool.
+    pool.exit()
+
+
+Close the PyMAPDL pool
+----------------------
+
+You can close the PyMAPDL pool with the following command.
+
+.. code:: pycon
+    
+    >>> pool.exit()
 
 
 API description
-~~~~~~~~~~~~~~~
+---------------
+
 For a comprehensive description, see :ref:`ref_pool_api`.
