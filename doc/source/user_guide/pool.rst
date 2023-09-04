@@ -16,6 +16,7 @@ This code creates a pool:
     >>> from ansys.mapdl.core import LocalMapdlPool
     >>> pool = LocalMapdlPool(10)
     'MAPDL Pool with 10 active instances'
+    >>> pool.exit(block=True)
 
 You can supply additional keyword arguments when creating the
 pool. This code creates several instances with one CPU each running
@@ -39,11 +40,6 @@ Note that this is a self-healing pool. If an instance of MAPDL dies
 during a batch process, that instance is automatically restarted.
 You can turn off this behavior by setting ``restart_failed=False`` when
 creating the pool.
-
-You can close the PyMAPDL pool with the following command.
-
-.. code:: pycon
-    >>> pool.exit()
 
 Run a set of input files
 ------------------------
@@ -101,6 +97,14 @@ output from MAPDL.
     # Close the PyMAPDL pool.
     pool.exit()
 
+
+Close the PyMAPDL pool
+----------------------
+
+You can close the PyMAPDL pool with the following command.
+
+.. code:: pycon
+    >>> pool.exit()
 
 
 API description
