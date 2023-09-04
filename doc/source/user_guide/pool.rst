@@ -40,12 +40,6 @@ during a batch process, that instance is automatically restarted.
 You can turn off this behavior by setting ``restart_failed=False`` when
 creating the pool.
 
-You can close the PyMAPDL pool with the following command.
-
-.. code:: pycon
-
-    >>> pool.exit()
-
 
 Run a set of input files
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,8 +92,6 @@ output from MAPDL.
         "Begin level",
     ]
 
-    # Close the PyMAPDL pool.
-    pool.exit()
 
 
 API description
