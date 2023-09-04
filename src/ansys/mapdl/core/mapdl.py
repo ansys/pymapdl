@@ -4576,7 +4576,7 @@ class _MapdlCore(Commands):
         """
         fname = self._get_file_name(fname, ext, "rst")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_ = self._decompose_fname(fname)
+        file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
     def _file(self, filename: str, extension: str, **kwargs) -> str:
@@ -4738,6 +4738,9 @@ class _MapdlCore(Commands):
 
         str
             File extension (without dot)
+
+        str
+            File path
         """
         fname = pathlib.Path(fname)
         return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
@@ -4905,3 +4908,41 @@ class _MapdlCore(Commands):
         # returning to previous selection
         self.cmsel("s", "__tmp_cm__", entity=entity)
         return output
+
+    @wraps(Commands.satin)
+    def satin(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wraps ~SATIN command"""
+        if self.is_grpc:
+            fname = name
+            if path:
+                fname = os.path.join(path, name)
+            fname = self._get_file_name(fname, extension, "sat")
+            fname = self._get_file_path(fname, False)
+            name, extension, path = self._decompose_fname(fname)
+
+            if path == path.parent:
+                path = ""
+            else:
+                path = str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().satin(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+        )
