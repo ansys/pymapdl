@@ -475,11 +475,11 @@ def create_temp_dir(tmpdir=None, name=None):
         os.makedirs(tmpdir)
 
     if not name:
-        name = random_string(10, letters)
+        letters_ = string.ascii_lowercase.replace("n", "")
+        name = random_string(10, letters_)
 
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
-    letters = string.ascii_lowercase.replace("n", "")
     path = os.path.join(tmpdir, name)
 
     # in the *rare* case of a duplicate path
