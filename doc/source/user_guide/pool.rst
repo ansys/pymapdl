@@ -104,6 +104,7 @@ Close the PyMAPDL pool
 You can close the PyMAPDL pool with the following command.
 
 .. code:: pycon
+    
     >>> pool.exit()
 
 
