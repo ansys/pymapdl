@@ -97,7 +97,7 @@ output from MAPDL.
         "Begin level",
         "Begin level",
     ]
-    
+
     # Close the PyMAPDL pool.
     pool.exit()
 
