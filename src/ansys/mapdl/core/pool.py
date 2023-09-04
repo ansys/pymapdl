@@ -1,5 +1,6 @@
 """This module is for threaded implementations of the mapdl interface"""
 
+from collections.abc import Callable
 import os
 import shutil
 import time
@@ -73,6 +74,14 @@ class LocalMapdlPool:
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
 
+    names : str, Callable, optional
+        You can specify the names of the directories where the instances are
+        created. A string or a function (callable) that accepts an integer and
+        return an string can be used.
+        If you use a string, "_{i}" is appended to that string, where "i" is
+        the index of each instance in the pool.
+        By default, the instances directories are named as "Instances_{i}".
+
     **kwargs : dict, optional
         See :func:`ansys.mapdl.core.launch_mapdl` for a complete
         listing of all additional keyword arguments.
@@ -117,6 +126,8 @@ class LocalMapdlPool:
         progress_bar: bool = True,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
+        names: Optional[str, Callable] = None,
+        override=True,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
@@ -127,6 +138,19 @@ class LocalMapdlPool:
         self._spawn_kwargs: Dict[str, Any] = kwargs
         self._spawning_i: int = 0
         self._exiting_i: int = 0
+        self._override = override
+
+        if not names:
+            names = "Instance"
+
+        if isinstance(names, str):
+            self._names = lambda i: names + "_" + str(i)
+        elif callable(names):
+            self._names = names
+        else:
+            raise ValueError(
+                "Only strings or functions are allowed in the argument 'name'."
+            )
 
         # verify that mapdl is 2021R1 or newer
         if "exec_file" in kwargs:
@@ -612,9 +636,13 @@ class LocalMapdlPool:
         # create a new temporary directory for each instance
         self._spawning_i += 1
 
-        run_location = create_temp_dir(self._root_dir)
+        run_location = create_temp_dir(self._root_dir, name=f"Instance_{index}")
+
         self._instances[index] = launch_mapdl(
-            run_location=run_location, port=port, **self._spawn_kwargs
+            run_location=run_location,
+            port=port,
+            override=self._override,
+            **self._spawn_kwargs,
         )
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:

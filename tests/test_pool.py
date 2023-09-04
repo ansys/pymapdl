@@ -190,3 +190,46 @@ def test_abort(pool, tmpdir):
             break
 
     assert path_deleted
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names(pool):
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "Instance 0" in dirs_path_pool
+    assert "Instance 1" in dirs_path_pool
+    assert "Instance 2" in dirs_path_pool
+    assert "Instance 3" in dirs_path_pool
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names():
+    pool = LocalMapdlPool(2, names="my_instance")
+
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "my_instance_0" in dirs_path_pool
+    assert "my_instance_1" in dirs_path_pool
+
+    pool.exit()
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names():
+    def myfun(i):
+        if i == 0:
+            return "instance_zero"
+        elif i == 1:
+            return "instance_one"
+        else:
+            return "Other_instance"
+
+    pool = LocalMapdlPool(3, names=myfun)
+
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "instance_zero" in dirs_path_pool
+    assert "instance_one" in dirs_path_pool
+    assert "Other_instance" in dirs_path_pool
+
+    pool.exit()
