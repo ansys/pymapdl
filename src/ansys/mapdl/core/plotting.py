@@ -398,6 +398,9 @@ def _general_plotter(
                 UserWarning,
             )
 
+    if not cmap:
+        cmap = "bwr"
+
     if background:
         plotter.set_background(background)
 
@@ -442,7 +445,7 @@ def _general_plotter(
         for each_mesh in mesh_:
             plotter.add_mesh(
                 each_mesh,
-                scalars=None,  # scalars,
+                scalars=scalars,
                 scalar_bar_args=scalar_bar_args,
                 color="w",  # mesh.get("color", color),
                 style=mesh.get("style", style),
