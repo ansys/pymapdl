@@ -111,3 +111,8 @@ def test_mx_plastic_inc(mapdl):
 
 def test_n_cg_iter(mapdl):
     assert isinstance(mapdl.solution.n_cg_iter, float)
+
+
+def test_solution_call(mapdl):
+    mapdl.finish()
+    assert "MAPDL SOLUTION ROUTINE" in mapdl.solution()
