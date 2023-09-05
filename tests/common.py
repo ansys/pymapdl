@@ -69,6 +69,10 @@ def has_dpf():
     return os.environ.get("DPF_PORT", "")
 
 
+def is_smp():
+    return os.environ.get("DISTRIBUTED_MODE", "smp").lower().strip() == "smp"
+
+
 def is_float(s: str) -> bool:
     try:
         float(s)
