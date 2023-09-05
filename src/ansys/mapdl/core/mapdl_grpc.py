@@ -2841,31 +2841,6 @@ class MapdlGrpc(_MapdlCore):
 
         return self._download_as_raw(error_file).decode("latin-1")
 
-    @wraps(_MapdlCore.igesin)
-    def igesin(self, fname="", ext="", **kwargs):
-        """Wrap the IGESIN command to handle the remote case."""
-
-        fname = self._get_file_name(fname=fname, ext=ext)
-        filename = self._get_file_path(fname, progress_bar=False)
-
-        if " " in fname:
-            # Bug in reading file paths with whitespaces.
-            # https://github.com/ansys/pymapdl/issues/1601
-
-            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
-            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
-            self._log.debug(msg_)
-
-            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
-            self.input_strings(cmd)
-
-            out = super().igesin(fname="__iges_file__(1)", **kwargs)
-            self.run("__iges_file__ =")  # cleaning array.
-            self.run("! Ending \\IGESIN whitespace patch.")
-            return out
-        else:
-            return super().igesin(fname=filename, **kwargs)
-
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(
         self,
@@ -3378,6 +3353,31 @@ class MapdlGrpc(_MapdlCore):
             return parameter[SESSION_ID_NAME]["value"]
         return None
 
+    @wraps(_MapdlCore.igesin)
+    def igesin(self, fname, ext="", **kwargs):
+        """Wrap the IGESIN command to handle the remote case."""
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        if " " in fname:
+            # Bug in reading file paths with whitespaces.
+            # https://github.com/ansys/pymapdl/issues/1601
+
+            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+            self._log.debug(msg_)
+
+            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+            self.input_strings(cmd)
+
+            out = super().igesin(fname="__iges_file__(1)", **kwargs)
+            self.run("__iges_file__ =")  # cleaning array.
+            self.run("! Ending \\IGESIN whitespace patch.")
+            return out
+        else:
+            return super().igesin(fname=filename, **kwargs)
+
     @wraps(_MapdlCore.satin)
     def satin(
         self,
@@ -3413,6 +3413,7 @@ class MapdlGrpc(_MapdlCore):
             fmt=fmt,
             nocl=nocl,
             noan=noan,
+            **kwargs,
         )
 
     @wraps(_MapdlCore.cat5in)
@@ -3450,6 +3451,7 @@ class MapdlGrpc(_MapdlCore):
             fmt=fmt,
             nocl=nocl,
             noan=noan,
+            **kwargs,
         )
 
     @wraps(_MapdlCore.parain)
@@ -3460,8 +3462,7 @@ class MapdlGrpc(_MapdlCore):
         path="",
         entity="",
         fmt="",
-        nocl="",
-        noan="",
+        scale="",
         **kwargs,
     ):
         """Wraps ~parain command"""
@@ -3485,6 +3486,6 @@ class MapdlGrpc(_MapdlCore):
             path=path,
             entity=entity,
             fmt=fmt,
-            nocl=nocl,
-            noan=noan,
+            scale=scale,
+            **kwargs,
         )
