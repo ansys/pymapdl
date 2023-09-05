@@ -30,7 +30,7 @@ jobs:
       SHELLOPTS: "errexit:pipefail"
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
