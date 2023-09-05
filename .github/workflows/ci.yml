@@ -315,7 +315,7 @@ jobs:
         run: |
           image=${{ matrix.mapdl-version }}
           export distributed_mode="smp"
-          if [[ $string == *".1."* ]]; then
+          if [[ $image == *".1."* ]]; then
           export distributed_mode="dmp";
           fi
           echo "Distributed mode: $distributed_mode"
