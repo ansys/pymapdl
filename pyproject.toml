@@ -69,6 +69,7 @@ tests = [
     "pyansys-tools-report==0.6.0",
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
+    "pytest-pyvista==0.1.8",
 ]
 doc = [
     "sphinx==7.2.2",
@@ -125,6 +126,7 @@ markers = [
     "gui: skip tests that launch the GUI interface",
 ]
 testpaths = "tests"
+image_cache_dir = "tests/.image_cache"
 
 [tool.isort]
 profile = "black"

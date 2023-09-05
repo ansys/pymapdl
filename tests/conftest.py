@@ -199,6 +199,11 @@ def pytest_collection_modifyitems(config, items):
 #
 
 
+@pytest.fixture(autouse=True)
+def wrapped_verify_image_cache(verify_image_cache):
+    return verify_image_cache
+
+
 class Running_test:
     def __init__(self, active: bool = True) -> None:
         self._state = active

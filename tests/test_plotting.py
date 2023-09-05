@@ -255,8 +255,10 @@ def test_bc_glyph(mapdl, bc_example):
         mapdl.nplot(plot_bc=True, bc_glyph_size="big")
 
 
-def test_bc_bc_labels(mapdl, bc_example):
+def test_bc_bc_labels(mapdl, bc_example, verify_image_cache):
     """Test values for 'bc_labels' keyword argument."""
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.nplot(plot_bc=True, bc_labels="UX")
     mapdl.nplot(plot_bc=True, bc_labels=["Ux", "uy", "VOLT"])
     with pytest.raises(ValueError):
