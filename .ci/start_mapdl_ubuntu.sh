@@ -13,7 +13,7 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
-    --shm-size=1gb
+    --shm-size=1gb \
     -w /jobs \
     -u=0:0 \
     $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -dmp -np 2 > log.txt &

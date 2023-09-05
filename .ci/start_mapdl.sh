@@ -12,7 +12,7 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
-    --shm-size=1gb
+    --shm-size=1gb \
     $MAPDL_IMAGE \
     -dmp -np 2 > log.txt &
 grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
