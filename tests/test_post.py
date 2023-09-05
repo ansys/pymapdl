@@ -625,7 +625,8 @@ def test_plot_element_stress(mapdl, static_solve, comp):
     assert mapdl.post_processing.plot_element_stress(comp) is None
 
 
-def test_plot_element_values(mapdl, static_solve):
+def test_plot_element_values(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.high_variance_test = 600
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_values("S", "X") is None
