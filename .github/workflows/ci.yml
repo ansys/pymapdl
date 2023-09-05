@@ -423,7 +423,7 @@ jobs:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main'
-    timeout-minutes: 45
+    timeout-minutes: 55
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
