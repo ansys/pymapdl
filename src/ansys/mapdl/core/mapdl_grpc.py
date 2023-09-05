@@ -3360,6 +3360,9 @@ class MapdlGrpc(_MapdlCore):
         fname = self._get_file_name(fname=fname, ext=ext)
         filename = self._get_file_path(fname, progress_bar=False)
 
+        # Entering aux15 preprocessor
+        self.aux15()
+
         if " " in fname:
             # Bug in reading file paths with whitespaces.
             # https://github.com/ansys/pymapdl/issues/1601
