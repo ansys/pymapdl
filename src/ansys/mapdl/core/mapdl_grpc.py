@@ -3446,6 +3446,7 @@ class MapdlGrpc(_MapdlCore):
 
         # wrapping path in single quotes because of #2286
         path = f"'{path}'"
+        self.finish()
         return super().cat5in(
             name=name,
             extension=extension,
