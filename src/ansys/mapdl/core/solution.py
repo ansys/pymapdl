@@ -38,6 +38,9 @@ class Solution:
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
 
+    def __call__(self):
+        return self._mapdl.slashsolu()
+
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of mapdl"""

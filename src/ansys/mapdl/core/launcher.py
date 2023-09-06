@@ -1115,13 +1115,15 @@ def launch_mapdl(
         Default ``False``.
 
     add_env_vars : dict, optional
-        The provided dictionary will be used to extend the system or process
+        The provided dictionary will be used to extend the MAPDL process
         environment variables. If you want to control all of the environment
-        variables, use ``replace_env_vars``. Defaults to ``None``.
+        variables, use the argument ``replace_env_vars``. Defaults to ``None``.
 
     replace_env_vars : dict, optional
-        The provided dictionary will be used to replace all the system or process
-        environment variables. To just add some environment variables to the MAPDL
+        The provided dictionary will be used to replace all the MAPDL process
+        environment variables. It replace the system environment variables
+        which otherwise would be used in the process.
+        To just add some environment variables to the MAPDL
         process, use ``add_env_vars``. Defaults to ``None``.
 
     version : float, optional
@@ -1307,6 +1309,18 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
     ...                       mode='console')
 
+    Run MAPDL with additional environment variables.
+
+    >>> my_env_vars = {"my_var":"true", "ANSYS_LOCK":"FALSE"}
+    >>> mapdl = launch_mapdl(add_env_vars=my_env_vars)
+
+    Run MAPDL with our own set of environment variables. It replace the system
+    environment variables which otherwise would be used in the process.
+
+    >>> my_env_vars = {"my_var":"true",
+        "ANSYS_LOCK":"FALSE",
+        "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
+    >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
     if remove_temp_files is not None:
         warnings.warn(

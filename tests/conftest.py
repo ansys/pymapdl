@@ -25,6 +25,7 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_smp,
 )
 
 ################################################################
@@ -46,6 +47,7 @@ ON_MACOS = platform == "darwin"
 HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = pyvista.system_supports_plotting()
+IS_SMP = is_smp()
 
 
 # check if the user wants to permit pytest to start MAPDL
@@ -195,6 +197,11 @@ def pytest_collection_modifyitems(config, items):
 # Setting fixtures
 # ---------------------------
 #
+
+
+@pytest.fixture(autouse=True)
+def wrapped_verify_image_cache(verify_image_cache):
+    return verify_image_cache
 
 
 class Running_test:
@@ -574,6 +581,7 @@ def coupled_example(mapdl, cleared):
     mapdl_code = mapdl_code.replace(
         "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
     )
+    mapdl.finish()
     mapdl.input_strings(mapdl_code)
 
 
