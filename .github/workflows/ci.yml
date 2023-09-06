@@ -3,6 +3,12 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_all_tests:
+        description: 'Run all extended MAPDL build tests'
+        required: true
+        type: boolean
+    
   push:
     tags:
       - "*"     
@@ -246,14 +252,14 @@ jobs:
   build-test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
-          - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+          - ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && || inputs.run_all_tests) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
             mapdl-version: 'v21.1.1'
