@@ -247,9 +247,8 @@ sphinx_gallery_conf = {
     # Modules for which function level galleries are created.  In
     "doc_module": "ansys-mapdl-core",
     "image_scrapers": (DynamicScraper(), "matplotlib"),
-    # "ignore_pattern": "flycheck*",
-    # "thumbnail_size": (350, 350),
-    "reset_modules_order": "both",
+    "ignore_pattern": "flycheck*",
+    "thumbnail_size": (350, 350),
 }
 # ---
 
@@ -294,10 +293,6 @@ html_context = {
     "doc_path": DOC_PATH,
 }
 html_show_sourcelink = False
-
-# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
-html_show_sphinx = False
-
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
