@@ -25,6 +25,7 @@ env:
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
   PYANSYS_OFF_SCREEN: True
+  I_MPI_SHM_LMT: shm
   DPF_START_SERVER: False
   DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
