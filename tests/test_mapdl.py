@@ -27,6 +27,7 @@ from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
 from conftest import (
+    IS_SMP,
     ON_LOCAL,
     skip_if_not_local,
     skip_if_on_cicd,
@@ -2125,10 +2126,10 @@ def test_port(mapdl):
 
 
 def test_distributed(mapdl):
-    if ON_LOCAL:
-        assert mapdl._distributed
+    if IS_SMP and not ON_LOCAL:
+        assert not mapdl._distributed
     else:
-        assert not mapdl._distributed  # assuming remote is using -smp
+        assert mapdl._distributed
 
 
 def test_non_used_kwargs(mapdl):
