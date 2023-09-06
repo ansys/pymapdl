@@ -1,5 +1,10 @@
 import os
 
+import pytest
+
+from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
+from conftest import ON_CI
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Files with CADs
@@ -17,17 +22,17 @@ def geometry_test_is_correct(mapdl, geometry=None):
         entities = [1, 8, 18, 12]
 
     assert (
-        mapdl.geometry.n_volu == entities[0]
-    ), f"The number of volumes ({mapdl.geometry.n_volu}) is not correct."
-    assert (
-        mapdl.geometry.n_area == entities[1]
-    ), f"The number of areas ({mapdl.geometry.n_volu}) is not correct."
+        mapdl.geometry.n_keypoint == entities[3]
+    ), f"The number of keypoints ({mapdl.geometry.n_keypoint}) is not correct."
     assert (
         mapdl.geometry.n_line == entities[2]
-    ), f"The number of lines ({mapdl.geometry.n_volu}) is not correct."
+    ), f"The number of lines ({mapdl.geometry.n_line}) is not correct."
     assert (
-        mapdl.geometry.n_keypoint == entities[3]
-    ), f"The number of keypoints ({mapdl.geometry.n_volu}) is not correct."
+        mapdl.geometry.n_area == entities[1]
+    ), f"The number of areas ({mapdl.geometry.n_area}) is not correct."
+    assert (
+        mapdl.geometry.n_volu == entities[0]
+    ), f"The number of volumes ({mapdl.geometry.n_volu}) is not correct."
     return True
 
 
@@ -41,6 +46,17 @@ def clear_wkdir_from_cads(mapdl):
             mapdl.slashdelete(each_file)
         except IOError:
             pass
+
+
+class NullContext:
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+    def __init__(self):
+        pass
 
 
 ## IGES
@@ -66,22 +82,60 @@ def test_readin_igs(mapdl, cleared):
 ## Connection commands
 #
 def test_readin_sat(mapdl, cleared):
-    mapdl.satin("CubeWithHole", extension="sat", path=CADs_path, entity="solid", fmt=0)
-    assert geometry_test_is_correct(mapdl)
-    clear_wkdir_from_cads(mapdl)
+    if ON_CI and mapdl.version >= 23.2:
+        context = pytest.raises(
+            MapdlRuntimeError, match="Specified library does not exist."
+        )
+    elif ON_CI:
+        context = pytest.raises(AssertionError)
+    else:
+        context = NullContext()
 
-
-def test_readin_catiav5(mapdl, cleared):
-    mapdl.cat5in(
-        name="CubeWithHole", extension="CATPart", path=CADs_path, entity="solid", fmt=0
-    )
-    assert geometry_test_is_correct(mapdl)
+    with context:
+        mapdl.satin(
+            "CubeWithHole", extension="sat", path=CADs_path, entity="solid", fmt=0
+        )
+        assert geometry_test_is_correct(mapdl)
     clear_wkdir_from_cads(mapdl)
 
 
 def test_readin_x_t(mapdl, cleared):
-    mapdl.parain(
-        name="CubeWithHole", extension="x_t", path=CADs_path, entity="solid", fmt=0
-    )
-    assert geometry_test_is_correct(mapdl)
+    if ON_CI and mapdl.version >= 23.2:
+        context = pytest.raises(
+            MapdlRuntimeError, match="Specified library does not exist."
+        )
+    elif ON_CI:
+        context = pytest.raises(
+            MapdlRuntimeError, match="File file.anf does not exist."
+        )
+    else:
+        context = NullContext()
+
+    with context:
+        mapdl.parain(
+            name="CubeWithHole", extension="x_t", path=CADs_path, entity="solid", fmt=0
+        )
+        assert geometry_test_is_correct(mapdl)
+
+    clear_wkdir_from_cads(mapdl)
+
+
+def test_readin_catiav5(mapdl, cleared):
+    if ON_CI:
+        context = pytest.raises(
+            MapdlInvalidRoutineError, match=" ~CAT5IN is not a recognized"
+        )
+    else:
+        context = NullContext()
+
+    with context:
+        mapdl.cat5in(
+            name="CubeWithHole",
+            extension="CATPart",
+            path=CADs_path,
+            entity="solid",
+            fmt=0,
+        )
+        assert geometry_test_is_correct(mapdl)
+
     clear_wkdir_from_cads(mapdl)
