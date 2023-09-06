@@ -115,7 +115,5 @@ def test_n_cg_iter(mapdl):
 
 def test_solution_call(mapdl):
     mapdl.finish()
-    assert (
-        "MAPDL SOLUTION ROUTINE" in mapdl.solution()
-        or "ANSYS SOLUTION ROUTINE" in mapdl.solution()
-    )
+    output = mapdl.solution()
+    assert "MAPDL SOLUTION ROUTINE" in output or "ANSYS SOLUTION ROUTINE" in output
