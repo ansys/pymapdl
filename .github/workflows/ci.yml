@@ -3,6 +3,12 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_all_tests:
+        description: 'Run all extended MAPDL build tests'
+        required: true
+        type: boolean
+    
   push:
     tags:
       - "*"     
@@ -243,18 +249,17 @@ jobs:
         if: always()
         run: cat log.txt
 
-        
   build-test:
     name: "Remote: Build and unit testing"
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    timeout-minutes: 20
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
         mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
-          - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
             mapdl-version: 'v21.1.1'
@@ -272,6 +277,9 @@ jobs:
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
+
+    outputs:
+      DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
     steps:
       - name: "Install Git and checkout project"
@@ -308,12 +316,24 @@ jobs:
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Getting SMP/DMP mode"
+        id: distributed_mode
+        run: |
+          image=${{ matrix.mapdl-version }}
+          export distributed_mode="smp"
+          if [[ $image == *".1."* ]]; then
+          export distributed_mode="dmp";
+          fi
+          echo "Distributed mode: $distributed_mode"
+          echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
+
       - name: "Pull, launch, and validate MAPDL service"
         run: .ci/start_mapdl.sh
         if: ${{ !contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
         run: .ci/start_mapdl_ubuntu.sh
@@ -321,6 +341,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Unit testing requirements installation"
         run: |
@@ -332,6 +353,8 @@ jobs:
           docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
+        env:
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
@@ -449,7 +472,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv ./.venv
           source ./.venv/bin/activate
- 
+
       - name: "Install OS packages"
         run: |
           apt update
@@ -520,7 +543,7 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --upgrade pip
-      
+
       - name: "Creating python venv"
         shell: powershell
         run: |
@@ -638,3 +661,16 @@ jobs:
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
+  
+  notify:
+    name: Notify failed build
+    needs: [upload-dev-docs]
+    if: failure() && github.event.pull_request == null
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open issue
+        uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title-template: "Failed scheduled build"
+          label-name: "Nightly build failed"
