@@ -1881,7 +1881,7 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surfs = self.geometry.get_areas(return_as_list=True)
+            surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []
 

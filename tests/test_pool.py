@@ -239,7 +239,7 @@ def test_directory_names_custom_string(tmpdir):
 
 @skip_if_not_local
 @skip_if_ignore_pool
-def test_directory_names_function():
+def test_directory_names_function(tmpdir):
     def myfun(i):
         if i == 0:
             return "instance_zero"
@@ -249,7 +249,11 @@ def test_directory_names_function():
             return "Other_instance"
 
     pool = LocalMapdlPool(
-        3, nproc=NPROC, names=myfun, additional_switches=LAUNCH_SWITCHES
+        3,
+        nproc=NPROC,
+        names=myfun,
+        run_location=tmpdir,
+        additional_switches=LAUNCH_SWITCHES,
     )
 
     dirs_path_pool = os.listdir(pool._root_dir)
