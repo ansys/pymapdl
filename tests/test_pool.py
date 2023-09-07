@@ -234,7 +234,7 @@ def test_directory_names_custom_string(tmpdir):
     assert "my_instance_0" in dirs_path_pool
     assert "my_instance_1" in dirs_path_pool
 
-    pool.exit()
+    pool.exit(block=True)
 
 
 @skip_if_not_local
@@ -257,4 +257,4 @@ def test_directory_names_function():
     assert "instance_one" in dirs_path_pool
     assert "Other_instance" in dirs_path_pool
 
-    pool.exit()
+    pool.exit(block=True)
