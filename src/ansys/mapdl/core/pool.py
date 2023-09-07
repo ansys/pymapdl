@@ -1,6 +1,7 @@
 """This module is for threaded implementations of the mapdl interface"""
 import os
 import shutil
+import tempfile
 import time
 from typing import Any, Dict, List, Optional
 import warnings
@@ -55,7 +56,7 @@ class LocalMapdlPool:
         Base directory to create additional directories for each MAPDL
         instance.  Defaults to a temporary working directory.
 
-    starting_port : int, optional
+    port : int, optional
         Starting port for the MAPDL instances.  Defaults to 50052.
 
     progress_bar : bool, optional
@@ -130,7 +131,11 @@ class LocalMapdlPool:
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+
+        if run_location is None:
+            run_location = tempfile.gettempdir()
         self._root_dir: str = run_location
+
         kwargs["remove_temp_files"] = remove_temp_files
         kwargs["mode"] = "grpc"
         self._spawn_kwargs: Dict[str, Any] = kwargs
@@ -194,7 +199,7 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=f"Instance {i}")
+            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
             for i in range(n_instances)
         ]
         if wait:
@@ -503,7 +508,14 @@ class LocalMapdlPool:
                 mapdl.clear(mute=True)
             return mapdl.input(input_file)
 
-        return self.map(run_file, files, progress_bar=progress_bar)
+        return self.map(
+            run_file,
+            files,
+            progress_bar=progress_bar,
+            timeout=timeout,
+            wait=wait,
+            close_when_finished=close_when_finished,
+        )
 
     def next_available(self, return_index=False):
         """Wait until an instance of mapdl is available and return that instance.
@@ -634,7 +646,7 @@ class LocalMapdlPool:
         # create a new temporary directory for each instance
         self._spawning_i += 1
 
-        run_location = create_temp_dir(self._root_dir, name=f"Instance_{index}")
+        run_location = create_temp_dir(self._root_dir, name=name)
 
         self._instances[index] = launch_mapdl(
             run_location=run_location,
@@ -642,6 +654,12 @@ class LocalMapdlPool:
             override=self._override,
             **self._spawn_kwargs,
         )
+
+        # Waiting for the instance being fully initialized.
+        # This is introduce to mitigate #2173
+        while self._instances[index] is None:
+            time.sleep(0.1)
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
