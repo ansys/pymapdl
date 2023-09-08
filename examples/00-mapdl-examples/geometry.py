@@ -72,7 +72,7 @@ my_theme.cmap = "jet"  # colormap
 my_theme.axes.show = False
 my_theme.show_scalar_bar = False
 
-mapdl.aplot(theme=my_theme, quality=6)
+mapdl.aplot(theme=my_theme)
 
 
 ###############################################################################
