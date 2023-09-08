@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlInvalidRoutineError, MapdlRuntimeError, MapdlCommandIgnoredError
 from conftest import ON_CI, ON_LOCAL
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -87,7 +87,7 @@ def test_readin_sat(mapdl, cleared):
             MapdlRuntimeError, match="Specified library does not exist."
         )
     elif ON_CI and ON_LOCAL:
-        context = pytest.raises(MapdlRuntimeError, match="anf does not exist.")
+        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
     elif ON_CI:
         context = pytest.raises(AssertionError)
     else:
@@ -108,13 +108,13 @@ def test_readin_x_t(mapdl, cleared):
         )
 
     elif ON_CI and mapdl.version == 23.1:
-        context = pytest.raises(MapdlRuntimeError, match="does not exist")
+        context = pytest.raises(MapdlCommandIgnoredError, match="does not exist")
 
     elif ON_CI and ON_LOCAL:
         context = pytest.raises(AssertionError)
 
     elif ON_CI:
-        context = pytest.raises(MapdlRuntimeError, match="anf does not exist.")
+        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
 
     else:
         context = NullContext()
