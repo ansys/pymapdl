@@ -60,6 +60,9 @@ if not os.path.isdir(SETTINGS_DIR):
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
 
+ON_WSL = bool(os.environ.get("WSL_DISTRO_NAME", None)) or bool(
+    os.environ.get("WSL_INTEROP", None)
+)
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
@@ -524,7 +527,7 @@ def launch_grpc(
         LOG.debug("Checking file error is created")
         _check_file_error_created(run_location, timeout)
 
-        if os.name == "posix":
+        if os.name == "posix" and not ON_WSL:
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
@@ -1358,7 +1361,8 @@ def launch_mapdl(
         LOG.debug(
             "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
         )
-        start_instance = False
+        if not ON_WSL:
+            start_instance = False
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
     check_valid_ip(ip)  # double check
