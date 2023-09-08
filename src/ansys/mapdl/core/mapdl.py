@@ -1719,8 +1719,6 @@ class _MapdlCore(Commands):
             points = []
             labels = []
 
-            # kwargs.setdefault("return_plotter", True)
-            kwargs["return_plotter"] = True
             color_areas = True
 
             for each_volu in volumes:
@@ -1733,7 +1731,8 @@ class _MapdlCore(Commands):
                     quality=quality,
                     show_area_numbering=show_area_numbering,
                     show_line_numbering=show_line_numbering,
-                    show_lines=False,
+                    show_lines=show_lines,
+                    return_plotter=True,
                     **kwargs,
                 )
 
