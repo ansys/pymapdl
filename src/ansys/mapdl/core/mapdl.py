@@ -1719,6 +1719,7 @@ class _MapdlCore(Commands):
             points = []
             labels = []
 
+            return_plotter = kwargs.pop("return_plotter", False)
             color_areas = True
 
             for each_volu in volumes:
@@ -1748,7 +1749,9 @@ class _MapdlCore(Commands):
             self.cmsel("S", cm_name_area, "AREA", mute=True)
             self.cmsel("S", cm_name_volu, "VOLU", mute=True)
 
-            return general_plotter(meshes, points, labels, **kwargs)
+            return general_plotter(
+                meshes, points, labels, return_plotter=return_plotter, **kwargs
+            )
 
         else:
             with self._enable_interactive_plotting():
