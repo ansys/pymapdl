@@ -288,7 +288,7 @@ Obtain the shape of the generated subspace.
 
     >>> print(Qz.shape)
     (3240, 10)
-    
+
 
 **Step 3**: Reduce the system of equations and solve at each frequency
 from 0 Hz to 1000 Hz with ramped loading.
@@ -303,7 +303,7 @@ Obtain the shape of the reduced solution generated.
 
     >>> print(Yz.shape)
     (10, 100)
-    
+
 
 **Step 4**: Expand the reduced solution back to the FE space.
 
