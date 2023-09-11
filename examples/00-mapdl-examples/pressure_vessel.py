@@ -53,7 +53,7 @@ mapdl.aplot(color="grey", background="w", show_area_numbering=True)
 
 # Generate a cylindrical volume by rotating an area pattern about an axis
 mapdl.vrotat(a_comb, pax1=6, arc=90)
-mapdl.vplot(color="grey", background="w", show_area_numbering=True, cpos="zy")
+mapdl.vplot(color="grey", background="w", cpos="zy")
 
 
 ###############################################################################
