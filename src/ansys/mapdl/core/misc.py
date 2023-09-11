@@ -1149,7 +1149,11 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                     orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
-                pl = plotting_function(return_plotter=True)
+                if entity == "area":
+                    # To overwrite the quality argument
+                    pl = plotting_function(return_plotter=True, quality=1)
+                else:
+                    pl = plotting_function(return_plotter=True)
 
                 vmin = self._enable_picking_entities(
                     entity, pl, type_, previous_picked_entities, **kwargs
