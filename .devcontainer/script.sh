@@ -32,3 +32,11 @@ else
   source ~/.bashrc
 
 fi
+
+# Installing libs for testing
+apt update
+apt install -y libgl1-mesa-glx xvfb
+
+# Installing libs for doc building
+apt update 
+apt install -y zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex
