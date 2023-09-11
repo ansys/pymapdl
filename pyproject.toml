@@ -89,7 +89,7 @@ doc = [
     "pypandoc==1.11",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
-    "pyvista[trame]==0.41.1",
+    "pyvista[trame]==0.42.1",
     "sphinx-autobuild==2021.3.14",
     "sphinx-autodoc-typehints==1.24.0",
     "sphinx-copybutton==0.5.2",
