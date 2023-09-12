@@ -86,6 +86,7 @@ mapdl.finish()
 # ===================
 #
 # Fully fixed (clamped) end.
+mapdl.solution()  # Entering the solution processor.
 mapdl.nsel("S", "LOC", "X", "0")
 mapdl.d("ALL", "ALL")
 mapdl.allsel()
@@ -96,7 +97,6 @@ mapdl.nplot(plot_bc=True, nnum=True)
 # =================
 #
 # Setting modal analysis
-mapdl.solution()  # Entering the solution processor.
 mapdl.antype("MODAL")
 mapdl.modopt("LANB", nmodes, 0, 200)
 mapdl.solve()
