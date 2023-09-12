@@ -192,7 +192,11 @@ Here is an example of the WSL ``/etc/hosts`` file:
 You can add the next lines to your WSL ``~/.bashrc`` file to create an
 environment variable with this IP address:
 
+.. vale off
+
 .. _ref_bash_win_ip:
+
+.. vale on
 
 .. code:: console
 
@@ -251,7 +255,8 @@ to using:
 
 You might need to disable the Microsoft Firewall completely or at least
 for the WSL network connection.
-To do so, follow `this link <disable_firewall_on_wsl_ethernet_section_>`_.
+To do so, follow 
+:ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
 For more information and troubleshooting visit `this issue <wsl_launching_mapdl_>`_
