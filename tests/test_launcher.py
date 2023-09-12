@@ -12,6 +12,7 @@ from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
     _is_ubuntu,
+    _parse_ip_route,
     _validate_MPI,
     _verify_version,
     find_ansys,
@@ -410,3 +411,16 @@ def test_launch_mapdl_non_recognaised_arguments():
 def test_mapdl_non_recognaised_arguments():
     with pytest.raises(ValueError, match="my_fake_argument"):
         pymapdl.Mapdl(my_fake_argument="my_fake_value")
+
+
+def test__parse_ip_route():
+    output = """default via 172.25.192.1 dev eth0 proto kernel <<<=== this
+172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
+
+    assert "172.25.192.1" == _parse_ip_route(output)
+
+    output = """
+default via 172.23.112.1 dev eth0 proto kernel
+172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
+
+    assert "172.23.112.1" == _parse_ip_route(output)
