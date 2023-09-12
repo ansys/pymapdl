@@ -25,8 +25,8 @@ services:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE} # License server env var
       - PYANSYS_OFF_SCREEN=true  # To avoid plotting.
     ports:
-      - '50052:50052'  # For the gRPC server
-      - '50055:50055'  # For the DB server
+      - '50042:50052'  # For the gRPC server
+      - '50045:50055'  # For the DB server
     image: 'ghcr.io/ansys/mapdl:v22.2-ubuntu'
     user: "0:0"
     volumes:
@@ -34,5 +34,5 @@ services:
       - ../:/local:cached
 
     # Overrides default command so things don't shut down after the process ends.
-    entrypoint: /bin/bash -c "echo 'Container is ready. You can now attach to it at the port 50052'; while sleep 10000; do :; done"
+    entrypoint: /bin/bash -c "echo 'Container is ready. You can now attach to it at the port 50042'; while sleep 10000; do :; done"
 

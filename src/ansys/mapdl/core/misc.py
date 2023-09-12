@@ -467,29 +467,37 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None):
+def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
     elif not os.path.isdir(tmpdir):
         os.makedirs(tmpdir)
 
+    if not name:
+        random_name = True
+        letters_ = string.ascii_lowercase.replace("n", "")
+        name = random_string(10, letters_)
+    else:
+        random_name = False
+
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
-    letters = string.ascii_lowercase.replace("n", "")
-    path = os.path.join(tmpdir, random_string(10, letters))
+    path = os.path.join(tmpdir, name)
 
-    # in the *rare* case of a duplicate path
-    while os.path.isdir(path):
-        path = os.path.join(tempfile.gettempdir(), random_string(10, letters))
+    if random_name:
+        # in the *rare* case of a duplicate path
+        while os.path.isdir(path):
+            path = os.path.join(tempfile.gettempdir(), name)
 
-    try:
-        os.mkdir(path)
-    except:
-        raise MapdlRuntimeError(
-            "Unable to create temporary working "
-            "directory %s\n" % path + "Please specify run_location="
-        )
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except:
+            raise MapdlRuntimeError(
+                "Unable to create temporary working "
+                f"directory {path}\nPlease specify 'run_location' argument"
+            )
 
     return path
 
@@ -1149,7 +1157,11 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                     orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
-                pl = plotting_function(return_plotter=True)
+                if entity == "area":
+                    # To overwrite the quality argument
+                    pl = plotting_function(return_plotter=True, quality=1)
+                else:
+                    pl = plotting_function(return_plotter=True)
 
                 vmin = self._enable_picking_entities(
                     entity, pl, type_, previous_picked_entities, **kwargs

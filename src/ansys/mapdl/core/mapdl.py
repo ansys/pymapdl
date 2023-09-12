@@ -1719,8 +1719,7 @@ class _MapdlCore(Commands):
             points = []
             labels = []
 
-            # kwargs.setdefault("return_plotter", True)
-            kwargs["return_plotter"] = True
+            return_plotter = kwargs.pop("return_plotter", False)
             color_areas = True
 
             for each_volu in volumes:
@@ -1733,7 +1732,8 @@ class _MapdlCore(Commands):
                     quality=quality,
                     show_area_numbering=show_area_numbering,
                     show_line_numbering=show_line_numbering,
-                    show_lines=False,
+                    show_lines=show_lines,
+                    return_plotter=True,
                     **kwargs,
                 )
 
@@ -1749,7 +1749,9 @@ class _MapdlCore(Commands):
             self.cmsel("S", cm_name_area, "AREA", mute=True)
             self.cmsel("S", cm_name_volu, "VOLU", mute=True)
 
-            return general_plotter(meshes, points, labels, **kwargs)
+            return general_plotter(
+                meshes, points, labels, return_plotter=return_plotter, **kwargs
+            )
 
         else:
             with self._enable_interactive_plotting():
@@ -1881,7 +1883,7 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surfs = self.geometry.get_areas(return_as_list=True)
+            surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []
 
@@ -4908,41 +4910,3 @@ class _MapdlCore(Commands):
         # returning to previous selection
         self.cmsel("s", "__tmp_cm__", entity=entity)
         return output
-
-    @wraps(Commands.satin)
-    def satin(
-        self,
-        name,
-        extension="",
-        path="",
-        entity="",
-        fmt="",
-        nocl="",
-        noan="",
-        **kwargs,
-    ):
-        """Wraps ~SATIN command"""
-        if self.is_grpc:
-            fname = name
-            if path:
-                fname = os.path.join(path, name)
-            fname = self._get_file_name(fname, extension, "sat")
-            fname = self._get_file_path(fname, False)
-            name, extension, path = self._decompose_fname(fname)
-
-            if path == path.parent:
-                path = ""
-            else:
-                path = str(path)
-
-        # wrapping path in single quotes because of #2286
-        path = f"'{path}'"
-        return super().satin(
-            name=name,
-            extension=extension,
-            path=path,
-            entity=entity,
-            fmt=fmt,
-            nocl=nocl,
-            noan=noan,
-        )
