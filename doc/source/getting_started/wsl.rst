@@ -258,8 +258,8 @@ To do so, follow
 :ref:`Disable firewall on WSL ethernet <disable_firewall_on_wsl_ethernet_section>`.
 
 
-For more information and troubleshooting visit `this issue <wsl_launching_mapdl_>`_
-or open a new issue in the `GitHub repository <pymapdl_issues_>`_.
+For more information, see the issue `Launching MAPDL from WSL <wsl_launching_mapdl_>`_
+or open a new issue in the `GitHub repository issues <pymapdl_issues_>`_.
 
 
 Connect to an MAPDL instance running in WSL
@@ -481,10 +481,10 @@ as shown in the following command. For more information, see the ``.ci`` folder.
 
 
 .. note::
-   If you want to replicate the CICD behaviour or develop from inside a docker container,
-   it is highly recommended to use Ubuntu as base operative system. You can find instructions
-   to `create your own MAPDL Ubuntu container in here <ref_make_container_>`_ and how to use it to
-   `develop on containers in here <ref_devcontainer_>`_.
+   If you want to replicate the CI/CD behavior or develop from inside a Docker container,
+   you should use Ubuntu as your base operative system. You can find instructions
+   to create your own MAPDL Ubuntu container in `Create your own MAPDL docker container <ref_make_container_>`_ and how to use
+   it to develop on containers in `Develop on a container <ref_devcontainer_>`_.
 
 Notes
 =====
