@@ -71,7 +71,7 @@ if ON_WSL:
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
 
-INTEL_MSG = """Due to incompatibilities between this MAPDL version, Windows and VPN connections,
+INTEL_MSG = """Due to incompatibilities between this MAPDL version, Windows, and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
 If you still want to use 'INTEL', set:
@@ -1357,7 +1357,7 @@ def launch_mapdl(
     # Raising error if using non-allowed arguments
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
-        raise ValueError(f"The following arguments are not recognaised: {ms_}")
+        raise ValueError(f"The following arguments are not recognized: {ms_}")
 
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", None)
@@ -1366,19 +1366,19 @@ def launch_mapdl(
             ip = _get_windows_host_ip()
             if ip:
                 LOG.debug(
-                    f"On WSL: Using the following IP for the Windows OS host: {ip}"
+                    f"On WSL: Using the following IP address for the Windows OS host: {ip}"
                 )
             else:
-                LOG.debug("PyMAPDL could not find the IP of the Windows Host Machine.")
+                LOG.debug("PyMAPDL could not find the IP address of the Windows host machine.")
 
         if not ip:
-            LOG.debug(f"No IP supplied, using default IP: {LOCALHOST}")
+            LOG.debug(f"No IP addres was supplied. Using the default IP address: {LOCALHOST}")
             ip = LOCALHOST
 
     else:
         LOG.debug(
-            "Because ``PYMAPDL_IP is not None, an attempt is made to connect to"
-            " a remote session. ('START_INSTANCE' is set to False.`)"
+            "Because 'PYMAPDL_IP' is not None, an attempt is made to connect to"
+            " a remote session ('START_INSTANCE' is set to 'False')."
         )
         if not ON_WSL:
             start_instance = False

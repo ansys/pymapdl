@@ -493,7 +493,7 @@ Notes
   is why the flag ``-smp`` should be included.
 
 - Because there are some incompatibilities between VPN and INTEL MPI, use the
-  flag ``-mpi msmpi`` when calling MAPDL. This guide has not been written or tested
-  under VPN. If you are experiencing issues connecting to the Windows host maachine,
-  your license server or an MAPDL instance please disconnect the VPN.
+  flag ``-mpi msmpi`` when calling MAPDL. This WSL guidance has not been written for or tested
+  on VPN. If you are experiencing issues connecting to the Windows host machine,
+  your license server, or an MAPDL instance, disconnect the VPN and try again.
 
