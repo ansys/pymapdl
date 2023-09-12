@@ -113,7 +113,9 @@ print(output)
 
 result = mapdl.result
 
-## animate result
+###############################################################################
+# Animate results
+
 mode2plot = 2
 normalizeDisplacement = 1 / result.nodal_displacement(mode2plot - 1)[1].max()
 result.plot_nodal_displacement(
