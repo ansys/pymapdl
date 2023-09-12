@@ -31,7 +31,7 @@ Install WSL by following Microsoft's directions at
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
 Install the CentOS7 WSL distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+====================================
 
 When working with PyAnsys libraries, you should use the CentOS7 WSL distribution.
 
@@ -42,7 +42,7 @@ You can install this distribution using an unofficial WSL distribution from
 
 .. vale off
 Using the Ubuntu WSL distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=================================
 .. vale on
 
 Ubuntu is a supported operative system for Ansys products. However it has not been
@@ -53,7 +53,7 @@ Install Ansys products in WSL
 #############################
 
 Prerequisites
-~~~~~~~~~~~~~
+=============
 If you are using CentOS 7, before installing MAPDL, you must install some
 required libraries:
 
@@ -68,7 +68,7 @@ If you are using Ubuntu, follow the instructions in `Run MAPDL: Ubuntu <pymapdl_
 .. _installing_ansys_in_wsl:
 
 Install Ansys products
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 To install Ansys products in WSL Linux, perform these steps:
 
@@ -127,7 +127,7 @@ Post-installation setup
 #######################
 
 Open ports for license server communication
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+===========================================
 
 **Theory:** You should open the ports ``1055`` and ``2325`` for license server
 communication in the **Windows Control Panel**. For the steps to set advanced
@@ -151,7 +151,7 @@ side effects and security risk so use it with caution. For more information, see
 
 
 Set up an environmental variable in WSL that points to Windows host license server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==================================================================================
 
 The IP address for the Windows host is given in the WSL ``/etc/hosts`` file before the name
 ``host.docker.internal``.
@@ -189,7 +189,7 @@ Here is an example of the WSL ``/etc/hosts`` file:
 
 .. vale on
 
-You can add the next lines to your WSL ``~/.bashrc`` file to create an
+You can add the next lines to your WSL ``=/.bashrc`` file to create an
 environment variable with this IP address:
 
 .. vale off
@@ -239,7 +239,7 @@ To do that, run this code:
 
 As mentioned in `Open ports for license server communication`_, the Windows host OS
 and WSL are connected with a virtual network where they both have different IP addresses.
-PyMAPDL does its best to detect the IP adress of the Windows host OS. For that, it parses
+PyMAPDL does its best to detect the IP address of the Windows host OS. For that, it parses
 the output given by the command ``ip route`` in WSL. However, if you find that this IP
 address is not correct, you can specify the IP address to connect to like this:
 
