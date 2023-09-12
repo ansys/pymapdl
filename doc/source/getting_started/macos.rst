@@ -33,7 +33,7 @@ Launch MAPDL on MacOS
 =====================
 
 If you do not have an MAPDL Docker image, you can create one on a Linux
-machine as indicated in  :ref:`ref_make_container`.
+machine as indicated in :ref:`ref_make_container`.
 
 
 If you already have an MAPDL Docker image, you can launch MAPDL as

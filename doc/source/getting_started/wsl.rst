@@ -41,8 +41,10 @@ You can install this distribution using an unofficial WSL distribution from
 
 
 .. vale off
+
 Using the Ubuntu WSL distribution
 =================================
+
 .. vale on
 
 Ubuntu is a supported operative system for Ansys products. However it has not been
@@ -483,8 +485,8 @@ as shown in the following command. For more information, see the ``.ci`` folder.
 .. note::
    If you want to replicate the CI/CD behavior or develop from inside a Docker container,
    you should use Ubuntu as your base operative system. You can find instructions
-   to create your own MAPDL Ubuntu container in `Create your own MAPDL docker container <ref_make_container_>`_ and how to use
-   it to develop on containers in `Develop on a container <ref_devcontainer_>`_.
+   to create your own MAPDL Ubuntu container in :ref:`ref_make_container` and how to use
+   it to develop on containers in :ref:`ref_devcontainer`.
 
 Notes
 =====
