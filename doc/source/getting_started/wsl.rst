@@ -213,6 +213,27 @@ If you want to change the working directory, you can use the ``-dir`` flag.
     /ansys_inc/v222/ansys/bin/ansys222 -grpc -dir /tmp/ansys_jobs/myjob
 
 
+Launch MAPDL in the Windows host OS
+===================================
+
+You can launch an instance of MAPDL using the MAPDL installation from the
+Windows host OS.
+To do that, you can just:
+
+.. code:: python
+
+   from ansys.mapdl.core import launch_mapdl
+
+   mapdl = launch_mapdl(
+       exec_file="/mnt/c/Program Files/ANSYS Inc/v231/ANSYS/bin/winx64/ANSYS231.exe",
+       ip="172.25.192.1",
+   )
+
+
+For more information visit `this issue <wsl_launching_mapdl_>`_.
+
+
+
 Connect to an MAPDL instance running in WSL
 ===========================================
 
@@ -223,6 +244,9 @@ you need to specify the IP address of the WSL instance:
 
     >>> from ansys.mapdl.core import Mapdl
     >>> mapdl = Mapdl(ip="127.0.0.1", port=50053)
+
+
+
 
 
 Additional information
