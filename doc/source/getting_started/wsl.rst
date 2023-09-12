@@ -15,25 +15,25 @@ Windows Server 2019. For more information, see:
 This page walk you through the installation of WSL on Windows and then
 show how to use it together with MAPDL, PyMAPDL, and `Docker <https://www.docker.com/>`_.
 
-.. caution::
-   This approach hasn't been fully tested with a VPN connection. If you
-   experience any problems connecting WSL to the internet, try to
-   disconnect from the VPN.
 
+.. note::
+   Updating this guide is doing a best effort basis. Due to WSL being under constant
+   development this guide might be outdated without any notice. 
+   If you find any issue or problem, feel free to
+   `open an issue in the GitHub repository <pymapdl_issues>`_.
 
-Run PyMAPDL on WSL 
-##################
-There are two versions of WSL: WSL1 and WSL2. Because WSL2 provides many improvements
-over WSL1, you should upgrade to and use WSL2.
 
 Install WSL
-============
+###########
+
+There are two versions of WSL: WSL1 and WSL2. Because WSL2 provides many improvements
+over WSL1, you should upgrade to and use WSL2.
 
 Install WSL by following Microsoft's directions at 
 `Microsoft: Install WSL <install_wsl_microsoft_>`_.
 
 Install the CentOS7 WSL distribution
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When working with PyAnsys libraries, you should use the CentOS7 WSL distribution.
 
@@ -41,11 +41,16 @@ You can install this distribution using an unofficial WSL distribution from
 `CentOS-WSL <gh_centos_wsl_1_>`_ package or the
 `CentOS WSL <gh_centos_wsl_2_>`_ package.
 
-Optionally, you can try Ubuntu, but it has not been tested yet in the context of WSL.
+
+Using Ubuntu WSL distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Ubuntu is a supported operative system for Ansys products. However it has not been
+tested yet in the context of WSL. We recommend to proceed with caution.
 
 
-Install Ansys products in WSL CentOS 7
-======================================
+Install Ansys products in WSL
+#############################
 
 Prerequisites
 ~~~~~~~~~~~~~
@@ -119,7 +124,7 @@ directory (``/*/ansys_inc``).
 
 
 Post-installation setup
-=======================
+#######################
 
 Open ports for license server communication
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -196,7 +201,7 @@ environment variable with this IP address:
 
 
 Launch MAPDL in WSL
-===================
+###################
 
 To launch MAPDL in WSL, you must launch MAPDL process.
 An example follows.
@@ -214,11 +219,11 @@ If you want to change the working directory, you can use the ``-dir`` flag.
 
 
 Launch MAPDL in the Windows host OS
-===================================
+###################################
 
 You can launch an instance of MAPDL using the MAPDL installation from the
 Windows host OS.
-To do that, you can just:
+To do that, you can just run the following code.
 
 .. code:: python
 
@@ -226,16 +231,35 @@ To do that, you can just:
 
    mapdl = launch_mapdl(
        exec_file="/mnt/c/Program Files/ANSYS Inc/v231/ANSYS/bin/winx64/ANSYS231.exe",
-       ip="172.25.192.1",
    )
 
+As mentioned in `Open ports for license server communication`_, the Windows host OS
+and WSL are connected with a virtual network where they have both different IPs.
+PyMAPDL does its best to detect the IP of the Windows host OS. For that, it parses
+the output given by the command `ip route` in WSL.
+However, if you find that this IP is not correct, you can specify the IP to connect
+to using:
 
-For more information visit `this issue <wsl_launching_mapdl_>`_.
+.. code:: python
 
+   from ansys.mapdl.core import launch_mapdl
+
+   mapdl = launch_mapdl(
+       exec_file="/mnt/c/Program Files/ANSYS Inc/v231/ANSYS/bin/winx64/ANSYS231.exe",
+       ip="172.23.112.1",
+   )
+
+You might need to disable the Microsoft Firewall completely or at least
+for the WSL network connection.
+To do so, follow `this link <disable_firewall_on_wsl_ethernet_section_>`_.
+
+
+For more information and troubleshooting visit `this issue <wsl_launching_mapdl_>`_
+or open a new issue in the `GitHub repository <pymapdl_issues_>`_.
 
 
 Connect to an MAPDL instance running in WSL
-===========================================
+###########################################
 
 To connect to the WSL instance that is running the MAPDL instance,
 you need to specify the IP address of the WSL instance:
@@ -244,8 +268,6 @@ you need to specify the IP address of the WSL instance:
 
     >>> from ansys.mapdl.core import Mapdl
     >>> mapdl = Mapdl(ip="127.0.0.1", port=50053)
-
-
 
 
 
@@ -454,6 +476,12 @@ as shown in the following command. For more information, see the ``.ci`` folder.
    yum install xorg-x11-server-Xvfb
 
 
+.. note::
+   If you want to replicate the CICD behaviour or develop from inside a docker container,
+   it is highly recommended to use Ubuntu as base operative system. You can find instructions
+   to `create your own MAPDL Ubuntu container in here <ref_make_container_>`_ and how to use it to
+   `develop on containers in here <ref_devcontainer_>`_.
+
 Notes
 =====
 
@@ -461,5 +489,7 @@ Notes
   is why the flag ``-smp`` should be included.
 
 - Because there are some incompatibilities between VPN and INTEL MPI, use the
-  flag ``-mpi msmpi`` when calling MAPDL.
+  flag ``-mpi msmpi`` when calling MAPDL. This guide has not been written or tested
+  under VPN. If you are experiencing issues connecting to the Windows host maachine,
+  your license server or an MAPDL instance please disconnect the VPN.
 
