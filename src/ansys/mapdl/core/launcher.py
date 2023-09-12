@@ -1375,7 +1375,7 @@ def launch_mapdl(
 
         if not ip:
             LOG.debug(
-                f"No IP addres was supplied. Using the default IP address: {LOCALHOST}"
+                f"No IP address was supplied. Using the default IP address: {LOCALHOST}"
             )
             ip = LOCALHOST
 
