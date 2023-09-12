@@ -239,7 +239,7 @@ To do that, run this code:
 
 As mentioned in `Open ports for license server communication`_, the Windows host OS
 and WSL are connected with a virtual network where they both have different IP addresses.
-PyMAPDL does its best to detect the IP adress of the Windows host OS. For that, it parses
+PyMAPDL does its best to detect the IP address of the Windows host OS. For that, it parses
 the output given by the command ``ip route`` in WSL. However, if you find that this IP
 address is not correct, you can specify the IP address to connect to like this:
 
