@@ -17,10 +17,8 @@ show how to use it together with MAPDL, PyMAPDL, and `Docker <https://www.docker
 
 
 .. note::
-   Updating this guide is doing a best effort basis. Due to WSL being under constant
-   development this guide might be outdated without any notice. 
-   If you find any issue or problem, feel free to
-   `open an issue in the GitHub repository <pymapdl_issues>`_.
+   Because WSL is under constant development, keeping this guide updated is difficult. If you
+   find any issues or have questions related to WSL, feel free to `open an issue in the GitHub repository <pymapdl_issues>`_.
 
 
 Install WSL
@@ -42,11 +40,13 @@ You can install this distribution using an unofficial WSL distribution from
 `CentOS WSL <gh_centos_wsl_2_>`_ package.
 
 
-Using Ubuntu WSL distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. vale off
+Using the Ubuntu WSL distribution
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. vale on
 
 Ubuntu is a supported operative system for Ansys products. However it has not been
-tested yet in the context of WSL. We recommend to proceed with caution.
+tested yet in the context of WSL. You should proceed with caution.
 
 
 Install Ansys products in WSL
@@ -203,7 +203,7 @@ environment variable with this IP address:
 Launch MAPDL in WSL
 ###################
 
-To launch MAPDL in WSL, you must launch MAPDL process.
+To launch MAPDL in WSL, you must launch the MAPDL process.
 An example follows.
 
 .. code:: console
@@ -223,7 +223,7 @@ Launch MAPDL in the Windows host OS
 
 You can launch an instance of MAPDL using the MAPDL installation from the
 Windows host OS.
-To do that, you can just run the following code.
+To do that, run this code:
 
 .. code:: python
 
@@ -234,11 +234,10 @@ To do that, you can just run the following code.
    )
 
 As mentioned in `Open ports for license server communication`_, the Windows host OS
-and WSL are connected with a virtual network where they have both different IPs.
-PyMAPDL does its best to detect the IP of the Windows host OS. For that, it parses
-the output given by the command `ip route` in WSL.
-However, if you find that this IP is not correct, you can specify the IP to connect
-to using:
+and WSL are connected with a virtual network where they both have different IP addresses.
+PyMAPDL does its best to detect the IP adress of the Windows host OS. For that, it parses
+the output given by the command ``ip route`` in WSL. However, if you find that this IP
+address is not correct, you can specify the IP address to connect to like this:
 
 .. code:: python
 
@@ -249,7 +248,7 @@ to using:
        ip="172.23.112.1",
    )
 
-You might need to disable the Microsoft Firewall completely or at least
+You might need to turn off the Microsoft Firewall completely or at least
 for the WSL network connection.
 To do so, follow `this link <disable_firewall_on_wsl_ethernet_section_>`_.
 
