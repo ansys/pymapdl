@@ -418,3 +418,9 @@ def test__parse_ip_route():
 172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
 
     assert "172.25.192.1" == _parse_ip_route(output)
+
+    output = """
+default via 172.23.112.1 dev eth0 proto kernel
+172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
+
+    assert "172.23.112.1" == _parse_ip_route(output)

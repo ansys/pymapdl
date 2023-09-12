@@ -1364,7 +1364,12 @@ def launch_mapdl(
 
         if not ip and ON_WSL:
             ip = _get_windows_host_ip()
-            LOG.debug(f"On WSL: Using the following IP for the Windows OS host: {ip}")
+            if ip:
+                LOG.debug(
+                    f"On WSL: Using the following IP for the Windows OS host: {ip}"
+                )
+            else:
+                LOG.debug("PyMAPDL could not find the IP of the Windows Host Machine.")
 
         if not ip:
             LOG.debug(f"No IP supplied, using default IP: {LOCALHOST}")
@@ -1855,9 +1860,15 @@ def _run_ip_route():
     from subprocess import run
 
     try:
-        output = run("ip route")
-    except FileNotFoundError:
+        p = run(["ip", "route"], capture_output=True)
+    except Exception:
+        LOG.debug(
+            "Detecting the IP of the host Windows machine requires to be able to execute the command 'ip route'."
+        )
         return None
+
+    if p and p.stdout and isinstance(p.stdout, bytes):
+        return p.stdout.decode()
 
 
 def _parse_ip_route(output):
