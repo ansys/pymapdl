@@ -1867,7 +1867,7 @@ def _run_ip_route():
         p = run(["ip", "route"], capture_output=True)
     except Exception:
         LOG.debug(
-            "Detecting the IP of the host Windows machine requires to be able to execute the command 'ip route'."
+            "Detecting the IP address of the host Windows machine requires being able to execute the command 'ip route'."
         )
         return None
 
