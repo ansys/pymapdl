@@ -1369,10 +1369,14 @@ def launch_mapdl(
                     f"On WSL: Using the following IP address for the Windows OS host: {ip}"
                 )
             else:
-                LOG.debug("PyMAPDL could not find the IP address of the Windows host machine.")
+                LOG.debug(
+                    "PyMAPDL could not find the IP address of the Windows host machine."
+                )
 
         if not ip:
-            LOG.debug(f"No IP addres was supplied. Using the default IP address: {LOCALHOST}")
+            LOG.debug(
+                f"No IP addres was supplied. Using the default IP address: {LOCALHOST}"
+            )
             ip = LOCALHOST
 
     else:
