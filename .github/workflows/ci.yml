@@ -363,6 +363,7 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           flags: centos,remote,${{ matrix.mapdl-version }}
 
@@ -511,6 +512,7 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v22.2.0-local.xml
           flags: ubuntu,local,v22.2.0
@@ -580,6 +582,7 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           name: windows-v22.2.0-local.xml
           flags: windows,local,v22.2.0
 
