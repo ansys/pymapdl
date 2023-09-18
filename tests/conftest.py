@@ -50,6 +50,7 @@ HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = pyvista.system_supports_plotting()
 IS_SMP = is_smp()
 
+QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -347,7 +348,6 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        # additional_switches="-smp",
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
