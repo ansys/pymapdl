@@ -53,7 +53,7 @@ release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
 REPOSITORY_NAME = "pymapdl"
-USERNAME = "pyansys"
+USERNAME = "ansys"
 BRANCH = "main"
 
 
@@ -80,6 +80,8 @@ extensions = [
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
+    "ansys_sphinx_theme.extension.linkcode",
+
 ]
 
 # Intersphinx mapping
@@ -277,6 +279,7 @@ html_context = {
     "github_repo": REPOSITORY_NAME,
     "github_version": BRANCH,
     "doc_path": DOC_PATH,
+    "source_path": "src",
 }
 html_show_sourcelink = False
 
