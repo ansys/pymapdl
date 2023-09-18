@@ -97,7 +97,7 @@ def test_readin_sat(mapdl, cleared):
         )
 
     elif ON_CI and mapdl.version == 22.2 and ON_UBUNTU and not ON_LOCAL:
-        context = pytest.raises(MapdlRuntimeError, match="test_readin_sat")
+        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
 
     elif ON_CI and ON_LOCAL:
         context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
