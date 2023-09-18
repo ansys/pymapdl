@@ -1115,7 +1115,10 @@ class MapdlGrpc(_MapdlCore):
 
         """
         self._log.debug("Killing MAPDL server")
-        self._ctrl("EXIT")
+        if self.version >= 24.2:
+            self.run("/EXIT,NOSAVE,,,,,SERVER")
+        else:
+            self._ctrl("EXIT")
 
     def _kill_process(self):
         """Kill process stored in self._mapdl_process"""

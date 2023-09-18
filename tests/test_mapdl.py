@@ -1945,7 +1945,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 @skip_if_not_local
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(license_server_check=False)
-    mapdl2.parameters["my_par"] = "asdf"
+    mapdl2.parameters["my_par"] = "initial_value"
     db_name = mapdl2.jobname + ".db"
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
@@ -1953,14 +1953,19 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.save(db_name)
     assert os.path.exists(db_path)
 
-    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.parameters["my_par"] = "final_value"
     mapdl2.exit()
 
     mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "qwerty"
+    if mapdl.version >= 24.1:
+        assert mapdl2.parameters["my_par"] == "initial_value"
+    else:
+        # This fails in earlier versions of MAPDL
+        assert mapdl2.parameters["my_par"] != "initial_value"
+        assert mapdl2.parameters["my_par"] == "final_value"
 
-    mapdl2.parameters["my_par"] = "zxcv"
+    mapdl2.parameters["my_par"] = "new_initial_value"
     db_name = mapdl2.jobname + ".db"  # reupdating db path
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
@@ -1968,7 +1973,7 @@ def test_save_on_exit(mapdl, cleared):
 
     mapdl2 = launch_mapdl(license_server_check=False)
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "zxcv"
+    assert mapdl2.parameters["my_par"] == "new_initial_value"
     mapdl2.exit()
 
 
