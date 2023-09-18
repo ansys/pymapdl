@@ -152,6 +152,8 @@ showcases, visit `Technology showcase guide <ansys_techdemo_guide_>`_.
 Recommended articles
 ====================
 
+.. vale off
+
 * Ansys Gets Into Open Source With GitHub.
   `Link to article in Ansys Blog <ansys_open_source_article_>`_
 * Access the Power of Ansys from the Python World.
@@ -168,6 +170,8 @@ Recommended articles
   `Link to 'Towards Data Science' article in Medium <tds_article_web_app_2_>`_.
 * Paraview: Reading ANSYS APDL (RST) results in Paraview.
   `Link to 'Paraview Forum' question <paraview_question_read_rst_>`_.
+
+.. vale on
 
 
 Feel free to email any educational or learning resource to
