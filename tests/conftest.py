@@ -39,7 +39,8 @@ pyvista.OFF_SCREEN = True
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
 
-ON_UBUNTU = is_on_ubuntu()
+ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
+# Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
 ON_WINDOWS = platform == "win32"
 ON_LINUX = platform == "linux" or platform == "linux2"
 ON_MACOS = platform == "darwin"
@@ -49,6 +50,7 @@ HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = pyvista.system_supports_plotting()
 IS_SMP = is_smp()
 
+QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -346,7 +348,6 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        # additional_switches="-smp",
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
