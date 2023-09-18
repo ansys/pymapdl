@@ -39,7 +39,8 @@ pyvista.OFF_SCREEN = True
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
 
-ON_UBUNTU = is_on_ubuntu()
+ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
+# Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
 ON_WINDOWS = platform == "win32"
 ON_LINUX = platform == "linux" or platform == "linux2"
 ON_MACOS = platform == "darwin"
