@@ -166,6 +166,9 @@ Recommended articles
 * ANSYS in a Python Web App, Part 2: Pre Processing & Solving with PyMAPDL:
   *ANSYS in a Python Web App, Part 2: Pre Processing & Solving with PyMAPDL*.
   `Link to 'Towards Data Science' article in Medium <tds_article_web_app_2_>`_.
+* Paraview: Reading ANSYS APDL (RST) results in Paraview.
+  `Link to 'Paraview Forum' question <paraview_question_read_rst_>`_.
+
 
 Feel free to email any educational or learning resource to
 `PyAnsys Core team <pyansys_core_>`_.
