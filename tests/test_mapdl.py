@@ -29,6 +29,7 @@ from ansys.mapdl.core.misc import random_string
 from conftest import (
     IS_SMP,
     ON_LOCAL,
+    QUICK_LAUNCH_SWITCHES,
     skip_if_not_local,
     skip_if_on_cicd,
     skip_no_xserver,
@@ -465,7 +466,9 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = launch_mapdl(start_timeout=30, log_apdl=filename)
+    mapdl = launch_mapdl(
+        start_timeout=30, log_apdl=filename, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -491,8 +494,7 @@ def test_apdl_logging_start(tmpdir):
 def test_corba_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl(mode="CORBA")
-    mapdl = launch_mapdl(log_apdl=filename)
+    mapdl = pymapdl.launch_mapdl(mode="CORBA", log_apdl=filename)
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -1944,7 +1946,9 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 
 @skip_if_not_local
 def test_save_on_exit(mapdl, cleared):
-    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
     mapdl2.parameters["my_par"] = "asdf"
     db_name = mapdl2.jobname + ".db"
     db_dir = mapdl2.directory
@@ -1956,7 +1960,9 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.parameters["my_par"] = "qwerty"
     mapdl2.exit()
 
-    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "qwerty"
 
@@ -1966,7 +1972,9 @@ def test_save_on_exit(mapdl, cleared):
     db_path = os.path.join(db_dir, db_name)
     mapdl2.exit(save=True)
 
-    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "zxcv"
     mapdl2.exit()

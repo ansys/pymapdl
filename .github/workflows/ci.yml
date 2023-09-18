@@ -445,7 +445,7 @@ jobs:
   build-test-ubuntu:
     name: "Local: Build and unit testing on Ubuntu"
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
