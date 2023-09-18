@@ -81,7 +81,6 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
-
 ]
 
 # Intersphinx mapping
