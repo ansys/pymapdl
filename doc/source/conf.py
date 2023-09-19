@@ -5,9 +5,12 @@ import warnings
 
 from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
 import numpy as np
+import plotly.io as pio
 import pyvista
 from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
+
+pio.renderers.default = "sphinx_gallery"
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
