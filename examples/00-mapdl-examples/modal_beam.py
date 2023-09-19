@@ -5,7 +5,7 @@
 MAPDL modal beam analysis example
 =================================
 
-This example demonstrate how to performa a simple modal analysis
+This example demonstrates how to perform a simple modal analysis
 and animate its results.
 
 
@@ -67,7 +67,7 @@ mapdl.lplot()
 # Define finite element model
 # ===========================
 #
-# Define element type/section type - Rectangular beam section
+# Define element type/section type - Rectangular beam section.
 mapdl.et(1, "BEAM188")
 mapdl.sectype(1, "BEAM", "RECT")
 mapdl.secoffset("CENT")
