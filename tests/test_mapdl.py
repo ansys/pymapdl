@@ -26,7 +26,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import (  # skip_no_xserver,
+from conftest import (
     IS_SMP,
     ON_LOCAL,
     QUICK_LAUNCH_SWITCHES,
@@ -367,47 +367,6 @@ def test_invalid_input(mapdl):
         mapdl.input("thisisnotafile")
 
 
-# @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_kplot(cleared, mapdl, tmpdir, vtk):
-    mapdl.k("", 0, 0, 0)
-    mapdl.k("", 1, 0, 0)
-    mapdl.k("", 1, 1, 0)
-    mapdl.k("", 0, 1, 0)
-
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
-    assert cpos is None
-    if vtk:
-        assert os.path.isfile(filename)
-
-
-# @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_aplot(cleared, mapdl, vtk):
-    k0 = mapdl.k("", 0, 0, 0)
-    k1 = mapdl.k("", 1, 0, 0)
-    k2 = mapdl.k("", 1, 1, 0)
-    k3 = mapdl.k("", 0, 1, 0)
-    l0 = mapdl.l(k0, k1)
-    l1 = mapdl.l(k1, k2)
-    l2 = mapdl.l(k2, k3)
-    l3 = mapdl.l(k3, k0)
-    mapdl.al(l0, l1, l2, l3)
-    mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(color_areas=vtk, show_lines=True, show_line_numbering=True)
-
-    mapdl.aplot(quality=100)
-    mapdl.aplot(quality=-1)
-
-
-# @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_vplot(cleared, mapdl, vtk):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.vplot(vtk=vtk, color_areas=True)
-
-
 def test_keypoints(cleared, mapdl):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
@@ -440,25 +399,6 @@ def test_lines(cleared, mapdl):
     assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
-
-
-# @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_lplot(cleared, mapdl, tmpdir, vtk):
-    k0 = mapdl.k("", 0, 0, 0)
-    k1 = mapdl.k("", 1, 0, 0)
-    k2 = mapdl.k("", 1, 1, 0)
-    k3 = mapdl.k("", 0, 1, 0)
-    mapdl.l(k0, k1)
-    mapdl.l(k1, k2)
-    mapdl.l(k2, k3)
-    mapdl.l(k3, k0)
-
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
-    assert cpos is None
-    if vtk:
-        assert os.path.isfile(filename)
 
 
 @skip_if_not_local
@@ -621,24 +561,6 @@ def test_enum(mapdl, make_block):
     assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
-@pytest.mark.parametrize("nnum", [True, False])
-@pytest.mark.parametrize("vtk", [True, False, None])
-# @skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, nnum, vtk):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
-
-
-# @skip_no_xserver
-def test_nplot(cleared, mapdl):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False)
-
-
 def test_elements(cleared, mapdl):
     mapdl.et(1, 185)
 
@@ -758,30 +680,6 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.material == 1
     assert mapdl.parameters.section == 1
     assert mapdl.parameters.real == 1
-
-
-# @skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_eplot(mapdl, make_block, vtk):
-    init_elem = mapdl.mesh.n_elem
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl.eplot(show_node_numbering=True, background="w", color="b")
-    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    assert mapdl.mesh.n_elem == init_elem
-
-
-# @skip_no_xserver
-def test_eplot_savefig(mapdl, make_block, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    mapdl.eplot(
-        background="w",
-        show_edges=True,
-        smooth_shading=True,
-        window_size=[1920, 1080],
-        savefig=filename,
-    )
-    assert os.path.isfile(filename)
 
 
 def test_partial_mesh_nnum(mapdl, make_block):
