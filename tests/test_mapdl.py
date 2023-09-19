@@ -26,13 +26,12 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import (
+from conftest import (  # skip_no_xserver,
     IS_SMP,
     ON_LOCAL,
     QUICK_LAUNCH_SWITCHES,
     skip_if_not_local,
     skip_if_on_cicd,
-    skip_no_xserver,
     skip_on_windows,
 )
 
@@ -368,7 +367,7 @@ def test_invalid_input(mapdl):
         mapdl.input("thisisnotafile")
 
 
-@skip_no_xserver
+# @skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_kplot(cleared, mapdl, tmpdir, vtk):
     mapdl.k("", 0, 0, 0)
@@ -383,7 +382,7 @@ def test_kplot(cleared, mapdl, tmpdir, vtk):
         assert os.path.isfile(filename)
 
 
-@skip_no_xserver
+# @skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_aplot(cleared, mapdl, vtk):
     k0 = mapdl.k("", 0, 0, 0)
@@ -402,7 +401,7 @@ def test_aplot(cleared, mapdl, vtk):
     mapdl.aplot(quality=-1)
 
 
-@skip_no_xserver
+# @skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
@@ -443,7 +442,7 @@ def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 4
 
 
-@skip_no_xserver
+# @skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_lplot(cleared, mapdl, tmpdir, vtk):
     k0 = mapdl.k("", 0, 0, 0)
@@ -624,7 +623,7 @@ def test_enum(mapdl, make_block):
 
 @pytest.mark.parametrize("nnum", [True, False])
 @pytest.mark.parametrize("vtk", [True, False, None])
-@skip_no_xserver
+# @skip_no_xserver
 def test_nplot_vtk(cleared, mapdl, nnum, vtk):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
@@ -632,7 +631,7 @@ def test_nplot_vtk(cleared, mapdl, nnum, vtk):
     mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
 
 
-@skip_no_xserver
+# @skip_no_xserver
 def test_nplot(cleared, mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
@@ -761,7 +760,7 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-@skip_no_xserver
+# @skip_no_xserver
 @pytest.mark.parametrize("vtk", [True, False, None])
 def test_eplot(mapdl, make_block, vtk):
     init_elem = mapdl.mesh.n_elem
@@ -772,7 +771,7 @@ def test_eplot(mapdl, make_block, vtk):
     assert mapdl.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
+# @skip_no_xserver
 def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl.eplot(
