@@ -236,6 +236,7 @@ class _MapdlCore(Commands):
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
+        self._version = None  # cached version
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -251,7 +252,6 @@ class _MapdlCore(Commands):
                 self._use_vtk = False
 
         self._log_filehandler = None
-        self._version = None  # cached version
         self._local: bool = local
         self._cleanup: bool = True
         self._vget_arr_counter = 0
@@ -3581,7 +3581,9 @@ class _MapdlCore(Commands):
         >>> mapdl.version
         20.2
         """
-        return self.parameters.revision
+        if not self._version:
+            self._version = self.parameters.revision
+        return self._version
 
     @property
     @supress_logging

@@ -8,7 +8,7 @@ import pytest
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from conftest import skip_if_not_local
+from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -26,7 +26,6 @@ skip_requires_194 = pytest.mark.skipif(
 )
 
 TWAIT = 90
-LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 NPROC = 1
 
 
@@ -42,7 +41,7 @@ def pool(tmpdir_factory):
         port=50056,
         start_timeout=30,
         exec_file=EXEC_FILE,
-        additional_switches=LAUNCH_SWITCHES,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
         nproc=NPROC,
     )
     yield mapdl_pool
@@ -74,7 +73,7 @@ def test_invalid_exec():
             4,
             nproc=NPROC,
             exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl",
-            additional_switches=LAUNCH_SWITCHES,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
         )
 
 
@@ -227,7 +226,7 @@ def test_directory_names_custom_string(tmpdir):
         nproc=NPROC,
         names="my_instance",
         port=50056,
-        additional_switches=LAUNCH_SWITCHES,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
     )
 
     dirs_path_pool = os.listdir(pool._root_dir)
@@ -253,7 +252,7 @@ def test_directory_names_function(tmpdir):
         nproc=NPROC,
         names=myfun,
         run_location=tmpdir,
-        additional_switches=LAUNCH_SWITCHES,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
     )
 
     dirs_path_pool = os.listdir(pool._root_dir)

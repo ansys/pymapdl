@@ -22,6 +22,7 @@ jobs:
   linkchecker:
     name: Check Links
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -53,7 +54,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v2.2.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -91,7 +92,6 @@ jobs:
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: documentation-html
           path: doc/_build/html

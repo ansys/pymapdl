@@ -101,6 +101,9 @@
 .. _pyvista_eye_dome_lighting: https://docs.pyvista.org/examples/02-plot/edl.html
 .. _pyinstaller: https://pyinstaller.org
 .. _pyinstaller_spec_files: https://pyinstaller.org/en/stable/spec-files.html
+.. _tds_article_web_app_1: https://towardsdatascience.com/ansys-in-a-python-web-app-part-1-post-processing-with-pydpf-44d2fbaa6135
+.. _tds_article_web_app_2: https://towardsdatascience.com/ansys-in-a-python-web-app-part-2-pre-processing-solving-with-pymapdl-50428c18f8e7
+.. _paraview_question_read_rst: https://discourse.paraview.org/t/reading-ansys-apdl-rst-results-in-paraview/9706
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
