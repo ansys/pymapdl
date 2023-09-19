@@ -2,7 +2,7 @@
 .. _ref_modal_beam:
 
 =================================
-MAPDL Modal Beam Analysis Example
+MAPDL modal beam analysis example
 =================================
 
 This example demonstrate how to performa a simple modal analysis
@@ -11,7 +11,7 @@ and animate its results.
 
 Objective
 ~~~~~~~~~
-In this example, we model a simple 3D elastic beam made of BEAM188 elements.
+This example models a simple 3D elastic beam made of BEAM188 elements.
 These beams elements are made of a linear elastic material similar to steel,
 and have a rectangular section.
 
@@ -44,8 +44,8 @@ print(mapdl)
 
 
 ###############################################################################
-# Material properties
-# ===================
+# Define material
+# ===============
 #
 # Define material
 mapdl.prep7()
@@ -54,8 +54,8 @@ mapdl.mp("PRXY", 1, 0.3)
 mapdl.mp("DENS", 1, 7800)
 
 ###############################################################################
-# Geometry
-# ========
+# Create geometry
+# ===============
 #
 # Create keypoints and line
 mapdl.k(1)
@@ -64,8 +64,8 @@ mapdl.l(1, 2)
 mapdl.lplot()
 
 ###############################################################################
-# Finite element model
-# ====================
+# Define finite element model
+# ===========================
 #
 # Define element type/section type - Rectangular beam section
 mapdl.et(1, "BEAM188")
@@ -82,8 +82,8 @@ mapdl.eplot()
 mapdl.finish()
 
 ###############################################################################
-# Boundary conditions
-# ===================
+# Specify boundary conditions
+# ===========================
 #
 # Fully fixed (clamped) end.
 mapdl.solution()  # Entering the solution processor.
@@ -93,8 +93,8 @@ mapdl.allsel()
 mapdl.nplot(plot_bc=True, nnum=True)
 
 ###############################################################################
-# Solving the model
-# =================
+# Solve the model
+# ===============
 #
 # Setting modal analysis
 mapdl.antype("MODAL")
@@ -103,8 +103,8 @@ mapdl.solve()
 mapdl.finish()
 
 ###############################################################################
-# Post-processing
-# ===============
+# Postprocess
+# ===========
 #
 # Enter the post processor (post1)
 mapdl.post1()

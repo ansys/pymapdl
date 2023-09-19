@@ -6,7 +6,7 @@
 
 This tutorial is the 3D corollary to the 2D plane example
 :ref:`ref_plane_stress_concentration`.
-However this example verifies the
+However, this example verifies the
 stress concentration factor :math:`K-t` when modeling opposite single
 notches in a finite width thin plate.
 
