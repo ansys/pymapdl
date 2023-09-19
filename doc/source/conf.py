@@ -3,7 +3,12 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
+from ansys_sphinx_theme import (
+    ansys_favicon,
+    get_version_match,
+    pyansys_logo_black,
+    pyansys_logo_white,
+)
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -240,6 +245,8 @@ sphinx_gallery_conf = {
     "image_scrapers": ("pyvista", "matplotlib"),
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
+    "remove_config_comments": True,
+    "default_thumb_file": pyansys_logo_white,
 }
 # ---
 
