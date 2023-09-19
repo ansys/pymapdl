@@ -56,6 +56,8 @@ The MAPDL default contour color style is used so Matplotlib is imported.
 The Power Graphics style plot is then set up via PyVista.
 
 """
+# sphinx_gallery_thumbnail_path = './_static/model_solenoid_2d.png'
+
 import numpy as np
 import pyvista as pv
 
