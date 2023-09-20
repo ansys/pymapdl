@@ -203,6 +203,14 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(autouse=True)
 def wrapped_verify_image_cache(verify_image_cache):
+    # default check
+    verify_image_cache.error_value = 500.0
+    verify_image_cache.warning_value = 200.0
+
+    # High variance test
+    verify_image_cache.var_error_value = 1000.0
+    verify_image_cache.var_warning_value = 1000.0
+
     return verify_image_cache
 
 
