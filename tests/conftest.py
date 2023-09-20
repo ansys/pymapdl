@@ -153,6 +153,12 @@ def pytest_addoption(parser):
         default=False,
         help="run only GUI tests",
     )
+    parser.addoption(
+        "--skip-regression-check",
+        action="store_true",
+        default=False,
+        help="Avoid checking the image regression check in all tests",
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -202,7 +208,14 @@ def pytest_collection_modifyitems(config, items):
 
 
 @pytest.fixture(autouse=True)
-def wrapped_verify_image_cache(verify_image_cache):
+def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+
+    # Checking if we want to avoid the check using pytest cli.
+    skip_regression_check = pytestconfig.option.skip_regression_check
+    if skip_regression_check:
+        verify_image_cache.skip = True
+
+    # Configuration
     # default check
     verify_image_cache.error_value = 500.0
     verify_image_cache.warning_value = 200.0
