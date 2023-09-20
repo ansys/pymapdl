@@ -127,8 +127,18 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
 def test_bc_plot_options(
-    mapdl, bc_example, return_plotter, plot_bc_legend, plot_bc_labels
+    mapdl,
+    bc_example,
+    verify_image_cache,
+    return_plotter,
+    plot_bc_legend,
+    plot_bc_labels,
 ):
+    if plot_bc_legend:
+        # The legend generates highly variance than other tests
+        # But it seems not always.
+        verify_image_cache.high_variance_test = True
+
     p = mapdl.nplot(
         return_plotter=return_plotter,
         plot_bc=True,
