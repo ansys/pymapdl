@@ -73,9 +73,6 @@ def static_solve(mapdl):
     mapdl.amesh("all")
     mapdl.prep7()
 
-    # plot elements
-    # mapdl.eplot()
-
     # Apply tangential pressure
     mapdl.esel("S", "TYPE", "", 2)
     mapdl.sfe("all", 2, "pres", "", pressure)
@@ -857,6 +854,20 @@ def test_meta_post_plot_docstrings():
                 )
                 >= 3
             ), f"Less than three complete one-liner general plotter link in {meth.__name__}"
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    # Display elements with their nodes numbers.
+    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )
 
 
 ###############################################################################
