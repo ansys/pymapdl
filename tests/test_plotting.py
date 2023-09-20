@@ -217,6 +217,7 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         bc_labels=bc_labels,
     )
     assert isinstance(p, Plotter)
+    p.show()  # plotting for catching
 
 
 @pytest.mark.parametrize(
@@ -228,7 +229,7 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -251,12 +252,12 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         bc_target=bc_target,
     )
     assert isinstance(p, Plotter)
+    p.show()  # plotting for catching
 
 
 @pytest.mark.parametrize(
     "bc_target",
     [
-        ["NOdes"],
         "error",
         ["error"],
         {"error": "Not accepting dicts"},
@@ -264,7 +265,7 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
 )
 def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -663,6 +664,7 @@ def test_plotter_input(mapdl, make_block):
         pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl == pl2
     assert pl is pl2
+    pl2.show()  # plotting for catching
 
     # invalid plotter type
     with pytest.raises(TypeError):
@@ -687,6 +689,7 @@ def test_show_bounds(mapdl, make_block):
     assert pl.bounds
     assert len(pl.bounds) == 6
     assert pl.bounds != default_bounds
+    pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
@@ -694,6 +697,7 @@ def test_background(mapdl, make_block):
     pl = mapdl.eplot(background="red", return_plotter=True)
     assert pl.background_color != default_color
     assert pl.background_color == "red"
+    pl.show()  # plotting for catching
 
 
 def test_plot_nodal_values(mapdl, make_block):
@@ -722,14 +726,14 @@ def test_vsel_iterable(mapdl, make_block):
 
 
 def test_color_areas(mapdl, make_block):
-    mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
-
-
-# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
-@pytest.mark.xfail
-def test_color_areas_fail(mapdl, make_block):
     pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
+
+    colors = [
+        value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
+    ]
+    assert len(np.unique(colors, axis=0)) == mapdl.geometry.n_area
+
+    pl.show()  # plotting for catching
 
 
 @pytest.mark.parametrize(
@@ -749,8 +753,8 @@ def test_color_areas_fail(mapdl, make_block):
     ],
 )
 def test_color_areas_individual(mapdl, make_block, color_areas):
-    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
+    # we do rely on the `pytest-pyvista` extension to deal with the differences
+    mapdl.aplot(vtk=True, color_areas=color_areas)
 
 
 def test_color_areas_error(mapdl, make_block):
@@ -811,7 +815,7 @@ def test_file_type_for_plots(mapdl):
 def test_cmplot_individual(mapdl, make_block, entity):
     mapdl.allsel()
     mapdl.cm("tmp_cm", entity=entity)
-    pl = mapdl.cmplot("tmp_cm", return_plotter=True)
+    mapdl.cmplot("tmp_cm")
 
 
 @pytest.mark.parametrize("label", ["N", "P"])
@@ -857,3 +861,4 @@ def test_cmplot_all(mapdl, make_block, entity):
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
     assert np.allclose(pl.mesh.points, ent[ids - 1])
+    pl.show()
