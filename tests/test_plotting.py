@@ -138,10 +138,9 @@ def test_bc_plot_options(
 
     if return_plotter:
         assert isinstance(p, Plotter)
+        p.show()
     else:
         assert p is None
-
-    p.show()
 
 
 @pytest.mark.parametrize(
