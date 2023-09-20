@@ -209,7 +209,6 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(autouse=True)
 def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
-
     # Checking if we want to avoid the check using pytest cli.
     skip_regression_check = pytestconfig.option.skip_regression_check
     if skip_regression_check:
