@@ -1938,7 +1938,7 @@ class _MapdlCore(Commands):
 
                 # expand color array until matching the number of areas.
                 # In this case we start to repeat colors in the same order.
-                colors = np.resize(colors, len(ent_num))
+                colors = np.resize(colors, (len(ent_num), 3))
 
                 for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
