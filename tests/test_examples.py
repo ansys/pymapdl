@@ -7,7 +7,7 @@ import pytest
 from ansys.mapdl.core import EXAMPLES_PATH, examples
 from ansys.mapdl.core.examples.downloads import (
     _download_file,
-    _download_rotor_tech_demo_plot,
+    _download_rotor_tech_demo_vtk,
     check_directory_exist,
     delete_downloads,
     download_bracket,
@@ -112,9 +112,9 @@ def test_download_vtk_rotor(running_test):
         assert download_vtk_rotor() is True
 
 
-def test__download_rotor_tech_demo_plot(running_test):
+def test__download_rotor_tech_demo_vtk(running_test):
     with running_test():
-        assert _download_rotor_tech_demo_plot() is True
+        assert _download_rotor_tech_demo_vtk() is True
 
 
 def test_download_example_data(running_test):
