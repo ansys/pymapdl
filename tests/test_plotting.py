@@ -101,7 +101,8 @@ def test_nplot(cleared, mapdl, nnum, vtk):
     mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
 
 
-def test_eplot(mapdl, make_block):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_eplot(mapdl, make_block, vtk):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
@@ -139,6 +140,8 @@ def test_bc_plot_options(
         assert isinstance(p, Plotter)
     else:
         assert p is None
+
+    p.show()
 
 
 @pytest.mark.parametrize(
@@ -806,3 +809,69 @@ def test_cmplot_all(mapdl, make_block, entity):
 
     assert np.allclose(pl.mesh.points, ent[ids - 1])
     pl.show()
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)
+
+
+def test_plot_empty_mesh(mapdl, cleared):
+    with pytest.warns(UserWarning):
+        mapdl.nplot(vtk=True)
+
+    with pytest.warns(UserWarning):
+        mapdl.eplot(vtk=True)
+
+
+def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
+    # Testing basic behaviour
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert os.path.exists("myfile.png")
+    ti_m = os.path.getmtime("myfile.png")
+
+    # Testing overwriting
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert not os.path.exists("myfile_1.png")
+    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
+
+    os.remove("myfile.png")
+
+    # Testing no extension
+    mapdl.eplot(vtk=False, savefig="myfile")
+    assert os.path.exists("myfile")
+    os.remove("myfile")
+
+    # Testing update name when file exists.
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot.png")
+
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot_1.png")
+
+    os.remove("plot.png")
+    os.remove("plot_1.png")
+
+    # Testing full path for downloading
+    plot_ = os.path.join(tmpdir, "myplot.png")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+    plot_ = os.path.join(tmpdir, "myplot")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )

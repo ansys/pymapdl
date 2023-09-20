@@ -73,9 +73,6 @@ def static_solve(mapdl):
     mapdl.amesh("all")
     mapdl.prep7()
 
-    # plot elements
-    # mapdl.eplot()
-
     # Apply tangential pressure
     mapdl.esel("S", "TYPE", "", 2)
     mapdl.sfe("all", 2, "pres", "", pressure)
@@ -745,6 +742,7 @@ def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
     verify_image_cache.skip = True  # skipping image verification
 
     # Returns
+
     assert (
         mapdl.post_processing.plot_nodal_displacement("X", smooth_shading=True) is None
     )
@@ -754,12 +752,12 @@ def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
         ),
         CameraPosition,
     )
-    assert isinstance(
-        mapdl.post_processing.plot_nodal_displacement(
-            "X", smooth_shading=True, return_plotter=True
-        ),
-        Plotter,
+
+    p = mapdl.post_processing.plot_nodal_displacement(
+        "X", smooth_shading=True, return_plotter=True
     )
+    assert isinstance(p, Plotter)
+    p.show()
 
     with pytest.raises(ValueError):
         mapdl.post_processing.plot_nodal_displacement(
@@ -787,16 +785,15 @@ def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
         ),
         CameraPosition,
     )
-    assert isinstance(
-        mapdl.post_processing.plot_nodal_displacement(
-            "X",
-            smooth_shading=True,
-            savefig=True,
-            return_cpos=False,
-            return_plotter=True,
-        ),
-        Plotter,
+
+    p = mapdl.post_processing.plot_nodal_displacement(
+        "X",
+        smooth_shading=True,
+        savefig=True,
+        return_cpos=False,
+        return_plotter=True,
     )
+    assert isinstance(p, Plotter)
 
 
 def test_time_frequency_values(mapdl, contact_solve):
