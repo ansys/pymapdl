@@ -684,9 +684,9 @@ def test_vsel_iterable(mapdl, make_block):
 def test_color_areas(mapdl, make_block):
     pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
 
-    colors = [
-        value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
-    ]
+    # colors = [
+    #     value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
+    # ]
     # assert len(np.unique(colors, axis=0)) == mapdl.geometry.n_area
 
     pl.show()  # plotting for catching
