@@ -4257,6 +4257,16 @@ class _MapdlCore(Commands):
             )
 
         if entity in ["kp", "node"]:
+            lines_pl = self.lplot(return_plotter=True)
+            lines_meshes = get_meshes_from_plotter(lines_pl)
+
+            for each_mesh in lines_meshes:
+                pl.add_mesh(
+                    each_mesh,
+                    pickable=False,
+                    # name="lines"
+                )
+
             # Picking points
             pl.enable_point_picking(
                 callback=callback_points,
