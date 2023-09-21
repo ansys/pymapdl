@@ -118,6 +118,7 @@ result = mapdl.result
 
 mode2plot = 2
 normalizeDisplacement = 1 / result.nodal_displacement(mode2plot - 1)[1].max()
+
 result.plot_nodal_displacement(
     mode2plot,
     show_displacement=True,
@@ -127,12 +128,14 @@ result.plot_nodal_displacement(
 
 result.animate_nodal_displacement(
     mode2plot,
-    loop=True,
+    loop=False,
     add_text=False,
     n_frames=100,
     displacement_factor=normalizeDisplacement,
     show_axes=False,
     background="w",
+    movie_filename="animation.gif",
+    off_screen=True,
 )
 
 ###############################################################################
