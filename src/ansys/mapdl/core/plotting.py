@@ -10,6 +10,8 @@ from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 
 from .theme import MapdlTheme
 
+POINT_SIZE = 10
+
 # Supported labels
 BC_D = [
     "TEMP",
@@ -154,7 +156,7 @@ def _general_plotter(
     color="w",
     show_edges=None,
     edge_color=None,
-    point_size=5.0,
+    point_size=POINT_SIZE,
     line_width=None,
     opacity=1.0,
     flip_scalars=False,
