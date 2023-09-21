@@ -30,7 +30,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html --reset_image_cache '
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -522,15 +522,6 @@ jobs:
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
-      
-      - name: 'Upload image cache to PR'
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add tests/.image_cache/*.png
-          git commit -m "Updating image cache from ${{ github. run_id }}"
-          git push
-
 
   test-windows:
     if: github.repository == ''
