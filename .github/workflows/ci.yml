@@ -531,8 +531,8 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           message: Update the image cache
-          # committer_name: GitHub Actions
-          # committer_email: actions@github.com
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
 
       - name: PR comment with reactions
@@ -544,9 +544,9 @@ jobs:
             
             Your PR is changing the image cache. So I am attaching the new image cache
             in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
-            This commit does not re-trigger the CICD (since no changes are made in the codebase) therefore
-            you will see as the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
-            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.sha }}) :smile:
+            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
+            you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
 
             You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
 
