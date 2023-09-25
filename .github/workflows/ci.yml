@@ -513,14 +513,14 @@ jobs:
       #     #   --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - run: |
-          touch ./tests/.image_cache/MY_FILE.png
+          touch ./tests/.image_cache/MY_FILE2.png
           git config --global --add safe.directory /__w/pymapdl/pymapdl
       
       - run: |
           echo $(pwd)
 
       - run: |
-          ls
+          ls /tests/.image_cache/ | grep MY_FILE
 
       - name: "Attaching modified files to PR"
         uses: EndBug/add-and-commit@v9
