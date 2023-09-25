@@ -520,7 +520,7 @@ jobs:
           echo $(pwd)
 
       - run: |
-          ls /tests/.image_cache/ | grep MY_FILE
+          ls ./tests/.image_cache | grep MY_FILE
 
       - name: "Attaching modified files to PR"
         uses: EndBug/add-and-commit@v9
