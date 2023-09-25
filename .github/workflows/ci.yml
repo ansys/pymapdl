@@ -509,14 +509,6 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
-      - name: 'Upload image cache to PR'
-        run: |
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-          git add tests/.image_cache/*.png
-          git commit -m "Updating image cache from ${{ github. run_id }}"
-          git push
-
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
