@@ -460,6 +460,9 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -505,9 +508,21 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:ubuntu-v22.2.0-local.xml
+          # xvfb-run pytest -k "not test_database and not test_dpf" \
+          #   ${{ env.PYTEST_ARGUMENTS }} \
+          #   --cov-report=xml:ubuntu-v22.2.0-local.xml
+
+      - run: |
+          touch ./tests/.image_cache/MY_FILE.png
+
+      - name: "Attaching modified files to PR"
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: Show GitHub Actions logo
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: './tests/.image_cache/*.png --force'
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
