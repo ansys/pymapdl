@@ -516,6 +516,10 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
+      - name: "Adding the directory as safe directory for later step"
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+
       - name: "Attaching modified files to PR"
         id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
@@ -525,7 +529,7 @@ jobs:
           committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
 
-      - name: PR comment with reactions
+      - name: "PR comment with reactions"
         if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
         uses: thollander/actions-comment-pull-request@v2
         with:
