@@ -447,6 +447,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
+    outputs:
+      pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
+      committed: ${{ steps.attatch-to-pr.outputs.committed }}
+      commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
@@ -513,7 +517,7 @@ jobs:
       #     #   --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - run: |
-          touch ./tests/.image_cache/MY_FILE2.png
+          touch ./tests/.image_cache/MY_FILE4.png
           git config --global --add safe.directory /__w/pymapdl/pymapdl
       
       - run: |
@@ -523,12 +527,30 @@ jobs:
           ls ./tests/.image_cache | grep MY_FILE
 
       - name: "Attaching modified files to PR"
+        id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
         with:
           message: Update the image cache
           # committer_name: GitHub Actions
           # committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
+
+      - name: PR comment with reactions
+        if: ${{ steps.attatch-to-pr.outputs.pushed }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Hello!  :wave:
+            
+            Your PR is changing the image cache. So I am attaching the new image cache
+            in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
+            This commit won't re-trigger the CICD (since no changes are made in the codebase) therefore
+            you will see as the actions being with status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ steps.attatch-to-pr.outputs.commit_long_sha }}) :smile:
+            
+            You will see this message everytime your commit change the image cache but you are not attaching the new changes. :smile:
+
+          reactions: rocket
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
