@@ -153,7 +153,8 @@ mapdl.rectng(box2[0], box2[1], box2[2], box2[3])
 # Step 2: change plot controls and replot
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# PyMapdl plot controls are in the properties of the :meth:`mapdl.aplot() <ansys.mapdl.core.mapdl.aplot>` command.
+# PyMapdl plot controls are in the properties of the
+# :meth:`mapdl.aplot() <ansys.mapdl.core.mapdl.aplot>` command.
 #
 # .. raw:: html
 #
@@ -166,7 +167,7 @@ mapdl.rectng(box2[0], box2[1], box2[2], box2[3])
 # The area plot shows both rectangles, which are areas, in the same color.
 # To more clearly distinguish between areas, turn on area numbers. The inputs
 # for the plotting controls can be found by highlighting the command
-# (mapdl.aplot() and right clicking for *show contextual help*.
+# (:meth:`mapdl.aplot() <ansys.mapdl.core.mapdl.aplot>` and right clicking for *show contextual help*.
 #
 
 # Area plot command to be reused through analysis
@@ -209,20 +210,27 @@ mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
 # Step 4: create second circle
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# The second circle to be created is at the X,Y location ((box2[0] + box2[0] ) / 2 , box2[3]). Use these parameter values to create the new area with the same radius of 1 as the first circle area.
+# The second circle to be created is at the X,Y location:
 #
 
 circle2_X = (box2[0] + box2[1]) / 2
 circle2_Y = box2[3]
-mapdl.cyl4(circle2_X, circle2_Y, radius)
 
+###############################################################################
+# Use these parameter values to create the new area with the same radius of 1
+# as the first circle area.
+
+mapdl.cyl4(circle2_X, circle2_Y, radius)
 mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
 
 
 ###############################################################################
 # Step 5: add areas
 # ~~~~~~~~~~~~~~~~~
-# Now that the appropriate pieces of the model (rectangles and circles) are defined, add them together so the model becomes one continuous area. Use the Boolean add operation :meth:`mapdl.aadd() <ansys.mapdl.core.mapdl.aadd>` to add the areas together.
+# Now that the appropriate pieces of the model (rectangles and circles) are defined,
+# add them together so the model becomes one continuous area.
+# Use the Boolean add operation :meth:`mapdl.aadd() <ansys.mapdl.core.mapdl.aadd>`
+# to add the areas together.
 #
 # .. rst:: html
 #
@@ -239,67 +247,73 @@ mapdl.aadd("all")
 ###############################################################################
 # ## 2.1.3.6. step 6: create line fillet.
 #
-# The right angle between the two boxes will be improved using a fillet with a radius of 0.4.
+# The right angle between the two boxes will be improved using a fillet with a
+# radius of 0.4.
 # This can be done by selecting the lines around that area and creating a fillet.
 #
-# The APDL :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command is used to select lines. Here we use the X and Y location of the lines used to create the boxes to create our selection.
+# The APDL :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command is used
+# to select lines. Here we use the X and Y location of the lines used to create
+# the boxes to create our selection.
 #
-# <pre>
-#  <code>
-#   <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/database/_autosummary/ansys.mapdl.core.mapdl.lsel.html#lsel">Mapdl.lsel(type_='', item='', comp='', vmin='', vmax='', vinc='', kswp='', **kwargs)</a>
-#  </code>
-# </pre>
+# .. raw:: html
+#
+#    <pre>
+#     <code>
+#      <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/database/_autosummary/ansys.mapdl.core.mapdl.lsel.html#lsel">Mapdl.lsel(type_='', item='', comp='', vmin='', vmax='', vinc='', kswp='', **kwargs)</a>
+#     </code>
+#    </pre>
 #
 # After we select the line it needs to be written to a parameter so we can use
 # it to generate the fillet line.
-# That is done using the :meth:`mapdl.get() <ansys.mapdl.core.mapdl.get>` command from APDL or GET in pymapdl.
-# Since we have selected one line, we can use the **MAX** and **NUM** arguments for the :meth:`mapdl.get() <ansys.mapdl.core.mapdl.get>` command.
+# That is done using the :meth:`mapdl.get() <ansys.mapdl.core.mapdl.get>` command
+# from PyMAPDL or `GET` in pymapdl.
+# Since we have selected one line, we can use the **MAX** and **NUM** arguments
+# for the :meth:`mapdl.get() <ansys.mapdl.core.mapdl.get>` command.
 #
-#     line1 = mapdl.lsel('S','LOC','X',box1[2])
-#     l1 = mapdl.get('LINE1', 'LINE', 0 , 'NUM','MAX')
-#
-# <pre>
-#  <code>
-#   <a href="https://mapdl.docs.pyansys.com/version/stable/api/_autosummary/ansys.mapdl.core.mapdl.get.html#get">Mapdl.get(par='__floatparameter__', entity='', entnum='', item1='', it1num='', item2='', it2num='', item3='', it3num='', item4='', it4num='', **kwargs)[source]
-# </a>
-#  </code>
-# </pre>
-#
-# If we write the command to a python parameter (**line1**) we can use either the APDL parameter **l1** or the python parameter **line1** when we create the fillet line.
-#
-# Select and parameterize the second line required for the fillet line.
-#
-#     line2 = mapdl.lsel('S','LOC','X',box2[0])
-#     l2 = mapdl.get('LINE2', 'LINE', 0 , 'NUM','MAX')
-#
-# Once we have both lines selected we can use the APDL command :meth:`mapdl.lfillt() <ansys.mapdl.core.mapdl.lfillt>` to generate the fillet between the lines.
-#
-# <pre>
-#  <code>
-#   <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.mapdl.lfillt.html#lfillt">Mapdl.lfillt(nl1='', nl2='', rad='', pcent='', **kwargs)</a>
-#  </code>
-# </pre>
-#
-# <em>Note that python could return a list if more than one line is selected.</em>
-
 # Select first line for fillet
 line1 = mapdl.lsel("S", "LOC", "Y", box1[2])
 l1 = mapdl.get("line1", "LINE", 0, "NUM", "MAX")
 
+
+###############################################################################
+#
+# .. raw:: html
+#
+#    <pre>
+#     <code>
+#      <a href="https://mapdl.docs.pyansys.com/version/stable/api/_autosummary/ansys.mapdl.core.mapdl.get.html#get">Mapdl.get(par='__floatparameter__', entity='', entnum='', item1='', it1num='', item2='', it2num='', item3='', it3num='', item4='', it4num='', **kwargs)[source]
+#    </a>
+#     </code>
+#    </pre>
+#
+# If we write the command to a python parameter (**line1**) we can use either
+# the APDL parameter **l1** or the python parameter **line1** when we create
+# the fillet line.
+#
 # Select second line for fillet, create python parameter
 line2 = mapdl.lsel("S", "LOC", "X", box2[0])
 l2 = mapdl.get("line2", "LINE", 0, "NUM", "MAX")
 
 ###############################################################################
-# Here we use a mix of the APDL parameter as a string **'LINE1'** and the **L2** python parameter to create the fillet line.
+# Once we have both lines selected we can use the APDL command
+# :meth:`mapdl.lfillt() <ansys.mapdl.core.mapdl.lfillt>` to generate the fillet
+# between the lines.
 #
-# .. code:: python
+# .. raw:: html
 #
-#     fillet_radius = 0.4
-#     line3 = mapdl.lfillt('LINE1', l2, fillet_radius)
+#    <pre>
+#     <code>
+#      <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.mapdl.lfillt.html#lfillt">Mapdl.lfillt(nl1='', nl2='', rad='', pcent='', **kwargs)</a>
+#     </code>
+#    </pre>
 #
+# <em>Note that python could return a list if more than one line is selected.</em>
 
-# create fillet line using selected line (parameter names)
+###############################################################################
+# Here we use a mix of the APDL parameter as a string **'LINE1'** and the **L2**
+# python parameter to create the fillet line.
+#
+# Create fillet line using selected line (parameter names)
 fillet_radius = 0.4
 mapdl.allsel()
 line3 = mapdl.lfillt("line1", l2, fillet_radius)
@@ -311,29 +325,47 @@ mapdl.lplot(vtk=True, cpos="xy")
 # Step 7: create fillet area
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
+# To create the area delineated by line1, line2 and newly created line3, we use
+# the :meth:`mapdl.al() <ansys.mapdl.core.mapdl.al>` command. The three lines
+# are the input. If we select them all, we can use the 'ALL' argument to create
+# the area.
 #
-# To create the area delineated by line1, line2 and newly created line3, we use the :meth:`mapdl.al() <ansys.mapdl.core.mapdl.al>` command. The three lines are the input. If we select them all, we can use the 'ALL' argument to create the area.
+# First we have to reselect the newly created lines in the fillet area.
+# To do this we can use the fillet_radius parameter and the
+# :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command.
 #
-# First we have to reselect the newly created lines in the fillet area. To do this we can use the fillet_radius parameter and the :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command.
+# For the two newly created straight lines, the length will be the same as the
+# fillet_radius. So we can use the length argument with the
+# :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command.
 #
-# For the two newly created straight lines, the length will be the same as the fillet_radius. So we can use the length argument with the :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command.
-#
-#     mapdl.lsel('S','LENGTH','',fillet_radius)
-#
-# Additionally, we need the fillet line itself (line3) but we can use the :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command again with either the RADIUS argument if there is only one line with that radius in our model or more directly using the parameter name of the line.
+mapdl.allsel()
+
+# Select lines for the area
+mapdl.lsel("S", "LENGTH", "", fillet_radius)
+
+###############################################################################
+# Additionally, we need the fillet line itself (line3) but we can use the
+# :meth:`mapdl.lsel() <ansys.mapdl.core.mapdl.lsel>` command again with either
+# the RADIUS argument if there is only one line with that radius in our model
+# or more directly using the parameter name of the line.
 # Note the **'A'** to additionally select items.
 #
-#     mapdl.lsel('A','LINE','',line3)
+mapdl.lsel("A", "LINE", "", line3)
+
+###############################################################################
 #
-# <pre>
-#  <code>
-#   <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.mapdl.al.html#al">Mapdl.al(l1='', l2='', l3='', l4='', l5='', l6='', l7='', l8='', l9='', l10='', **kwargs)</a>
-#  </code>
-# </pre>
+# .. raw:: html
+#
+#     <pre>
+#      <code>
+#       <a href="https://mapdl.docs.pyansys.com/version/stable/mapdl_commands/prep7/_autosummary/ansys.mapdl.core.mapdl.al.html#al">Mapdl.al(l1='', l2='', l3='', l4='', l5='', l6='', l7='', l8='', l9='', l10='', **kwargs)</a>
+#      </code>
+#     </pre>
 #
 #
-#     mapdl.al('ALL')
-#
+# Create the area
+mapdl.al("ALL")
+
 ###############################################################################
 # ### 2.1.3.8. step 8: add areas together.
 # Append all areas again with the :meth:`mapdl.aadd() <ansys.mapdl.core.mapdl.aadd>`. Since we have only the 2 areas to combine, use the 'ALL' argument.
@@ -346,15 +378,8 @@ mapdl.lplot(vtk=True, cpos="xy")
 #
 
 
-mapdl.allsel()
-
-# Select lines for the area
-mapdl.lsel("S", "LENGTH", "", fillet_radius)
-mapdl.lsel("A", "LINE", "", line3)
 mapdl.lplot(vtk=True, cpos="xy", show_line_numbering=True)
 
-# Create the area
-mapdl.al("ALL")
 
 # Add the area to the main area
 mapdl.aadd("all")
