@@ -30,7 +30,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html --reset_image_cache '
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -516,16 +516,6 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
-      - run: |
-          touch ./tests/.image_cache/MY_FILE3.png
-          git config --global --add safe.directory /__w/pymapdl/pymapdl
-      
-      - run: |
-          echo $(pwd)
-
-      - run: |
-          ls ./tests/.image_cache | grep MY_FILE
-
       - name: "Attaching modified files to PR"
         id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
@@ -536,7 +526,7 @@ jobs:
           add: './tests/.image_cache/*.png'
 
       - name: PR comment with reactions
-        if: ${{ steps.attatch-to-pr.outputs.pushed }}
+        if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
