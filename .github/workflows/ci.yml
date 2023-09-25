@@ -517,7 +517,7 @@ jobs:
       #     #   --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - run: |
-          touch ./tests/.image_cache/MY_FILE4.png
+          touch ./tests/.image_cache/MY_FILE3.png
           git config --global --add safe.directory /__w/pymapdl/pymapdl
       
       - run: |
@@ -544,11 +544,11 @@ jobs:
             
             Your PR is changing the image cache. So I am attaching the new image cache
             in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
-            This commit won't re-trigger the CICD (since no changes are made in the codebase) therefore
-            you will see as the actions being with status `Expected — Waiting for status to be reported`. Do not worry.
-            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ steps.attatch-to-pr.outputs.commit_long_sha }}) :smile:
-            
-            You will see this message everytime your commit change the image cache but you are not attaching the new changes. :smile:
+            This commit does not re-trigger the CICD (since no changes are made in the codebase) therefore
+            you will see as the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.sha }}) :smile:
+
+            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
 
           reactions: rocket
 
