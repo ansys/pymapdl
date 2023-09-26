@@ -662,11 +662,13 @@ jobs:
       - name: "Install Git and clone project"
         uses: actions/checkout@v4
 
-      - name: "get version of library"
+      - name: "Get version of library"
+
         shell: bash
         run: |
           echo "FULL_VERSION=$(cat VERSION)" >> $GITHUB_ENV
-      - name: Scrape the stable documentation to PyMeilisearch
+      - name: "Scrape the stable documentation to PyMeilisearch"
+
         run: |
           VERSION=$(python -c "import os; version=os.environ['FULL_VERSION']; print('.'.join(version.split('.')[:2]))")
           VERSION_MEILI=$(python -c "import os; version=os.environ['FULL_VERSION']; print('-'.join(version.split('.')[:2]))")
