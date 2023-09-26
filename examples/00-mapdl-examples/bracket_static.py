@@ -146,8 +146,8 @@ mapdl.rectng(*box2)  # prints the id of the created area
 
 
 ###############################################################################
-# Change plot controls and replot
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Plot areas
+# ~~~~~~~~~~
 #
 # PyMapdl plots can be controlled through argument passed to the different plot
 # functions, such as :meth:`mapdl.aplot() <ansys.mapdl.core.Mapdl.aplot>` command.
