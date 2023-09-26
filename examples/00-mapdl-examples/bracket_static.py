@@ -1,4 +1,6 @@
 """
+.. _ref_static_analysis_bracket:
+
 
 ===================================
 Static analysis of a corner bracket
@@ -157,6 +159,18 @@ mapdl.rectng(*box2)  # prints the id of the created area
 #
 
 mapdl.aplot(cpos="xy", show_lines=True, show_area_numbering=True)
+
+
+###############################################################################
+#
+# .. note::
+#
+#    If you download the jupyter notebook of
+#    `this example <ref_static_analysis_bracket_end_>`_, you can take advantage
+#    of the jupyter notebook features.
+#    For example you can right click on a command to get the contextual help
+#    which will pop up on screen.
+#
 
 ###############################################################################
 # Create first circle
@@ -329,8 +343,8 @@ mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
 # The first pin hole is located at the left side of the first box, so we can use
 # the box dimensions to locate our new circle.
 #
-# The X value (center) of the pinhole is at the first coordinate of the ``box1`` (`X1`)
-# The Y value is the average of the two ``box1`` Y values:
+# The X value (center) of the pinhole is at the first coordinate of the ``box1``
+# (``X1``). The Y value is the average of the two ``box1`` Y values:
 #
 
 # Create the first pinhole
@@ -341,6 +355,9 @@ pinhole1_Y = (box1[2] + box1[3]) / 2
 pinhole1 = mapdl.cyl4(pinhole1_X, pinhole1_Y, pinhole_radius)
 
 ###############################################################################
+#
+# Since we have two pin hole circles, we will use the command twice.
+#
 # **Note** some of these areas are set to parameters to use later in the analysis.
 # This will later allow us to these lines that are used to create the areas
 # :meth:`mapdl.asll() <ansys.mapdl.core.Mapdl.asll>`
@@ -367,23 +384,15 @@ pinhole2_lines = mapdl.asll("S", 0)
 # We can use the :meth:`mapdl.asba() <ansys.mapdl.core.Mapdl.asba>` command,
 # the boolean command to subtract areas, to remove the circles from the bracket.
 #
-# Since we have two pin hole circles, we will use the command twice.
-#
+
 # Remove pin hole areas from bracket
 mapdl.asba("all", pinhole1)
 bracket = mapdl.asba("all", pinhole2)
 mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos="xy")
 
 ###############################################################################
-# Save the database
-# ~~~~~~~~~~~~~~~~~
-#
-# Probably a good idea at this point, if not earlier, to save the jupyter notebook.
-#
-
-###############################################################################
-# Material definition
-# ===================
+# Model definition
+# ================
 #
 # Define material properties
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -411,7 +420,8 @@ mapdl.mp("PRXY", 1, prxy)
 #
 # In any analysis, you select elements from a library of element types and
 # define the appropriate ones for the analysis. In this case, only one element
-# type is used: `PLANE183 <elem_plane183_>`_, a 2D, quadratic, structural, higher-order element.
+# type is used: `PLANE183 <elem_plane183_>`_, a 2D, quadratic, structural,
+# higher-order element.
 #
 # A higher-order element enables you to have a coarser mesh than with lower-order
 # elements while still maintaining solution accuracy. Also, Mechanical APDL
@@ -430,7 +440,7 @@ mapdl.mp("PRXY", 1, prxy)
 # But it is set using the element keyoption 3.
 #
 
-# define a `PLANE183 <elem_plane183_>`_ element type with thickness
+# define a ``PLANE183`` element type with thickness
 mapdl.et(1, "PLANE183", kop3=3)
 
 ###############################################################################
@@ -455,8 +465,8 @@ mapdl.r(1, thick)  # thickness of 0.5 length units)
 # unsure of how to determine mesh density, you can allow Mechanical APDL to apply
 # a default mesh. For this model, however, you will specify a global element size
 # to control overall mesh density.
-# Set Global Size control using the :meth:`mapdl.esize() <ansys.mapdl.core.Mapdl.esize>`
-# command. Set a size of 0.5 or a slightly smaller value to improve the mesh.
+# Set global size control using the :meth:`mapdl.esize() <ansys.mapdl.core.Mapdl.esize>`
+# command. Set a size of :math:`0.5` or a slightly smaller value to improve the mesh.
 #
 # Mesh the areas using the :meth:`mapdl.amesh() <ansys.mapdl.core.Mapdl.amesh>` command.
 # Your mesh may vary slightly from the mesh shown. You may see slightly different
@@ -476,21 +486,20 @@ mapdl.eplot(
     background="w",
 )
 
-mapdl.save()  # Save the model
-
 ###############################################################################
 # Boundary conditions
 # ===================
 #
 # Loading is considered part of the
 # :meth:`mapdl.solu() <ansys.mapdl.core.Mapdl.solu>` or solution processor in APDL.
-# But it can be also done in the pre-processor :meth:`mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
+# But it can be also done in the pre-processor
+# :meth:`mapdl.prep7() <ansys.mapdl.core.Mapdl.prep7>`.
 #
 # The Solution processor can be activated calling
 # :class:`mapdl.solution() <ansys.mapdl.core.solution.Solution>`,
 # using the APDL :meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`
-# command or using :meth:`mapdl.run("/solu") <ansys.mapdl.core.Mapdl.run>` to call the
-# APDL command `/SOLU`.
+# command or using :meth:`mapdl.run("/solu") <ansys.mapdl.core.Mapdl.run>` to
+# call the APDL command ``/SOLU``.
 #
 
 mapdl.allsel()
@@ -506,17 +515,17 @@ mapdl.antype("STATIC")
 # Apply displacement constraints
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This is where we add boundary conditions to the model. First we want to fix
-# the model so it doesn't fly off into space. We do that by setting a zero
-# displacement at the first pinhold.
+# the model by setting a zero displacement at the first pinhold.
 # You can apply displacement constraints directly to lines.
 #
 # To do this without the graphical interface we would need to replot the lines
-# or we can booleans and generate the lines from the pinholes locations/box parameters.
-# By using the parameters we have created we can grab the lines and fix one end
+# or we can use booleans and generate the lines from the pinholes locations/box
+# parameters.
+# By using the parameters we have created we can select the lines and fix one end
 # of the bracket.
 #
 # Pick the four lines around left-hand hole using the
-# :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command and the `pinehole1`
+# :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command and the ``pinehole1``
 # parameters.
 #
 
@@ -531,6 +540,7 @@ print(f"Number of lines selected : {len(bc1)}")
 #
 
 fixNodes = mapdl.nsll(type_="S")
+
 ###############################################################################
 # And then use the :meth:`mapdl.d() <ansys.mapdl.core.Mapdl.d>` command to set
 # the displacement to zero (fixed constraint).
@@ -545,8 +555,8 @@ mapdl.allsel()
 # Apply pressure load
 # ~~~~~~~~~~~~~~~~~~~
 #
-# Apply the tapered pressure load to the bottom-right pin hole (tapered here
-# means varying linearly).
+# Apply the tapered pressure load to the bottom-right pin hole. In this case
+# tapered means varying linearly.
 # When a circle is created in Mechanical APDL, four lines define the perimeter;
 # therefore, apply the pressure to two lines making up the lower half of the circle.
 # Because the pressure tapers from a maximum value (500 psi) at the bottom of the
@@ -563,10 +573,11 @@ p2 = 500
 #
 # To pick the line use the same method used in the previous cell block
 # (:meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>`) and then convert the lines
-# to a nodal selection with the :meth:`mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>` command.
+# to a nodal selection with the :meth:`mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+# command.
 #
 # Note we have a slightly more complicated picking procedure for the two quarters
-# of the full circle. A method to select the lines would be to grab the lower
+# of the full circle. A method to select the lines would be to select the lower
 # half of the second pinhole circle.
 #
 
@@ -586,7 +597,7 @@ mapdl.lplot(vtk=True, cpos="xy")
 # command to load the line with a varying surface load.
 #
 
-# here we load the left side of the lower half of second pin hole
+# Here we load the left side of the lower half of second pin hole
 mapdl.sf("ALL", "PRES", p1, p2)
 mapdl.allsel()
 
@@ -611,12 +622,13 @@ mapdl.allsel()
 # Solution
 # ========
 #
-# To solve an Ansys FE analysis you have to be in the Solution processor, which
-# is activated using :class:`mapdl.solution() <ansys.mapdl.core.solution.Solution>`
+# To solve an Ansys FE analysis the *Solution* processor needs to be activated,
+# using :class:`mapdl.solution() <ansys.mapdl.core.solution.Solution>`
 # or the APDL :meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`
 # command. This was done a few steps earlier.
 #
-# The model is ready to solve using the :meth:`mapdl.solve() <ansys.mapdl.core.Mapdl.solve>` command.
+# The model is ready to be solved using the
+# :meth:`mapdl.solve() <ansys.mapdl.core.Mapdl.solve>` command.
 #
 
 # Solve the model
@@ -653,9 +665,6 @@ mapdl.post1()
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # Here :class:`mapdl.result <ansys.mapdl.core.Mapdl.result>` is used to retrieve
 # the results and for plotting.
-#
-# In jupyter notebooks you can right click on a command to get the contextual help
-# which will pop up on screen.
 #
 
 # Plot displacement
@@ -726,3 +735,9 @@ print(reactForces)
 # Exit the Mechanical APDL program once you finished.
 #
 mapdl.exit()
+
+
+###############################################################################
+#
+# .. _ref_static_analysis_bracket_end:
+#
