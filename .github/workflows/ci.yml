@@ -663,10 +663,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Get version of library"
-
         shell: bash
         run: |
           echo "FULL_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+
       - name: "Scrape the stable documentation to PyMeilisearch"
 
         run: |
