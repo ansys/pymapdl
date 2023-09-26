@@ -872,6 +872,7 @@ class MapdlGrpc(_MapdlCore):
             self.numvar(200, mute=True)
 
         self.show(self._file_type_for_plots)
+        self.version  # Caching version
 
     def _reset_cache(self):
         """Reset cached items."""
@@ -1115,7 +1116,12 @@ class MapdlGrpc(_MapdlCore):
 
         """
         self._log.debug("Killing MAPDL server")
-        self._ctrl("EXIT")
+        if (
+            self._version >= 24.2
+        ):  # We can't use the non-cached version because of recursion error.
+            self.run("/EXIT,NOSAVE,,,,,SERVER")
+        else:
+            self._ctrl("EXIT")
 
     def _kill_process(self):
         """Kill process stored in self._mapdl_process"""
