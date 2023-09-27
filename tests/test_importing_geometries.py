@@ -89,11 +89,7 @@ def test_readin_igs(mapdl, cleared):
 
 @pytest.mark.xfail(not ON_LOCAL, reason="Docker images fail to run this command")
 def test_readin_sat(mapdl, cleared):
-    if ON_CI and mapdl.version == 24.1:
-        mapdl.prep7()
-        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
-
-    elif ON_CI and mapdl.version == 23.2:
+    if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
             MapdlRuntimeError, match="Specified library does not exist."
         )
@@ -123,10 +119,7 @@ def test_readin_sat(mapdl, cleared):
 
 @pytest.mark.xfail(True, reason="Command seems broken.")
 def test_readin_x_t(mapdl, cleared):
-    if ON_CI and mapdl.version == 24.1:
-        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
-
-    elif ON_CI and mapdl.version == 23.2:
+    if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
             MapdlRuntimeError, match="Specified library does not exist."
         )
