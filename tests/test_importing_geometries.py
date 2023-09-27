@@ -85,6 +85,9 @@ def test_readin_igs(mapdl, cleared):
 
 ## Connection commands
 #
+
+
+@skip_if_not_local  # Docker images fail to run this command
 def test_readin_sat(mapdl, cleared):
     if ON_CI and mapdl.version == 24.1:
         mapdl.prep7()
@@ -118,6 +121,7 @@ def test_readin_sat(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@skip_if_not_local  # Docker images fail to run this command
 def test_readin_x_t(mapdl, cleared):
     if ON_CI and mapdl.version == 24.1:
         context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
@@ -153,9 +157,9 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@skip_if_not_local  # Docker images fail to run this command
 def test_readin_catiav5(mapdl, cleared):
     if ON_CI and mapdl.version == 24.1:
-        mapdl.prep7()
         context = NullContext()
 
     elif ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
