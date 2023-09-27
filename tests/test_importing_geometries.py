@@ -86,11 +86,7 @@ def test_readin_igs(mapdl, cleared):
 ## Connection commands
 #
 def test_readin_sat(mapdl, cleared):
-    if ON_CI and mapdl.version == 24.1:
-        mapdl.prep7()
-        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
-
-    elif ON_CI and mapdl.version == 23.2:
+    if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
             MapdlRuntimeError, match="Specified library does not exist."
         )
@@ -119,10 +115,7 @@ def test_readin_sat(mapdl, cleared):
 
 
 def test_readin_x_t(mapdl, cleared):
-    if ON_CI and mapdl.version == 24.1:
-        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
-
-    elif ON_CI and mapdl.version == 23.2:
+    if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
             MapdlRuntimeError, match="Specified library does not exist."
         )
@@ -154,11 +147,7 @@ def test_readin_x_t(mapdl, cleared):
 
 
 def test_readin_catiav5(mapdl, cleared):
-    if ON_CI and mapdl.version == 24.1:
-        mapdl.prep7()
-        context = NullContext()
-
-    elif ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
+    if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
         context = pytest.raises(
             MapdlRuntimeError, match="No shared command/library files were found"
         )
