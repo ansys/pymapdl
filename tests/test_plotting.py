@@ -221,7 +221,7 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
 @pytest.mark.parametrize(
     "bc_target",
     [
-        ["NOdes"],
+        ["NOsdes"],
         "error",
         ["error"],
         {"error": "Not accepting dicts"},
@@ -690,13 +690,6 @@ def test_color_areas(mapdl, make_block):
     mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
 
 
-# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
-@pytest.mark.xfail
-def test_color_areas_fail(mapdl, make_block):
-    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
-
-
 @skip_no_xserver
 @pytest.mark.parametrize(
     "color_areas",
@@ -716,7 +709,10 @@ def test_color_areas_fail(mapdl, make_block):
 )
 def test_color_areas_individual(mapdl, make_block, color_areas):
     pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
+    colors = [
+        value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
+    ]
+    assert len(np.unique(colors, axis=0)) == mapdl.geometry.n_area
 
 
 def test_color_areas_error(mapdl, make_block):
