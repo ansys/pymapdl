@@ -447,7 +447,7 @@ def _general_plotter(
                 each_mesh,
                 scalars=scalars,
                 scalar_bar_args=scalar_bar_args,
-                color="w",  # mesh.get("color", color),
+                color=mesh.get("color", color),
                 style=mesh.get("style", style),
                 show_edges=show_edges,
                 edge_color=edge_color,
