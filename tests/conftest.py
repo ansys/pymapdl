@@ -15,6 +15,7 @@ pymapdl.RUNNING_TESTS = True
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.theme import _apply_default_theme
 from common import (
     Element,
     Node,
@@ -27,6 +28,8 @@ from common import (
     is_on_ubuntu,
     is_smp,
 )
+
+_apply_default_theme()
 
 ################################################################
 #
