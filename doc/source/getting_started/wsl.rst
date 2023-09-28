@@ -18,7 +18,7 @@ show how to use it together with MAPDL, PyMAPDL, and `Docker <https://www.docker
 
 .. note::
    Because WSL is under constant development, keeping this guide updated is difficult. If you
-   find any issues or have questions related to WSL, feel free to `open an issue in the GitHub repository <pymapdl_issues>`_.
+   find any issues or have questions related to WSL, feel free to `open an issue in the GitHub repository <pymapdl_issues_>`_.
 
 
 Install WSL
