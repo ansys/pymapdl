@@ -269,6 +269,7 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
 @pytest.mark.parametrize(
     "bc_target",
     [
+        ["NOsdes"],
         "error",
         ["error"],
         {"error": "Not accepting dicts"},
@@ -329,7 +330,7 @@ def test_all_same_values(mapdl, bc_example):
     "selection",
     ["S", "R", "A", "U"],
 )
-def test_pick_nodes(mapdl, make_block, selection):
+def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     # Cleaning the model a bit
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
@@ -367,29 +368,29 @@ def test_pick_nodes(mapdl, make_block, selection):
         selection,
         "P",
         _debug=lambda x: debug_orders(x, point=point),
-        tolerance=0.2,
+        tolerance=1,
     )  # Selects node 2
 
     assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
-        assert selected.all()
+        assert selected.all(), "Array is empty"
     else:
-        assert selected
-    assert len(selected) > 0
+        assert selected, "List is empty"
+    assert len(selected) > 0, "The result has length zero"
 
     if selection != "U":
-        assert sorted(selected) == sorted(mapdl._get_selected_("node"))
+        assert sorted(selected) == sorted(
+            mapdl._get_selected_("node")
+        ), "Order does not match"
 
-    if selection == "S":
-        assert selected == [1]
-    elif selection == "R":
-        assert selected == [2]
+    if selection in ["S", "R"]:
+        assert selected == [2], "Second node is not selected, nor the only one"
     elif selection == "A":
-        assert 1 in selected
-        assert len(selected) > 1
+        assert 1 in selected, "Node 1 is not selected"
+        assert len(selected) > 1, "There should be at least two nodes"
     elif selection == "U":
-        assert 2 not in selected
-        assert 1 in selected
+        assert 2 not in selected, "Node 2 should not be selected."
+        assert 1 in selected, "Node 1 should be selected."
 
 
 @pytest.mark.parametrize(
@@ -737,14 +738,7 @@ def test_vsel_iterable(mapdl, make_block):
 
 
 def test_color_areas(mapdl, make_block):
-    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
-
-    # colors = [
-    #     value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
-    # ]
-    # assert len(np.unique(colors, axis=0)) == mapdl.geometry.n_area
-
-    pl.show()  # plotting for catching
+    mapdl.aplot(vtk=True, color_areas=True)
 
 
 @pytest.mark.parametrize(

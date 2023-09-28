@@ -4171,6 +4171,8 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
+            from ansys.mapdl.core.plotting import POINT_SIZE
+
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
@@ -4202,7 +4204,7 @@ class _MapdlCore(Commands):
                 pl.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
-                    point_size=10,
+                    point_size=POINT_SIZE + 10,
                     name="_picked_entities",
                     pickable=False,
                     reset_camera=False,
@@ -4257,6 +4259,17 @@ class _MapdlCore(Commands):
             )
 
         if entity in ["kp", "node"]:
+            lines_pl = self.lplot(return_plotter=True, color="w")
+            lines_meshes = get_meshes_from_plotter(lines_pl)
+
+            for each_mesh in lines_meshes:
+                pl.add_mesh(
+                    each_mesh,
+                    pickable=False,
+                    color="w",
+                    # name="lines"
+                )
+
             # Picking points
             pl.enable_point_picking(
                 callback=callback_points,

@@ -281,6 +281,12 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": get_version_match(__version__),
     },
+    "use_meilisearch": {
+        "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
+        "index_uids": {
+            f"pymapdl-v{get_version_match(__version__).replace('.', '-')}": "PyMAPDL",
+        },
+    },
 }
 
 html_context = {

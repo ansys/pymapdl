@@ -7,13 +7,11 @@ updates:
       interval: "weekly"      
       day: "friday"
       time: "00:00"
-
     labels:
       - "Maintenance"
       - "Dependencies"
     ignore:
       - dependency-name: "grpcio"
-      - dependency-name: "sphinx"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

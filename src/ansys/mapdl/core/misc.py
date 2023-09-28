@@ -1144,6 +1144,7 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
             )
+            from ansys.mapdl.core.plotting import POINT_SIZE
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1160,6 +1161,8 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                 if entity == "area":
                     # To overwrite the quality argument
                     pl = plotting_function(return_plotter=True, quality=1)
+                elif entity in ["node", "nodes", "kp"]:
+                    pl = plotting_function(return_plotter=True, point_size=POINT_SIZE)
                 else:
                     pl = plotting_function(return_plotter=True)
 
