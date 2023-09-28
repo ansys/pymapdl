@@ -359,8 +359,7 @@ jobs:
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
-            ${{ env.PYTEST_ARGUMENTS }} \ 
-            --ignore_image_cache \
+            ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v3
