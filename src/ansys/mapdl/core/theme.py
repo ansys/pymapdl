@@ -90,7 +90,7 @@ class MapdlTheme(base_class):
 
         self.name = "PyMAPDL-Theme"
         self.title = "PyMAPDL"
-        self.background = "paraview"
+        self.background = "white"
         self.interactive = True
 
         self.cmap = PyMAPDL_cmap
