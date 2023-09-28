@@ -30,7 +30,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html --reset_image_cache '
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html '
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -357,7 +357,8 @@ jobs:
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
-            ${{ env.PYTEST_ARGUMENTS }} \
+            ${{ env.PYTEST_ARGUMENTS }} \ 
+            --skip-regression-check \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v3
@@ -514,6 +515,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --reset_only_failed \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - name: "Adding the directory as safe directory for later step"
@@ -614,6 +616,7 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --skip-regression-check \
             --cov-report=xml:windows-v22.2.0-local.xml
 
       - uses: codecov/codecov-action@v3
