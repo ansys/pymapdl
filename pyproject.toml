@@ -69,7 +69,7 @@ tests = [
     "pyansys-tools-report==0.6.0",
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
-    "pytest-pyvista@git+https://github.com/pyvista/pytest-pyvista#main",
+    "pytest-pyvista==0.1.9",
 ]
 doc = [
     "sphinx==7.2.6",
