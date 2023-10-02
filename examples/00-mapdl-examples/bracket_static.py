@@ -680,7 +680,7 @@ result.plot_nodal_displacement(
 )
 
 ###############################################################################
-# Plot the Von mises equivalent stress
+# Plot the von Mises equivalent stress
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # You can also generate stress plots using the
@@ -701,7 +701,7 @@ result.plot_principal_nodal_stress(
 
 ###############################################################################
 #
-# Obtain Von Mises stresses.
+# Obtain von Mises stresses.
 #
 
 nnum, stress = result.principal_nodal_stress(0)
