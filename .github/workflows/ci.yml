@@ -517,7 +517,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --reset_only_failed \
+            --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - name: "Adding the directory as safe directory for later step"
