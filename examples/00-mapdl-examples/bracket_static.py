@@ -157,7 +157,7 @@ mapdl.rectng(*box2)  # prints the id of the created area
 # For more information, see the :meth:`mapdl.aplot() <ansys.mapdl.core.Mapdl.aplot>` method.
 #
 
-mapdl.aplot(cpos="xy", show_lines=True, show_area_numbering=True)
+mapdl.aplot(cpos="xy", show_lines=True)
 
 
 ###############################################################################
@@ -193,7 +193,7 @@ circle1_X = box1[0]
 circle1_Y = (box1[2] + box1[3]) / 2
 mapdl.cyl4(circle1_X, circle1_Y, radius)
 
-mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
+mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
 
 
 ###############################################################################
@@ -211,7 +211,7 @@ circle2_Y = box2[3]
 # as the first circle area.
 
 mapdl.cyl4(circle2_X, circle2_Y, radius)
-mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
+mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
 
 
 ###############################################################################
@@ -332,7 +332,7 @@ mapdl.al("ALL")  # Prints the ID of the newly created area
 
 # Add the area to the main area
 mapdl.aadd("all")
-mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
+mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
 
 ###############################################################################
 # Create first pin hole
@@ -387,7 +387,7 @@ pinhole2_lines = mapdl.asll("S", 0)
 # Remove pin hole areas from bracket
 mapdl.asba("all", pinhole1)
 bracket = mapdl.asba("all", pinhole2)
-mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos="xy")
+mapdl.aplot(vtk=True, show_lines=True, cpos="xy")
 
 ###############################################################################
 # Model definition
