@@ -294,9 +294,9 @@ from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 plotter = pv.Plotter()
 
-for i in range(0, len(grids)):
+for i, grid in enumerate(grids):
     plotter.add_mesh(
-        grids[i],
+        grid,
         scalars=scalars[i],
         show_edges=True,
         cmap=PyMAPDL_cmap,
