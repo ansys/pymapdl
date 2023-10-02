@@ -700,11 +700,12 @@ result.plot_principal_nodal_stress(
 
 ###############################################################################
 #
-# Obtain Von mises stresses
+# Obtain Von Mises stresses.
 #
 
 nnum, stress = result.principal_nodal_stress(0)
-# von-Mises stress is the last column in the stress results [-1]
+
+# Von Mises stress is the last column in the stress results
 von_mises = stress[:, -1]
 
 
