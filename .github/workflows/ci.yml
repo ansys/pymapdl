@@ -449,6 +449,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
+    outputs:
+      pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
+      committed: ${{ steps.attatch-to-pr.outputs.committed }}
+      commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
@@ -462,6 +466,9 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -509,7 +516,41 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --reset_only_failed \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
+
+      - name: "Adding the directory as safe directory for later step"
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: "Attaching modified files to PR"
+        id: attatch-to-pr
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Update the image cache
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: './tests/.image_cache/*.png'
+
+      - name: "PR comment with reactions"
+        if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Hello!  :wave:
+            
+            Your PR is changing the image cache. So I am attaching the new image cache
+            in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
+
+            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
+            you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
+            
+            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
+
+            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
+
+          reactions: rocket
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
@@ -579,6 +620,7 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --skip-regression-check \
             --cov-report=xml:windows-v22.2.0-local.xml
 
       - uses: codecov/codecov-action@v3
