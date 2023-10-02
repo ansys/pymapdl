@@ -7,7 +7,6 @@ from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting import general_plotter
-from conftest import skip_no_xserver
 
 
 @pytest.fixture
@@ -37,23 +36,77 @@ def bc_example(mapdl, make_block):
     mapdl.nsel("all")
 
 
-@skip_no_xserver
-def test_kplot(cleared, mapdl, tmpdir):
+def test_plot_empty_mesh(mapdl, cleared):
+    with pytest.warns(UserWarning):
+        mapdl.nplot(vtk=True)
+
+    with pytest.warns(UserWarning):
+        mapdl.eplot(vtk=True)
+
+
+def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
+    # Testing basic behaviour
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert os.path.exists("myfile.png")
+    ti_m = os.path.getmtime("myfile.png")
+
+    # Testing overwriting
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert not os.path.exists("myfile_1.png")
+    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
+
+    os.remove("myfile.png")
+
+    # Testing no extension
+    mapdl.eplot(vtk=False, savefig="myfile")
+    assert os.path.exists("myfile")
+    os.remove("myfile")
+
+    # Testing update name when file exists.
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot.png")
+
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot_1.png")
+
+    os.remove("plot.png")
+    os.remove("plot_1.png")
+
+    # Testing full path for downloading
+    plot_ = os.path.join(tmpdir, "myplot.png")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+    plot_ = os.path.join(tmpdir, "myplot")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)
+
+
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_kplot(cleared, mapdl, tmpdir, vtk):
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(savefig=filename)
+    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
-    mapdl.kplot(vtk=False)  # make sure legacy still works
 
-
-@skip_no_xserver
-def test_lplot(cleared, mapdl, tmpdir):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_lplot(cleared, mapdl, tmpdir, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -64,15 +117,14 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
+    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
-    mapdl.lplot(vtk=False)  # make sure legacy still works
 
-
-@skip_no_xserver
-def test_aplot(cleared, mapdl):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_aplot(cleared, mapdl, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -83,49 +135,37 @@ def test_aplot(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
     mapdl.al(l0, l1, l2, l3)
     mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
+    mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
 
     mapdl.aplot(quality=100)
     mapdl.aplot(quality=-1)
 
-    # and legacy as well
-    mapdl.aplot(vtk=False)
 
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False])
+@pytest.mark.parametrize("vtk", [True, False, None])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.vplot(vtk=vtk, color_areas=True)
 
 
-@skip_no_xserver
-def test_nplot(cleared, mapdl):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False)
-
-
 @pytest.mark.parametrize("nnum", [True, False])
-@skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, nnum):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_nplot(cleared, mapdl, nnum, vtk):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=True, nnum=nnum, background="w", color="k")
+    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
 
 
-@skip_no_xserver
-def test_eplot(mapdl, make_block):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_eplot(mapdl, make_block, vtk):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
+    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
 def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl.eplot(
@@ -138,13 +178,22 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
 def test_bc_plot_options(
-    mapdl, bc_example, return_plotter, plot_bc_legend, plot_bc_labels
+    mapdl,
+    bc_example,
+    verify_image_cache,
+    return_plotter,
+    plot_bc_legend,
+    plot_bc_labels,
 ):
+    if plot_bc_legend:
+        # The legend generates highly variance than other tests
+        # But it seems not always.
+        verify_image_cache.high_variance_test = True
+
     p = mapdl.nplot(
         return_plotter=return_plotter,
         plot_bc=True,
@@ -154,21 +203,22 @@ def test_bc_plot_options(
 
     if return_plotter:
         assert isinstance(p, Plotter)
+        p.show()
     else:
         assert p is None
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
-    "bc_labels",
+    "bc_labels",  # Added second part of the argument to avoid image cache name clashing.
+    # See https://github.com/pyvista/pytest-pyvista/issues/93
     [
-        "Mechanical",
-        "mechanical",
-        "meCHANICAL",
-        "ux",
-        "UX",
-        ["UX", "UY"],
-        "CSGZ",
+        ["Mechanical", "Title case"],
+        ["mechanical", "lower case"],
+        ["meCHANICAL", "Mixed case"],
+        ["ux", "Lower case"],
+        ["UX", "Upper case"],
+        [["UX", "UY"], "List of displacements"],
+        ["CSGZ", "Magnetic forces"],
     ],
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
@@ -176,12 +226,12 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_labels=bc_labels,
+        bc_labels=bc_labels[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_labels[1]
+    p.show()  # plotting for catching
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_labels",
     [
@@ -191,7 +241,7 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -199,12 +249,11 @@ def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
         )
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_target",
     [
-        "Nodes",
-        "NOdes",
+        ["Nodes", "Title case"],
+        ["NOdes", "Mixed case"],
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
@@ -212,12 +261,12 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_target=bc_target,
+        bc_target=bc_target[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_target[1]
+    p.show()  # plotting for catching
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_target",
     [
@@ -229,7 +278,7 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
 )
 def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -628,6 +677,7 @@ def test_plotter_input(mapdl, make_block):
         pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl == pl2
     assert pl is pl2
+    pl2.show()  # plotting for catching
 
     # invalid plotter type
     with pytest.raises(TypeError):
@@ -652,6 +702,7 @@ def test_show_bounds(mapdl, make_block):
     assert pl.bounds
     assert len(pl.bounds) == 6
     assert pl.bounds != default_bounds
+    pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
@@ -659,6 +710,7 @@ def test_background(mapdl, make_block):
     pl = mapdl.eplot(background="red", return_plotter=True)
     assert pl.background_color != default_color
     assert pl.background_color == "red"
+    pl.show()  # plotting for catching
 
 
 def test_plot_nodal_values(mapdl, make_block):
@@ -687,10 +739,9 @@ def test_vsel_iterable(mapdl, make_block):
 
 
 def test_color_areas(mapdl, make_block):
-    mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+    mapdl.aplot(vtk=True, color_areas=True)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "color_areas",
     [
@@ -708,11 +759,8 @@ def test_color_areas(mapdl, make_block):
     ],
 )
 def test_color_areas_individual(mapdl, make_block, color_areas):
-    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
-    colors = [
-        value.prop.color.hex_rgba for key, value in pl.actors.items() if "Grid" in key
-    ]
-    assert len(np.unique(colors, axis=0)) == mapdl.geometry.n_area
+    # we do rely on the `pytest-pyvista` extension to deal with the differences
+    mapdl.aplot(vtk=True, color_areas=color_areas)
 
 
 def test_color_areas_error(mapdl, make_block):
@@ -773,7 +821,7 @@ def test_file_type_for_plots(mapdl):
 def test_cmplot_individual(mapdl, make_block, entity):
     mapdl.allsel()
     mapdl.cm("tmp_cm", entity=entity)
-    pl = mapdl.cmplot("tmp_cm", return_plotter=True)
+    mapdl.cmplot("tmp_cm")
 
 
 @pytest.mark.parametrize("label", ["N", "P"])
@@ -819,3 +867,15 @@ def test_cmplot_all(mapdl, make_block, entity):
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
     assert np.allclose(pl.mesh.points, ent[ids - 1])
+    pl.show()
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )

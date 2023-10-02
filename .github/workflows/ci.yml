@@ -360,6 +360,7 @@ jobs:
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --ignore_image_cache \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v3
@@ -516,7 +517,7 @@ jobs:
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --reset_only_failed \
+            --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
 
       - name: "Adding the directory as safe directory for later step"
@@ -620,7 +621,7 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --skip-regression-check \
+            --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
       - uses: codecov/codecov-action@v3

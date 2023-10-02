@@ -24,7 +24,7 @@ body:
         required: true
       - label: I am using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
         required: true
-      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``.
+      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core`` in your activated virtual environment.
         required: true
 
   - type: textarea

@@ -113,7 +113,7 @@ def test_vext(mapdl, cleared):
     carc0 = mapdl.circle(k0, 1, k1)
     a0 = mapdl.al(*carc0)
 
-    # next, extrude it and plot it
+    # next, and extrude it
     mapdl.vext(a0, dz=4)
 
 
@@ -153,7 +153,7 @@ def test_va(mapdl, cleared):
     a2 = mapdl.a(k1, k2, k3)
     a3 = mapdl.a(k0, k2, k3)
 
-    # generate and plot the volume
+    # generate the volume
     vnum = mapdl.va(a0, a1, a2, a3)
     assert vnum == 1
 
