@@ -60,7 +60,7 @@ tests = [
     "autopep8==2.0.4",
     "matplotlib==3.8.0",
     "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
-    "scipy==1.11.2; python_version > '3.8'",
+    "scipy==1.11.3; python_version > '3.8'",
     "pandas==2.1.1",
     "pyiges[full]==0.3.1",
     "pytest==7.4.2",
@@ -69,13 +69,13 @@ tests = [
     "pyansys-tools-report==0.6.0",
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
-    "pytest-pyvista==0.1.8",
+    "pytest-pyvista==0.1.9",
 ]
 doc = [
-    "sphinx==7.2.2",
+    "sphinx==7.2.6",
     "ansys-dpf-core==0.9.0",
     "ansys-mapdl-reader==0.52.20",
-    "ansys-sphinx-theme==0.11.2",
+    "ansys-sphinx-theme==0.12.0",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.9",
     "imageio==2.31.4",
