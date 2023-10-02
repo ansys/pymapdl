@@ -315,7 +315,7 @@ mapdl.lsel("A", "LINE", "", line3)
 mapdl.lplot(vtk=True, cpos="xy", show_line_numbering=True)
 
 ###############################################################################
-# Then use :meth:`mapdl.al() <ansys.mapdl.core.Mapdl.al>`command to create the areas
+# Then use :meth:`mapdl.al() <ansys.mapdl.core.Mapdl.al>` command to create the areas
 # from the lines.
 #
 
@@ -358,8 +358,8 @@ pinhole1 = mapdl.cyl4(pinhole1_X, pinhole1_Y, pinhole_radius)
 #
 # .. note::
 #    Some of these areas are set to parameters to use later in the analysis.
-#    This allows you to use the lines to create the areas with the
-#     :meth:`mapdl.asll() <ansys.mapdl.core.Mapdl.asll>` command.
+#    This allows you to use the lines to create the areas with
+#    the :meth:`mapdl.asll() <ansys.mapdl.core.Mapdl.asll>` command.
 
 ###############################################################################
 # Create second pin hole
@@ -593,8 +593,9 @@ mapdl.lplot(vtk=True, cpos="xy")
 
 ###############################################################################
 #
-# Once you have the correct line, use the :meth:`mapdl.sf() <ansys.mapdl.core.Mapdl.sf>`
-# command to load the line with the varying surface load.
+# Once you have the correct line, use
+# the :meth:`mapdl.sf() <ansys.mapdl.core.Mapdl.sf>` command
+# to load the line with the varying surface load.
 #
 
 # Here you load the left side of the lower half of second pin hole.
@@ -683,9 +684,8 @@ result.plot_nodal_displacement(
 # Plot the von Mises equivalent stress
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# You can also generate stress plots using the
-# :meth:`mapdl.plot_principal_nodal_stress() <ansys.mapdl.core.Mapdl.plot_principal_nodal_stress>`
-# command.
+# You can also generate stress plots using
+# the :meth:`mapdl.plot_principal_nodal_stress() <ansys.mapdl.core.Mapdl.plot_principal_nodal_stress>` command.
 #
 
 result.plot_principal_nodal_stress(
