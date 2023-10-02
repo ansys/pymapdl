@@ -15,6 +15,7 @@
 [Pp]ythonic
 [Pp]ythonically
 [Ss]uperelements
+[Vv]on Mises
 3-D
 aadd
 aas
@@ -142,7 +143,6 @@ UPF
 UPFs
 viscoplastic
 vise
-von
 VTK
 wan
 WAN
