@@ -268,8 +268,8 @@ l2 = mapdl.get("line2", "LINE", 0, "NUM", "MAX")
 # **Note** that Python could return a list if more than one line is selected.
 
 ###############################################################################
-# Here you use a mix of the APDL parameter as a string ``line1`` and the ``l2``
-# Python parameter to create the fillet line.
+# Here you use a mix of the APDL parameter as a string ``line1`` and
+# the ``l2`` Python parameter to create the fillet line.
 #
 # Create fillet line using selected line (parameter names)
 fillet_radius = 0.4
@@ -285,16 +285,16 @@ mapdl.lplot(vtk=True, cpos="xy")
 #
 # To create the area delineated by ``line1``, ``line2``, and newly created
 # ``line3``, use the :meth:`mapdl.al() <ansys.mapdl.core.Mapdl.al>` method.
-# The three lines are the input. If you select them all, you can use the ``'ALL'``
-# argument to create the area.
+# The three lines are the input. If you select them all, you can use
+# the ``'ALL'`` argument to create the area.
 #
 # First you have to reselect the newly created lines in the fillet area.
 # To do this, you can use the ``fillet_radius`` parameter and the
 # :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command.
 #
-# For the two newly created straight lines, the length is the same as the
-# ``fillet_radius`` value. Thus, you can use the length argument with the
-# :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command.
+# For the two newly created straight lines, the length is the same as
+# the ``fillet_radius`` value. Thus, you can use the length argument
+# with the :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command.
 #
 
 mapdl.allsel()
@@ -341,8 +341,8 @@ mapdl.aplot(vtk=True, cpos="xy", show_area_numbering=True, show_lines=True)
 # The first pin hole is located at the left side of the first box. Thus, you can use
 # the box dimensions to locate your new circle.
 #
-# The X value (center) of the pin hole is at the first coordinate of the ``box1``
-# (``X1``). The Y value is the average of the two ``box1`` Y values:
+# The X value (center) of the pin hole is at the first coordinate of
+# the ``box1`` (``X1``). The Y value is the average of the two ``box1`` Y values:
 #
 
 # Create the first pinhole
@@ -523,9 +523,9 @@ mapdl.antype("STATIC")
 # By using the parameters that you have created, you can select the lines and fix one end
 # of the bracket.
 #
-# Pick the four lines around the left-hand hole using the
-# :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command and the ``pinehole1``
-# parameters.
+# Pick the four lines around the left-hand hole using
+# the :meth:`mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>` command and
+# the ``pinehole1`` parameters.
 #
 
 bc1 = mapdl.lsel(
@@ -545,10 +545,11 @@ fixNodes = mapdl.nsll(type_="S")
 # the displacement to zero (fixed constraint).
 #
 
-# set up boundary conditions
+# Set up boundary conditions
 mapdl.d("ALL", "ALL", 0)  # The 0 is not required since default is zero
-mapdl.allsel()
+
 # Selecting everything again
+mapdl.allsel()
 
 ###############################################################################
 # Apply pressure load
@@ -621,7 +622,7 @@ mapdl.allsel()
 # Solution
 # ========
 #
-# To solve an Ansys FE analysis, the *Solution* processor must be activated,
+# To solve an Ansys FE analysis, the solution processor must be activated,
 # using the :class:`mapdl.solution() <ansys.mapdl.core.solution.Solution>` class
 # or the :meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`
 # command. This was done a few steps earlier.
