@@ -209,15 +209,16 @@ def test_bc_plot_options(
 
 
 @pytest.mark.parametrize(
-    "bc_labels",
+    "bc_labels",  # Added second part of the argument to avoid image cache name clashing.
+    # See https://github.com/pyvista/pytest-pyvista/issues/93
     [
-        "Mechanical",
-        "mechanical",
-        "meCHANICAL",
-        "ux",
-        "UX",
-        ["UX", "UY"],
-        "CSGZ",
+        ["Mechanical", "Title case"],
+        ["mechanical", "lower case"],
+        ["meCHANICAL", "Mixed case"],
+        ["ux", "Lower case"],
+        ["UX", "Upper case"],
+        [["UX", "UY"], "List of displacements"],
+        ["CSGZ", "Magnetic forces"],
     ],
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
@@ -225,9 +226,9 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_labels=bc_labels,
+        bc_labels=bc_labels[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_labels[1]
     p.show()  # plotting for catching
 
 
@@ -251,8 +252,8 @@ def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
 @pytest.mark.parametrize(
     "bc_target",
     [
-        "Nodes",
-        "NOdes",
+        ["Nodes", "Title case"],
+        ["NOdes", "Mixed case"],
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
@@ -260,9 +261,9 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_target=bc_target,
+        bc_target=bc_target[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_target[1]
     p.show()  # plotting for catching
 
 
