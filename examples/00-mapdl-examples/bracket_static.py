@@ -240,7 +240,7 @@ mapdl.aadd("all")  # Prints the ID of the created area
 # After selecting the line, you need to write it to a parameter so you can use
 # it to generate the fillet line.
 # This is done using the :meth:`mapdl.get() <ansys.mapdl.core.Mapdl.get>`
-#method.
+# method.
 #
 # Because you have selected one line, you can use the ``MAX`` and ``NUM`` arguments
 # for the :meth:`mapdl.get() <ansys.mapdl.core.Mapdl.get>` method.
@@ -356,7 +356,7 @@ pinhole1 = mapdl.cyl4(pinhole1_X, pinhole1_Y, pinhole_radius)
 #
 # Because you have two pin hole circles, you use the command twice.
 #
-# .. note:: 
+# .. note::
 #    Some of these areas are set to parameters to use later in the analysis.
 #    This allows you to use the lines to create the areas with the
 #     :meth:`mapdl.asll() <ansys.mapdl.core.Mapdl.asll>` command.
