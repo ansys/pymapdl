@@ -10,8 +10,16 @@ class Solution:
     ``mapdl.solve()`` and determining if it converged, the number of
     iterations to converge, etc.
 
+    If the ``mapdl.solution()`` class is called, it activates the solution processor.
+
     Examples
     --------
+    Enter the solution processor (equivalent of the
+    :meth:`Mapdl.slashsolu <ansys.mapdl.core.Mapdl.slashsolu>` command).
+
+    >>> mapdl.solution()
+    *****  MAPDL SOLUTION ROUTINE  *****
+
     Check if a solution has converged.
 
     >>> mapdl.solution.converged
