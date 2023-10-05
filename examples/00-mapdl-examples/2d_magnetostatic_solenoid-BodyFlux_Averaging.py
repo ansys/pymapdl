@@ -56,6 +56,8 @@ The MAPDL default contour color style is used so Matplotlib is imported.
 The Power Graphics style plot is then set up via PyVista.
 
 """
+# sphinx_gallery_thumbnail_path = './_static/model_solenoid_2d.png'
+
 import numpy as np
 import pyvista as pv
 
@@ -292,9 +294,9 @@ from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 plotter = pv.Plotter()
 
-for i in range(0, len(grids)):
+for i, grid in enumerate(grids):
     plotter.add_mesh(
-        grids[i],
+        grid,
         scalars=scalars[i],
         show_edges=True,
         cmap=PyMAPDL_cmap,

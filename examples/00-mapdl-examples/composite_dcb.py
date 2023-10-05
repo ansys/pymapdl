@@ -315,10 +315,12 @@ rst_path = mapdl.download_result(temp_directory)
 dpf.core.make_tmp_dir_server(dpf.SERVER)
 
 if dpf.SERVER.local_server:
-    model = dpf.Model(rst_path)
+    path_source = rst_path
 else:
-    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
-    model = dpf.Model(server_file_path)
+    path_source = dpf.upload_file_in_tmp_folder(rst_path)
+
+# Building the model
+model = dpf.Model(path_source)
 
 # Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
@@ -342,7 +344,7 @@ mesh_field_cohesive = result_mesh.field_of_properties(
 nmisc_index = 70
 
 # Generate the damage result operator
-data_src = dpf.DataSources(server_file_path)
+data_src = dpf.DataSources(path_source)
 dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
 # Generate the displacement operator
@@ -446,8 +448,9 @@ camera_pos = disp.animate(
 ###############################################################################
 #
 # Exit MAPDL
-try:
-    os.remove(rst_path)
-except FileNotFoundError:
-    pass
 mapdl.exit()
+
+try:
+    os.remove(path_source)
+except (FileNotFoundError, PermissionError):
+    pass

@@ -236,6 +236,7 @@ class _MapdlCore(Commands):
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
+        self._version = None  # cached version
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -251,7 +252,6 @@ class _MapdlCore(Commands):
                 self._use_vtk = False
 
         self._log_filehandler = None
-        self._version = None  # cached version
         self._local: bool = local
         self._cleanup: bool = True
         self._vget_arr_counter = 0
@@ -1719,8 +1719,7 @@ class _MapdlCore(Commands):
             points = []
             labels = []
 
-            # kwargs.setdefault("return_plotter", True)
-            kwargs["return_plotter"] = True
+            return_plotter = kwargs.pop("return_plotter", False)
             color_areas = True
 
             for each_volu in volumes:
@@ -1733,7 +1732,8 @@ class _MapdlCore(Commands):
                     quality=quality,
                     show_area_numbering=show_area_numbering,
                     show_line_numbering=show_line_numbering,
-                    show_lines=False,
+                    show_lines=show_lines,
+                    return_plotter=True,
                     **kwargs,
                 )
 
@@ -1749,7 +1749,9 @@ class _MapdlCore(Commands):
             self.cmsel("S", cm_name_area, "AREA", mute=True)
             self.cmsel("S", cm_name_volu, "VOLU", mute=True)
 
-            return general_plotter(meshes, points, labels, **kwargs)
+            return general_plotter(
+                meshes, points, labels, return_plotter=return_plotter, **kwargs
+            )
 
         else:
             with self._enable_interactive_plotting():
@@ -1881,7 +1883,7 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surfs = self.geometry.get_areas(return_as_list=True)
+            surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []
 
@@ -1936,7 +1938,7 @@ class _MapdlCore(Commands):
 
                 # expand color array until matching the number of areas.
                 # In this case we start to repeat colors in the same order.
-                colors = np.resize(colors, len(ent_num))
+                colors = np.resize(colors, (len(ent_num), 3))
 
                 for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
@@ -3579,7 +3581,9 @@ class _MapdlCore(Commands):
         >>> mapdl.version
         20.2
         """
-        return self.parameters.revision
+        if not self._version:
+            self._version = self.parameters.revision
+        return self._version
 
     @property
     @supress_logging
@@ -4167,6 +4171,8 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
+            from ansys.mapdl.core.plotting import POINT_SIZE
+
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
@@ -4198,7 +4204,7 @@ class _MapdlCore(Commands):
                 pl.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
-                    point_size=10,
+                    point_size=POINT_SIZE + 10,
                     name="_picked_entities",
                     pickable=False,
                     reset_camera=False,
@@ -4253,6 +4259,17 @@ class _MapdlCore(Commands):
             )
 
         if entity in ["kp", "node"]:
+            lines_pl = self.lplot(return_plotter=True, color="w")
+            lines_meshes = get_meshes_from_plotter(lines_pl)
+
+            for each_mesh in lines_meshes:
+                pl.add_mesh(
+                    each_mesh,
+                    pickable=False,
+                    color="w",
+                    # name="lines"
+                )
+
             # Picking points
             pl.enable_point_picking(
                 callback=callback_points,
@@ -4908,41 +4925,3 @@ class _MapdlCore(Commands):
         # returning to previous selection
         self.cmsel("s", "__tmp_cm__", entity=entity)
         return output
-
-    @wraps(Commands.satin)
-    def satin(
-        self,
-        name,
-        extension="",
-        path="",
-        entity="",
-        fmt="",
-        nocl="",
-        noan="",
-        **kwargs,
-    ):
-        """Wraps ~SATIN command"""
-        if self.is_grpc:
-            fname = name
-            if path:
-                fname = os.path.join(path, name)
-            fname = self._get_file_name(fname, extension, "sat")
-            fname = self._get_file_path(fname, False)
-            name, extension, path = self._decompose_fname(fname)
-
-            if path == path.parent:
-                path = ""
-            else:
-                path = str(path)
-
-        # wrapping path in single quotes because of #2286
-        path = f"'{path}'"
-        return super().satin(
-            name=name,
-            extension=extension,
-            path=path,
-            entity=entity,
-            fmt=fmt,
-            nocl=nocl,
-            noan=noan,
-        )

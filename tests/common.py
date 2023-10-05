@@ -50,8 +50,11 @@ def is_on_ci():
 
 # Set if on ubuntu
 def is_on_ubuntu():
-    if os.environ.get("ON_UBUNTU", "").lower() == "true":
-        return True
+    envvar = os.environ.get("ON_UBUNTU", None)
+
+    if envvar is not None:
+        return envvar.lower() == "true"
+
     return _is_ubuntu()
 
 
