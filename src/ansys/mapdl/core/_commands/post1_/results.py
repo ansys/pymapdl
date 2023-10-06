@@ -1004,7 +1004,7 @@ class Results:
         sessions.
 
         SUMTYPE,PRIN also causes principal nodal values to be the average of
-        the contibuting principal element nodal values (see AVPRIN,1).
+        the contributing principal element nodal values (see AVPRIN,1).
 
         BEAM188 and BEAM189 elements compute principal stress, equivalent
         stress, and stress intensity values on request instead of storing them
