@@ -152,7 +152,7 @@ def test_tshape_key(mapdl, contact_geom_and_mesh):
 
 
 def test_save(mapdl, cube_geom_and_mesh):
-    # This test seems to fail when paralelized.
+    # This test seems to fail when parallelized.
     fname = "mesh.vtk"
     for binary_ in [True, False]:
         mapdl.mesh.save(fname, binary_)
