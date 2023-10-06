@@ -878,7 +878,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
-            # This is due to the intel compiler, and only afects versions between
+            # This is due to the intel compiler, and only affects versions between
             # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
