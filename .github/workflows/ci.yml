@@ -61,6 +61,10 @@ jobs:
       - name: "Install Git and clone project"
         uses: actions/checkout@v4
 
+      - name: "test"
+        run: |
+            echo $HOME
+
       - name: "Run Vale"
         uses: errata-ai/vale-action@reviewdog
         env:
