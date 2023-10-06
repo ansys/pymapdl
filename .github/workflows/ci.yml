@@ -69,6 +69,7 @@ jobs:
         uses: errata-ai/vale-action@reviewdog
         env:
           GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
+          HOME: /home/runner
         with:
           version: 2.29.1
           files: doc
