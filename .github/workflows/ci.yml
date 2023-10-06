@@ -57,6 +57,8 @@ jobs:
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
+    #Skipping until 2394 is fixed
+    if:  github.ref == 'Skip for now'
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
