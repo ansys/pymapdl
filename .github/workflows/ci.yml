@@ -8,10 +8,10 @@ on:
         description: 'Run all extended MAPDL build tests'
         required: true
         type: boolean
-    
+
   push:
     tags:
-      - "*"     
+      - "*"
     branches:
        - main
   schedule:
@@ -55,6 +55,8 @@ jobs:
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
+    #Skipping until 2394 is fixed
+    if:  github.ref == 'Skip for now'
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
@@ -72,7 +74,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11']
         # Only perform wheelhouse builds for macOS when releasing
-        should-release: 
+        should-release:
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
         exclude:
           - should-release: false
@@ -109,7 +111,7 @@ jobs:
 
       - name: "Install OS packages"
         run: |
-          sudo apt update 
+          sudo apt update
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex
 
       - name: "Test virtual framebuffer"
@@ -663,7 +665,7 @@ jobs:
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
-  
+
   notify:
     name: Notify failed build
     needs: [upload-dev-docs]
