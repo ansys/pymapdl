@@ -36,7 +36,7 @@ SHAPE_MAP = {  # from ELIST definition
     7: "QUAD",
     8: "TRI6",
     9: "QUA8",
-    10: "POIN",
+    10: "POIN",  # codespell-ignore
     11: "CIRC",
     12: "",
     13: "",
