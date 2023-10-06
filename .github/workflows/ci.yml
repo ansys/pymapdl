@@ -58,10 +58,21 @@ jobs:
     name: "Documentation style check"
     runs-on: ubuntu-latest
     steps:
-      - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v4
+      - name: "Install Git and clone project"
+        uses: actions/checkout@v4
+
+      - name: "Run Vale"
+        uses: errata-ai/vale-action@reviewdog
+        env:
+          GITHUB_TOKEN:  ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          version: 2.29.1
+          files: doc
+          reporter: github-pr-check
+          level: error
+          filter_mode: nofilter
+          fail_on_error: true
+          vale_flags: "--config=doc/.vale.ini"
 
   smoke-tests:
     name: "Build and smoke tests"
