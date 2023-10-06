@@ -4,6 +4,7 @@
 [Ee]igensolver
 [Hh]yperelasticity
 [Kk]eypoints
+[Mm]apdl
 [Mm]atplotlib
 [Nn]umpy
 [Pp]ostprocess
