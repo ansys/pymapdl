@@ -1,10 +1,6 @@
-
-
-
 .. _ref_troubleshooting:
 
 
-=======================
 Troubleshooting PyMAPDL
 =======================
 
@@ -13,9 +9,8 @@ To help you resolve any problems that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
 
-*****************
 Debug in PyMAPDL
-*****************
+----------------
 
 If you are having trouble with PyMAPDL, you can record some internal
 logs into a file using a logger. 
@@ -43,11 +38,9 @@ If you believe you have found a bug, open an issue on the
 `PyMAPDL Issues page <pymapdl_issues_>`_.
 
 
-.. _debugging_launch_mapdl:
 
-****************
 Launching issues
-****************
+----------------
 
 There are several issues that can cause MAPDL not to launch, including:
 
@@ -255,9 +248,6 @@ you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you are likely missing some necessary
 dependencies.
 
-
-.. _installing_mapdl_on_centos7:
-
 CentOS 7
 --------
 
@@ -267,8 +257,6 @@ On CentOS 7, you can install missing dependencies with:
 
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
-
-.. _installing_mapdl_on_ubuntu:
 
 Ubuntu
 ------
@@ -520,13 +508,9 @@ method lists higher versions first and student versions last.
     information, see :ref:`conflicts_student_version`.
 
 
-.. _ref_pymapdl_limitations:
-
 *********************
 PyMAPDL usage issues
 *********************
-
-.. _ref_numpy_arrays_in_mapdl:
 
 Issues when importing and exporting numpy arrays in MAPDL
 =========================================================
@@ -584,7 +568,6 @@ to one, have the same shape if later retrieved.
 
 
 
-.. _ref_pymapdl_stability:
 
 *****************
 PyMAPDL stability
@@ -613,11 +596,13 @@ Issues
 ======
 
 .. note::
+
    MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
    <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
-   possible. Attempt to use the :func:`Mapdl.upload()
-   <ansys.mapdl.core.Mapdl.upload>` method to upload nodes and elements and read them
-   in via the :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+   possible. Attempt to use the
+   :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
+   nodes and elements and read them in via the
+   :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
    :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
 
 
