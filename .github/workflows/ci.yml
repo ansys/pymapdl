@@ -515,7 +515,7 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
+          xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
