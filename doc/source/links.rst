@@ -110,7 +110,7 @@
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
 .. _gh_centos_wsl_1: https://github.com/wsldl-pg/CentWSL/
 .. _gh_centos_wsl_2: https://github.com/mishamosher/CentOS-WSL/
-.. _codecov: https://github.com/codecov
+.. _codecov_ref: https://github.com/codecov
 .. _WSL_Windows_Toolbar_Launcher: https://github.com/cascadium/wsl-windows-toolbar-launcher
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
 

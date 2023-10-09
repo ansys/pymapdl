@@ -19,7 +19,7 @@ tests several units of the code to ensure that they all work together.
 
 To verify that all code is properly tested, you must ensure that every piece
 of code is used (covered) in at least one unit test. In this repository, the
-`Codecov <codecov_>`_ tool generates a coverage report of the
+`Codecov <codecov_ref_>`_ tool generates a coverage report of the
 committed code. It details how merging a pull request would impact coverage. It
 is one of the checks that must run successfully to merge code changes.
 
@@ -93,6 +93,7 @@ lifecycle, providing a comprehensive CI/CD approach.
 .. figure:: ../images/cicd.jpg
     :width: 300pt
 
+
 Creation of a unit test
 -----------------------
 
@@ -106,11 +107,12 @@ For more information, see `pytest usage <pytest_usage_>`_.
 Here are some guidelines for creating good unit tests: 
 
 - Assign long and descriptive names to tests.
-- Use the `Codecov <codecov_>`_ tool to ensure all implemented code is tested.
+- Use the `Codecov <codecov_ref_>`_ tool to ensure all implemented code is tested.
 - Check that tests return the same results each time. 
 - Verify that tests are independent.
 - Write tests that verify only one part of the code at a time.
 - Make tests as short and fast as possible.
+
 
 `What makes a good unit test <article_good_unit_test_>`_ 
 is an exhaustive list of tips for creating good unit tests.
