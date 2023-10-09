@@ -2,8 +2,8 @@
 
 Create a pool of MAPDL instances
 ================================
-PyMAPDL contains the :class:`LocalMapdlPool
-<ansys.mapdl.core.LocalMapdlPool>` class to simplify creating multiple
+PyMAPDL contains the :class:`LocalMapdlPool <ansys.mapdl.core.pool.LocalMapdlPool>`
+class to simplify creating multiple
 local instances of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class for batch processing. This can be used for the batch processing of a
 set of input files, convergence analysis, or other batch related
