@@ -99,7 +99,8 @@ from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 _HAS_ANSYS = _check_has_ansys()
 
-_apply_default_theme()
+if _HAS_PYVISTA:
+    _apply_default_theme()
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False
