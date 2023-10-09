@@ -62,7 +62,6 @@ jobs:
         uses: ansys/actions/doc-style@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          vale-config: .vale.ini
 
   smoke-tests:
     name: "Build and smoke tests"
