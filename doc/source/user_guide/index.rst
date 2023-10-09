@@ -222,4 +222,4 @@ with it. For example:
         recommended.
 
 
-For stability considerations, see `PyMAPDL stability`_.
+For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability>`.

@@ -47,7 +47,7 @@ For a full list of the methods and attributes available to the
 ``Parameters`` class, see :ref:`ref_parameters_api`.
 
 For additional information on PyMAPDL array limitations, see
-`Issues when importing and exporting numpy arrays in MAPDL`_.
+:ref:`Issues when importing and exporting numpy arrays in MAPDL <ref_issues_np_mapdl>`.
 
 .. _ref_special_named_param:
 
