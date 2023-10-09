@@ -95,7 +95,7 @@ jobs:
       
       - name: "Checking plotting support"
         run:
-          python -c "from pyvista.plotting import system_supports_plotting; print("system_supports_plotting", system_supports_plotting())"
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
 
   docs-build:
