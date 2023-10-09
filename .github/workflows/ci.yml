@@ -92,7 +92,7 @@ jobs:
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
-    # needs: doc-style  #Skipping until 2394 is fixed
+    # needs: doc-style - Skip for now
     timeout-minutes: 60
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
