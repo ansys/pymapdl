@@ -90,7 +90,7 @@ jobs:
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
-    needs: doc-style
+    # needs: doc-style - Skip for now
     timeout-minutes: 60
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -515,7 +515,7 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
+          xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
@@ -705,20 +705,18 @@ jobs:
       - name: "Install Git and clone project"
         uses: actions/checkout@v4
 
-      - name: "Get version of library"
-        shell: bash
-        run: |
-          echo "FULL_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      - name: "Install the package requirements"
+        run: pip install -e .
 
-      - name: "Scrape the stable documentation to PyMeilisearch"
-
+      - name: "Get the version to PyMeilisearch"
         run: |
-          VERSION=$(python -c "import os; version=os.environ['FULL_VERSION']; print('.'.join(version.split('.')[:2]))")
-          VERSION_MEILI=$(python -c "import os; version=os.environ['FULL_VERSION']; print('-'.join(version.split('.')[:2]))")
+          VERSION=$(python -c "from ansys.mapdl.core import __version__; print('.'.join(__version__.split('.')[:2]))")
+          VERSION_MEILI=$(python -c "from ansys.mapdl.core import __version__; print('-'.join(__version__.split('.')[:2]))")
           echo "Calculated VERSION: $VERSION"
           echo "Calculated VERSION_MEILI: $VERSION_MEILI"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
+
       - name: "Deploy the latest documentation index"
         uses: ansys/actions/doc-deploy-index@v4
         with:
@@ -748,7 +746,7 @@ jobs:
         uses: ansys/actions/doc-deploy-index@v4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
-          index-name: "pymapdl-vdev"
+          index-name: pymapdl-vdev
           host-url: ${{ vars.MEILISEARCH_HOST_URL }}
           api-key: ${{ env.MEILISEARCH_API_KEY }}
   
