@@ -10,6 +10,8 @@ from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 
 from .theme import MapdlTheme
 
+POINT_SIZE = 10
+
 # Supported labels
 BC_D = [
     "TEMP",
@@ -154,7 +156,7 @@ def _general_plotter(
     color="w",
     show_edges=None,
     edge_color=None,
-    point_size=5.0,
+    point_size=POINT_SIZE,
     line_width=None,
     opacity=1.0,
     flip_scalars=False,
@@ -304,7 +306,7 @@ def _general_plotter(
 
     theme : pyvista.DefaultTheme, optional
         PyVista theme. Defaults to `PyMAPDL theme <https://github
-        .com/pyansys/pyansys-sphinx-theme>`_.
+        .com/ansys/ansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
         If a :class:`pyvista.Plotter` not is provided, then creates its
@@ -398,6 +400,9 @@ def _general_plotter(
                 UserWarning,
             )
 
+    if not cmap:
+        cmap = "bwr"
+
     if background:
         plotter.set_background(background)
 
@@ -434,36 +439,42 @@ def _general_plotter(
         else:
             rgb = False
 
-        plotter.add_mesh(
-            mesh["mesh"],
-            scalars=scalars,
-            scalar_bar_args=scalar_bar_args,
-            color=mesh.get("color", color),
-            style=mesh.get("style", style),
-            show_edges=show_edges,
-            edge_color=edge_color,
-            smooth_shading=smooth_shading,
-            split_sharp_edges=split_sharp_edges,
-            feature_angle=feature_angle,
-            point_size=point_size,
-            line_width=line_width,
-            show_scalar_bar=show_scalar_bar,
-            opacity=opacity,
-            flip_scalars=flip_scalars,
-            lighting=lighting,
-            n_colors=n_colors,
-            interpolate_before_map=interpolate_before_map,
-            cmap=cmap,
-            render_points_as_spheres=render_points_as_spheres,
-            render_lines_as_tubes=render_lines_as_tubes,
-            rgb=rgb,
-            **add_mesh_kwargs,
-        )
+        # To avoid index error.
+        mesh_ = mesh["mesh"]
+        if not isinstance(mesh_, list):
+            mesh_ = [mesh_]
+
+        for each_mesh in mesh_:
+            plotter.add_mesh(
+                each_mesh,
+                scalars=scalars,
+                scalar_bar_args=scalar_bar_args,
+                color=mesh.get("color", color),
+                style=mesh.get("style", style),
+                show_edges=show_edges,
+                edge_color=edge_color,
+                smooth_shading=smooth_shading,
+                split_sharp_edges=split_sharp_edges,
+                feature_angle=feature_angle,
+                point_size=point_size,
+                line_width=line_width,
+                show_scalar_bar=show_scalar_bar,
+                opacity=opacity,
+                flip_scalars=flip_scalars,
+                lighting=lighting,
+                n_colors=n_colors,
+                interpolate_before_map=interpolate_before_map,
+                cmap=cmap,
+                render_points_as_spheres=render_points_as_spheres,
+                render_lines_as_tubes=render_lines_as_tubes,
+                rgb=rgb,
+                **add_mesh_kwargs,
+            )
 
     for label in labels:
         # verify points are not duplicates
-        points, idx, _ = unique_rows(np.array(label["points"]))
-        labels = np.array(label["labels"])[idx].tolist()
+        points, idx, _ = unique_rows(np.atleast_2d(np.array(label["points"])))
+        labels = np.array(label["labels"])[idx - 1].tolist()
 
         plotter.add_point_labels(
             points,
@@ -765,7 +776,7 @@ def general_plotter(
     Notes
     -----
     Plotting boundary conditions is still under-development, so feel free to share feedback
-    or suggestion in `PyMAPDL <https://github.com/pyansys/pymapdl>`_.
+    or suggestion in `PyMAPDL <https://github.com/ansys/pymapdl>`_.
     At the moment only nodal boundary conditions can be shown (``bc_target='Nodes'``), and only
     the following types of boundary conditions:
 
@@ -1165,3 +1176,14 @@ def _bc_labels_default(mapdl):
         )
     )
     return flist + dlist
+
+
+def get_meshes_from_plotter(pl):
+    datasets = []
+    for actor in pl.actors.values():
+        if hasattr(actor, "mapper"):
+            datasets.append(actor.mapper.dataset)
+
+    return [
+        actor.mapper.dataset for actor in pl.actors.values() if hasattr(actor, "mapper")
+    ]

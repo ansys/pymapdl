@@ -17,12 +17,12 @@ env:
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
-  DISPLAY: ':99.0'
 
 jobs:
   linkchecker:
     name: Check Links
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -31,7 +31,7 @@ jobs:
       SHELLOPTS: "errexit:pipefail"
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -54,7 +54,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -83,14 +83,23 @@ jobs:
 
       - name: LinkCheck
         run: |
-          make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
-
+          xvfb-run make -C doc linkcheck  SPHINXOPTS="-j auto -W --keep-going"
+  
       - name: "Display linkchecker results"
+        if: always()
         run: |
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
+      - name: "Upload HTML Documentation"
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation-html
+          path: doc/_build/html
+          retention-days: 7
+          
       - name: "Upload artifacts"
         uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: output
           path: doc/**/output.txt

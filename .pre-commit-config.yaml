@@ -8,17 +8,17 @@ repos:
   - id: isort
 
 - repo: https://github.com/psf/black
-  rev: 23.7.0  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
+  rev: 23.9.1  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/adamchainz/blacken-docs
-  rev: 1.15.0
+  rev: 1.16.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==23.7.0]
+    additional_dependencies: [black==23.9.1]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 6.1.0
@@ -26,7 +26,7 @@ repos:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.5
+  rev: v2.2.6
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -47,6 +47,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.23.3
+  rev: 0.27.0
   hooks:
     - id: check-github-workflows

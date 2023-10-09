@@ -424,7 +424,7 @@ class Booleans:
         model boundary conditions assigned to the original entities will not be
         transferred to the new entities generated.
         """
-        command = f"ASBL,{na},{nl},{keepa},{keepl}"
+        command = f"ASBL,{na},{nl},,{keepa},{keepl}"
         return self.run(command, **kwargs)
 
     def asbv(self, na="", nv="", sepo="", keepa="", keepv="", **kwargs):

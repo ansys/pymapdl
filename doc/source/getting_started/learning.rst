@@ -152,8 +152,27 @@ showcases, visit `Technology showcase guide <ansys_techdemo_guide_>`_.
 Recommended articles
 ====================
 
-* `Ansys Gets Into Open Source With GitHub <ansys_open_source_article_>`_
-* `Access the Power of Ansys from the Python World <ansys_python_power_article_>`_
-* PADT Inc.'s `Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - PART 1: Running and Post-Processing an Ansys Model Outside <padt_post_>`_
+.. vale off
 
-Feel free to email any educational or learning resource to |pyansys_contact|.
+* Ansys Gets Into Open Source With GitHub.
+  `Link to article in Ansys Blog <ansys_open_source_article_>`_
+* Access the Power of Ansys from the Python World.
+  `Link to article in Ansys blog <ansys_python_power_article_>`_
+* Using Ansys Scripting with pyMAPDL, pyDPF-Post, and More - Part 1
+  *Running and Post-Processing an Ansys Model Outside Ansys*. 
+  `Link to article in PADT Inc Blog <padt_post_>`_.
+* ANSYS in a Python Web App, Part 1: Post Processing with PyDPF:
+  *Integrating PyAnsys with Plotly's Dash and the Dash-VTK component to build an
+  Ansys structural analysis post-processing web application*.
+  `Link to 'Towards Data Science' article in Medium <tds_article_web_app_1_>`_.
+* ANSYS in a Python Web App, Part 2: Pre Processing & Solving with PyMAPDL:
+  *ANSYS in a Python Web App, Part 2: Pre Processing & Solving with PyMAPDL*.
+  `Link to 'Towards Data Science' article in Medium <tds_article_web_app_2_>`_.
+* Paraview: Reading ANSYS APDL (RST) results in Paraview.
+  `Link to 'Paraview Forum' question <paraview_question_read_rst_>`_.
+
+.. vale on
+
+
+Feel free to email any educational or learning resource to
+`PyAnsys Core team <pyansys_core_>`_.

@@ -20,7 +20,7 @@ Run this code to clone and install the latest version of PyMAPDL in development 
 
 .. code:: console
 
-    git clone https://github.com/pyansys/pymapdl
+    git clone https://github.com/ansys/pymapdl
     cd pymapdl
     pip install pip -U
     pip install -e .
@@ -38,7 +38,7 @@ use these issue templates:
 
 If your issue does not fit into one of these categories, create your own issue.
 
-To reach the project support team, email |pyansys_contact|.
+To reach the project support team, email `PyAnsys Core team <pyansys_core_>`_.
 
 Viewing PyMAPDL documentation
 =============================

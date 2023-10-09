@@ -30,6 +30,9 @@ mapdl.eplot()
 # ~~~~~~~~~~~~~~~~~~~~~
 # Enter the preprocessing routine and make the mesh cyclic.
 mapdl.prep7()
+mapdl.shpp("off")
+mapdl.nummrg(label="NODE", toler=1e-3)
+
 mapdl.cyclic()
 
 
@@ -50,11 +53,12 @@ mapdl.mp("EX", 1, 16900000)
 mapdl.omega(0, 0, 1000)  # 1000 RPM
 
 mapdl.csys(1)  # enter the cyclic coordinate system
-mapdl.nsel("S", "loc", "x", 0.69, 0.71)  # radial between 0.69 - 0.71
+
+mapdl.nsel("S", "loc", "x", 0, 0.71)  # radial between 0.69 - 0.71
 mapdl.d("ALL", "ALL")  # all DOF for those 8 nodes
+
 mapdl.allsel()
 mapdl.csys(0)  # return to cartesian coordinate system
-
 
 ###############################################################################
 # Run a static analysis

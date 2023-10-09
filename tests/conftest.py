@@ -15,6 +15,7 @@ pymapdl.RUNNING_TESTS = True
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.theme import _apply_default_theme
 from common import (
     Element,
     Node,
@@ -25,7 +26,10 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_smp,
 )
+
+_apply_default_theme()
 
 ################################################################
 #
@@ -38,7 +42,8 @@ pyvista.OFF_SCREEN = True
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
 
-ON_UBUNTU = is_on_ubuntu()
+ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
+# Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
 ON_WINDOWS = platform == "win32"
 ON_LINUX = platform == "linux" or platform == "linux2"
 ON_MACOS = platform == "darwin"
@@ -46,7 +51,9 @@ ON_MACOS = platform == "darwin"
 HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = pyvista.system_supports_plotting()
+IS_SMP = is_smp()
 
+QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -149,6 +156,12 @@ def pytest_addoption(parser):
         default=False,
         help="run only GUI tests",
     )
+    parser.addoption(
+        "--skip-regression-check",
+        action="store_true",
+        default=False,
+        help="Avoid checking the image regression check in all tests",
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -195,6 +208,25 @@ def pytest_collection_modifyitems(config, items):
 # Setting fixtures
 # ---------------------------
 #
+
+
+@pytest.fixture(autouse=True)
+def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+    # Checking if we want to avoid the check using pytest cli.
+    skip_regression_check = pytestconfig.option.skip_regression_check
+    if skip_regression_check:
+        verify_image_cache.skip = True
+
+    # Configuration
+    # default check
+    verify_image_cache.error_value = 500.0
+    verify_image_cache.warning_value = 200.0
+
+    # High variance test
+    verify_image_cache.var_error_value = 1000.0
+    verify_image_cache.var_warning_value = 1000.0
+
+    return verify_image_cache
 
 
 class Running_test:
@@ -339,7 +371,6 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        additional_switches="-smp",
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
@@ -574,6 +605,7 @@ def coupled_example(mapdl, cleared):
     mapdl_code = mapdl_code.replace(
         "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
     )
+    mapdl.finish()
     mapdl.input_strings(mapdl_code)
 
 
@@ -685,7 +717,6 @@ def contact_geom_and_mesh(mapdl):
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    # mapdl.eplot()
     # ==========================================================
     # * Contact Pairs
     # ==========================================================
@@ -727,12 +758,10 @@ def contact_geom_and_mesh(mapdl):
     mapdl.mat(1)
     mapdl.asel("s", "", "", 5)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
     mapdl.asel("s", "", "", 12)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
     mapdl.allsel("all")
@@ -744,7 +773,6 @@ def contact_geom_and_mesh(mapdl):
     # for welding, 'C
     mapdl.real(6)
     mapdl.cmsel("s", "tn.cnt")
-    # mapdl.nplot()
     mapdl.esurf()
     mapdl.type(7)
     mapdl.real(6)
@@ -921,7 +949,6 @@ def cuadratic_beam_problem(mapdl):
 
     mapdl.mp("EX", 1, 30e6)
     mapdl.mp("PRXY", 1, 0.3)
-    print(mapdl.mplist())
 
     w_f = 1.048394965
     w_w = 0.6856481
@@ -936,17 +963,8 @@ def cuadratic_beam_problem(mapdl):
     # Define one node for the orientation of the beam cross-section.
     orient_node = mapdl.n(6, 60, 1)
 
-    # Print the list of the created nodes.
-    print(mapdl.nlist())
-
     for elem_num in range(1, 5):
         mapdl.e(elem_num, elem_num + 1, orient_node)
-
-    # Print the list of the created elements.
-    print(mapdl.elist())
-
-    # Display elements with their nodes numbers.
-    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
 
     # BC for the beams seats
     mapdl.d(2, "UX", lab2="UY")

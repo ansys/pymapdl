@@ -60,11 +60,18 @@ if not os.path.isdir(SETTINGS_DIR):
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
 
+ON_WSL = os.name == "posix" and (
+    bool(os.environ.get("WSL_DISTRO_NAME", None))
+    or bool(os.environ.get("WSL_INTEROP", None))
+)
+
+if ON_WSL:
+    LOG.info("On WSL: Running on WSL detected.")
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
 
-INTEL_MSG = """Due to incompatibilities between 'DMP', Windows and VPN connections,
+INTEL_MSG = """Due to incompatibilities between this MAPDL version, Windows, and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
 If you still want to use 'INTEL', set:
@@ -524,7 +531,7 @@ def launch_grpc(
         LOG.debug("Checking file error is created")
         _check_file_error_created(run_location, timeout)
 
-        if os.name == "posix":
+        if os.name == "posix" and not ON_WSL:
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
@@ -871,7 +878,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
-            # This is due to the intel compiler, and only afects versions between
+            # This is due to the intel compiler, and only affects versions between
             # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
@@ -1115,13 +1122,15 @@ def launch_mapdl(
         Default ``False``.
 
     add_env_vars : dict, optional
-        The provided dictionary will be used to extend the system or process
+        The provided dictionary will be used to extend the MAPDL process
         environment variables. If you want to control all of the environment
-        variables, use ``replace_env_vars``. Defaults to ``None``.
+        variables, use the argument ``replace_env_vars``. Defaults to ``None``.
 
     replace_env_vars : dict, optional
-        The provided dictionary will be used to replace all the system or process
-        environment variables. To just add some environment variables to the MAPDL
+        The provided dictionary will be used to replace all the MAPDL process
+        environment variables. It replace the system environment variables
+        which otherwise would be used in the process.
+        To just add some environment variables to the MAPDL
         process, use ``add_env_vars``. Defaults to ``None``.
 
     version : float, optional
@@ -1307,6 +1316,18 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
     ...                       mode='console')
 
+    Run MAPDL with additional environment variables.
+
+    >>> my_env_vars = {"my_var":"true", "ANSYS_LOCK":"FALSE"}
+    >>> mapdl = launch_mapdl(add_env_vars=my_env_vars)
+
+    Run MAPDL with our own set of environment variables. It replace the system
+    environment variables which otherwise would be used in the process.
+
+    >>> my_env_vars = {"my_var":"true",
+        "ANSYS_LOCK":"FALSE",
+        "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
+    >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
     if remove_temp_files is not None:
         warnings.warn(
@@ -1336,15 +1357,38 @@ def launch_mapdl(
     # Raising error if using non-allowed arguments
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
-        raise ValueError(f"The following arguments are not recognaised: {ms_}")
+        raise ValueError(f"The following arguments are not recognized: {ms_}")
 
     if ip is None:
-        ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
+        ip = os.environ.get("PYMAPDL_IP", None)
+
+        if not ip and ON_WSL:
+            ip = _get_windows_host_ip()
+            if ip:
+                LOG.debug(
+                    f"On WSL: Using the following IP address for the Windows OS host: {ip}"
+                )
+            else:
+                LOG.debug(
+                    "PyMAPDL could not find the IP address of the Windows host machine."
+                )
+
+        if not ip:
+            LOG.debug(
+                f"No IP address was supplied. Using the default IP address: {LOCALHOST}"
+            )
+            ip = LOCALHOST
+
     else:
         LOG.debug(
-            "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
+            "Because 'PYMAPDL_IP' is not None, an attempt is made to connect to"
+            " a remote session ('START_INSTANCE' is set to 'False')."
         )
-        start_instance = False
+        if not ON_WSL:
+            start_instance = False
+        else:
+            LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
+
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
     check_valid_ip(ip)  # double check
@@ -1808,3 +1852,31 @@ def _verify_version(version):
         )
 
     return version
+
+
+def _get_windows_host_ip():
+    output = _run_ip_route()
+    if output:
+        return _parse_ip_route(output)
+
+
+def _run_ip_route():
+    from subprocess import run
+
+    try:
+        p = run(["ip", "route"], capture_output=True)
+    except Exception:
+        LOG.debug(
+            "Detecting the IP address of the host Windows machine requires being able to execute the command 'ip route'."
+        )
+        return None
+
+    if p and p.stdout and isinstance(p.stdout, bytes):
+        return p.stdout.decode()
+
+
+def _parse_ip_route(output):
+    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
+
+    if match:
+        return match[0]

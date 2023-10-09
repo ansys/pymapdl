@@ -50,8 +50,11 @@ def is_on_ci():
 
 # Set if on ubuntu
 def is_on_ubuntu():
-    if os.environ.get("ON_UBUNTU", "").lower() == "true":
-        return True
+    envvar = os.environ.get("ON_UBUNTU", None)
+
+    if envvar is not None:
+        return envvar.lower() == "true"
+
     return _is_ubuntu()
 
 
@@ -67,6 +70,10 @@ def has_grpc():
 
 def has_dpf():
     return os.environ.get("DPF_PORT", "")
+
+
+def is_smp():
+    return os.environ.get("DISTRIBUTED_MODE", "smp").lower().strip() == "smp"
 
 
 def is_float(s: str) -> bool:

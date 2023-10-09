@@ -210,7 +210,7 @@ using this approach (non-tested):
 
       steps:
          - name: "Install Git and check out project"
-           uses: actions/checkout@v3
+           uses: actions/checkout@v4
 
          - name: "Set up Python"
            uses: actions/setup-python@v4

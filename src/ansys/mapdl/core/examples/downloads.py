@@ -50,9 +50,9 @@ def _decompress(filename):
 def _get_file_url(filename, directory=None):
     if directory:
         return (
-            f"https://github.com/pyansys/example-data/raw/master/{directory}/{filename}"
+            f"https://github.com/ansys/example-data/raw/master/{directory}/{filename}"
         )
-    return f"https://github.com/pyansys/example-data/raw/master/{filename}"
+    return f"https://github.com/ansys/example-data/raw/master/{filename}"
 
 
 def _check_url_exist(url):
@@ -124,7 +124,7 @@ def download_vtk_rotor():
     return _download_file("rotor.vtk", "geometry")[0]
 
 
-def _download_rotor_tech_demo_plot():
+def _download_rotor_tech_demo_vtk():
     """Download the rotor surface VTK file."""
     return _download_file("rotor2.vtk", "geometry")[0]
 

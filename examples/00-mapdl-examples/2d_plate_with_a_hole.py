@@ -202,7 +202,7 @@ max_stress = np.nanmax(von_mises)
 # We use nanmean here because mid-side nodes have no stress
 mask = result.mesh.nodes[:, 0] == length
 far_field_stress = np.nanmean(von_mises[mask])
-print("Far field von mises stress: %e" % far_field_stress)
+print("Far field von Mises stress: %e" % far_field_stress)
 # Which almost exactly equals the analytical value of 10000000.0 Pa
 
 ###############################################################################
@@ -286,7 +286,6 @@ def compute_stress_con(ratio):
     mapdl.esize(plate_esize)
     mapdl.amesh(plate_with_hole_anum)
 
-    ###############################################################################
     # Boundary Conditions
     # ~~~~~~~~~~~~~~~~~~~
     # Fix the left-hand side of the plate in the X direction

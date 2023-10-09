@@ -8,7 +8,7 @@ import numpy as np
 from numpy.typing import NDArray
 import pyvista as pv
 
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
 from ansys.mapdl.core.errors import ComponentNoData, VersionError
 
 if _HAS_PYVISTA:
@@ -131,7 +131,17 @@ class Geometry:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
+        """Geometry manager
+
+        Class to help to manage geometry representations in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
         from ansys.mapdl.core.mapdl import _MapdlCore
 
         if not isinstance(mapdl, _MapdlCore):
@@ -1324,13 +1334,13 @@ class Geometry:
             self._mapdl.cm("__temp_volu__", "volu")
             self._mapdl.cm("__temp_area__", "area")
 
-        area_num = surf["entity_num"]
+        area_num = surf["entity_num"].astype(int)
 
         for each_volu in self.vnum:
             self._mapdl.vsel("S", vmin=each_volu)
             self._mapdl.aslv("S")
             unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-            unstruct.entity_num = each_volu
+            unstruct.entity_num = int(each_volu)
             volumes_.append(unstruct)
 
         self._mapdl.cmsel("S", "__temp_volu__")
@@ -1493,6 +1503,19 @@ class LegacyGeometry(Geometry):
     This class contains advanced methods for extending geometry building and
     selection within MAPDL.
     """
+
+    def __init__(self, mapdl: Mapdl):
+        """Legacy geometry manager
+
+        Class to help to manage geometry representations in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
         """Keypoint coordinates"""

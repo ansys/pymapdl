@@ -8,7 +8,7 @@ This guide guides you on how to develop PyMAPDL features or fix bugs using
 a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_
 or `Codespaces <https://github.com/features/codespaces>`_.
 The files for setting up the container can be found in the 
-`.devcontainer directory <https://github.com/pyansys/pymapdl/tree/main/.devcontainer>`_.
+`.devcontainer directory <https://github.com/ansys/pymapdl/tree/main/.devcontainer>`_.
 
 About the MAPDL container
 =========================
@@ -24,7 +24,7 @@ If you want to build your own docker image, visit the following link
 Develop on a remote container
 =============================
 
-.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email |pyansys_contact|.
+.. note:: If you are an Ansys employee or collaborator and want to use this development method, please email `PyAnsys Core team <pyansys_core_>`_.
 
 To use a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_, you must install:
 
@@ -39,7 +39,7 @@ As mentioned before, you must have your own Docker image with MAPDL installed lo
 online registry, i.e. GitHub `ghcr.io <https://github.com/features/packages>`_.
 For the purpose of this document, assume your image is hosted at ``ghcr.io/myaccount/mapdlimage:mytag``.
 
-You must then modify the file `docker-compose.yml <https://github.com/pyansys/pymapdl/tree/main/.devcontainer/docker-compose.yml>`_
+You must then modify the file `docker-compose.yml <https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml>`_
 with your custom image:
 
 .. code-block:: yaml
@@ -111,5 +111,5 @@ You can launch a container which all the required tools and start to work in cou
 This is an easy way to get started with PyMAPDL development.
 
 .. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
-   If you are an Ansys employee and wants use this development method, please email |pyansys_contact|.
+   If you are an Ansys employee and wants use this development method, please email `PyAnsys Core team <pyansys_core_>`_.
 

@@ -12,6 +12,7 @@ from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
     _is_ubuntu,
+    _parse_ip_route,
     _validate_MPI,
     _verify_version,
     find_ansys,
@@ -21,7 +22,12 @@ from ansys.mapdl.core.launcher import (
     version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
+from conftest import (
+    QUICK_LAUNCH_SWITCHES,
+    skip_if_not_local,
+    skip_on_linux,
+    skip_on_windows,
+)
 
 try:
     import ansys_corba  # noqa: F401
@@ -153,7 +159,11 @@ def test_launch_corba(version):
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(license_type=license_name, start_timeout=start_timeout)
+        mapdl = launch_mapdl(
+            license_type=license_name,
+            start_timeout=start_timeout,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
 
         # Using first line to ensure not picking up other stuff.
         checks.append(license_description in mapdl.__str__().split("\n")[0])
@@ -169,7 +179,11 @@ def test_license_type_keyword_names():
 
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(license_type=license_name, start_timeout=start_timeout)
+        mapdl = launch_mapdl(
+            license_type=license_name,
+            start_timeout=start_timeout,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
@@ -187,7 +201,8 @@ def test_license_type_additional_switch():
     successful_check = False
     for license_name, license_description in LICENSES.items():
         mapdl = launch_mapdl(
-            additional_switches=" -p " + license_name, start_timeout=start_timeout
+            additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
+            start_timeout=start_timeout,
         )
 
         # Using first line to ensure not picking up other stuff.
@@ -204,14 +219,19 @@ def test_license_type_dummy():
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
         launch_mapdl(
-            additional_switches=f" -p {dummy_license_type}", start_timeout=start_timeout
+            additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
+            start_timeout=start_timeout,
         )
 
 
 @skip_if_not_local
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
-    mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
+    mapdl = launch_mapdl(
+        remove_temp_files=True,
+        start_timeout=start_timeout,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
 
     # possible MAPDL is installed but running in "remote" mode
     path = mapdl.directory
@@ -228,7 +248,11 @@ def test_remove_temp_files():
 @skip_if_not_local
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
-    mapdl = launch_mapdl(remove_temp_files=True, start_timeout=start_timeout)
+    mapdl = launch_mapdl(
+        remove_temp_files=True,
+        start_timeout=start_timeout,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
     old_path = mapdl.directory
     assert os.path.isdir(str(tmpdir))
     mapdl.cwd(str(tmpdir))
@@ -381,14 +405,23 @@ def test_find_ansys(mapdl):
 @skip_if_not_local
 def test_version(mapdl):
     version = int(10 * mapdl.version)
-    mapdl_ = launch_mapdl(version=version, start_timeout=start_timeout)
+    mapdl_ = launch_mapdl(
+        version=version,
+        start_timeout=start_timeout,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
     mapdl_.exit()
 
 
 @skip_if_not_local
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
-        launch_mapdl(exec_file="asdf", version="asdf", start_timeout=start_timeout)
+        launch_mapdl(
+            exec_file="asdf",
+            version="asdf",
+            start_timeout=start_timeout,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
 
 
 @skip_on_windows
@@ -404,9 +437,26 @@ def test_get_default_ansys():
 
 def test_launch_mapdl_non_recognaised_arguments():
     with pytest.raises(ValueError, match="my_fake_argument"):
-        launch_mapdl(my_fake_argument="my_fake_value")
+        launch_mapdl(
+            my_fake_argument="my_fake_value", additional_switches=QUICK_LAUNCH_SWITCHES
+        )
 
 
 def test_mapdl_non_recognaised_arguments():
     with pytest.raises(ValueError, match="my_fake_argument"):
-        pymapdl.Mapdl(my_fake_argument="my_fake_value")
+        pymapdl.Mapdl(
+            my_fake_argument="my_fake_value", additional_switches=QUICK_LAUNCH_SWITCHES
+        )
+
+
+def test__parse_ip_route():
+    output = """default via 172.25.192.1 dev eth0 proto kernel <<<=== this
+172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
+
+    assert "172.25.192.1" == _parse_ip_route(output)
+
+    output = """
+default via 172.23.112.1 dev eth0 proto kernel
+172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
+
+    assert "172.23.112.1" == _parse_ip_route(output)

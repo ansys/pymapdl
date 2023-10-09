@@ -8,7 +8,7 @@ import pytest
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from conftest import skip_if_not_local
+from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -26,13 +26,23 @@ skip_requires_194 = pytest.mark.skipif(
 )
 
 TWAIT = 90
+NPROC = 1
 
 
 @pytest.fixture(scope="module")
-def pool():
+def pool(tmpdir_factory):
     EXEC_FILE = find_ansys()[0]
+    run_path = str(tmpdir_factory.mktemp("ansys_pool"))
+
     mapdl_pool = LocalMapdlPool(
-        4, license_server_check=False, start_timeout=30, exec_file=EXEC_FILE
+        4,
+        license_server_check=False,
+        run_location=run_path,
+        port=50056,
+        start_timeout=30,
+        exec_file=EXEC_FILE,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        nproc=NPROC,
     )
     yield mapdl_pool
 
@@ -59,7 +69,12 @@ def pool():
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
-        LocalMapdlPool(4, exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl")
+        LocalMapdlPool(
+            4,
+            nproc=NPROC,
+            exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl",
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
 
 
 @skip_if_not_local
@@ -190,3 +205,59 @@ def test_abort(pool, tmpdir):
             break
 
     assert path_deleted
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names_default(pool):
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "Instance_0" in dirs_path_pool
+    assert "Instance_1" in dirs_path_pool
+    assert "Instance_2" in dirs_path_pool
+    assert "Instance_3" in dirs_path_pool
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names_custom_string(tmpdir):
+    pool = LocalMapdlPool(
+        2,
+        run_location=tmpdir,
+        nproc=NPROC,
+        names="my_instance",
+        port=50056,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
+
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "my_instance_0" in dirs_path_pool
+    assert "my_instance_1" in dirs_path_pool
+
+    pool.exit(block=True)
+
+
+@skip_if_not_local
+@skip_if_ignore_pool
+def test_directory_names_function(tmpdir):
+    def myfun(i):
+        if i == 0:
+            return "instance_zero"
+        elif i == 1:
+            return "instance_one"
+        else:
+            return "Other_instance"
+
+    pool = LocalMapdlPool(
+        3,
+        nproc=NPROC,
+        names=myfun,
+        run_location=tmpdir,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
+
+    dirs_path_pool = os.listdir(pool._root_dir)
+    assert "instance_zero" in dirs_path_pool
+    assert "instance_one" in dirs_path_pool
+    assert "Other_instance" in dirs_path_pool
+
+    pool.exit(block=True)
