@@ -138,7 +138,7 @@ the mentioned IP address/hostname for this to work.
 If you have MAPDL installed on your local host, you
 can use the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method to both start and connect to MAPDL.
 
-If you have any problem launching PyMAPDL, see :ref:`debugging_launch_mapdl`.
+If you have any problem launching PyMAPDL, see :ref:`Launching issues <ref_launching_issue>`.
 
 If you are connecting to an MAPDL Docker image, the procedure is the same.
 Just make sure that you specify the mapped port instead of the internal Docker image port.

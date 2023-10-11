@@ -47,7 +47,8 @@ ROUT``, you can access it with this code:
 For a full list of the methods and attributes available to the
 ``Parameters`` class, see :ref:`ref_parameters_api`.
 
-For additional information on PyMAPDL array limitations, see :ref:`ref_numpy_arrays_in_mapdl`.
+For additional information on PyMAPDL array limitations, see
+:ref:`Issues when importing and exporting numpy arrays in MAPDL <ref_issues_np_mapdl>`.
 
 .. _ref_special_named_param:
 
