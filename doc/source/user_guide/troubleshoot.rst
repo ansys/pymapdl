@@ -38,6 +38,7 @@ If you believe you have found a bug, open an issue on the
 `PyMAPDL Issues page <pymapdl_issues_>`_.
 
 
+.. _ref_launching_issue:
 
 Launching issues
 ----------------
@@ -513,6 +514,8 @@ method lists higher versions first and student versions last.
 PyMAPDL usage issues
 --------------------
 
+.. _ref_issues_np_mapdl:
+
 Issues when importing and exporting NumPy arrays in MAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -568,7 +571,7 @@ to one, have the same shape if later retrieved.
    True
 
 
-
+.. _ref_pymapdl_stability:
 
 PyMAPDL stability
 -----------------
