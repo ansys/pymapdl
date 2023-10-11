@@ -88,6 +88,15 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
+      
+      - name: "Importing library"
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      
+      - name: "Checking plotting support"
+        run:
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+
 
   docs-build:
     name: "Build documentation"
