@@ -1,6 +1,6 @@
 .. _ref_unit_testing_contributing:
 
-Unit Testing
+Unit testing
 ============
 
 Unit tests validate the software by testing that the logic
@@ -8,7 +8,7 @@ implemented inside a certain method, class, or module is
 working as expected. They should be as atomic and 
 independent as possible.
 
-Unit testing is highly important. The tests check that code
+Unit testing is highly important. The tests verify that code
 changes are consistent with other parts of the code
 and verify that these changes are implemented properly.
 
