@@ -34,7 +34,7 @@ Coverage example
 To show how the coverage works, assume that you have
 this library:
 
-**My awesome library**
+**Awesome library**
 
 
 .. code:: python
@@ -87,8 +87,8 @@ Continuous Integration and Continuous Deployment (CI/CD) approach
 
 Unit tests and integration tests are part of Continuous Integration (CI). 
 The automation of testing, monitoring, and deployment of newly added
-code allows Continuous Deployment (CD) throughout the application
-lifecycle, providing a comprehensive CI/CD approach.
+code allows Continuous Deployment (CD) throughout the app lifecycle,
+providing a comprehensive CI/CD approach.
 
 .. figure:: ../images/cicd.jpg
     :width: 300pt
