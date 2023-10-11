@@ -584,10 +584,9 @@ Use ``mute`` to improve stability
 -----------------------------------
 
 When possible, pass ``mute=True`` to individual MAPDL commands or
-set it globally with the :func:`Mapdl.mute
-<ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
-back the response from MAPDL for each command and marginally
-improves performance and stability. Consider having a debug flag in
+set it globally with the :func:`Mapdl.mute <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
+method. This disables streaming back the response from MAPDL for each command
+and marginally improves performance and stability. Consider having a debug flag in
 your program or script so that you can turn on and off logging and
 verbosity as needed.
 
@@ -597,9 +596,9 @@ Issues
 
 .. note::
 
-   MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
-   <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
-   possible. Attempt to use the
+   MAPDL 2021 R1 has a stability issue with the :
+   func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+   method. Avoid using input files if possible. Attempt to use the
    :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
    nodes and elements and read them in via the
    :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and

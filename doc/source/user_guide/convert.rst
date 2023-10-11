@@ -94,10 +94,10 @@ Caveats
 
 These examples only show an automatic translation of a verification:
 file and not optimized code. Should it be necessary to pull
-parameters or arrays from ansys, use the :func:`Mapdl.get_value()
-<ansys.mapdl.core.Mapdl.get_value>` function, which is quite similar to the
-MAPDL :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` 
-command shown here:
+parameters or arrays from ansys, use the 
+:func:`Mapdl.get_value() <ansys.mapdl.core.Mapdl.get_value>` function,
+which is quite similar to the MAPDL
+:func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` command shown here:
 
 .. code:: pycon
 
@@ -154,15 +154,14 @@ Or, you can convert code in form of strings for later processing using the
 The script conversion functions allow some interesting arguments, which you can see in
 the respective :func:`convert_script() <ansys.mapdl.core.convert_script>`
 and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
-function documentation. Especially interesting are the ``add_imports``, ``comment_solve``, and
-``print_com`` keyword arguments.
+function documentation. Especially interesting are the ``add_imports``, ``comment_solve``,
+and ``print_com`` keyword arguments.
 
-Of particular note in the following examples is how most of the
-commands can be called as a method to the Ansys object rather than
-sending a string as a command. Additionally, take note that some
-commands require the :attr:`Mapdl.non_interactive
-<ansys.mapdl.core.Mapdl.non_interactive>` context manager since some
-commands require and may break the server connection for some
+Of particular note in the following examples is how most of the commands can be called
+as a method to the Ansys object rather than sending a string as a command. Additionally,
+take note that some commands require the
+:attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+context manager since some commands require and may break the server connection for some
 interfaces (such as CORBA) or are invalid (as in gRPC).
 
 Also note that APDL macros that use ``*CREATE`` have been replaced

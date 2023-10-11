@@ -17,8 +17,9 @@ Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
 this causes a conflict with an existing name. Most notable is
 ``/SOLU``, which would conflict with ``SOLU``. Therefore,
-``/SOLU`` is renamed to the :func:`Mapdl.slashsolu()
-<ansys.mapdl.core.Mapdl.slashsolu>` method to differentiate it from ``solu``.
+``/SOLU`` is renamed to the
+:func:`Mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`
+method to differentiate it from ``solu``.
 Out of the 1500 MAPDL commands, about 15 start with ``slash (/)`` and 8
 start with ``star (*)``.
 
@@ -35,9 +36,9 @@ Or, these commands can be called using keyword arguments:
 
     mapdl.esel("s", "type", vmin=1)
 
-None of these restrictions apply to commands run with the :func:`Mapdl.run()
-<ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
-these commands, such as ``"/SOLU"``:
+None of these restrictions apply to commands run with the
+:func:`Mapdl.run() <ansys.mapdl.core.Mapdl.run>` method. It might be easier
+to run some of these commands, such as ``"/SOLU"``:
 
 .. code:: python
 
@@ -341,9 +342,9 @@ example:
 Prompts
 ~~~~~~~
 Prompts from MAPDL automatically continued as if MAPDL is in batch
-mode. Commands requiring user input, such as the :func:`Mapdl.vwrite()
-<ansys.mapdl.core.Mapdl.vwrite>` method fail and must be entered in
-non-interactively.
+mode. Commands requiring user input, such as the
+:func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>` method fail
+and must be entered in non-interactively.
 
 
 APDL command logging
@@ -618,8 +619,8 @@ using the :attr:`Mapdl.chain_commands <ansys.mapdl.core.Mapdl.chain_commands>` a
 
 The execution time using this approach is generally 4 to 10 times faster than running
 each command individually. You can then view the final response of
-the chained commands with the :attr:`Mapdl.last_response
-<ansys.mapdl.core.Mapdl.last_response>` attribute.
+the chained commands with the
+:attr:`Mapdl.last_response <ansys.mapdl.core.Mapdl.last_response>` attribute.
 
 .. note::
    Command chaining is not supported in distributed MAPDL.  To improve
