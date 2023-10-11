@@ -597,7 +597,7 @@ Issues
 .. note::
 
    MAPDL 2021 R1 has a stability issue with the :
-   func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+   :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
    method. Avoid using input files if possible. Attempt to use the
    :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
    nodes and elements and read them in via the
