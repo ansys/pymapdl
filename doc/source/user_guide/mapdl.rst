@@ -36,9 +36,9 @@ Or, these commands can be called using keyword arguments:
 
     mapdl.esel("s", "type", vmin=1)
 
-None of these restrictions apply to commands run with the
-:func:`Mapdl.run() <ansys.mapdl.core.Mapdl.run>` method. It might be easier
-to run some of these commands, such as ``"/SOLU"``:
+None of these restrictions apply to commands run with the :func:`Mapdl.run()
+<ansys.mapdl.core.Mapdl.run>` method. It might be easier to run some of
+these commands, such as ``"/SOLU"``:
 
 .. code:: python
 
