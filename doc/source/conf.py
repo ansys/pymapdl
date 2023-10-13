@@ -3,7 +3,12 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_black
+from ansys_sphinx_theme import (
+    ansys_favicon,
+    get_version_match,
+    pyansys_logo_black,
+    pyansys_logo_white,
+)
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -11,7 +16,6 @@ from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
-from ansys.mapdl.core.docs import linkcode_resolve
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -54,7 +58,7 @@ release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
 
 REPOSITORY_NAME = "pymapdl"
-USERNAME = "pyansys"
+USERNAME = "ansys"
 BRANCH = "main"
 
 
@@ -74,10 +78,6 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
-    # sphinx.ext.linkcode add the button ``[Source]`` to each website.
-    # The link of that button is created by calling ``linkcode_resolve``
-    # function which we overwrite in ansys.mapdl.core.docs
-    "sphinx.ext.linkcode",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
@@ -85,6 +85,7 @@ extensions = [
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
+    "ansys_sphinx_theme.extension.linkcode",
 ]
 
 # Intersphinx mapping
@@ -240,6 +241,8 @@ sphinx_gallery_conf = {
     "image_scrapers": ("pyvista", "matplotlib"),
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
+    "remove_config_comments": True,
+    "default_thumb_file": pyansys_logo_white,
 }
 # ---
 
@@ -288,6 +291,7 @@ html_context = {
     "github_repo": REPOSITORY_NAME,
     "github_version": BRANCH,
     "doc_path": DOC_PATH,
+    "source_path": "src",
 }
 html_show_sourcelink = False
 
@@ -367,48 +371,6 @@ epub_title = project
 epub_exclude_files = ["search.html"]
 
 
-def setup_to_py(
-    app: Sphinx, pagename: str, templatename: str, context, doctree
-) -> None:
-    """Add a function that jinja can access for returning an "edit this page" link pointing to `main`."""
-
-    def fix_edit_link_button(link: str) -> str:
-        """Transform "edit on github" links and make sure they always point to the main branch.
-
-        Args:
-            link: the link to the github edit interface
-
-        Returns:
-            the link to the tip of the main branch for the same file
-        """
-        # Create custom 'edit' URLs for API modules since they are dynamically generated.
-        doc_path = "/".join(link.split("/")[:-1])
-        file_name = link.split("/")[-1]
-
-        if GALLERY_EXAMPLES_PATH in doc_path:
-            # We are in a python example
-            doc_path = doc_path.replace(
-                f"{DOC_PATH}/{GALLERY_EXAMPLES_PATH}", EXAMPLES_ROOT
-            )
-            file_name = (
-                os.path.basename(file_name).replace(source_suffix, "")
-                + f".{DEFAULT_EXAMPLE_EXTENSION}"
-            )
-            return f"{doc_path}/{file_name}"
-
-        elif "_autosummary" in link:
-            # This is an API example
-            fullname = link.split("_autosummary")[1][1:]
-            return linkcode_resolve(
-                "py", {"module": "ansys.mapdl.core", "fullname": fullname}, edit=True
-            )
-
-        else:
-            return link
-
-    context["fix_edit_link_button"] = fix_edit_link_button
-
-
 def setup(app: Sphinx):
     """Add custom configuration to sphinx app.
 
@@ -417,7 +379,6 @@ def setup(app: Sphinx):
     app : sphinx.application.Sphinx
         The Sphinx application.
     """
-    app.connect("html-page-context", setup_to_py)
 
     # Adding apdl syntax highlighting
     from pygments.lexers.apdlexer import apdlexer

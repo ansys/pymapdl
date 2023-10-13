@@ -60,25 +60,25 @@ tests = [
     "autopep8==2.0.4",
     "matplotlib==3.8.0",
     "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
-    "scipy==1.11.2; python_version > '3.8'",
+    "scipy==1.11.3; python_version > '3.8'",
     "pandas==2.1.1",
     "pyiges[full]==0.3.1",
     "pytest==7.4.2",
     "pytest-cov==4.1.0",
-    "pyvista==0.42.2",
-    "pyansys-tools-report==0.6.0",
+    "pyvista==0.42.3",
+    "pyansys-tools-report==0.7.0",
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
-    "pytest-pyvista==0.1.8",
+    "pytest-pyvista==0.1.9",
 ]
 doc = [
     "sphinx==7.2.6",
     "ansys-dpf-core==0.9.0",
     "ansys-mapdl-reader==0.52.20",
-    "ansys-sphinx-theme==0.12.0",
+    "ansys-sphinx-theme==0.12.3",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.9",
-    "imageio==2.31.4",
+    "imageio==2.31.5",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
     "matplotlib==3.8.0",
@@ -155,6 +155,7 @@ show_missing = true
 skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
 ignore-words = "doc/styles/Vocab/ANSYS/accept.txt"
 quiet-level = 3
+ignore-regex=".*codespell-ignore$|NORML|POIN"
 
 [tool.numpydoc_validation]
 checks = [

@@ -33,6 +33,10 @@ clean-except-examples:
 	rm -rf $(BUILDDIR)/*
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
+# clean only examples
+clean-examples:
+	rm -rf source/examples/gallery_examples
+
 # customized to build the pdf rather than using latexpdf due to various issues
 # with our docs like GIFs being written as PNG.
 pdf:

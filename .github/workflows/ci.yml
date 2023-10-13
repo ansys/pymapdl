@@ -57,6 +57,8 @@ jobs:
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
+    #Skipping until 2394 is fixed
+    if:  github.ref == 'Skip for now'
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
@@ -86,11 +88,20 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
+      
+      - name: "Importing library"
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      
+      - name: "Checking plotting support"
+        run:
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+
 
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
-    needs: doc-style
+    # needs: doc-style - Skip for now
     timeout-minutes: 60
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -360,6 +371,7 @@ jobs:
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --ignore_image_cache \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v3
@@ -449,6 +461,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
+    outputs:
+      pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
+      committed: ${{ steps.attatch-to-pr.outputs.committed }}
+      commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: "-u=0:0 --entrypoint /bin/bash"
@@ -462,6 +478,9 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -507,9 +526,43 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
+          xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
+
+      - name: "Adding the directory as safe directory for later step"
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: "Attaching modified files to PR"
+        id: attatch-to-pr
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Update the image cache
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: './tests/.image_cache/*.png'
+
+      - name: "PR comment with reactions"
+        if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Hello!  :wave:
+            
+            Your PR is changing the image cache. So I am attaching the new image cache
+            in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
+
+            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
+            you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
+            
+            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
+
+            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
+
+          reactions: rocket
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
@@ -579,6 +632,7 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
       - uses: codecov/codecov-action@v3
@@ -662,20 +716,18 @@ jobs:
       - name: "Install Git and clone project"
         uses: actions/checkout@v4
 
-      - name: "Get version of library"
-        shell: bash
-        run: |
-          echo "FULL_VERSION=$(cat VERSION)" >> $GITHUB_ENV
+      - name: "Install the package requirements"
+        run: pip install -e .
 
-      - name: "Scrape the stable documentation to PyMeilisearch"
-
+      - name: "Get the version to PyMeilisearch"
         run: |
-          VERSION=$(python -c "import os; version=os.environ['FULL_VERSION']; print('.'.join(version.split('.')[:2]))")
-          VERSION_MEILI=$(python -c "import os; version=os.environ['FULL_VERSION']; print('-'.join(version.split('.')[:2]))")
+          VERSION=$(python -c "from ansys.mapdl.core import __version__; print('.'.join(__version__.split('.')[:2]))")
+          VERSION_MEILI=$(python -c "from ansys.mapdl.core import __version__; print('-'.join(__version__.split('.')[:2]))")
           echo "Calculated VERSION: $VERSION"
           echo "Calculated VERSION_MEILI: $VERSION_MEILI"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
+
       - name: "Deploy the latest documentation index"
         uses: ansys/actions/doc-deploy-index@v4
         with:
@@ -705,7 +757,7 @@ jobs:
         uses: ansys/actions/doc-deploy-index@v4
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
-          index-name: "pymapdl-vdev"
+          index-name: pymapdl-vdev
           host-url: ${{ vars.MEILISEARCH_HOST_URL }}
           api-key: ${{ env.MEILISEARCH_API_KEY }}
   

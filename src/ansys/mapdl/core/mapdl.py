@@ -18,8 +18,7 @@ import weakref
 
 from matplotlib.colors import to_rgba
 import numpy as np
-from numpy._typing import DTypeLike
-from numpy.typing import NDArray
+from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
@@ -1938,7 +1937,7 @@ class _MapdlCore(Commands):
 
                 # expand color array until matching the number of areas.
                 # In this case we start to repeat colors in the same order.
-                colors = np.resize(colors, len(ent_num))
+                colors = np.resize(colors, (len(ent_num), 3))
 
                 for surf, color in zip(surfs, colors):
                     meshes.append({"mesh": surf, "color": color})
