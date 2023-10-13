@@ -362,8 +362,7 @@ class ansXpl:
         return response
 
     def extract(self, recordname, sets="ALL", asarray=False):
-        """
-        Import a Matrix/Vector from a MAPDL result file.
+        """Import a Matrix/Vector from a MAPDL result file.
 
         At the moment, this only supports reading the displacement vectors from
         a result file.

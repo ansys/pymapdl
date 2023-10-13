@@ -104,7 +104,7 @@ def check_vget_input(entity: str, item: str, itnum: str) -> str:
 
     Returns
     -------
-    command : str
+    str
         MAPDL formatted vget command after the "VGET, " in the format of:
         "ENTITY, , ITEM, ITNUM"
     """
@@ -158,7 +158,7 @@ def parse_chunks(chunks, dtype=None):
 
     Returns
     -------
-    array : np.ndarray
+    np.ndarray
         Deserialized numpy array.
 
     """

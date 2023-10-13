@@ -2996,11 +2996,13 @@ class _MapdlCore(Commands):
         return out
 
     def run_multiline(self, commands) -> str:
-        """Run several commands as a single block
+        """
 
         .. deprecated:: 0.61.0
            This function is being deprecated. Please use `input_strings`
            instead.
+
+        Run several commands as a single block
 
         Parameters
         ----------
@@ -3642,7 +3644,7 @@ class _MapdlCore(Commands):
 
     @property
     def _lockfile(self):
-        """lockfile path"""
+        """Lockfile path"""
         path = self.directory
         if path is not None:
             return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
@@ -3885,7 +3887,7 @@ class _MapdlCore(Commands):
         return filenames[-1]
 
     def _set_log_level(self, level):
-        """alias for set_log_level"""
+        """Alias for set_log_level"""
         self.set_log_level(level)
 
     def list(self, filename, ext=""):
