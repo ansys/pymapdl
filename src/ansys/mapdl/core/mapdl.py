@@ -2996,13 +2996,13 @@ class _MapdlCore(Commands):
         return out
 
     def run_multiline(self, commands) -> str:
-        """
+        """Run several commands as a single block
 
         .. deprecated:: 0.61.0
            This function is being deprecated. Please use `input_strings`
            instead.
 
-        Run several commands as a single block
+        Allows to run multiple mapdl commands in different lines in one go.
 
         Parameters
         ----------
