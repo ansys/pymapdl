@@ -17,7 +17,8 @@ repos:
               docs/source|
               examples|
               /doc/source/examples|
-              src/ansys/mapdl/core/_commands
+              src/ansys/mapdl/core/_commands|
+              src/ansys/mapdl/core/commands
           )
 
 - repo: https://github.com/psf/black
