@@ -13,10 +13,9 @@ repos:
     - id: numpydoc-validation
       exclude: |
           (?x)(
-              /tests|
-              docs/source|
+              tests/|
               examples|
-              /doc/source/examples|
+              doc/source/|
               src/ansys/mapdl/core/_commands|
               src/ansys/mapdl/core/commands
           )
