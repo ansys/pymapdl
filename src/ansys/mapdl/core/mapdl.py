@@ -18,8 +18,7 @@ import weakref
 
 from matplotlib.colors import to_rgba
 import numpy as np
-from numpy._typing import DTypeLike
-from numpy.typing import NDArray
+from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger

@@ -862,10 +862,10 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw:  # pragma: no cover
+    if "smp" not in add_sw_lower_case:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
@@ -878,7 +878,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
-            # This is due to the intel compiler, and only afects versions between
+            # This is due to the intel compiler, and only affects versions between
             # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
@@ -887,13 +887,13 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-            if "intelmpi" in add_sw:
+            if "intelmpi" in add_sw_lower_case:
                 LOG.debug(
                     "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
                 )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
-                add_sw = re.sub(regex, "", add_sw)
+                add_sw = re.sub(regex, "", add_sw, flags=re.IGNORECASE)
                 warnings.warn(INTEL_MSG)
 
             LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
@@ -919,10 +919,12 @@ def _force_smp_student_version(add_sw, exec_path):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     if (
-        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+        "-mpi" not in add_sw_lower_case
+        and "-dmp" not in add_sw_lower_case
+        and "-smp" not in add_sw_lower_case
     ):  # pragma: no cover
         if "student" in exec_path.lower():
             add_sw += " -smp"

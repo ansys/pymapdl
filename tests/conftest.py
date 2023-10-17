@@ -15,6 +15,7 @@ pymapdl.RUNNING_TESTS = True
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.theme import _apply_default_theme
 from common import (
     Element,
     Node,
@@ -27,6 +28,8 @@ from common import (
     is_on_ubuntu,
     is_smp,
 )
+
+_apply_default_theme()
 
 ################################################################
 #
@@ -209,9 +212,20 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(autouse=True)
 def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+    # Checking if we want to avoid the check using pytest cli.
     skip_regression_check = pytestconfig.option.skip_regression_check
     if skip_regression_check:
         verify_image_cache.skip = True
+
+    # Configuration
+    # default check
+    verify_image_cache.error_value = 500.0
+    verify_image_cache.warning_value = 200.0
+
+    # High variance test
+    verify_image_cache.var_error_value = 1000.0
+    verify_image_cache.var_warning_value = 1000.0
+
     return verify_image_cache
 
 
@@ -703,7 +717,6 @@ def contact_geom_and_mesh(mapdl):
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    # mapdl.eplot()
     # ==========================================================
     # * Contact Pairs
     # ==========================================================
@@ -745,12 +758,10 @@ def contact_geom_and_mesh(mapdl):
     mapdl.mat(1)
     mapdl.asel("s", "", "", 5)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
     mapdl.asel("s", "", "", 12)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
     mapdl.allsel("all")
@@ -762,7 +773,6 @@ def contact_geom_and_mesh(mapdl):
     # for welding, 'C
     mapdl.real(6)
     mapdl.cmsel("s", "tn.cnt")
-    # mapdl.nplot()
     mapdl.esurf()
     mapdl.type(7)
     mapdl.real(6)
@@ -939,7 +949,6 @@ def cuadratic_beam_problem(mapdl):
 
     mapdl.mp("EX", 1, 30e6)
     mapdl.mp("PRXY", 1, 0.3)
-    print(mapdl.mplist())
 
     w_f = 1.048394965
     w_w = 0.6856481
@@ -954,17 +963,8 @@ def cuadratic_beam_problem(mapdl):
     # Define one node for the orientation of the beam cross-section.
     orient_node = mapdl.n(6, 60, 1)
 
-    # Print the list of the created nodes.
-    print(mapdl.nlist())
-
     for elem_num in range(1, 5):
         mapdl.e(elem_num, elem_num + 1, orient_node)
-
-    # Print the list of the created elements.
-    print(mapdl.elist())
-
-    # Display elements with their nodes numbers.
-    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
 
     # BC for the beams seats
     mapdl.d(2, "UX", lab2="UY")
