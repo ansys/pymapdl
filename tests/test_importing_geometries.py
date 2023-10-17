@@ -123,19 +123,23 @@ def test_readin_x_t(mapdl, cleared):
             MapdlRuntimeError, match="Specified library does not exist."
         )
 
-    # elif ON_CI and mapdl.version == 23.1:
-    #     context = pytest.raises(MapdlCommandIgnoredError, match="does not exist")
+    elif ON_CI and mapdl.version == 23.1:
+        """
+        Running "/ansys_inc/ansys/ac4/bin/para/linx64/ac4para CubeWithHole.x_t test_para.anf ALL ANF" shows the following errors:
+
+        /ansys_inc/ansys/ac4/bin/para/linx64/ac4para: /lib64/libstdc++.so.6: version `CXXABI_1.3.8' not found (required by /ansys_inc/ansys/ac4/bin/para/linx64/ac4para)
+        /ansys_inc/ansys/ac4/bin/para/linx64/ac4para: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found (required by /ansys_inc/ansys/ac4/bin/para/linx64/ac4para)
+        /ansys_inc/ansys/ac4/bin/para/linx64/ac4para: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.22' not found (required by /ansys_inc/ansys/ac4/bin/para/linx64/ac4para)
+        /ansys_inc/ansys/ac4/bin/para/linx64/ac4para: /lib64/libstdc++.so.6: version `CXXABI_1.3.9' not found (required by /ansys_inc/ansys/ac4/bin/para/linx64/ac4para)
+
+        So it seems the library `libstdc++.so` (which I believe it is the standard c++ library) is missing some versions or dependencies.
+        """
+        context = pytest.raises(MapdlRuntimeError, match=".anf does not exist.")
 
     elif ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
         context = pytest.raises(
             MapdlRuntimeError, match="No shared command/library files were found"
         )
-
-    # elif ON_CI and ON_LOCAL:
-    #     context = pytest.raises(AssertionError)
-
-    # elif ON_CI:
-    #     context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
 
     else:
         context = NullContext()
@@ -149,7 +153,7 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
-@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
+# @pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_catiav5(mapdl, cleared):
     if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
         context = pytest.raises(

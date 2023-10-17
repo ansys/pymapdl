@@ -462,6 +462,7 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
 
     steps:
       - name: "Install Git and checkout project"
