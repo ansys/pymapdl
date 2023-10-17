@@ -454,6 +454,7 @@ class FileTranslator:
         self.cleanup_output = cleanup_output
         self._header = header
         self.print_com = print_com
+        self.verification_example = False
 
         self.write_header()
         if self._add_imports:
@@ -623,6 +624,8 @@ class FileTranslator:
 
         line = ",".join(line_[ind:][::-1])
 
+        line_with_trailing_commas = line
+
         # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
         line_upper = line.upper()
@@ -640,8 +643,16 @@ class FileTranslator:
             self.store_command("com", [line])
             return
 
+        if cmd_caps_short == "/VER":
+            self.verification_example = True
+
         if cmd_caps_short == "/COM":
             # It is a comment
+            self.store_command("com", [line[5:]])
+            return
+
+        if cmd_caps_short == "C***":
+            # It is an old style comment
             self.store_command("com", [line[5:]])
             return
 
@@ -669,7 +680,7 @@ class FileTranslator:
         if cmd_caps == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
-            self.store_run_command("/PREP7")
+            self.store_command("prep7", "")
             return
 
         if cmd_caps_short == "*REP":
@@ -686,7 +697,10 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
-        if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
+        if (
+            cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED
+            and ",," in line_with_trailing_commas
+        ):
             self.store_run_command(line)
             return
 

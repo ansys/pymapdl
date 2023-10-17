@@ -318,9 +318,16 @@ def test_header():
     assert '"""My header"""' in convert_apdl_block("/com", header="My header")
 
 
-def test_com():
-    converted_output = convert_apdl_block(
+@pytest.mark.parametrize(
+    "cmd",
+    [
         "/com, this is a comment !inline comment!",
+        "C***, this is a comment !inline comment!",
+    ],
+)
+def test_com(cmd):
+    converted_output = convert_apdl_block(
+        cmd,
         header=False,
         add_imports=False,
     )
@@ -362,9 +369,31 @@ def test_repeat():
 
 @pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
 def test_commands_to_not_be_converted(cmd):
-    assert f'mapdl.run("{cmd}")' in convert_apdl_block(
+    # Checking trailing commas does not avoid conversion
+    # assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
+    #     cmd+",,", header=False, add_imports=False
+    # )
+    # Checking empty arguments avoid conversion
+    assert f'mapdl.run("{cmd},,OTHER_ARG")' in convert_apdl_block(
+        cmd + ",,OTHER_ARG", header=False, add_imports=False
+    )
+
+    # Checking default conversion
+    assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
         cmd, header=False, add_imports=False
     )
+
+
+def test_commands_with_empty_arguments():
+    cmd = """ANTYPE,STATIC             ! STATIC ANALYSIS
+ANTYPE,STATIC,,NON_EMPTY_ARGUMENT
+
+ANTYPE,STATIC,,,"""
+    pycmd = """mapdl.antype("STATIC")  # STATIC ANALYSIS
+mapdl.run("ANTYPE,STATIC,,NON_EMPTY_ARGUMENT")
+mapdl.antype("STATIC")"""
+
+    assert pycmd in convert_apdl_block(cmd, header=False, add_imports=False)
 
 
 @pytest.mark.parametrize("ending", ["\n", "\r\n"])
