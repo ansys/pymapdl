@@ -486,6 +486,7 @@ class FileTranslator:
         self.verification_example = False
         self.use_vtk = use_vtk
         self.clear_at_start = clear_at_start
+        self.macros_names = []
 
         self.write_header()
         if self._add_imports:
@@ -770,11 +771,17 @@ class FileTranslator:
             return
 
         if cmd_caps_short == "*CRE":  # creating a function
+            self.macros_names.append(items[1])
             if self.macros_as_functions:
                 self.start_function(items[1].strip())
                 return
             else:
                 self.start_non_interactive()
+
+        if items[0] in self.macros_names:
+            # We are calling the function/macro created before.
+            self.store_python_command(f"{items[0]}()")
+            return
 
         if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
@@ -903,10 +910,12 @@ class FileTranslator:
             func_name,
             ", ".join(["ARG%d=''" % i for i in range(1, 7)]),
         )
+        line += "\n"
         line += "%s%s," % (
             spacing,
             ", ".join(["ARG%d=''" % i for i in range(7, 13)]),
         )
+        line += "\n"
         line += "%s%s):" % (
             spacing,
             ", ".join(["ARG%d=''" % i for i in range(13, 19)]),
@@ -969,6 +978,10 @@ class FileTranslator:
     def store_empty_line(self):
         """Stores an empty line"""
         self.lines.append("")
+
+    def store_python_command(self, command):
+        line = f"{self.indent}{command}"
+        self.lines.append(line)
 
     def store_command(self, function, parameters):
         """Stores a valid pyansys function with parameters"""

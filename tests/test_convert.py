@@ -524,6 +524,19 @@ def test_parsing_items():
     assert 'mapdl.vget("VALUE7(2,2)", 2, 7E-2)' in conv_cmd
 
 
+def test_macros_call():
+    cmd = """
+*create,myfunc
+/prep7
+*end
+myfunc
+"""
+    conv_cmd = convert_apdl_block(cmd, only_commands=True)
+    assert "mapdl.prep7()" in conv_cmd
+    assert "def myfunc(" in conv_cmd
+    assert "myfunc()" in conv_cmd
+
+
 ## CLI testing
 
 
