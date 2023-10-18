@@ -477,6 +477,22 @@ def test_use_vtk(vtk):
         assert f"use_vtk={vtk}" in output
 
 
+@pytest.mark.parametrize("clear_at_start", [None, True, False])
+def test_clear_at_start(clear_at_start):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        clear_at_start=clear_at_start,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if clear_at_start:
+        assert "mapdl.clear()" in output
+    else:
+        assert "mapdl.clear()" not in output
+
+
 @pytest.mark.parametrize(
     "parameters",
     [

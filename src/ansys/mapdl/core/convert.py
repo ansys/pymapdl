@@ -85,6 +85,7 @@ def convert_script(
     print_com=True,
     only_commands=False,
     use_vtk=None,
+    clear_at_start=False,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -160,6 +161,9 @@ def convert_script(
         It sets the `mapdl.use_vtk` argument equals True or False depending on
         this value.
 
+    clear_at_start : bool, optional
+        Add a `mapdl.clear()` after the Mapdl object initialization.
+
     Returns
     -------
     list
@@ -216,6 +220,7 @@ def convert_script(
         print_com=print_com,
         only_commands=only_commands,
         use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
     )
 
     translator.save(filename_out)
@@ -238,6 +243,7 @@ def convert_apdl_block(
     print_com=True,
     only_commands=False,
     use_vtk=None,
+    clear_at_start=False,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -309,6 +315,9 @@ def convert_apdl_block(
         It sets the `mapdl.use_vtk` argument equals True or False depending on
         this value.
 
+    clear_at_start : bool, optional
+        Add a `mapdl.clear()` after the Mapdl object initialization.
+
     Returns
     -------
     list
@@ -346,6 +355,7 @@ def convert_apdl_block(
         print_com=print_com,
         only_commands=only_commands,
         use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
     )
 
     if isinstance(apdl_strings, str):
@@ -369,6 +379,7 @@ def _convert(
     print_com=True,
     only_commands=False,
     use_vtk=None,
+    clear_at_start=False,
 ):
     if only_commands:
         auto_exit = False
@@ -388,6 +399,7 @@ def _convert(
         header=header,
         print_com=print_com,
         use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
     )
 
     if isinstance(apdl_strings, str):
@@ -451,6 +463,7 @@ class FileTranslator:
         header=True,
         print_com=True,
         use_vtk=None,
+        clear_at_start=False,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -470,6 +483,7 @@ class FileTranslator:
         self.print_com = print_com
         self.verification_example = False
         self.use_vtk = use_vtk
+        self.clear_at_start = clear_at_start
 
         self.write_header()
         if self._add_imports:
@@ -582,7 +596,9 @@ class FileTranslator:
 
         line = f'{self.obj_name} = launch_mapdl({", ".join(mapdl_arguments)})'
         self.lines.append(line)
-        self.lines.append(f"{self.obj_name}.clear() # Clearing session")
+
+        if self.clear_at_start:
+            self.lines.append(f"{self.obj_name}.clear() # Clearing session")
 
     @property
     def line_ending(self):
