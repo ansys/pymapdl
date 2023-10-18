@@ -84,6 +84,7 @@ def convert_script(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -155,6 +156,10 @@ def convert_script(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
+    use_vtk : bool, optional
+        It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value.
+
     Returns
     -------
     list
@@ -210,6 +215,7 @@ def convert_script(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
+        use_vtk=use_vtk,
     )
 
     translator.save(filename_out)
@@ -231,6 +237,7 @@ def convert_apdl_block(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -298,6 +305,10 @@ def convert_apdl_block(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
+    use_vtk : bool, optional
+        It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value.
+
     Returns
     -------
     list
@@ -334,6 +345,7 @@ def convert_apdl_block(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
+        use_vtk=use_vtk,
     )
 
     if isinstance(apdl_strings, str):
@@ -356,6 +368,7 @@ def _convert(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
 ):
     if only_commands:
         auto_exit = False
@@ -374,6 +387,7 @@ def _convert(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        use_vtk=use_vtk,
     )
 
     if isinstance(apdl_strings, str):
@@ -436,6 +450,7 @@ class FileTranslator:
         cleanup_output=True,
         header=True,
         print_com=True,
+        use_vtk=None,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -454,6 +469,7 @@ class FileTranslator:
         self._header = header
         self.print_com = print_com
         self.verification_example = False
+        self.use_vtk = use_vtk
 
         self.write_header()
         if self._add_imports:
@@ -553,16 +569,20 @@ class FileTranslator:
         core_module = "ansys.mapdl.core"  # shouldn't change
         self.lines.append(f"from {core_module} import launch_mapdl")
 
+        mapdl_arguments = [f'loglevel="{loglevel}"']
+
         if exec_file:
-            exec_file_parameter = f'exec_file="{exec_file}", '
-        else:
-            exec_file_parameter = ""
+            mapdl_arguments.append(f'exec_file="{exec_file}"')
 
         if self.print_com:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)\n'
-        else:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")\n'
+            mapdl_arguments.append("print_com=True")
+
+        if self.use_vtk is not None:
+            mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
+
+        line = f'{self.obj_name} = launch_mapdl({", ".join(mapdl_arguments)})'
         self.lines.append(line)
+        self.lines.append(f"{self.obj_name}.clear() # Clearing session")
 
     @property
     def line_ending(self):

@@ -461,6 +461,22 @@ def test_only_commands():
     assert "mapdl.exit" not in output
 
 
+@pytest.mark.parametrize("vtk", [None, True, False])
+def test_use_vtk(vtk):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        use_vtk=vtk,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if vtk is None:
+        assert "use_vtk" not in output
+    else:
+        assert f"use_vtk={vtk}" in output
+
+
 @pytest.mark.parametrize(
     "parameters",
     [
