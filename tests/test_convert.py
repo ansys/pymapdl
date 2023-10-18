@@ -4,11 +4,7 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import (
-    COMMANDS_TO_NOT_BE_CONVERTED,
-    FileTranslator,
-    convert_apdl_block,
-)
+from ansys.mapdl.core.convert import FileTranslator, convert_apdl_block
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -367,14 +363,23 @@ def test_repeat():
     )
 
 
-@pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        "/PMORE",  # "/PMORE,
+        "ANTYPE",  # ANTYPE,
+        "ASBL",  # ASBL,
+        "ATAN",  # ATAN,
+    ],
+)
 def test_commands_to_not_be_converted(cmd):
     # Checking trailing commas does not avoid conversion
-    # assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
-    #     cmd+",,", header=False, add_imports=False
-    # )
+    assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
+        cmd + ",,", header=False, add_imports=False
+    )
+
     # Checking empty arguments avoid conversion
-    assert f'mapdl.run("{cmd},,OTHER_ARG")' in convert_apdl_block(
+    assert f'mapdl.run("{cmd.upper()},,OTHER_ARG")' in convert_apdl_block(
         cmd + ",,OTHER_ARG", header=False, add_imports=False
     )
 
