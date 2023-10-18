@@ -721,7 +721,6 @@ class FileTranslator:
         if cmd_caps == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
-            self.store_command("prep7", "")
             return
 
         if cmd_caps_short == "*REP":
