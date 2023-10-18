@@ -703,7 +703,7 @@ class FileTranslator:
 
         if self.output_to_file(line):
             if self.verification_example and "SCRATCH" in line.upper():
-                self.store_command("com", [line])
+                self.store_command("com", [f"Skipping: {line}"])
             else:
                 self.start_non_interactive()
                 self.store_run_command(line)
