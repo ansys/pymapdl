@@ -66,7 +66,6 @@ COMMANDS_WITH_EMPTY_ARGS = [
 
 
 COMMANDS_TO_NOT_BE_CONVERTED = []
-COMMANDS_TO_NOT_BE_CONVERTED.extend(COMMANDS_WITH_EMPTY_ARGS)
 
 
 def convert_script(
@@ -667,8 +666,11 @@ class FileTranslator:
             return
 
         if self.output_to_file(line):
-            self.start_non_interactive()
-            self.store_run_command(line)
+            if self.verification_example and "SCRATCH" in line.upper():
+                self.store_command("com", [line])
+            else:
+                self.start_non_interactive()
+                self.store_run_command(line)
             return
 
         if self.output_to_default(line):
@@ -697,10 +699,16 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
+        # Skipping conversion if command has empty arguments and there is ",," in the call
         if (
-            cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED
+            cmd_caps_short in COMMANDS_WITH_EMPTY_ARGS
             and ",," in line_with_trailing_commas
         ):
+            self.store_run_command(line)
+            return
+
+        # Skipping commands to not be converted
+        if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
             self.store_run_command(line)
             return
 
