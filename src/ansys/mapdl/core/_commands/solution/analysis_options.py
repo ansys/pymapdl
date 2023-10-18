@@ -2016,7 +2016,7 @@ class AnalysisOptions:
         command = f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
         return self.run(command, **kwargs)
 
-    def expass(self, key="", **kwargs):
+    def expass(self, key="", keystat="", **kwargs):
         """Specifies an expansion pass of an analysis.
 
         APDL Command: EXPASS
@@ -2025,10 +2025,13 @@ class AnalysisOptions:
         ----------
         key
             Expansion pass key:
+            * OFF - No expansion pass will be performed (default).
+            * ON - An expansion pass will be performed.
 
-            OFF - No expansion pass will be performed (default).
-
-            ON - An expansion pass will be performed.
+        keystat
+            Static correction vectors key:
+            * ON - Include static correction vectors in the expanded displacements (default).
+            * OFF - Do not include static correction vectors in the expanded displacements.
 
         Notes
         -----
@@ -2040,7 +2043,7 @@ class AnalysisOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"EXPASS,{key}"
+        command = f"EXPASS,{key},,,{keystat}"
         return self.run(command, **kwargs)
 
     def gauge(self, opt="", freq="", **kwargs):
