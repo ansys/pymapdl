@@ -67,7 +67,8 @@ COMMANDS_WITH_EMPTY_ARGS = {
 
 
 COMMANDS_TO_NOT_BE_CONVERTED = [
-    "CMPL"  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
+    "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
+    "MODE",  # Until we merge #2431
 ]
 
 
@@ -672,7 +673,7 @@ class FileTranslator:
         cmd_caps = line.split(",")[0].upper()
         cmd_caps_short = cmd_caps[:4]
 
-        items = self._get_items(line)
+        items = self._get_items(line.strip())
 
         if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
@@ -748,7 +749,7 @@ class FileTranslator:
 
         # Skipping commands to not be converted
         if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
-            self.store_run_command(line)
+            self.store_run_command(line.strip())
             return
 
         if cmd_caps_short == "/TIT":  # /TITLE
@@ -873,9 +874,9 @@ class FileTranslator:
                 self.start_non_interactive()
 
             if self._in_block and cmd_caps_short not in self._non_interactive_commands:
-                self.store_run_command(original_line)
+                self.store_run_command(original_line.strip())
             else:
-                self.store_run_command(line)
+                self.store_run_command(line.strip())
 
         elif self.use_function_names:
             if command[0] == "/":
@@ -893,7 +894,7 @@ class FileTranslator:
 
             self.store_command(command, parameters)
         else:
-            self.store_run_command(line)
+            self.store_run_command(line.strip())
 
     def _pymapdl_command(self, command):
         if command[0] in ["/", "*"]:
