@@ -518,6 +518,12 @@ def test_convert_star_slash(parameters):
     assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]
 
 
+def test_parsing_items():
+    cmd = "VGET,VALUE7(2,2),2,7E-2"
+    conv_cmd = convert_apdl_block(cmd, only_commands=True)
+    assert 'mapdl.vget("VALUE7(2,2)", 2, 7E-2)' in conv_cmd
+
+
 ## CLI testing
 
 

@@ -65,7 +65,9 @@ COMMANDS_WITH_EMPTY_ARGS = [
 ]
 
 
-COMMANDS_TO_NOT_BE_CONVERTED = []
+COMMANDS_TO_NOT_BE_CONVERTED = [
+    "CMPL"  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
+]
 
 
 def convert_script(
@@ -668,7 +670,7 @@ class FileTranslator:
         cmd_caps = line.split(",")[0].upper()
         cmd_caps_short = cmd_caps[:4]
 
-        items = line.split(",")
+        items = self._get_items(line)
 
         if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
@@ -1058,6 +1060,30 @@ class FileTranslator:
             return True
 
         return False
+
+    def _get_items(self, line_):
+        """Parse the line items (comma separated elements) but ignoring the ones inside parenthesis, or brackets"""
+
+        parenthesis_count = 0
+
+        items = []
+        begining_substring = 0
+
+        for ind, each_char in enumerate(line_):
+            if each_char in ["(", "[", "{"]:
+                parenthesis_count += 1
+
+            if each_char == "," and parenthesis_count == 0:
+                items.append(line_[begining_substring:ind])
+                begining_substring = ind + 1
+
+            if ind == len(line_) - 1:  # reaching ending of line
+                items.append(line_[begining_substring : ind + 1])
+
+            if each_char in [")", "]", "}"]:
+                parenthesis_count -= 1
+
+        return items
 
 
 import click
