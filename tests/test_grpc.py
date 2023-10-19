@@ -418,7 +418,7 @@ def test__channel_str(mapdl):
 
 
 def test_mode_corba(mapdl):
-    assert mapdl.mode == "grpc"
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
