@@ -1003,7 +1003,16 @@ class SpecialPurpose:
         command = f"XFDATA,{enrichmentid},{elemnum},{nodenum},{phi}"
         return self.run(command, **kwargs)
 
-    def xfenrich(self, enrichmentid="", compname="", matid="", **kwargs):
+    def xfenrich(
+        self,
+        enrichmentid="",
+        compname="",
+        matid="",
+        method="",
+        radius="",
+        snaptoler="",
+        **kwargs,
+    ):
         """Defines parameters associated with crack propagation using XFEM
 
         APDL Command: XFENRICH
@@ -1025,6 +1034,19 @@ class SpecialPurpose:
             the initial crack. If 0 or not specified, the initial crack is
             assumed to be free of cohesive zone behavior.
 
+        method
+            PHAN -- Use phantom-node-based XFEM (default).
+            SING -- Use singularity-based XFEM.
+
+        radius
+            Radius defining the region around the crack tip encompassing the
+            set of elements to be influenced by the crack-tip singularity effects.
+            Default = 0.0. Used only in singularity-based XFEM.
+
+        snaptoler
+            Snap tolerance to snap the crack tip to the closest crack face along
+            the extension direction. Default = 1.0E-6. Used only in singularity-based XFEM.
+
         Notes
         -----
         If MatID is specified, the cohesive zone behavior is described by the
@@ -1032,7 +1054,7 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFENRICH,{enrichmentid},{compname},{matid}"
+        command = f"XFENRICH,{enrichmentid},{compname},{matid}, {method}, {radius}, {snaptoler}"
         return self.run(command, **kwargs)
 
     def xflist(self, enrichmentid="", **kwargs):
