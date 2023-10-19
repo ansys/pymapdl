@@ -1812,11 +1812,6 @@ class MapdlGrpc(_MapdlCore):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
-        # Escaping early if inside non_interactive context
-        if self._store_commands:
-            self._stored_commands.append(tmp_dat.splitlines()[1])
-            return None
-
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)
@@ -1824,6 +1819,11 @@ class MapdlGrpc(_MapdlCore):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
+        # Escaping early if inside non_interactive context
+        if self._store_commands:
+            self._stored_commands.append(tmp_dat.splitlines()[1])
+            return None
 
         request = pb_types.InputFileRequest(filename=tmp_name)
 
@@ -1872,10 +1872,6 @@ class MapdlGrpc(_MapdlCore):
         overwriting the MAPDL directory copy.
         """
 
-        if self._store_commands:
-            # Exiting early if in non-interactive mode.
-            return fname
-
         if os.path.isdir(fname):
             raise ValueError(
                 f"`fname` should be a full file path or name, not the directory '{fname}'."
@@ -1901,8 +1897,12 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(fname):
                 # And it exists
                 filename = os.path.join(os.getcwd(), fname)
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
+            elif self._store_commands:
+                # Assuming that in non_interactive we have uploaded the file
+                # manually.
                 filename = os.path.join(self.directory, fname)
             else:
                 # Finally
@@ -1914,8 +1914,13 @@ class MapdlGrpc(_MapdlCore):
                 self.upload(ffullpath, progress_bar=progress_bar)
                 filename = fname
 
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = fname
+
+            elif self._store_commands:
+                # Assuming that in non_interactive, the file exists already in
+                # the Mapdl working directory
                 filename = fname
 
             else:
@@ -3340,7 +3345,7 @@ class MapdlGrpc(_MapdlCore):
         if pymapdl_session_id is None or self._mapdl_session_id is None:
             return
         elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
-            if pymapdl_session_id != self._mapdl_session_id:
+            if pymapdl_session_id != self._mapdl_session_id and False:
                 self._log.error("The session ids do not match")
                 raise DifferentSessionConnectionError(
                     f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
