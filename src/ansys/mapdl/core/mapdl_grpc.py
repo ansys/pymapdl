@@ -873,6 +873,7 @@ class MapdlGrpc(_MapdlCore):
 
         self.show(self._file_type_for_plots)
         self.version  # Caching version
+        self.file_type_for_plots  # Setting /show,png and caching it.
 
     def _reset_cache(self):
         """Reset cached items."""

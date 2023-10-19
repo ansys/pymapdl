@@ -369,6 +369,9 @@ class _MapdlCore(Commands):
     @property
     def file_type_for_plots(self):
         """Returns the current file type for plotting."""
+        if not self._file_type_for_plots:
+            self._run("/show, PNG")
+            self._file_type_for_plots = "PNG"
         return self._file_type_for_plots
 
     @file_type_for_plots.setter
@@ -2026,23 +2029,31 @@ class _MapdlCore(Commands):
                     "``vtk=True``"
                 )
 
-            if self._parent()._store_commands or not self._parent()._png_mode:
-                self._parent().show("PNG", mute=True)
-                self._parent().gfile(self._pixel_res, mute=True)
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
 
-            self.previous_device = self._parent().file_type_for_plots
+                self.previous_device = self._parent().file_type_for_plots
 
-            if self._parent().file_type_for_plots not in ["PNG", "TIFF", "PNG", "VRML"]:
-                self._parent().show(self._parent().default_file_type_for_plots)
+                if self._parent().file_type_for_plots not in [
+                    "PNG",
+                    "TIFF",
+                    "PNG",
+                    "VRML",
+                ]:
+                    self._parent().show(self._parent().default_file_type_for_plots)
 
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
             self._parent().show("close", mute=True)
-            if self._parent()._store_commands or not self._parent()._png_mode:
-                self._parent().show("PNG", mute=True)
-                self._parent().gfile(self._pixel_res, mute=True)
 
-            self._parent().file_type_for_plots = self.previous_device
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
+
+                self._parent().file_type_for_plots = self.previous_device
 
     @property
     def _has_matplotlib(self):
