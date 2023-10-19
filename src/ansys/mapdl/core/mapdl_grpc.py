@@ -3345,7 +3345,7 @@ class MapdlGrpc(_MapdlCore):
         if pymapdl_session_id is None or self._mapdl_session_id is None:
             return
         elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
-            if pymapdl_session_id != self._mapdl_session_id and False:
+            if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
                 raise DifferentSessionConnectionError(
                     f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
