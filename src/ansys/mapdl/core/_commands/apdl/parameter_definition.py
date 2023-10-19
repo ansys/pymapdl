@@ -521,10 +521,10 @@ class ParameterDefinition:
         if not fname:
             fname = self.jobname
 
-        if not ext:
-            ext = "parm"  # Although documentation says `PARM`
-
-        fname = fname + "." + ext
+        fname = self._get_file_name(
+            fname=fname, ext=ext, default_extension="parm"
+        )  # Although documentation says `PARM`
+        file_, ext_, _ = self._decompose_fname(fname)
 
         if self._mode == "grpc":  # grpc mode
             if self.is_local:
