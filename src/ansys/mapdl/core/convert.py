@@ -73,6 +73,7 @@ COMMANDS_WITH_EMPTY_ARGS = {
     "RACE": (),  # RACE,
     "REAL": (),  # REALVAR,
     "REME": (),  # REMESH,
+    "RPSD": (),  # RPSD
     "SECR": (),  # SECREAD
     "SECW": (),  # SECWRITE
     "SESY": (),  # SESYMM,
@@ -93,6 +94,7 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     "/LIN",  # Until we merge 2432
     "/LAR",  # Until we merge 2432
     "/TYP",  # Until we merge 2432
+    "/DSC",  # Until we merge 2432
 ]
 
 
@@ -545,7 +547,6 @@ class FileTranslator:
         }  # Commands where you need to count the number of lines.
 
         _NON_INTERACTIVE_COMMANDS = {
-            "*CRE": "*CREATE",
             "*VWR": "*VWRITE",
             "*VRE": "*VREAD",
         }
@@ -769,7 +770,7 @@ class FileTranslator:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
                 new_prev_cmd = (
-                    "    " + prev_cmd
+                    self.indent + prev_cmd
                 )  # Since we are writing in self.lines we need to add the indentation by ourselves.
                 self.lines.append(new_prev_cmd)
                 self.store_run_command(
@@ -856,10 +857,6 @@ class FileTranslator:
                     + "The previous line is: \n%s\n\n" % self.lines[-1]
                 )
             self.store_run_command(line)
-            if (
-                not self._in_block
-            ):  # To escape cmds that require (XX) but they are not in block
-                self.end_non_interactive()
             return
         elif cmd_caps_short == "*USE" and self.macros_as_functions:
             func_name = items[1].strip()
@@ -946,7 +943,7 @@ class FileTranslator:
         self.store_empty_line()
         self._infunction = True
         spacing = " " * (len(func_name) + 5)
-        line = "def %s(%s," % (
+        line = self.indent + "def %s(%s," % (
             func_name,
             ", ".join(["ARG%d=''" % i for i in range(1, 7)]),
         )
@@ -1070,9 +1067,9 @@ class FileTranslator:
 
     def end_non_interactive(self):
         self._non_interactive_level -= 1
-        if self._non_interactive_level == 0:
+        self.indent = self.indent[4:]
+        if self._non_interactive_level <= 0:
             self.non_interactive = False
-            self.indent = self.indent[4:]
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
