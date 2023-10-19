@@ -1360,7 +1360,8 @@ def launch_mapdl(
     # Transferring MAPDL arguments to start_parameters:
     start_parm = {}
 
-    for each_par in kwargs:
+    kwargs_keys = list(kwargs.keys())
+    for each_par in kwargs_keys:
         if each_par in _ALLOWED_START_PARM:
             start_parm[each_par] = kwargs.pop(each_par)
 
@@ -1457,6 +1458,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    **start_parm,
                 )
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
@@ -1469,6 +1471,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    **start_parm,
                 )
                 if clear_on_connect:
                     mapdl.clear()
@@ -1482,6 +1485,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    **start_parm,
                 )
             if clear_on_connect:
                 mapdl.clear()
@@ -1497,6 +1501,7 @@ def launch_mapdl(
             loglevel=loglevel,
             set_no_abort=set_no_abort,
             log_apdl=log_apdl,
+            **start_parm,
         )
         if clear_on_connect:
             mapdl.clear()
