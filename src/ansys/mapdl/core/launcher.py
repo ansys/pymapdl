@@ -1356,6 +1356,7 @@ def launch_mapdl(
     # Extract arguments:
     force_intel = kwargs.pop("force_intel", False)
     broadcast = kwargs.pop("log_broadcast", False)
+    use_vtk = kwargs.pop("use_vtk", None)
 
     # Transferring MAPDL arguments to start_parameters:
     start_parm = {}
@@ -1471,6 +1472,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
                     **start_parm,
                 )
                 if clear_on_connect:
@@ -1485,6 +1487,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
                     **start_parm,
                 )
             if clear_on_connect:
@@ -1501,6 +1504,7 @@ def launch_mapdl(
             loglevel=loglevel,
             set_no_abort=set_no_abort,
             log_apdl=log_apdl,
+            use_vtk=use_vtk,
             **start_parm,
         )
         if clear_on_connect:
@@ -1600,7 +1604,9 @@ def launch_mapdl(
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-            mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+            mapdl = MapdlConsole(
+                loglevel=loglevel, log_apdl=log_apdl, use_vtk=use_vtk, **start_parm
+            )
         elif mode == "corba":
             try:
                 # pending deprecation to ansys-mapdl-corba
@@ -1616,6 +1622,7 @@ def launch_mapdl(
                 log_apdl=log_apdl,
                 log_broadcast=broadcast,
                 verbose=verbose_mapdl,
+                use_vtk=use_vtk,
                 **start_parm,
             )
         elif mode == "grpc":
@@ -1636,6 +1643,7 @@ def launch_mapdl(
                 remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 process=process,
+                use_vtk=use_vtk,
                 **start_parm,
             )
             if run_location is None:
