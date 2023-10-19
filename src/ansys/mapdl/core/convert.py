@@ -819,10 +819,21 @@ class FileTranslator:
             else:
                 self.start_non_interactive()
 
-        if items[0] in self.macros_names:
+        ## Treating functions
+        if items[0] in self.macros_names and self.macros_as_functions:
             # We are calling the function/macro created before.
-            self.store_python_command(f"{items[0]}()")
+            func_name = items[0].strip()
+
+            args = self._parse_arguments(items[1:])
+            self.store_python_command(f"{func_name}({args})")
             return
+
+        if cmd_caps_short == "*USE" and self.macros_as_functions:
+            func_name = items[1].strip()
+            if func_name in self._functions:
+                args = ", ".join(items[2:])
+                self.lines.append(f"{func_name}({args})")
+                return
 
         if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
@@ -858,12 +869,6 @@ class FileTranslator:
                 )
             self.store_run_command(line)
             return
-        elif cmd_caps_short == "*USE" and self.macros_as_functions:
-            func_name = items[1].strip()
-            if func_name in self._functions:
-                args = ", ".join(items[2:])
-                self.lines.append(f"{func_name}({args})")
-                return
 
         # check if a line is setting a variable
         if "=" in items[0]:  # line sets a variable:
@@ -1020,8 +1025,7 @@ class FileTranslator:
         line = f"{self.indent}{command}"
         self.lines.append(line)
 
-    def store_command(self, function, parameters):
-        """Stores a valid pyansys function with parameters"""
+    def _parse_arguments(self, parameters):
         parsed_parameters = []
         for parameter in parameters:
             parameter = parameter.strip()
@@ -1037,7 +1041,12 @@ class FileTranslator:
                     parameter = parameter[1:-1]
                 parsed_parameters.append(f'"{parameter}"')
 
-        parameter_str = ", ".join(parsed_parameters)
+        return ", ".join(parsed_parameters)
+
+    def store_command(self, function, parameters):
+        """Stores a valid pyansys function with parameters"""
+        parameter_str = self._parse_arguments(parameters)
+
         if self.comment:
             line = "%s%s.%s(%s)  # %s" % (
                 self.indent,
