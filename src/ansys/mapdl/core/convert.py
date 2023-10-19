@@ -26,7 +26,7 @@ ADD_IMPORTS_DEFAULT = True
 COMMENT_SOLVE_DEFAULT = False
 CLEANUP_OUTPUT_DEFAULT = True
 HEADER_DEFAULT = True
-PRINT_COM_DEFAULT = PRINT_COM_DEFAULT
+PRINT_COM_DEFAULT = True
 ONLY_COMMANDS_DEFAULT = False
 USE_VTK_DEFAULT = None
 CLEAR_AT_START_DEFAULT = False
@@ -1335,6 +1335,11 @@ def cli(
 
 
 def _parse_cli_command(command, default=None):
+    if isinstance(command, bool):
+        return command
+    if command is None:
+        return
+
     if command.upper() == "TRUE":
         return True
     elif command.upper() == "FALSE":
