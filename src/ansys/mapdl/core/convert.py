@@ -73,6 +73,8 @@ COMMANDS_WITH_EMPTY_ARGS = {
     "RACE": (),  # RACE,
     "REAL": (),  # REALVAR,
     "REME": (),  # REMESH,
+    "SECR": (),  # SECREAD
+    "SECW": (),  # SECWRITE
     "SESY": (),  # SESYMM,
     "SETF": (),  # SETFGAP,
     "SETR": (),  # SETRAN,
