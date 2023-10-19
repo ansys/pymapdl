@@ -2026,7 +2026,7 @@ class _MapdlCore(Commands):
                     "``vtk=True``"
                 )
 
-            if not self._parent()._png_mode:
+            if self._parent()._store_commands or not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
 
@@ -2038,15 +2038,11 @@ class _MapdlCore(Commands):
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
             self._parent().show("close", mute=True)
-            if not self._parent()._png_mode:
+            if self._parent()._store_commands or not self._parent()._png_mode:
                 self._parent().show("PNG", mute=True)
                 self._parent().gfile(self._pixel_res, mute=True)
 
             self._parent().file_type_for_plots = self.previous_device
-
-        def __exit__(self, *args) -> None:
-            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
-            self._parent().show("close", mute=True)
 
     @property
     def _has_matplotlib(self):

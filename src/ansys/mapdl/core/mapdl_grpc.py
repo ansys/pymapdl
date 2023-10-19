@@ -3038,7 +3038,8 @@ class MapdlGrpc(_MapdlCore):
     ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        return self.parameters[par]
+        if not self._store_commands:
+            return self.parameters[par]
 
     def get_variable(
         self,
