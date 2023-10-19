@@ -2067,7 +2067,8 @@ class _MapdlCore(Commands):
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
-        return "PNG" in self.show(mute=False)
+        with self.force_output:
+            return "PNG" in self.show(mute=False)
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -3259,7 +3260,7 @@ class _MapdlCore(Commands):
             command = "/CLE,NOSTART"
 
         # Tracking output device
-        if command[:4].upper() == "/SHO":
+        if command[:4].upper() == "/SHO" and "," in command:
             self._file_type_for_plots = command.split(",")[1].upper()
 
         # Invalid commands silently ignored.
