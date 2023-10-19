@@ -44,6 +44,8 @@ COMMANDS_WITH_EMPTY_ARGS = {
     "ASBL": (),  # ASBL,
     "ATAN": (),  # ATAN,
     "BCSO": (),  # BCSOPTION,
+    "CORI": (),  # CORIOLIS
+    "CDRE": (),  # CDREAD
     "CLOG": (),  # CLOG,
     "CONJ": (),  # CONJUG,
     "DERI": (),  # DERIV,
@@ -71,6 +73,7 @@ COMMANDS_WITH_EMPTY_ARGS = {
     "QRDO": (),  # QRDOPT,
     "QUOT": (),  # QUOT,
     "RACE": (),  # RACE,
+    "RDEC": (),  # RDEC
     "REAL": (),  # REALVAR,
     "REME": (),  # REMESH,
     "RPSD": (),  # RPSD
@@ -95,6 +98,7 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     "/LAR",  # Until we merge 2432
     "/TYP",  # Until we merge 2432
     "/DSC",  # Until we merge 2432
+    # CDREAD # commented above
 ]
 
 
