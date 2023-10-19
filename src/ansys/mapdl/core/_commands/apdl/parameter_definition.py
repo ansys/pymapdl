@@ -518,13 +518,16 @@ class ParameterDefinition:
         >>> mapdl.parres('parm.PARM')
 
         """
-        if ext:
-            fname = fname + "." + ext
-        elif not fname:
-            fname = "." + "PARM"
+        if not fname:
+            fname = self.jobname
 
-        if "Grpc" in self.__class__.__name__:  # grpc mode
-            if self._local:
+        if not ext:
+            ext = "parm"  # Although documentation says `PARM`
+
+        fname = fname + "." + ext
+
+        if self._mode == "grpc":  # grpc mode
+            if self.is_local:
                 # It must be a file!
                 if os.path.isfile(fname):
                     # And it exist!
