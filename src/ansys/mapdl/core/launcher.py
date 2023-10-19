@@ -32,6 +32,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
+from ansys.mapdl.core.mapdl import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -1356,6 +1357,13 @@ def launch_mapdl(
     force_intel = kwargs.pop("force_intel", False)
     broadcast = kwargs.pop("log_broadcast", False)
 
+    # Transferring MAPDL arguments to start_parameters:
+    start_parm = {}
+
+    for each_par in kwargs:
+        if each_par in _ALLOWED_START_PARM:
+            start_parm[each_par] = kwargs.pop(each_par)
+
     # Raising error if using non-allowed arguments
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
@@ -1556,14 +1564,16 @@ def launch_mapdl(
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
 
-    start_parm = {
-        "exec_file": exec_file,
-        "run_location": run_location,
-        "additional_switches": additional_switches,
-        "jobname": jobname,
-        "nproc": nproc,
-        "print_com": print_com,
-    }
+    start_parm.update(
+        {
+            "exec_file": exec_file,
+            "run_location": run_location,
+            "additional_switches": additional_switches,
+            "jobname": jobname,
+            "nproc": nproc,
+            "print_com": print_com,
+        }
+    )
 
     if mode in ["console", "corba"]:
         start_parm["start_timeout"] = start_timeout

@@ -477,6 +477,22 @@ def test_use_vtk(vtk):
         assert f"use_vtk={vtk}" in output
 
 
+@pytest.mark.parametrize("check_parameter_names", [None, True, False])
+def test_check_parameter_names(check_parameter_names):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        check_parameter_names=check_parameter_names,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if check_parameter_names is not None and not check_parameter_names:
+        assert "check_parameter_names=False" in output
+    else:
+        assert f"check_parameter_names" not in output
+
+
 @pytest.mark.parametrize("clear_at_start", [None, True, False])
 def test_clear_at_start(clear_at_start):
     output = convert_apdl_block(

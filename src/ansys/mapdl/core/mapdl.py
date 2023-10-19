@@ -193,7 +193,9 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
-    "start_timeout" "timeout",
+    "start_timeout",
+    "timeout",
+    "check_parameter_names",
 ]
 
 
@@ -267,6 +269,7 @@ class _MapdlCore(Commands):
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
         self._print_com: bool = print_com  # print the command /COM input.
+        self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logging.Logger = logger.add_instance_logger(
@@ -3983,6 +3986,9 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        if not self.check_parameter_names:
+            return
+
         param_name = param_name.strip()
 
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"

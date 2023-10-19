@@ -71,6 +71,7 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     "MODE",  # Until we merge #2431
     "/LIN",  # Until we merge 2432
     "/LAR",  # Until we merge 2432
+    "/TYP",  # Until we merge 2432
 ]
 
 
@@ -92,6 +93,7 @@ def convert_script(
     only_commands=False,
     use_vtk=None,
     clear_at_start=False,
+    check_parameter_names=True,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -227,6 +229,7 @@ def convert_script(
         only_commands=only_commands,
         use_vtk=use_vtk,
         clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     translator.save(filename_out)
@@ -250,6 +253,7 @@ def convert_apdl_block(
     only_commands=False,
     use_vtk=None,
     clear_at_start=False,
+    check_parameter_names=False,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -319,10 +323,14 @@ def convert_apdl_block(
 
     use_vtk : bool, optional
         It sets the `mapdl.use_vtk` argument equals True or False depending on
-        this value.
+        this value. Defaults to `None` which is Mapdl class default.
 
     clear_at_start : bool, optional
-        Add a `mapdl.clear()` after the Mapdl object initialization.
+        Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
+        `False`.
+
+    check_parameter_names : bool, optional
+        Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.
 
     Returns
     -------
@@ -362,6 +370,7 @@ def convert_apdl_block(
         only_commands=only_commands,
         use_vtk=use_vtk,
         clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     if isinstance(apdl_strings, str):
@@ -386,6 +395,7 @@ def _convert(
     only_commands=False,
     use_vtk=None,
     clear_at_start=False,
+    check_parameter_names=True,
 ):
     if only_commands:
         auto_exit = False
@@ -406,6 +416,7 @@ def _convert(
         print_com=print_com,
         use_vtk=use_vtk,
         clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     if isinstance(apdl_strings, str):
@@ -470,6 +481,7 @@ class FileTranslator:
         print_com=True,
         use_vtk=None,
         clear_at_start=False,
+        check_parameter_names=False,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -490,6 +502,7 @@ class FileTranslator:
         self.verification_example = False
         self.use_vtk = use_vtk
         self.clear_at_start = clear_at_start
+        self.check_parameter_names = check_parameter_names
         self.macros_names = []
 
         self.write_header()
@@ -600,6 +613,9 @@ class FileTranslator:
 
         if self.use_vtk is not None:
             mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
+
+        if self.check_parameter_names is not None and not self.check_parameter_names:
+            mapdl_arguments.append(f"check_parameter_names=False")
 
         line = f'{self.obj_name} = launch_mapdl({", ".join(mapdl_arguments)})'
         self.lines.append(line)
@@ -1165,6 +1181,31 @@ import click
     default=True,
     help="Print command ``/COM`` arguments to python console. Defaults to ``True``.",
 )
+@click.option(
+    "--only_commands",
+    default=False,
+    help="""converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
+)
+@click.option(
+    "--use_vtk",
+    default=None,
+    help="""It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value.""",
+)
+@click.option(
+    "--clear_at_start",
+    default=False,
+    help="""Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
+        `False`.""",
+)
+@click.option(
+    "--check_parameter_names",
+    default=False,
+    help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
+)
 def cli(
     filename_in,
     o,
@@ -1181,6 +1222,10 @@ def cli(
     cleanup_output,
     header,
     print_com,
+    only_commands,
+    use_vtk,
+    clear_at_start,
+    check_parameter_names,
 ):
     """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
 
@@ -1228,6 +1273,10 @@ def cli(
         cleanup_output,
         header,
         print_com,
+        only_commands,
+        use_vtk,
+        clear_at_start,
+        check_parameter_names,
     )
 
     if filename_out:
