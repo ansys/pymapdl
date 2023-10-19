@@ -532,7 +532,7 @@ class FileTranslator:
         if self._add_imports:
             self.initialize_mapdl_object(loglevel, exec_file)
 
-        self._valid_commands = dir(Commands)
+        self._valid_commands = self._get_valid_pymapdl_methods_short()
         self._block_commands = {
             "NBLO": "NBLOCK",
             "EBLO": "EBLOCK",
@@ -920,20 +920,27 @@ class FileTranslator:
                 self.store_run_command(line.strip())
 
         elif self.use_function_names:
+            # Takign into account the leading characters
             if command[0] == "/":
                 slash_command = f"slash{command[1:]}"
-                if slash_command in dir(Commands):
+                if slash_command in self._valid_commands:
                     command = slash_command
                 else:
                     command = command[1:]
             elif command[0] == "*":
                 star_command = f"star{command[1:]}"
-                if star_command in dir(Commands):
+                if star_command in self._valid_commands:
                     command = star_command
                 else:
                     command = command[1:]
 
+            # Some commands are abbreviated (only 4 letters)
+            if command not in dir(Commands):
+                command = self.find_match(command)
+
+            # Storing
             self.store_command(command, parameters)
+
         else:
             self.store_run_command(line.strip())
 
@@ -1143,6 +1150,28 @@ class FileTranslator:
                 parenthesis_count -= 1
 
         return items
+
+    def _get_valid_pymapdl_methods_short(self):
+        pymethods = dir(Commands)
+
+        reduced_list = []
+        for each_method in pymethods:
+            if not re.match(r"^[\*~/A-Za-z]\w*$", each_method):
+                continue
+            if each_method.startswith("slash"):
+                reduced_list.append(each_method[:9])
+            elif each_method.startswith("star"):
+                reduced_list.append(each_method[:8])
+            else:
+                reduced_list.append(each_method[:4])
+        return reduced_list
+
+    def find_match(self, cmd):
+        pymethods = sorted(dir(Commands))
+
+        for each in pymethods:
+            if each.startswith(cmd):
+                return each
 
 
 import click
