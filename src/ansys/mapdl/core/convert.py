@@ -69,6 +69,8 @@ COMMANDS_WITH_EMPTY_ARGS = {
 COMMANDS_TO_NOT_BE_CONVERTED = [
     "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
     "MODE",  # Until we merge #2431
+    "/LIN",  # Until we merge 2432
+    "/LAR",  # Until we merge 2432
 ]
 
 
@@ -989,7 +991,7 @@ class FileTranslator:
         parsed_parameters = []
         for parameter in parameters:
             parameter = parameter.strip()
-            if is_float(parameter):
+            if is_float(parameter) and parameter.upper() != "INF":
                 parsed_parameters.append(parameter)
             elif "ARG" in parameter and self._infunction:
                 parsed_parameters.append("%s" % parameter)
