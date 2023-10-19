@@ -636,7 +636,7 @@ class FileTranslator:
             mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
 
         if self.check_parameter_names is not None and not self.check_parameter_names:
-            mapdl_arguments.append(f"check_parameter_names=False")
+            mapdl_arguments.append("check_parameter_names=False")
 
         line = f'{self.obj_name} = launch_mapdl({", ".join(mapdl_arguments)})'
         self.lines.append(line)

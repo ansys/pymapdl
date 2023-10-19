@@ -524,7 +524,6 @@ class ParameterDefinition:
         fname = self._get_file_name(
             fname=fname, ext=ext, default_extension="parm"
         )  # Although documentation says `PARM`
-        file_, ext_, _ = self._decompose_fname(fname)
 
         if self._mode == "grpc":  # grpc mode
             if self.is_local:
