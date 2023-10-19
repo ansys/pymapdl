@@ -1871,6 +1871,10 @@ class MapdlGrpc(_MapdlCore):
         overwriting the MAPDL directory copy.
         """
 
+        if self._store_commands:
+            # Exiting early if in non-interactive mode.
+            return fname
+
         if os.path.isdir(fname):
             raise ValueError(
                 f"`fname` should be a full file path or name, not the directory '{fname}'."
