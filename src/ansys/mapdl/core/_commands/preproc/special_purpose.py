@@ -969,7 +969,9 @@ class SpecialPurpose:
         command = f"SSTATE,{action},{cm_name},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="", **kwargs):
+    def xfdata(
+        self, enrichmentid="", lsm="", elemnum="", nodenum="", phi="", psi="", **kwargs
+    ):
         """Defines a crack in the model by specifying nodal level set values
 
         APDL Command: XFDATA
@@ -993,6 +995,10 @@ class SpecialPurpose:
         phi
             Signed normal distance of the node from the crack.
 
+        psi
+            Signed normal distance of the node from the crack tip (or crack front).
+            Used only in the singularity- based XFEM method.
+
         Notes
         -----
         Issue the XFDATA command multiple times as needed to specify nodal
@@ -1000,7 +1006,7 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFDATA,{enrichmentid},{elemnum},{nodenum},{phi}"
+        command = f"XFDATA,{enrichmentid},{lsm},{elemnum},{nodenum},{phi},{psi}"
         return self.run(command, **kwargs)
 
     def xfenrich(
