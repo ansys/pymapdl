@@ -755,6 +755,9 @@ class FileTranslator:
             self.end_non_interactive()
             return
 
+        if "/EXI" in cmd_caps.upper() and self.non_interactive:
+            self.store_command("com", [f"Skipping: {line}"])
+
         if self.output_to_file(line):
             if self.verification_example and "SCRATCH" in line.upper():
                 self.store_command("com", [f"Skipping: {line}"])
@@ -899,7 +902,7 @@ class FileTranslator:
         # check valid command
         if (
             self._pymapdl_command(command) not in self._valid_commands
-            or cmd_caps_short in self._non_interactive_commands
+            and cmd_caps_short in self._non_interactive_commands
         ):
             if cmd_caps_short in self._non_interactive_commands:
                 if cmd_caps_short in self._block_commands:
@@ -950,7 +953,9 @@ class FileTranslator:
                         command = command[1:]
 
                 # Some commands are abbreviated (only 4 letters)
-                if command not in dir(Commands):
+                from ansys.mapdl.core import Mapdl
+
+                if command not in dir(Mapdl):
                     command = self.find_match(command)
 
             # Storing
@@ -1189,6 +1194,8 @@ class FileTranslator:
         for each in pymethods:
             if each.startswith(cmd):
                 return each
+
+        return cmd
 
 
 import click
