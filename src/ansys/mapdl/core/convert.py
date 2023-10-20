@@ -701,6 +701,8 @@ class FileTranslator:
                 self.comment = self.comment.lstrip()
 
         if not line:
+            # Keeping empty lines
+            self.lines.append("")
             return
 
         # Cleaning ending empty arguments.
@@ -794,7 +796,7 @@ class FileTranslator:
         # Skipping conversion if command has empty arguments and there is ",," in the call
         if (
             cmd_caps_short in COMMANDS_WITH_EMPTY_ARGS
-            and ",," in line_with_trailing_commas
+            and ",," in line_with_trailing_commas.replace(" ", "")
         ):
             self.store_run_command(line.strip())
             return
@@ -959,7 +961,10 @@ class FileTranslator:
                     command = self.find_match(command)
 
             # Storing
-            self.store_command(command, parameters)
+            if command:
+                self.store_command(command, parameters)
+            else:  # find_match can return None
+                self.store_run_command(line.strip())
 
         else:
             self.store_run_command(line.strip())
@@ -1194,8 +1199,6 @@ class FileTranslator:
         for each in pymethods:
             if each.startswith(cmd):
                 return each
-
-        return cmd
 
 
 import click
