@@ -86,7 +86,7 @@ doc = [
     "pandas==2.1.1",
     "plotly==5.17.0",
     "pyiges[full]==0.3.1",
-    "pypandoc==1.11",
+    "pypandoc==1.12",
     "pytest-sphinx==0.5.0",
     "pythreejs==2.4.2",
     "pyvista[trame]==0.42.3",
