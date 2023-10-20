@@ -101,6 +101,11 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     # CDREAD # commented above
 ]
 
+FORCED_MAPPING = {
+    # Forced mapping between MAPDL and PyMAPDL
+    "SECT": "sectype",  # Because it is shadowed by `sectinqr`
+}
+
 
 def convert_script(
     filename_in,
@@ -836,7 +841,7 @@ class FileTranslator:
             func_name = items[1].strip()
             if func_name in self._functions:
                 args = ", ".join(items[2:])
-                self.lines.append(f"{func_name}({args})")
+                self.store_python_command(f"{func_name}({args})")
                 return
 
         if cmd_caps == "/PREP7":
@@ -925,22 +930,28 @@ class FileTranslator:
 
         elif self.use_function_names:
             # Takign into account the leading characters
-            if command[0] == "/":
-                slash_command = f"slash{command[1:]}"
-                if slash_command in self._valid_commands:
-                    command = slash_command
-                else:
-                    command = command[1:]
-            elif command[0] == "*":
-                star_command = f"star{command[1:]}"
-                if star_command in self._valid_commands:
-                    command = star_command
-                else:
-                    command = command[1:]
+            if command.upper() in FORCED_MAPPING:
+                # Checking exceptions/forced mapping
+                command = FORCED_MAPPING[command.upper()]
 
-            # Some commands are abbreviated (only 4 letters)
-            if command not in dir(Commands):
-                command = self.find_match(command)
+            else:
+                # Looking for a suitable candidate.
+                if command[0] == "/":
+                    slash_command = f"slash{command[1:]}"
+                    if slash_command in self._valid_commands:
+                        command = slash_command
+                    else:
+                        command = command[1:]
+                elif command[0] == "*":
+                    star_command = f"star{command[1:]}"
+                    if star_command in self._valid_commands:
+                        command = star_command
+                    else:
+                        command = command[1:]
+
+                # Some commands are abbreviated (only 4 letters)
+                if command not in dir(Commands):
+                    command = self.find_match(command)
 
             # Storing
             self.store_command(command, parameters)
@@ -987,6 +998,9 @@ class FileTranslator:
             underscore = "_"
         else:
             underscore = ""
+
+        # Removing trailing/leading spaces
+        command = command.strip()
 
         if self._infunction and "ARG" in command:
             args = []
@@ -1086,8 +1100,9 @@ class FileTranslator:
 
     def end_non_interactive(self):
         self._non_interactive_level -= 1
-        self.indent = self.indent[4:]
-        self.non_interactive = False
+        if self._non_interactive_level <= 0:
+            self.indent = self.indent[4:]
+            self.non_interactive = False
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
