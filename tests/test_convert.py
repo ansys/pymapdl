@@ -153,7 +153,7 @@ GOLDEN_TESTS = {
     "SECT,1,SHELL": 'mapdl.sectype(1, "SHELL")',
     "SECD,.00005,1            ! PLATE THICKNESS": "mapdl.secdata(.00005, 1)  # PLATE THICKNESS",
     "/show, asdf": 'mapdl.show("asdf")',
-    "*STAT,UXFEA2	": 'mapdl.stat("UXFEA2")',
+    "*STAT,UXFEA2	": 'mapdl.starstatus("UXFEA2")',
     "/AXLAB,X,NORMALIZED TIME,TAU=ALPHA**2*D*t": 'mapdl.axlab("X", "NORMALIZED TIME,TAU=ALPHA**2*D*t")',
 }
 
@@ -415,6 +415,7 @@ ANTYPE,STATIC,,NON_EMPTY_ARGUMENT
 ANTYPE,STATIC,,,"""
     pycmd = """mapdl.antype("STATIC")  # STATIC ANALYSIS
 mapdl.run("ANTYPE,STATIC,,NON_EMPTY_ARGUMENT")
+
 mapdl.antype("STATIC")"""
 
     assert pycmd in convert_apdl_block(cmd, header=False, add_imports=False)
@@ -440,7 +441,7 @@ def test_no_macro_as_functions():
         APDL_MACRO, macros_as_functions=False, add_imports=False, header=False
     )
     assert "with mapdl.non_interactive" in output
-    assert '    mapdl.run("*CREATE,SLV")' in output
+    assert '    mapdl.create("SLV")' in output
     assert '    mapdl.run("*END")' in output
 
 

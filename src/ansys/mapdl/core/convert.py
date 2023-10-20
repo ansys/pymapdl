@@ -955,7 +955,7 @@ class FileTranslator:
                     else:
                         command = command[1:]
                 elif command[0] == "*":
-                    star_command = f"star{command[1:]}"
+                    star_command = f"star{command[1:4]}"
                     if star_command in self._valid_commands:
                         command = star_command
                     else:
