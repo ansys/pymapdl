@@ -138,6 +138,25 @@ LSWRITE,1 ! WRITE LOAD STEP FILE 1
 *END
 *USE,SLV"""
 
+DO_CONVERSION = """with mapdl.non_interactive:
+    mapdl.run("*DO,I,1,81")  # REPEAT MACRO EXECUTION"""
+
+GOLDEN_TESTS = {
+    "/DELETE,TABLE_1": 'mapdl.slashdelete("TABLE_1")',
+    "PROD,4,3, , ,FORCE , , ,-1.0,1,1,": 'mapdl.run("PROD,4,3, , ,FORCE , , ,-1.0,1,1")',
+    "ALLSEL,ALL": 'mapdl.allsel("ALL")',
+    "/EXIT,NOSAVE": 'mapdl.exit("NOSAVE")',
+    "": "",
+    "*DO,I,1,81                    ! REPEAT MACRO EXECUTION": DO_CONVERSION,
+    " *USE,LOAD                    ! EXECUTE MACRO": 'mapdl.use("LOAD")  # EXECUTE MACRO',
+    "*ENDDO": 'mapdl.run("*ENDDO")',
+    "SECT,1,SHELL": 'mapdl.sectype(1, "SHELL")',
+    "SECD,.00005,1            ! PLATE THICKNESS": "mapdl.secdata(.00005, 1)  # PLATE THICKNESS",
+    "/show, asdf": 'mapdl.show("asdf")',
+    "*STAT,UXFEA2	": 'mapdl.stat("UXFEA2")',
+    "/AXLAB,X,NORMALIZED TIME,TAU=ALPHA**2*D*t": 'mapdl.axlab("X", "NORMALIZED TIME,TAU=ALPHA**2*D*t")',
+}
+
 
 def test_convert_no_use_function_names(tmpdir):
     vm_file = examples.vmfiles["vm1"]
@@ -551,6 +570,11 @@ myfunc
     assert "mapdl.prep7()" in conv_cmd
     assert "def myfunc(" in conv_cmd
     assert "myfunc()" in conv_cmd
+
+
+@pytest.mark.parametrize("mapdl_cmd", GOLDEN_TESTS.keys())
+def test_golden(mapdl_cmd):
+    assert GOLDEN_TESTS[mapdl_cmd] == convert_apdl_block(mapdl_cmd, only_commands=True)
 
 
 ## CLI testing
