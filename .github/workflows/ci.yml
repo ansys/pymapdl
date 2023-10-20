@@ -47,7 +47,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 defaults:
   run:
     shell: bash
@@ -472,6 +471,8 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+    permissions:
+      contents: write
 
     steps:
       - name: "Install Git and checkout project"
