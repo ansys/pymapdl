@@ -88,6 +88,7 @@ COMMANDS_WITH_EMPTY_ARGS = {
     "SURE": (),  # SURESU,
     "THOP": (),  # THOPT,
     "TINT": (),  # TINTP,
+    "XFDA": (),  # XFDATA
 }
 
 
@@ -99,6 +100,7 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     "/TYP",  # Until we merge 2432
     "/DSC",  # Until we merge 2432
     # CDREAD # commented above
+    "AXLAB",  # because it can include commas in the arguments.
 ]
 
 FORCED_MAPPING = {
@@ -808,7 +810,12 @@ class FileTranslator:
 
         if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
-            return self.store_command("title", ["".join(parameters).strip()])
+            return self.store_command("title", [",".join(parameters).strip()])
+
+        if cmd_caps_short == "/AXL":  # /AXLAB
+            parameters = line.split(",")[1:]
+            parameters_ = [parameters[0], ",".join(parameters[1:])]
+            return self.store_command("axlab", parameters_)
 
         if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
@@ -942,7 +949,7 @@ class FileTranslator:
             else:
                 # Looking for a suitable candidate.
                 if command[0] == "/":
-                    slash_command = f"slash{command[1:]}"
+                    slash_command = f"slash{command[1:4]}"
                     if slash_command in self._valid_commands:
                         command = slash_command
                     else:
@@ -1186,9 +1193,9 @@ class FileTranslator:
             if not re.match(r"^[\*~/A-Za-z]\w*$", each_method):
                 continue
             if each_method.startswith("slash"):
-                reduced_list.append(each_method[:9])
-            elif each_method.startswith("star"):
                 reduced_list.append(each_method[:8])
+            elif each_method.startswith("star"):
+                reduced_list.append(each_method[:7])
             else:
                 reduced_list.append(each_method[:4])
         return reduced_list
