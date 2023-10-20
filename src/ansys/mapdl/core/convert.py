@@ -994,16 +994,15 @@ class FileTranslator:
                 arg = "ARG%d" % i
                 c = 0
                 if arg in command:
-                    command = command.replace(arg, "{%d:s}" % c)
+                    command = command.replace(arg, "{" + f"{arg}" + "}")
                     args.append(arg)
                     c += 1
 
-            line = '%s%s.%srun("%s".format(%s))' % (
+            line = '%s%s.%srun(f"%s")' % (
                 self.indent,
                 self.obj_name,
                 underscore,
                 command,
-                ", ".join(args),
             )
 
         elif self.comment:
@@ -1088,8 +1087,7 @@ class FileTranslator:
     def end_non_interactive(self):
         self._non_interactive_level -= 1
         self.indent = self.indent[4:]
-        if self._non_interactive_level <= 0:
-            self.non_interactive = False
+        self.non_interactive = False
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
