@@ -328,8 +328,8 @@ class _MapdlCore(Commands):
             )
 
     @property
-    def mode(self):
-        """Return the type of instance, namely: grpc, corba or console."""
+    def connection(self):
+        """Return the type of connection to the instance, namely: grpc, corba or console."""
         return self._mode
 
     @property

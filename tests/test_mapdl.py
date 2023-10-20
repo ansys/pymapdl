@@ -1578,7 +1578,7 @@ def test_set_list(mapdl, cube_solve):
 
 
 def test_mode(mapdl):
-    assert mapdl.mode == "grpc"
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
