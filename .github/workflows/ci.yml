@@ -51,6 +51,9 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+  
 jobs:
 
   doc-style:
