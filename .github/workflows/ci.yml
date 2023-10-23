@@ -53,6 +53,7 @@ defaults:
 
 permissions:
   contents: write
+  packages: read
   
 jobs:
 
