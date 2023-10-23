@@ -15,6 +15,10 @@ from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 if _HAS_TQDM:
     from tqdm import tqdm
 
+    DEFAULT_PROGRESS_BAR = True
+else:
+    DEFAULT_PROGRESS_BAR = False
+
 
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
     """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
@@ -245,7 +249,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -439,7 +443,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,

@@ -167,7 +167,7 @@ def test_map(pool):
         return mapdl.parameters.routine
 
     inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, 11)]
-    outputs = pool.map(func, inputs, progress_bar=True, wait=True)
+    outputs = pool.map(func, inputs, wait=True)
 
     assert len(outputs) == len(inputs)
 

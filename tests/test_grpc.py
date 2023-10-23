@@ -258,7 +258,10 @@ def test__download(mapdl, tmpdir):
     assert out_file.exists()
 
     out_file = tmpdir.join("out1_" + file_name)
-    mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    try:
+        mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    except ModuleNotFoundError:
+        mapdl._download(file_name, out_file_name=out_file)
     assert out_file.exists()
 
     out_file = tmpdir.join("out2_" + file_name)

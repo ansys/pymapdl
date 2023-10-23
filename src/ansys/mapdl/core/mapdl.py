@@ -4050,7 +4050,7 @@ class _MapdlCore(Commands):
         lib="",
         mat="",
         download_file=False,
-        progress_bar=True,
+        progress_bar=False,
         **kwargs,
     ):
         fname_ = fname + "." + ext
