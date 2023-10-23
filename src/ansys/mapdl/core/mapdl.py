@@ -2801,6 +2801,10 @@ class _MapdlCore(Commands):
         with self.force_output:
             response = self.run(command, **kwargs)
 
+        if self._store_commands:
+            # Return early in non_interactive
+            return
+
         value = response.split("=")[-1].strip()
         if item3:
             self._log.info(
