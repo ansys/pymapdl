@@ -4,7 +4,11 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import FileTranslator, convert_apdl_block
+from ansys.mapdl.core.convert import (
+    COMMANDS_TO_NOT_BE_CONVERTED,
+    FileTranslator,
+    convert_apdl_block,
+)
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -391,7 +395,7 @@ def test_repeat():
         "ATAN",  # ATAN,
     ],
 )
-def test_commands_to_not_be_converted(cmd):
+def test_empty_arguments_2(cmd):
     # Checking trailing commas does not avoid conversion
     assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
         cmd + ",,", header=False, add_imports=False
@@ -636,3 +640,21 @@ def test_converter_cli(tmpdir, run_cli):
     assert "mapdl.prep7()" in newcontent
     assert "mapdl.exit()" not in newcontent
     assert "launch_mapdl" not in newcontent
+
+
+def test_exit_in_non_interactive():
+    cmd = """
+*do,i,1,10
+/exit
+*enddo"""
+    output = convert_apdl_block(cmd, only_commands=True)
+
+    assert 'mapdl.run("*do,i,1,10")' in output
+    assert 'mapdl.com("Skipping: /exit")' in output
+    assert 'mapdl.run("*enddo")' in output
+    assert "mapdl.exit" not in output
+
+
+@pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
+def test_commands_to_not_be_converted(cmd):
+    assert f'mapdl.run("{cmd}")' in convert_apdl_block(cmd, only_commands=True)
