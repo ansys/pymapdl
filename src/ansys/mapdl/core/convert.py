@@ -852,7 +852,7 @@ class FileTranslator:
         if cmd_caps_short == "*USE" and self.macros_as_functions:
             func_name = items[1].strip()
             if func_name in self._functions:
-                args = ", ".join(items[2:])
+                args = self._parse_arguments(items[2:])
                 self.store_python_command(f"{func_name}({args})")
                 return
 
