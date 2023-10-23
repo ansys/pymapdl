@@ -100,7 +100,6 @@ COMMANDS_TO_NOT_BE_CONVERTED = [
     "/TYP",  # Until we merge 2432
     "/DSC",  # Until we merge 2432
     # CDREAD # commented above
-    "AXLAB",  # because it can include commas in the arguments.
 ]
 
 FORCED_MAPPING = {
@@ -761,6 +760,7 @@ class FileTranslator:
 
         if "/EXI" in cmd_caps.upper() and self.non_interactive:
             self.store_command("com", [f"Skipping: {line}"])
+            return
 
         if self.output_to_file(line):
             if self.verification_example and "SCRATCH" in line.upper():
@@ -913,32 +913,26 @@ class FileTranslator:
             self._pymapdl_command(command) not in self._valid_commands
             and cmd_caps_short in self._non_interactive_commands
         ):
-            if cmd_caps_short in self._non_interactive_commands:
-                if cmd_caps_short in self._block_commands:
-                    self._in_block = True
-                    self._block_count = 0
-                    self._block_count_target = 0
+            if cmd_caps_short in self._block_commands:
+                self._in_block = True
+                self._block_count = 0
+                self._block_count_target = 0
 
-                elif cmd_caps_short in self._enum_block_commands:
-                    self._in_block = True
-                    self._block_count = 0
-                    if cmd_caps_short == "CMBL":  # In cmblock
-                        # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
-                        numitems = int(line.split(",")[3])
-                        _block_count_target = (
-                            numitems // 8 + 1 if numitems % 8 != 0 else numitems // 8
-                        )
-                        self._block_count_target = (
-                            _block_count_target + 2
-                        )  # because the cmd_caps_short line and option line.
+            elif cmd_caps_short in self._enum_block_commands:
+                self._in_block = True
+                self._block_count = 0
+                if cmd_caps_short == "CMBL":  # In cmblock
+                    # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
+                    numitems = int(line.split(",")[3])
+                    _block_count_target = (
+                        numitems // 8 + 1 if numitems % 8 != 0 else numitems // 8
+                    )
+                    self._block_count_target = (
+                        _block_count_target + 2
+                    )  # because the cmd_caps_short line and option line.
 
-                self._block_current_cmd = cmd_caps_short
-                self.start_non_interactive()
-
-            if self._in_block and cmd_caps_short not in self._non_interactive_commands:
-                self.store_run_command(original_line.strip())
-            else:
-                self.store_run_command(line.strip())
+            self._block_current_cmd = cmd_caps_short
+            self.start_non_interactive()
 
         elif self.use_function_names:
             # Takign into account the leading characters
