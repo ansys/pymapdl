@@ -15,11 +15,8 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     _validate_MPI,
     _verify_version,
-    find_ansys,
-    get_default_ansys,
     launch_mapdl,
     update_env_vars,
-    version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
 from conftest import (
@@ -38,18 +35,25 @@ except:
 
 # CORBA and console available versions
 try:
-    from ansys.tools.path import get_available_ansys_installations
+    from ansys.tools.path import (
+        find_ansys,
+        get_available_ansys_installations,
+        get_default_ansys,
+        version_from_path,
+    )
 
-    valid_versions = list(get_available_ansys_installations().keys())
+    installed_mapdl_versions = list(get_available_ansys_installations().keys())
+    try:
+        V150_EXEC = find_ansys("150")[0]
+    except ValueError:
+        V150_EXEC = ""
 except:
-    valid_versions = [24.1, 23.2, 22.2]
+    from conftest import MAPDL_VERSION
+
+    installed_mapdl_versions = [MAPDL_VERSION]
+    V150_EXEC = ""
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
-
-try:
-    V150_EXEC = find_ansys("150")[0]
-except ValueError:
-    V150_EXEC = ""
 
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
@@ -114,7 +118,7 @@ def test_find_ansys_linux():
 @skip_if_not_local
 def test_invalid_mode():
     with pytest.raises(ValueError):
-        exec_file = find_ansys(valid_versions[0])[0]
+        exec_file = find_ansys(installed_mapdl_versions[0])[0]
         pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
@@ -130,13 +134,13 @@ def test_old_version():
 @skip_on_windows
 @pytest.mark.console
 def test_failed_console():
-    exec_file = find_ansys(valid_versions[0])[0]
+    exec_file = find_ansys(installed_mapdl_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
 @skip_if_not_local
-@pytest.mark.parametrize("version", valid_versions)
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 @pytest.mark.console
 @skip_on_windows
 def test_launch_console(version):
@@ -147,7 +151,7 @@ def test_launch_console(version):
 
 @skip_if_not_local
 @pytest.mark.corba
-@pytest.mark.parametrize("version", valid_versions)
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_corba(version):
     mapdl = pymapdl.launch_mapdl(
         find_ansys(version)[0], mode="corba", start_timeout=start_timeout
@@ -377,15 +381,15 @@ def test_license_product_argument_p_arg_warning():
         assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
 
 
-valid_versions = []
-valid_versions.extend(list(versions.keys()))
-valid_versions.extend([each / 10 for each in versions.keys()])
-valid_versions.extend([str(each) for each in list(versions.keys())])
-valid_versions.extend([str(each / 10) for each in versions.keys()])
-valid_versions.extend(list(versions.values()))
+installed_mapdl_versions = []
+installed_mapdl_versions.extend(list(versions.keys()))
+installed_mapdl_versions.extend([each / 10 for each in versions.keys()])
+installed_mapdl_versions.extend([str(each) for each in list(versions.keys())])
+installed_mapdl_versions.extend([str(each / 10) for each in versions.keys()])
+installed_mapdl_versions.extend(list(versions.values()))
 
 
-@pytest.mark.parametrize("version", valid_versions)
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
     ver = _verify_version(version)
     assert isinstance(ver, int)

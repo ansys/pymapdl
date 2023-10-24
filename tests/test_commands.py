@@ -679,6 +679,9 @@ def test_string_with_literal():
     assert len(output.split()) == 2
 
 
+@pytest.mark.skipif(
+    not HAS_PANDAS, reason="This test requires to have pandas installed."
+)
 @pytest.mark.parametrize("output,last_element", [(set_list_0, 9), (set_list_1, 15)])
 def test_magicwords(output, last_element):
     magicwords = ["SET"]

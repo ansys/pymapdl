@@ -5,6 +5,12 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
 
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    # Needs ansys-mapdl-math
+    pytest.skip(allow_module_level=True)
+
 PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Krylov Apdl Macro Files

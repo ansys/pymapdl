@@ -6,13 +6,16 @@ import re
 import shutil
 import time
 
-from ansys.mapdl.reader import examples
-from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
 import pytest
-from pyvista import MultiBlock
+
+from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+
+if not TESTING_MINIMAL:
+    from ansys.mapdl.reader.rst import Result
+    from pyvista import MultiBlock
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
@@ -28,12 +31,17 @@ from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
 from conftest import (
     IS_SMP,
+    ON_CI,
     ON_LOCAL,
     QUICK_LAUNCH_SWITCHES,
     skip_if_not_local,
     skip_if_on_cicd,
     skip_on_windows,
 )
+
+# Path to files needed for examples
+PATH = os.path.dirname(os.path.abspath(__file__))
+test_files = os.path.join(PATH, "test_files")
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -306,7 +314,8 @@ def test_allow_ignore(mapdl):
     mapdl.allow_ignore = True
     assert mapdl.allow_ignore is True
     mapdl.k()
-    assert mapdl.geometry.n_keypoint == 0
+    with pytest.raises(ValueError, match="There are no KEYPOINTS defined"):
+        mapdl.get_value("KP", 0, "count")
     mapdl.allow_ignore = False
 
 
@@ -367,6 +376,7 @@ def test_invalid_input(mapdl):
         mapdl.input("thisisnotafile")
 
 
+@skip_if_testing_minimal
 def test_keypoints(cleared, mapdl):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
@@ -383,6 +393,7 @@ def test_keypoints(cleared, mapdl):
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
+@skip_if_testing_minimal
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -692,6 +703,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
+@skip_if_testing_minimal
 def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
@@ -702,7 +714,7 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp("off")
-    mapdl.cdread("db", examples.sector_archive_file)
+    mapdl.cdread("db", os.path.join(test_files, "sector.cdb"))
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()
@@ -1078,6 +1090,7 @@ def test_cwd(mapdl, tmpdir):
 
 
 @skip_if_on_cicd
+@skip_if_not_local
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1110,7 +1123,9 @@ def test_ksel(mapdl, cleared):
     mapdl.prep7()
     assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
     assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
-    assert 1 in mapdl.ksel("S", "KP", vmin=1)
+
+    if not TESTING_MINIMAL:
+        assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
 def test_get_file_path(mapdl, tmpdir):
@@ -1304,7 +1319,10 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     captured = capsys.readouterr()  # To flush it
     output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
-    assert f"Uploading {fname}.{ext}:" in captured.err
+    if not TESTING_MINIMAL:
+        # Printing uploading requires tqdm
+        assert f"Uploading {fname}.{ext}:" in captured.err
+
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
@@ -1493,7 +1511,7 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
-    assert len(mapdl.geometry.keypoints) == 2
+    assert mapdl.get_value("KP", 0, "count") == 2
 
 
 def test_ignored_command(mapdl, cleared):
@@ -1805,6 +1823,7 @@ def test_check_empty_session_id(mapdl):
     assert mapdl.prep7()
 
 
+@skip_if_testing_minimal  # Requires 'request' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1920,6 +1939,7 @@ def test_rlblock_rlblock_num(mapdl):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
+@skip_if_testing_minimal
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
@@ -1971,7 +1991,7 @@ def test_port(mapdl):
 
 
 def test_distributed(mapdl):
-    if IS_SMP and not ON_LOCAL:
+    if ON_CI and IS_SMP and not ON_LOCAL:
         assert not mapdl._distributed
     else:
         assert mapdl._distributed

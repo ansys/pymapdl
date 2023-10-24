@@ -4,7 +4,11 @@ import os
 
 import numpy as np
 import pytest
-from pyvista.plotting import system_supports_plotting
+
+from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+
+if not TESTING_MINIMAL:
+    from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import (
@@ -20,6 +24,7 @@ from ansys.mapdl.core.misc import (
 )
 
 
+@skip_if_testing_minimal
 def test_report():
     report = pymapdl.Report(
         additional=["matplotlib", "pyvista", "pyiges", "tqdm"],
@@ -276,6 +281,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     assert file_ not in mapdl.list_files()
 
 
+@skip_if_testing_minimal
 def test_plain_report():
     from ansys.mapdl.core.misc import Plain_Report
 

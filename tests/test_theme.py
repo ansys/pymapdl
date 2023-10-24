@@ -1,3 +1,10 @@
+import pytest
+
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
+
 from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 

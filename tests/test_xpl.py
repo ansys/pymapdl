@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from conftest import skip_if_testing_minimal
 
 # skip entire module unless HAS_GRPC
 pytestmark = pytest.mark.skip_grpc
@@ -33,6 +34,7 @@ def test_xpl_str(xpl):
     assert "file.full" in str(xpl)
 
 
+@skip_if_testing_minimal
 def test_read_int32(xpl):
     vec = xpl.read("MASS")
     arr = vec.asarray()
@@ -40,6 +42,7 @@ def test_read_int32(xpl):
     assert arr.dtype == np.int32
 
 
+@skip_if_testing_minimal
 def test_read_double(xpl):
     vec = xpl.read("DIAGK")
     arr = vec.asarray()
@@ -47,6 +50,7 @@ def test_read_double(xpl):
     assert arr.dtype == np.double
 
 
+@skip_if_testing_minimal
 def test_read_asarray(xpl):
     vec1 = xpl.read("MASS", asarray=True)
     vec2 = xpl.read("MASS")
@@ -109,6 +113,7 @@ def test_goto(xpl):
     assert "Current Location : FULL::MASS" in xpl.where()
 
 
+@skip_if_testing_minimal
 @pytest.mark.usefixtures("check_supports_extract")
 def test_extract(xpl):
     # expecting fixture to already have a non-result file open

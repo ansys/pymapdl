@@ -3,7 +3,11 @@ import os
 
 import numpy as np
 import pytest
-import pyvista as pv
+
+from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+
+if not TESTING_MINIMAL:
+    import pyvista as pv
 
 from ansys.mapdl.core import examples
 
@@ -93,9 +97,10 @@ def test_empty_mesh(mapdl, cleared):
     assert not mapdl.mesh._has_nodes
 
     # Others
-    assert mapdl.mesh.grid is None
-    with pytest.raises(ValueError):
-        mapdl.mesh.save("file.vtk")
+    if not TESTING_MINIMAL:
+        assert mapdl.mesh.grid is None
+        with pytest.raises(ValueError):
+            mapdl.mesh.save("file.vtk")
 
 
 def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
@@ -136,9 +141,11 @@ def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
     assert mapdl.mesh._has_nodes
 
     # Others
-    assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
-    assert mapdl.mesh.grid.n_cells > 0
-    assert mapdl.mesh.grid.n_points > 0
+    if not TESTING_MINIMAL:
+        assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
+
+        assert mapdl.mesh.grid.n_cells > 0
+        assert mapdl.mesh.grid.n_points > 0
 
 
 def test_tshape_key(mapdl, contact_geom_and_mesh):
@@ -151,6 +158,7 @@ def test_tshape_key(mapdl, contact_geom_and_mesh):
     assert tshape.size > 0
 
 
+@skip_if_testing_minimal
 def test_save(mapdl, cube_geom_and_mesh):
     # This test seems to fail when parallelized.
     fname = "mesh.vtk"
