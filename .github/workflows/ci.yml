@@ -576,6 +576,75 @@ jobs:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
 
+
+  build-test-ubuntu-minimal:
+    name: "Local: Build and unit testing on minimal package in Ubuntu"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 55
+    container:
+      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
+      options: "-u=0:0 --entrypoint /bin/bash"
+      credentials:
+        username: ${{ secrets.GH_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      ON_LOCAL: true
+      ON_UBUNTU: true
+      TESTING_MINIMAL: true
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Checking Python"
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+          python -m venv ./.venv
+          source ./.venv/bin/activate
+
+      - name: "Install ansys-mapdl-core"
+        run: |
+          python -m pip install -r minimum_requirements.txt --no-deps
+          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+      
+      - name: "Running some verification manual examples"
+        shell: python
+        run: |
+          from ansys.mapdl.core import launch_mapdl
+          mapdl = launch_mapdl(start_instance=True)
+          from ansys.mapdl.core.examples import vmfiles
+          vms = list(vmfiles.keys())
+          for i, vm in enumerate(vms[:2]):
+              mapdl.clear()
+              print(f"Running the vm {i}: {vm}")
+              output = mapdl.input(vmfiles[vm])
+              print(f"Running the vm {i}: Successfully completed")
+          mapdl.exit()
+
+      - name: "Unit testing requirements installation"
+        run: |
+          python -m pip install pytest
+
+      - name: "Unit testing"
+        run: |
+          unset PYMAPDL_PORT
+          unset PYMAPDL_START_INSTANCE
+          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          export AWP_ROOT222=/ansys_inc
+          pytest -k "not test_dpf" \
+            ${{ env.PYTEST_ARGUMENTS }} \
+            --skip-regression-check
+
   test-windows:
     if: github.repository == ''
     name: "Local: Build and unit testing on Windows"
