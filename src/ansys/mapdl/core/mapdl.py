@@ -3307,7 +3307,16 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
+
+        if (
+            "Display device has not yet been specified with the /SHOW command" in text
+            and short_cmd in PLOT_COMMANDS
+        ):
+            # Reissuing the command to make sure we get output.
+            self.show(self.default_file_type_for_plots)
+            text = self._run(command, verbose=verbose, mute=mute)
 
         if command[:4].upper() == "/CLE" and self.is_grpc:
             # We have reset the database, so we need to create a new session id
@@ -3328,8 +3337,6 @@ class _MapdlCore(Commands):
             self._raise_errors(text)
 
         # special returns for certain geometry commands
-        short_cmd = parse_to_short_cmd(command)
-
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             plot_path = self._get_plot_name(text)
