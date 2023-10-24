@@ -3,6 +3,12 @@ import os
 
 import numpy as np
 import pytest
+
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
+
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits

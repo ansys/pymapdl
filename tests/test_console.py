@@ -6,6 +6,13 @@ This has been copied from test_mapdl.py
 import os
 import time
 
+import pytest
+
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
+
 from ansys.mapdl.reader import examples
 import numpy as np
 import pytest

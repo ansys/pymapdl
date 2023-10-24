@@ -2,9 +2,15 @@ import os
 from pathlib import Path
 import time
 
-from ansys.tools.path import find_ansys
 import numpy as np
 import pytest
+
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
+
+from ansys.tools.path import find_ansys
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError

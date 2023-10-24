@@ -1,6 +1,12 @@
 """Test geometry commands"""
 import numpy as np
 import pytest
+
+from conftest import TESTING_MINIMAL
+
+if TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
+
 import pyvista as pv
 
 from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
