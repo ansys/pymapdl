@@ -16,7 +16,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from matplotlib.colors import to_rgba
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
@@ -457,6 +456,10 @@ class _MapdlCore(Commands):
             def wrap_xsel_function_output(method):
                 # Injecting doc string modification
                 name = method.__func__.__name__.upper()
+                if not self.geometry:
+                    # Cases where the geometry module is not loaded
+                    return None
+
                 if name == "NSEL":
                     return self.mesh.nnum
                 elif name == "ESEL":
@@ -984,7 +987,6 @@ class _MapdlCore(Commands):
             return Geometry(self)
 
     @property
-    @requires_package("pyvista", softerror=True)
     def mesh(self):
         """Mesh information.
 
@@ -1031,7 +1033,6 @@ class _MapdlCore(Commands):
         return self._mesh
 
     @property
-    @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
@@ -1868,6 +1869,8 @@ class _MapdlCore(Commands):
                 )
 
         if vtk:
+            from matplotlib.colors import to_rgba
+
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
@@ -3314,10 +3317,15 @@ class _MapdlCore(Commands):
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             plot_path = self._get_plot_name(text)
+
             if save_fig:
                 return self._download_plot(plot_path, save_fig)
-            else:
+            elif self._has_matplotlib:
                 return self._display_plot(plot_path)
+            else:
+                self._log.debug(
+                    "Since matplolib is not installed, images are not shown."
+                )
 
         return self._response
 

@@ -1,6 +1,14 @@
 """Store parameters for a PyMAPDL-specific theme for pyvista"""
-from matplotlib.colors import ListedColormap
+
 import numpy as np
+
+try:
+    from matplotlib.colors import ListedColormap
+
+    _HAS_MATPLOTLIB = True
+except ModuleNotFoundError:
+    _HAS_MATPLOTLIB = False
+
 
 from ansys.mapdl.core import _HAS_PYVISTA
 
@@ -46,10 +54,15 @@ MAPDL_colorbar = (
     / 255
 )
 
-PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
+if _HAS_MATPLOTLIB:
+    PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
 
 
 def get_ansys_colors(N=9):
+    if not _HAS_MATPLOTLIB:
+        raise ModuleNotFoundError(
+            "'matplotlib' package is needed for 'get_ansys_colors'."
+        )
     return np.array([PyMAPDL_cmap(i) for i in range(N)])
 
 
