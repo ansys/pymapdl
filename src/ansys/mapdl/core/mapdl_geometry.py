@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
-import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
 from ansys.mapdl.core.errors import ComponentNoData, VersionError
@@ -57,28 +56,29 @@ For more information, see `Mesh and geometry <https://mapdl.docs.pyansys.com/ver
 """
 
 
-class Multiblock(pv.MultiBlock):
-    def __call__(self, *args, **kwargs):
-        raise VersionError(VERSION_ERROR)
+if _HAS_PYVISTA:
 
-    @wraps(pv.MultiBlock.plot)
-    def plot(self, *args, **kwargs):
-        color = kwargs.pop("color", "white")
-        return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
+    class Multiblock(pv.MultiBlock):
+        def __call__(self, *args, **kwargs):
+            raise VersionError(VERSION_ERROR)
 
+        @wraps(pv.MultiBlock.plot)
+        def plot(self, *args, **kwargs):
+            color = kwargs.pop("color", "white")
+            return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
 
-def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
-    """Merge list of polydata or unstructured grids"""
+    def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
+        """Merge list of polydata or unstructured grids"""
 
-    # lazy import here for faster module loading
-    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
+        # lazy import here for faster module loading
+        from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
-    afilter = vtkAppendPolyData()
-    for item in items:
-        afilter.AddInputData(item)
-        afilter.Update()
+        afilter = vtkAppendPolyData()
+        for item in items:
+            afilter.AddInputData(item)
+            afilter.Update()
 
-    return pv.wrap(afilter.GetOutput())
+        return pv.wrap(afilter.GetOutput())
 
 
 def get_elements_per_area(resp: str) -> List[List[int]]:
@@ -146,6 +146,9 @@ class Geometry:
 
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be initialized using a gRPC MAPDL class")
+
+        if not _HAS_PYVISTA:
+            raise ModuleNotFoundError("Geometry module requires Pyvista package.")
 
         self._mapdl = mapdl
         self._keypoints_cache = None

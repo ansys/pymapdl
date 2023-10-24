@@ -9,7 +9,7 @@ import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import supress_logging, threaded
+from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
 
 TMP_NODE_CM = "__NODE__"
 
@@ -714,6 +714,7 @@ class MeshGrpc:
         return self._grid
 
     @property
+    @requires_package("pyvista")
     def _grid(self):
         if self._grid_cache is None:
             self._update_cache()
