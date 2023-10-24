@@ -95,6 +95,8 @@ def support_plotting():
     if testing_minimal():
         return False
 
+    import pyvista
+
     return pyvista.system_supports_plotting()
 
 
