@@ -4,9 +4,28 @@ from pathlib import Path
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-from ansys.tools.path import get_available_ansys_installations
 import pytest
-import pyvista
+
+try:
+    from ansys.tools.path import get_available_ansys_installations
+except:
+    # Only used in mapdl_corba and mapdl_console
+    pass
+
+try:
+    import pyvista
+
+    _HAS_PYVISTA = True
+
+    from ansys.mapdl.core.theme import _apply_default_theme
+
+    _apply_default_theme()
+
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+
+except ModuleNotFoundError:
+    _HAS_PYVISTA = False
 
 import ansys.mapdl.core as pymapdl
 
@@ -15,7 +34,6 @@ pymapdl.RUNNING_TESTS = True
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
-from ansys.mapdl.core.theme import _apply_default_theme
 from common import (
     Element,
     Node,
@@ -27,17 +45,21 @@ from common import (
     is_on_local,
     is_on_ubuntu,
     is_smp,
+    support_plotting,
+    testing_minimal,
 )
-
-_apply_default_theme()
 
 ################################################################
 #
 # Setting testing environment
 # ---------------------------
 #
-# Necessary for CI plotting
-pyvista.OFF_SCREEN = True
+
+TESTING_MINIMAL = testing_minimal()
+
+skip_if_testing_minimal = pytest.mark.skipif(
+    TESTING_MINIMAL, reason="Test not required when testing minimal package."
+)
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -50,7 +72,7 @@ ON_MACOS = platform == "darwin"
 
 HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
-SUPPORT_PLOTTING = pyvista.system_supports_plotting()
+SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
@@ -107,6 +129,7 @@ automatically find your Ansys installation.  Email the developer at:
 alexander.kaszynski@ansys.com
 
 """
+MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
 
 if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
@@ -209,24 +232,25 @@ def pytest_collection_modifyitems(config, items):
 # ---------------------------
 #
 
+if not TESTING_MINIMAL:
 
-@pytest.fixture(autouse=True)
-def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
-    # Checking if we want to avoid the check using pytest cli.
-    skip_regression_check = pytestconfig.option.skip_regression_check
-    if skip_regression_check:
-        verify_image_cache.skip = True
+    @pytest.fixture(autouse=True)
+    def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+        # Checking if we want to avoid the check using pytest cli.
+        skip_regression_check = pytestconfig.option.skip_regression_check
+        if skip_regression_check:
+            verify_image_cache.skip = True
 
-    # Configuration
-    # default check
-    verify_image_cache.error_value = 500.0
-    verify_image_cache.warning_value = 200.0
+        # Configuration
+        # default check
+        verify_image_cache.error_value = 500.0
+        verify_image_cache.warning_value = 200.0
 
-    # High variance test
-    verify_image_cache.var_error_value = 1000.0
-    verify_image_cache.var_warning_value = 1000.0
+        # High variance test
+        verify_image_cache.var_error_value = 1000.0
+        verify_image_cache.var_warning_value = 1000.0
 
-    return verify_image_cache
+        return verify_image_cache
 
 
 class Running_test:
@@ -276,6 +300,7 @@ def run_before_and_after_tests(request, mapdl):
         # Restoring the local configuration
         mapdl._local = local_
 
+    mapdl.gopr()
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
@@ -374,6 +399,7 @@ def mapdl(request, tmpdir_factory):
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+    MAPDL_VERSION = mapdl.version  # Caching version
 
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
