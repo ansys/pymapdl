@@ -642,7 +642,7 @@ class Parameters:
             filename = os.path.join(self._mapdl.directory, filename)
         else:
             filename = os.path.join(tempfile.gettempdir(), filename)
-        write_array(filename.encode(), arr.ravel("F"))
+        write_array(filename, arr.ravel("F"))
 
         if not self._mapdl._local:
             self._mapdl.upload(filename, progress_bar=False)
