@@ -7,6 +7,19 @@ repos:
   hooks:
   - id: isort
 
+- repo: https://github.com/numpy/numpydoc
+  rev: v1.6.0
+  hooks:
+    - id: numpydoc-validation
+      exclude: |
+          (?x)(
+              tests/|
+              examples|
+              doc/source/|
+              src/ansys/mapdl/core/_commands|
+              src/ansys/mapdl/core/commands
+          )
+
 - repo: https://github.com/psf/black
   rev: 23.9.1  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
   hooks:

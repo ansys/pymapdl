@@ -543,7 +543,7 @@ class MeshGrpc:
 
         Returns
         -------
-        nodes : np.ndarray
+        np.ndarray
             Numpy array of nodes
         """
         if self._chunk_size:
@@ -655,7 +655,7 @@ class MeshGrpc:
 
         Parameters
         ----------
-        chunk_size : int
+        int
             Size of the chunks to request from the server.
         """
         request = anskernel.StreamRequest(chunk_size=chunk_size)
