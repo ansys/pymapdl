@@ -414,7 +414,7 @@ class MapdlCorba(_MapdlCore):
         return response
 
     def _close_output(self):
-        """closes the output file"""
+        """Closes the output file"""
         self._output = ""
         if self._outfile:
             self._outfile.close()

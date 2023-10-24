@@ -1241,7 +1241,7 @@ class Elements:
         APDL Command: EPLOT
 
         Notes
-        ------
+        -----
         Produces an element display of the selected elements. In full
         graphics, only those elements faces with all of their corresponding
         nodes selected are plotted. In PowerGraphics, all element faces of the selected
