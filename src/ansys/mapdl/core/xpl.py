@@ -6,7 +6,6 @@ import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
-from ansys.math.core.math import AnsMath
 import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
@@ -421,6 +420,8 @@ class ansXpl:
                  1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
 
         """
+        from ansys.math.core.math import AnsMath
+
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
@@ -473,6 +474,8 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
+        from ansys.math.core.math import AnsMath
+
         rand_name = id_generator()
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
