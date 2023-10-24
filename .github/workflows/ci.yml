@@ -622,7 +622,7 @@ jobs:
         shell: python
         run: |
           from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl(start_instance=True)
+          mapdl = launch_mapdl(start_instance=True, exec_file="/ansys_inc/v222/ansys/bin/ansys222")
           from ansys.mapdl.core.examples import vmfiles
           vms = list(vmfiles.keys())
           for i, vm in enumerate(vms[:2]):
