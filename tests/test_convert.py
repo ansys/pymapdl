@@ -658,3 +658,14 @@ def test_exit_in_non_interactive():
 @pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
 def test_commands_to_not_be_converted(cmd):
     assert f'mapdl.run("{cmd}")' in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_vwrite():
+    cmd = """*VWRITE                                ! WRITE OUTPUT IN TABULAR FORMAT
+(///T14,'MODE',T24,'COEFF',T34,'ISYM',/)"""
+
+    pycmd = """with mapdl.non_interactive:
+    mapdl.run("*VWRITE")  # WRITE OUTPUT IN TABULAR FORMAT
+    mapdl.run("(///T14,'MODE',T24,'COEFF',T34,'ISYM',/)")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)

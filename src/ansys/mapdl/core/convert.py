@@ -933,6 +933,7 @@ class FileTranslator:
 
             self._block_current_cmd = cmd_caps_short
             self.start_non_interactive()
+            self.store_run_command(line.strip())
 
         elif self.use_function_names:
             # Takign into account the leading characters
