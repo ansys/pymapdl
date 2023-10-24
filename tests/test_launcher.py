@@ -37,11 +37,14 @@ except:
     HAS_CORBA = False
 
 # CORBA and console available versions
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    valid_versions = list(get_available_ansys_installations().keys())
+except:
+    valid_versions = [24.1, 23.2, 22.2]
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
-
-valid_versions = list(get_available_ansys_installations().keys())
 
 try:
     V150_EXEC = find_ansys("150")[0]

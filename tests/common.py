@@ -3,8 +3,6 @@ from collections import namedtuple
 import os
 from typing import Dict
 
-from ansys.tools.path import find_mapdl
-
 from ansys.mapdl.core.launcher import _is_ubuntu
 
 Node = namedtuple("Node", ["number", "x", "y", "z", "thx", "thy", "thz"])
@@ -35,6 +33,8 @@ def is_on_local():
             os.environ.get("PYMAPDL_START_INSTANCE", "").lower() != "false"
         )  # default is false
 
+    from ansys.tools.path import find_mapdl
+
     _, rver = find_mapdl()
 
     if rver:
@@ -59,6 +59,16 @@ def is_on_ubuntu():
 
 
 def has_grpc():
+    envvar = os.environ.get("HAS_GRPC", None)
+
+    if envvar is not None:
+        return envvar.lower().strip() == "true"
+
+    if testing_minimal():
+        return True
+
+    from ansys.tools.path import find_mapdl
+
     _, rver = find_mapdl()
 
     if rver:
@@ -74,6 +84,22 @@ def has_dpf():
 
 def is_smp():
     return os.environ.get("DISTRIBUTED_MODE", "smp").lower().strip() == "smp"
+
+
+def support_plotting():
+    envvar = os.environ.get("SUPPORT_PLOTTING", None)
+
+    if envvar is not None:
+        return envvar.lower().strip() == "true"
+
+    if testing_minimal():
+        return False
+
+    return pyvista.system_supports_plotting()
+
+
+def testing_minimal():
+    return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
 def is_float(s: str) -> bool:

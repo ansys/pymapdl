@@ -20,7 +20,12 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
-from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
+try:
+    from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
@@ -412,8 +417,9 @@ def launch_grpc(
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    if version_from_path("mapdl", exec_file) < 202:
-        raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
+    if _HAS_ATP:
+        if version_from_path("mapdl", exec_file) < 202:
+            raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
 
     # verify lock file does not exist
     check_lock_file(run_location, jobname, override)
@@ -871,11 +877,22 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
 
-        if (
-            os.name == "nt"
-            and not force_intel
-            and (222 > version_from_path("mapdl", exec_path) >= 210)
-        ):
+        if _HAS_ATP:
+            condition = (
+                os.name == "nt"
+                and not force_intel
+                and (222 > version_from_path("mapdl", exec_path) >= 210)
+            )
+        else:
+            warn(
+                "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
+                "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
+                "the fix is applied by default.\n"
+                "Use 'force_intel=True' to not apply the fix."
+            )
+            condition = os.name == "nt" and not force_intel
+
+        if condition:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
             # This is due to the intel compiler, and only affects versions between
@@ -1499,6 +1516,11 @@ def launch_mapdl(
         exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
 
     if exec_file is None:
+        if not _HAS_ATP:
+            raise ModuleNotFoundError(
+                "If you don't have 'ansys-tools-path' library installed, you need to input the executable path ('exec_path')."
+            )
+
         LOG.debug("Using default executable.")
         # Load cached path
         exec_file = get_ansys_path(version=version)
@@ -1542,8 +1564,9 @@ def launch_mapdl(
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
 
-    mode = check_mode(mode, version_from_path("mapdl", exec_file))
-    LOG.debug("Using mode %s", mode)
+    if _HAS_ATP:
+        mode = check_mode(mode, version_from_path("mapdl", exec_file))
+        LOG.debug("Using mode %s", mode)
 
     # Setting SMP by default if student version is used.
     additional_switches = _force_smp_student_version(additional_switches, exec_file)

@@ -6,11 +6,18 @@ import time
 from typing import Any, Dict, List, Optional
 import warnings
 
-from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
+from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
+
+try:
+    from ansys.tools.path import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -163,7 +170,14 @@ class LocalMapdlPool:
         if "exec_file" in kwargs:
             exec_file = kwargs["exec_file"]
         else:  # get default executable
-            exec_file = get_ansys_path()
+            if _HAS_ATP:
+                exec_file = get_ansys_path()
+            else:
+                raise ValueError(
+                    "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
+                    "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                )
+
             if exec_file is None:
                 raise FileNotFoundError(
                     "Invalid exec_file path or cannot load cached "
