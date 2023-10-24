@@ -18,8 +18,10 @@ import weakref
 
 try:
     from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
 except ModuleNotFoundError:
-    pass
+    _HAS_ATP = False
 
 import numpy as np
 
