@@ -614,7 +614,7 @@ jobs:
 
       - name: "Install ansys-mapdl-core"
         run: |
-          python -m pip install ansys-mapdl-core --no-deps
+          python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
       
