@@ -3005,6 +3005,8 @@ class _MapdlCore(Commands):
            This function is being deprecated. Please use `input_strings`
            instead.
 
+        Allows to run multiple mapdl commands in different lines in one go.
+
         Parameters
         ----------
         commands : str
@@ -3650,7 +3652,7 @@ class _MapdlCore(Commands):
 
     @property
     def _lockfile(self):
-        """lockfile path"""
+        """Lockfile path"""
         path = self.directory
         if path is not None:
             return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
@@ -3893,7 +3895,7 @@ class _MapdlCore(Commands):
         return filenames[-1]
 
     def _set_log_level(self, level):
-        """alias for set_log_level"""
+        """Alias for set_log_level"""
         self.set_log_level(level)
 
     def list(self, filename, ext=""):
