@@ -10,7 +10,7 @@ from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
 try:
-    from ansys.mapdl.core.launcher import get_ansys_path, version_from_path
+    from ansys.tools.path import get_ansys_path, version_from_path
 
     _HAS_ATP = True
 
