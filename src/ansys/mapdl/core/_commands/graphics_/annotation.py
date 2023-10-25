@@ -185,7 +185,7 @@ class Annotation:
         command = f"/ANUM,{num},{type_},{xhot},{yhot}"
         return self.run(command, **kwargs)
 
-    def slashlarc(self, xcentr="", ycentr="", xlrad="", angle1="", angle2=""):
+    def slashlarc(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="", **kwargs):
         """Creates annotation arcs (GUI).
 
         APDL Command: /LARC
