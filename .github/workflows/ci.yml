@@ -592,6 +592,8 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       TESTING_MINIMAL: true
+      PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
+      PYMAPDL_START_INSTANCE: True
 
     steps:
       - name: "Install Git and checkout project"
@@ -622,7 +624,7 @@ jobs:
         shell: python
         run: |
           from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl(start_instance=True, exec_file="/ansys_inc/v222/ansys/bin/ansys222")
+          mapdl = launch_mapdl()
           from ansys.mapdl.core.examples import vmfiles
           vms = list(vmfiles.keys())
           for i, vm in enumerate(vms[:2]):
