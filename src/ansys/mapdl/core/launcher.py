@@ -884,12 +884,13 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
                 and (222 > version_from_path("mapdl", exec_path) >= 210)
             )
         else:
-            warnings.warn(
-                "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
-                "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
-                "the fix is applied by default.\n"
-                "Use 'force_intel=True' to not apply the fix."
-            )
+            if os.name == "nt":
+                warnings.warn(
+                    "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
+                    "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
+                    "the fix is applied by default.\n"
+                    "Use 'force_intel=True' to not apply the fix."
+                )
             condition = os.name == "nt" and not force_intel
 
         if condition:
