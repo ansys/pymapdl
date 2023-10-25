@@ -9,6 +9,15 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
+try:
+    from ansys.mapdl.core.launcher import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
+
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
 LIC_FILE_ENVAR = "ANSYSLMD_LICENSE_FILE"
@@ -121,7 +130,7 @@ class LicenseChecker:
             disabled.
 
         """
-        if license_file:
+        if license_file and _HAS_ATP:
             self._lic_file_thread = self.check_license_file()
         if checkout_license:
             self._checkout_thread = self.checkout_license()
@@ -463,8 +472,6 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     # Licdebug name convention:
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
-
-    from ansys.mapdl.core.launcher import get_ansys_path, version_from_path
 
     name = "licdebug"
     hostname = socket.gethostname()
