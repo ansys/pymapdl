@@ -13,6 +13,7 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
@@ -1080,7 +1081,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1094,6 +1095,8 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
+    if isinstance(filename, bytes):
+        filename = filename.decode()
     np.savetxt(filename, array, fmt="%20.12f")
 
 
