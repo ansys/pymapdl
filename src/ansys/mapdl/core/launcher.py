@@ -1080,14 +1080,14 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        .. deprecated:: 0.64.0
-           Use argument ``remove_temp_dir_on_exit`` instead.
-
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+
+        .. deprecated:: 0.64.0
+           Use argument ``remove_temp_dir_on_exit`` instead.
 
     remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL

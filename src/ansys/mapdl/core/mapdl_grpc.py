@@ -1,4 +1,4 @@
-"""gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
 from functools import wraps
@@ -2483,7 +2483,7 @@ class MapdlGrpc(_MapdlCore):
         kloop="",
         **kwargs,
     ):
-        """gRPC VGET request.
+        """Do a gRPC VGET request.
 
         Send a vget request, receive a bytes stream, and return it as
         a numpy array.

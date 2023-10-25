@@ -224,13 +224,13 @@ def _general_plotter(
         ``off_screen`` are evaluated to ``False`` and ``True``
         respectively.
 
-    style : string, optional
+    style : str, optional
         Visualization style of the mesh.  One of the following:
         ``style='surface'``, ``style='wireframe'``,
         ``style='points'``.  Defaults to ``'surface'``. Note that
         ``'wireframe'`` only shows a wireframe of the outer geometry.
 
-    color : string or 3 item list, optional
+    color : str, list[int, int, int],  optional
         Use to make the entire mesh have a single solid color.  Either
         a string, RGB list, or hex color string.  For example:
         ``color='white'``, ``color='w'``, ``color=[1, 1, 1]``, or
@@ -241,9 +241,9 @@ def _general_plotter(
         Shows the edges of a mesh.  Does not apply to a wireframe
         representation.
 
-    edge_color : string or 3 item list, optional, defaults to black
+    edge_color : str, list[int, int, int],  optional
         The solid color to give the edges when ``show_edges=True``.
-        Either a string, RGB list, or hex color string.
+        Either a string, RGB list, or hex color string. Defaults to black.
 
     point_size : float, optional
         Point size of any nodes in the dataset plotted. Also applicable
@@ -594,13 +594,13 @@ def general_plotter(
     savefig : str, optional
         Saves screenshot to a file path.
 
-    style : string, optional
+    style : str, optional
         Visualization style of the mesh.  One of the following:
         ``style='surface'``, ``style='wireframe'``,
         ``style='points'``.  Defaults to ``'surface'``. Note that
         ``'wireframe'`` only shows a wireframe of the outer geometry.
 
-    color : string or 3 item list, optional
+    color : str, list[int, int, int],  optional
         Use to make the entire mesh have a single solid color.  Either
         a string, RGB list, or hex color string.  For example:
         ``color='white'``, ``color='w'``, ``color=[1, 1, 1]``, or
@@ -611,7 +611,7 @@ def general_plotter(
         Shows the edges of a mesh.  Does not apply to a wireframe
         representation.
 
-    edge_color : string or 3 item list, optional,
+    edge_color : str, list[int, int, int],  optional
         The solid color to give the edges when ``show_edges=True``.
         Either a string, RGB list, or hex color string.
         Defaults to black.
