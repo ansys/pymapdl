@@ -33,14 +33,14 @@ try:
 except:
     HAS_CORBA = False
 
-# CORBA and console available versions
 try:
     from ansys.tools.path import (
         find_ansys,
         get_available_ansys_installations,
-        get_default_ansys,
         version_from_path,
     )
+
+    from ansys.mapdl.core.launcher import get_default_ansys
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
     try:
