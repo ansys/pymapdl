@@ -592,6 +592,7 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       TESTING_MINIMAL: true
+      # Because there is no 'ansys-tools-path' we need to input the executable path.
       PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
       PYMAPDL_START_INSTANCE: True
 
@@ -611,8 +612,6 @@ jobs:
         run: |
           python --version
           python -m pip install --upgrade pip
-          python -m venv ./.venv
-          source ./.venv/bin/activate
 
       - name: "Install ansys-mapdl-core"
         run: |
@@ -621,18 +620,9 @@ jobs:
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
       
       - name: "Running some verification manual examples"
-        shell: python
         run: |
-          from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl()
-          from ansys.mapdl.core.examples import vmfiles
-          vms = list(vmfiles.keys())
-          for i, vm in enumerate(vms[:2]):
-              mapdl.clear()
-              print(f"Running the vm {i}: {vm}")
-              output = mapdl.input(vmfiles[vm])
-              print(f"Running the vm {i}: Successfully completed")
-          mapdl.exit()
+          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          python .ci/run_vms.py
 
       - name: "Unit testing requirements installation"
         run: |
