@@ -594,7 +594,6 @@ jobs:
       TESTING_MINIMAL: true
       # Because there is no 'ansys-tools-path' we need to input the executable path.
       PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
-      PYMAPDL_START_INSTANCE: True
 
     steps:
       - name: "Install Git and checkout project"
@@ -621,6 +620,7 @@ jobs:
       
       - name: "Running some verification manual examples"
         run: |
+          unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           python .ci/run_vms.py
 
@@ -630,10 +630,8 @@ jobs:
 
       - name: "Unit testing"
         run: |
-          unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
-          export AWP_ROOT222=/ansys_inc
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --skip-regression-check
