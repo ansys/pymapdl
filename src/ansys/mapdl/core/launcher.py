@@ -1568,6 +1568,8 @@ def launch_mapdl(
     if _HAS_ATP:
         mode = check_mode(mode, version_from_path("mapdl", exec_file))
         LOG.debug("Using mode %s", mode)
+    else:
+        mode = "grpc"
 
     # Setting SMP by default if student version is used.
     additional_switches = _force_smp_student_version(additional_switches, exec_file)
@@ -1650,6 +1652,9 @@ def launch_mapdl(
             if run_location is None:
                 mapdl._path = actual_run_location
 
+        # Setting launched property
+        mapdl._launched = True
+
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
@@ -1663,9 +1668,6 @@ def launch_mapdl(
     if license_server_check:
         LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
-
-    # Setting launched property
-    mapdl._launched = True
 
     return mapdl
 
