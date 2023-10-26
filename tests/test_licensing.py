@@ -273,6 +273,7 @@ def test_license_check():
         license_checker.check()
 
 
+@skip_if_testing_minimal
 def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
@@ -285,6 +286,7 @@ def test_stop_license_checker():
     assert not license_checker._lic_file_thread.is_alive()
 
 
+@skip_if_testing_minimal
 def test_is_connected_license_checker():
     license_checker = licensing.LicenseChecker()
 
