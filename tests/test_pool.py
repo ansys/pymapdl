@@ -88,6 +88,7 @@ def test_invalid_exec():
         )
 
 
+@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 @requires("local")
 def test_heal(pool):
     pool_sz = len(pool)

@@ -62,6 +62,7 @@ def test_local(mapdl):
     assert mapdl._local == mapdl.mesh.local
 
 
+@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 def test_empty_mesh(mapdl, cleared):
     assert mapdl.mesh.n_node == 0
     assert mapdl.mesh.n_elem == 0

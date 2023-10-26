@@ -1266,13 +1266,13 @@ def allow_iterables_vmin(entity="node"):
             else:
                 return original_sel_func(
                     self,
-                    type_=type_,
-                    item=item,
-                    comp=comp,
-                    vmin=vmin,
-                    vmax=vmax,
-                    vinc=vinc,
-                    kabs=kabs,
+                    type_,
+                    item,
+                    comp,
+                    vmin,
+                    vmax,
+                    vinc,
+                    kabs,  # ksel, esel, nsel uses kabs, but lsel, asel, vsel uses kswp
                     **kwargs,
                 )
 
