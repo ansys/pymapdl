@@ -1,5 +1,16 @@
 .. _ref_examples:
 
+
+.. toctree::
+    :hidden:
+    :maxdepth: 3
+
+    devportal.rst
+    Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
+    Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
+    extended_examples/index.rst
+
+
 ========
 Examples
 ========
@@ -17,22 +28,18 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
    :start-line: 2
 
 
+.. === Dev portal examples ==
+
+.. include:: devportal.rst
+   :start-line: 2
+
+
 .. === PYMAPDL EXAMPLES ===
-
-.. toctree::
-    :hidden:
-    :maxdepth: 3
-
-    Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>
-    Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
-    extended_examples/index.rst
-
 
 .. include:: pymapdl_examples_repo/index.rst
    :start-line: 2
 
 .. === EXTENDED EXAMPLES ===
-
 
 .. include:: extended_examples/index.rst
    :start-line: 2

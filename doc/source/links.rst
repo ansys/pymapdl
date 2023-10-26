@@ -54,6 +54,9 @@
 .. _ansys_introductory_mapdl_courses: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
 .. _ansys_current_supported_os: https://www.ansys.com/content/dam/it-solutions/platform-support/2023-r2/ansys-2023-r2-platform-support-by-application.pdf
 
+.. # Developer portal
+.. _developer_portal: https://developer.ansys.com
+
 .. # Ansys guides
 .. _ansys_command_reference_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_cmd/Hlp_C_CmdTOC.html
 .. _ansys_techdemo_guide: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tec/tecintro.html
