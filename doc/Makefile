@@ -55,6 +55,6 @@ linkcheck:
 
 html-noexamples:
 	@echo "Building gallery without running examples."
-	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
 	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
