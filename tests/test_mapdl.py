@@ -1435,7 +1435,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@requires("windows")
+@requires("linux")
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 

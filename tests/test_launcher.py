@@ -72,7 +72,7 @@ def fake_local_mapdl(mapdl):
 
 
 @requires("local")
-@requires("nolinux")
+@requires("windows")
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
@@ -104,7 +104,7 @@ def test_catch_version_from_path():
 
 @requires("ansys-tools-path")
 @requires("local")
-@requires("nowindows")
+@requires("linux")
 def test_find_ansys_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
@@ -132,7 +132,7 @@ def test_old_version():
 
 @requires("ansys-tools-path")
 @requires("local")
-@requires("nowindows")
+@requires("linux")
 @requires("console")
 def test_failed_console():
     exec_file = find_ansys(installed_mapdl_versions[0])[0]
@@ -143,7 +143,7 @@ def test_failed_console():
 @requires("ansys-tools-path")
 @requires("local")
 @requires("console")
-@requires("nowindows")
+@requires("linux")
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_console(version):
     exec_file = find_ansys(version)[0]
@@ -439,7 +439,7 @@ def test_raise_exec_path_and_version_launcher():
         )
 
 
-@requires("nowindows")
+@requires("linux")
 @requires("local")
 def test_is_ubuntu():
     assert _is_ubuntu()

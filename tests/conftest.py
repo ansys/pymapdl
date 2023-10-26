@@ -74,6 +74,14 @@ skip_if_no_has_dpf = pytest.mark.skipif(
     reason="""Requires DPF.""",
 )
 
+requires_linux = pytest.mark.skipif(not ON_LINUX, reason="This test requires Linux")
+requires_windows = pytest.mark.skipif(
+    not ON_WINDOWS, reason="This test requires Windows"
+)
+requires_on_cicd = pytest.mark.skipif(
+    not ON_CI, reason="This test requires to be on CICD"
+)
+
 
 def has_dependency(requirement):
     try:
@@ -96,14 +104,23 @@ def requires(requirement: str):
     elif "local" == requirement:
         return skip_if_not_local
 
+    elif "cicd" == requirement:
+        return skip_if_on_cicd
+
     elif "nocicd" == requirement:
         return skip_if_on_cicd
 
     elif "xserver" == requirement:
         return skip_no_xserver
 
+    elif "linux" == requirement:
+        return requires_linux
+
     elif "nolinux" == requirement:
         return skip_on_linux
+
+    elif "windows" == requirement:
+        return requires_windows
 
     elif "nowindows" == requirement:
         return skip_on_windows
