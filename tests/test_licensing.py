@@ -9,7 +9,7 @@ import pytest
 from ansys.mapdl.core import errors, launch_mapdl, licensing
 from ansys.mapdl.core.misc import threaded
 from conftest import ON_LOCAL as IS_LOCAL
-from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
+from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local, skip_if_testing_minimal
 
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
@@ -238,6 +238,7 @@ def test_check_license_file_exception(license_checker):
         license_checker._check_license_file(0.01)
 
 
+@skip_if_testing_minimal
 def test_license_wait():
     license_checker = licensing.LicenseChecker()
     assert not license_checker._lic_file_thread

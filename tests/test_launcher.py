@@ -22,6 +22,7 @@ from ansys.mapdl.core.licensing import LICENSES
 from conftest import (
     QUICK_LAUNCH_SWITCHES,
     skip_if_not_local,
+    skip_if_testing_minimal,
     skip_on_linux,
     skip_on_windows,
 )
@@ -92,6 +93,7 @@ def test_validate_sw():
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
@@ -99,12 +101,14 @@ def test_version_from_path(path_data):
     assert version_from_path("mapdl", exec_file) == version
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @skip_on_windows
 def test_find_ansys_linux():
@@ -115,6 +119,7 @@ def test_find_ansys_linux():
     assert isinstance(ver, float)
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 def test_invalid_mode():
     with pytest.raises(ValueError):
@@ -122,6 +127,7 @@ def test_invalid_mode():
         pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
@@ -130,6 +136,7 @@ def test_old_version():
         pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @skip_on_windows
 @pytest.mark.console
@@ -139,6 +146,7 @@ def test_failed_console():
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 @pytest.mark.console
@@ -149,6 +157,7 @@ def test_launch_console(version):
     assert mapdl.version == int(version) / 10
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 @pytest.mark.corba
 @pytest.mark.parametrize("version", installed_mapdl_versions)
@@ -224,6 +233,7 @@ def test_license_type_additional_switch():
     assert successful_check  # if at least one license is ok, this should be true.
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 def test_license_type_dummy():
     dummy_license_type = "dummy"
@@ -396,6 +406,7 @@ def test__verify_version_pass(version):
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 def test_find_ansys(mapdl):
     assert find_ansys() is not None
@@ -440,6 +451,7 @@ def test_is_ubuntu():
     assert _is_ubuntu()
 
 
+@skip_if_testing_minimal
 @skip_if_not_local
 def test_get_default_ansys():
     assert get_default_ansys() is not None
