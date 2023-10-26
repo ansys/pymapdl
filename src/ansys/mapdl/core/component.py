@@ -441,7 +441,8 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
-    def list(self):
+    @property
+    def names(self):
         """
         Return a tuple that contains the components.
 
@@ -453,6 +454,7 @@ class ComponentManager:
         """
         return tuple(self._comp.keys())
 
+    @property
     def types(self):
         """
         Return the types of the components.
@@ -476,3 +478,24 @@ class ComponentManager:
 
         """
         return self._comp.items()
+
+    def select(self, names: Union[str, list[str], tuple[str]], mute=False) -> None:
+        """Select Select components given their names
+
+        Select components given their names.
+
+        Parameters
+        ----------
+        names : Union[str, list[str], tuple[str]]
+            Name(s) of the components
+        mute : bool, optional
+            Whether to mute the `/CMSEL` command output or not, by default False.
+        """
+        if isinstance(names, str):
+            names = [names]
+
+        for i, each_name in enumerate(names):
+            if i == 0:
+                self._mapdl.cmsel("S", each_name)
+            else:
+                self._mapdl.cmsel("A", each_name)
