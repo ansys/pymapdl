@@ -2,11 +2,6 @@ import os
 
 import pytest
 
-from conftest import TESTING_MINIMAL
-
-if TESTING_MINIMAL:
-    pytest.skip(allow_module_level=True)
-
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,

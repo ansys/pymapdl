@@ -597,7 +597,6 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      TESTING_MINIMAL: true
       # Because there is no 'ansys-tools-path' we need to input the executable path.
       PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
 

@@ -8,22 +8,22 @@ import time
 
 import pytest
 
-from conftest import TESTING_MINIMAL
-
-if TESTING_MINIMAL:
-    pytest.skip(allow_module_level=True)
-
-from ansys.mapdl.reader import examples
-import numpy as np
-import pytest
-import pyvista
-
-from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import requires
+from conftest import has_dependency, requires
 
 # skip entire module unless --console is enabled
 pytestmark = requires("console")
+
+import numpy as np
+import pytest
+
+if has_dependency("pyvista"):
+    import pyvista
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader import examples
+
+from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 @pytest.fixture(scope="function")

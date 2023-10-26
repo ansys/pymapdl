@@ -11,11 +11,13 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import TESTING_MINIMAL
+from conftest import has_dependency
 
-if not TESTING_MINIMAL:
-    from ansys.mapdl.reader.rst import Result
+if has_dependency("pyvista"):
     from pyvista import MultiBlock
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
@@ -367,7 +369,6 @@ def test_invalid_input(mapdl):
         mapdl.input("thisisnotafile")
 
 
-@requires("pyvista")
 def test_keypoints(cleared, mapdl):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
@@ -379,9 +380,11 @@ def test_keypoints(cleared, mapdl):
         knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
-    assert isinstance(mapdl.geometry.keypoints, MultiBlock)
-    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
+
+    if has_dependency("pyvista"):
+        assert isinstance(mapdl.geometry.keypoints, MultiBlock)
+        assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
 
 
 @requires("pyvista")
@@ -398,9 +401,11 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
+
+    if has_dependency("pyvista"):
+        assert isinstance(lines, MultiBlock)
 
 
 @requires("local")
@@ -1115,8 +1120,7 @@ def test_ksel(mapdl, cleared):
     assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
     assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
 
-    if not TESTING_MINIMAL:
-        assert 1 in mapdl.ksel("S", "KP", vmin=1)
+    assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
 def test_get_file_path(mapdl, tmpdir):
@@ -1310,7 +1314,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     captured = capsys.readouterr()  # To flush it
     output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
-    if not TESTING_MINIMAL:
+    if has_dependency("tqdm"):
         # Printing uploading requires tqdm
         assert f"Uploading {fname}.{ext}:" in captured.err
 

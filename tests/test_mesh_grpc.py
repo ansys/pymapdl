@@ -4,9 +4,9 @@ import os
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL, requires
+from conftest import has_dependency, requires
 
-if not TESTING_MINIMAL:
+if has_dependency("pyvista"):
     import pyvista as pv
 
 from ansys.mapdl.core import examples
@@ -97,7 +97,7 @@ def test_empty_mesh(mapdl, cleared):
     assert not mapdl.mesh._has_nodes
 
     # Others
-    if not TESTING_MINIMAL:
+    if has_dependency("pyvista"):
         assert mapdl.mesh.grid is None
         with pytest.raises(ValueError):
             mapdl.mesh.save("file.vtk")
@@ -141,7 +141,7 @@ def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
     assert mapdl.mesh._has_nodes
 
     # Others
-    if not TESTING_MINIMAL:
+    if has_dependency("pyvista"):
         assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
 
         assert mapdl.mesh.grid.n_cells > 0

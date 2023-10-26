@@ -5,12 +5,18 @@ import time
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL
+from conftest import has_dependency
 
-if TESTING_MINIMAL:
+if has_dependency("ansys-tools-path"):
+    from ansys.tools.path import find_ansys
+
+    EXEC_FILE = find_ansys()[0]
+
+else:
+    EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
+
+if not EXEC_FILE:
     pytest.skip(allow_module_level=True)
-
-from ansys.tools.path import find_ansys
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
@@ -37,7 +43,6 @@ NPROC = 1
 
 @pytest.fixture(scope="module")
 def pool(tmpdir_factory):
-    EXEC_FILE = find_ansys()[0]
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
     mapdl_pool = LocalMapdlPool(
@@ -228,6 +233,7 @@ def test_directory_names_default(pool):
 def test_directory_names_custom_string(tmpdir):
     pool = LocalMapdlPool(
         2,
+        exec_file=EXEC_FILE,
         run_location=tmpdir,
         nproc=NPROC,
         names="my_instance",
@@ -255,6 +261,7 @@ def test_directory_names_function(tmpdir):
 
     pool = LocalMapdlPool(
         3,
+        exec_file=EXEC_FILE,
         nproc=NPROC,
         names=myfun,
         run_location=tmpdir,

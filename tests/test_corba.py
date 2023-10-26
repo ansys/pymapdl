@@ -9,20 +9,19 @@ import time
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL
-
-if TESTING_MINIMAL:
-    pytest.skip(allow_module_level=True)
-
-from ansys.mapdl.reader import examples
-import pyvista
-
-from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import requires
+from conftest import has_dependency, requires
 
 # skip entire module unless --corba is enabled
 pytestmark = requires("corba")
+
+if has_dependency("pyvista"):
+    import pyvista
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader import examples
+
+from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 @pytest.fixture(scope="function")

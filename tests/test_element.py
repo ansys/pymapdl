@@ -4,6 +4,7 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._commands.parse import parse_e, parse_et
+from conftest import requires
 
 
 @pytest.fixture

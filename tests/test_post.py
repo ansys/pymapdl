@@ -5,9 +5,9 @@ import re
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL, requires
+from conftest import has_dependency, requires
 
-if not TESTING_MINIMAL:
+if has_dependency("pyvista"):
     from pyvista import Plotter
     from pyvista.plotting.renderer import CameraPosition
 

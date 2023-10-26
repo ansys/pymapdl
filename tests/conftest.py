@@ -7,34 +7,6 @@ from sys import platform
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import pytest
 
-try:
-    from ansys.tools.path import get_available_ansys_installations
-except:
-    # Only used in mapdl_corba and mapdl_console
-    pass
-
-try:
-    import pyvista
-
-    _HAS_PYVISTA = True
-
-    from ansys.mapdl.core.theme import _apply_default_theme
-
-    _apply_default_theme()
-
-    # Necessary for CI plotting
-    pyvista.OFF_SCREEN = True
-
-except ModuleNotFoundError:
-    _HAS_PYVISTA = False
-
-import ansys.mapdl.core as pymapdl
-
-pymapdl.RUNNING_TESTS = True
-
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from common import (
     Element,
     Node,
@@ -74,9 +46,6 @@ IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 
-# check if the user wants to permit pytest to start MAPDL
-START_INSTANCE = get_start_instance()
-
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
 skip_on_linux = pytest.mark.skipif(ON_LINUX, reason="Skip on Linux")
@@ -104,6 +73,14 @@ skip_if_no_has_dpf = pytest.mark.skipif(
     not HAS_DPF,
     reason="""Requires DPF.""",
 )
+
+
+def has_dependency(requirement):
+    try:
+        import_module(requirement)
+        return True
+    except ModuleNotFoundError:
+        return False
 
 
 def requires(requirement: str):
@@ -144,12 +121,41 @@ def requires(requirement: str):
 def requires_dependency(dependency: str):
     try:
         import_module(dependency)
-        return pytest.mark.skipif(False, reason="Never skip")
+        return pytest.mark.skipif(
+            False, reason="Never skip"
+        )  # faking a null skipif decorator
 
     except ModuleNotFoundError:
-        # package do not exit.
+        # package does not exist
         return pytest.mark.skip(reason=f"Requires '{dependency}' package")
 
+
+################
+
+if has_dependency("ansys-tools-package"):
+    from ansys.tools.path import get_available_ansys_installations
+
+
+if has_dependency("pyvista"):
+    import pyvista
+
+    from ansys.mapdl.core.theme import _apply_default_theme
+
+    _apply_default_theme()
+
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core.examples import vmfiles
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+# check if the user wants to permit pytest to start MAPDL
+START_INSTANCE = get_start_instance()
 
 ################
 if os.name == "nt":
@@ -275,7 +281,7 @@ def pytest_collection_modifyitems(config, items):
 # ---------------------------
 #
 
-if not TESTING_MINIMAL:
+if has_dependency("pytest-pyvista"):
 
     @pytest.fixture(autouse=True)
     def wrapped_verify_image_cache(verify_image_cache, pytestconfig):

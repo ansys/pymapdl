@@ -16,7 +16,7 @@ from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-from conftest import requires
+from conftest import has_dependency, requires
 
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = requires("grpc")
@@ -258,9 +258,9 @@ def test__download(mapdl, tmpdir):
     assert out_file.exists()
 
     out_file = tmpdir.join("out1_" + file_name)
-    try:
+    if has_dependency("tqdm"):
         mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
-    except ModuleNotFoundError:
+    else:
         mapdl._download(file_name, out_file_name=out_file)
     assert out_file.exists()
 

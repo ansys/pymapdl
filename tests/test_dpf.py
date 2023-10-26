@@ -3,9 +3,9 @@ import os
 
 import pytest
 
-from conftest import HAS_DPF, TESTING_MINIMAL, requires
+from conftest import HAS_DPF, has_dependency, requires
 
-if TESTING_MINIMAL or not HAS_DPF:
+if not has_dependency("ansys-dpf-core") or not HAS_DPF:
     pytest.skip(allow_module_level=True)
 
 from ansys.dpf import core as dpf

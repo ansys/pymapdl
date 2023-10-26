@@ -4,9 +4,9 @@ import os
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL
+from conftest import has_dependency
 
-if TESTING_MINIMAL:
+if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
 from pyvista.plotting import Plotter

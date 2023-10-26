@@ -5,10 +5,10 @@ from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL
+from conftest import has_dependency
 
-if TESTING_MINIMAL:
-    # Needs ansys-mapdl-math
+if not has_dependency("ansys-math-core"):
+    # Needs ansys-math-core
     pytest.skip(allow_module_level=True)
 
 PATH = os.path.dirname(os.path.abspath(__file__))

@@ -14,14 +14,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
 )
 from ansys.mapdl.core.examples import verif_files
-
-try:
-    import pandas as pd
-
-    HAS_PANDAS = True
-
-except ModuleNotFoundError:
-    HAS_PANDAS = False
+from conftest import has_dependency, requires
 
 LIST_OF_INQUIRE_FUNCTIONS = [
     "ndinqr",
@@ -570,7 +563,7 @@ def test_cmd_class_prnsol_short():
     assert out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
-    if HAS_PANDAS:
+    if has_dependency("pandas"):
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
@@ -631,7 +624,7 @@ def test_output_listing(mapdl, plastic_solve, func, args):
     assert isinstance(out_list, list) and out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
-    if HAS_PANDAS:
+    if has_dependency("pandas"):
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
@@ -648,7 +641,7 @@ def test_bclist(mapdl, beam_solve, func):
     with pytest.raises(ValueError):
         out.to_array()
 
-    if HAS_PANDAS:
+    if has_dependency("pandas"):
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 

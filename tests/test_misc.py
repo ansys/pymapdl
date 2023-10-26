@@ -5,9 +5,9 @@ import os
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL, requires
+from conftest import has_dependency, requires
 
-if not TESTING_MINIMAL:
+if has_dependency("pyvista"):
     from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
@@ -281,7 +281,6 @@ def test_load_file_local(mapdl, tmpdir, file_):
     assert file_ not in mapdl.list_files()
 
 
-@requires("pyvista")
 def test_plain_report():
     from ansys.mapdl.core.misc import Plain_Report
 
@@ -297,8 +296,20 @@ def test_plain_report():
 
     # There should be only one package not found ("ger")
     assert "Package not found" in rep_str
-    _rep_str = rep_str.replace("Package not found", "", 1)
-    assert "Package not found" not in _rep_str
+    not_found_packages = 1
+
+    # Plus the not additional packages
+    if not has_dependency("pyvista"):
+        not_found_packages += 1
+    if not has_dependency("tqdm"):
+        not_found_packages += 1
+    if not has_dependency("ansys.mapdl.reader"):
+        not_found_packages += 1
+    if not has_dependency("scipy"):
+        not_found_packages += 1
+
+    _rep_str = rep_str.replace("Package not found", "", not_found_packages)
+    assert "Package not found" in _rep_str
 
     assert "\n" in rep_str
     assert len(rep_str.splitlines()) > 3

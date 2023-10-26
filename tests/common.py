@@ -67,7 +67,10 @@ def has_grpc():
     if testing_minimal():
         return True
 
-    from ansys.tools.path import find_mapdl
+    try:
+        from ansys.tools.path import find_mapdl
+    except ModuleNotFoundError:
+        return True
 
     _, rver = find_mapdl()
 
@@ -95,9 +98,13 @@ def support_plotting():
     if testing_minimal():
         return False
 
-    import pyvista
+    try:
+        import pyvista
 
-    return pyvista.system_supports_plotting()
+        return pyvista.system_supports_plotting()
+
+    except ModuleNotFoundError:
+        return False
 
 
 def testing_minimal():

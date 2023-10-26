@@ -133,7 +133,7 @@ class LocalMapdlPool:
         wait: bool = True,
         run_location: Optional[str] = None,
         port: int = MAPDL_DEFAULT_PORT,
-        progress_bar: bool = True,
+        progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
         names: Optional[str] = None,
@@ -185,8 +185,9 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if version_from_path("mapdl", exec_file) < 211:
-            raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+        if _HAS_ATP:
+            if version_from_path("mapdl", exec_file) < 211:
+                raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
         ports = available_ports(n_instances, port)
