@@ -15,58 +15,97 @@ FORMAT_OPTIONS = {
     "max-line-length": 100,
 }
 
+LOGLEVEL_DEFAULT = "WARNING"
+AUTO_EXIT_DEFAULT = True
+LINE_ENDING_DEFAULT = None
+EXEC_FILE_DEFAULT = None
+MACROS_AS_FUNCTIONS_DEFAULT = True
+USE_FUNCTION_NAMES_DEFAULT = True
+SHOW_LOG_DEFAULT = False
+ADD_IMPORTS_DEFAULT = True
+COMMENT_SOLVE_DEFAULT = False
+CLEANUP_OUTPUT_DEFAULT = True
+HEADER_DEFAULT = True
+PRINT_COM_DEFAULT = True
+ONLY_COMMANDS_DEFAULT = False
+USE_VTK_DEFAULT = None
+CLEAR_AT_START_DEFAULT = False
+CHECK_PARAMETER_NAMES_DEFAULT = True
+
+
 # This commands have "--" as one or some arguments
-COMMANDS_WITH_EMPTY_ARGS = [
-    "/CMA",  # "/CMAP,
-    "/NER",  # "/NERR,
-    "/PBF",  # "/PBF,
-    "/PMO",  # "/PMORE,
-    "ANTY",  # ANTYPE,
-    "ASBL",  # ASBL,
-    "ATAN",  # ATAN,
-    "BCSO",  # BCSOPTION,
-    "CLOG",  # CLOG,
-    "CONJ",  # CONJUG,
-    "DERI",  # DERIV,
-    "DSPO",  # DSPOPTION,
-    "ENER",  # ENERSOL,
-    "ENSY",  # ENSYM,
-    "ESYM",  # ESYM,
-    "EXP",  # EXP,
-    "EXPA",  # EXPAND,
-    "FCLI",  # FCLIST,
-    "FILE",  # FILEAUX2,
-    "FLUR",  # FLUREAD,
-    "GMAT",  # GMATRIX,
-    "IMAG",  # IMAGIN,
-    "INT1",  # INT1,
-    "LARG",  # LARGE,
-    "LATT",  # LATT,
-    "MAP",  # MAP,
-    "MORP",  # MORPH,
-    "MPCO",  # MPCOPY,
-    "NLOG",  # NLOG,
-    "PLMA",  # PLMAP,
-    "PRED",  # PRED,
-    "PROD",  # PROD,
-    "QRDO",  # QRDOPT,
-    "QUOT",  # QUOT,
-    "RACE",  # RACE,
-    "REAL",  # REALVAR,
-    "REME",  # REMESH,
-    "SESY",  # SESYMM,
-    "SETF",  # SETFGAP,
-    "SETR",  # SETRAN,
-    "SMAL",  # SMALL,
-    "SNOP",  # SNOPTION,
-    "SURE",  # SURESU,
-    "THOP",  # THOPT,
-    "TINT",  # TINTP,
+COMMANDS_WITH_EMPTY_ARGS = {
+    "/CMA": (),  # "/CMAP,
+    "/NER": (),  # "/NERR,
+    "/PBF": (),  # "/PBF,
+    "/PMO": (),  # "/PMORE,
+    "ADD": (),  # "ADD"
+    "ANTY": (),  # ANTYPE,
+    "ASBL": (),  # ASBL,
+    "ATAN": (),  # ATAN,
+    "BCSO": (),  # BCSOPTION,
+    "CORI": (),  # CORIOLIS
+    "CDRE": (),  # CDREAD
+    "CLOG": (),  # CLOG,
+    "CONJ": (),  # CONJUG,
+    "DERI": (),  # DERIV,
+    "DSPO": (),  # DSPOPTION,
+    "ENER": (),  # ENERSOL,
+    "ENSY": (),  # ENSYM,
+    "ESYM": (),  # ESYM,
+    "EXP": (),  # EXP,
+    "EXPA": (),  # EXPAND,
+    "FCLI": (),  # FCLIST,
+    "FILE": (),  # FILEAUX2,
+    "FLUR": (),  # FLUREAD,
+    "GMAT": (),  # GMATRIX,
+    "IMAG": (),  # IMAGIN,
+    "INT1": (),  # INT1,
+    "LARG": (),  # LARGE,
+    "LATT": (),  # LATT,
+    "MAP": (),  # MAP,
+    "MORP": (),  # MORPH,
+    "MPCO": (),  # MPCOPY,
+    "NLOG": (),  # NLOG,
+    "PLMA": (),  # PLMAP,
+    "PRED": (),  # PRED,
+    "PROD": (),  # PROD,
+    "QRDO": (),  # QRDOPT,
+    "QUOT": (),  # QUOT,
+    "RACE": (),  # RACE,
+    "RDEC": (),  # RDEC
+    "REAL": (),  # REALVAR,
+    "REME": (),  # REMESH,
+    "RPSD": (),  # RPSD
+    "SECR": (),  # SECREAD
+    "SECW": (),  # SECWRITE
+    "SESY": (),  # SESYMM,
+    "SETF": (),  # SETFGAP,
+    "SETR": (),  # SETRAN,
+    "SMAL": (),  # SMALL,
+    "SNOP": (),  # SNOPTION,
+    "SQRT": (),  # SQRT
+    "SURE": (),  # SURESU,
+    "THOP": (),  # THOPT,
+    "TINT": (),  # TINTP,
+    "XFDA": (),  # XFDATA
+}
+
+
+COMMANDS_TO_NOT_BE_CONVERTED = [
+    "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
+    "MODE",  # Until we merge #2431
+    "/LIN",  # Until we merge 2432
+    "/LAR",  # Until we merge 2432
+    "/TYP",  # Until we merge 2432
+    "/DSC",  # Until we merge 2432
+    # CDREAD # commented above
 ]
 
-
-COMMANDS_TO_NOT_BE_CONVERTED = []
-COMMANDS_TO_NOT_BE_CONVERTED.extend(COMMANDS_WITH_EMPTY_ARGS)
+FORCED_MAPPING = {
+    # Forced mapping between MAPDL and PyMAPDL
+    "SECT": "sectype",  # Because it is shadowed by `sectinqr`
+}
 
 
 def convert_script(
@@ -85,6 +124,9 @@ def convert_script(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
+    clear_at_start=False,
+    check_parameter_names=True,
 ):
     """Converts an ANSYS input file to a python PyMAPDL script.
 
@@ -156,6 +198,13 @@ def convert_script(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
+    use_vtk : bool, optional
+        It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value.
+
+    clear_at_start : bool, optional
+        Add a `mapdl.clear()` after the Mapdl object initialization.
+
     Returns
     -------
     list
@@ -211,6 +260,9 @@ def convert_script(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
+        use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     translator.save(filename_out)
@@ -232,6 +284,9 @@ def convert_apdl_block(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
+    clear_at_start=False,
+    check_parameter_names=False,
 ):
     """Converts an ANSYS input string to a python PyMAPDL string.
 
@@ -299,6 +354,17 @@ def convert_apdl_block(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
+    use_vtk : bool, optional
+        It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value. Defaults to `None` which is Mapdl class default.
+
+    clear_at_start : bool, optional
+        Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
+        `False`.
+
+    check_parameter_names : bool, optional
+        Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.
+
     Returns
     -------
     list
@@ -335,6 +401,9 @@ def convert_apdl_block(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
+        use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     if isinstance(apdl_strings, str):
@@ -357,6 +426,9 @@ def _convert(
     header=True,
     print_com=True,
     only_commands=False,
+    use_vtk=None,
+    clear_at_start=False,
+    check_parameter_names=True,
 ):
     if only_commands:
         auto_exit = False
@@ -375,6 +447,9 @@ def _convert(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
+        use_vtk=use_vtk,
+        clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
     )
 
     if isinstance(apdl_strings, str):
@@ -437,6 +512,9 @@ class FileTranslator:
         cleanup_output=True,
         header=True,
         print_com=True,
+        use_vtk=None,
+        clear_at_start=False,
+        check_parameter_names=False,
     ):
         self._non_interactive_level = 0
         self.lines = Lines(mute=not show_log)
@@ -454,12 +532,17 @@ class FileTranslator:
         self.cleanup_output = cleanup_output
         self._header = header
         self.print_com = print_com
+        self.verification_example = False
+        self.use_vtk = use_vtk
+        self.clear_at_start = clear_at_start
+        self.check_parameter_names = check_parameter_names
+        self.macros_names = []
 
         self.write_header()
         if self._add_imports:
             self.initialize_mapdl_object(loglevel, exec_file)
 
-        self._valid_commands = dir(Commands)
+        self._valid_commands = self._get_valid_pymapdl_methods_short()
         self._block_commands = {
             "NBLO": "NBLOCK",
             "EBLO": "EBLOCK",
@@ -474,7 +557,6 @@ class FileTranslator:
         }  # Commands where you need to count the number of lines.
 
         _NON_INTERACTIVE_COMMANDS = {
-            "*CRE": "*CREATE",
             "*VWR": "*VWRITE",
             "*VRE": "*VREAD",
         }
@@ -553,16 +635,25 @@ class FileTranslator:
         core_module = "ansys.mapdl.core"  # shouldn't change
         self.lines.append(f"from {core_module} import launch_mapdl")
 
+        mapdl_arguments = [f'loglevel="{loglevel}"']
+
         if exec_file:
-            exec_file_parameter = f'exec_file="{exec_file}", '
-        else:
-            exec_file_parameter = ""
+            mapdl_arguments.append(f'exec_file="{exec_file}"')
 
         if self.print_com:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}", print_com=True)\n'
-        else:
-            line = f'{self.obj_name} = launch_mapdl({exec_file_parameter}loglevel="{loglevel}")\n'
+            mapdl_arguments.append("print_com=True")
+
+        if self.use_vtk is not None:
+            mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
+
+        if self.check_parameter_names is not None and not self.check_parameter_names:
+            mapdl_arguments.append("check_parameter_names=False")
+
+        line = f'{self.obj_name} = launch_mapdl({", ".join(mapdl_arguments)})'
         self.lines.append(line)
+
+        if self.clear_at_start:
+            self.lines.append(f"{self.obj_name}.clear() # Clearing session")
 
     @property
     def line_ending(self):
@@ -611,6 +702,8 @@ class FileTranslator:
                 self.comment = self.comment.lstrip()
 
         if not line:
+            # Keeping empty lines
+            self.lines.append("")
             return
 
         # Cleaning ending empty arguments.
@@ -623,6 +716,8 @@ class FileTranslator:
 
         line = ",".join(line_[ind:][::-1])
 
+        line_with_trailing_commas = line
+
         # remove trailing comma
         line = line[:-1] if line[-1] == "," else line
         line_upper = line.upper()
@@ -630,7 +725,7 @@ class FileTranslator:
         cmd_caps = line.split(",")[0].upper()
         cmd_caps_short = cmd_caps[:4]
 
-        items = line.split(",")
+        items = self._get_items(line.strip())
 
         if cmd_caps_short in ["SOLV", "LSSO"] and self._comment_solve:
             self.store_command(
@@ -640,8 +735,16 @@ class FileTranslator:
             self.store_command("com", [line])
             return
 
+        if cmd_caps_short == "/VER":
+            self.verification_example = True
+
         if cmd_caps_short == "/COM":
             # It is a comment
+            self.store_command("com", [line[5:]])
+            return
+
+        if cmd_caps_short == "C***":
+            # It is an old style comment
             self.store_command("com", [line[5:]])
             return
 
@@ -655,9 +758,16 @@ class FileTranslator:
             self.end_non_interactive()
             return
 
+        if "/EXI" in cmd_caps.upper() and self.non_interactive:
+            self.store_command("com", [f"Skipping: {line}"])
+            return
+
         if self.output_to_file(line):
-            self.start_non_interactive()
-            self.store_run_command(line)
+            if self.verification_example and "SCRATCH" in line.upper():
+                self.store_command("com", [f"Skipping: {line}"])
+            else:
+                self.start_non_interactive()
+                self.store_run_command(line)
             return
 
         if self.output_to_default(line):
@@ -669,7 +779,6 @@ class FileTranslator:
         if cmd_caps == "/VERIFY":
             self.store_run_command("FINISH")
             self.store_run_command(line)
-            self.store_run_command("/PREP7")
             return
 
         if cmd_caps_short == "*REP":
@@ -677,7 +786,7 @@ class FileTranslator:
                 prev_cmd = self.lines.pop(-1)
                 self.start_non_interactive()
                 new_prev_cmd = (
-                    "    " + prev_cmd
+                    self.indent + prev_cmd
                 )  # Since we are writing in self.lines we need to add the indentation by ourselves.
                 self.lines.append(new_prev_cmd)
                 self.store_run_command(
@@ -686,13 +795,27 @@ class FileTranslator:
                 self.end_non_interactive()
                 return
 
+        # Skipping conversion if command has empty arguments and there is ",," in the call
+        if (
+            cmd_caps_short in COMMANDS_WITH_EMPTY_ARGS
+            and ",," in line_with_trailing_commas.replace(" ", "")
+        ):
+            self.store_run_command(line.strip())
+            return
+
+        # Skipping commands to not be converted
         if cmd_caps_short in COMMANDS_TO_NOT_BE_CONVERTED:
-            self.store_run_command(line)
+            self.store_run_command(line.strip())
             return
 
         if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
-            return self.store_command("title", ["".join(parameters).strip()])
+            return self.store_command("title", [",".join(parameters).strip()])
+
+        if cmd_caps_short == "/AXL":  # /AXLAB
+            parameters = line.split(",")[1:]
+            parameters_ = [parameters[0], ",".join(parameters[1:])]
+            return self.store_command("axlab", parameters_)
 
         if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
@@ -710,11 +833,28 @@ class FileTranslator:
             return
 
         if cmd_caps_short == "*CRE":  # creating a function
+            self.macros_names.append(items[1])
             if self.macros_as_functions:
                 self.start_function(items[1].strip())
                 return
             else:
                 self.start_non_interactive()
+
+        ## Treating functions
+        if items[0] in self.macros_names and self.macros_as_functions:
+            # We are calling the function/macro created before.
+            func_name = items[0].strip()
+
+            args = self._parse_arguments(items[1:])
+            self.store_python_command(f"{func_name}({args})")
+            return
+
+        if cmd_caps_short == "*USE" and self.macros_as_functions:
+            func_name = items[1].strip()
+            if func_name in self._functions:
+                args = self._parse_arguments(items[2:])
+                self.store_python_command(f"{func_name}({args})")
+                return
 
         if cmd_caps == "/PREP7":
             return self.store_command("prep7", [])
@@ -749,17 +889,7 @@ class FileTranslator:
                     + "The previous line is: \n%s\n\n" % self.lines[-1]
                 )
             self.store_run_command(line)
-            if (
-                not self._in_block
-            ):  # To escape cmds that require (XX) but they are not in block
-                self.end_non_interactive()
             return
-        elif cmd_caps_short == "*USE" and self.macros_as_functions:
-            func_name = items[1].strip()
-            if func_name in self._functions:
-                args = ", ".join(items[2:])
-                self.lines.append(f"{func_name}({args})")
-                return
 
         # check if a line is setting a variable
         if "=" in items[0]:  # line sets a variable:
@@ -781,52 +911,65 @@ class FileTranslator:
         # check valid command
         if (
             self._pymapdl_command(command) not in self._valid_commands
-            or cmd_caps_short in self._non_interactive_commands
+            and cmd_caps_short in self._non_interactive_commands
         ):
-            if cmd_caps_short in self._non_interactive_commands:
-                if cmd_caps_short in self._block_commands:
-                    self._in_block = True
-                    self._block_count = 0
-                    self._block_count_target = 0
+            if cmd_caps_short in self._block_commands:
+                self._in_block = True
+                self._block_count = 0
+                self._block_count_target = 0
 
-                elif cmd_caps_short in self._enum_block_commands:
-                    self._in_block = True
-                    self._block_count = 0
-                    if cmd_caps_short == "CMBL":  # In cmblock
-                        # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
-                        numitems = int(line.split(",")[3])
-                        _block_count_target = (
-                            numitems // 8 + 1 if numitems % 8 != 0 else numitems // 8
-                        )
-                        self._block_count_target = (
-                            _block_count_target + 2
-                        )  # because the cmd_caps_short line and option line.
+            elif cmd_caps_short in self._enum_block_commands:
+                self._in_block = True
+                self._block_count = 0
+                if cmd_caps_short == "CMBL":  # In cmblock
+                    # CMBLOCK,Cname,Entity,NUMITEMS,,,,,KOPT
+                    numitems = int(line.split(",")[3])
+                    _block_count_target = (
+                        numitems // 8 + 1 if numitems % 8 != 0 else numitems // 8
+                    )
+                    self._block_count_target = (
+                        _block_count_target + 2
+                    )  # because the cmd_caps_short line and option line.
 
-                self._block_current_cmd = cmd_caps_short
-                self.start_non_interactive()
-
-            if self._in_block and cmd_caps_short not in self._non_interactive_commands:
-                self.store_run_command(original_line)
-            else:
-                self.store_run_command(line)
+            self._block_current_cmd = cmd_caps_short
+            self.start_non_interactive()
+            self.store_run_command(line.strip())
 
         elif self.use_function_names:
-            if command[0] == "/":
-                slash_command = f"slash{command[1:]}"
-                if slash_command in dir(Commands):
-                    command = slash_command
-                else:
-                    command = command[1:]
-            elif command[0] == "*":
-                star_command = f"star{command[1:]}"
-                if star_command in dir(Commands):
-                    command = star_command
-                else:
-                    command = command[1:]
+            # Takign into account the leading characters
+            if command.upper() in FORCED_MAPPING:
+                # Checking exceptions/forced mapping
+                command = FORCED_MAPPING[command.upper()]
 
-            self.store_command(command, parameters)
+            else:
+                # Looking for a suitable candidate.
+                if command[0] == "/":
+                    slash_command = f"slash{command[1:4]}"
+                    if slash_command in self._valid_commands:
+                        command = slash_command
+                    else:
+                        command = command[1:]
+                elif command[0] == "*":
+                    star_command = f"star{command[1:4]}"
+                    if star_command in self._valid_commands:
+                        command = star_command
+                    else:
+                        command = command[1:]
+
+                # Some commands are abbreviated (only 4 letters)
+                from ansys.mapdl.core import Mapdl
+
+                if command not in dir(Mapdl):
+                    command = self.find_match(command)
+
+            # Storing
+            if command:
+                self.store_command(command, parameters)
+            else:  # find_match can return None
+                self.store_run_command(line.strip())
+
         else:
-            self.store_run_command(line)
+            self.store_run_command(line.strip())
 
     def _pymapdl_command(self, command):
         if command[0] in ["/", "*"]:
@@ -839,14 +982,16 @@ class FileTranslator:
         self.store_empty_line()
         self._infunction = True
         spacing = " " * (len(func_name) + 5)
-        line = "def %s(%s," % (
+        line = self.indent + "def %s(%s," % (
             func_name,
             ", ".join(["ARG%d=''" % i for i in range(1, 7)]),
         )
+        line += "\n"
         line += "%s%s," % (
             spacing,
             ", ".join(["ARG%d=''" % i for i in range(7, 13)]),
         )
+        line += "\n"
         line += "%s%s):" % (
             spacing,
             ", ".join(["ARG%d=''" % i for i in range(13, 19)]),
@@ -866,22 +1011,24 @@ class FileTranslator:
         else:
             underscore = ""
 
+        # Removing trailing/leading spaces
+        command = command.strip()
+
         if self._infunction and "ARG" in command:
             args = []
             for i in range(1, 19):
                 arg = "ARG%d" % i
                 c = 0
                 if arg in command:
-                    command = command.replace(arg, "{%d:s}" % c)
+                    command = command.replace(arg, "{" + f"{arg}" + "}")
                     args.append(arg)
                     c += 1
 
-            line = '%s%s.%srun("%s".format(%s))' % (
+            line = '%s%s.%srun(f"%s")' % (
                 self.indent,
                 self.obj_name,
                 underscore,
                 command,
-                ", ".join(args),
             )
 
         elif self.comment:
@@ -910,12 +1057,15 @@ class FileTranslator:
         """Stores an empty line"""
         self.lines.append("")
 
-    def store_command(self, function, parameters):
-        """Stores a valid pyansys function with parameters"""
+    def store_python_command(self, command):
+        line = f"{self.indent}{command}"
+        self.lines.append(line)
+
+    def _parse_arguments(self, parameters):
         parsed_parameters = []
         for parameter in parameters:
             parameter = parameter.strip()
-            if is_float(parameter):
+            if is_float(parameter) and parameter.upper() != "INF":
                 parsed_parameters.append(parameter)
             elif "ARG" in parameter and self._infunction:
                 parsed_parameters.append("%s" % parameter)
@@ -927,7 +1077,12 @@ class FileTranslator:
                     parameter = parameter[1:-1]
                 parsed_parameters.append(f'"{parameter}"')
 
-        parameter_str = ", ".join(parsed_parameters)
+        return ", ".join(parsed_parameters)
+
+    def store_command(self, function, parameters):
+        """Stores a valid pyansys function with parameters"""
+        parameter_str = self._parse_arguments(parameters)
+
         if self.comment:
             line = "%s%s.%s(%s)  # %s" % (
                 self.indent,
@@ -957,9 +1112,9 @@ class FileTranslator:
 
     def end_non_interactive(self):
         self._non_interactive_level -= 1
-        if self._non_interactive_level == 0:
-            self.non_interactive = False
+        if self._non_interactive_level <= 0:
             self.indent = self.indent[4:]
+            self.non_interactive = False
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
@@ -1001,6 +1156,52 @@ class FileTranslator:
 
         return False
 
+    def _get_items(self, line_):
+        """Parse the line items (comma separated elements) but ignoring the ones inside parenthesis, or brackets"""
+
+        parenthesis_count = 0
+
+        items = []
+        begining_substring = 0
+
+        for ind, each_char in enumerate(line_):
+            if each_char in ["(", "[", "{"]:
+                parenthesis_count += 1
+
+            if each_char == "," and parenthesis_count == 0:
+                items.append(line_[begining_substring:ind])
+                begining_substring = ind + 1
+
+            if ind == len(line_) - 1:  # reaching ending of line
+                items.append(line_[begining_substring : ind + 1])
+
+            if each_char in [")", "]", "}"]:
+                parenthesis_count -= 1
+
+        return items
+
+    def _get_valid_pymapdl_methods_short(self):
+        pymethods = dir(Commands)
+
+        reduced_list = []
+        for each_method in pymethods:
+            if not re.match(r"^[\*~/A-Za-z]\w*$", each_method):
+                continue
+            if each_method.startswith("slash"):
+                reduced_list.append(each_method[:8])
+            elif each_method.startswith("star"):
+                reduced_list.append(each_method[:7])
+            else:
+                reduced_list.append(each_method[:4])
+        return reduced_list
+
+    def find_match(self, cmd):
+        pymethods = sorted(dir(Commands))
+
+        for each in pymethods:
+            if each.startswith(cmd):
+                return each
+
 
 import click
 
@@ -1011,59 +1212,88 @@ import click
 @click.option("--filename_out", default=None, help="Name of the output Python script.")
 @click.option(
     "--loglevel",
-    default="WARNING",
+    default=LOGLEVEL_DEFAULT,
     help="Logging level of the ansys object within the script.",
 )
 @click.option(
     "--auto_exit",
-    default=True,
+    default=AUTO_EXIT_DEFAULT,
     help="Adds a line to the end of the script to exit MAPDL. Default ``True``",
 )
-@click.option("--line_ending", default=None, help="When None, automatically is ``\n.``")
+@click.option(
+    "--line_ending",
+    default=LINE_ENDING_DEFAULT,
+    help="When None, automatically is ``\n.``",
+)
 @click.option(
     "--exec_file",
-    default=None,
+    default=EXEC_FILE_DEFAULT,
     help="Specify the location of the ANSYS executable and include it in the converter output ``launch_mapdl`` call.",
 )
 @click.option(
     "--macros_as_functions",
-    default=True,
+    default=MACROS_AS_FUNCTIONS_DEFAULT,
     help="Attempt to convert MAPDL macros to python functions.",
 )
 @click.option(
     "--use_function_names",
-    default=True,
+    default=USE_FUNCTION_NAMES_DEFAULT,
     help="Convert MAPDL functions to ansys.mapdl.core.Mapdl class methods.  When ``True``, the MAPDL command ``K`` will be converted to ``mapdl.k``.  When ``False``, it will be converted to ``mapdl.run('k')``.",
 )
 @click.option(
     "--show_log",
-    default=False,
+    default=SHOW_LOG_DEFAULT,
     help="Print the converted commands using a logger (from ``logging`` Python module).",
 )
 @click.option(
     "--add_imports",
-    default=True,
+    default=ADD_IMPORTS_DEFAULT,
     help='If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl`` and ``mapdl = launch_mapdl(loglevel="WARNING")`` to the beginning of the output file. This option is useful if you are planning to use the output script from another mapdl session. See examples section. This option overrides ``auto_exit``.',
 )
 @click.option(
     "--comment_solve",
-    default=False,
+    default=COMMENT_SOLVE_DEFAULT,
     help='If ``True``, it will pythonically comment the lines that contain ``"SOLVE"`` or ``"/EOF"``.',
 )
 @click.option(
     "--cleanup_output",
-    default=True,
+    default=CLEANUP_OUTPUT_DEFAULT,
     help="If ``True`` the output is formatted using ``autopep8`` before writing the file or returning the string. This requires ``autopep8`` to be installed.",
 )
 @click.option(
     "--header",
-    default=True,
+    default=HEADER_DEFAULT,
     help="If ``True``, the default header is written in the first line of the output. If a string is provided, this string will be used as header.",
 )
 @click.option(
     "--print_com",
-    default=True,
+    default=PRINT_COM_DEFAULT,
     help="Print command ``/COM`` arguments to python console. Defaults to ``True``.",
+)
+@click.option(
+    "--only_commands",
+    default=ONLY_COMMANDS_DEFAULT,
+    help="""converts only the commands, meaning that header
+        (``header=False``), imports (``add_imports=False``),
+        and exit commands are NOT included (``auto_exit=False``).
+        Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
+)
+@click.option(
+    "--use_vtk",
+    default=USE_VTK_DEFAULT,
+    help="""It sets the `mapdl.use_vtk` argument equals True or False depending on
+        this value.""",
+)
+@click.option(
+    "--clear_at_start",
+    default=CLEAR_AT_START_DEFAULT,
+    help="""Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
+        `False`.""",
+)
+@click.option(
+    "--check_parameter_names",
+    default=CHECK_PARAMETER_NAMES_DEFAULT,
+    help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `True`.""",
 )
 def cli(
     filename_in,
@@ -1081,6 +1311,10 @@ def cli(
     cleanup_output,
     header,
     print_com,
+    only_commands,
+    use_vtk,
+    clear_at_start,
+    check_parameter_names,
 ):
     """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
 
@@ -1113,6 +1347,30 @@ def cli(
     if o:
         filename_out = o
 
+    # Parsing commands:
+    loglevel = _parse_cli_command(loglevel, LOGLEVEL_DEFAULT)
+    auto_exit = _parse_cli_command(auto_exit, AUTO_EXIT_DEFAULT)
+    line_ending = _parse_cli_command(line_ending, LINE_ENDING_DEFAULT)
+    exec_file = _parse_cli_command(exec_file, EXEC_FILE_DEFAULT)
+    macros_as_functions = _parse_cli_command(
+        macros_as_functions, MACROS_AS_FUNCTIONS_DEFAULT
+    )
+    use_function_names = _parse_cli_command(
+        use_function_names, USE_FUNCTION_NAMES_DEFAULT
+    )
+    show_log = _parse_cli_command(show_log, SHOW_LOG_DEFAULT)
+    add_imports = _parse_cli_command(add_imports, ADD_IMPORTS_DEFAULT)
+    comment_solve = _parse_cli_command(comment_solve, COMMENT_SOLVE_DEFAULT)
+    cleanup_output = _parse_cli_command(cleanup_output, CLEANUP_OUTPUT_DEFAULT)
+    header = _parse_cli_command(header, HEADER_DEFAULT)
+    print_com = _parse_cli_command(print_com, PRINT_COM_DEFAULT)
+    only_commands = _parse_cli_command(only_commands, ONLY_COMMANDS_DEFAULT)
+    use_vtk = _parse_cli_command(use_vtk, USE_VTK_DEFAULT)
+    clear_at_start = _parse_cli_command(clear_at_start, CLEAR_AT_START_DEFAULT)
+    check_parameter_names = _parse_cli_command(
+        check_parameter_names, CHECK_PARAMETER_NAMES_DEFAULT
+    )
+
     convert_script(
         filename_in,
         filename_out,
@@ -1128,6 +1386,10 @@ def cli(
         cleanup_output,
         header,
         print_com,
+        only_commands,
+        use_vtk,
+        clear_at_start,
+        check_parameter_names,
     )
 
     if filename_out:
@@ -1136,3 +1398,17 @@ def cli(
         print(
             f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
         )
+
+
+def _parse_cli_command(command, default=None):
+    if isinstance(command, bool):
+        return command
+    if command is None:
+        return
+
+    if command.upper() == "TRUE":
+        return True
+    elif command.upper() == "FALSE":
+        return False
+    else:
+        return default
