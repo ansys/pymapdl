@@ -76,7 +76,7 @@ class TestRunQuery:
             with mapdl.non_interactive:
                 q.kx(1)
 
-    @pytest.mark.skip_grpc  # only works in gRPC mode
+    @requires("grpc")  # only works in gRPC mode
     def test_nopr_mode(self, mapdl, line_geometry):
         try:
             # enter no printout mode

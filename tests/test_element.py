@@ -33,7 +33,7 @@ def test_et(mapdl, cleared):
     assert n_plane183 == 17
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_ewrite(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)

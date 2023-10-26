@@ -11,7 +11,7 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+from conftest import TESTING_MINIMAL
 
 if not TESTING_MINIMAL:
     from ansys.mapdl.reader.rst import Result
@@ -28,15 +28,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import (
-    IS_SMP,
-    ON_CI,
-    ON_LOCAL,
-    QUICK_LAUNCH_SWITCHES,
-    skip_if_not_local,
-    skip_if_on_cicd,
-    skip_on_windows,
-)
+from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -163,7 +155,7 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
         return any(warns)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
@@ -188,7 +180,7 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_server_version(mapdl):
     if mapdl.version == 20.2:
         assert mapdl._server_version == (0, 0, 0)
@@ -203,7 +195,7 @@ def test_server_version(mapdl):
         assert mapdl._server_version[0] >= 0
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
@@ -225,7 +217,7 @@ def test_parsav_parres(mapdl, cleared, tmpdir):
     assert np.allclose(mapdl.parameters["MYARR"], arr)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
@@ -355,7 +347,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = "tmp.txt"
@@ -369,13 +361,13 @@ def test_list(mapdl, tmpdir):
     assert output == txt
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input("thisisnotafile")
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_keypoints(cleared, mapdl):
     assert mapdl.geometry.n_keypoint == 0
     kps = [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0]]
@@ -392,7 +384,7 @@ def test_keypoints(cleared, mapdl):
     assert np.allclose(knum, mapdl.geometry.knum)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -411,7 +403,7 @@ def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 4
 
 
-@skip_if_not_local
+@requires("local")
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
@@ -439,7 +431,7 @@ def test_apdl_logging_start(tmpdir):
     assert "K,4,0,1,0" in text
 
 
-@pytest.mark.corba
+@requires("corba")
 def test_corba_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
@@ -702,7 +694,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
@@ -796,7 +788,7 @@ def test_load_array_failure_types(mapdl, array):
     assert mapdl.parameters["myarr"].ndim == array.ndim + 1
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
 
@@ -892,7 +884,7 @@ def test_cdread(mapdl, cleared):
         mapdl.cdread("test", "model2", "cdb")
 
 
-@skip_if_not_local
+@requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split("/")[0][-3:0]
     dirname = "tt" + random_letters
@@ -1038,7 +1030,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     mapdl._run("/gopr")  # getting settings back
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_without_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1048,7 +1040,7 @@ def test_path_without_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_with_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1058,7 +1050,7 @@ def test_path_with_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
@@ -1088,8 +1080,8 @@ def test_cwd(mapdl, tmpdir):
         mapdl.cwd(old_path)
 
 
-@skip_if_on_cicd
-@skip_if_not_local
+@requires("nocicd")
+@requires("local")
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1376,7 +1368,7 @@ def test_result_file(mapdl, solved_box):
     assert isinstance(mapdl.result_file, str)
 
 
-@skip_if_not_local
+@requires("local")
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl.result_file
 
@@ -1439,7 +1431,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@skip_on_windows
+@requires("windows")
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
@@ -1737,7 +1729,7 @@ def test_get_file_name(mapdl):
     )
 
 
-@skip_if_not_local
+@requires("local")
 def test_cache_pids(mapdl):
     assert mapdl._pids
     mapdl._cache_pids()  # Recache pids
@@ -1746,7 +1738,7 @@ def test_cache_pids(mapdl):
         assert "ansys" in "".join(psutil.Process(each).cmdline())
 
 
-@skip_if_not_local
+@requires("local")
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
 
@@ -1810,7 +1802,7 @@ def test_check_empty_session_id(mapdl):
     assert mapdl.prep7()
 
 
-@skip_if_testing_minimal  # Requires 'request' package
+@requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1828,7 +1820,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-@skip_if_not_local
+@requires("local")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
@@ -1926,7 +1918,7 @@ def test_rlblock_rlblock_num(mapdl):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
-@skip_if_testing_minimal
+@requires("ansys-mapdl-reader")
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)

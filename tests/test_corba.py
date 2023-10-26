@@ -19,10 +19,10 @@ import pyvista
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import skip_no_xserver
+from conftest import requires
 
 # skip entire module unless --corba is enabled
-pytestmark = pytest.mark.corba
+pytestmark = requires("corba")
 
 
 @pytest.fixture(scope="function")
@@ -192,7 +192,7 @@ def test_invalid_area(mapdl_corba):
 # mapdl_corba.input('thisisnotafile')
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_kplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.k("", 0, 0, 0)
     mapdl_corba.k("", 1, 0, 0)
@@ -207,7 +207,7 @@ def test_kplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.kplot(knum=True, vtk=False)  # make sure legacy still works
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_aplot(cleared, mapdl_corba):
     k0 = mapdl_corba.k("", 0, 0, 0)
     k1 = mapdl_corba.k("", 1, 0, 0)
@@ -228,7 +228,7 @@ def test_aplot(cleared, mapdl_corba):
     mapdl_corba.aplot(vtk=False)
 
 
-@skip_no_xserver
+@requires("xserver")
 @pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl_corba, vtk):
     mapdl_corba.block(0, 1, 0, 1, 0, 1)
@@ -269,7 +269,7 @@ def test_lines(cleared, mapdl_corba):
     assert mapdl_corba.geometry.n_line == 4
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_lplot(cleared, mapdl_corba, tmpdir):
     mapdl_corba.lplot(vtk=True)
 
@@ -346,7 +346,7 @@ def test_enum(mapdl_corba, make_block):
 
 
 @pytest.mark.parametrize("nnum", [True, False])
-@skip_no_xserver
+@requires("xserver")
 def test_nplot_vtk(cleared, mapdl_corba, nnum):
     mapdl_corba.nplot()
 
@@ -356,7 +356,7 @@ def test_nplot_vtk(cleared, mapdl_corba, nnum):
     mapdl_corba.nplot(vtk=True, nnum=nnum, background="w", color="k")
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_nplot(cleared, mapdl_corba):
     mapdl_corba.n(1, 0, 0, 0)
     mapdl_corba.n(11, 10, 0, 0)
@@ -468,7 +468,7 @@ def test_builtin_parameters(mapdl_corba, cleared):
     assert mapdl_corba.parameters.real == 1
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot(mapdl_corba, make_block):
     init_elem = mapdl_corba.mesh.n_elem
     mapdl_corba.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -477,7 +477,7 @@ def test_eplot(mapdl_corba, make_block):
     assert mapdl_corba.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot_screenshot(mapdl_corba, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl_corba.eplot(

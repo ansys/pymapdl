@@ -16,10 +16,10 @@ from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-# skip entire module unless HAS_GRPC installed or connecting to server
-pytestmark = pytest.mark.skip_grpc
+from conftest import requires
 
-from conftest import skip_if_not_local
+# skip entire module unless HAS_GRPC installed or connecting to server
+pytestmark = requires("grpc")
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -358,7 +358,7 @@ def test_download_with_extension(
         os.remove(file)
 
 
-@skip_if_not_local
+@requires("local")
 def test_download_recursive(mapdl):
     if mapdl._local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")

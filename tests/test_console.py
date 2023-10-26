@@ -20,10 +20,10 @@ import pyvista
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import skip_no_xserver
+from conftest import requires
 
 # skip entire module unless --console is enabled
-pytestmark = pytest.mark.console
+pytestmark = requires("console")
 
 
 @pytest.fixture(scope="function")
@@ -205,7 +205,7 @@ def test_invalid_area(mapdl_console):
 # mapdl_console.input('thisisnotafile')
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_kplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.kplot(vtk=True)
@@ -223,7 +223,7 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_aplot(cleared, mapdl_console):
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
@@ -244,7 +244,7 @@ def test_aplot(cleared, mapdl_console):
     mapdl_console.aplot(vtk=False)
 
 
-@skip_no_xserver
+@requires("xserver")
 @pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl_console, vtk):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
@@ -285,7 +285,7 @@ def test_lines(cleared, mapdl_console):
     assert mapdl_console.geometry.n_line == 4
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_lplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.lplot(vtk=True)
@@ -360,7 +360,7 @@ def test_enum(mapdl_console, make_block):
 
 
 @pytest.mark.parametrize("knum", [True, False])
-@skip_no_xserver
+@requires("xserver")
 def test_nplot_vtk(cleared, mapdl_console, knum):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.nplot()
@@ -371,7 +371,7 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
@@ -490,7 +490,7 @@ def test_eplot_fail(mapdl_console):
         mapdl_console.eplot()
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot(mapdl_console, make_block):
     init_elem = mapdl_console.mesh.n_elem
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -499,7 +499,7 @@ def test_eplot(mapdl_console, make_block):
     assert mapdl_console.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot_screenshot(mapdl_console, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl_console.eplot(

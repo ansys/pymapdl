@@ -14,10 +14,10 @@ from ansys.tools.path import find_ansys
 
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 # skip entire module unless HAS_GRPC
-pytestmark = pytest.mark.skip_grpc
+pytestmark = requires("grpc")
 
 
 skip_if_ignore_pool = pytest.mark.skipif(
@@ -83,7 +83,7 @@ def test_invalid_exec():
         )
 
 
-@skip_if_not_local
+@requires("local")
 def test_heal(pool):
     pool_sz = len(pool)
     pool[0].exit()
@@ -101,7 +101,7 @@ def test_heal(pool):
     pool._verify_unique_ports()
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_simple_map(pool):
     pool_sz = len(pool)
@@ -109,7 +109,7 @@ def test_simple_map(pool):
     assert len(pool) == pool_sz
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_map_timeout(pool):
     pool_sz = len(pool)
@@ -136,7 +136,7 @@ def test_map_timeout(pool):
     assert len(pool) == pool_sz
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_simple(pool):
     pool_sz = len(pool)
@@ -150,7 +150,7 @@ def test_simple(pool):
 
 
 # fails intermittently
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_batch(pool):
     input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
@@ -159,7 +159,7 @@ def test_batch(pool):
 
 
 # fails intermittently
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_map(pool):
     completed_indices = []
@@ -178,7 +178,7 @@ def test_map(pool):
     assert len(outputs) == len(inputs)
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_abort(pool, tmpdir):
     pool_sz = len(pool)  # initial pool size
@@ -213,7 +213,7 @@ def test_abort(pool, tmpdir):
     assert path_deleted
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_default(pool):
     dirs_path_pool = os.listdir(pool._root_dir)
@@ -223,7 +223,7 @@ def test_directory_names_default(pool):
     assert "Instance_3" in dirs_path_pool
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_custom_string(tmpdir):
     pool = LocalMapdlPool(
@@ -242,7 +242,7 @@ def test_directory_names_custom_string(tmpdir):
     pool.exit(block=True)
 
 
-@skip_if_not_local
+@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_function(tmpdir):
     def myfun(i):

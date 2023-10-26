@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+from conftest import TESTING_MINIMAL, requires
 
 if not TESTING_MINIMAL:
     import pyvista as pv
@@ -158,7 +158,7 @@ def test_tshape_key(mapdl, contact_geom_and_mesh):
     assert tshape.size > 0
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_save(mapdl, cube_geom_and_mesh):
     # This test seems to fail when parallelized.
     fname = "mesh.vtk"

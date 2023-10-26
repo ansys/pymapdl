@@ -9,7 +9,7 @@ from ansys.mapdl.core.convert import (
     FileTranslator,
     convert_apdl_block,
 )
-from conftest import skip_if_testing_minimal
+from conftest import requires
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -465,7 +465,7 @@ def run_cli():
     return do_run
 
 
-@skip_if_testing_minimal
+@requires("click")
 def test_converter_cli(tmpdir, run_cli):
     input_file = tmpdir.join("mapdl.dat")
     output_file = tmpdir.join("mapdl.py")

@@ -5,7 +5,7 @@ import re
 import numpy as np
 import pytest
 
-from conftest import TESTING_MINIMAL, skip_if_testing_minimal
+from conftest import TESTING_MINIMAL, requires
 
 if not TESTING_MINIMAL:
     from pyvista import Plotter
@@ -155,14 +155,14 @@ def test_disp_norm_all(mapdl, static_solve):
 
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z", "norm"])  # lowercase intentional
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_disp_plot(mapdl, static_solve, comp):
     assert (
         mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
     )
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_disp_plot_subselection(mapdl, static_solve, verify_image_cache):
     verify_image_cache.skip = True  # skipping image verification
 
@@ -191,7 +191,7 @@ def test_nodal_eqv_stress(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_eqv_stress(mapdl, static_solve, verify_image_cache):
     verify_image_cache.skip = True  # skipping image verification
 
@@ -231,7 +231,7 @@ def test_rot(mapdl, static_solve, comp):
 
 
 @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_rot(mapdl, static_solve, comp):
     assert mapdl.post_processing.plot_nodal_rotation(comp) is None
 
@@ -250,13 +250,13 @@ def test_element_temperature(mapdl, static_solve):
     assert np.allclose(values, 0)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_element_temperature(mapdl, static_solve):
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_temperature() is None
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_temperature(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_temperature() is None
 
@@ -267,7 +267,7 @@ def test_pressure(mapdl, static_solve):
     assert np.allclose(from_grpc, 0)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_pressure(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_pressure() is None
 
@@ -278,7 +278,7 @@ def test_voltage(mapdl, static_solve):
     assert np.allclose(from_grpc, 0)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_voltage(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_voltage() is None
 
@@ -300,7 +300,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_component_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
@@ -322,7 +322,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_principal_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
@@ -341,7 +341,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
@@ -363,7 +363,7 @@ def test_nodal_total_component_strain(mapdl, static_solve, comp):
     assert np.allclose(data_ans, data)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_total_component_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_component_strain("x") is None
 
@@ -385,7 +385,7 @@ def test_nodal_principal_total_strain(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_principal_total_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_principal_strain(1) is None
 
@@ -404,7 +404,7 @@ def test_nodal_total_strain_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_total_strain_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_total_strain_intensity() is None
 
@@ -423,7 +423,7 @@ def test_nodal_total_eqv_strain(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_total_eqv_strain(mapdl, static_solve):
     assert (
         mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True) is None
@@ -448,7 +448,7 @@ def test_nodal_component_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_component_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
@@ -469,7 +469,7 @@ def test_nodal_principal_stress(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns, atol=1e-5)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_principal_stress(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
@@ -488,7 +488,7 @@ def test_nodal_stress_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_stress_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
@@ -510,7 +510,7 @@ def test_nodal_elastic_component_strain(mapdl, static_solve, comp):
     assert np.allclose(data_ans, data)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_elastic_component_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_component_strain("x") is None
 
@@ -532,7 +532,7 @@ def test_nodal_elastic_principal_strain(mapdl, static_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_elastic_principal_strain(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_principal_strain(1) is None
 
@@ -551,7 +551,7 @@ def test_nodal_elastic_strain_intensity(mapdl, static_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_elastic_strain_intensity(mapdl, static_solve):
     assert mapdl.post_processing.plot_nodal_elastic_strain_intensity() is None
 
@@ -570,7 +570,7 @@ def test_nodal_elastic_eqv_strain(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
     assert (
         mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True) is None
@@ -619,7 +619,7 @@ def test_elem_disp_norm(mapdl, static_solve):
 
 
 @pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM"])
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_elem_disp_plot(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
@@ -641,14 +641,14 @@ def test_element_stress(mapdl, static_solve, component, option):
 
 
 @pytest.mark.parametrize("comp", ["X", "1", "INT", "EQV"])
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_element_stress(mapdl, static_solve, comp):
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_stress(comp) is None
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_element_values(mapdl, static_solve, verify_image_cache):
     verify_image_cache.high_variance_test = 600
     mapdl.post1(mute=True)
@@ -673,7 +673,7 @@ def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
     assert np.allclose(data_ans, data)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_plastic_component_strain(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_component_strain("x") is None
 
@@ -694,7 +694,7 @@ def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
     assert np.allclose(from_grpc, from_prns)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_principal_strain(1) is None
 
@@ -710,7 +710,7 @@ def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     assert np.allclose(sint_ans, sint_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
     assert mapdl.post_processing.plot_nodal_plastic_strain_intensity() is None
 
@@ -726,7 +726,7 @@ def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
     assert (
         mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True) is None
@@ -752,7 +752,7 @@ def test_nodal_contact_friction_stress(mapdl, contact_solve):
     assert np.allclose(sfric_prn, sfric_nod)
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     assert (
         mapdl.post_processing.plot_nodal_contact_friction_stress(smooth_shading=True)
@@ -760,20 +760,19 @@ def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
     )
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_incomplete_element_selection(mapdl, contact_solve):
     mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
     assert mapdl.post_processing.plot_element_displacement() is None
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
     mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
     assert mapdl.post_processing.plot_nodal_displacement() is None
 
 
-@skip_if_testing_minimal
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
     verify_image_cache.skip = True  # skipping image verification
 
@@ -851,7 +850,6 @@ def test_set(mapdl, contact_solve, step_):
     assert mapdl.post_processing.step == step_
 
 
-@skip_if_testing_minimal
 def test_meta_post_plot_docstrings():
     for each in dir(PostProcessing):
         if each.startswith("plot_"):
@@ -893,7 +891,7 @@ def test_meta_post_plot_docstrings():
             ), f"Less than three complete one-liner general plotter link in {meth.__name__}"
 
 
-@skip_if_testing_minimal
+@requires("pyvista")
 def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
     # Display elements with their nodes numbers.
     mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
@@ -924,7 +922,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 #     assert np.allclose(data_ans, data)
 
 
-# @skip_if_testing_minimal
+# @requires("pyvista")
 # def test_plot_nodal_thermal_component_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_component_strain('x') is None
 
@@ -945,7 +943,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 #     assert np.allclose(from_grpc, from_prns)
 
 
-# @skip_if_testing_minimal
+# @requires("pyvista")
 # def test_plot_nodal_thermal_principal_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_principal_strain(1) is None
 
@@ -961,7 +959,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 #     assert np.allclose(sint_ans, sint_aligned)
 
 
-# @skip_if_testing_minimal
+# @requires("pyvista")
 # def test_plot_nodal_thermal_strain_intensity(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_strain_intensity() is None
 
@@ -977,7 +975,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 #     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-# @skip_if_testing_minimal
+# @requires("pyvista")
 # def test_plot_nodal_thermal_eqv_strain(mapdl, thermal_solve):
 #     assert mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True) is None
 

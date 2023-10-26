@@ -1,4 +1,5 @@
 from collections import namedtuple
+from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
@@ -57,10 +58,6 @@ from common import (
 
 TESTING_MINIMAL = testing_minimal()
 
-skip_if_testing_minimal = pytest.mark.skipif(
-    TESTING_MINIMAL, reason="Test not required when testing minimal package."
-)
-
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
 
@@ -107,6 +104,52 @@ skip_if_no_has_dpf = pytest.mark.skipif(
     not HAS_DPF,
     reason="""Requires DPF.""",
 )
+
+
+def requires(requirement: str):
+    """Check requirements"""
+    requirement = requirement.lower()
+
+    if "grpc" == requirement:
+        return skip_if_no_has_grpc
+
+    elif "dpf" == requirement:
+        return skip_if_no_has_dpf
+
+    elif "local" == requirement:
+        return skip_if_not_local
+
+    elif "nocicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "xserver" == requirement:
+        return skip_no_xserver
+
+    elif "nolinux" == requirement:
+        return skip_on_linux
+
+    elif "nowindows" == requirement:
+        return skip_on_windows
+
+    elif "console" == requirement:
+        return pytest.mark.console
+
+    elif "corba" == requirement:
+        return pytest.mark.corba
+
+    else:
+        return requires_dependency(requirement)
+
+
+def requires_dependency(dependency: str):
+    try:
+        import_module(dependency)
+        return pytest.mark.skipif(False, reason="Never skip")
+
+    except ModuleNotFoundError:
+        # package do not exit.
+        return pytest.mark.skip(reason=f"Requires '{dependency}' package")
+
 
 ################
 if os.name == "nt":
