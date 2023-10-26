@@ -73,7 +73,11 @@ you can create issues to report bugs and request new features. On the `PyMAPDL D
 <https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
 page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
 
-To reach the project support team, email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_.
+To reach the PyAnsys project support team, email `PyAnsys Core team <pyansys_core_>`_.
+Unfortunately no specific library questions or issues are answered through this email.
+Please refer to `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_,
+or `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ for raising issues,
+request new features, or asking questions.
 
 Project transition - legacy support
 -----------------------------------
