@@ -309,7 +309,7 @@ def test_plain_report():
         not_found_packages += 1
 
     _rep_str = rep_str.replace("Package not found", "", not_found_packages)
-    assert "Package not found" in _rep_str
+    assert "Package not found" not in _rep_str
 
     assert "\n" in rep_str
     assert len(rep_str.splitlines()) > 3

@@ -16,6 +16,9 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.examples import verif_files
 from conftest import has_dependency, requires
 
+if has_dependency("pandas"):
+    import pandas as pd
+
 LIST_OF_INQUIRE_FUNCTIONS = [
     "ndinqr",
     "elmiqr",
