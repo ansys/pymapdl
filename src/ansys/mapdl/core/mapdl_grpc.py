@@ -873,6 +873,7 @@ class MapdlGrpc(_MapdlCore):
 
         self.show(self._file_type_for_plots)
         self.version  # Caching version
+        self.file_type_for_plots  # Setting /show,png and caching it.
 
     def _reset_cache(self):
         """Reset cached items."""
@@ -1811,11 +1812,6 @@ class MapdlGrpc(_MapdlCore):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
-        # Escaping early if inside non_interactive context
-        if self._store_commands:
-            self._stored_commands.append(tmp_dat.splitlines()[1])
-            return None
-
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)
@@ -1823,6 +1819,11 @@ class MapdlGrpc(_MapdlCore):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
+        # Escaping early if inside non_interactive context
+        if self._store_commands:
+            self._stored_commands.append(tmp_dat.splitlines()[1])
+            return None
 
         request = pb_types.InputFileRequest(filename=tmp_name)
 
@@ -1896,8 +1897,12 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(fname):
                 # And it exists
                 filename = os.path.join(os.getcwd(), fname)
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
+            elif self._store_commands:
+                # Assuming that in non_interactive we have uploaded the file
+                # manually.
                 filename = os.path.join(self.directory, fname)
             else:
                 # Finally
@@ -1909,8 +1914,13 @@ class MapdlGrpc(_MapdlCore):
                 self.upload(ffullpath, progress_bar=progress_bar)
                 filename = fname
 
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = fname
+
+            elif self._store_commands:
+                # Assuming that in non_interactive, the file exists already in
+                # the Mapdl working directory
                 filename = fname
 
             else:
@@ -3034,7 +3044,8 @@ class MapdlGrpc(_MapdlCore):
     ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        return self.parameters[par]
+        if not self._store_commands:
+            return self.parameters[par]
 
     def get_variable(
         self,

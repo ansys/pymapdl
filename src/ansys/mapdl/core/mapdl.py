@@ -193,7 +193,9 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
-    "start_timeout" "timeout",
+    "start_timeout",
+    "timeout",
+    "check_parameter_names",
 ]
 
 
@@ -267,6 +269,7 @@ class _MapdlCore(Commands):
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
         self._print_com: bool = print_com  # print the command /COM input.
+        self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logging.Logger = logger.add_instance_logger(
@@ -366,6 +369,9 @@ class _MapdlCore(Commands):
     @property
     def file_type_for_plots(self):
         """Returns the current file type for plotting."""
+        if not self._file_type_for_plots:
+            self._run("/show, PNG")
+            self._file_type_for_plots = "PNG"
         return self._file_type_for_plots
 
     @file_type_for_plots.setter
@@ -475,6 +481,10 @@ class _MapdlCore(Commands):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 # in interactive mode (item='p'), the output is not suppressed
+                if self._store_commands:
+                    # In non-interactive mode, we do not need to check anything.
+                    return
+
                 is_interactive_arg = (
                     True
                     if len(args) >= 2
@@ -2019,27 +2029,31 @@ class _MapdlCore(Commands):
                     "``vtk=True``"
                 )
 
-            if not self._parent()._png_mode:
-                self._parent().show("PNG", mute=True)
-                self._parent().gfile(self._pixel_res, mute=True)
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
 
-            self.previous_device = self._parent().file_type_for_plots
+                self.previous_device = self._parent().file_type_for_plots
 
-            if self._parent().file_type_for_plots not in ["PNG", "TIFF", "PNG", "VRML"]:
-                self._parent().show(self._parent().default_file_type_for_plots)
-
-        def __exit__(self, *args) -> None:
-            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
-            self._parent().show("close", mute=True)
-            if not self._parent()._png_mode:
-                self._parent().show("PNG", mute=True)
-                self._parent().gfile(self._pixel_res, mute=True)
-
-            self._parent().file_type_for_plots = self.previous_device
+                if self._parent().file_type_for_plots not in [
+                    "PNG",
+                    "TIFF",
+                    "PNG",
+                    "VRML",
+                ]:
+                    self._parent().show(self._parent().default_file_type_for_plots)
 
         def __exit__(self, *args) -> None:
             self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
             self._parent().show("close", mute=True)
+
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
+
+                self._parent().file_type_for_plots = self.previous_device
 
     @property
     def _has_matplotlib(self):
@@ -2053,7 +2067,8 @@ class _MapdlCore(Commands):
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
-        return "PNG" in self.show(mute=False)
+        with self.force_output:
+            return "PNG" in self.show(mute=False)
 
     def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
@@ -2786,6 +2801,10 @@ class _MapdlCore(Commands):
         with self.force_output:
             response = self.run(command, **kwargs)
 
+        if self._store_commands:
+            # Return early in non_interactive
+            return
+
         value = response.split("=")[-1].strip()
         if item3:
             self._log.info(
@@ -3247,7 +3266,7 @@ class _MapdlCore(Commands):
             command = "/CLE,NOSTART"
 
         # Tracking output device
-        if command[:4].upper() == "/SHO":
+        if command[:4].upper() == "/SHO" and "," in command:
             self._file_type_for_plots = command.split(",")[1].upper()
 
         # Invalid commands silently ignored.
@@ -3290,7 +3309,16 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
+
+        if (
+            "Display device has not yet been specified with the /SHOW command" in text
+            and short_cmd in PLOT_COMMANDS
+        ):
+            # Reissuing the command to make sure we get output.
+            self.show(self.default_file_type_for_plots)
+            text = self._run(command, verbose=verbose, mute=mute)
 
         if command[:4].upper() == "/CLE" and self.is_grpc:
             # We have reset the database, so we need to create a new session id
@@ -3311,8 +3339,6 @@ class _MapdlCore(Commands):
             self._raise_errors(text)
 
         # special returns for certain geometry commands
-        short_cmd = parse_to_short_cmd(command)
-
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             plot_path = self._get_plot_name(text)
@@ -3981,6 +4007,9 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        if not self.check_parameter_names:
+            return
+
         param_name = param_name.strip()
 
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
