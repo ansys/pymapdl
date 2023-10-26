@@ -174,5 +174,5 @@ Recommended articles
 .. vale on
 
 
-Feel free to email any educational or learning resource to
-`PyAnsys Core team <pyansys_core_>`_.
+Feel free to share any educational or learning resources by `opening an issue <pymapdl_issues_>`_
+or `starting a discussion <pymapdl_discussions_>`_ on Github.
