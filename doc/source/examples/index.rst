@@ -28,18 +28,18 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
    :start-line: 2
 
 
-.. === Dev portal examples ==
+.. === Developer Portal examples ==
 
 .. include:: devportal.rst
    :start-line: 2
 
 
-.. === PYMAPDL EXAMPLES ===
+.. === PyMAPDL examples ===
 
 .. include:: pymapdl_examples_repo/index.rst
    :start-line: 2
 
-.. === EXTENDED EXAMPLES ===
+.. === Extended examples ===
 
 .. include:: extended_examples/index.rst
    :start-line: 2
