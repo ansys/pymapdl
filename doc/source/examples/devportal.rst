@@ -27,8 +27,9 @@ connect to Ansys experts and the growing Ansys developer community.
       :text-align: center
       :class-title: pyansys-card-title
 
-      This article explores the mechanical behavior of a flexible,
-      biomedical catheter under large deformation. Using the scripting...
+      Analyzing biomedical catheter flexibility using PyMAPDL scripting to
+      assess its flexural rigidity in various designs.
+
 
     .. grid-item-card:: Postprocessing of simplified bolted connections with the help of PyAnsys
       :img-top: https://developer.ansys.com/sites/default/files/inline-images/Postprocessing_of_simplified_bolted_connections_with_the_help_of_PyAnsys_image_04.jpg
@@ -36,5 +37,6 @@ connect to Ansys experts and the growing Ansys developer community.
       :text-align: center
       :class-title: pyansys-card-title
 
-      This article demonstrates graphical user interface (GUI) application
-      possibilities in calculating pre-tensioned bolted connections using...
+      Illustrating PyMAPDL's GUI possibilities for pre-tensioned bolted
+      connections, adhering to industry standards, and data extraction to Excel
+      for analysis.
