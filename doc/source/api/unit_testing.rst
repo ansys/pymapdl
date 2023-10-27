@@ -160,7 +160,7 @@ Here are some examples of how you use ``pytest``:
 
 
     def test_dunder_methods_keys(mapdl, basic_components):
-        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
+        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.names())
 
 
     def test_dunder_methods_types(mapdl, basic_components):
