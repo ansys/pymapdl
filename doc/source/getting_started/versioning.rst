@@ -86,8 +86,7 @@ it is recommended exploring alternative interfaces available in PyMAPDL.
 PyMAPDL maintainers greatly appreciate your support and understanding
 during this transition.
 If you have any questions or concerns regarding this change,
-email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_ or
-post them on the `PyMAPDL Discussions <https://github.com/ansys/pymapdl>`_ page.
+post them on the `PyMAPDL Discussions <pymapdl_discussions_>`_ page.
 
 Console interface
 -----------------

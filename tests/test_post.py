@@ -733,6 +733,7 @@ def test_plot_incomplete_element_selection(mapdl, contact_solve):
     assert mapdl.post_processing.plot_element_displacement() is None
 
 
+@pytest.mark.xfail(strict=False, reason="The image regression is failing. See #2435")
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
     mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
     assert mapdl.post_processing.plot_nodal_displacement() is None

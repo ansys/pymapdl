@@ -535,11 +535,11 @@ class Parameters:
 
         Parameters
         ----------
-        arr : np.ndarray or List
-            Array to send to MAPDL.  Maximum of 3 dimensions.
-
         name : str
             Name of the array to write to within MAPDL.
+
+        arr : np.ndarray or List
+            Array to send to MAPDL.  Maximum of 3 dimensions.
 
         Examples
         --------

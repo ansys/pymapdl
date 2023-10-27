@@ -669,7 +669,7 @@ class SpectrumOptions:
         command = f"PSDFRQ,{tblno1},{tblno2},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
         return self.run(command, **kwargs)
 
-    def psdgraph(self, tblno1="", tblno2="", **kwargs):
+    def psdgraph(self, tblno1="", tblno2="", displaykey="", **kwargs):
         """Displays input PSD curves
 
         APDL Command: PSDGRAPH
@@ -682,6 +682,14 @@ class SpectrumOptions:
         tblno2
             Second PSD table number to display. TBLNO2 is used only in
             conjunction with the COVAL or the QDVAL commands.
+
+        displaykey
+            Key to display the points markers and numbering:
+
+                0 - Display points markers and numbering (default).
+                1 - Display points numbering only.
+                2 - Display points markers only.
+                3 - No points markers or numbering.
 
         Notes
         -----
@@ -699,7 +707,7 @@ class SpectrumOptions:
 
         This command is valid in any processor.
         """
-        command = f"PSDGRAPH,{tblno1},{tblno2}"
+        command = f"PSDGRAPH,{tblno1},{tblno2},{displaykey}"
         return self.run(command, **kwargs)
 
     def psdres(self, lab="", relkey="", **kwargs):
