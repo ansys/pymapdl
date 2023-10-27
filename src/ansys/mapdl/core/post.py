@@ -3,6 +3,7 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 from ansys.mapdl.core.plotting import general_plotter
 
@@ -113,11 +114,11 @@ class PostProcessing:
 
     @property
     def _log(self):
-        """alias for mapdl log"""
+        """Alias for mapdl log"""
         return self._mapdl._log
 
     def _set_log_level(self, level):
-        """alias for mapdl._set_log_level"""
+        """Alias for mapdl._set_log_level"""
         return self._mapdl._set_log_level(level)
 
     @supress_logging
@@ -1346,6 +1347,7 @@ class PostProcessing:
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`
+
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition

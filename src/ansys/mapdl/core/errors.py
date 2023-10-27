@@ -1,4 +1,4 @@
-"""pymapdl specific errors"""
+"""PyMAPDL specific errors"""
 
 from functools import wraps
 import signal

@@ -81,6 +81,9 @@ def test_validate_sw():
     add_sw = _validate_MPI("-mpi intelmpi", exec_path)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
+    add_sw = _validate_MPI("-mpi INTELMPI", exec_path)
+    assert "msmpi" in add_sw and "INTELMPI" not in add_sw
+
 
 @skip_if_not_local
 @pytest.mark.parametrize("path_data", paths)
@@ -331,9 +334,9 @@ def test__force_smp_student_version():
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
     assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
 
-    add_sw = "-smp"
+    add_sw = "-SMP"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+    assert "-SMP" in _force_smp_student_version(add_sw, exec_path)
 
 
 @pytest.mark.parametrize(

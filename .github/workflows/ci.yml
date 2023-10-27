@@ -47,18 +47,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+  packages: read
+  
 jobs:
 
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
-    #Skipping until 2394 is fixed
-    if:  github.ref == 'Skip for now'
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
@@ -101,7 +102,7 @@ jobs:
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
-    # needs: doc-style - Skip for now
+    needs: doc-style
     timeout-minutes: 60
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
@@ -481,6 +482,9 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
+          fetch-depth: 0
+
 
       - name: "Setup Python"
         uses: actions/setup-python@v4

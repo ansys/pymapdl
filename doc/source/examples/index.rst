@@ -54,5 +54,4 @@ These links refers to the following GitHub repository where you can find all of 
 `GitHub Example Data Repository <example_data_repo_>`_
 
 If you find a missing or broken link, open an issue in
-GitHub (`PyMAPDL Issues <pymapdl_issues_>`_)
-or send an email to `PyAnsys Core team <pyansys_core_>`_.
+GitHub (`PyMAPDL Issues <pymapdl_issues_>`_).

@@ -1578,7 +1578,7 @@ def test_set_list(mapdl, cube_solve):
 
 
 def test_mode(mapdl):
-    assert mapdl.mode == "grpc"
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
@@ -1995,3 +1995,12 @@ def test_non_valid_kwarg(mapdl):
 
     with pytest.warns(UserWarning):
         mapdl.cdwrite(options="DB", fname="test1", ext="cdb")
+
+
+def test_check_parameter_names(mapdl):
+    with pytest.raises(ValueError):
+        mapdl.parameters["_dummy"] = 1
+
+    mapdl.check_parameter_names = False
+    mapdl.parameters["_dummy"] = 1
+    mapdl.check_parameter_names = True  # returning to default

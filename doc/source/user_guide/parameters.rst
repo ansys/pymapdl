@@ -4,10 +4,11 @@
 *********************************
 Setting and retrieving parameters
 *********************************
-APDL parameters can be retrieved from and instance of :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` using the :attr:`Mapdl.parameters
-<ansys.mapdl.core.Mapdl.parameters>`.  For example, if you want to use
-MAPDL's :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to
+APDL parameters can be retrieved from and instance of 
+:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
+For example, if you want to use MAPDL's
+:func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to
 populate a parameter, you can then access the parameter with code:
 
 .. code:: pycon
