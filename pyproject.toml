@@ -98,6 +98,7 @@ doc = [
     "sphinxemoji==0.2.0",
     "sphinx-reredirects==0.1.2",
     "vtk==9.2.6",
+    "sphinx_design==0.5.0",
 ]
 
 [tool.flit.module]
