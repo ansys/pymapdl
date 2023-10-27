@@ -670,27 +670,27 @@ class PostProcessing:
     @property
     @supress_logging
     def _all_nnum(self):
-        self._mapdl.cm("__TMP_NODE__", "NODE")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+
+            # rerun if encountered weird edge case of negative first index.
+            if nnum[0] == -1:
+                nnum = self._mapdl.get_array("NODE", item1="NLIST")
+
         return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
     def _all_enum(self):
-        self._mapdl.cm("__TMP_ELEM__", "ELEM")
-        self._mapdl.allsel()
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if enum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
+
+            # rerun if encountered weird edge case of negative first index.
+            if enum[0] == -1:
+                enum = self._mapdl.get_array("ELEM", item1="ELIST")
+
         return enum.astype(np.int32, copy=False)
 
     @property

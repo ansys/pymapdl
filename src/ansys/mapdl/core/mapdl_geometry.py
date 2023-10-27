@@ -1,5 +1,4 @@
 """Module to support MAPDL CAD geometry"""
-import contextlib
 from functools import wraps
 import re
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
@@ -8,7 +7,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
-from ansys.mapdl.core.errors import ComponentNoData, VersionError
+from ansys.mapdl.core.errors import VersionError
 
 if _HAS_PYVISTA:
     import pyvista as pv
@@ -666,75 +665,67 @@ class Geometry:
         ninc : int, optional
             Steps to between amin and amax.
         """
-        # store initially selected areas and elements
-        with contextlib.suppress(ComponentNoData):
-            # avoiding empty components exceptions
-            with self._mapdl.non_interactive:
-                self._mapdl.cm("__tmp_elem__", "ELEM")
-                self._mapdl.cm("__tmp_area__", "AREA")
+        with self._mapdl.save_selection:
+            orig_anum = self.anum
 
-        orig_anum = self.anum
+            # reselect from existing selection to mimic APDL behavior
+            if amin or amax:
+                if amax is None:
+                    amax = amin
 
-        # reselect from existing selection to mimic APDL behavior
-        if amin or amax:
-            if amax is None:
-                amax = amin
+                if amin is None:  # amax is non-zero
+                    amin = 1
 
-            if amin is None:  # amax is non-zero
-                amin = 1
+                if ninc is None:
+                    ninc = ""
 
-            if ninc is None:
-                ninc = ""
+                self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
-            self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
+            # duplicate areas to avoid affecting existing areas
+            a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            self._mapdl.numstr("AREA", a_num, mute=True)
+            self._mapdl.agen(2, "ALL", noelem=1, mute=True)
+            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
-        # duplicate areas to avoid affecting existing areas
-        a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-        self._mapdl.numstr("AREA", a_num, mute=True)
-        self._mapdl.agen(2, "ALL", noelem=1, mute=True)
-        a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+            # necessary to reset element/area meshing association
+            self._mapdl.aatt(mute=True)
 
-        self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
-        # necessary to reset element/area meshing association
-        self._mapdl.aatt(mute=True)
+            # create a temporary etype
+            etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
+            etype_old = self._mapdl.parameters.type
+            etype_tmp = etype_max + 1
 
-        # create a temporary etype
-        etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
-        etype_old = self._mapdl.parameters.type
-        etype_tmp = etype_max + 1
+            old_routine = self._mapdl.parameters.routine
 
-        old_routine = self._mapdl.parameters.routine
+            self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
+            self._mapdl.shpp("off", mute=True)
+            self._mapdl.smrtsize(density, mute=True)
+            self._mapdl.type(etype_tmp, mute=True)
 
-        self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
-        self._mapdl.shpp("off", mute=True)
-        self._mapdl.smrtsize(density, mute=True)
-        self._mapdl.type(etype_tmp, mute=True)
+            if old_routine != "PREP7":
+                self._mapdl.prep7(mute=True)
 
-        if old_routine != "PREP7":
-            self._mapdl.prep7(mute=True)
+            # Mesh and get the number of elements per area
+            resp = self._mapdl.amesh("all")
+            groups = get_elements_per_area(resp)
 
-        # Mesh and get the number of elements per area
-        resp = self._mapdl.amesh("all")
-        groups = get_elements_per_area(resp)
+            self._mapdl.esla("S")
+            grid = self._mapdl.mesh._grid.linear_copy()
+            pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
 
-        self._mapdl.esla("S")
-        grid = self._mapdl.mesh._grid.linear_copy()
-        pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
+            # pd['ansys_node_num'] = grid['ansys_node_num']
+            # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
+            # pd.clean(inplace=True)  # OPTIONAL
 
-        # pd['ansys_node_num'] = grid['ansys_node_num']
-        # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
-        # pd.clean(inplace=True)  # OPTIONAL
-
-        # delete all temporary meshes and clean up settings
-        self._mapdl.aclear("ALL", mute=True)
-        self._mapdl.adele("ALL", kswp=1, mute=True)
-        self._mapdl.numstr("AREA", 1, mute=True)
-        self._mapdl.type(etype_old, mute=True)
-        self._mapdl.etdele(etype_tmp, mute=True)
-        self._mapdl.shpp("ON", mute=True)
-        self._mapdl.smrtsize("OFF", mute=True)
-        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
-        self._mapdl.cmsel("S", "__tmp_elem__", "ELEM", mute=True)
+            # delete all temporary meshes and clean up settings
+            self._mapdl.aclear("ALL", mute=True)
+            self._mapdl.adele("ALL", kswp=1, mute=True)
+            self._mapdl.numstr("AREA", 1, mute=True)
+            self._mapdl.type(etype_old, mute=True)
+            self._mapdl.etdele(etype_tmp, mute=True)
+            self._mapdl.shpp("ON", mute=True)
+            self._mapdl.smrtsize("OFF", mute=True)
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
@@ -879,21 +870,13 @@ class Geometry:
     def _load_lines(self) -> List["pv.PolyData"]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
-        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
-        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
-        self._mapdl.cm("__tmp_keyp__", "KP", mute=True)
-        self._mapdl.ksel("ALL", mute=True)
-        self._mapdl.lsel("ALL", mute=True)
-        self._mapdl.asel("ALL", mute=True)
-        self._mapdl.vsel("NONE", mute=True)
+        with self._mapdl.save_selection:
+            self._mapdl.ksel("ALL", mute=True)
+            self._mapdl.lsel("ALL", mute=True)
+            self._mapdl.asel("ALL", mute=True)
+            self._mapdl.vsel("NONE", mute=True)
 
-        iges = self._load_iges()
-
-        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
-        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
-        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
-        self._mapdl.cmsel("S", "__tmp_keyp__", "KP", mute=True)
+            iges = self._load_iges()
 
         selected_lnum = self.lnum
         lines = []
@@ -928,18 +911,11 @@ class Geometry:
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
         # write only keypoints
-        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
-        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
-        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
-        self._mapdl.vsel("NONE", mute=True)
-        self._mapdl.asel("NONE", mute=True)
-        self._mapdl.lsel("NONE", mute=True)
-
-        iges = self._load_iges()
-
-        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
-        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
-        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
+        with self._mapdl.save_selection:
+            self._mapdl.vsel("NONE", mute=True)
+            self._mapdl.asel("NONE", mute=True)
+            self._mapdl.lsel("NONE", mute=True)
+            iges = self._load_iges()
 
         keypoints = []
         kp_num = []
@@ -1345,22 +1321,15 @@ class Geometry:
             return surf
 
         # Cache current selection
-        with contextlib.suppress(ComponentNoData):
-            # avoiding empty components exceptions
-            self._mapdl.cm("__temp_volu__", "volu")
-            self._mapdl.cm("__temp_area__", "area")
+        with self._mapdl.save_selection:
+            area_num = surf["entity_num"].astype(int)
 
-        area_num = surf["entity_num"].astype(int)
-
-        for each_volu in self.vnum:
-            self._mapdl.vsel("S", vmin=each_volu)
-            self._mapdl.aslv("S")
-            unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-            unstruct.entity_num = int(each_volu)
-            volumes_.append(unstruct)
-
-        self._mapdl.cmsel("S", "__temp_volu__")
-        self._mapdl.cmsel("S", "__temp_area__")
+            for each_volu in self.vnum:
+                self._mapdl.vsel("S", vmin=each_volu)
+                self._mapdl.aslv("S")
+                unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
+                unstruct.entity_num = int(each_volu)
+                volumes_.append(unstruct)
 
         return volumes_
 

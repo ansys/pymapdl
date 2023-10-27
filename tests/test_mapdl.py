@@ -2007,3 +2007,112 @@ def test_check_parameter_names(mapdl):
     mapdl.check_parameter_names = False
     mapdl.parameters["_dummy"] = 1
     mapdl.check_parameter_names = True  # returning to default
+
+
+def test_components_selection_keep_between_plots(mapdl, cube_solve):
+    mapdl.cm("mycm", "volu")
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+    mapdl.vplot()
+
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+
+def test_saving_selection_context(mapdl, cube_solve):
+    mapdl.allsel()
+
+    for i in range(1, 4):
+        mapdl.nsel("s", "", "", i)
+        mapdl.cm(f"nod_selection_{i}", "node")
+
+    for i in range(1, 4):
+        mapdl.esel("s", "", "", i)
+        mapdl.cm(f"elem_selection_{i}", "elem")
+
+    mapdl.cmsel("s", "nod_selection_1")
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    mapdl.cmsel("a", "elem_selection_1")
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    with mapdl.save_selection:
+        mapdl.cmsel("a", "nod_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+
+        mapdl.cmsel("a", "elem_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_1".upper() in mapdl.cmlist()
+        assert "elem_selection_1" in mapdl.components
+        assert "nod_selection_1".upper() in mapdl.cmlist()
+        assert "nod_selection_1" in mapdl.components
+
+        mapdl.nsel("s", "", "", 4)
+        mapdl.cm("nod_selection_4", "node")
+
+        with mapdl.save_selection:
+            mapdl.cmsel("s", "nod_selection_3")
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            mapdl.cmsel("a", "elem_selection_3")
+            assert "elem_selection_3".upper() in mapdl.cmlist()
+            assert "elem_selection_3" in mapdl.components
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            # Erased because the previous cmsel("s")
+            assert "nod_selection_4".upper() not in mapdl.cmlist()
+            assert "nod_selection_4" not in mapdl.components
+
+            assert "nod_selection_2".upper() not in mapdl.cmlist()
+            assert "nod_selection_2" not in mapdl.components
+            assert "elem_selection_2".upper() not in mapdl.cmlist()
+            assert "elem_selection_2" not in mapdl.components
+
+            assert "elem_selection_1".upper() not in mapdl.cmlist()
+            assert "elem_selection_1" not in mapdl.components
+            assert "nod_selection_1".upper() not in mapdl.cmlist()
+            assert "nod_selection_1" not in mapdl.components
+
+        # Checking correctly exiting contexts
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_3".upper() not in mapdl.cmlist()
+        assert "elem_selection_3" not in mapdl.components
+        assert "nod_selection_3".upper() not in mapdl.cmlist()
+        assert "nod_selection_3" not in mapdl.components
+
+        assert "nod_selection_4".upper() in mapdl.cmlist()
+        assert "nod_selection_4" in mapdl.components
+
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+
+    assert "elem_selection_3".upper() not in mapdl.cmlist()
+    assert "elem_selection_3" not in mapdl.components
+    assert "nod_selection_3".upper() not in mapdl.cmlist()
+    assert "nod_selection_3" not in mapdl.components
+
+    assert "nod_selection_4".upper() not in mapdl.cmlist()
+    assert "nod_selection_4" not in mapdl.components

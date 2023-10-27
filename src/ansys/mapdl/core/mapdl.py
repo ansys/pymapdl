@@ -652,6 +652,17 @@ class _MapdlCore(Commands):
         return self._force_output(self)
 
     @property
+    def save_selection(self):
+        """Save selection
+
+        Save the current selection (nodes, elements, keypoints, lines, areas,
+        volumes and components) before entering in the context manager, and
+        when exit returns to that selection.
+
+        """
+        return self._save_selection(self)
+
+    @property
     def solution(self) -> "Solution":
         """Solution parameters of MAPDL.
 
@@ -818,6 +829,50 @@ class _MapdlCore(Commands):
             self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
             self._parent()._store_commands = False
+
+    class _save_selection:
+        """Save the selection and returns to it when exiting"""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.selection_sets = []
+            self.selection_sets_comps = []
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering saving selection context")
+
+            selection_set_name = random_string(10)
+            self.selection_sets.append(selection_set_name)
+            self.selection_sets_comps.append(self._parent().components.names)
+
+            mapdl = self._parent()
+
+            prev_ier = mapdl.ignore_errors
+            mapdl.ignore_errors = True
+            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
+                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
+            mapdl.ignore_errors = prev_ier
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting saving selection context")
+            last_selection_name = self.selection_sets.pop()
+            last_selection_cmps = self.selection_sets_comps.pop()
+
+            mapdl = self._parent()
+
+            # probably this is redundant
+            prev_ier = mapdl.ignore_errors
+            mapdl.ignore_errors = True
+            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
+                cmp_name = f"_{last_selection_name}_{entity}_"
+                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
+                mapdl.cmdele(cmp_name)
+
+            mapdl.ignore_errors = prev_ier
+
+            # mute to avoid getting issues when the component wasn't created in
+            # first place because there was no entities.
+            self._parent().components.select(last_selection_cmps, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1721,45 +1776,39 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            cm_name_area = "__tmp_area2__"
-            cm_name_volu = "__tmp_volu2__"
-            self.cm(cm_name_area, "AREA", mute=True)
-            self.cm(cm_name_volu, "VOLU", mute=True)
+            # Storing entities selection
+            with self.save_selection:
+                volumes = self.geometry.vnum
+                meshes = []
+                points = []
+                labels = []
 
-            volumes = self.geometry.vnum
-            meshes = []
-            points = []
-            labels = []
+                return_plotter = kwargs.pop("return_plotter", False)
+                color_areas = True
 
-            return_plotter = kwargs.pop("return_plotter", False)
-            color_areas = True
+                for each_volu in volumes:
+                    self.vsel("S", vmin=each_volu)
+                    self.aslv("S", mute=True)  # select areas attached to active volumes
 
-            for each_volu in volumes:
-                self.vsel("S", vmin=each_volu)
-                self.aslv("S", mute=True)  # select areas attached to active volumes
+                    pl = self.aplot(
+                        vtk=True,
+                        color_areas=color_areas,
+                        quality=quality,
+                        show_area_numbering=show_area_numbering,
+                        show_line_numbering=show_line_numbering,
+                        show_lines=show_lines,
+                        return_plotter=True,
+                        **kwargs,
+                    )
 
-                pl = self.aplot(
-                    vtk=True,
-                    color_areas=color_areas,
-                    quality=quality,
-                    show_area_numbering=show_area_numbering,
-                    show_line_numbering=show_line_numbering,
-                    show_lines=show_lines,
-                    return_plotter=True,
-                    **kwargs,
-                )
+                    meshes_ = get_meshes_from_plotter(pl)
 
-                meshes_ = get_meshes_from_plotter(pl)
+                    for each_mesh in meshes_:
+                        each_mesh.cell_data["entity_num"] = int(each_volu)
 
-                for each_mesh in meshes_:
-                    each_mesh.cell_data["entity_num"] = int(each_volu)
+                    meshes.extend(meshes_)
 
-                meshes.extend(meshes_)
-
-            meshes = [{"mesh": meshes}]
-
-            self.cmsel("S", cm_name_area, "AREA", mute=True)
-            self.cmsel("S", cm_name_volu, "VOLU", mute=True)
+                meshes = [{"mesh": meshes}]
 
             return general_plotter(
                 meshes, points, labels, return_plotter=return_plotter, **kwargs
@@ -1978,11 +2027,10 @@ class _MapdlCore(Commands):
             if show_lines or show_line_numbering:
                 kwargs.setdefault("line_width", 2)
                 # subselect lines belonging to the current areas
-                self.cm("__area__", "AREA", mute=True)
-                self.lsla("S", mute=True)
 
-                lines = self.geometry.get_lines()
-                self.cmsel("S", "__area__", "AREA", mute=True)
+                with self.save_selection:
+                    self.lsla("S", mute=True)
+                    lines = self.geometry.get_lines()
 
                 if show_lines:
                     meshes.append(
@@ -4943,6 +4991,7 @@ class _MapdlCore(Commands):
         if entity[:4] not in ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]:
             raise ValueError(f"The entity '{entity}' is not allowed.")
 
+        cmps_names = self.components.names
         self.cm("__tmp_cm__", entity=entity)
         if label == "ALL":
             self.cmsel("ALL", entity=entity)
@@ -4964,4 +5013,5 @@ class _MapdlCore(Commands):
 
         # returning to previous selection
         self.cmsel("s", "__tmp_cm__", entity=entity)
+        self.components.select(cmps_names)
         return output
