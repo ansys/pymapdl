@@ -86,6 +86,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
+    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -243,6 +244,7 @@ sphinx_gallery_conf = {
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
     "default_thumb_file": pyansys_logo_white,
+    "show_signature": False,
 }
 # ---
 
