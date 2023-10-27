@@ -263,7 +263,7 @@ jobs:
         run: cat log.txt
 
   build-test:
-    name: "Remote: Build and unit testing"
+    name: "Remote: Build & test"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 35
@@ -458,7 +458,7 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
   build-test-ubuntu:
-    name: "Local: Build and unit testing on Ubuntu"
+    name: "Local: Build & test on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
@@ -581,10 +581,15 @@ jobs:
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
-
+      
+      - name: 'Upload minimal requirements file'
+        uses: actions/upload-artifact@v3
+        with:
+          name: minimum_requirements.txt
+          path: ./minimum_requirements.txt
 
   build-test-ubuntu-minimal:
-    name: "Local: Build and unit testing on minimal package in Ubuntu"
+    name: "Local: Build & test minimal package on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
@@ -658,7 +663,7 @@ jobs:
 
   test-windows:
     if: github.repository == ''
-    name: "Local: Build and unit testing on Windows"
+    name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
     env:
@@ -750,6 +755,7 @@ jobs:
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
             ./**/ansys-mapdl-core*.zip
+            ./minimum_requirements.txt
 
       - name: Upload to Public PyPi
         env:
