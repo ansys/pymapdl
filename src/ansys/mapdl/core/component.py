@@ -496,6 +496,6 @@ class ComponentManager:
 
         for i, each_name in enumerate(names):
             if i == 0:
-                self._mapdl.cmsel("S", each_name)
+                self._mapdl.cmsel("S", each_name, mute=mute)
             else:
-                self._mapdl.cmsel("A", each_name)
+                self._mapdl.cmsel("A", each_name, mute=mute)
