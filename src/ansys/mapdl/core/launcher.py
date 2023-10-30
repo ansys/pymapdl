@@ -223,8 +223,10 @@ def launch_grpc(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Fixed amount of memory to request for MAPDL.  If ``None``,
-        then MAPDL will use as much as available on the host machine.
+        Specifies the total size of the workspace Workspace (memory) in
+        megabytes used for the initial allocation. Specify a negative number to
+        force a fixed size throughout the run. If ``None``, then the default is
+        2 GB (2048 MB).
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
@@ -432,6 +434,9 @@ def launch_grpc(
         port += 1
         LOG.debug(f"Port in use.  Incrementing port number. port={port}")
     pymapdl._LOCAL_PORTS.append(port)
+
+    if not nproc:
+        nproc = 2
 
     cpu_sw = "-np %d" % nproc
 
@@ -992,8 +997,10 @@ def launch_mapdl(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Fixed amount of memory to request for MAPDL.  If ``None``,
-        then MAPDL will use as much as available on the host machine.
+        Specifies the total size of the workspace Workspace (memory) in
+        megabytes used for the initial allocation. Specify a negative number to
+        force a fixed size throughout the run. If ``None``, then the default is
+        2 GB (2048 MB).
 
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
@@ -1354,14 +1361,12 @@ def launch_mapdl(
 
         # extracting parameters
         exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-            exec_file,
-            jobname,
-            nproc,
-            ram,
-            additional_switches,
-            slurm_multiplier,
-            kwargs,
+            exec_file, jobname, nproc, ram, additional_switches, slurm_multiplier, **kwargs,
         )
+        # To avoid timeouts
+        license_server_check=False
+        start_timeout=2*start_timeout 
+
 
     if remove_temp_files is not None:
         warnings.warn(
@@ -1947,6 +1952,45 @@ def _parse_slurm_options(
     slurm_multiplier: Union[str, int] = 1,
     **kwargs,
 ):
+    ## Getting env vars    
+    SLURM_NNODES = int(
+        kwargs.pop("SLURM_NNODES", os.environ.get("SLURM_NNODES", 1))
+    )
+    # ntasks is for mpi
+    SLURM_NTASKS = int(
+        kwargs.pop("SLURM_NTASKS", os.environ.get("SLURM_NTASKS", 1))
+    )
+    # Sharing tasks acrros multiple nodes (DMP)
+    # the format of this envvar is a bit tricky. Avoiding it for the moment.
+    # SLURM_TASKS_PER_NODE = int(
+    #     kwargs.pop(
+    #         "SLURM_TASKS_PER_NODE", os.environ.get("SLURM_TASKS_PER_NODE", 1)
+    #     )
+    # )
+
+    # cpus-per-task is for multithreading,
+    # sharing tasks across multiple CPUs in same node (SMP)
+    SLURM_CPUS_PER_TASK = int(
+        kwargs.pop("SLURM_CPUS_PER_TASK", os.environ.get("SLURM_CPUS_PER_TASK", 1))
+    )
+
+    # Set to value of the --ntasks option, if specified. See SLURM_NTASKS. Included for backwards compatibility.
+    SLURM_NPROCS = int(
+        kwargs.pop("SLURM_NPROCS", os.environ.get("SLURM_NPROCS", 1))
+    )
+
+    # Number of CPUs allocated to the batch step.
+    SLURM_CPUS_ON_NODE = int(
+        kwargs.pop("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
+    )
+
+    SLURM_MEM_PER_NODE = kwargs.pop(
+            "SLURM_MEM_PER_NODE", os.environ.get("SLURM_MEM_PER_NODE", None))
+
+    SLURM_NODELIST = kwargs.pop(
+        "SLURM_NODELIST", os.environ.get("SLURM_NODELIST", "")
+    ).lower()
+
     if not exec_file:
         exec_file = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
 
@@ -1958,48 +2002,19 @@ def _parse_slurm_options(
 
     if not jobname:
         jobname = os.environ.get("SLURM_JOB_NAME", "file")
+    LOG.info(f"Using jobname: {jobname}")
 
     # Checking specific env var
     if not nproc:
-        nproc = os.environ.get("PYMAPDL_NPROC", nproc)
+        nproc = os.environ.get("PYMAPDL_NPROC", None)
 
     if not nproc:
         ## Attempt to calculate the appropriate number of cores:
         # Reference: https://stackoverflow.com/a/51141287/6650211
-        SLURM_NNODES = int(
-            kwargs.get("SLURM_NNODES", os.environ.get("SLURM_NNODES", 1))
-        )
-        # ntasks is for mpi
-        SLURM_NTASKS = int(
-            kwargs.get("SLURM_NTASKS", os.environ.get("SLURM_NTASKS", 1))
-        )
-        # Sharing tasks acrros multiple nodes (DMP)
-        SLURM_TASKS_PER_NODE = int(
-            kwargs.get(
-                "SLURM_TASKS_PER_NODE", os.environ.get("SLURM_TASKS_PER_NODE", 1)
-            )
-        )
-
-        # cpus-per-task is for multithreading,
-        # sharing tasks across multiple CPUs in same node (SMP)
-        SLURM_CPUS_PER_TASK = int(
-            kwargs.get("SLURM_CPUS_PER_TASK", os.environ.get("SLURM_CPUS_PER_TASK", 1))
-        )
-
-        # Set to value of the --ntasks option, if specified. See SLURM_NTASKS. Included for backwards compatibility.
-        SLURM_NPROCS = int(
-            kwargs.get("SLURM_NPROCS", os.environ.get("SLURM_NPROCS", 1))
-        )
-
-        # Number of CPUs allocated to the batch step.
-        SLURM_CPUS_ON_NODE = int(
-            kwargs.get("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
-        )
-
         # I'm assuming the env var makes sense.
         nproc = max(
             [
-                SLURM_NNODES * SLURM_TASKS_PER_NODE,  # tasks
+                # SLURM_NNODES * SLURM_TASKS_PER_NODE,  # tasks
                 SLURM_NTASKS,  # tasks
                 SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # cpus
                 SLURM_NPROCS,  # nproc
@@ -2011,12 +2026,11 @@ def _parse_slurm_options(
     LOG.info(f"Setting number of CPUs to: {nproc}")
 
     if not ram:
-        SLURM_MEM_PER_NODE = int(
-            kwargs.get(
-                "SLURM_MEM_PER_NODE", os.environ.get("SLURM_MEM_PER_NODE", 8 * 1024)
-            )
-        )
-        ram = SLURM_MEM_PER_NODE
+        if SLURM_MEM_PER_NODE:
+            if SLURM_CPUS_ON_NODE:
+                ram = SLURM_MEM_PER_NODE/SLURM_CPUS_ON_NODE
+            else:
+                ram = SLURM_MEM_PER_NODE
 
     LOG.info(f"Setting RAM to: {ram}")
 
@@ -2025,10 +2039,6 @@ def _parse_slurm_options(
 
     ## Getting the node list
     machines = ""
-    SLURM_NODELIST = kwargs.get(
-        "SLURM_NODELIST", os.environ.get("SLURM_NODELIST", "")
-    ).lower()
- 
     # parsing nodes to list
     if SLURM_NODELIST:
         p = subprocess.Popen(["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"], 
@@ -2039,23 +2049,22 @@ def _parse_slurm_options(
         stdout = p.stdout.read().decode()
 
         if "Invalid hostlist" in stderr:
-            raise ValueError(f"The node list is invalid, or it could not be parsed.\n"
-                             "Are you passing the nodes correctly?\n
-                             "Nodes list: {SLURM_NODELIST}")
+            raise ValueError("The node list is invalid, or it could not be parsed.\n",
+                             "Are you passing the nodes correctly?\n",
+                             f"Nodes list: {SLURM_NODELIST}")
         if stderr:
             raise RuntimeError(stderr)
         nodes = stdout.strip().splitlines()
         SLURM_CPUS_ON_NODE = int(
-            kwargs.get("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
+            kwargs.pop("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
         )
-        machines = "-machines " + ":".join([
+        machines = " -machines " + ":".join([
             f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
         ])
 
         additional_switches += machines
 
     LOG.info(f"Using nodes configuration: {machines}")
-
     return exec_file, jobname, nproc, ram, additional_switches
 
 
