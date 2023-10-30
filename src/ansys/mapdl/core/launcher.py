@@ -2020,18 +2020,41 @@ def _parse_slurm_options(
 
     LOG.info(f"Setting RAM to: {ram}")
 
-    nodes = []
+    if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
+        additional_switches += " -dis"
+
+    ## Getting the node list
+    machines = ""
     SLURM_NODELIST = kwargs.get(
         "SLURM_NODELIST", os.environ.get("SLURM_NODELIST", "")
     ).lower()
+ 
     # parsing nodes to list
     if SLURM_NODELIST:
-        subprocess.run(f"scontrol show hostnames '{SLURM_NODELIST}'")
+        p = subprocess.Popen(["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"], 
+                         stderr=subprocess.PIPE,
+                         stdout=subprocess.PIPE,
+                         )
+        stderr = p.stderr.read().decode()
+        stdout = p.stdout.read().decode()
 
-    LOG.info(f"Using nodes: {ram}")
+        if "Invalid hostlist" in stderr:
+            raise ValueError(f"The node list is invalid, or it could not be parsed.\n"
+                             "Are you passing the nodes correctly?\n
+                             "Nodes list: {SLURM_NODELIST}")
+        if stderr:
+            raise RuntimeError(stderr)
+        nodes = stdout.strip().splitlines()
+        SLURM_CPUS_ON_NODE = int(
+            kwargs.get("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
+        )
+        machines = "-machines " + ":".join([
+            f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
+        ])
 
-    if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
-        additional_switches += " -dis"
+        additional_switches += machines
+
+    LOG.info(f"Using nodes configuration: {machines}")
 
     return exec_file, jobname, nproc, ram, additional_switches
 
