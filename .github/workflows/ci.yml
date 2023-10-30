@@ -55,7 +55,7 @@ permissions:
   contents: write
   packages: read
   pull-requests: write
-  
+
 jobs:
 
   doc-style:
@@ -484,7 +484,7 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           persist-credentials: false
-          fetch-depth: 0
+          # fetch-depth: 0
 
 
       - name: "Setup Python"
