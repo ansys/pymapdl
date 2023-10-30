@@ -2009,6 +2009,7 @@ def test_check_parameter_names(mapdl):
     mapdl.check_parameter_names = True  # returning to default
 
 
+@requires("pyvista")
 def test_components_selection_keep_between_plots(mapdl, cube_solve):
     mapdl.cm("mycm", "volu")
     assert "MYCM" in mapdl.cmlist()
