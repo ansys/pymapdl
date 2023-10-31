@@ -1956,10 +1956,12 @@ def _parse_slurm_options(
     SLURM_NNODES = int(
         kwargs.pop("SLURM_NNODES", os.environ.get("SLURM_NNODES", 1))
     )
+    LOG.info(f"SLURM_NNODES: {SLURM_NNODES}")
     # ntasks is for mpi
     SLURM_NTASKS = int(
         kwargs.pop("SLURM_NTASKS", os.environ.get("SLURM_NTASKS", 1))
     )
+    LOG.info(f"SLURM_NTASKS: {SLURM_NTASKS}")
     # Sharing tasks acrros multiple nodes (DMP)
     # the format of this envvar is a bit tricky. Avoiding it for the moment.
     # SLURM_TASKS_PER_NODE = int(
@@ -1973,23 +1975,28 @@ def _parse_slurm_options(
     SLURM_CPUS_PER_TASK = int(
         kwargs.pop("SLURM_CPUS_PER_TASK", os.environ.get("SLURM_CPUS_PER_TASK", 1))
     )
+    LOG.info(f"SLURM_CPUS_PER_TASK: {SLURM_CPUS_PER_TASK}")
 
     # Set to value of the --ntasks option, if specified. See SLURM_NTASKS. Included for backwards compatibility.
     SLURM_NPROCS = int(
         kwargs.pop("SLURM_NPROCS", os.environ.get("SLURM_NPROCS", 1))
     )
+    LOG.info(f"SLURM_NPROCS: {SLURM_NPROCS}")
 
     # Number of CPUs allocated to the batch step.
     SLURM_CPUS_ON_NODE = int(
         kwargs.pop("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
     )
+    LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
     SLURM_MEM_PER_NODE = kwargs.pop(
             "SLURM_MEM_PER_NODE", os.environ.get("SLURM_MEM_PER_NODE", None))
+    LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = kwargs.pop(
         "SLURM_NODELIST", os.environ.get("SLURM_NODELIST", "")
     ).lower()
+    LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
     if not exec_file:
         exec_file = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
@@ -2012,14 +2019,17 @@ def _parse_slurm_options(
         ## Attempt to calculate the appropriate number of cores:
         # Reference: https://stackoverflow.com/a/51141287/6650211
         # I'm assuming the env var makes sense.
+        #
+        # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
+        #
         nproc = max(
             [
-                # SLURM_NNODES * SLURM_TASKS_PER_NODE,  # tasks
-                SLURM_NTASKS,  # tasks
-                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # cpus
-                SLURM_NPROCS,  # nproc
-                SLURM_CPUS_ON_NODE * SLURM_NNODES,  # cpus
-                4,
+                4, # Fall back option
+                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+                SLURM_NPROCS,  # (CPUs)
+                # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
+                # SLURM_NNODES * SLURM_TASKS_PER_NODE,  # (tasks)
+                # SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
             ]
         )
 
@@ -2027,10 +2037,17 @@ def _parse_slurm_options(
 
     if not ram:
         if SLURM_MEM_PER_NODE:
-            if SLURM_CPUS_ON_NODE:
-                ram = SLURM_MEM_PER_NODE/SLURM_CPUS_ON_NODE
+            # RAM argument is in MB, so we need to convert
+            if SLURM_MEM_PER_NODE[-1] == "T": # tera
+                ram = int(SLURM_MEM_PER_NODE[:-1])*10**6
+            elif SLURM_MEM_PER_NODE[-1] == "G": # giga
+                ram = int(SLURM_MEM_PER_NODE[:-1])*10**3
+            elif SLURM_MEM_PER_NODE[-1] == "G": # mega
+                ram = int(SLURM_MEM_PER_NODE[:-1])*10**0
+            elif SLURM_MEM_PER_NODE[-1].upper() == "k": # mega
+                ram = int(SLURM_MEM_PER_NODE[:-1])*10**(-3)
             else:
-                ram = SLURM_MEM_PER_NODE
+                ram = int(SLURM_MEM_PER_NODE)
 
     LOG.info(f"Setting RAM to: {ram}")
 
@@ -2041,30 +2058,38 @@ def _parse_slurm_options(
     machines = ""
     # parsing nodes to list
     if SLURM_NODELIST:
-        p = subprocess.Popen(["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"], 
-                         stderr=subprocess.PIPE,
-                         stdout=subprocess.PIPE,
-                         )
-        stderr = p.stderr.read().decode()
-        stdout = p.stdout.read().decode()
+        try:
+            p = subprocess.Popen(["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"], 
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            )
+            stderr = p.stderr.read().decode()
+            stdout = p.stdout.read().decode()
 
-        if "Invalid hostlist" in stderr:
-            raise ValueError("The node list is invalid, or it could not be parsed.\n",
-                             "Are you passing the nodes correctly?\n",
-                             f"Nodes list: {SLURM_NODELIST}")
-        if stderr:
-            raise RuntimeError(stderr)
-        nodes = stdout.strip().splitlines()
-        SLURM_CPUS_ON_NODE = int(
-            kwargs.pop("SLURM_CPUS_ON_NODE", os.environ.get("SLURM_CPUS_ON_NODE", 1))
-        )
-        machines = " -machines " + ":".join([
-            f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
-        ])
+            if "Invalid hostlist" in stderr:
+                raise ValueError("The node list is invalid, or it could not be parsed.\n",
+                                "Are you passing the nodes correctly?\n",
+                                f"Nodes list: {SLURM_NODELIST}")
+            if stderr:
+                raise RuntimeError(stderr)
+            nodes = stdout.strip().splitlines()
 
-        additional_switches += machines
+            machines = ":".join([f"{each_node}" for each_node in nodes ])
 
-    LOG.info(f"Using nodes configuration: {machines}")
+            # The following code creates the cmd line bit for MAPDL. It seems it
+            # is not needed in slurm.
+            # machines = " -machines " + ":".join([
+            #     f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
+            # ])
+
+
+            # We do not need to inject the machines in MAPDL command line.
+            # additional_switches += machines
+            LOG.info(f"Using nodes configuration: {machines}")
+
+        except Exception as e:
+            LOG.info(f"The machines list cold not be obtained.\nFollowing error happened:\n{str(e)}")
+
     return exec_file, jobname, nproc, ram, additional_switches
 
 
