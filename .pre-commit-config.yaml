@@ -7,26 +7,39 @@ repos:
   hooks:
   - id: isort
 
+- repo: https://github.com/numpy/numpydoc
+  rev: v1.6.0
+  hooks:
+    - id: numpydoc-validation
+      exclude: |
+          (?x)(
+              tests/|
+              examples|
+              doc/source/|
+              src/ansys/mapdl/core/_commands|
+              src/ansys/mapdl/core/commands
+          )
+
 - repo: https://github.com/psf/black
-  rev: 23.3.0  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
+  rev: 23.10.1  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/adamchainz/blacken-docs
-  rev: 1.14.0
+  rev: 1.16.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==23.3.0]
+    additional_dependencies: [black==23.10.1]
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 6.1.0
   hooks:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.5
+  rev: v2.2.6
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -40,13 +53,13 @@ repos:
 #     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v4.5.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.23.2
+  rev: 0.27.0
   hooks:
     - id: check-github-workflows

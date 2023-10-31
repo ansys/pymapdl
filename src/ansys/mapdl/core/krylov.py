@@ -3,9 +3,8 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-from .mapdl_grpc import MapdlGrpc
 
 
 class KrylovSolver:
@@ -46,9 +45,19 @@ class KrylovSolver:
 
     """
 
-    def __init__(self, mapdl):
-        if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
-            raise TypeError("``mapdl`` must be a MapdlGrpc instance")
+    def __init__(self, mapdl: Mapdl):
+        """Krylov analysis
+
+        Abstract mapdl krylov class.  Created from an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        if not isinstance(mapdl, Mapdl):  # pragma: no cover
+            raise TypeError("``mapdl`` must be an Mapdl class instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.mm = self._mapdl.math
         self.jobname = self._mapdl.jobname
@@ -77,7 +86,7 @@ class KrylovSolver:
             self.full_file = full_file
 
         # Checking if the full file exists.
-        if self._mapdl._local:  # pragma: no cover
+        if self._mapdl._local:
             if not os.path.exists(os.path.join(current_dir, self.full_file)):
                 raise FileNotFoundError(
                     f"The file '{self.full_file}' could not be found in local directory '{current_dir}'."
@@ -244,7 +253,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Krylov subspace.
 
         Notes
@@ -396,7 +405,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Reduced solution over the frequency range.
 
         Notes

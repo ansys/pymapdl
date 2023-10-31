@@ -1,4 +1,6 @@
 """Common gRPC functions"""
+from typing import List, Literal, get_args
+
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlConnectionError
@@ -6,7 +8,6 @@ from ansys.mapdl.core.errors import MapdlConnectionError
 # chunk sizes for streaming and file streaming
 DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
 DEFAULT_FILE_CHUNK_SIZE = 1024 * 1024  # 1MB
-
 
 ANSYS_VALUE_TYPE = {
     0: None,  # UNKNOWN
@@ -21,7 +22,7 @@ ANSYS_VALUE_TYPE = {
 }
 
 
-VGET_ENTITY_TYPES = [
+VGET_ENTITY_TYPES_TYPING = Literal[
     "NODE",
     "ELEM",
     "KP",
@@ -32,6 +33,9 @@ VGET_ENTITY_TYPES = [
     "RCON",
     "TLAB",
 ]
+
+VGET_ENTITY_TYPES: List[str] = list(get_args(VGET_ENTITY_TYPES_TYPING))
+
 STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
 COMP_TYPE = ["X", "Y", "Z", "SUM"]
 VGET_NODE_ENTITY_TYPES = {
@@ -66,7 +70,7 @@ class GrpcError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
-def check_vget_input(entity, item, itnum):
+def check_vget_input(entity: str, item: str, itnum: str) -> str:
     """Verify that entity and item for VGET are valid.
 
     Raises a ``ValueError`` when invalid.
@@ -100,7 +104,7 @@ def check_vget_input(entity, item, itnum):
 
     Returns
     -------
-    command : str
+    str
         MAPDL formatted vget command after the "VGET, " in the format of:
         "ENTITY, , ITEM, ITNUM"
     """
@@ -154,7 +158,7 @@ def parse_chunks(chunks, dtype=None):
 
     Returns
     -------
-    array : np.ndarray
+    np.ndarray
         Deserialized numpy array.
 
     """

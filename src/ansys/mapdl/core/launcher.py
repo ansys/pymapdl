@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from typing import TYPE_CHECKING, Tuple, Union
 import warnings
 
 try:
@@ -31,7 +32,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -41,6 +42,9 @@ from ansys.mapdl.core.misc import (
     random_string,
     threaded,
 )
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
 
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
@@ -57,11 +61,18 @@ if not os.path.isdir(SETTINGS_DIR):
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["corba", "console", "grpc"]
 
+ON_WSL = os.name == "posix" and (
+    bool(os.environ.get("WSL_DISTRO_NAME", None))
+    or bool(os.environ.get("WSL_INTEROP", None))
+)
+
+if ON_WSL:
+    LOG.info("On WSL: Running on WSL detected.")
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
 
-INTEL_MSG = """Due to incompatibilities between 'DMP', Windows and VPN connections,
+INTEL_MSG = """Due to incompatibilities between this MAPDL version, Windows, and VPN connections,
 the flat '-mpi INTELMPI' is overwritten by '-mpi msmpi'.
 
 If you still want to use 'INTEL', set:
@@ -196,7 +207,7 @@ def launch_grpc(
     add_env_vars=None,
     replace_env_vars=None,
     **kwargs,
-) -> tuple:  # pragma: no cover
+) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
@@ -521,7 +532,7 @@ def launch_grpc(
         LOG.debug("Checking file error is created")
         _check_file_error_created(run_location, timeout)
 
-        if os.name == "posix":
+        if os.name == "posix" and not ON_WSL:
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
@@ -632,7 +643,7 @@ def _create_queue_for_std(std):
 def launch_remote_mapdl(
     version=None,
     cleanup_on_exit=True,
-) -> _MapdlCore:
+) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
 
     When calling this method, you need to ensure that you are in an environment where PyPIM is configured.
@@ -852,10 +863,10 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw:  # pragma: no cover
+    if "smp" not in add_sw_lower_case:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
@@ -868,7 +879,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
         ):
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
-            # This is due to the intel compiler, and only afects versions between
+            # This is due to the intel compiler, and only affects versions between
             # 210 and 222.
             #
             # There doesn't appear to be an easy way to check if we
@@ -877,13 +888,13 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-            if "intelmpi" in add_sw:
+            if "intelmpi" in add_sw_lower_case:
                 LOG.debug(
                     "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
                 )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
-                add_sw = re.sub(regex, "", add_sw)
+                add_sw = re.sub(regex, "", add_sw, flags=re.IGNORECASE)
                 warnings.warn(INTEL_MSG)
 
             LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
@@ -909,10 +920,12 @@ def _force_smp_student_version(add_sw, exec_path):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     if (
-        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+        "-mpi" not in add_sw_lower_case
+        and "-dmp" not in add_sw_lower_case
+        and "-smp" not in add_sw_lower_case
     ):  # pragma: no cover
         if "student" in exec_path.lower():
             add_sw += " -smp"
@@ -947,7 +960,7 @@ def launch_mapdl(
     replace_env_vars=None,
     version=None,
     **kwargs,
-) -> _MapdlCore:
+) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
     Parameters
@@ -990,8 +1003,9 @@ def launch_mapdl(
         The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
         provides the best performance and stability.  The ``'corba'``
         mode is available from v17.0 and newer and is given legacy
-        support.  This mode requires the additional
-        ``ansys_corba`` module.  Finally, the ``'console'`` mode
+        support. However only Python up to 3.8 is supported.
+        This mode requires the additional ``ansys_corba`` module.
+        Finally, the ``'console'`` mode
         is for legacy use only Linux only prior to v17.0.  This console
         mode is pending depreciation.
         Visit :ref:`versions_and_interfaces` for more information.
@@ -1066,14 +1080,14 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        .. deprecated:: 0.64.0
-           Use argument ``remove_temp_dir_on_exit`` instead.
-
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+
+        .. deprecated:: 0.64.0
+           Use argument ``remove_temp_dir_on_exit`` instead.
 
     remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
@@ -1111,13 +1125,15 @@ def launch_mapdl(
         Default ``False``.
 
     add_env_vars : dict, optional
-        The provided dictionary will be used to extend the system or process
+        The provided dictionary will be used to extend the MAPDL process
         environment variables. If you want to control all of the environment
-        variables, use ``replace_env_vars``. Defaults to ``None``.
+        variables, use the argument ``replace_env_vars``. Defaults to ``None``.
 
     replace_env_vars : dict, optional
-        The provided dictionary will be used to replace all the system or process
-        environment variables. To just add some environment variables to the MAPDL
+        The provided dictionary will be used to replace all the MAPDL process
+        environment variables. It replace the system environment variables
+        which otherwise would be used in the process.
+        To just add some environment variables to the MAPDL
         process, use ``add_env_vars``. Defaults to ``None``.
 
     version : float, optional
@@ -1159,7 +1175,7 @@ def launch_mapdl(
 
     Returns
     -------
-    ansys.mapdl.core.mapdl._MapdlCore
+    Union[MapdlGrpc, MapdlConsole, MapdlCorba]
         An instance of Mapdl.  Type depends on the selected ``mode``.
 
     Notes
@@ -1294,17 +1310,29 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
     ...                      port=50001)
 
-    Force the usage of the CORBA protocol.
+    Force the usage of the CORBA protocol (not recommended).
 
     >>> mapdl = launch_mapdl(mode='corba')
 
-    Run MAPDL using the console mode (available only on Linux).
+    Run MAPDL using the console mode (not recommended, and available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
     ...                       mode='console')
 
+    Run MAPDL with additional environment variables.
+
+    >>> my_env_vars = {"my_var":"true", "ANSYS_LOCK":"FALSE"}
+    >>> mapdl = launch_mapdl(add_env_vars=my_env_vars)
+
+    Run MAPDL with our own set of environment variables. It replace the system
+    environment variables which otherwise would be used in the process.
+
+    >>> my_env_vars = {"my_var":"true",
+        "ANSYS_LOCK":"FALSE",
+        "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
+    >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
-    if remove_temp_files is not None:  # pragma: no cover
+    if remove_temp_files is not None:
         warnings.warn(
             "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
             "Please use ``remove_temp_dir_on_exit`` instead.",
@@ -1328,19 +1356,51 @@ def launch_mapdl(
     # Extract arguments:
     force_intel = kwargs.pop("force_intel", False)
     broadcast = kwargs.pop("log_broadcast", False)
+    use_vtk = kwargs.pop("use_vtk", None)
+
+    # Transferring MAPDL arguments to start_parameters:
+    start_parm = {}
+
+    kwargs_keys = list(kwargs.keys())
+    for each_par in kwargs_keys:
+        if each_par in _ALLOWED_START_PARM:
+            start_parm[each_par] = kwargs.pop(each_par)
 
     # Raising error if using non-allowed arguments
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
-        raise ValueError(f"The following arguments are not recognaised: {ms_}")
+        raise ValueError(f"The following arguments are not recognized: {ms_}")
 
     if ip is None:
-        ip = os.environ.get("PYMAPDL_IP", LOCALHOST)
-    else:  # pragma: no cover
+        ip = os.environ.get("PYMAPDL_IP", None)
+
+        if not ip and ON_WSL:
+            ip = _get_windows_host_ip()
+            if ip:
+                LOG.debug(
+                    f"On WSL: Using the following IP address for the Windows OS host: {ip}"
+                )
+            else:
+                LOG.debug(
+                    "PyMAPDL could not find the IP address of the Windows host machine."
+                )
+
+        if not ip:
+            LOG.debug(
+                f"No IP address was supplied. Using the default IP address: {LOCALHOST}"
+            )
+            ip = LOCALHOST
+
+    else:
         LOG.debug(
-            "Because ``PYMAPDL_IP is not None, an attempt is made to connect to a remote session. ('START_INSTANCE' is set to False.`)"
+            "Because 'PYMAPDL_IP' is not None, an attempt is made to connect to"
+            " a remote session ('START_INSTANCE' is set to 'False')."
         )
-        start_instance = False
+        if not ON_WSL:
+            start_instance = False
+        else:
+            LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
+
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
     check_valid_ip(ip)  # double check
@@ -1399,6 +1459,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    **start_parm,
                 )
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
@@ -1411,6 +1472,8 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
+                    **start_parm,
                 )
                 if clear_on_connect:
                     mapdl.clear()
@@ -1424,6 +1487,8 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
+                    **start_parm,
                 )
             if clear_on_connect:
                 mapdl.clear()
@@ -1431,8 +1496,6 @@ def launch_mapdl(
 
     if not start_instance:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
-        if clear_on_connect is None:  # pragma: no cover
-            clear_on_connect = False
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1440,6 +1503,9 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
+            log_apdl=log_apdl,
+            use_vtk=use_vtk,
+            **start_parm,
         )
         if clear_on_connect:
             mapdl.clear()
@@ -1507,14 +1573,16 @@ def launch_mapdl(
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
 
-    start_parm = {
-        "exec_file": exec_file,
-        "run_location": run_location,
-        "additional_switches": additional_switches,
-        "jobname": jobname,
-        "nproc": nproc,
-        "print_com": print_com,
-    }
+    start_parm.update(
+        {
+            "exec_file": exec_file,
+            "run_location": run_location,
+            "additional_switches": additional_switches,
+            "jobname": jobname,
+            "nproc": nproc,
+            "print_com": print_com,
+        }
+    )
 
     if mode in ["console", "corba"]:
         start_parm["start_timeout"] = start_timeout
@@ -1536,7 +1604,9 @@ def launch_mapdl(
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-            mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+            mapdl = MapdlConsole(
+                loglevel=loglevel, log_apdl=log_apdl, use_vtk=use_vtk, **start_parm
+            )
         elif mode == "corba":
             try:
                 # pending deprecation to ansys-mapdl-corba
@@ -1552,6 +1622,7 @@ def launch_mapdl(
                 log_apdl=log_apdl,
                 log_broadcast=broadcast,
                 verbose=verbose_mapdl,
+                use_vtk=use_vtk,
                 **start_parm,
             )
         elif mode == "grpc":
@@ -1572,6 +1643,7 @@ def launch_mapdl(
                 remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 process=process,
+                use_vtk=use_vtk,
                 **start_parm,
             )
             if run_location is None:
@@ -1615,6 +1687,12 @@ def check_mode(mode, version):
                 elif os.name == "posix":
                     raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
         elif mode == "corba":
+            warnings.warn(
+                "The CORBA interface is going to be deprecated with the version"
+                " v0.67 release. Please use the gRPC interface instead.\n"
+                "For more information visit: "
+                "https://mapdl.docs.pyansys.com/version/0.66/getting_started/versioning.html#corba-interface"
+            )
             if version < 170:
                 raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
             if version >= 211:
@@ -1799,3 +1877,31 @@ def _verify_version(version):
         )
 
     return version
+
+
+def _get_windows_host_ip():
+    output = _run_ip_route()
+    if output:
+        return _parse_ip_route(output)
+
+
+def _run_ip_route():
+    from subprocess import run
+
+    try:
+        p = run(["ip", "route"], capture_output=True)
+    except Exception:
+        LOG.debug(
+            "Detecting the IP address of the host Windows machine requires being able to execute the command 'ip route'."
+        )
+        return None
+
+    if p and p.stdout and isinstance(p.stdout, bytes):
+        return p.stdout.decode()
+
+
+def _parse_ip_route(output):
+    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
+
+    if match:
+        return match[0]

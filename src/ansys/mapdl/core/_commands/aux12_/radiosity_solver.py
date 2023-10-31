@@ -9,8 +9,11 @@ class RadiositySolver:
         hres
             Hemicube resolution.  Increase value to increase the accuracy of
             the view factor calculation.  Defaults to 10.
+
+        tolerance
+            Tolerance value that controls whether or not facets are subdivided in view factor calculations to increase view factor accuracy. TOLERANCE is closely related to the spacing between facets. Defaults to 1e-6.
         """
-        command = f"HEMIOPT,{hres}"
+        command = f"HEMIOPT,{hres},{tolerance}"
         return self.run(command, **kwargs)
 
     def radopt(

@@ -18,7 +18,7 @@ jobs:
     name: Syncer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: micnncim/action-label-syncer@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,10 +90,10 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           Please add one of the following labels to add this contribution to the Release Notes :point_down:
-          - [BUG](https://github.com/pyansys/pymapdl/pulls?q=label%3Abug+)
-          - [NEW FEATURE](https://github.com/pyansys/pymapdl/pulls?q=label%3A"NEW%20FEATURE"+)
-          - [Enhancement](https://github.com/pyansys/pymapdl/pulls?q=label%3Aenhancement+)
-          - [Documentation](https://github.com/pyansys/pymapdl/pulls?q=label%3Adocumentation+)
-          - [Examples](https://github.com/pyansys/pymapdl/pulls?q=label%3Aexamples+)
-          - [Maintenance](https://github.com/pyansys/pymapdl/pulls?q=label%3Amaintenance+)
-          - [CI/CD](https://github.com/pyansys/pymapdl/pulls?q=label%3Aci%2Fcd+)
+          - [BUG](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
+          - [NEW FEATURE](https://github.com/ansys/pymapdl/pulls?q=label%3A"NEW%20FEATURE"+)
+          - [Enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
+          - [Documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
+          - [Examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
+          - [Maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
+          - [CI/CD](https://github.com/ansys/pymapdl/pulls?q=label%3Aci%2Fcd+)

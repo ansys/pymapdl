@@ -10,8 +10,16 @@ class Solution:
     ``mapdl.solve()`` and determining if it converged, the number of
     iterations to converge, etc.
 
+    If the ``mapdl.solution()`` class is called, it activates the solution processor.
+
     Examples
     --------
+    Enter the solution processor (equivalent of the
+    :meth:`Mapdl.slashsolu <ansys.mapdl.core.Mapdl.slashsolu>` command).
+
+    >>> mapdl.solution()
+    *****  MAPDL SOLUTION ROUTINE  *****
+
     Check if a solution has converged.
 
     >>> mapdl.solution.converged
@@ -23,10 +31,23 @@ class Solution:
     1.0
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: _MapdlCore):
+        """Solution manager
+
+        Class to help to manage the solution configuration in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
+
+    def __call__(self):
+        return self._mapdl.slashsolu()
 
     @property
     def _mapdl(self):

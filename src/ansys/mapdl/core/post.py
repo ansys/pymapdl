@@ -3,6 +3,7 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 from ansys.mapdl.core.plotting import general_plotter
 
@@ -113,11 +114,11 @@ class PostProcessing:
 
     @property
     def _log(self):
-        """alias for mapdl log"""
+        """Alias for mapdl log"""
         return self._mapdl._log
 
     def _set_log_level(self, level):
-        """alias for mapdl._set_log_level"""
+        """Alias for mapdl._set_log_level"""
         return self._mapdl._set_log_level(level)
 
     @supress_logging
@@ -669,27 +670,27 @@ class PostProcessing:
     @property
     @supress_logging
     def _all_nnum(self):
-        self._mapdl.cm("__TMP_NODE__", "NODE")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+
+            # rerun if encountered weird edge case of negative first index.
+            if nnum[0] == -1:
+                nnum = self._mapdl.get_array("NODE", item1="NLIST")
+
         return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
     def _all_enum(self):
-        self._mapdl.cm("__TMP_ELEM__", "ELEM")
-        self._mapdl.allsel()
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if enum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
+
+            # rerun if encountered weird edge case of negative first index.
+            if enum[0] == -1:
+                enum = self._mapdl.get_array("ELEM", item1="ELIST")
+
         return enum.astype(np.int32, copy=False)
 
     @property
@@ -1346,6 +1347,7 @@ class PostProcessing:
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`
+
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition

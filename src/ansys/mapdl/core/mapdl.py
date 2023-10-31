@@ -11,11 +11,14 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
 
+from matplotlib.colors import to_rgba
 import numpy as np
+from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
@@ -32,15 +35,19 @@ from ansys.mapdl.core.commands import (
     inject_docs,
 )
 from ansys.mapdl.core.errors import (
+    ComponentDoesNotExits,
+    ComponentNoData,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.inline_functions import Query
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     Information,
-    allow_pickable_points,
+    allow_iterables_vmin,
+    allow_pickable_entities,
     check_valid_routine,
     last_created,
     load_file,
@@ -48,13 +55,32 @@ from ansys.mapdl.core.misc import (
     requires_package,
     run_as_prep7,
     supress_logging,
-    wrap_point_SEL,
 )
+from ansys.mapdl.core.theme import get_ansys_colors
+
+if TYPE_CHECKING:  # pragma: no cover
+    from ansys.mapdl.reader import Archive
+
+    from ansys.mapdl.core.component import ComponentManager
+    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
+    from ansys.mapdl.core.parameters import Parameters
+    from ansys.mapdl.core.solution import Solution
+    from ansys.mapdl.core.xpl import ansXpl
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import general_plotter
+    from ansys.mapdl.core.plotting import general_plotter, get_meshes_from_plotter
 
 from ansys.mapdl.core.post import PostProcessing
+
+DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+
+VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
+VALID_DEVICES_LITERAL = Literal[tuple(["PNG", "TIFF", "VRML", "TERM", "CLOSE"])]
+
+VALID_FILE_TYPE_FOR_PLOT = VALID_DEVICES.copy()
+VALID_FILE_TYPE_FOR_PLOT.remove("CLOSE")
+VALID_FILE_TYPE_FOR_PLOT_LITERAL = Literal[tuple(VALID_FILE_TYPE_FOR_PLOT)]
 
 _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*(?:[\r\n]+.*)+highly distorted.",
@@ -63,7 +89,9 @@ _PERMITTED_ERRORS = [
 ]
 
 # test for png file
-PNG_TEST = re.compile("WRITTEN TO FILE(.*).png")
+PNG_IS_WRITTEN_TO_FILE = re.compile(
+    "WRITTEN TO FILE"
+)  # getting the file name is buggy.
 
 VWRITE_REPLACEMENT = """
 Cannot use *VWRITE directly as a command in MAPDL
@@ -115,6 +143,11 @@ INVAL_COMMANDS_SILENT = {
 PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
+VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
+VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
+
+GUI_FONT_SIZE = 15
+
 
 def parse_to_short_cmd(command):
     """Takes any MAPDL command and returns the first 4 characters of
@@ -160,7 +193,9 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
-    "start_timeout" "timeout",
+    "start_timeout",
+    "timeout",
+    "check_parameter_names",
 ]
 
 
@@ -175,12 +210,13 @@ class _MapdlCore(Commands):
 
     def __init__(
         self,
-        loglevel="DEBUG",
-        use_vtk=None,
-        log_apdl=None,
-        log_file=False,
-        local=True,
-        print_com=False,
+        loglevel: DEBUG_LEVELS = "DEBUG",
+        use_vtk: Optional[bool] = None,
+        log_apdl: Optional[str] = None,
+        log_file: Union[bool, str] = False,
+        local: bool = True,
+        print_com: bool = False,
+        file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
@@ -188,17 +224,20 @@ class _MapdlCore(Commands):
         self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
-        self._exited = False
-        self._ignore_errors = False
+        self._exited: bool = False
+        self._ignore_errors: bool = False
         self._apdl_log = None
-        self._store_commands = False
+        self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched = False
+        self._launched: bool = False
         self._stderr = None
         self._stdout = None
+        self._file_type_for_plots = file_type_for_plots
+        self._default_file_type_for_plots = file_type_for_plots
+        self._version = None  # cached version
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -214,25 +253,26 @@ class _MapdlCore(Commands):
                 self._use_vtk = False
 
         self._log_filehandler = None
-        self._version = None  # cached version
-        self._local = local
-        self._cleanup = True
+        self._local: bool = local
+        self._cleanup: bool = True
         self._vget_arr_counter = 0
         self._cached_routine = None
         self._geometry = None
+        self.legacy_geometry: bool = False
         self._math = None
         self._krylov = None
         self._on_docker = None
         self._platform = None
 
         _sanitize_start_parm(start_parm)
-        self._start_parm = start_parm
-        self._jobname = start_parm.get("jobname", "file")
-        self._path = start_parm.get("run_location", None)
-        self._print_com = print_com  # print the command /COM input.
+        self._start_parm: Dict[str, Any] = start_parm
+        self._jobname: str = start_parm.get("jobname", "file")
+        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
+        self._print_com: bool = print_com  # print the command /COM input.
+        self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
-        self._log = logger.add_instance_logger(
+        self._log: logging.Logger = logger.add_instance_logger(
             self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
@@ -243,17 +283,20 @@ class _MapdlCore(Commands):
 
         self._log.debug("Logging set to %s", loglevel)
 
+        # Modules
         from ansys.mapdl.core.parameters import Parameters
 
-        self._parameters = Parameters(self)
+        self._parameters: Parameters = Parameters(self)
 
         from ansys.mapdl.core.solution import Solution
 
-        self._solution = Solution(self)
+        self._solution: Solution = Solution(self)
 
-        from ansys.mapdl.core.xpl import ansXpl
+        self._xpl: Optional[ansXpl] = None  # Initialized in mapdl_grpc
 
-        self._xpl = ansXpl(self)
+        from ansys.mapdl.core.component import ComponentManager
+
+        self._componentmanager: ComponentManager = ComponentManager(self)
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -285,8 +328,8 @@ class _MapdlCore(Commands):
             )
 
     @property
-    def mode(self):
-        """Return the type of instance, namely: grpc, corba or console."""
+    def connection(self):
+        """Return the type of connection to the instance, namely: grpc, corba or console."""
         return self._mode
 
     @property
@@ -303,6 +346,70 @@ class _MapdlCore(Commands):
     def is_console(self):
         """Return true if using console to connect to the MAPDL instance."""
         return self._mode == "console"
+
+    @property
+    def exited(self):
+        """Return true if the MAPDL session exited"""
+        return self._exited
+
+    @property
+    def check_status(self):
+        """Return MAPDL status.
+        * 'exited' if MAPDL is exited
+        * 'exiting' if MAPDL is exiting
+        * Otherwise returns 'OK'.
+        """
+        if self.exited:
+            return "exited"
+        elif self.exiting:
+            return "exiting"
+        else:
+            return "OK"
+
+    @property
+    def file_type_for_plots(self):
+        """Returns the current file type for plotting."""
+        if not self._file_type_for_plots:
+            self._run("/show, PNG")
+            self._file_type_for_plots = "PNG"
+        return self._file_type_for_plots
+
+    @file_type_for_plots.setter
+    def file_type_for_plots(self, value: VALID_DEVICES_LITERAL):
+        """Modify the current file type for plotting."""
+        if isinstance(value, str) and value.upper() in VALID_DEVICES:
+            self._run(
+                f"/show, {value.upper()}"
+            )  # To avoid recursion we need to use _run.
+            self._file_type_for_plots = value.upper()
+        else:
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
+
+    @property
+    def default_file_type_for_plots(self):
+        """Default file type for plots.
+
+        Use when device is not properly set, for instance when the device is closed."""
+        return self._default_file_type_for_plots
+
+    @default_file_type_for_plots.setter
+    def default_file_type_for_plots(self, value: VALID_FILE_TYPE_FOR_PLOT_LITERAL):
+        """Set default file type for plots.
+
+        Used when device is not properly set, for instance when the device is closed."""
+        if not isinstance(value, str) and value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
+            raise ValueError(f"'{value}' is not allowed as file output for plots.")
+        return self._default_file_type_for_plots
+
+    @property
+    def use_vtk(self):
+        """Returns if using VTK by default or not."""
+        return self._use_vtk
+
+    @use_vtk.setter
+    def use_vtk(self, value: bool):
+        """Set VTK to be used by default or not."""
+        self._use_vtk = value
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
@@ -374,6 +481,10 @@ class _MapdlCore(Commands):
             @wraps(func)
             def inner_wrapper(*args, **kwargs):
                 # in interactive mode (item='p'), the output is not suppressed
+                if self._store_commands:
+                    # In non-interactive mode, we do not need to check anything.
+                    return
+
                 is_interactive_arg = (
                     True
                     if len(args) >= 2
@@ -408,12 +519,16 @@ class _MapdlCore(Commands):
                 setattr(self, name, wrap_xsel_function(method))
 
     @property
-    def name(self):  # pragma: no cover
+    def name(self) -> str:
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, name):  # pragma: no cover
+    def name(self, name) -> None:
         raise AttributeError("The name of an instance cannot be changed.")
+
+    @property
+    def logger(self) -> logging.Logger:
+        return self._log
 
     @property
     def queries(self):
@@ -534,7 +649,18 @@ class _MapdlCore(Commands):
         return self._force_output(self)
 
     @property
-    def solution(self):
+    def save_selection(self):
+        """Save selection
+
+        Save the current selection (nodes, elements, keypoints, lines, areas,
+        volumes and components) before entering in the context manager, and
+        when exit returns to that selection.
+
+        """
+        return self._save_selection(self)
+
+    @property
+    def solution(self) -> "Solution":
         """Solution parameters of MAPDL.
 
         Returns
@@ -552,12 +678,30 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
+    def components(self) -> "ComponentManager":
+        """MAPDL Component manager.
+
+        Returns
+        -------
+        :class:`ansys.mapdl.core.component.ComponentManager`
+
+        Examples
+        --------
+        Check if a solution has converged.
+
+        >>> mapdl.solution.converged
+        """
+        if self._exited:  # pragma: no cover
+            raise MapdlRuntimeError("MAPDL exited.")
+        return self._componentmanager
+
+    @property
     def _distributed(self):
         """MAPDL is running in distributed mode."""
         return "-smp" not in self._start_parm.get("additional_switches", "")
 
     @property
-    def post_processing(self):
+    def post_processing(self) -> "PostProcessing":
         """Post-process an active MAPDL session.
 
         Examples
@@ -636,7 +780,7 @@ class _MapdlCore(Commands):
         self._response = "\n".join(responses)
 
     @property
-    def parameters(self):
+    def parameters(self) -> "Parameters":
         """Collection of MAPDL parameters.
 
         Notes
@@ -682,6 +826,50 @@ class _MapdlCore(Commands):
             self._parent()._log.debug("Exiting non-interactive mode")
             self._parent()._flush_stored()
             self._parent()._store_commands = False
+
+    class _save_selection:
+        """Save the selection and returns to it when exiting"""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.selection_sets = []
+            self.selection_sets_comps = []
+
+        def __enter__(self):
+            self._parent()._log.debug("Entering saving selection context")
+
+            selection_set_name = random_string(10)
+            self.selection_sets.append(selection_set_name)
+            self.selection_sets_comps.append(self._parent().components.names)
+
+            mapdl = self._parent()
+
+            prev_ier = mapdl.ignore_errors
+            mapdl.ignore_errors = True
+            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
+                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
+            mapdl.ignore_errors = prev_ier
+
+        def __exit__(self, *args):
+            self._parent()._log.debug("Exiting saving selection context")
+            last_selection_name = self.selection_sets.pop()
+            last_selection_cmps = self.selection_sets_comps.pop()
+
+            mapdl = self._parent()
+
+            # probably this is redundant
+            prev_ier = mapdl.ignore_errors
+            mapdl.ignore_errors = True
+            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
+                cmp_name = f"_{last_selection_name}_{entity}_"
+                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
+                mapdl.cmdele(cmp_name)
+
+            mapdl.ignore_errors = prev_ier
+
+            # mute to avoid getting issues when the component wasn't created in
+            # first place because there was no entities.
+            self._parent().components.select(last_selection_cmps, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -793,6 +981,8 @@ class _MapdlCore(Commands):
         >>> mapdl.clear()
 
         """
+        if self.is_grpc:
+            self._create_session()
         self.run("/CLE,NOSTART", mute=True)
 
     @supress_logging
@@ -806,7 +996,7 @@ class _MapdlCore(Commands):
 
     @property
     @requires_package("pyvista", softerror=True)
-    def geometry(self):
+    def geometry(self) -> "Geometry":
         """Geometry information.
 
         See :class:`ansys.mapdl.core.mapdl_geometry.Geometry`
@@ -849,11 +1039,14 @@ class _MapdlCore(Commands):
             self._geometry = self._create_geometry()
         return self._geometry
 
-    def _create_geometry(self):  # pragma: no cover
+    def _create_geometry(self) -> Union["Geometry", "LegacyGeometry"]:
         """Return geometry cache"""
-        from ansys.mapdl.core.mapdl_geometry import Geometry
+        from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
-        return Geometry(self)
+        if self.legacy_geometry:
+            return LegacyGeometry
+        else:
+            return Geometry(self)
 
     @property
     @requires_package("pyvista", softerror=True)
@@ -905,7 +1098,7 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
-    def _mesh(self):
+    def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
         # lazy import here to avoid loading pyvista and vtk
@@ -1000,7 +1193,9 @@ class _MapdlCore(Commands):
         )
         self._ignore_errors = bool(value)
 
-    def open_apdl_log(self, filename, mode="w"):
+    def open_apdl_log(
+        self, filename: Union[str, pathlib.Path], mode: Literal["w", "a", "x"] = "w"
+    ) -> None:
         """Start writing all APDL commands to an MAPDL input file.
 
         Parameters
@@ -1361,8 +1556,8 @@ class _MapdlCore(Commands):
         if isinstance(nnum, bool):
             nnum = int(nnum)
 
-        self._enable_interactive_plotting()
-        return super().nplot(nnum, **kwargs)
+        with self._enable_interactive_plotting():
+            return super().nplot(nnum, **kwargs)
 
     def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
         """Plots the currently selected elements.
@@ -1491,8 +1686,8 @@ class _MapdlCore(Commands):
             )
 
         # otherwise, use MAPDL plotter
-        self._enable_interactive_plotting()
-        return self.run("EPLOT", **kwargs)
+        with self._enable_interactive_plotting():
+            return self.run("EPLOT", **kwargs)
 
     def vplot(
         self,
@@ -1503,6 +1698,7 @@ class _MapdlCore(Commands):
         scale="",
         vtk=None,
         quality=4,
+        show_volume_numbering=False,
         show_area_numbering=False,
         show_line_numbering=False,
         color_areas=False,
@@ -1577,25 +1773,49 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            cm_name = "__tmp_area2__"
-            self.cm(cm_name, "AREA", mute=True)
-            self.aslv("S", mute=True)  # select areas attached to active volumes
-            out = self.aplot(
-                vtk=vtk,
-                color_areas=color_areas,
-                quality=quality,
-                show_area_numbering=show_area_numbering,
-                show_line_numbering=show_line_numbering,
-                show_lines=show_lines,
-                **kwargs,
+            # Storing entities selection
+            with self.save_selection:
+                volumes = self.geometry.vnum
+                meshes = []
+                points = []
+                labels = []
+
+                return_plotter = kwargs.pop("return_plotter", False)
+                color_areas = True
+
+                for each_volu in volumes:
+                    self.vsel("S", vmin=each_volu)
+                    self.aslv("S", mute=True)  # select areas attached to active volumes
+
+                    pl = self.aplot(
+                        vtk=True,
+                        color_areas=color_areas,
+                        quality=quality,
+                        show_area_numbering=show_area_numbering,
+                        show_line_numbering=show_line_numbering,
+                        show_lines=show_lines,
+                        return_plotter=True,
+                        **kwargs,
+                    )
+
+                    meshes_ = get_meshes_from_plotter(pl)
+
+                    for each_mesh in meshes_:
+                        each_mesh.cell_data["entity_num"] = int(each_volu)
+
+                    meshes.extend(meshes_)
+
+                meshes = [{"mesh": meshes}]
+
+            return general_plotter(
+                meshes, points, labels, return_plotter=return_plotter, **kwargs
             )
-            self.cmsel("S", cm_name, "AREA", mute=True)
-            return out
+
         else:
-            self._enable_interactive_plotting()
-            return super().vplot(
-                nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
-            )
+            with self._enable_interactive_plotting():
+                return super().vplot(
+                    nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
+                )
 
     def aplot(
         self,
@@ -1658,11 +1878,14 @@ class _MapdlCore(Commands):
         show_line_numbering : bool, optional
             Display line numbers when ``vtk=True``.
 
-        color_areas : np.array, optional
+        color_areas : Union[bool, str, np.array], optional
             Only used when ``vtk=True``.
-            If ``color_areas`` is a bool, randomly color areas when ``True`` .
-            If ``color_areas`` is an array or list, it colors each area with
-            the RGB colors, specified in that array or list.
+            If ``color_areas`` is a bool, randomly color areas when ``True``.
+            If ``color_areas`` is a string, it must be a valid color string
+            which will be applied to all areas.
+            If ``color_areas`` is an array or list made of color names (str) or
+            the RGBa numbers ([R, G, B, transparency]), it colors each area with
+            the colors, specified in that array or list.
 
         show_lines : bool, optional
             Plot lines and areas.  Change the thickness of the lines
@@ -1718,42 +1941,79 @@ class _MapdlCore(Commands):
                 quality = 10
             if quality < 1:
                 quality = 1
-            surf = self.geometry.generate_surface(11 - quality, na1, na2, ninc)
+            surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []
 
+            # anums = np.unique(surf["entity_num"])
+            anums = self.geometry.anum  # This might need double check
+
             # individual surface isolation is quite slow, so just
             # color individual areas
-            if color_areas:  # pragma: no cover
+            if (isinstance(color_areas, np.ndarray) and len(color_areas) > 1) or (
+                not isinstance(color_areas, np.ndarray) and color_areas
+            ):
                 if isinstance(color_areas, bool):
-                    anum = surf["entity_num"]
-                    size_ = max(anum) + 1
-                    # Because this is only going to be used for plotting purpuses, we don't need to allocate
+                    size_ = len(anums)
+                    # Because this is only going to be used for plotting
+                    # purposes, we don't need to allocate
                     # a huge vector with random numbers (colours).
-                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors` argument is set to 256, so let
-                    # do here the same.
-                    # We will limit the number of randoms values (colours) to 256
+                    # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
+                    # argument is set to 256, so let do here the same.
+                    # We will limit the number of randoms values (colours)
+                    # to 256.
                     #
                     # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
                     size_ = min([256, size_])
                     # Generating a colour array,
                     # Size = number of areas.
                     # Values are random between 0 and min(256, number_areas)
-                    area_color = np.random.choice(range(size_), size=(len(anum), 3))
+                    colors = get_ansys_colors(size_)
+
+                elif isinstance(color_areas, str):
+                    # A color is provided as a string
+                    colors = np.atleast_2d(to_rgba(color_areas))
+
                 else:
-                    if len(surf["entity_num"]) != len(color_areas):
+                    if len(anums) != len(color_areas):
                         raise ValueError(
-                            f"The length of the parameter array 'color_areas' should be the same as the number of areas."
+                            "The length of the parameter array 'color_areas' "
+                            "should be the same as the number of areas."
+                            f"\nanums: {anums}"
+                            f"\ncolor_areas: {color_areas}"
                         )
-                    area_color = color_areas
-                meshes.append({"mesh": surf, "scalars": area_color})
+
+                    if isinstance(color_areas[0], str):
+                        colors = [to_rgba(each) for each in color_areas]
+                    else:
+                        colors = color_areas
+
+                # Creating a mapping of colors
+                ent_num = []
+                for each_surf in surfs:
+                    ent_num.append(int(np.unique(each_surf["entity_num"])[0]))
+                ent_num.sort()
+
+                # expand color array until matching the number of areas.
+                # In this case we start to repeat colors in the same order.
+                colors = np.resize(colors, (len(ent_num), 3))
+
+                for surf, color in zip(surfs, colors):
+                    meshes.append({"mesh": surf, "color": color})
+
             else:
-                meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
+                for surf in surfs:
+                    meshes.append({"mesh": surf, "color": kwargs.get("color", "white")})
 
             if show_area_numbering:
-                anums = np.unique(surf["entity_num"])
                 centers = []
-                for anum in anums:
+
+                for surf in surfs:
+                    anum = np.unique(surf["entity_num"])
+                    assert (
+                        len(anum) == 1
+                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
@@ -1762,11 +2022,10 @@ class _MapdlCore(Commands):
             if show_lines or show_line_numbering:
                 kwargs.setdefault("line_width", 2)
                 # subselect lines belonging to the current areas
-                self.cm("__area__", "AREA", mute=True)
-                self.lsla("S", mute=True)
 
-                lines = self.geometry.lines
-                self.cmsel("S", "__area__", "AREA", mute=True)
+                with self.save_selection:
+                    self.lsla("S", mute=True)
+                    lines = self.geometry.get_lines()
 
                 if show_lines:
                     meshes.append(
@@ -1782,13 +2041,13 @@ class _MapdlCore(Commands):
 
             return general_plotter(meshes, [], labels, **kwargs)
 
-        self._enable_interactive_plotting()
-        return super().aplot(
-            na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
-        )
+        with self._enable_interactive_plotting():
+            return super().aplot(
+                na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
+            )
 
     @supress_logging
-    def _enable_interactive_plotting(self, pixel_res=1600):
+    def _enable_interactive_plotting(self, pixel_res: int = 1600):
         """Enables interactive plotting.  Requires matplotlib
 
         Parameters
@@ -1799,16 +2058,50 @@ class _MapdlCore(Commands):
             Increasing the resolution produces a "sharper" image but
             takes longer to render.
         """
-        if not self._has_matplotlib:
-            raise ImportError(
-                "Install matplotlib to display plots from MAPDL ,"
-                "from Python.  Otherwise, plot with vtk with:\n"
-                "``vtk=True``"
-            )
+        return self.WithInterativePlotting(self, pixel_res)
 
-        if not self._png_mode:
-            self.show("PNG", mute=True)
-            self.gfile(pixel_res, mute=True)
+    class WithInterativePlotting:
+        """Allows to redirect plots to MAPDL plots."""
+
+        def __init__(self, parent: "_MapdlCore", pixel_res: int) -> None:
+            self._parent = weakref.ref(parent)
+            self._pixel_res = pixel_res
+
+        def __enter__(self) -> None:
+            self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
+
+            if not self._parent()._has_matplotlib:  # pragma: no cover
+                raise ImportError(
+                    "Install matplotlib to display plots from MAPDL ,"
+                    "from Python.  Otherwise, plot with vtk with:\n"
+                    "``vtk=True``"
+                )
+
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
+
+                self.previous_device = self._parent().file_type_for_plots
+
+                if self._parent().file_type_for_plots not in [
+                    "PNG",
+                    "TIFF",
+                    "PNG",
+                    "VRML",
+                ]:
+                    self._parent().show(self._parent().default_file_type_for_plots)
+
+        def __exit__(self, *args) -> None:
+            self._parent()._log.debug("Exiting in 'WithInterativePlotting' mode")
+            self._parent().show("close", mute=True)
+
+            if not self._parent()._store_commands:
+                if not self._parent()._png_mode:
+                    self._parent().show("PNG", mute=True)
+                    self._parent().gfile(self._pixel_res, mute=True)
+
+                self._parent().file_type_for_plots = self.previous_device
 
     @property
     def _has_matplotlib(self):
@@ -1822,9 +2115,10 @@ class _MapdlCore(Commands):
     @property
     def _png_mode(self):
         """Returns True when MAPDL is set to write plots as png to file."""
-        return "PNG" in self.show(mute=False)
+        with self.force_output:
+            return "PNG" in self.show(mute=False)
 
-    def set_log_level(self, loglevel):
+    def set_log_level(self, loglevel: DEBUG_LEVELS) -> None:
         """Sets log level
 
         Parameters
@@ -1933,32 +2227,65 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            lines = self.geometry.lines
-            meshes = [{"mesh": lines}]
+            lines = self.geometry.get_lines(return_as_list=True)
+            meshes = []
+
             if color_lines:
-                meshes[0]["scalars"] = np.random.random(lines.n_cells)
+                size_ = len(lines)
+                # Because this is only going to be used for plotting
+                # purposes, we don't need to allocate
+                # a huge vector with random numbers (colours).
+                # By default `pyvista.DataSetMapper.set_scalars` `n_colors`
+                # argument is set to 256, so let do here the same.
+                # We will limit the number of randoms values (colours)
+                # to 256.
+                #
+                # Link: https://docs.pyvista.org/api/plotting/_autosummary/pyvista.DataSetMapper.set_scalars.html#pyvista.DataSetMapper.set_scalars
+                size_ = min([256, size_])
+                # Generating a colour array,
+                # Size = number of areas.
+                # Values are random between 0 and min(256, number_areas)
+                colors = get_ansys_colors(size_)
+
+                # Creating a mapping of colors
+                ent_num = []
+                for line in lines:
+                    ent_num.append(int(np.unique(line["entity_num"])[0]))
+                ent_num.sort()
+
+                # expand color array until matching the number of areas.
+                # In this case we start to repeat colors in the same order.
+                colors = np.resize(colors, (len(ent_num), 4))
+
+                for line, color in zip(lines, colors):
+                    meshes.append({"mesh": line, "color": color})
+
+            else:
+                for line in lines:
+                    meshes.append({"mesh": line, "color": kwargs.get("color", "white")})
 
             labels = []
             if show_line_numbering:
-                labels.append(
-                    {
-                        "points": lines.points[50::101],
-                        "labels": lines["entity_num"],
-                    }
-                )
+                for line in lines:
+                    labels.append(
+                        {
+                            "points": line.points[len(line.points) // 2],
+                            "labels": line["entity_num"],
+                        }
+                    )
 
             if show_keypoint_numbering:
                 labels.append(
                     {
-                        "points": self.geometry.keypoints,
+                        "points": self.geometry.get_keypoints(return_as_array=True),
                         "labels": self.geometry.knum,
                     }
                 )
 
             return general_plotter(meshes, [], labels, **kwargs)
         else:
-            self._enable_interactive_plotting()
-            return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
+            with self._enable_interactive_plotting():
+                return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
     def kplot(
         self,
@@ -2023,7 +2350,7 @@ class _MapdlCore(Commands):
                 )
                 return general_plotter([], [], [], **kwargs)
 
-            keypoints = self.geometry.keypoints
+            keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
 
             labels = []
@@ -2033,8 +2360,8 @@ class _MapdlCore(Commands):
             return general_plotter([], points, labels, **kwargs)
 
         # otherwise, use the legacy plotter
-        self._enable_interactive_plotting()
-        return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
+        with self._enable_interactive_plotting():
+            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
@@ -2135,7 +2462,7 @@ class _MapdlCore(Commands):
         except Exception:  # pragma: no cover
             ext = "rst"
 
-        if self._local:  # pragma: no cover
+        if self._local:
             if ext == "":
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
@@ -2185,7 +2512,7 @@ class _MapdlCore(Commands):
         elif os.path.isfile(rst_file):
             return rst_file
 
-    def _get(self, *args, **kwargs):
+    def _get(self, *args, **kwargs) -> MapdlFloat:
         """Simply use the default get method"""
         return self.get(*args, **kwargs)
 
@@ -2233,7 +2560,7 @@ class _MapdlCore(Commands):
         self._log.removeHandler(self._log_filehandler)
         self._log.info("Removed file handler")
 
-    def _flush_stored(self):  # pragma: no cover
+    def _flush_stored(self):
         """Writes stored commands to an input file and runs the input file.
 
         Used with ``non_interactive``.
@@ -2269,25 +2596,25 @@ class _MapdlCore(Commands):
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
 
-        if self._response is None:
+        if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
             self._log.info(self._response)
 
     def get_value(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
-    ):
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Runs the MAPDL GET command and returns a Python value.
 
         This method uses :func:`Mapdl.get`.
@@ -2383,19 +2710,19 @@ class _MapdlCore(Commands):
 
     def get(
         self,
-        par="__floatparameter__",
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        item3="",
-        it3num="",
-        item4="",
-        it4num="",
-        **kwargs,
-    ):
+        par: str = "__floatparameter__",
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
         """Retrieves a value and stores it as a scalar parameter or part of an array parameter.
 
         APDL Command: ``*GET``
@@ -2522,6 +2849,10 @@ class _MapdlCore(Commands):
         with self.force_output:
             response = self.run(command, **kwargs)
 
+        if self._store_commands:
+            # Return early in non_interactive
+            return
+
         value = response.split("=")[-1].strip()
         if item3:
             self._log.info(
@@ -2551,7 +2882,7 @@ class _MapdlCore(Commands):
     def jobname(self, new_jobname: str):
         """Set the jobname"""
         self.finish(mute=True)
-        self.filname(new_jobname, mute=True)
+        self.filname(new_jobname)
         self._jobname = new_jobname
 
     def modal_analysis(
@@ -2738,6 +3069,8 @@ class _MapdlCore(Commands):
            This function is being deprecated. Please use `input_strings`
            instead.
 
+        Allows to run multiple mapdl commands in different lines in one go.
+
         Parameters
         ----------
         commands : str
@@ -2858,7 +3191,13 @@ class _MapdlCore(Commands):
             self._flush_stored()
             return self._response
 
-    def run(self, command, write_to_log=True, mute=None, **kwargs) -> str:
+    def run(
+        self,
+        command: str,
+        write_to_log: bool = True,
+        mute: Optional[bool] = None,
+        **kwargs,
+    ) -> str:
         """
         Run single APDL command.
 
@@ -2918,6 +3257,13 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            if self.is_grpc:
+                self._create_session()
+
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -2928,11 +3274,31 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
-        # check if we want to avoid the current non-interactive context.
+        # Check kwargs
+        verbose = kwargs.pop("verbose", False)
+        save_fig = kwargs.pop("savefig", False)
+
+        # Check if you want to avoid the current non-interactive context.
         avoid_non_interactive = kwargs.pop("avoid_non_interactive", False)
 
+        # Check if there is an unused keyword argument. If there is, it
+        # might be because you wrote a wrong argument name.
+        #
+        # Remove empty string kwargs
+        for key, value in list(kwargs.items()):
+            if value == "":
+                kwargs.pop(key)
+
+        if kwargs:
+            warn(
+                "The following keyword arguments are not used:\n"
+                f"{', '.join(kwargs.keys())}\n"
+                "Make sure you are using the intended keyword arguments.",
+                UserWarning,
+            )
+
         if self._store_commands and not avoid_non_interactive:
-            # If we are using NBLOCK on input, we should not strip the string
+            # If you are using NBLOCK on input, you should not strip the string
             self._stored_commands.append(command)
             return
 
@@ -2944,8 +3310,12 @@ class _MapdlCore(Commands):
         # address MAPDL /INPUT level issue
         if command[:4].upper() == "/CLE":
             # Address gRPC issue
-            # https://github.com/pyansys/pymapdl/issues/380
+            # https://github.com/ansys/pymapdl/issues/380
             command = "/CLE,NOSTART"
+
+        # Tracking output device
+        if command[:4].upper() == "/SHO" and "," in command:
+            self._file_type_for_plots = command.split(",")[1].upper()
 
         # Invalid commands silently ignored.
         cmd_ = command.split(",")[0].upper()
@@ -2987,8 +3357,20 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
-        verbose = kwargs.get("verbose", False)
+        short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
+
+        if (
+            "Display device has not yet been specified with the /SHOW command" in text
+            and short_cmd in PLOT_COMMANDS
+        ):
+            # Reissuing the command to make sure we get output.
+            self.show(self.default_file_type_for_plots)
+            text = self._run(command, verbose=verbose, mute=mute)
+
+        if command[:4].upper() == "/CLE" and self.is_grpc:
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
 
         if mute:
             return
@@ -3005,10 +3387,13 @@ class _MapdlCore(Commands):
             self._raise_errors(text)
 
         # special returns for certain geometry commands
-        short_cmd = parse_to_short_cmd(command)
-
         if short_cmd in PLOT_COMMANDS:
-            return self._display_plot(self._response)
+            self._log.debug("It is a plot command.")
+            plot_path = self._get_plot_name(text)
+            if save_fig:
+                return self._download_plot(plot_path, save_fig)
+            else:
+                return self._display_plot(plot_path)
 
         return self._response
 
@@ -3145,7 +3530,7 @@ class _MapdlCore(Commands):
             containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
-        array : numpy.ndarray or List
+        array : numpy.ndarray or list
             List as a table or :class:`numpy.ndarray` array.
 
         var1 : str, optional
@@ -3258,9 +3643,6 @@ class _MapdlCore(Commands):
         else:
             self.slashdelete(filename)
 
-    def _display_plot(self, *args, **kwargs):  # pragma: no cover
-        raise NotImplementedError("Implemented by child class")
-
     def _run(self, *args, **kwargs):  # pragma: no cover
         raise NotImplementedError("Implemented by child class")
 
@@ -3274,7 +3656,9 @@ class _MapdlCore(Commands):
         >>> mapdl.version
         20.2
         """
-        return self.parameters.revision
+        if not self._version:
+            self._version = self.parameters.revision
+        return self._version
 
     @property
     @supress_logging
@@ -3328,13 +3712,13 @@ class _MapdlCore(Commands):
 
     @directory.setter
     @supress_logging
-    def directory(self, path):
+    def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
 
     @property
     def _lockfile(self):
-        """lockfile path"""
+        """Lockfile path"""
         path = self.directory
         if path is not None:
             return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
@@ -3343,7 +3727,7 @@ class _MapdlCore(Commands):
         """Exit from MAPDL"""
         raise NotImplementedError("Implemented by child class")
 
-    def __del__(self):  # pragma: no cover
+    def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
             try:
@@ -3358,15 +3742,15 @@ class _MapdlCore(Commands):
     @supress_logging
     def get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        **kwargs,
-    ):
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
         """Uses the ``*VGET`` command to Return an array from ANSYS as a
         Python array.
 
@@ -3445,16 +3829,16 @@ class _MapdlCore(Commands):
 
     def _get_array(
         self,
-        entity="",
-        entnum="",
-        item1="",
-        it1num="",
-        item2="",
-        it2num="",
-        kloop="",
-        dtype=None,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        dtype: DTypeLike = None,
         **kwargs,
-    ):
+    ) -> NDArray[np.float64]:
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
@@ -3488,34 +3872,87 @@ class _MapdlCore(Commands):
         else:
             return array
 
-    def _display_plot(self, text):
-        """Display the last generated plot (*.png) from MAPDL"""
-        import scooby
+    def _get_plot_name(self, text: str) -> str:
+        """ "Obtain the plot filename. It also downloads it if in remote session."""
+        self._log.debug(text)
+        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
 
-        self._enable_interactive_plotting()
-        png_found = PNG_TEST.findall(text)
         if png_found:
             # flush graphics writer
             self.show("CLOSE", mute=True)
-            self.show("PNG", mute=True)
-
-            import matplotlib.image as mpimg
-            import matplotlib.pyplot as plt
+            # self.show("PNG", mute=True)
 
             filename = self._screenshot_path()
+            self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):
-                img = mpimg.imread(filename)
-                plt.imshow(img)
-                plt.axis("off")
-                if self._show_matplotlib_figures:  # pragma: no cover
-                    plt.show()  # consider in-line plotting
-                if scooby.in_ipython():
-                    from IPython.display import display
-
-                    display(plt.gcf())
+                return filename
             else:  # pragma: no cover
                 self._log.error("Unable to find screenshot at %s", filename)
+        else:
+            self._log.error("Unable to find file in MAPDL command output.")
+
+    def _display_plot(self, filename: str) -> None:
+        """Display the last generated plot (*.png) from MAPDL"""
+        import matplotlib.image as mpimg
+        import matplotlib.pyplot as plt
+
+        def in_ipython():
+            # from scooby.in_ipython
+            # to avoid dependency here.
+            try:
+                __IPYTHON__
+                return True
+            except NameError:  # pragma: no cover
+                return False
+
+        self._log.debug("A screenshot file has been found.")
+        img = mpimg.imread(filename)
+        plt.imshow(img)
+        plt.axis("off")
+
+        if self._show_matplotlib_figures:  # pragma: no cover
+            self._log.debug("Using Matplotlib to plot")
+            plt.show()  # consider in-line plotting
+
+        if in_ipython():
+            self._log.debug("Using ipython")
+            from IPython.display import display
+
+            display(plt.gcf())
+
+    def _download_plot(self, filename: str, plot_name: str) -> None:
+        """Copy the temporary download plot to the working directory."""
+        if isinstance(plot_name, str):
+            provided = True
+            path_ = pathlib.Path(plot_name)
+            plot_name = path_.name
+            plot_stem = path_.stem
+            plot_ext = path_.suffix
+            plot_path = str(path_.parent)
+            if not plot_path or plot_path == ".":
+                plot_path = os.getcwd()
+
+        elif isinstance(plot_name, bool):
+            provided = False
+            plot_name = "plot.png"
+            plot_stem = "plot"
+            plot_ext = ".png"
+            plot_path = os.getcwd()
+        else:  # pragma: no cover
+            raise ValueError("Only booleans and str are allowed.")
+
+        id_ = 0
+        plot_path_ = os.path.join(plot_path, plot_name)
+        while os.path.exists(plot_path_) and not provided:
+            id_ += 1
+            plot_path_ = os.path.join(plot_path, f"{plot_stem}_{id_}{plot_ext}")
+        else:
+            copyfile(filename, plot_path_)
+
+        self._log.debug(
+            f"Copy plot file from temp directory to working directory as: {plot_path}"
+        )
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
@@ -3524,7 +3961,7 @@ class _MapdlCore(Commands):
         return filenames[-1]
 
     def _set_log_level(self, level):
-        """alias for set_log_level"""
+        """Alias for set_log_level"""
         self.set_log_level(level)
 
     def list(self, filename, ext=""):
@@ -3618,6 +4055,9 @@ class _MapdlCore(Commands):
 
     def _check_parameter_name(self, param_name):
         """Checks if a parameter name is allowed or not."""
+        if not self.check_parameter_names:
+            return
+
         param_name = param_name.strip()
 
         match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
@@ -3730,7 +4170,7 @@ class _MapdlCore(Commands):
             par, type_, imax, jmax, kmax, var1, var2, var3, csysid, **kwargs
         )
 
-    def _get_selected_(self, entity):  # pragma: no cover
+    def _get_selected_(self, entity):
         """Get list of selected entities."""
         allowed_values = ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]
         if entity.upper() not in allowed_values:
@@ -3754,16 +4194,25 @@ class _MapdlCore(Commands):
         elif entity == "VOLU":
             return self.geometry.vnum
 
-    def _pick_points(self, entity, pl, type_, previous_picked_points, **kwargs):
-        """Show a plot and get the selected points."""
+    def _enable_picking_entities(
+        self, entity, pl, type_, previous_picked_entities, **kwargs
+    ):
+        """Show a plot and get the selected entity."""
         _debug = kwargs.pop("_debug", False)  # for testing purposes
-        previous_picked_points = set(previous_picked_points)
+        previous_picked_entities = set(previous_picked_entities)
+
+        PICKING_USING_LEFT_CLICKING = False
 
         q = self.queries
-        picked_points = []
+        picked_entities = []
         picked_ids = []
+        entity = entity.lower()
 
-        selector = getattr(q, entity.lower())
+        if entity in ["kp", "node"]:
+            selector = getattr(q, entity)
+        else:
+            # We need to come out with a different thing.
+            pass
 
         # adding selection inversor
         pl._inver_mouse_click_selection = False
@@ -3775,86 +4224,160 @@ class _MapdlCore(Commands):
             "U": "Unselecting",
         }
 
-        def gen_text(picked_points=None):
+        def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
             sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
             type_text = selection_text[type_]
+            button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
-                f"Please use the left mouse button to pick the {entity}s.\n"
+                f"Please use the {button_} mouse button to pick the {entity}s.\n"
                 f"Press the key 'u' to change between mouse selecting and unselecting.\n"
                 f"Type: {type_} - {type_text}\n"
                 f"Mouse selection: {sel_}\n"
             )
 
-            picked_points_str = ""
-            if picked_points:
+            picked_entities_str = ""
+            if picked_entities:
                 # reverse picked point order, exclude the brackets, and limit
                 # to 40 characters
-                picked_points_str = str(picked_points[::-1])[1:-1]
-                if len(picked_points_str) > 40:
-                    picked_points_str = picked_points_str[:40]
-                    idx = picked_points_str.rfind(",") + 2
-                    picked_points_str = picked_points_str[:idx] + "..."
+                picked_entities_str = str(picked_entities[::-1])[1:-1]
+                if len(picked_entities_str) > 40:
+                    picked_entities_str = picked_entities_str[:40]
+                    idx = picked_entities_str.rfind(",") + 2
+                    picked_entities_str = picked_entities_str[:idx] + "..."
 
-            return text + f"Current {entity} selection: {picked_points_str}"
+            return text + f"Current {entity} selection: {picked_entities_str}"
 
-        def callback_(mesh, id_):
+        def callback_points(mesh, id_):
+            from ansys.mapdl.core.plotting import POINT_SIZE
+
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
             if not pl._inver_mouse_click_selection:
-                # Updating MAPDL points mapping
-                if node_id not in picked_points:
-                    picked_points.append(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id not in picked_entities:
+                    picked_entities.append(node_id)
+                # Updating pyvista entity mapping
                 if id_ not in picked_ids:
                     picked_ids.append(id_)
             else:
-                # Updating MAPDL points mapping
-                if node_id in picked_points:
-                    picked_points.remove(node_id)
-                # Updating pyvista points mapping
+                # Updating MAPDL entity mapping
+                if node_id in picked_entities:
+                    picked_entities.remove(node_id)
+                # Updating pyvista entity mapping
                 if id_ in picked_ids:
                     picked_ids.remove(id_)
 
             # remov etitle and update text
             pl.remove_actor("title")
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
-                font_size=10,
-                name="_point_picking_message",
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
             )
             if picked_ids:
                 pl.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
-                    point_size=10,
-                    name="_picked_points",
+                    point_size=POINT_SIZE + 10,
+                    name="_picked_entities",
                     pickable=False,
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_points")
+                pl.remove_actor("_picked_entities")
 
-        pl.enable_point_picking(
-            callback=callback_,
-            use_mesh=True,
-            show_message=gen_text(),
-            show_point=True,
-            left_clicking=True,
-            font_size=10,
-            tolerance=kwargs.get("tolerance", 0.025),
-        )
+        def callback_mesh(mesh):
+            def get_entnum(mesh):
+                return int(np.unique(mesh.cell_data["entity_num"])[0])
+
+            mesh_id = get_entnum(mesh)
+
+            # Getting meshes with that entity_num.
+            meshes = get_meshes_from_plotter(pl)
+
+            meshes = [each for each in meshes if get_entnum(each) == mesh_id]
+
+            if not pl._inver_mouse_click_selection:
+                # Updating MAPDL entity mapping
+                if mesh_id not in picked_entities:
+                    picked_entities.append(mesh_id)
+                    for i, each in enumerate(meshes):
+                        pl.add_mesh(
+                            each,
+                            color="red",
+                            point_size=10,
+                            name=f"_picked_entity_{mesh_id}_{i}",
+                            pickable=False,
+                            reset_camera=False,
+                        )
+
+            else:
+                # Updating MAPDL entity mapping
+                if mesh_id in picked_entities:
+                    picked_entities.remove(mesh_id)
+
+                    for i, each in enumerate(meshes):
+                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
+
+            # Removing only-first time actors
+            pl.remove_actor("title")
+            pl.remove_actor("_point_picking_message")
+
+            if "_entity_picking_message" in pl.actors:
+                pl.remove_actor("_entity_picking_message")
+
+            pl._picking_text = pl.add_text(
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
+            )
+
+        if entity in ["kp", "node"]:
+            lines_pl = self.lplot(return_plotter=True, color="w")
+            lines_meshes = get_meshes_from_plotter(lines_pl)
+
+            for each_mesh in lines_meshes:
+                pl.add_mesh(
+                    each_mesh,
+                    pickable=False,
+                    color="w",
+                    # name="lines"
+                )
+
+            # Picking points
+            pl.enable_point_picking(
+                callback=callback_points,
+                use_mesh=True,
+                show_message=gen_text(),
+                show_point=True,
+                left_clicking=PICKING_USING_LEFT_CLICKING,
+                font_size=GUI_FONT_SIZE,
+                tolerance=kwargs.get("tolerance", 0.025),
+            )
+        else:
+            # Picking meshes
+            pl.enable_mesh_picking(
+                callback=callback_mesh,
+                use_mesh=True,
+                show=False,  # This should be false to avoid a warning.
+                show_message=gen_text(),
+                left_clicking=PICKING_USING_LEFT_CLICKING,
+                font_size=GUI_FONT_SIZE,
+            )
 
         def callback_u():
             # inverting bool
             pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.remove_actor("_entity_picking_message")
+
             pl._picking_text = pl.add_text(
-                gen_text(picked_points),
-                font_size=10,
-                name="_point_picking_message",
+                gen_text(picked_entities),
+                font_size=GUI_FONT_SIZE,
+                name="_entity_picking_message",
             )
 
         pl.add_key_event("u", callback_u)
@@ -3864,20 +4387,20 @@ class _MapdlCore(Commands):
         else:
             _debug(pl)
 
-        picked_points = set(
-            picked_points
+        picked_entities = set(
+            picked_entities
         )  # removing duplicates (although there should be none)
 
         if type_ == "S":
             pass
         elif type_ == "R":
-            picked_points = previous_picked_points.intersection(picked_points)
+            picked_entities = previous_picked_entities.intersection(picked_entities)
         elif type_ == "A":
-            picked_points = previous_picked_points.union(picked_points)
+            picked_entities = previous_picked_entities.union(picked_entities)
         elif type_ == "U":
-            picked_points = previous_picked_points.difference(picked_points)
+            picked_entities = previous_picked_entities.difference(picked_entities)
 
-        return list(picked_points)
+        return list(picked_entities)
 
     def _perform_entity_list_selection(
         self, entity, selection_function, type_, item, comp, vmin, kabs
@@ -3901,7 +4424,7 @@ class _MapdlCore(Commands):
         self.cmdele(f"__temp_{entity}s_1__")
 
     @wraps(Commands.nsel)
-    def nsel(self, *args, **kwargs):
+    def nsel(self, *args, **kwargs) -> str:
         """Wraps previons NSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3910,15 +4433,15 @@ class _MapdlCore(Commands):
             super().nsel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points()
-        @wrap_point_SEL(entity="node")
+        @allow_pickable_entities()
+        @allow_iterables_vmin(entity="node")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.esel)
-    def esel(self, *args, **kwargs):
+    def esel(self, *args, **kwargs) -> str:
         """Wraps previons ESEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3927,15 +4450,15 @@ class _MapdlCore(Commands):
             super().esel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points()
-        @wrap_point_SEL(entity="elem")
+        @allow_pickable_entities(entity="elem", plot_function="eplot")
+        @allow_iterables_vmin(entity="elem")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.ksel)
-    def ksel(self, *args, **kwargs):
+    def ksel(self, *args, **kwargs) -> str:
         """Wraps superclassed KSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3944,15 +4467,15 @@ class _MapdlCore(Commands):
             super().ksel
         )  # using super() inside the wrapped function confuses the references
 
-        @allow_pickable_points(entity="kp", plot_function="kplot")
-        @wrap_point_SEL(entity="kp")
+        @allow_pickable_entities(entity="kp", plot_function="kplot")
+        @allow_iterables_vmin(entity="kp")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.lsel)
-    def lsel(self, *args, **kwargs):
+    def lsel(self, *args, **kwargs) -> str:
         """Wraps superclassed LSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3961,15 +4484,15 @@ class _MapdlCore(Commands):
             super().lsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="line", plot_function="lplot")
-        @wrap_point_SEL(entity="line")
+        @allow_pickable_entities(entity="line", plot_function="lplot")
+        @allow_iterables_vmin(entity="line")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.asel)
-    def asel(self, *args, **kwargs):
+    def asel(self, *args, **kwargs) -> str:
         """Wraps superclassed ASEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3978,15 +4501,15 @@ class _MapdlCore(Commands):
             super().asel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="area", plot_function="aplot")
-        @wrap_point_SEL(entity="area")
+        @allow_pickable_entities(entity="area", plot_function="aplot")
+        @allow_iterables_vmin(entity="area")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
         return wrapped(self, *args, **kwargs)
 
     @wraps(Commands.vsel)
-    def vsel(self, *args, **kwargs):
+    def vsel(self, *args, **kwargs) -> str:
         """Wraps superclassed VSEL to allow to use a list/tuple/array for vmin.
 
         It will raise an error in case vmax or vinc are used too.
@@ -3995,8 +4518,8 @@ class _MapdlCore(Commands):
             super().vsel
         )  # using super() inside the wrapped function confuses the references
 
-        # @allow_pickable_points(entity="volume", plot_function="vplot")
-        @wrap_point_SEL(entity="volume")
+        @allow_pickable_entities(entity="volu", plot_function="vplot")
+        @allow_iterables_vmin(entity="volume")
         def wrapped(self, *args, **kwargs):
             return sel_func(*args, **kwargs)
 
@@ -4005,15 +4528,23 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlInvalidRoutineError(text)
 
         if "command is ignored" in flat_text:
-            text += "\n\nIgnore these messages by setting 'ignore_errors'=True"
+            text += base_error_msg
             raise MapdlCommandIgnoredError(text)
+
+        if (
+            "The component definition of" in flat_text
+            and "contains no data." in flat_text
+        ):
+            text += base_error_msg
+            raise ComponentNoData(text)
 
         # flag errors
         if "*** ERROR ***" in flat_text:
@@ -4072,6 +4603,11 @@ class _MapdlCore(Commands):
                     [each for each in error_message.splitlines() if each]
                 )
 
+                # Trimming empty lines
+                error_message = "\n".join(
+                    [each for each in error_message.splitlines() if each]
+                )
+
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
                     permited_error_message = re.search(each_error, error_message)
@@ -4101,7 +4637,7 @@ class _MapdlCore(Commands):
             super().lsread(*args, **kwargs)
         return self._response.strip()
 
-    def file(self, fname="", ext="", **kwargs):
+    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Specifies the data file where results are to be found.
 
         APDL Command: FILE
@@ -4135,10 +4671,10 @@ class _MapdlCore(Commands):
         """
         fname = self._get_file_name(fname, ext, "rst")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_ = self._decompose_fname(fname)
+        file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename, extension, **kwargs):
+    def _file(self, filename: str, extension: str, **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
@@ -4256,7 +4792,7 @@ class _MapdlCore(Commands):
         if not self.is_local:
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
-        else:  # pragma: no cover
+        else:
             file_ = os.path.join(self.directory, "__outputcmd__.txt")
             with open(file_, "r") as f:
                 sys_output = f.read().strip()
@@ -4282,7 +4818,7 @@ class _MapdlCore(Commands):
         """Check if the MAPDL instance has been launched by PyMAPDL."""
         return self._launched
 
-    def _decompose_fname(self, fname):
+    def _decompose_fname(self, fname: str) -> Tuple[str, str, str]:
         """Decompose a file name (with or without path) into filename and extension.
 
         Parameters
@@ -4297,15 +4833,18 @@ class _MapdlCore(Commands):
 
         str
             File extension (without dot)
+
+        str
+            File path
         """
         fname = pathlib.Path(fname)
-        return fname.stem, fname.suffix.replace(".", "")
+        return (fname.stem, fname.suffix.replace(".", ""), fname.parent)
 
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
 
-        def __init__(self, parent):
-            self._parent = weakref.ref(parent)
+        def __init__(self, parent: "_MapdlCore"):
+            self._parent: "_MapdlCore" = weakref.ref(parent)
 
         def __enter__(self):
             self._parent()._log.debug("Entering force-output mode")
@@ -4324,7 +4863,7 @@ class _MapdlCore(Commands):
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
 
-    def _parse_rlist(self):
+    def _parse_rlist(self) -> Dict[int, float]:
         # mapdl.rmore(*list)
         with self.force_output:
             rlist = self.rlist()
@@ -4357,3 +4896,112 @@ class _MapdlCore(Commands):
                 const_[set_][jlimit] = values_[i]
 
         return const_
+
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        header = "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+        cmlist = "\n".join(blocks)
+
+        def extract(each_line, ind):
+            return each_line.split()[ind].strip()
+
+        return {
+            extract(each_line, 0): extract(each_line, 1)
+            for each_line in cmlist.splitlines()
+            if each_line
+        }
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+        # Capturing blocks
+        cmlist = "\n\n".join(
+            re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        )
+
+        # Capturing items in each block
+        rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+        items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+        # Joining them together and giving them format.
+        items = items.replace("\n", "  ").split()
+        items = [int(each) for each in items]
+
+        return items
+
+    @wraps(Commands.cmplot)
+    def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
+        """Wraps cmplot"""
+
+        label = label.upper()
+        entity = entity.upper()
+
+        if label in ["N", "P"]:
+            raise ValueError(f"The label '{label}' is not supported.")
+
+        if (not label or label == "ALL") and not entity:
+            raise ValueError(
+                f"If not using label or label =='ALL', then you "
+                "need to provide a valid entity."
+            )
+
+        if label != "ALL":
+            if label not in self.components:
+                raise ComponentDoesNotExits(f"The component '{label}' does not exist.")
+
+            if not entity:
+                entity = self.components[label].type
+            else:
+                entity_ = self.components[label].type
+                if entity_.upper() != entity.upper():
+                    raise ValueError(
+                        f"The component entity supplied '{entity}' "
+                        "does not seems to match the component "
+                        f"type '{entity_}' with name '{label}' "
+                        "in MAPDL."
+                    )
+
+        if label and not entity:
+            # supposing entity
+            entity = self.components[label].type
+
+        if entity[:4] not in ["NODE", "ELEM", "KP", "LINE", "AREA", "VOLU"]:
+            raise ValueError(f"The entity '{entity}' is not allowed.")
+
+        cmps_names = self.components.names
+        self.cm("__tmp_cm__", entity=entity)
+        if label == "ALL":
+            self.cmsel("ALL", entity=entity)
+        else:
+            self.cmsel("S", name=label, entity=entity)
+
+        mapping = {
+            "NODE": self.nplot,
+            "ELEM": self.eplot,
+            "KP": self.kplot,
+            "LINE": self.lplot,
+            "AREA": self.aplot,
+            "VOLU": self.vplot,
+        }
+        func = mapping[entity]
+
+        kwargs.setdefault("title", f"PyMAPDL CMPLOT")
+        output = func(**kwargs)
+
+        # returning to previous selection
+        self.cmsel("s", "__tmp_cm__", entity=entity)
+        self.components.select(cmps_names)
+        return output

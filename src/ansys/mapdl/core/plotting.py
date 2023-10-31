@@ -1,12 +1,16 @@
 """Plotting helper for MAPDL using pyvista"""
+from typing import Any, Optional
 from warnings import warn
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 
 from .theme import MapdlTheme
+
+POINT_SIZE = 10
 
 # Supported labels
 BC_D = [
@@ -152,7 +156,7 @@ def _general_plotter(
     color="w",
     show_edges=None,
     edge_color=None,
-    point_size=5.0,
+    point_size=POINT_SIZE,
     line_width=None,
     opacity=1.0,
     flip_scalars=False,
@@ -220,13 +224,13 @@ def _general_plotter(
         ``off_screen`` are evaluated to ``False`` and ``True``
         respectively.
 
-    style : string, optional
+    style : str, optional
         Visualization style of the mesh.  One of the following:
         ``style='surface'``, ``style='wireframe'``,
         ``style='points'``.  Defaults to ``'surface'``. Note that
         ``'wireframe'`` only shows a wireframe of the outer geometry.
 
-    color : string or 3 item list, optional
+    color : str, list[int, int, int],  optional
         Use to make the entire mesh have a single solid color.  Either
         a string, RGB list, or hex color string.  For example:
         ``color='white'``, ``color='w'``, ``color=[1, 1, 1]``, or
@@ -237,9 +241,9 @@ def _general_plotter(
         Shows the edges of a mesh.  Does not apply to a wireframe
         representation.
 
-    edge_color : string or 3 item list, optional, defaults to black
+    edge_color : str, list[int, int, int],  optional
         The solid color to give the edges when ``show_edges=True``.
-        Either a string, RGB list, or hex color string.
+        Either a string, RGB list, or hex color string. Defaults to black.
 
     point_size : float, optional
         Point size of any nodes in the dataset plotted. Also applicable
@@ -302,7 +306,7 @@ def _general_plotter(
 
     theme : pyvista.DefaultTheme, optional
         PyVista theme. Defaults to `PyMAPDL theme <https://github
-        .com/pyansys/pyansys-sphinx-theme>`_.
+        .com/ansys/ansys-sphinx-theme>`_.
 
     plotter : pyvista.Plotter, optional
         If a :class:`pyvista.Plotter` not is provided, then creates its
@@ -396,6 +400,9 @@ def _general_plotter(
                 UserWarning,
             )
 
+    if not cmap:
+        cmap = "bwr"
+
     if background:
         plotter.set_background(background)
 
@@ -420,35 +427,54 @@ def _general_plotter(
         )
 
     for mesh in meshes:
-        plotter.add_mesh(
-            mesh["mesh"],
-            scalars=mesh.get("scalars"),
-            scalar_bar_args=scalar_bar_args,
-            color=mesh.get("color", color),
-            style=mesh.get("style", style),
-            show_edges=show_edges,
-            edge_color=edge_color,
-            smooth_shading=smooth_shading,
-            split_sharp_edges=split_sharp_edges,
-            feature_angle=feature_angle,
-            point_size=point_size,
-            line_width=line_width,
-            show_scalar_bar=show_scalar_bar,
-            opacity=opacity,
-            flip_scalars=flip_scalars,
-            lighting=lighting,
-            n_colors=n_colors,
-            interpolate_before_map=interpolate_before_map,
-            cmap=cmap,
-            render_points_as_spheres=render_points_as_spheres,
-            render_lines_as_tubes=render_lines_as_tubes,
-            **add_mesh_kwargs,
-        )
+        scalars: Optional[NDArray[Any]] = mesh.get("scalars")
+
+        if (
+            "scalars" in mesh
+            and scalars.ndim == 2
+            and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
+        ):
+            # for the case we are using scalars for plotting
+            rgb = True
+        else:
+            rgb = False
+
+        # To avoid index error.
+        mesh_ = mesh["mesh"]
+        if not isinstance(mesh_, list):
+            mesh_ = [mesh_]
+
+        for each_mesh in mesh_:
+            plotter.add_mesh(
+                each_mesh,
+                scalars=scalars,
+                scalar_bar_args=scalar_bar_args,
+                color=mesh.get("color", color),
+                style=mesh.get("style", style),
+                show_edges=show_edges,
+                edge_color=edge_color,
+                smooth_shading=smooth_shading,
+                split_sharp_edges=split_sharp_edges,
+                feature_angle=feature_angle,
+                point_size=point_size,
+                line_width=line_width,
+                show_scalar_bar=show_scalar_bar,
+                opacity=opacity,
+                flip_scalars=flip_scalars,
+                lighting=lighting,
+                n_colors=n_colors,
+                interpolate_before_map=interpolate_before_map,
+                cmap=cmap,
+                render_points_as_spheres=render_points_as_spheres,
+                render_lines_as_tubes=render_lines_as_tubes,
+                rgb=rgb,
+                **add_mesh_kwargs,
+            )
 
     for label in labels:
         # verify points are not duplicates
-        points, idx, _ = unique_rows(np.array(label["points"]))
-        labels = np.array(label["labels"])[idx].tolist()
+        points, idx, _ = unique_rows(np.atleast_2d(np.array(label["points"])))
+        labels = np.array(label["labels"])[idx - 1].tolist()
 
         plotter.add_point_labels(
             points,
@@ -568,13 +594,13 @@ def general_plotter(
     savefig : str, optional
         Saves screenshot to a file path.
 
-    style : string, optional
+    style : str, optional
         Visualization style of the mesh.  One of the following:
         ``style='surface'``, ``style='wireframe'``,
         ``style='points'``.  Defaults to ``'surface'``. Note that
         ``'wireframe'`` only shows a wireframe of the outer geometry.
 
-    color : string or 3 item list, optional
+    color : str, list[int, int, int],  optional
         Use to make the entire mesh have a single solid color.  Either
         a string, RGB list, or hex color string.  For example:
         ``color='white'``, ``color='w'``, ``color=[1, 1, 1]``, or
@@ -585,7 +611,7 @@ def general_plotter(
         Shows the edges of a mesh.  Does not apply to a wireframe
         representation.
 
-    edge_color : string or 3 item list, optional,
+    edge_color : str, list[int, int, int],  optional
         The solid color to give the edges when ``show_edges=True``.
         Either a string, RGB list, or hex color string.
         Defaults to black.
@@ -714,21 +740,21 @@ def general_plotter(
         since they should be set when instantiated the provided plotter.
         Defaults to ``None`` (create the Plotter object).
 
-    add_points_kwargs : list[dict]
+    add_points_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_points` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot nodes for example.
         See examples section to learn more about its usage.
 
-    add_mesh_kwargs : list[dict]
+    add_mesh_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_mesh` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
         This pyvista method is used to plot elements for example.
         See examples section to learn more about its usage.
 
-    add_point_labels_kwargs : list[dict]
+    add_point_labels_kwargs : List[dict]
         This is a dict or list of dicts to be passed to all or just the
         correspondent :class:`pyvista.Plotter.add_point_labels` call in
         :func:`ansys.mapdl.core.plotting.general_plotter`.
@@ -750,7 +776,7 @@ def general_plotter(
     Notes
     -----
     Plotting boundary conditions is still under-development, so feel free to share feedback
-    or suggestion in `PyMAPDL <https://github.com/pyansys/pymapdl>`_.
+    or suggestion in `PyMAPDL <https://github.com/ansys/pymapdl>`_.
     At the moment only nodal boundary conditions can be shown (``bc_target='Nodes'``), and only
     the following types of boundary conditions:
 
@@ -1150,3 +1176,14 @@ def _bc_labels_default(mapdl):
         )
     )
     return flist + dlist
+
+
+def get_meshes_from_plotter(pl):
+    datasets = []
+    for actor in pl.actors.values():
+        if hasattr(actor, "mapper"):
+            datasets.append(actor.mapper.dataset)
+
+    return [
+        actor.mapper.dataset for actor in pl.actors.values() if hasattr(actor, "mapper")
+    ]

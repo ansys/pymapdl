@@ -7,9 +7,9 @@ import types
 import pytest
 
 from ansys.mapdl.core import errors, launch_mapdl, licensing
-from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import threaded
-from conftest import LOCAL as IS_LOCAL
+from conftest import ON_LOCAL as IS_LOCAL
+from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
 
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
@@ -19,11 +19,6 @@ except:
 skip_no_lic_bin = pytest.mark.skipif(
     not (LIC_INSTALLED and IS_LOCAL),
     reason="Requires being in 'local' mode and have license utilities binaries.",
-)
-
-skip_launch_mapdl = pytest.mark.skipif(
-    not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally",
 )
 
 
@@ -146,7 +141,7 @@ def test_get_ansys_license_debug_file_tail(tmpdir, license_checker):
     assert "CHECKOUT" in line
 
 
-@skip_launch_mapdl
+@skip_if_not_local
 @skip_no_lic_bin
 def test_check_license_file_fail(license_checker):
     with pytest.raises(TimeoutError):
@@ -163,7 +158,7 @@ def test_license_checker(tmpdir, license_checker):
     assert license_checker.check()
 
 
-@skip_launch_mapdl
+@skip_if_not_local
 @skip_no_lic_bin
 def test_check_license_file(tmpdir):
     timeout = 15
@@ -172,7 +167,11 @@ def test_check_license_file(tmpdir):
     checker.start(checkout_license=False)
 
     try:
-        mapdl = launch_mapdl(license_server_check=False, start_timeout=timeout)
+        mapdl = launch_mapdl(
+            license_server_check=False,
+            start_timeout=timeout,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
         assert mapdl._local
         mapdl.exit()
     except IOError:  # MAPDL never started

@@ -57,8 +57,8 @@ You now have solved for the first 10 modes of the cube:
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
 Next, load the mass and stiffness matrices that are stored by default
-in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlMath
-<ansys.math.core.math.AnsMath>` class as ``mm``:
+in the :file:`<jobname>.full` file. First, create an instance of the 
+:class:`MapdlMath <ansys.math.core.math.AnsMath>` class as ``mm``:
 
 .. code:: python
 

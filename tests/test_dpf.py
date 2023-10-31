@@ -1,11 +1,25 @@
 """Test the DPF implementation"""
 import os
 
-from ansys.dpf import core as dpf
+import pytest
 
-DPF_PORT = os.environ.get("DPF_PORT", 21002)  # Set in ci.yaml
+from conftest import skip_if_no_has_dpf
+
+try:
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+except ImportError:
+    skip_if_no_has_dpf = pytest.mark.skipif(
+        True,
+        reason="""DPF couldn't be imported.""",
+    )
+    DPF_DEFAULT_PORT = None
 
 
+DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
+
+
+@skip_if_no_has_dpf
 def test_dpf_connection():
     # uses 127.0.0.1 and port 50054 by default
     try:
@@ -16,6 +30,7 @@ def test_dpf_connection():
         assert False
 
 
+@skip_if_no_has_dpf
 def test_upload(mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))

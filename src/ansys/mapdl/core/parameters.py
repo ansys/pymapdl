@@ -56,6 +56,8 @@ class Parameters:
     Simply list all parameters except for MAPDL MATH parameters.
 
     >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
     ARR                              : ARRAY DIM (3, 1, 1)
     PARM_FLOAT                       : 20.0
     PARM_INT                         : 10.0
@@ -75,7 +77,17 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: _MapdlCore):
+        """Parameters manager
+
+        Class to help to manage parameters in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -280,14 +292,16 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        params = interp_star_status(self._mapdl.starstatus(avoid_non_interactive=True))
+        params = interp_star_status(
+            self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
+        )
 
         if self.show_leading_underscore_parameters:
-            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            _params = interp_star_status(self._mapdl.starstatus("_PRM", mute=False))
             params.update(_params)
 
         if self.show_trailing_underscore_parameters:
-            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_", mute=False))
             params.update(params_)
 
         return params
@@ -322,12 +336,12 @@ class Parameters:
         if key not in parameters:
             try:
                 val_ = interp_star_status(self._mapdl.starstatus(key))
+                if not val_:
+                    raise KeyError(f"The parameter '{key}' does not exist.")
+
                 val_ = val_[list(val_.keys())[0]]["value"]
-                if len(val_) == 1:
-                    return val_[0]
-                else:
-                    return val_
-                return
+                return val_[0] if len(val_) == 1 else val_
+
             except MapdlRuntimeError:
                 raise IndexError("%s not a valid parameter_name" % key)
 
@@ -521,11 +535,11 @@ class Parameters:
 
         Parameters
         ----------
-        arr : np.ndarray or List
-            Array to send to MAPDL.  Maximum of 3 dimensions.
-
         name : str
             Name of the array to write to within MAPDL.
+
+        arr : np.ndarray or List
+            Array to send to MAPDL.  Maximum of 3 dimensions.
 
         Examples
         --------
@@ -717,11 +731,13 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "There are no parameters defined." in status:
+    if "no parameters defined" in status or (
+        "Parameter name" in status and "command is undefined" in status
+    ):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
-    # parameters that we don't want to include in the analysis.
+    # text that we don't want to include in the output.
     ind = find_parameter_listing_line(status)
     status = "\n".join(status.splitlines()[ind:])
 

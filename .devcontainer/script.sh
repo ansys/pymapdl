@@ -24,4 +24,19 @@ if [[ -z "${ANSYSLMD_LICENSE_FILE}" ]]; then
 else
   echo "ANSYSLMD_LICENSE_FILE was found."
   echo "It is defined as ${ANSYSLMD_LICENSE_FILE}"
+
+  # Storing env var in .bashrc file so it is automatically loaded.
+  printf "\n%s\n" "ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}" >> ~/.bashrc
+
+  # Activating the new configuration
+  source ~/.bashrc
+
 fi
+
+# Installing libs for testing
+apt update
+apt install -y libgl1-mesa-glx xvfb
+
+# Installing libs for doc building
+apt update 
+apt install -y zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex

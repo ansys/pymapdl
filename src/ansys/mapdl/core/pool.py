@@ -1,12 +1,13 @@
 """This module is for threaded implementations of the mapdl interface"""
-
 import os
 import shutil
+import tempfile
 import time
+from typing import Any, Dict, List, Optional
 import warnings
 
 from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
-from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
@@ -15,11 +16,11 @@ if _HAS_TQDM:
     from tqdm import tqdm
 
 
-def available_ports(n_ports, starting_port=MAPDL_DEFAULT_PORT):
+def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
     """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
     port = MAPDL_DEFAULT_PORT
-    ports = []
+    ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
         if not port_in_use(port):
             ports.append(port)
@@ -55,7 +56,7 @@ class LocalMapdlPool:
         Base directory to create additional directories for each MAPDL
         instance.  Defaults to a temporary working directory.
 
-    starting_port : int, optional
+    port : int, optional
         Starting port for the MAPDL instances.  Defaults to 50052.
 
     progress_bar : bool, optional
@@ -71,6 +72,14 @@ class LocalMapdlPool:
         ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+
+    names : str, Callable, optional
+        You can specify the names of the directories where the instances are
+        created. A string or a function (callable) that accepts an integer and
+        return an string can be used.
+        If you use a string, "_{i}" is appended to that string, where "i" is
+        the index of each instance in the pool.
+        By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
         See :func:`ansys.mapdl.core.launch_mapdl` for a complete
@@ -109,21 +118,42 @@ class LocalMapdlPool:
 
     def __init__(
         self,
-        n_instances,
-        wait=True,
-        run_location=None,
-        port=MAPDL_DEFAULT_PORT,
-        progress_bar=True,
-        restart_failed=True,
-        remove_temp_files=True,
+        n_instances: int,
+        wait: bool = True,
+        run_location: Optional[str] = None,
+        port: int = MAPDL_DEFAULT_PORT,
+        progress_bar: bool = True,
+        restart_failed: bool = True,
+        remove_temp_files: bool = True,
+        names: Optional[str] = None,
+        override=True,
         **kwargs,
-    ):
+    ) -> None:
         """Initialize several instances of mapdl"""
-        self._instances = []
-        self._root_dir = run_location
+        self._instances: List[None] = []
+
+        if run_location is None:
+            run_location = tempfile.gettempdir()
+        self._root_dir: str = run_location
+
         kwargs["remove_temp_files"] = remove_temp_files
         kwargs["mode"] = "grpc"
-        self._spawn_kwargs = kwargs
+        self._spawn_kwargs: Dict[str, Any] = kwargs
+        self._spawning_i: int = 0
+        self._exiting_i: int = 0
+        self._override = override
+
+        if not names:
+            names = "Instance"
+
+        if isinstance(names, str):
+            self._names = lambda i: names + "_" + str(i)
+        elif callable(names):
+            self._names = names
+        else:
+            raise ValueError(
+                "Only strings or functions are allowed in the argument 'name'."
+            )
 
         # verify that mapdl is 2021R1 or newer
         if "exec_file" in kwargs:
@@ -169,7 +199,7 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=f"Instance {i}")
+            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
             for i in range(n_instances)
         ]
         if wait:
@@ -191,7 +221,23 @@ class LocalMapdlPool:
 
         self._verify_unique_ports()
 
-    def _verify_unique_ports(self):
+    @property
+    def _spawning(self) -> bool:
+        """Return true if spawning new MAPDL instance"""
+        # Because spawning is threaded, we need to make sure we are approaching this
+        # with counters instead of a bool.
+
+        return self._spawning_i != 0
+
+    @property
+    def _exiting(self) -> bool:
+        """Return true if exiting a MAPDL instance"""
+        # Because exiting is threaded, we need to make sure we are approaching this
+        # with counters instead of a bool.
+
+        return self._exiting_i != 0
+
+    def _verify_unique_ports(self) -> None:
         if len(self._ports) != len(self):
             raise MapdlRuntimeError("MAPDLPool has overlapping ports")
 
@@ -367,9 +413,11 @@ class LocalMapdlPool:
                     self._instances[i] = None
 
                     try:
+                        self._exiting_i += 1
                         instance.exit()
                     except Exception as e:
                         LOG.error("Failed to close instance", exc_info=True)
+                        self._exiting_i -= 1
 
             else:
                 # wait for all threads to complete
@@ -460,7 +508,14 @@ class LocalMapdlPool:
                 mapdl.clear(mute=True)
             return mapdl.input(input_file)
 
-        return self.map(run_file, files, progress_bar=progress_bar)
+        return self.map(
+            run_file,
+            files,
+            progress_bar=progress_bar,
+            timeout=timeout,
+            wait=wait,
+            close_when_finished=close_when_finished,
+        )
 
     def next_available(self, return_index=False):
         """Wait until an instance of mapdl is available and return that instance.
@@ -532,12 +587,14 @@ class LocalMapdlPool:
         @threaded
         def threaded_exit(index, instance):
             if instance:
+                self._exiting_i += 1
                 try:
                     instance.exit()
                 except:
                     pass
                 self._instances[index] = None
                 # LOG.debug("Exited instance: %s", str(instance))
+                self._exiting_i -= 1
 
         threads = []
         for i, instance in enumerate(self):
@@ -554,8 +611,25 @@ class LocalMapdlPool:
                     count += 1
         return count
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int):
         """Return an instance by an index"""
+
+        # Regarding issue 2173.
+        # there are two options here:
+        # * the MAPDL instance hasn't be created yet. It is threaded.
+        # * it died and it hasn't been relaunched.
+        # Because we are seeing some random errors, I would bet on the first
+        time0 = time.time()
+        timeout = 10  # seconds
+        while (
+            self._instances[key] is None
+            and time.time() < (time0 + timeout)
+            and self._spawning
+        ):
+            time.sleep(0.1)
+            # We could respawn an instance here, but later at some parts of the code,
+            # we do check if the instance is None.
+
         return self._instances[key]
 
     def __iter__(self):
@@ -565,16 +639,32 @@ class LocalMapdlPool:
                 yield instance
 
     @threaded_daemon
-    def _spawn_mapdl(self, index, port=None, pbar=None, name=""):
+    def _spawn_mapdl(
+        self, index: int, port: int = None, pbar: Optional[bool] = None, name: str = ""
+    ):
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
-        run_location = create_temp_dir(self._root_dir)
+        self._spawning_i += 1
+
+        run_location = create_temp_dir(self._root_dir, name=name)
+
         self._instances[index] = launch_mapdl(
-            run_location=run_location, port=port, **self._spawn_kwargs
+            run_location=run_location,
+            port=port,
+            override=self._override,
+            **self._spawn_kwargs,
         )
+
+        # Waiting for the instance being fully initialized.
+        # This is introduce to mitigate #2173
+        while self._instances[index] is None:
+            time.sleep(0.1)
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
+
+        self._spawning_i -= 1
 
     @threaded_daemon
     def _monitor_pool(self, refresh=1.0, name=""):
@@ -588,12 +678,15 @@ class LocalMapdlPool:
                 if instance._exited:
                     try:
                         # use the next port after the current available port
+                        self._spawning_i += 1
                         port = max(self._ports) + 1
                         self._spawn_mapdl(
                             index, port=port, name=f"Instance {index}"
                         ).join()
                     except Exception as e:
                         LOG.error(e, exc_info=True)
+                        self._spawning_i -= 1
+
             time.sleep(refresh)
 
     @property

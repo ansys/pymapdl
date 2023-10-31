@@ -1,7 +1,7 @@
 Access MAPDL database
 =====================
 
-.. warning:: This feature is still in beta. Report any errors or suggestions to |pyansys_contact|.
+.. warning:: This feature is still in beta. To report any errors or suggestions, `open an issue on GitHub <pymapdl_new_issue_>`_.
 
 
 In PyMAPDL v0.61.2 and later, you can access elements and nodes data from the MAPDL database using the DB module.

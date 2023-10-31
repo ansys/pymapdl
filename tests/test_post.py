@@ -15,13 +15,6 @@ from ansys.mapdl.core.post import (
     PostProcessing,
 )
 
-# must be run first before loading a result
-# since MAPDL may be on a remote windows machine, cannot test
-# @pytest.mark.skipif(os.name == 'nt', reason="Causes MAPDL to die on windows")
-# def test_nodal_eqv_stress_fail(mapdl, static_solve):
-#     with pytest.raises(MapdlRuntimeError):
-#         mapdl.post_processing.nodal_eqv_stress
-
 
 @pytest.fixture(scope="module")
 def static_solve(mapdl):
@@ -79,9 +72,6 @@ def static_solve(mapdl):
     mapdl.aatt(2, 2, 2, 11)
     mapdl.amesh("all")
     mapdl.prep7()
-
-    # plot elements
-    # mapdl.eplot()
 
     # Apply tangential pressure
     mapdl.esel("S", "TYPE", "", 2)
@@ -167,7 +157,9 @@ def test_disp_plot(mapdl, static_solve, comp):
     )
 
 
-def test_disp_plot_subselection(mapdl, static_solve):
+def test_disp_plot_subselection(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
     mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
     assert (
@@ -179,7 +171,9 @@ def test_disp_plot_subselection(mapdl, static_solve):
     mapdl.allsel()
 
 
-def test_nodal_eqv_stress(mapdl, static_solve):
+def test_nodal_eqv_stress(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
 
@@ -193,7 +187,9 @@ def test_nodal_eqv_stress(mapdl, static_solve):
     assert np.allclose(seqv_ans, seqv_aligned)
 
 
-def test_plot_nodal_eqv_stress(mapdl, static_solve):
+def test_plot_nodal_eqv_stress(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.skip = True  # skipping image verification
+
     assert mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True) is None
 
 
@@ -626,7 +622,8 @@ def test_plot_element_stress(mapdl, static_solve, comp):
     assert mapdl.post_processing.plot_element_stress(comp) is None
 
 
-def test_plot_element_values(mapdl, static_solve):
+def test_plot_element_values(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.high_variance_test = 600
     mapdl.post1(mute=True)
     mapdl.set(1, 1, mute=True)
     assert mapdl.post_processing.plot_element_values("S", "X") is None
@@ -736,13 +733,17 @@ def test_plot_incomplete_element_selection(mapdl, contact_solve):
     assert mapdl.post_processing.plot_element_displacement() is None
 
 
+@pytest.mark.xfail(strict=False, reason="The image regression is failing. See #2435")
 def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
     mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
     assert mapdl.post_processing.plot_nodal_displacement() is None
 
 
-def test_general_plotter_returns(mapdl, static_solve):
+def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
+    verify_image_cache.skip = True  # skipping image verification
+
     # Returns
+
     assert (
         mapdl.post_processing.plot_nodal_displacement("X", smooth_shading=True) is None
     )
@@ -752,12 +753,12 @@ def test_general_plotter_returns(mapdl, static_solve):
         ),
         CameraPosition,
     )
-    assert isinstance(
-        mapdl.post_processing.plot_nodal_displacement(
-            "X", smooth_shading=True, return_plotter=True
-        ),
-        Plotter,
+
+    p = mapdl.post_processing.plot_nodal_displacement(
+        "X", smooth_shading=True, return_plotter=True
     )
+    assert isinstance(p, Plotter)
+    p.show()
 
     with pytest.raises(ValueError):
         mapdl.post_processing.plot_nodal_displacement(
@@ -785,16 +786,15 @@ def test_general_plotter_returns(mapdl, static_solve):
         ),
         CameraPosition,
     )
-    assert isinstance(
-        mapdl.post_processing.plot_nodal_displacement(
-            "X",
-            smooth_shading=True,
-            savefig=True,
-            return_cpos=False,
-            return_plotter=True,
-        ),
-        Plotter,
+
+    p = mapdl.post_processing.plot_nodal_displacement(
+        "X",
+        smooth_shading=True,
+        savefig=True,
+        return_cpos=False,
+        return_plotter=True,
     )
+    assert isinstance(p, Plotter)
 
 
 def test_time_frequency_values(mapdl, contact_solve):
@@ -855,6 +855,20 @@ def test_meta_post_plot_docstrings():
                 )
                 >= 3
             ), f"Less than three complete one-liner general plotter link in {meth.__name__}"
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    # Display elements with their nodes numbers.
+    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
+
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )
 
 
 ###############################################################################

@@ -1,4 +1,4 @@
-"""pymapdl specific errors"""
+"""PyMAPDL specific errors"""
 
 from functools import wraps
 import signal
@@ -110,6 +110,13 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
 
     def __init__(self, msg=""):
         MapdlRuntimeError.__init__(self, msg)
+
+
+class DifferentSessionConnectionError(RuntimeError):
+    """Provides the error when connecting to the MAPDL instance fails."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
 
 
 # handler for protect_grpc
@@ -229,3 +236,24 @@ class EmptyRecordError(RuntimeError):
 
     def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
+
+
+class ComponentNoData(MapdlException):
+    """Raised when the component has no data"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
+
+
+class ComponentIsNotSelected(MapdlException):
+    """Raised when the component is not selected"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
+
+
+class ComponentDoesNotExits(MapdlException):
+    """Raised when the component does not exist"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)

@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: marcoroth/dependabot-bump-together-action@main
         with:
-          dependencies: ansys-api-mapdl, vtk, ansys-corba, ansys-dpf-core, ansys-mapdl-reader, ansys-platform-instancemanagement, ansys-sphinx-theme, pyansys-tools-report, appdirs, autopep8, click, imageio-ffmpeg, imageio, importlib-metadata, jupyter_sphinx, jupyterlab, matplotlib, numpy, numpydoc, pandas, pexpect, plotly, protobuf, pyiges, pypandoc, pytest-cov, pytest-rerunfailures, pytest-sphinx, pytest, pythreejs, pyvista, scipy, setuptools, sphinx-autobuild, sphinx-autodoc-typehints, sphinx-copybutton, sphinx-gallery, sphinx-notfound-page, sphinxcontrib-websupport, sphinxemoji, tqdm, wheel
+          dependencies: ansys-api-mapdl, ansys-corba, ansys-dpf-core, ansys-mapdl-reader, ansys-math-core, ansys-platform-instancemanagement, ansys-sphinx-theme, ansys-tools-path, autopep8, click, grpcio, imageio, imageio-ffmpeg, importlib-metadata, jupyter_sphinx, jupyterlab, matplotlib, numpy, numpydoc, pandas, pexpect, platformdirs, plotly, protobuf, psutil, pyansys-tools-report, pyansys-tools-versioning, pyiges, pyiges[full], pypandoc, pytest, pytest-cov, pytest-pyvista, pytest-rerunfailures, pytest-sphinx, pythreejs, pyvista, scipy, sphinx, sphinx-autobuild, sphinx-autodoc-typehints, sphinx-copybutton, sphinx-gallery, sphinx-reredirects, sphinxcontrib-websupport, sphinxemoji, tqdm, vtk
           package_managers: pip
           directory: /
           branch: main
           username: ${{ secrets.GH_USERNAME }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.MULTIPR_DEPENDABOT }}
 

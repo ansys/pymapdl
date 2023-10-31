@@ -361,9 +361,8 @@ class ansXpl:
         self._check_ignored(response)
         return response
 
-    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
-        """
-        Import a Matrix/Vector from a MAPDL result file.
+    def extract(self, recordname, sets="ALL", asarray=False):
+        """Import a Matrix/Vector from a MAPDL result file.
 
         At the moment, this only supports reading the displacement vectors from
         a result file.
@@ -378,14 +377,14 @@ class ansXpl:
             Number of sets. Can be ``"ALL"`` or the number of sets to load.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansy.math.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansy.math.core.math.AnsMath>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray or ansys.math.core.math.AnsMat
-            A :class:`numpy.ndarray` or :class:`AnsMat
-            <ansys.math.core.math.AnsMat>` of the displacement vectors,
+        numpy.ndarray or ansys.math.core.math.AnsMath
+            A :class:`numpy.ndarray` or :class:`AnsMath
+            <ansys.math.core.math.AnsMath>` of the displacement vectors,
             depending on the value of ``asarray``.
 
         Notes
@@ -456,12 +455,12 @@ class ansXpl:
 
         Returns
         -------
-        ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+        ansys.mapdl.AnsMath or ansys.mapdl.AnsVec
             A handle to the APDLMath object.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.math.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansys.math.core.math.AnsMath>`. Default ``False``.
 
         Examples
         --------
@@ -479,7 +478,7 @@ class ansXpl:
         data_info = self._mapdl._data_info(rand_name)
 
         dtype = ANSYS_VALUE_TYPE[data_info.stype]
-        if dtype is None:  # pragma: no cover
+        if dtype is None:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type

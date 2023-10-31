@@ -76,7 +76,7 @@ def launch_corba(
     # Using stored parameters so launch command can be run from a
     # cached state (when launching the GUI)
 
-    if verbose is not None:  # pragma: no cover
+    if verbose is not None:
         warnings.warn(
             "The ``verbose`` argument is deprecated and will be removed in a future release. "
             "Use a logger instead. See :ref:`api_logging` for more details.",
@@ -414,7 +414,7 @@ class MapdlCorba(_MapdlCore):
         return response
 
     def _close_output(self):
-        """closes the output file"""
+        """Closes the output file"""
         self._output = ""
         if self._outfile:
             self._outfile.close()

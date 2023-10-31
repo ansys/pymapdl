@@ -97,10 +97,10 @@ class LicenseChecker:
             self._license_file_success = False
             self._license_file_msg.append(str(error))
         else:
-            self._license_file_success = True  # pragma: no cover
+            self._license_file_success = True
 
     @threaded_daemon
-    def checkout_license(self, host=None):  # pragma: no cover
+    def checkout_license(self, host=None):
         try:
             self._check_mech_license_available(host)
         except Exception as error:

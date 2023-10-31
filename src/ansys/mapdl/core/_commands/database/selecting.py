@@ -117,6 +117,17 @@ class Selecting:
 
         APDL Command: ASEL
 
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
+
         Parameters
         ----------
         type\_
@@ -346,6 +357,17 @@ class Selecting:
         """Selects a subset of elements.
 
         APDL Command: ESEL
+
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
 
         Parameters
         ----------
@@ -637,6 +659,17 @@ class Selecting:
 
         APDL Command: KSEL
 
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
+
         Parameters
         ----------
         type\_
@@ -814,6 +847,17 @@ class Selecting:
         """Selects a subset of lines.
 
         APDL Command: LSEL
+
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
 
         Parameters
         ----------
@@ -994,6 +1038,17 @@ class Selecting:
         """Selects a subset of nodes.
 
         APDL Command: NSEL
+
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
 
         Parameters
         ----------
@@ -1445,6 +1500,17 @@ class Selecting:
         """Selects a subset of volumes.
 
         APDL Command: VSEL
+
+        .. note::
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second
+            argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities
+            depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is
+            closed.
+
+            You can switch between ``selecting`` and ``unselecting``
+            pressing the keyboard key ``U``.
 
         Parameters
         ----------
