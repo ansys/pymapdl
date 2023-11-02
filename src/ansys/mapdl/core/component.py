@@ -392,19 +392,17 @@ class ComponentManager:
 
         _check_valid_pyobj_to_entities(cmitems)
 
-        # Save current selection
-        self._mapdl.cm("__temp__", cmtype)
+        # Using context manager to proper save the selections (including CM)
+        with self._mapdl.save_selection:
+            # Select the cmitems entities
+            func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
+            func(type_="S", vmin=cmitems)
 
-        # Select the cmitems entities
-        func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
-        func(type_="S", vmin=cmitems)
+            # create component
+            self._mapdl.cm(cmname, cmtype)
 
-        # create component
-        self._mapdl.cm(cmname, cmtype)
-
-        # reselecting previous selection
-        self._mapdl.cmsel("S", "__temp__")
-        self._mapdl.cmdele("__temp__")
+        # adding newly created selection
+        self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
         """Return the current components in a pretty format"""

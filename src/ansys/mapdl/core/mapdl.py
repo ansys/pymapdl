@@ -866,7 +866,7 @@ class _MapdlCore(Commands):
             for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
                 cmp_name = f"_{last_selection_name}_{entity}_"
                 mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
-                mapdl.cmdele(cmp_name)
+                # mapdl.cmdele(cmp_name)
 
             mapdl.ignore_errors = prev_ier
 

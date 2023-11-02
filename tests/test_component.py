@@ -268,3 +268,33 @@ def test_dunder_methods_types(mapdl, basic_components):
 
 def test_dunder_methods_items(mapdl, basic_components):
     assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(mapdl.components.items())
+
+
+def test__get_all_components_type(mapdl, cube_geom_and_mesh):
+    mapdl.allsel()
+    mapdl.esel("s", "", "", 1)
+    mapdl.nsel("s", "", "", 1)
+    mapdl.cm("cmelem", "ELEM")
+    mapdl.cm("cmnodes", "NODE")
+
+    mapdl.nsel("a", "", "", 2)
+    mapdl.esel("a", "", "", 2)
+    mapdl.cm("cmnodes2", "NODE")
+    mapdl.cm("cmelem2", "ELEM")
+
+    comp_elem = mapdl.components._get_all_components_type("ELEM")
+
+    expected_output = {"CMELEM": (1,), "CMELEM2": (1, 2)}
+    assert comp_elem
+    assert comp_elem == expected_output
+    assert "CMNODES" not in comp_elem
+    assert "CMNODES2" not in comp_elem
+
+    # Nodes
+    comp_nodes = mapdl.components._get_all_components_type("NODE")
+
+    expected_output = {"CMNODES": (1,), "CMNODES2": (1, 2)}
+    assert comp_nodes
+    assert comp_nodes == expected_output
+    assert "CMELEM" not in comp_nodes
+    assert "CMELEM2" not in comp_nodes
