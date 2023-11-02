@@ -55,6 +55,12 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+jupyter = [
+    "jupyterlab>=3",
+    "ipywidgets",
+    "pyvista[jupyter]"
+]
+
 tests = [
     "ansys-dpf-core==0.10.0",
     "autopep8==2.0.4",
