@@ -142,6 +142,10 @@ class Component(tuple):
         """Return the type of the component. For instance "NODES", "KP", etc."""
         return self._type
 
+    @property
+    def items(self) -> tuple:
+        return tuple(self)
+
 
 class ComponentManager:
     """Collection of MAPDL components.
@@ -499,3 +503,14 @@ class ComponentManager:
                 self._mapdl.cmsel("S", each_name, mute=mute)
             else:
                 self._mapdl.cmsel("A", each_name, mute=mute)
+
+    def _get_all_components_type(self, type_: ENTITIES_TYP):
+        """Returns a dict with all the components which type matches the entity type"""
+        dict_ = {}
+        for each_comp in self._comp:
+            item = self.__getitem__(each_comp)
+            i_type_ = item.type
+            i_items = item.items
+            if i_type_ == type_:
+                dict_[each_comp] = i_items
+        return dict_
