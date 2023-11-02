@@ -5266,7 +5266,7 @@ class _MapdlCore(Commands):
 
         return super().com(comment=command, **kwargs)
 
-    @wraps(Command.lssolve)
+    @wraps(Commands.lssolve)
     def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
         """Wraps LSSOLVE"""
         with self.non_interactive:
