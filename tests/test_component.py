@@ -43,7 +43,7 @@ def test_set_item(mapdl, cube_geom_and_mesh, type_):
     mapdl.components[comp_name] = type_, [1, 2, 3]
 
     cm_ = mapdl.run("cmlist").upper()
-    assert comp_name not in cm_
+    assert comp_name in cm_  # the component should be selected already after creation
 
     mapdl.cmsel("S", comp_name)
     cm_ = mapdl.run("cmlist").upper()
@@ -68,6 +68,7 @@ def test_set_item_no_type(mapdl, cube_geom_and_mesh):
 def test_get_item(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
 
+    mapdl.cmsel("NONE")
     with pytest.raises(ComponentIsNotSelected):
         mapdl.components["mycomp"]
 
@@ -83,6 +84,7 @@ def test_get_item(mapdl, cube_geom_and_mesh):
 
 def test_get_item_autoselect_components(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
+    mapdl.cmsel("NONE")
 
     mapdl.components._autoselect_components = True
     cm_ = mapdl.run("cmlist").upper()

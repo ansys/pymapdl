@@ -144,6 +144,7 @@ class Component(tuple):
 
     @property
     def items(self) -> tuple:
+        """Return the ids of the entities in the component."""
         return tuple(self)
 
 
