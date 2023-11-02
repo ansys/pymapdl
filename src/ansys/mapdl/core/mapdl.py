@@ -5246,3 +5246,13 @@ class _MapdlCore(Commands):
             )
 
         return self._response  # returning last response
+
+    @wraps(Commands.nrm)
+    def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
+        """Wraps *NRM"""
+        if not parr:
+            parr = "__temp_par__"
+        super().nrm(
+            name=name, normtype=normtype, parr=parr, normalize=normalize, **kwargs
+        )
+        return self.parameters[parr]
