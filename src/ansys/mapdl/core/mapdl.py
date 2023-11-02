@@ -5256,3 +5256,12 @@ class _MapdlCore(Commands):
             name=name, normtype=normtype, parr=parr, normalize=normalize, **kwargs
         )
         return self.parameters[parr]
+
+    @wraps(Commands.com)
+    def com(self, comment="", **kwargs):
+        """Wraps /COM"""
+        command = "/COM,%s" % (str(comment))
+        if self.print_com and not self.mute and not kwargs.get("mute", False):
+            print(command)
+
+        return super().com(comment=command, **kwargs)
