@@ -46,6 +46,7 @@ def db(mapdl):
         )
 
     mapdl.clear()
+    mapdl.db.start()
     return mapdl.db
 
 
@@ -127,7 +128,8 @@ def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
     db.clear()
-    assert db._mapdl.geometry.n_keypoint == 0
+    with pytest.raises(ValueError, match="There are no KEYPOINTS defined."):
+        db._mapdl.get_value("KP", 0, "count")
 
 
 def test_nodes_repr(nodes):

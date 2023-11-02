@@ -49,7 +49,6 @@ from ansys.mapdl.core.common_grpc import (
     parse_chunks,
 )
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -61,7 +60,6 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
     random_string,
-    requires_package,
     run_as_prep7,
     supress_logging,
 )
@@ -419,12 +417,9 @@ class MapdlGrpc(_MapdlCore):
         # initialize mesh, post processing, and file explorer interfaces
         self._mesh_rep: Optional["MeshGrpc"] = None
 
-        try:
-            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
-            self._mesh_rep = MeshGrpc(self)
-        except ModuleNotFoundError:  # pragma: no cover
-            self._mesh_rep = None
+        self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
         self._run_at_connect()
@@ -884,7 +879,6 @@ class MapdlGrpc(_MapdlCore):
             self._geometry._reset_cache()
 
     @property
-    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -2438,7 +2432,7 @@ class MapdlGrpc(_MapdlCore):
             )
 
     @protect_grpc
-    def upload(self, file_name: str, progress_bar: bool = True) -> str:
+    def upload(self, file_name: str, progress_bar: bool = _HAS_TQDM) -> str:
         """Upload a file to the grpc instance
 
         file_name : str
@@ -3347,9 +3341,6 @@ class MapdlGrpc(_MapdlCore):
         elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
-                raise DifferentSessionConnectionError(
-                    f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
-                )
 
             else:
                 self._log.debug("The session ids match")

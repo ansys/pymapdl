@@ -119,12 +119,7 @@ def test_contains_entities(mapdl, cube_geom_and_mesh, func, entity, selector, im
     func_ = getattr(mapdl, func)
     func_("S", vmin=1, vmax=imax)
 
-    if entity in ["nodes", "elem"]:
-        count = getattr(mapdl.mesh, selector)
-    else:
-        count = getattr(mapdl.geometry, selector)
-
-    assert len(count) == imax
+    assert mapdl.get_value(entity[:4], 0, "count") == imax
 
     mapdl.cm("mycomp", entity)
 

@@ -16,7 +16,6 @@ import warnings
 from warnings import warn
 import weakref
 
-from matplotlib.colors import to_rgba
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
@@ -463,6 +462,10 @@ class _MapdlCore(Commands):
             def wrap_xsel_function_output(method):
                 # Injecting doc string modification
                 name = method.__func__.__name__.upper()
+                if not self.geometry:
+                    # Cases where the geometry module is not loaded
+                    return None
+
                 if name == "NSEL":
                     return self.mesh.nnum
                 elif name == "ESEL":
@@ -995,7 +998,6 @@ class _MapdlCore(Commands):
         return self._info
 
     @property
-    @requires_package("pyvista", softerror=True)
     def geometry(self) -> "Geometry":
         """Geometry information.
 
@@ -1041,15 +1043,17 @@ class _MapdlCore(Commands):
 
     def _create_geometry(self) -> Union["Geometry", "LegacyGeometry"]:
         """Return geometry cache"""
-        from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
         if self.legacy_geometry:
+            from ansys.mapdl.core.mapdl_geometry import LegacyGeometry
+
             return LegacyGeometry
         else:
+            from ansys.mapdl.core.mapdl_geometry import Geometry
+
             return Geometry(self)
 
     @property
-    @requires_package("pyvista", softerror=True)
     def mesh(self):
         """Mesh information.
 
@@ -1096,7 +1100,6 @@ class _MapdlCore(Commands):
         return self._mesh
 
     @property
-    @requires_package("ansys.mapdl.reader", softerror=True)
     @supress_logging
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
@@ -1927,6 +1930,8 @@ class _MapdlCore(Commands):
                 )
 
         if vtk:
+            from matplotlib.colors import to_rgba
+
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
@@ -2071,7 +2076,7 @@ class _MapdlCore(Commands):
             self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
 
             if not self._parent()._has_matplotlib:  # pragma: no cover
-                raise ImportError(
+                raise ModuleNotFoundError(
                     "Install matplotlib to display plots from MAPDL ,"
                     "from Python.  Otherwise, plot with vtk with:\n"
                     "``vtk=True``"
@@ -2109,7 +2114,7 @@ class _MapdlCore(Commands):
             import matplotlib  # noqa: F401
 
             return True
-        except ImportError:
+        except ModuleNotFoundError:
             return False
 
     @property
@@ -3390,10 +3395,15 @@ class _MapdlCore(Commands):
         if short_cmd in PLOT_COMMANDS:
             self._log.debug("It is a plot command.")
             plot_path = self._get_plot_name(text)
+
             if save_fig:
                 return self._download_plot(plot_path, save_fig)
-            else:
+            elif self._has_matplotlib:
                 return self._display_plot(plot_path)
+            else:
+                self._log.debug(
+                    "Since matplolib is not installed, images are not shown."
+                )
 
         return self._response
 
@@ -4129,7 +4139,7 @@ class _MapdlCore(Commands):
         lib="",
         mat="",
         download_file=False,
-        progress_bar=True,
+        progress_bar=False,
         **kwargs,
     ):
         fname_ = fname + "." + ext

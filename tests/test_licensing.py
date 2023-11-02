@@ -9,7 +9,7 @@ import pytest
 from ansys.mapdl.core import errors, launch_mapdl, licensing
 from ansys.mapdl.core.misc import threaded
 from conftest import ON_LOCAL as IS_LOCAL
-from conftest import QUICK_LAUNCH_SWITCHES, skip_if_not_local
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
@@ -141,7 +141,7 @@ def test_get_ansys_license_debug_file_tail(tmpdir, license_checker):
     assert "CHECKOUT" in line
 
 
-@skip_if_not_local
+@requires("local")
 @skip_no_lic_bin
 def test_check_license_file_fail(license_checker):
     with pytest.raises(TimeoutError):
@@ -158,7 +158,7 @@ def test_license_checker(tmpdir, license_checker):
     assert license_checker.check()
 
 
-@skip_if_not_local
+@requires("local")
 @skip_no_lic_bin
 def test_check_license_file(tmpdir):
     timeout = 15
@@ -238,6 +238,7 @@ def test_check_license_file_exception(license_checker):
         license_checker._check_license_file(0.01)
 
 
+@requires("ansys-tools-path")
 def test_license_wait():
     license_checker = licensing.LicenseChecker()
     assert not license_checker._lic_file_thread
@@ -272,6 +273,7 @@ def test_license_check():
         license_checker.check()
 
 
+@requires("ansys-tools-path")
 def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
@@ -284,6 +286,7 @@ def test_stop_license_checker():
     assert not license_checker._lic_file_thread.is_alive()
 
 
+@requires("ansys-tools-path")
 def test_is_connected_license_checker():
     license_checker = licensing.LicenseChecker()
 
