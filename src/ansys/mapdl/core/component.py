@@ -179,15 +179,17 @@ class ComponentManager:
     Set a component without specifying the type, by default it is ``NODE``:
 
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
+    /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
+    It is recommended you use the following notation to avoid this warning:
+    \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
+    Alternatively, you disable this warning using:
+    > mapdl.components.default_entity_warning=False
+    warnings.warn(
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
 
     >>> mapdl.component.default_entity = "KP"
-        /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
-        It is recommended you use the following notation to avoid this warning:
-        \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
-        Alternatively, you disable this warning using
     >>> mapdl.component["mycomp] = [1, 2, 3]
     >>> mapdl.component["mycomp"].type
     'KP'
