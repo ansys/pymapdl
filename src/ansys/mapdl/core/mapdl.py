@@ -5138,3 +5138,59 @@ class _MapdlCore(Commands):
                 fid.writelines(lines)
 
         return output
+
+    @wraps(Commands.vwrite)
+    def vwrite(
+        self,
+        par1="",
+        par2="",
+        par3="",
+        par4="",
+        par5="",
+        par6="",
+        par7="",
+        par8="",
+        par9="",
+        par10="",
+        par11="",
+        par12="",
+        par13="",
+        par14="",
+        par15="",
+        par16="",
+        par17="",
+        par18="",
+        par19="",
+        **kwargs,
+    ):
+        """Wrapping *VWRITE"""
+
+        # cannot be run in interactive mode
+        if not self._store_commands:
+            raise MapdlRuntimeError(
+                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
+
+        return super().vwrite(
+            par1=par1,
+            par2=par2,
+            par3=par3,
+            par4=par4,
+            par5=par5,
+            par6=par6,
+            par7=par7,
+            par8=par8,
+            par9=par9,
+            par10=par10,
+            par11=par11,
+            par12=par12,
+            par13=par13,
+            par14=par14,
+            par15=par15,
+            par16=par16,
+            par17=par17,
+            par18=par18,
+            par19=par19,
+            **kwargs,
+        )
