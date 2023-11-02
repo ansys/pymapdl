@@ -5265,3 +5265,10 @@ class _MapdlCore(Commands):
             print(command)
 
         return super().com(comment=command, **kwargs)
+
+    @wraps(Command.lssolve)
+    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
+        """Wraps LSSOLVE"""
+        with self.non_interactive:
+            super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
+        return self.last_response
