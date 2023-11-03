@@ -58,7 +58,7 @@ classifiers = [
 jupyter = [
     "jupyterlab>=3",
     "ipywidgets",
-    "pyvista[jupyter]"
+    "pyvista[jupyter]",
 ]
 
 tests = [

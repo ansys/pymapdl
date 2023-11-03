@@ -114,7 +114,7 @@ Install the latest release from `PyPi
 
    pip install ansys-mapdl-core
 
-If you are planning to use PyMAPDL together with `Jupyter lab <jupyter_>`_,
+If you are planning to use PyMAPDL together with `Jupyter lab <https://jupyter.org/>`_,
 you can install both in one step:
 
 .. code:: console
