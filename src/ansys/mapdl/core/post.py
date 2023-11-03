@@ -658,11 +658,6 @@ class PostProcessing:
         # Hence:
         # uni[ridx] = surf["ansys_elem_num"]
         #
-        # Now let's get the mask of the selected elements in the Pyvista object,
-        # with the MAPDL ordering
-        mask = np.isin(enum, uni, assume_unique=True)
-        # enum[mask] = surf_ids
-        #
         # Let's notice that:
         # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
         #
@@ -696,10 +691,6 @@ class PostProcessing:
         surf_values = scalars[uni - 1][ridx]
 
         #######################################################################
-
-        # if scalars.size != mask.size:
-        #     scalars = scalars[self.selected_elements]
-        # scalars = scalars[mask][ridx]
 
         meshes = [
             {
