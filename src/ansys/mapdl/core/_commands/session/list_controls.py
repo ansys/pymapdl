@@ -26,7 +26,7 @@ class ListControls:
 
         This command is valid anywhere.
         """
-        return self.run(command, **kwargs)
+        return self.run(comment, **kwargs)
 
     def golist(self, **kwargs):
         """Reactivates the suppressed data input listing.

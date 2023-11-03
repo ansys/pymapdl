@@ -4730,7 +4730,11 @@ class _MapdlCore(Commands):
 
         # Update arg because the path is no longer needed
         args = (base_name, *args[1:])
-        return super().use(*args, **kwargs)
+
+        with self.non_interactive:
+            super().use(*args, **kwargs)
+
+        return self._response  # returning last response
 
     @wraps(Commands.set)
     def set(
@@ -5106,38 +5110,39 @@ class _MapdlCore(Commands):
 
         return self.input(filename)
 
-        @wraps(Commands.lgwrite)
-        def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
-            """Wraps original /LGWRITE"""
+    @wraps(Commands.lgwrite)
+    def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
+        """Wraps original /LGWRITE"""
 
-        # always add extension to fname
-        if ext:
-            fname = fname + f".{ext}"
+    # always add extension to fname
+    if ext:
+        fname = fname + f".{ext}"
 
-        # seamlessly deal with remote instances in gRPC mode
-        target_dir = None
-        is_grpc = "Grpc" in type(self).__name__
-        if is_grpc and fname:
-            if not self._local and os.path.basename(fname) != fname:
-                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
+    # seamlessly deal with remote instances in gRPC mode
+    target_dir = None
+    is_grpc = "Grpc" in type(self).__name__
+    if is_grpc and fname:
+        if not self._local and os.path.basename(fname) != fname:
+            target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
 
-        # generate the log and download if necessary
-        output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
-        if not fname:
-            # defaults to <jobname>.lgw
-            fname = self.jobname + ".lgw"
-        if target_dir is not None:
-            self.download(fname, target_dir=target_dir)
+    # generate the log and download if necessary
+    output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
 
-        # remove extra grpc /OUT commands
-        if remove_grpc_extra and is_grpc and target_dir:
-            filename = os.path.join(target_dir, fname)
-            with open(filename, "r") as fid:
-                lines = [line for line in fid if not line.startswith("/OUT")]
-            with open(filename, "w") as fid:
-                fid.writelines(lines)
+    if not fname:
+        # defaults to <jobname>.lgw
+        fname = self.jobname + ".lgw"
+    if target_dir is not None:
+        self.download(fname, target_dir=target_dir)
 
-        return output
+    # remove extra grpc /OUT commands
+    if remove_grpc_extra and is_grpc and target_dir:
+        filename = os.path.join(target_dir, fname)
+        with open(filename, "r") as fid:
+            lines = [line for line in fid if not line.startswith("/OUT")]
+        with open(filename, "w") as fid:
+            fid.writelines(lines)
+
+    return output
 
     @wraps(Commands.vwrite)
     def vwrite(
@@ -5195,58 +5200,6 @@ class _MapdlCore(Commands):
             **kwargs,
         )
 
-    @wraps(Commands.use)
-    def use(
-        self,
-        name="",
-        arg1="",
-        arg2="",
-        arg3="",
-        arg4="",
-        arg5="",
-        arg6="",
-        arg7="",
-        arg8="",
-        arg9="",
-        ar10="",
-        ar11="",
-        ar12="",
-        ar13="",
-        ar14="",
-        ag15="",
-        ar16="",
-        ar17="",
-        ar18="",
-        **kwargs,
-    ):
-        """Wraps *USE"""
-
-        with self.non_interactive:
-            super().use(
-                name=name,
-                arg1=arg1,
-                arg2=arg2,
-                arg3=arg3,
-                arg4=arg4,
-                arg5=arg5,
-                arg6=arg6,
-                arg7=arg7,
-                arg8=arg8,
-                arg9=arg9,
-                ar10=ar10,
-                ar11=ar11,
-                ar12=ar12,
-                ar13=ar13,
-                ar14=ar14,
-                ag15=ag15,
-                ar16=ar16,
-                ar17=ar17,
-                ar18=ar18,
-                **kwargs,
-            )
-
-        return self._response  # returning last response
-
     @wraps(Commands.nrm)
     def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
         """Wraps *NRM"""
@@ -5260,11 +5213,10 @@ class _MapdlCore(Commands):
     @wraps(Commands.com)
     def com(self, comment="", **kwargs):
         """Wraps /COM"""
-        command = "/COM,%s" % (str(comment))
         if self.print_com and not self.mute and not kwargs.get("mute", False):
-            print(command)
+            print("/COM,%s" % (str(comment)))
 
-        return super().com(comment=command, **kwargs)
+        return super().com(comment=comment, **kwargs)
 
     @wraps(Commands.lssolve)
     def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
