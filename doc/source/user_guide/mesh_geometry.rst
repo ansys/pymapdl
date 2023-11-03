@@ -235,7 +235,8 @@ One of the most important is that you no longer need to call the entities like y
      Y Bounds:	0.000e+00, 1.974e+00
      Z Bounds:	5.500e-01, 5.500e-01
      N Arrays:	4,
-   ...
+    ...
+
 
 **New API**
 
