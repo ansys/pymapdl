@@ -5114,35 +5114,35 @@ class _MapdlCore(Commands):
     def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
         """Wraps original /LGWRITE"""
 
-    # always add extension to fname
-    if ext:
-        fname = fname + f".{ext}"
+        # always add extension to fname
+        if ext:
+            fname = fname + f".{ext}"
 
-    # seamlessly deal with remote instances in gRPC mode
-    target_dir = None
-    is_grpc = "Grpc" in type(self).__name__
-    if is_grpc and fname:
-        if not self._local and os.path.basename(fname) != fname:
-            target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
+        # seamlessly deal with remote instances in gRPC mode
+        target_dir = None
+        is_grpc = "Grpc" in type(self).__name__
+        if is_grpc and fname:
+            if not self._local and os.path.basename(fname) != fname:
+                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
 
-    # generate the log and download if necessary
-    output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
+        # generate the log and download if necessary
+        output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
 
-    if not fname:
-        # defaults to <jobname>.lgw
-        fname = self.jobname + ".lgw"
-    if target_dir is not None:
-        self.download(fname, target_dir=target_dir)
+        if not fname:
+            # defaults to <jobname>.lgw
+            fname = self.jobname + ".lgw"
+        if target_dir is not None:
+            self.download(fname, target_dir=target_dir)
 
-    # remove extra grpc /OUT commands
-    if remove_grpc_extra and is_grpc and target_dir:
-        filename = os.path.join(target_dir, fname)
-        with open(filename, "r") as fid:
-            lines = [line for line in fid if not line.startswith("/OUT")]
-        with open(filename, "w") as fid:
-            fid.writelines(lines)
+        # remove extra grpc /OUT commands
+        if remove_grpc_extra and is_grpc and target_dir:
+            filename = os.path.join(target_dir, fname)
+            with open(filename, "r") as fid:
+                lines = [line for line in fid if not line.startswith("/OUT")]
+            with open(filename, "w") as fid:
+                fid.writelines(lines)
 
-    return output
+        return output
 
     @wraps(Commands.vwrite)
     def vwrite(
