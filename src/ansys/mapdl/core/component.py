@@ -281,7 +281,6 @@ class ComponentManager:
         self.__comp = value
 
     def __getitem__(self, key: str) -> ITEMS_VALUES:
-        self._comp = self._mapdl._parse_cmlist()
         forced_to_select = False
 
         if key.upper() not in self._comp and self._autoselect_components:
@@ -405,7 +404,7 @@ class ComponentManager:
             self._mapdl.cm(cmname, cmtype)
 
         # adding newly created selection
-        # self._mapdl.cmsel("A", cmname)
+        self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
         """Return the current components in a pretty format"""
