@@ -43,9 +43,7 @@ def test_set_item(mapdl, cube_geom_and_mesh, type_):
     mapdl.components[comp_name] = type_, [1, 2, 3]
 
     cm_ = mapdl.run("cmlist").upper()
-    assert (
-        comp_name not in cm_
-    )  # the component should be selected already after creation
+    assert comp_name in cm_  # the component should be selected already after creation
 
     mapdl.cmsel("S", comp_name)
     cm_ = mapdl.run("cmlist").upper()

@@ -106,13 +106,46 @@ def test_empty_mesh(mapdl, cleared):
 
 def test_element_node_components(mapdl, contact_geom_and_mesh):
     mapdl.allsel()
-    # mapdl.cmsel("all")
+    assert not mapdl.mesh.element_components
+    assert "MYELEMCOMP" not in mapdl.mesh.element_components
+
+    assert mapdl.mesh.node_components
+    assert "TN.TGT" in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("NONE")
     mapdl.cm("CMNODE", "NODE")
     mapdl.components["MYELEMCOMP"] = "ELEM", (1, 2, 3)
 
     assert mapdl.mesh.element_components
     assert "MYELEMCOMP" in mapdl.mesh.element_components
 
+    assert mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
+
+    mapdl.cmsel("NONE")
+    assert not mapdl.mesh.element_components
+    assert "MYELEMCOMP" not in mapdl.mesh.element_components
+
+    assert not mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("S", "MYELEMCOMP")
+    assert mapdl.mesh.element_components
+    assert "MYELEMCOMP" in mapdl.mesh.element_components
+
+    assert not mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("S", "CMNODE")
+    assert mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("all")
     assert mapdl.mesh.node_components
     assert "TN.TGT" in mapdl.mesh.node_components
     assert "CMNODE" in mapdl.mesh.node_components
