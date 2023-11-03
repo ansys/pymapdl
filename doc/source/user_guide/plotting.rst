@@ -52,9 +52,9 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
 Area and volume plotting
 ------------------------
 You can using Boolean operations to obtain more complex geometry and
-visualize them using the :func:`Mapdl.vplot()
-<ansys.mapdl.core.Mapdl.vplot>` method. This example cuts the initial
-area with the eight circles and then extrudes it.
+visualize them using the :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
+method. This example cuts the initial area with the eight circles and then
+extrudes it.
 
 .. code:: pycon
 
@@ -202,8 +202,8 @@ method:
 
 .. note::
     Because boundary conditions can only target nodes, you can
-    only use ``plot_bc`` as an argument in the :func:`Mapdl.nplot()
-    <ansys.mapdl.core.Mapdl.nplot>` method.
+    only use ``plot_bc`` as an argument in the
+    :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>` method.
 
 
 

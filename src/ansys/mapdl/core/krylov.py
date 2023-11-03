@@ -253,7 +253,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Krylov subspace.
 
         Notes
@@ -405,7 +405,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Reduced solution over the frequency range.
 
         Notes

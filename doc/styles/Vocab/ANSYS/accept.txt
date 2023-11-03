@@ -15,6 +15,7 @@
 [Pp]ythonic
 [Pp]ythonically
 [Ss]uperelements
+[Vv]on Mises
 3-D
 aadd
 aas
@@ -83,6 +84,7 @@ MAPDL
 mapdl
 mater
 MATLAB
+matricies
 mesher
 midside
 Mises
@@ -93,12 +95,14 @@ nce
 Newton-Raphson
 nin
 nonlinearities
+NORML
 NumPy
 onefile
 optiSLang
 parm
 performant
 PMLs
+POIN
 Poisson
 postprocessor
 Prasanna

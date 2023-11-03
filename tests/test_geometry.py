@@ -1,7 +1,11 @@
 """Test geometry commands"""
 import numpy as np
 import pytest
-import pyvista as pv
+
+from conftest import has_dependency, requires
+
+if has_dependency("pyvista"):
+    import pyvista as pv
 
 from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
@@ -113,7 +117,7 @@ def test_vext(mapdl, cleared):
     carc0 = mapdl.circle(k0, 1, k1)
     a0 = mapdl.al(*carc0)
 
-    # next, extrude it and plot it
+    # next, and extrude it
     mapdl.vext(a0, dz=4)
 
 
@@ -153,7 +157,7 @@ def test_va(mapdl, cleared):
     a2 = mapdl.a(k1, k2, k3)
     a3 = mapdl.a(k0, k2, k3)
 
-    # generate and plot the volume
+    # generate the volume
     vnum = mapdl.va(a0, a1, a2, a3)
     assert vnum == 1
 
@@ -497,6 +501,7 @@ def test_empty_model(mapdl):
     assert mapdl.geometry.vnum.size == 0
 
 
+@requires("pyvista")
 @pytest.mark.parametrize(
     "entity,number", (["keypoints", 8], ["lines", 12], ["areas", 6], ["volumes", 1])
 )
@@ -506,6 +511,7 @@ def test_entities_simple_cube(mapdl, cube_solve, entity, number):
     assert isinstance(entity, pv.MultiBlock)
 
 
+@requires("pyvista")
 @pytest.mark.parametrize(
     "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
 )
@@ -519,10 +525,12 @@ def test_create_geometry(mapdl):
     assert isinstance(mapdl._create_geometry(), Geometry)
 
 
+@requires("pyvista")
 def test_get_lines(mapdl, contact_geom_and_mesh):
     assert isinstance(mapdl.geometry.get_lines(), pv.PolyData)
 
 
+@requires("pyvista")
 @pytest.mark.parametrize(
     "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
 )
@@ -548,6 +556,7 @@ def test_geometry_get_apis(mapdl, contact_geom_and_mesh, entity, number):
         assert len(as_an_array) == number
 
 
+@requires("pyvista")
 @pytest.mark.parametrize(
     "entity,entity_name,number",
     (
@@ -573,6 +582,7 @@ def test_geometry_names(mapdl, contact_geom_and_mesh, entity, entity_name, numbe
     assert mb_names == names
 
 
+@requires("pyvista")
 def test_geometry_get_item(mapdl, contact_geom_and_mesh):
     assert isinstance(mapdl.geometry["kp 2"], pv.PolyData)
     assert mapdl.geometry["kp 2"].n_points > 0
@@ -587,6 +597,7 @@ def test_geometry_get_item(mapdl, contact_geom_and_mesh):
     assert mapdl.geometry["volume 1"].n_cells > 0
 
 
+@requires("pyvista")
 def test_geometry_get_item_error(mapdl, contact_geom_and_mesh):
     with pytest.raises(ValueError):
         mapdl.geometry["l 0"]
@@ -595,11 +606,13 @@ def test_geometry_get_item_error(mapdl, contact_geom_and_mesh):
         mapdl.geometry["kip 0"]
 
 
+@requires("pyvista")
 def test_geometry_get_block_error(mapdl, contact_geom_and_mesh):
     with pytest.raises(KeyError):
         mapdl.geometry["kp 0"]
 
 
+@requires("pyvista")
 def test_build_legacy_geometry(mapdl, contact_geom_and_mesh):
     leg_geo = LegacyGeometry(mapdl)
 

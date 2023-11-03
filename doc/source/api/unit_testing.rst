@@ -1,6 +1,6 @@
 .. _ref_unit_testing_contributing:
 
-Unit Testing
+Unit testing
 ============
 
 Unit tests validate the software by testing that the logic
@@ -8,7 +8,7 @@ implemented inside a certain method, class, or module is
 working as expected. They should be as atomic and 
 independent as possible.
 
-Unit testing is highly important. The tests check that code
+Unit testing is highly important. The tests verify that code
 changes are consistent with other parts of the code
 and verify that these changes are implemented properly.
 
@@ -34,7 +34,7 @@ Coverage example
 To show how the coverage works, assume that you have
 this library:
 
-**My awesome library**
+**Awesome library**
 
 
 .. code:: python
@@ -87,8 +87,8 @@ Continuous Integration and Continuous Deployment (CI/CD) approach
 
 Unit tests and integration tests are part of Continuous Integration (CI). 
 The automation of testing, monitoring, and deployment of newly added
-code allows Continuous Deployment (CD) throughout the application
-lifecycle, providing a comprehensive CI/CD approach.
+code allows Continuous Deployment (CD) throughout the app lifecycle,
+providing a comprehensive CI/CD approach.
 
 .. figure:: ../images/cicd.jpg
     :width: 300pt
@@ -160,7 +160,7 @@ Here are some examples of how you use ``pytest``:
 
 
     def test_dunder_methods_keys(mapdl, basic_components):
-        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
+        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.names())
 
 
     def test_dunder_methods_types(mapdl, basic_components):

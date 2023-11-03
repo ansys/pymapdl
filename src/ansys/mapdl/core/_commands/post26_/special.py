@@ -330,7 +330,7 @@ class Special:
         See POST26 - Response Power Spectral Density in the Mechanical APDL
         Theory Reference for more information on these equations.
         """
-        command = f"RPSD,{ir},{ia},{ib},{itype},{datum},{name},{signif}"
+        command = f"RPSD,{ir},{ia},{ib},{itype},{datum},{name},,{signif}"
         return self.run(command, **kwargs)
 
     def smooth(

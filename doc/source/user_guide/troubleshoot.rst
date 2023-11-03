@@ -1,10 +1,6 @@
-
-
-
 .. _ref_troubleshooting:
 
 
-=======================
 Troubleshooting PyMAPDL
 =======================
 
@@ -42,7 +38,7 @@ If you believe you have found a bug, open an issue on the
 `PyMAPDL Issues page <pymapdl_issues_>`_.
 
 
-.. _debugging_launch_mapdl:
+.. _ref_launching_issue:
 
 Launching issues
 ----------------
@@ -61,7 +57,7 @@ There are several issues that can cause MAPDL not to launch, including:
 
 
 Connection timeout
-==================
+~~~~~~~~~~~~~~~~~~
 
 In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
 In those cases, you might see the following message:
@@ -91,12 +87,11 @@ Or if you are connecting to a remote instance you can use:
 
 
 Testing MAPDL launching
-=======================
+~~~~~~~~~~~~~~~~~~~~~~~
 
 In some cases, it may be necessary to run the launch command manually from the command line.
 
-On Windows
-----------
+**On Windows**
 
 Open up a command prompt and run the version-dependent command:
 
@@ -107,8 +102,7 @@ Open up a command prompt and run the version-dependent command:
 .. note:: PowerShell users can run the preceding command without quotes.
 
 
-On Linux
---------
+**On Linux**
 
 Run the version-dependent command:
 
@@ -151,7 +145,7 @@ If this command doesn't launch MAPDL, look at the command output:
 .. vale on
 
 Licensing issues
-================
+~~~~~~~~~~~~~~~~
 
 Incorrect license server configuration can prevent MAPDL from being able to get a valid license.
 In such cases, you might see output **similar** to:
@@ -182,7 +176,7 @@ for maintaining Ansys licensing or have a personal install of Ansys, see the onl
 For more comprehensive information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
 
 Incorrect licensing environment variables
------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The license server can be also specified using the environment variable :envvar:`ANSYSLMD_LICENSE_FILE`.
 The following code examples show how you can see the value of this environment variable on
@@ -207,7 +201,7 @@ either Windows or Linux.
 .. _vpn_issues_troubleshooting:
 
 Virtual private network (VPN) issues
-====================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 From ANSYS 2022 R2 to ANSYS 2021 R1, MAPDL has issues launching when VPN software is running.
 One issue stems from MPI communication and can be solved by either passing
@@ -246,18 +240,14 @@ On Windows, you can find the license configuration file that points to the licen
 .. _missing_dependencies_on_linux:
 
 Missing dependencies on Linux
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some Linux installations might be missing required dependencies. If
 you get errors like ``libXp.so.6: cannot open shared object file: No
 such file or directory``, you are likely missing some necessary
 dependencies.
 
-
-.. _installing_mapdl_on_centos7:
-
-CentOS 7
---------
+**CentOS 7**
 
 On CentOS 7, you can install missing dependencies with:
 
@@ -266,10 +256,7 @@ On CentOS 7, you can install missing dependencies with:
     yum install openssl openssh-clients mesa-libGL mesa-libGLU motif libgfortran
 
 
-.. _installing_mapdl_on_ubuntu:
-
-Ubuntu
-------
+**Ubuntu**
 
 On Ubuntu 22.04, use this code to install the needed dependencies:
 
@@ -298,8 +285,7 @@ using this code:
     apt-get install -y libxp6
 
 
-Ubuntu 20.04 and older
-----------------------
+**Ubuntu 20.04 and older**
 
 If you are using Ubuntu 16.04, you can install ``libxp16`` with this code:
 
@@ -331,7 +317,7 @@ then installs it via the ``dpkg`` package.
 .. _conflicts_student_version:
 
 Conflicts with student version
-==============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Although you can install Ansys together with other Ansys products or versions, on Windows, you
 should not install a student version of an Ansys product together with its non-student version.
@@ -351,7 +337,8 @@ to the correct location.
    ``SMP`` mode, unless another MPI option is specified.
 
 Incorrect environment variables
-===============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 If you are using a non-standard install, you might need to manually set the
 environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 ``CADOE_LIBDIRXXX`` to the correct location. 
@@ -385,7 +372,8 @@ shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
 .. vale on
 
 Using a proxy server
-====================
+~~~~~~~~~~~~~~~~~~~~
+
 In some rare cases, you might experience some problems to connect to the MAPDL instance if you are
 using a proxy.
 When `gRPC <grpc_>`_ is used in a proxy environment, if a local address is specified (that is ``127.0.0.1``)
@@ -397,7 +385,8 @@ to connect to MAPDL instance.
 
 
 Firewall settings
-=================
+~~~~~~~~~~~~~~~~~
+
 MAPDL and Python should have the correct firewall settings to allow communication between the two.
 If you are using a firewall, you should allow MAPDL to receive inbound connections to the following ports:
 
@@ -423,8 +412,12 @@ For more information on how to **configure your firewall on Ubuntu Linux**, plea
 link `Security-Firewall | Ubuntu <ubuntu_firewall_>`_.
 
 
+Location of the executable file
+-------------------------------
+
 Manually set the location of the executable file
-================================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 If you have a non-standard install, PyMAPDL might be unable find
 your MAPDL installation. If this is the case, provide the location of MAPDL
 as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
@@ -448,7 +441,7 @@ as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
 
 
 Default location of the executable file
----------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first time that you run PyMAPDL, it detects the
 available Ansys installations.
@@ -518,20 +511,17 @@ method lists higher versions first and student versions last.
     information, see :ref:`conflicts_student_version`.
 
 
-.. _ref_pymapdl_limitations:
-
-*********************
 PyMAPDL usage issues
-*********************
+--------------------
 
-.. _ref_numpy_arrays_in_mapdl:
+.. _ref_issues_np_mapdl:
 
-Issues when importing and exporting numpy arrays in MAPDL
-=========================================================
+Issues when importing and exporting NumPy arrays in MAPDL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Because of the way MAPDL is designed, there is no way to store an
 array where one or more dimensions are zero.
-This can happens in numpy arrays, where its first dimension can be
+This can happens in NumPy arrays, where its first dimension can be
 set to zero. For example:
 
 .. code:: pycon
@@ -581,41 +571,40 @@ to one, have the same shape if later retrieved.
    True
 
 
-
 .. _ref_pymapdl_stability:
 
-*****************
 PyMAPDL stability
-*****************
+-----------------
 
 Recommendations
-===============
+~~~~~~~~~~~~~~~
 
 When connecting to an instance of MAPDL using gRPC (default), there are some cases
 where the MAPDL server might exit unexpectedly. There
 are several ways to improve MADPL performance and stability:
 
 Use ``mute`` to improve stability
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When possible, pass ``mute=True`` to individual MAPDL commands or
-set it globally with the :func:`Mapdl.mute
-<ansys.mapdl.core.mapdl_grpc.MapdlGrpc>` method. This disables streaming
-back the response from MAPDL for each command and marginally
-improves performance and stability. Consider having a debug flag in
+set it globally with the :func:`Mapdl.mute <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
+method. This disables streaming back the response from MAPDL for each command
+and marginally improves performance and stability. Consider having a debug flag in
 your program or script so that you can turn on and off logging and
 verbosity as needed.
 
 
 Issues
-======
+~~~~~~
 
 .. note::
-   MAPDL 2021 R1 has a stability issue with the :func:`Mapdl.input()
-   <ansys.mapdl.core.Mapdl.input>` method. Avoid using input files if
-   possible. Attempt to use the :func:`Mapdl.upload()
-   <ansys.mapdl.core.Mapdl.upload>` method to upload nodes and elements and read them
-   in via the :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+
+   MAPDL 2021 R1 has a stability issue with the :
+   :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+   method. Avoid using input files if possible. Attempt to use the
+   :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
+   nodes and elements and read them in via the
+   :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
    :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
 
 

@@ -7,7 +7,7 @@ the location of MAPDL must be provided for non-standard installations.
 When running for the first time, ``ansys-mapdl-core`` requests the
 location of the MAPDL executable if it cannot automatically find it.
 You can test your installation of PyMAPDL and set it up by running
-the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function:
+the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function:
 
 .. code:: python
 
@@ -83,4 +83,4 @@ API reference
 -------------
 
 For more information on controlling how MAPDL launches locally, see the
-description of the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function.
+description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.

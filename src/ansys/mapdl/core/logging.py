@@ -10,8 +10,8 @@ is intended to be unique.  This name is printed in all the active
 outputs and it is used to track the different MAPDL instances.
 
 
-Usage
------
+How to use
+==========
 
 Global logger
 ~~~~~~~~~~~~~

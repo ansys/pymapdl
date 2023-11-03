@@ -119,12 +119,7 @@ def test_contains_entities(mapdl, cube_geom_and_mesh, func, entity, selector, im
     func_ = getattr(mapdl, func)
     func_("S", vmin=1, vmax=imax)
 
-    if entity in ["nodes", "elem"]:
-        count = getattr(mapdl.mesh, selector)
-    else:
-        count = getattr(mapdl.geometry, selector)
-
-    assert len(count) == imax
+    assert mapdl.get_value(entity[:4], 0, "count") == imax
 
     mapdl.cm("mycomp", entity)
 
@@ -264,11 +259,11 @@ def test_dunder_methods_iter(mapdl, basic_components):
 
 
 def test_dunder_methods_keys(mapdl, basic_components):
-    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
+    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.names)
 
 
 def test_dunder_methods_types(mapdl, basic_components):
-    assert ["NODE", "KP"] == list(mapdl.components.types())
+    assert ["NODE", "KP"] == list(mapdl.components.types)
 
 
 def test_dunder_methods_items(mapdl, basic_components):

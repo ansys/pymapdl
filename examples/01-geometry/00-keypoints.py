@@ -151,7 +151,7 @@ print(items)
 # plotting methods.
 mapdl.kplot(
     show_keypoint_numbering=True,
-    background="black",
+    background="white",
     show_bounds=True,
     font_size=26,
 )

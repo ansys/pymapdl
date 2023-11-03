@@ -54,12 +54,16 @@
 .. _ansys_introductory_mapdl_courses: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
 .. _ansys_current_supported_os: https://www.ansys.com/content/dam/it-solutions/platform-support/2023-r2/ansys-2023-r2-platform-support-by-application.pdf
 
+.. # Developer portal
+.. _developer_portal: https://developer.ansys.com
+
 .. # Ansys guides
 .. _ansys_command_reference_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_cmd/Hlp_C_CmdTOC.html
 .. _ansys_techdemo_guide: https://ansyshelp.ansys.com/Views/Secured/corp/%%VERSION%%/en/ans_tec/tecintro.html
 .. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
 .. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_dan/dantoc.html
 .. _ansys_verification_manual: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_vm/Hlp_V_VMTOC.html
+.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/ans_tut/Hlp_UI_Tutorials.html
 
 .. # Ansys introductory tutorials
 .. _ansys_introtut: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
@@ -101,6 +105,9 @@
 .. _pyvista_eye_dome_lighting: https://docs.pyvista.org/examples/02-plot/edl.html
 .. _pyinstaller: https://pyinstaller.org
 .. _pyinstaller_spec_files: https://pyinstaller.org/en/stable/spec-files.html
+.. _tds_article_web_app_1: https://towardsdatascience.com/ansys-in-a-python-web-app-part-1-post-processing-with-pydpf-44d2fbaa6135
+.. _tds_article_web_app_2: https://towardsdatascience.com/ansys-in-a-python-web-app-part-2-pre-processing-solving-with-pymapdl-50428c18f8e7
+.. _paraview_question_read_rst: https://discourse.paraview.org/t/reading-ansys-apdl-rst-results-in-paraview/9706
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
@@ -116,6 +123,8 @@
 .. _pymapdl_releases: https://github.com/ansys/pymapdl/releases
 .. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/version/dev/user_guide/troubleshoot.html#ubuntu
 .. _pymapdl_issues: https://github.com/ansys/pymapdl/issues
+.. _pymapdl_new_issue: https://github.com/ansys/pymapdl/issues/new/choose
+.. _pymapdl_new_blank_issue: https://github.com/ansys/pymapdl/issues/new
 .. _pymapdl_repo: https://github.com/ansys/pymapdl
 .. _pymapdl_docs: https://mapdl.docs.pyansys.com/version/stable/
 .. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/version/dev/
@@ -138,6 +147,7 @@
 .. _pymapdl_docker_compose_license_server: https://github.com/ansys/pymapdl/blob/main/docker/docker-compose.license_server.yml
 .. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/ansys/pymapdl-reader/issues/185
 .. _cartpole_example_notebook: https://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html
+.. _wsl_launching_mapdl: https://github.com/ansys/pymapdl/issues/2315
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
@@ -160,3 +170,7 @@
 .. _docker_cp: https://docs.docker.com/engine/reference/commandline/cp/
 .. _docker_run: https://docs.docker.com/engine/reference/run/
 .. _docker_compose: https://docs.docker.com/compose/
+
+.. # Elements references
+
+.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/v231/en/ans_elem/Hlp_E_PLANE183.html

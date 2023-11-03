@@ -73,14 +73,18 @@ except ModuleNotFoundError:  # pragma: no cover
 
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
-
-from ansys.tools.path.path import (
-    change_default_ansys_path,
-    find_ansys,
-    get_ansys_path,
-    get_available_ansys_installations,
-    save_ansys_path,
-)
+try:
+    from ansys.tools.path.path import (
+        change_default_ansys_path,
+        find_ansys,
+        get_ansys_path,
+        get_available_ansys_installations,
+        save_ansys_path,
+    )
+except:
+    # We don't really use these imports in the library. They are here for
+    # convenience.
+    pass
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
@@ -99,7 +103,8 @@ from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 _HAS_ANSYS = _check_has_ansys()
 
-_apply_default_theme()
+if _HAS_PYVISTA:
+    _apply_default_theme()
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False

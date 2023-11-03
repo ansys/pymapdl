@@ -7,7 +7,7 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
-from conftest import ON_CI, ON_LOCAL
+from conftest import ON_CI, ON_LOCAL, ON_UBUNTU
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -85,11 +85,21 @@ def test_readin_igs(mapdl, cleared):
 
 ## Connection commands
 #
+@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_sat(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
             MapdlRuntimeError, match="Specified library does not exist."
         )
+
+    elif ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
+        context = pytest.raises(
+            MapdlRuntimeError, match="No shared command/library files were found"
+        )
+
+    elif ON_CI and mapdl.version == 22.2 and ON_UBUNTU and not ON_LOCAL:
+        context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
+
     elif ON_CI and ON_LOCAL:
         context = pytest.raises(MapdlCommandIgnoredError, match="anf does not exist.")
     elif ON_CI:
@@ -105,6 +115,7 @@ def test_readin_sat(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_x_t(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
@@ -113,6 +124,11 @@ def test_readin_x_t(mapdl, cleared):
 
     elif ON_CI and mapdl.version == 23.1:
         context = pytest.raises(MapdlCommandIgnoredError, match="does not exist")
+
+    elif ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
+        context = pytest.raises(
+            MapdlRuntimeError, match="No shared command/library files were found"
+        )
 
     elif ON_CI and ON_LOCAL:
         context = pytest.raises(AssertionError)
@@ -132,11 +148,18 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
+@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_catiav5(mapdl, cleared):
-    if ON_CI:
+    if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
+        context = pytest.raises(
+            MapdlRuntimeError, match="No shared command/library files were found"
+        )
+
+    elif ON_CI:
         context = pytest.raises(
             MapdlInvalidRoutineError, match=" ~CAT5IN is not a recognized"
         )
+
     else:
         context = NullContext()
 
