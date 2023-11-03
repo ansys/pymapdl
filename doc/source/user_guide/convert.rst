@@ -16,11 +16,15 @@ After you have activated and installed the package as described
 in :ref:`installation`, you can use the converter from your terminal.
 Here is how you use the ``pymapdl_convert_script`` command:
 
+.. vale off
+
 .. code:: console
+    
+    pymapdl_convert_script MAPDL.dat -o python.py
 
-    $ pymapdl_convert_script mapdl.dat -o python.py
+    File MAPDL.dat successfully converted to python.py.
 
-    File mapdl.dat successfully converted to python.py.
+.. vale on
 
 To obtain help on converter usage, options, and examples, type this command:
 
@@ -36,8 +40,8 @@ To obtain help on converter usage, options, and examples, type this command:
 
     ...
 
-The ``pymapdl_convert_script`` command uses the
-:func:`convert_script() <ansys.mapdl.core.convert_script>` function.
+The ``pymapdl_convert_script`` command uses
+the :func:`convert_script() <ansys.mapdl.core.convert_script>` function.
 Hence, this command accepts most of this function's arguments.
 
 Usage
