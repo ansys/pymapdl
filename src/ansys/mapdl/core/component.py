@@ -405,7 +405,7 @@ class ComponentManager:
             self._mapdl.cm(cmname, cmtype)
 
         # adding newly created selection
-        self._mapdl.cmsel("A", cmname)
+        # self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
         """Return the current components in a pretty format"""
