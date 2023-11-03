@@ -64,7 +64,7 @@ jupyter = [
 tests = [
     "ansys-dpf-core==0.10.0",
     "autopep8==2.0.4",
-    "matplotlib==3.8.0",
+    "matplotlib==3.8.1",
     "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
     "scipy==1.11.3; python_version > '3.8'",
     "pandas==2.1.2",
@@ -87,7 +87,7 @@ doc = [
     "imageio==2.31.6",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.8.0",
+    "matplotlib==3.8.1",
     "numpydoc==1.6.0",
     "pandas==2.1.2",
     "plotly==5.18.0",
