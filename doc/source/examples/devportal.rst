@@ -5,12 +5,12 @@ PyMAPDL Developer Portal articles
 =================================
 
 In this section, you'll find informative and insightful blog
-articles crafted by our expert developers at Ansys and published
+articles crafted by the expert developers at Ansys and published
 in the `Developer Portal <developer_portal_>`_.
-Whether you're a seasoned pro or just getting started with PYMAPDL, our blog
+Whether you're a seasoned pro or just getting started with PyMAPDL, the blog
 articles cover a wide range of topics, from best practices and tips to in-depth
-tutorials and real-world use cases. Our aim is to provide you with a valuable
-resource that will help you harness the full potential of PYMAPDL for your
+tutorials and real-world use cases. The aim is to provide you with a valuable
+resource that can help you harness the full potential of PyMAPDL for your
 engineering and simulation needs.
 
 Because the Developer Portal is your hub for all things related to Ansys
