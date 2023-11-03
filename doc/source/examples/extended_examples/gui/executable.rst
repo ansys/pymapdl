@@ -164,7 +164,7 @@ Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.h
 class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>`
 class from the ``ansys-mapdl-core`` package:
 
-.. code-block:: python
+.. code:: python
 
     from pyvistaqt import QtInteractor
     from ansys.mapdl.core import MapdlTheme
@@ -173,7 +173,7 @@ Then, add a plotter on the first tab:
 
 .. vale off
 
-.. code-block:: python
+.. code:: python
 
     def _setup_tab_preprocessing(self) -> None:
         ...
@@ -187,7 +187,7 @@ Then, add a plotter on the first tab:
 
 Add another plotter on the second tab:
 
-.. code-block:: python
+.. code:: python
 
     def _setup_tab_postprocessing(self) -> None:
         container_layout = QtWidgets.QVBoxLayout()
@@ -199,7 +199,7 @@ Add another plotter on the second tab:
 
 Finally, make sure to correctly close the VTK widgets when closing the app:
 
-.. code-block:: python
+.. code:: python
 
     def closeEvent(self, event) -> None:
         self._preprocessing_plotter.close()
