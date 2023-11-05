@@ -78,16 +78,16 @@ example, if you input an invalid command:
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   apdlRuntimeError: 
-   L, 1, 2, 3
+   MapdlRuntimeError: 
+   AL, 1, 2, 3
 
-   EFINE AREA BY LIST OF LINES
-   INE LIST =     1    2    3
+   DEFINE AREA BY LIST OF LINES
+   LINE LIST =     1    2    3
    TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   eypoint 1 is referenced by only one line.  Improperly connected line   
-   et for AL command.                                                     
+   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   Keypoint 1 is referenced by only one line.  Improperly connected line   
+   set for AL command.                                                     
 
 This ``MapdlRuntimeError`` was caught immediately. This means that
 you can write your MAPDL scripts in Python, run them interactively, and
