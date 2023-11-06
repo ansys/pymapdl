@@ -635,7 +635,7 @@ class PostProcessing:
         # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
         # and to index to the output node numbers
         if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum
+            enum = self._mapdl.mesh.enum_all
         else:
             enum = self._all_enum
 
@@ -666,30 +666,22 @@ class PostProcessing:
         # The theoretical approach will be using an intermediate array of the
         # size of the MAPDL total number of elements (we do not care about selected).
         #
-        # >>> values = np.zeros(enum.shape)
+        values = np.zeros(enum.shape)
         #
         # Then assign the MAPDL values for the selected element (scalars)
         #
-        # >>> values[self.selected_elements] = scalars
+        values[self.selected_elements] = scalars
         #
         # Because values are in order, but with python notation, then we can do:
         #
-        # >>> surf_values = values[uni-1]  # -1 to set MAPDL element indexing to python indexing
-        #
-        # To obtain the surf values of the selected elements in the MAPDL notation
+        surf_values = values[
+            uni - 1
+        ]  # -1 to set MAPDL element indexing to python indexing
         #
         # Then to account for the original Pyvista object:
         #
-        # >>> surf_values = surf_values[ridx]
+        surf_values = surf_values[ridx]
         #
-        # Effective approach
-        # ------------------
-        # Now the more efficient approach (not allocating a full size array):
-        # values = np.zeros(enum[self.selected_elements].shape)
-        # values = scalars # But this is the scalars itself! Hence, putting all
-        # together:
-        surf_values = scalars[uni - 1][ridx]
-
         #######################################################################
 
         meshes = [
