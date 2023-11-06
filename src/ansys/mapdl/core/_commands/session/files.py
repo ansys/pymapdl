@@ -503,7 +503,7 @@ class Files:
         K,2,2,0,0
 
         """
-        return self.run(f"LGWRITE, {fname}, {ext}, --, {kedit}")
+        return self.run(f"LGWRITE,{fname},{ext},,{kedit}")
 
     def starlist(self, fname="", ext="", **kwargs):
         """Displays the contents of an external, coded file.
