@@ -13,10 +13,17 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -197,14 +204,22 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = get_available_ansys_installations()
-        if not mapdl_install:
-            lines.append("Unable to locate any Ansys installations")
+        if _HAS_ATP:
+            mapdl_install = get_available_ansys_installations()
+
+            if not mapdl_install:
+                lines.append("Unable to locate any Ansys installations")
+            else:
+                lines.append("Version   Location")
+                lines.append("------------------")
+                for key in sorted(mapdl_install.keys()):
+                    lines.append(f"{abs(key)}       {mapdl_install[key]}")
         else:
-            lines.append("Version   Location")
-            lines.append("------------------")
-            for key in sorted(mapdl_install.keys()):
-                lines.append(f"{abs(key)}       {mapdl_install[key]}")
+            mapdl_install = None
+            lines.append(
+                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+            )
+
         install_info = "\n".join(lines)
 
         env_info_lines = [
@@ -1066,7 +1081,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1080,6 +1095,8 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
+    if isinstance(filename, bytes):
+        filename = filename.decode()
     np.savetxt(filename, array, fmt="%20.12f")
 
 
@@ -1249,13 +1266,13 @@ def allow_iterables_vmin(entity="node"):
             else:
                 return original_sel_func(
                     self,
-                    type_=type_,
-                    item=item,
-                    comp=comp,
-                    vmin=vmin,
-                    vmax=vmax,
-                    vinc=vinc,
-                    kabs=kabs,
+                    type_,
+                    item,
+                    comp,
+                    vmin,
+                    vmax,
+                    vinc,
+                    kabs,  # ksel, esel, nsel uses kabs, but lsel, asel, vsel uses kswp
                     **kwargs,
                 )
 

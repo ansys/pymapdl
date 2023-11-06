@@ -1,4 +1,4 @@
-"""gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
 from functools import wraps
@@ -49,7 +49,6 @@ from ansys.mapdl.core.common_grpc import (
     parse_chunks,
 )
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -61,7 +60,6 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
     random_string,
-    requires_package,
     run_as_prep7,
     supress_logging,
 )
@@ -419,12 +417,9 @@ class MapdlGrpc(_MapdlCore):
         # initialize mesh, post processing, and file explorer interfaces
         self._mesh_rep: Optional["MeshGrpc"] = None
 
-        try:
-            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
-            self._mesh_rep = MeshGrpc(self)
-        except ModuleNotFoundError:  # pragma: no cover
-            self._mesh_rep = None
+        self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
         self._run_at_connect()
@@ -873,6 +868,7 @@ class MapdlGrpc(_MapdlCore):
 
         self.show(self._file_type_for_plots)
         self.version  # Caching version
+        self.file_type_for_plots  # Setting /show,png and caching it.
 
     def _reset_cache(self):
         """Reset cached items."""
@@ -883,7 +879,6 @@ class MapdlGrpc(_MapdlCore):
             self._geometry._reset_cache()
 
     @property
-    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -1811,11 +1806,6 @@ class MapdlGrpc(_MapdlCore):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
-        # Escaping early if inside non_interactive context
-        if self._store_commands:
-            self._stored_commands.append(tmp_dat.splitlines()[1])
-            return None
-
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)
@@ -1823,6 +1813,11 @@ class MapdlGrpc(_MapdlCore):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
+        # Escaping early if inside non_interactive context
+        if self._store_commands:
+            self._stored_commands.append(tmp_dat.splitlines()[1])
+            return None
 
         request = pb_types.InputFileRequest(filename=tmp_name)
 
@@ -1896,8 +1891,12 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(fname):
                 # And it exists
                 filename = os.path.join(os.getcwd(), fname)
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
+            elif self._store_commands:
+                # Assuming that in non_interactive we have uploaded the file
+                # manually.
                 filename = os.path.join(self.directory, fname)
             else:
                 # Finally
@@ -1909,8 +1908,13 @@ class MapdlGrpc(_MapdlCore):
                 self.upload(ffullpath, progress_bar=progress_bar)
                 filename = fname
 
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = fname
+
+            elif self._store_commands:
+                # Assuming that in non_interactive, the file exists already in
+                # the Mapdl working directory
                 filename = fname
 
             else:
@@ -2428,7 +2432,7 @@ class MapdlGrpc(_MapdlCore):
             )
 
     @protect_grpc
-    def upload(self, file_name: str, progress_bar: bool = True) -> str:
+    def upload(self, file_name: str, progress_bar: bool = _HAS_TQDM) -> str:
         """Upload a file to the grpc instance
 
         file_name : str
@@ -2473,7 +2477,7 @@ class MapdlGrpc(_MapdlCore):
         kloop="",
         **kwargs,
     ):
-        """gRPC VGET request.
+        """Do a gRPC VGET request.
 
         Send a vget request, receive a bytes stream, and return it as
         a numpy array.
@@ -3034,7 +3038,8 @@ class MapdlGrpc(_MapdlCore):
     ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        return self.parameters[par]
+        if not self._store_commands:
+            return self.parameters[par]
 
     def get_variable(
         self,
@@ -3336,9 +3341,6 @@ class MapdlGrpc(_MapdlCore):
         elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
-                raise DifferentSessionConnectionError(
-                    f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
-                )
 
             else:
                 self._log.debug("The session ids match")

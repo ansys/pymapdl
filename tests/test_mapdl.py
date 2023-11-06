@@ -6,18 +6,22 @@ import re
 import shutil
 import time
 
-from ansys.mapdl.reader import examples
-from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
 import pytest
-from pyvista import MultiBlock
+
+from conftest import has_dependency
+
+if has_dependency("pyvista"):
+    from pyvista import MultiBlock
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -26,14 +30,11 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import (
-    IS_SMP,
-    ON_LOCAL,
-    QUICK_LAUNCH_SWITCHES,
-    skip_if_not_local,
-    skip_if_on_cicd,
-    skip_on_windows,
-)
+from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
+
+# Path to files needed for examples
+PATH = os.path.dirname(os.path.abspath(__file__))
+test_files = os.path.join(PATH, "test_files")
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -156,7 +157,7 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
         return any(warns)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
@@ -181,7 +182,7 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_server_version(mapdl):
     if mapdl.version == 20.2:
         assert mapdl._server_version == (0, 0, 0)
@@ -196,7 +197,7 @@ def test_server_version(mapdl):
         assert mapdl._server_version[0] >= 0
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
@@ -218,7 +219,7 @@ def test_parsav_parres(mapdl, cleared, tmpdir):
     assert np.allclose(mapdl.parameters["MYARR"], arr)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
@@ -306,7 +307,8 @@ def test_allow_ignore(mapdl):
     mapdl.allow_ignore = True
     assert mapdl.allow_ignore is True
     mapdl.k()
-    assert mapdl.geometry.n_keypoint == 0
+    with pytest.raises(ValueError, match="There are no KEYPOINTS defined"):
+        mapdl.get_value("KP", 0, "count")
     mapdl.allow_ignore = False
 
 
@@ -347,7 +349,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = "tmp.txt"
@@ -361,7 +363,7 @@ def test_list(mapdl, tmpdir):
     assert output == txt
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input("thisisnotafile")
@@ -378,11 +380,14 @@ def test_keypoints(cleared, mapdl):
         knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
-    assert isinstance(mapdl.geometry.keypoints, MultiBlock)
-    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
 
+    if has_dependency("pyvista"):
+        assert isinstance(mapdl.geometry.keypoints, MultiBlock)
+        assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
 
+
+@requires("pyvista")
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -396,12 +401,14 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
 
+    if has_dependency("pyvista"):
+        assert isinstance(lines, MultiBlock)
 
-@skip_if_not_local
+
+@requires("local")
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
@@ -429,7 +436,7 @@ def test_apdl_logging_start(tmpdir):
     assert "K,4,0,1,0" in text
 
 
-@pytest.mark.corba
+@requires("corba")
 def test_corba_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
@@ -692,6 +699,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
+@requires("pyvista")
 def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
@@ -702,7 +710,7 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp("off")
-    mapdl.cdread("db", examples.sector_archive_file)
+    mapdl.cdread("db", os.path.join(test_files, "sector.cdb"))
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()
@@ -785,7 +793,7 @@ def test_load_array_failure_types(mapdl, array):
     assert mapdl.parameters["myarr"].ndim == array.ndim + 1
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
 
@@ -881,7 +889,7 @@ def test_cdread(mapdl, cleared):
         mapdl.cdread("test", "model2", "cdb")
 
 
-@skip_if_not_local
+@requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split("/")[0][-3:0]
     dirname = "tt" + random_letters
@@ -1027,7 +1035,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     mapdl._run("/gopr")  # getting settings back
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_without_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1037,7 +1045,7 @@ def test_path_without_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_with_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1047,7 +1055,7 @@ def test_path_with_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_not_local
+@requires("local")
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
@@ -1077,7 +1085,8 @@ def test_cwd(mapdl, tmpdir):
         mapdl.cwd(old_path)
 
 
-@skip_if_on_cicd
+@requires("nocicd")
+@requires("local")
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1110,6 +1119,7 @@ def test_ksel(mapdl, cleared):
     mapdl.prep7()
     assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
     assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
+
     assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
@@ -1304,7 +1314,10 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     captured = capsys.readouterr()  # To flush it
     output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
-    assert f"Uploading {fname}.{ext}:" in captured.err
+    if has_dependency("tqdm"):
+        # Printing uploading requires tqdm
+        assert f"Uploading {fname}.{ext}:" in captured.err
+
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
@@ -1359,7 +1372,7 @@ def test_result_file(mapdl, solved_box):
     assert isinstance(mapdl.result_file, str)
 
 
-@skip_if_not_local
+@requires("local")
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl.result_file
 
@@ -1422,7 +1435,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@skip_on_windows
+@requires("linux")
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
@@ -1493,7 +1506,7 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
-    assert len(mapdl.geometry.keypoints) == 2
+    assert mapdl.get_value("KP", 0, "count") == 2
 
 
 def test_ignored_command(mapdl, cleared):
@@ -1578,7 +1591,7 @@ def test_set_list(mapdl, cube_solve):
 
 
 def test_mode(mapdl):
-    assert mapdl.mode == "grpc"
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
@@ -1720,7 +1733,7 @@ def test_get_file_name(mapdl):
     )
 
 
-@skip_if_not_local
+@requires("local")
 def test_cache_pids(mapdl):
     assert mapdl._pids
     mapdl._cache_pids()  # Recache pids
@@ -1729,7 +1742,7 @@ def test_cache_pids(mapdl):
         assert "ansys" in "".join(psutil.Process(each).cmdline())
 
 
-@skip_if_not_local
+@requires("local")
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
 
@@ -1785,18 +1798,6 @@ def test_session_id(mapdl, running_test):
     mapdl._session_id_ = id_
 
 
-def test_session_id_different(mapdl, running_test):
-    # Assert it works
-    with running_test():
-        assert mapdl.prep7()
-
-    mapdl._run(f"{SESSION_ID_NAME}='1234'")
-
-    with running_test():
-        with pytest.raises(DifferentSessionConnectionError):
-            mapdl.prep7()
-
-
 def test_check_empty_session_id(mapdl):
     # it should run normal
     mapdl._session_id_ = None
@@ -1805,6 +1806,7 @@ def test_check_empty_session_id(mapdl):
     assert mapdl.prep7()
 
 
+@requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1822,7 +1824,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-@skip_if_not_local
+@requires("local")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
@@ -1920,6 +1922,7 @@ def test_rlblock_rlblock_num(mapdl):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
+@requires("ansys-mapdl-reader")
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
@@ -1971,7 +1974,7 @@ def test_port(mapdl):
 
 
 def test_distributed(mapdl):
-    if IS_SMP and not ON_LOCAL:
+    if ON_CI and IS_SMP and not ON_LOCAL:
         assert not mapdl._distributed
     else:
         assert mapdl._distributed
@@ -1995,3 +1998,122 @@ def test_non_valid_kwarg(mapdl):
 
     with pytest.warns(UserWarning):
         mapdl.cdwrite(options="DB", fname="test1", ext="cdb")
+
+
+def test_check_parameter_names(mapdl):
+    with pytest.raises(ValueError):
+        mapdl.parameters["_dummy"] = 1
+
+    mapdl.check_parameter_names = False
+    mapdl.parameters["_dummy"] = 1
+    mapdl.check_parameter_names = True  # returning to default
+
+
+@requires("pyvista")
+def test_components_selection_keep_between_plots(mapdl, cube_solve):
+    mapdl.cm("mycm", "volu")
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+    mapdl.vplot()
+
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+
+def test_saving_selection_context(mapdl, cube_solve):
+    mapdl.allsel()
+
+    for i in range(1, 4):
+        mapdl.nsel("s", "", "", i)
+        mapdl.cm(f"nod_selection_{i}", "node")
+
+    for i in range(1, 4):
+        mapdl.esel("s", "", "", i)
+        mapdl.cm(f"elem_selection_{i}", "elem")
+
+    mapdl.cmsel("s", "nod_selection_1")
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    mapdl.cmsel("a", "elem_selection_1")
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    with mapdl.save_selection:
+        mapdl.cmsel("a", "nod_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+
+        mapdl.cmsel("a", "elem_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_1".upper() in mapdl.cmlist()
+        assert "elem_selection_1" in mapdl.components
+        assert "nod_selection_1".upper() in mapdl.cmlist()
+        assert "nod_selection_1" in mapdl.components
+
+        mapdl.nsel("s", "", "", 4)
+        mapdl.cm("nod_selection_4", "node")
+
+        with mapdl.save_selection:
+            mapdl.cmsel("s", "nod_selection_3")
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            mapdl.cmsel("a", "elem_selection_3")
+            assert "elem_selection_3".upper() in mapdl.cmlist()
+            assert "elem_selection_3" in mapdl.components
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            # Erased because the previous cmsel("s")
+            assert "nod_selection_4".upper() not in mapdl.cmlist()
+            assert "nod_selection_4" not in mapdl.components
+
+            assert "nod_selection_2".upper() not in mapdl.cmlist()
+            assert "nod_selection_2" not in mapdl.components
+            assert "elem_selection_2".upper() not in mapdl.cmlist()
+            assert "elem_selection_2" not in mapdl.components
+
+            assert "elem_selection_1".upper() not in mapdl.cmlist()
+            assert "elem_selection_1" not in mapdl.components
+            assert "nod_selection_1".upper() not in mapdl.cmlist()
+            assert "nod_selection_1" not in mapdl.components
+
+        # Checking correctly exiting contexts
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_3".upper() not in mapdl.cmlist()
+        assert "elem_selection_3" not in mapdl.components
+        assert "nod_selection_3".upper() not in mapdl.cmlist()
+        assert "nod_selection_3" not in mapdl.components
+
+        assert "nod_selection_4".upper() in mapdl.cmlist()
+        assert "nod_selection_4" in mapdl.components
+
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+
+    assert "elem_selection_3".upper() not in mapdl.cmlist()
+    assert "elem_selection_3" not in mapdl.components
+    assert "nod_selection_3".upper() not in mapdl.cmlist()
+    assert "nod_selection_3" not in mapdl.components
+
+    assert "nod_selection_4".upper() not in mapdl.cmlist()
+    assert "nod_selection_4" not in mapdl.components

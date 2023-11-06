@@ -119,7 +119,7 @@ Most PyMAPDL tests require a connection to a running instance of
 MAPDL, which makes them integration tests. If your test
 requires a running MAPDL instance, you can use the PyMAPDL
 `mapdl <mapdl_fixture_>`_ method in your function signature.
-It will be executed upstream of each test and not within all tests.
+It is executed upstream of each test and not within all tests.
 
 .. code:: python
 
@@ -160,7 +160,7 @@ Here are some examples of how you use ``pytest``:
 
 
     def test_dunder_methods_keys(mapdl, basic_components):
-        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
+        assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.names())
 
 
     def test_dunder_methods_types(mapdl, basic_components):

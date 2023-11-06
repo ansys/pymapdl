@@ -7,9 +7,8 @@ import re
 import time
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-
-# from ansys.mapdl.core.misc import kill_process
 from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.misc import requires_package
 
 ready_items = [
     rb"BEGIN:",
@@ -199,6 +198,54 @@ class MapdlConsole(_MapdlCore):
 
         # return last response and all preceding responses
         return full_response
+
+    @property
+    @requires_package("ansys.mapdl.reader", softerror=True)
+    @requires_package("pyvista", softerror=True)
+    def mesh(self):
+        """Mesh information.
+
+        Returns
+        -------
+        :class:`Mapdl.Mesh <ansys.mapdl.core.mesh_grpc.Mesh>`
+
+        Examples
+        --------
+        Return an array of the active nodes
+
+        >>> mapdl.mesh.nodes
+        array([[ 1.,  0.,  0.],
+               [ 2.,  0.,  0.],
+               [ 3.,  0.,  0.],
+               [ 4.,  0.,  0.],
+               [ 5.,  0.,  0.],
+               [ 6.,  0.,  0.],
+               [ 7.,  0.,  0.],
+               [ 8.,  0.,  0.],
+               [ 9.,  0.,  0.],
+               [10.,  0.,  0.]])
+
+        Return an array of the node numbers of the active nodes
+
+        >>> mapdl.mesh.nnum
+        array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10], dtype=int32)
+
+        Simply query and print the geometry
+
+        >>> print(mapdl.mesh)
+          ANSYS Mapdl Mesh
+          Number of Nodes:              321
+          Number of Elements:           40
+          Number of Element Types:      1
+          Number of Node Components:    2
+          Number of Element Components: 2
+
+        Access the geometry as a VTK object
+
+        >>> mapdl.mesh.grid
+
+        """
+        return self._mesh
 
     def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process.

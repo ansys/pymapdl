@@ -3,6 +3,7 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 from ansys.mapdl.core.plotting import general_plotter
 
@@ -113,11 +114,11 @@ class PostProcessing:
 
     @property
     def _log(self):
-        """alias for mapdl log"""
+        """Alias for mapdl log"""
         return self._mapdl._log
 
     def _set_log_level(self, level):
-        """alias for mapdl._set_log_level"""
+        """Alias for mapdl._set_log_level"""
         return self._mapdl._set_log_level(level)
 
     @supress_logging
@@ -350,7 +351,7 @@ class PostProcessing:
         Returns
         -------
         numpy.ndarray
-            Numpy array containing the requested element values for ta
+            Numpy array containing the requested element values for a
             given item and component.
 
         Notes
@@ -631,27 +632,63 @@ class PostProcessing:
 
         surf = self._mapdl.mesh._surf
 
-        # as ``disp`` returns the result for all nodes, we need all node numbers
+        # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
         # and to index to the output node numbers
         if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum
+            enum = self._mapdl.mesh.enum_all
         else:
             enum = self._all_enum
 
-        # it's possible that there are duplicated element numbers,
-        # therefore we need to get the unique values and a reverse index
+        #######################################################################
+        # Bool operations
+        # ===============
+        # I'm going to explain this clearly because it can be confusing for the
+        # future developers (me).
+        # This explanation is based in scalars (`element_values`) NOT having the
+        # full elements (selected and not selected) size.
+        #
+        # First, it's possible that there are duplicated element numbers,
+        # in the surf object returned by Pyvista.
+        # Therefore we need to get the unique values and a reverse index, to
+        # later convert the MAPDL values to Pyvista values.
         uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        mask = np.isin(enum, uni, assume_unique=True)
-
-        if scalars.size != mask.size:
-            scalars = scalars[self.selected_elements]
-        scalars = scalars[mask][ridx]
+        # which means that, uni is the id of mapdl elements in the polydata
+        # object. These elements does not need to be in order, and there can be
+        # duplicated!
+        # Hence:
+        # uni[ridx] = surf["ansys_elem_num"]
+        #
+        # Let's notice that:
+        # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
+        #
+        # Theoretical approach
+        # --------------------
+        # The theoretical approach will be using an intermediate array of the
+        # size of the MAPDL total number of elements (we do not care about selected).
+        #
+        values = np.zeros(enum.shape)
+        #
+        # Then assign the MAPDL values for the selected element (scalars)
+        #
+        values[self.selected_elements] = scalars
+        #
+        # Because values are in order, but with python notation, then we can do:
+        #
+        surf_values = values[
+            uni - 1
+        ]  # -1 to set MAPDL element indexing to python indexing
+        #
+        # Then to account for the original Pyvista object:
+        #
+        surf_values = surf_values[ridx]
+        #
+        #######################################################################
 
         meshes = [
             {
                 "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
                 "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": scalars,
+                "scalars": surf_values,
             }
         ]
 
@@ -669,27 +706,27 @@ class PostProcessing:
     @property
     @supress_logging
     def _all_nnum(self):
-        self._mapdl.cm("__TMP_NODE__", "NODE")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+
+            # rerun if encountered weird edge case of negative first index.
+            if nnum[0] == -1:
+                nnum = self._mapdl.get_array("NODE", item1="NLIST")
+
         return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
     def _all_enum(self):
-        self._mapdl.cm("__TMP_ELEM__", "ELEM")
-        self._mapdl.allsel()
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if enum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
+
+            # rerun if encountered weird edge case of negative first index.
+            if enum[0] == -1:
+                enum = self._mapdl.get_array("ELEM", item1="ELIST")
+
         return enum.astype(np.int32, copy=False)
 
     @property
@@ -1346,6 +1383,7 @@ class PostProcessing:
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`
+
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition

@@ -6,7 +6,12 @@ import shutil
 import urllib.request
 import zipfile
 
-import requests
+try:
+    import requests
+
+    _HAS_REQUESTS = True
+except ModuleNotFoundError:
+    _HAS_REQUESTS = False
 
 from ansys.mapdl import core as pymapdl
 
@@ -56,6 +61,9 @@ def _get_file_url(filename, directory=None):
 
 
 def _check_url_exist(url):
+    if not _HAS_REQUESTS:
+        raise ModuleNotFoundError("Examples module requires request module")
+
     response = requests.get(url)
     if response.status_code == 200:
         return [True]

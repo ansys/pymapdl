@@ -227,7 +227,7 @@ using this approach (non-tested):
            run: |
             python rotor.py 4 --density 7000
 
-         - name: "Postprocess images"
+         - name: "Postprocessing images"
            run: |
               COMPOSITE=/usr/bin/composite
               mogrify -mattecolor #f1ce80 -frame 10x10 volume.jpg

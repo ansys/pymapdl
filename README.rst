@@ -73,7 +73,11 @@ you can create issues to report bugs and request new features. On the `PyMAPDL D
 <https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
 page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
 
-To reach the project support team, email `pyansys.core@ansys.com <pyansys.core@ansys.com>`_.
+To reach the project support team, email `PyAnsys Core team <pyansys.core@ansys.com>`_.
+Unfortunately, this team cannot answer specific library questions or issues. You must
+use the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_
+and `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ pages
+for raising issues, request new features, and asking questions.
 
 Project transition - legacy support
 -----------------------------------
@@ -109,6 +113,14 @@ Install the latest release from `PyPi
 .. code:: console
 
    pip install ansys-mapdl-core
+
+If you are planning to use PyMAPDL together with `Jupyter lab <https://jupyter.org/>`_,
+you can install both in one step:
+
+.. code:: console
+
+   pip install 'ansys-mapdl-core[jupyter]'
+
 
 Alternatively, install the latest from `PyMAPDL GitHub
 <https://github.com/ansys/pymapdl/issues>`_ via:

@@ -1,4 +1,11 @@
 """Test the PyPIM integration."""
+import pytest
+
+from conftest import has_dependency
+
+if not has_dependency("ansys-platform-instancemanagement"):
+    pytest.skip(allow_module_level=True)
+
 from unittest.mock import create_autospec
 
 import ansys.platform.instancemanagement as pypim

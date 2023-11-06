@@ -1105,25 +1105,27 @@ class AnalysisOptions:
         command = f"CUTCONTROL,{lab},{value},{option}"
         return self.run(command, **kwargs)
 
-    def ddoption(self, decomp="", **kwargs):
+    def ddoption(self, decomp="", nprocpersol="", numsolforlp="", **kwargs):
         """Sets domain decomposer option for Distributed ANSYS.
 
         APDL Command: DDOPTION
 
         Parameters
         ----------
-        decomp
+        Decomp
             Controls which domain decomposition algorithm to use.
 
-            AUTO
-                Use the default domain decomposition algorithm when splitting the model into
-                domains for Distributed ANSYS (default).
+            * AUTO - Automatically selects the optimal domain decomposition method (default).
+            * MESH - Decompose the FEA mesh.
+            * FREQ - Decompose the frequency domain for harmonic analyses.
+            * CYCHI -Decompose the harmonic indices for cyclic symmetry modal analyses.
 
-            GREEDY
-                Use the "greedy" domain decomposition algorithm.
+        nprocpersol
+            Number of processes to be used for mesh-based decomposition in conjunction with each frequency solution (`Decomp = FREQ`) or harmonic index solution (`Decomp = CYCHI`). Defaults to 1. This field
+            is ignored when `Decomp = MESH`.
 
-            METIS
-                Use the METIS graph partitioning domain decomposition algorithm.
+        numsolforlp
+            Number of frequency or harmonic index solutions in a subsequent linear perturbation harmonic or linear perturbation cyclic modal analysis. This field is ignored when `Decomp = MESH`
 
         Notes
         -----
@@ -2016,7 +2018,7 @@ class AnalysisOptions:
         command = f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
         return self.run(command, **kwargs)
 
-    def expass(self, key="", **kwargs):
+    def expass(self, key="", keystat="", **kwargs):
         """Specifies an expansion pass of an analysis.
 
         APDL Command: EXPASS
@@ -2025,10 +2027,13 @@ class AnalysisOptions:
         ----------
         key
             Expansion pass key:
+            * OFF - No expansion pass will be performed (default).
+            * ON - An expansion pass will be performed.
 
-            OFF - No expansion pass will be performed (default).
-
-            ON - An expansion pass will be performed.
+        keystat
+            Static correction vectors key:
+            * ON - Include static correction vectors in the expanded displacements (default).
+            * OFF - Do not include static correction vectors in the expanded displacements.
 
         Notes
         -----
@@ -2040,7 +2045,7 @@ class AnalysisOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"EXPASS,{key}"
+        command = f"EXPASS,{key},,,{keystat}"
         return self.run(command, **kwargs)
 
     def gauge(self, opt="", freq="", **kwargs):
