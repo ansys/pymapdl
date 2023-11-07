@@ -76,6 +76,7 @@ tests = [
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
     "pytest-pyvista==0.1.9",
+    "pytest-timeout==2.2.0",
 ]
 doc = [
     "sphinx==7.2.6",
