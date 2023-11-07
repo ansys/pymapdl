@@ -249,6 +249,8 @@ def test_parsav_parres(mapdl, cleared, tmpdir):
     with pytest.raises(FileNotFoundError):
         mapdl.parres("change", "mydummy", "file")
 
+    os.remove("db.txt")
+
 
 @requires("grpc")
 def test_no_results(mapdl, cleared, tmpdir):
@@ -2181,3 +2183,4 @@ def test_vwrite(mapdl):
         content = fid.read()
 
     assert "hello" == content.strip()
+    os.remove("test_vwrite.txt")
