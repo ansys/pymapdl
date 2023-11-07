@@ -33,6 +33,7 @@ env:
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  CONTAINER_ARGUMENTS: '-u=0:0 --entrypoint /bin/bash'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -470,7 +471,7 @@ jobs:
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: ${{ env.CONTAINER_ARGUMENTS }}
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -595,7 +596,7 @@ jobs:
     timeout-minutes: 55
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: ${{ env.CONTAINER_ARGUMENTS }}
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
