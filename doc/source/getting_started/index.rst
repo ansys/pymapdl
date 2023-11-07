@@ -45,7 +45,7 @@ Install the latest release from
    pip install ansys-mapdl-core
 
 Alternatively, install the latest from 
-`PyMAPDL GitHub <pymapdl_issues_>`_ via:
+`PyMAPDL GitHub <pymapdl_repo_>`_ via:
 
 .. code:: console
 

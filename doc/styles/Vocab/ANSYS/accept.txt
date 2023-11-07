@@ -69,6 +69,7 @@ GPa
 GUI
 hexahedral
 hostname
+HTML
 Imagemagick
 ImageMagick
 imagin
