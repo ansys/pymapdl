@@ -471,11 +471,11 @@ jobs:
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: |
-        '-u=0:0 \
+        -u=0:0 \
         --oom-kill-disable \
         --memory=6656 \
         --memory-swap=16896 \
-        --entrypoint /bin/bash'
+        --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -601,11 +601,11 @@ jobs:
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
       options: |
-        '-u=0:0 \
+        -u=0:0 \
         --oom-kill-disable \
         --memory=6656 \
         --memory-swap=16896 \
-        --entrypoint /bin/bash'
+        --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
