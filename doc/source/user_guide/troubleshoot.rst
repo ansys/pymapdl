@@ -612,10 +612,13 @@ Known Issues
 More help needed?
 -----------------
 
+.. vale off
+
 .. epigraph::
 
    *"What do I do if a problem is not listed here?"*  
 
+.. vale on
 
 Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
 issue is already listed. If not, you can do one of the following:
