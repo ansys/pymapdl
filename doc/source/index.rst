@@ -74,10 +74,9 @@ Here's a brief example of how PyMAPDL works:
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
     >>> print(mapdl)
-
-    Product:             ANSYS Mechanical Enterprise
-    MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
-    PyMAPDL Version:     Version: 0.57.0
+    Product:             Ansys Mechanical Enterprise
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
 MAPDL is now active and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using

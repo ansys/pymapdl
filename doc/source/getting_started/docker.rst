@@ -162,7 +162,7 @@ number available on the host machine) with the ``-np`` switch:
 
 
 For additional command line arguments, see the *Notes* section in the
-description for the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
+description for the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 function.
 
 You can use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)

@@ -81,7 +81,7 @@ NU = 0.27
 
 ###############################################################################
 # Often used MAPDL command line options are exposed as Pythonic parameter names in
-# :func:`ansys.mapdl.core.launch_mapdl`. For example, ``-dir``
+# :func:`ansys.mapdl.core.launcher.launch_mapdl`. For example, ``-dir``
 # has become ``run_location``.
 # You could use ``run_location`` to specify the MAPDL run location. For example:
 #

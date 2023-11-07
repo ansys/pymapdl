@@ -55,6 +55,8 @@ There are several issues that can cause MAPDL not to launch, including:
 - `Using a proxy server`_
 - `Firewall settings`_
 
+If you cannot find your issue, go to `More help needed?`_.
+
 
 Connection timeout
 ~~~~~~~~~~~~~~~~~~
@@ -62,11 +64,11 @@ Connection timeout
 In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
 In those cases, you might see the following message:
 
-.. vale off
 
-.. rubric:: PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...
+.. code:: output
 
-.. vale on
+    PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...
+
 
 You might consider to increase the starting timeout before trying other options.
 The start timeout can be increased using:
@@ -380,7 +382,7 @@ When `gRPC <grpc_>`_ is used in a proxy environment, if a local address is speci
 as the connection destination, the gRPC implementation refers automatically to the proxy address.
 In this case, the local address cannot be referred, resulting in a connection error.
 As a workaround, you can set the environment variable ``NO_PROXY`` to your local address ``127.0.0.1``,
-and then run :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
+and then run :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 to connect to MAPDL instance.
 
 
@@ -420,7 +422,7 @@ Manually set the location of the executable file
 
 If you have a non-standard install, PyMAPDL might be unable find
 your MAPDL installation. If this is the case, provide the location of MAPDL
-as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`.
+as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
 **On Windows**
 
@@ -594,18 +596,16 @@ your program or script so that you can turn on and off logging and
 verbosity as needed.
 
 
-Issues
-~~~~~~
+Known Issues
+~~~~~~~~~~~~
 
-.. note::
-
-   MAPDL 2021 R1 has a stability issue with the :
-   :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
-   method. Avoid using input files if possible. Attempt to use the
-   :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
-   nodes and elements and read them in via the
-   :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
-   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
+* MAPDL 2021 R1 has a stability issue with the :
+  :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
+  method. Avoid using input files if possible. Attempt to use the
+  :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
+  nodes and elements and read them in via the
+  :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
+  :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.
 
 
 
@@ -614,16 +614,17 @@ More help needed?
 
 .. epigraph::
 
-   *"What do you do if a problem is not listed here?"*  
+   *"What do I do if a problem is not listed here?"*  
 
 
 Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
 issue is already listed. If not, you can do one of the following:
 
-* Go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and 
-  create a discussion about your issue.
-* Go to the `PyMAPDL Issues <pymapdl_issues_>`_ if you have found a bug
-  or want to create a feature request.
+* If you are not sure the cause, or you would like some explanation about the
+  usage of the function or its documentation, go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and create a discussion to talk about it.
+
+* If you believe you have found a bug or want to create a feature request
+  go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and open an issue.
 
 For more complex issues or queries, contact `PyAnsys Core team <pyansys_core_>`_.
 

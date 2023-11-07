@@ -148,6 +148,7 @@
 .. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/ansys/pymapdl-reader/issues/185
 .. _cartpole_example_notebook: https://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html
 .. _wsl_launching_mapdl: https://github.com/ansys/pymapdl/issues/2315
+.. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html

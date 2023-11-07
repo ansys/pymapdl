@@ -219,9 +219,9 @@ A successful connection returns:
 
 .. code:: output
 
-    Product:             ANSYS Mechanical Enterprise
-    MAPDL Version:       RELEASE  2020 R2           BUILD 20.2TEST  UPDATE 20200601
-    ansys.mapdl.core Version: 0.57.0
+   Product:             Ansys Mechanical Enterprise
+   MAPDL Version:       24.1
+   ansys.mapdl Version: 0.68.0
 
 
 Should you want to connect to this instance of MAPDL from a remote
