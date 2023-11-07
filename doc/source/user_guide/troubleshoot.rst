@@ -624,7 +624,9 @@ Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your
 issue is already listed. If not, you can do one of the following:
 
 * If you are not sure the cause, or you would like some explanation about the
-  usage of the function or its documentation, go to the `PyMAPDL Discussions <pymapdl_discussions_>`_ page and create a discussion to talk about it.
+  usage of the function or its documentation, go to the
+  `PyMAPDL Discussions <pymapdl_discussions_>`_ page and create a discussion
+  to talk about it.
 
 * If you believe you have found a bug or want to create a feature request
   go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and open an issue.
