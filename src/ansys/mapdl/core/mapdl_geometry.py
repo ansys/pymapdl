@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
-import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
 from ansys.mapdl.core.errors import VersionError
@@ -16,7 +15,7 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import run_as_prep7, supress_logging
+from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
 from ansys.mapdl.core.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
@@ -56,28 +55,30 @@ For more information, see `Mesh and geometry <https://mapdl.docs.pyansys.com/ver
 """
 
 
-class Multiblock(pv.MultiBlock):
-    def __call__(self, *args, **kwargs):
-        raise VersionError(VERSION_ERROR)
+if _HAS_PYVISTA:
 
-    @wraps(pv.MultiBlock.plot)
-    def plot(self, *args, **kwargs):
-        color = kwargs.pop("color", "white")
-        return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
+    class Multiblock(pv.MultiBlock):
+        def __call__(self, *args, **kwargs):
+            raise VersionError(VERSION_ERROR)
 
+        @wraps(pv.MultiBlock.plot)
+        def plot(self, *args, **kwargs):
+            color = kwargs.pop("color", "white")
+            return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
 
-def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
-    """Merge list of polydata or unstructured grids"""
+    @requires_package("pyvista")
+    def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
+        """Merge list of polydata or unstructured grids"""
 
-    # lazy import here for faster module loading
-    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
+        # lazy import here for faster module loading
+        from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
-    afilter = vtkAppendPolyData()
-    for item in items:
-        afilter.AddInputData(item)
-        afilter.Update()
+        afilter = vtkAppendPolyData()
+        for item in items:
+            afilter.AddInputData(item)
+            afilter.Update()
 
-    return pv.wrap(afilter.GetOutput())
+        return pv.wrap(afilter.GetOutput())
 
 
 def get_elements_per_area(resp: str) -> List[List[int]]:
@@ -154,6 +155,7 @@ class Geometry:
     def _set_log_level(self, level: DEBUG_LEVELS) -> None:
         return self._mapdl.set_log_level(level)
 
+    @requires_package("pyiges")
     def _load_iges(self) -> "Iges":
         """Loads the iges file from MAPDL as a pyiges class"""
         # Lazy import here for speed and stability
@@ -173,6 +175,7 @@ class Geometry:
     def __setitem__(self, key: Any, value: Any):
         raise NotImplementedError("This method has not been implemented yet")
 
+    @requires_package("pyvista")
     def __getitem__(self, name: str):
         name = name.lower()
         if "kp" in name:
@@ -189,6 +192,7 @@ class Geometry:
             )
 
     @property
+    @requires_package("pyiges")
     def _keypoints(self) -> Tuple[NDArray, NDArray]:
         """Returns keypoints cache"""
         if self._keypoints_cache is None:
@@ -196,7 +200,8 @@ class Geometry:
         return self._keypoints_cache
 
     @property
-    def keypoints(self) -> pv.MultiBlock:
+    @requires_package("pyvista")
+    def keypoints(self) -> "pv.MultiBlock":
         """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.MultiBlock` object.
@@ -255,12 +260,13 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"kp {mapdl_index}")
         return mb
 
+    @requires_package("pyvista")
     def get_keypoints(
         self,
         return_as_list: bool = False,
         return_as_array: bool = False,
         return_ids_in_array: bool = False,
-    ) -> Union[NDArray[Any], pv.PolyData, List[pv.PolyData]]:
+    ) -> Union[NDArray[Any], "pv.PolyData", List["pv.PolyData"]]:
         """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
@@ -356,14 +362,15 @@ class Geometry:
             return keypoints_pd
 
     @property
-    def _lines(self) -> List[pv.PolyData]:
+    def _lines(self) -> List["pv.PolyData"]:
         """Cache of the lines."""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
         return self._lines_cache
 
     @property
-    def lines(self) -> pv.MultiBlock:
+    @requires_package("pyvista")
+    def lines(self) -> "pv.MultiBlock":
         """Geometry of the lines.
 
         Obtain the selected lines as a :class:`pyvista.MultiBlock` object.
@@ -435,9 +442,10 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"line {mapdl_index}")
         return mb
 
+    @requires_package("pyvista")
     def get_lines(
         self, return_as_list: bool = False
-    ) -> Union[pv.PolyData, List[pv.PolyData]]:
+    ) -> Union["pv.PolyData", List["pv.PolyData"]]:
         """Obtain line geometry
 
         Obtain the active lines as a :class:`pyvista.PolyData` object or
@@ -481,7 +489,8 @@ class Geometry:
             return merge_polydata(self._lines)
 
     @property
-    def areas(self) -> pv.MultiBlock:
+    @requires_package("pyvista")
+    def areas(self) -> "pv.MultiBlock":
         """Geometry of the areas.
 
         Obtain the selected areas as a :class:`pyvista.MultiBlock` object.
@@ -550,9 +559,10 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"area {mapdl_index}")
         return mb
 
+    @requires_package("pyvista")
     def get_areas(
         self, quality: int = 1, return_as_list: Optional[bool] = False
-    ) -> Union[List[pv.UnstructuredGrid], pv.PolyData]:
+    ) -> Union[List["pv.UnstructuredGrid"], "pv.PolyData"]:
         """Get active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
 
         Parameters
@@ -627,13 +637,14 @@ class Geometry:
 
     @supress_logging
     @run_as_prep7
+    @requires_package("pyvista")
     def generate_surface(
         self,
         density: int = 4,
         amin: Optional[int] = None,
         amax: Optional[int] = None,
         ninc: Optional[int] = None,
-    ) -> pv.PolyData:
+    ) -> "pv.PolyData":
         """
         Generate an all-triangular surface of the active surfaces.
 
@@ -854,7 +865,9 @@ class Geometry:
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
-    def _load_lines(self) -> List[pv.PolyData]:
+    @requires_package("pyvista")
+    @requires_package("pyiges")
+    def _load_lines(self) -> List["pv.PolyData"]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
         with self._mapdl.save_selection:
@@ -894,6 +907,7 @@ class Geometry:
 
         return lines_
 
+    @requires_package("pyiges")
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
         # write only keypoints
@@ -1167,7 +1181,8 @@ class Geometry:
             return self.anum
 
     @property
-    def volumes(self) -> pv.MultiBlock:
+    @requires_package("pyvista")
+    def volumes(self) -> "pv.MultiBlock":
         """Obtain the volumes geometry
 
         Obtain the selected volumes as a :class:`pyvista.MultiBlock` object.
@@ -1238,9 +1253,10 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"volume {mapdl_index}")
         return mb
 
+    @requires_package("pyvista")
     def get_volumes(
         self, return_as_list: bool = False, quality: int = 4
-    ) -> Union[List[pv.PolyData], pv.PolyData]:
+    ) -> Union[List["pv.PolyData"], "pv.PolyData"]:
         """Get active volumes from MAPDL represented as a :class:`pyvista.PolyData` object
         or a list of :class:`pyvista.UnstructuredGrid` objects.
 
@@ -1490,13 +1506,15 @@ class LegacyGeometry(Geometry):
         """Keypoint coordinates"""
         return super().get_keypoints(return_as_array=True)
 
-    def lines(self) -> pv.PolyData:
+    @requires_package("pyvista")
+    def lines(self) -> "pv.PolyData":
         """Active lines as a ``pyvista.PolyData`` object."""
         return super().get_lines()  # type: ignore
 
+    @requires_package("pyvista")
     def areas(
         self, quality=1, merge=False
-    ) -> Union[pv.PolyData, List[pv.UnstructuredGrid]]:
+    ) -> Union["pv.PolyData", List["pv.UnstructuredGrid"]]:
         """List of areas from MAPDL represented as a ``pyvista.PolyData`` object.
 
         Parameters

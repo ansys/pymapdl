@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.68.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.12"
 license = {file = "LICENSE"}
 authors = [
     {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
@@ -55,10 +55,16 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+jupyter = [
+    "jupyterlab>=3",
+    "ipywidgets",
+    "pyvista[jupyter]",
+]
+
 tests = [
     "ansys-dpf-core==0.10.0",
     "autopep8==2.0.4",
-    "matplotlib==3.8.0",
+    "matplotlib==3.8.1",
     "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
     "scipy==1.11.3; python_version > '3.8'",
     "pandas==2.1.2",
@@ -81,7 +87,7 @@ doc = [
     "imageio==2.31.6",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.8.0",
+    "matplotlib==3.8.1",
     "numpydoc==1.6.0",
     "pandas==2.1.2",
     "plotly==5.18.0",
@@ -91,7 +97,7 @@ doc = [
     "pythreejs==2.4.2",
     "pyvista[trame]==0.42.3",
     "sphinx-autobuild==2021.3.14",
-    "sphinx-autodoc-typehints==1.24.0",
+    "sphinx-autodoc-typehints==1.24.1",
     "sphinx-copybutton==0.5.2",
     "sphinx-gallery==0.14.0",
     "sphinxcontrib-websupport==1.2.6",

@@ -7,7 +7,7 @@ import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
-from conftest import skip_if_no_has_grpc
+from conftest import requires
 
 ## Notes
 # Use the next fixtures for:
@@ -172,7 +172,7 @@ def test_global_logger_debug_levels(caplog):
                     )
 
 
-@skip_if_no_has_grpc
+@requires("grpc")
 def test_global_logger_format():
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
@@ -195,7 +195,7 @@ def test_global_logger_format():
     assert "This is a message" in log
 
 
-@skip_if_no_has_grpc
+@requires("grpc")
 def test_instance_logger_format(mapdl):
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers

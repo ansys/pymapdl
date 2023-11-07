@@ -38,7 +38,7 @@ use these issue templates:
 * **🎓 Adding an example**: Proposing a new example for the library
 * **💡 New feature**: Enhancements to the code
 
-If your issue does not fit into one of these categories, click on `Open a black issue <pymapdl_new_blank_issue_>`_.
+If your issue does not fit into one of these categories, click in `Open a blank issue <pymapdl_new_blank_issue_>`_.
 
 
 Viewing PyMAPDL documentation

@@ -1,6 +1,14 @@
 """Store parameters for a PyMAPDL-specific theme for pyvista"""
-from matplotlib.colors import ListedColormap
+
 import numpy as np
+
+try:
+    from matplotlib.colors import ListedColormap
+
+    _HAS_MATPLOTLIB = True
+except ModuleNotFoundError:
+    _HAS_MATPLOTLIB = False
+
 
 from ansys.mapdl.core import _HAS_PYVISTA
 
@@ -46,10 +54,15 @@ MAPDL_colorbar = (
     / 255
 )
 
-PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
+if _HAS_MATPLOTLIB:
+    PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
 
 
 def get_ansys_colors(N=9):
+    if not _HAS_MATPLOTLIB:
+        raise ModuleNotFoundError(
+            "'matplotlib' package is needed for 'get_ansys_colors'."
+        )
     return np.array([PyMAPDL_cmap(i) for i in range(N)])
 
 
@@ -93,20 +106,22 @@ class MapdlTheme(base_class):
         self.background = "paraview"
         self.interactive = True
 
-        self.cmap = PyMAPDL_cmap
+        if _HAS_MATPLOTLIB:
+            self.cmap = PyMAPDL_cmap
 
-        self.font.size = 18
-        self.font.title_size = 18
-        self.font.label_size = 18
-        self.font.color = "black"
+            self.font.size = 18
+            self.font.title_size = 18
+            self.font.label_size = 18
+            self.font.color = "black"
+
+            self.axes.x_color = "tomato"
+            self.axes.y_color = "seagreen"
+            self.axes.z_color = "blue"
+
         self.show_edges = False
         self.color = "lightblue"
         self.outline_color = "black"
         self.edge_color = "black"
-
-        self.axes.x_color = "tomato"
-        self.axes.y_color = "seagreen"
-        self.axes.z_color = "blue"
 
         self.color_cycler = get_cycler(MAPDL_colorbar.tolist())
         self.render_points_as_spheres = True
