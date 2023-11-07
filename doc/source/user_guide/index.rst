@@ -21,6 +21,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    mesh_geometry
    post
    parameters
+   components
    database
    convert
    math

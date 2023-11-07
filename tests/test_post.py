@@ -765,11 +765,42 @@ def test_plot_incomplete_element_selection(mapdl, contact_solve):
     mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
     assert mapdl.post_processing.plot_element_displacement() is None
 
+    mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_elem // 2, 2)
+    assert mapdl.post_processing.plot_element_displacement() is None
+
+    mapdl.nsel("S", "NODE", "", 5, mapdl.mesh.n_elem // 2, 2)
+    assert mapdl.post_processing.plot_element_displacement() is None
+
+    mapdl.vsel("s", "", "", 1)
+    mapdl.eslv("s")
+    assert mapdl.post_processing.plot_element_displacement() is None
+
+    mapdl.vsel("s", "", "", 2)
+    mapdl.eslv("s")
+    assert mapdl.post_processing.plot_element_displacement() is None
+
 
 @requires("pyvista")
-@pytest.mark.xfail(strict=False, reason="The image regression is failing. See #2435")
-def test_plot_incomplete_nodal_selection(mapdl, contact_solve):
+def test_plot_incomplete_nodal_selection(mapdl, contact_solve, verify_image_cache):
+    verify_image_cache.skip = True
+
     mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
+    assert mapdl.post_processing.plot_nodal_displacement() is None
+
+    mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2, 2)
+    assert mapdl.post_processing.plot_nodal_displacement() is None
+
+    mapdl.nsel("S", "NODE", "", 5, mapdl.mesh.n_node // 2, 2)
+    assert mapdl.post_processing.plot_nodal_displacement() is None
+
+    mapdl.vsel("s", "", "", 1)
+    mapdl.eslv("S")
+    mapdl.nsle("S")
+    assert mapdl.post_processing.plot_nodal_displacement() is None
+
+    mapdl.vsel("s", "", "", 2)
+    mapdl.eslv("S")
+    mapdl.nsle("S")
     assert mapdl.post_processing.plot_nodal_displacement() is None
 
 
