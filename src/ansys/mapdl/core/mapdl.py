@@ -2865,9 +2865,10 @@ class _MapdlCore(Commands):
 
         value = response.split("=")[-1].strip()
         if item3:
-            self._log.info(
-                f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
-            )
+            if len(value.splitlines()) > 1:
+                self._log.info(
+                    f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
+                )
             value = value.splitlines()[0]
 
         try:  # always either a float or string
@@ -4946,12 +4947,19 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist()
 
-        header = "NAME                            TYPE      SUBCOMPONENTS"
-        blocks = re.findall(
-            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
-            cmlist,
-            flags=re.DOTALL,
-        )
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            # header
+            #  "NAME                            TYPE      SUBCOMPONENTS"
+            blocks = re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        elif "LIST ALL SELECTED COMPONENTS":
+            blocks = cmlist.splitlines()[1:]
+        else:
+            raise ValueError("The format of the CMLIST output is not recognaised.")
+
         cmlist = "\n".join(blocks)
 
         def extract(each_line, ind):
@@ -4969,9 +4977,15 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist(cmname, 1)
         # Capturing blocks
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
+
+        elif "LIST COMPONENT" in cmlist:
+            header = ""
+
         cmlist = "\n\n".join(
             re.findall(
-                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
                 cmlist,
                 flags=re.DOTALL,
             )
