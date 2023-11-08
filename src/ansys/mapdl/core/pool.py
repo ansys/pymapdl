@@ -236,7 +236,7 @@ class LocalMapdlPool:
 
         # monitor pool if requested
         if restart_failed:
-            self._pool_monitor_thread = self._monitor_pool(name="Monitoring_Thread")
+            self._pool_monitor_thread = self._monitor_pool()
 
         self._verify_unique_ports()
 
@@ -686,12 +686,13 @@ class LocalMapdlPool:
         self._spawning_i -= 1
 
     @threaded_daemon
-    def _monitor_pool(self, refresh=1.0, name=""):
+    def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
         """
         while self._active:
             for index, instance in enumerate(self._instances):
+                name = self._names[index]
                 if not instance:  # encountered placeholder
                     continue
                 if instance._exited:
@@ -699,9 +700,7 @@ class LocalMapdlPool:
                         # use the next port after the current available port
                         self._spawning_i += 1
                         port = max(self._ports) + 1
-                        self._spawn_mapdl(
-                            index, port=port, name=f"Instance {index}"
-                        ).join()
+                        self._spawn_mapdl(index, port=port, name=name).join()
                     except Exception as e:
                         LOG.error(e, exc_info=True)
                         self._spawning_i -= 1
