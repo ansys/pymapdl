@@ -292,6 +292,10 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
+        if self._mapdl._store_commands:
+            # in interactive mode
+            return {}
+
         params = interp_star_status(
             self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
         )
@@ -326,6 +330,13 @@ class Parameters:
 
     def __getitem__(self, key):
         """Return a parameter"""
+        if self._mapdl._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.parameters` to retrieve parameters when in "
+                "`non_interactive` mode. "
+                "Exit non_interactive mode before using this method."
+            )
+
         if not isinstance(key, str):
             raise TypeError("Parameter name must be a string")
         key = key.upper()
