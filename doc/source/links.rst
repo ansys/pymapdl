@@ -108,6 +108,7 @@
 .. _tds_article_web_app_1: https://towardsdatascience.com/ansys-in-a-python-web-app-part-1-post-processing-with-pydpf-44d2fbaa6135
 .. _tds_article_web_app_2: https://towardsdatascience.com/ansys-in-a-python-web-app-part-2-pre-processing-solving-with-pymapdl-50428c18f8e7
 .. _paraview_question_read_rst: https://discourse.paraview.org/t/reading-ansys-apdl-rst-results-in-paraview/9706
+.. _python_context_manager: https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
@@ -150,7 +151,7 @@
 .. _wsl_launching_mapdl: https://github.com/ansys/pymapdl/issues/2315
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
-
+.. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
