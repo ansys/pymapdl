@@ -2117,3 +2117,10 @@ def test_saving_selection_context(mapdl, cube_solve):
 
     assert "nod_selection_4".upper() not in mapdl.cmlist()
     assert "nod_selection_4" not in mapdl.components
+
+
+def test_get_array_non_interactive(mapdl, solved_box):
+    mapdl.allsel()
+    with pytest.raises(MapdlRuntimeError):
+        with mapdl.non_interactive:
+            mapdl.get_array("asdf", "2")
