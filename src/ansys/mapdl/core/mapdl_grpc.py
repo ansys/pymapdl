@@ -2040,8 +2040,10 @@ class MapdlGrpc(_MapdlCore):
 
         if self._store_commands:
             raise MapdlRuntimeError(
-                "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
-                "Exit non_interactive mode before using this method."
+                "Cannot use `mapdl.get_value` when in `non_interactive` mode. "
+                "Exit non_interactive mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.get` to specify the name of "
+                "the MAPDL parameter where to store the retrieved value.\n"
             )
 
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
