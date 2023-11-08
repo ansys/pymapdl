@@ -827,13 +827,19 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
+            self._parent()._store_commands = False
+
             if args[0] is not None:
                 # An exception was raised, let's exit now without flushing
+                self._parent()._log.debug(
+                    "An exception was found in the `non_interactive` environment. "
+                    "Hence the commands are not flushed."
+                )
                 return None
-
-            self._parent()._log.debug("Exiting non-interactive mode")
-            self._parent()._flush_stored()
-            self._parent()._store_commands = False
+            else:
+                # No exception so let's flush.
+                self._parent()._log.debug("Exiting non-interactive mode")
+                self._parent()._flush_stored()
 
     class _save_selection:
         """Save the selection and returns to it when exiting"""
