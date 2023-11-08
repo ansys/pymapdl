@@ -15,7 +15,6 @@ translated from its original MAPDL all CAPS format to a PEP8
 compatible format. For example, ``ESEL`` is now the
 :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>` method.
 
-.. vale off
 
 .. tab-set::
 
@@ -31,14 +30,13 @@ compatible format. For example, ``ESEL`` is now the
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             # Selecting elements whose centroid x coordinate
             # is between the 1 and 2.
             # returns an array of selected elements ids
             mapdl.esel("S", "CENT", "X", 1, 2)
     
-.. vale on
 
 Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
