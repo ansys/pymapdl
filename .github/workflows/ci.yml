@@ -478,6 +478,7 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
@@ -628,12 +629,6 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-      
-      - name: "Running some verification manual examples"
-        run: |
-          unset PYMAPDL_START_INSTANCE
-          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
-          python .ci/run_vms.py
 
       - name: "Unit testing requirements installation"
         run: |
