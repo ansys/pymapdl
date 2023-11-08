@@ -30,7 +30,7 @@ compatible format. For example, ``ESEL`` is now the
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             # Selecting elements whose centroid x coordinate
             # is between the 1 and 2.
@@ -62,7 +62,7 @@ start with ``star (*)``.
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             mapdl.startstatus()
             mapdl.slashsolu()
@@ -84,7 +84,7 @@ or, these commands can be called using keyword arguments:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             mapdl.esel("s", "type", "", 1)
             mapdl.esel("s", "type", vmin=1)
@@ -106,7 +106,7 @@ these commands, such as ``"/SOLU"``:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             # The next three functions are equivalent. Enter the solution processor.
             mapdl.run("/SOLU")
@@ -180,7 +180,7 @@ which is executed with a :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` ca
 
 Because of the non-interactive context not running all the commands until the end,
 you might find issues interacting inside it, with Python for instance.
-For example, running python commands such as
+For example, running Python commands such as
 :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
 inside the context can give you out-of-sync responses.
 The following code snippet is a demonstration of this kind of problem:
@@ -252,7 +252,7 @@ a file) do not appear to run correctly. For example, here is the macro
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             def DISP(
                 ARG1="",
@@ -421,7 +421,7 @@ attribute. For example:
     .. tab-item:: Python-Non interactive
         :sync: key3
 
-        .. code:: Python
+        .. code:: python
 
             with mapdl.non_interactive:
                 mapdl.run("*IF,ARG1,EQ,0,THEN")
@@ -446,7 +446,7 @@ attribute. For example:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: Python
+        .. code:: python
 
             # MAPDL parameters can be obtained using load_parameters
             if ARG1 == 0:
