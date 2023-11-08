@@ -15,6 +15,7 @@ translated from its original MAPDL all CAPS format to a PEP8
 compatible format. For example, ``ESEL`` is now the
 :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>` method.
 
+.. vale off
 
 .. tab-set::
 
@@ -37,6 +38,7 @@ compatible format. For example, ``ESEL`` is now the
             # returns an array of selected elements ids
             mapdl.esel("S", "CENT", "X", 1, 2)
     
+.. vale on
 
 Additionally, MAPDL commands
 containing a ``/`` or ``*`` have had those characters removed, unless
@@ -201,7 +203,7 @@ The following code snippet is a demonstration of this kind of problem:
 
     assert klist_inside != klist_outside  # Evaluates to true
 
-In the above script, the values obtained by
+In the preceding script, the values obtained by
 :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` are different:
 
 .. code:: pycon
