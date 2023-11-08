@@ -92,9 +92,8 @@ def test_invalid_exec():
 @requires("local")
 def test_heal(pool):
     pool_sz = len(pool)
+    pool_names = pool._names
     pool[0].exit()
-    pool[1].exit()
-    pool[2].exit()
 
     time.sleep(1)  # wait for shutdown
     timeout = time.time() + TWAIT
@@ -103,6 +102,7 @@ def test_heal(pool):
         if time.time() > timeout:
             raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
 
+    assert pool._names == pool_names
     assert len(pool) == pool_sz
     pool._verify_unique_ports()
 
