@@ -181,6 +181,8 @@ with open("links.rst") as f:
     rst_epilog += f.read()
 
 rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
+
 
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
