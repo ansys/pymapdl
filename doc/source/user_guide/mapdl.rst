@@ -62,7 +62,7 @@ start with ``star (*)``.
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             mapdl.startstatus()
             mapdl.slashsolu()
@@ -84,7 +84,7 @@ or, these commands can be called using keyword arguments:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             mapdl.esel("s", "type", "", 1)
             mapdl.esel("s", "type", vmin=1)
@@ -106,7 +106,7 @@ these commands, such as ``"/SOLU"``:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             # The next three functions are equivalent. Enter the solution processor.
             mapdl.run("/SOLU")
@@ -252,7 +252,7 @@ a file) do not appear to run correctly. For example, here is the macro
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             def DISP(
                 ARG1="",
@@ -421,7 +421,7 @@ attribute. For example:
     .. tab-item:: Python-Non interactive
         :sync: key3
 
-        .. code:: python
+        .. code:: Python
 
             with mapdl.non_interactive:
                 mapdl.run("*IF,ARG1,EQ,0,THEN")
@@ -446,7 +446,7 @@ attribute. For example:
     .. tab-item:: Python
         :sync: key2
 
-        .. code:: python
+        .. code:: Python
 
             # MAPDL parameters can be obtained using load_parameters
             if ARG1 == 0:
