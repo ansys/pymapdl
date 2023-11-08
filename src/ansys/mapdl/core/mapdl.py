@@ -10,7 +10,6 @@ import re
 from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
-import threading
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
@@ -3840,10 +3839,7 @@ class _MapdlCore(Commands):
         """
         parm_name = kwargs.get("parm", None)
 
-        if (
-            self._store_commands
-            and threading.current_thread().__class__.__name__ == "_MainThread"
-        ):
+        if self._store_commands:
             raise MapdlRuntimeError(
                 "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
                 "since it does not return anything until the `non_interactive` context "
