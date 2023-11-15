@@ -105,7 +105,7 @@ For more information on each project, visit their GitHub pages.
 Installation
 ------------
 The ``ansys-mapdl-core`` package currently supports Python 3.8 through
-Python 3.11 on Windows, Mac OS, and Linux.
+Python 3.12 on Windows, Mac OS, and Linux.
 
 Install the latest release from `PyPi
 <https://pypi.org/project/ansys-mapdl-core/>`_ with:
@@ -147,7 +147,7 @@ Page <https://github.com/ansys/pymapdl/releases>`_ for your corresponding
 machine architecture.
 
 Each wheelhouse archive contains all the python wheels necessary to install
-PyMAPDL from scratch on Windows and Linux for Python 3.8 and 3.11. You can install
+PyMAPDL from scratch on Windows and Linux for Python 3.8 and 3.12. You can install
 this on an isolated system with a fresh python or on a virtual environment.
 
 For example, on Linux Ubuntu with Python 3.10, unzip it and install it with the following:
