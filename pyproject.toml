@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.68.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.8,<3.12"
 license = {file = "LICENSE"}
 authors = [
     {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
@@ -55,6 +55,12 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+jupyter = [
+    "jupyterlab>=3",
+    "ipywidgets",
+    "pyvista[jupyter]",
+]
+
 tests = [
     "ansys-dpf-core==0.10.0",
     "autopep8==2.0.4",
@@ -70,6 +76,7 @@ tests = [
     "vtk==9.2.6",
     "pytest-rerunfailures==12.0",
     "pytest-pyvista==0.1.9",
+    "pytest-timeout==2.2.0",
 ]
 doc = [
     "sphinx==7.2.6",
