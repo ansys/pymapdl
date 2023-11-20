@@ -32,7 +32,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 1 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -516,6 +516,15 @@ jobs:
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
+      - name: "Test launching"
+        shell: python
+        run: |
+          from ansys.mapdl.core import launch_mapdl
+          mapdl = launch_mapdl(start_timeout=100)
+          print(mapdl.prep7())
+          print("Everything OK")
+          mapdl.exit()
+          
       - name: "Unit testing requirements installation"
         run: |
           python -m pip install .[tests]
