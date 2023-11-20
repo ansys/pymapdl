@@ -515,15 +515,6 @@ jobs:
           python -m build
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Test launching"
-        shell: python
-        run: |
-          from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl(start_timeout=100)
-          print(mapdl.prep7())
-          print("Everything OK")
-          mapdl.exit()
           
       - name: "Unit testing requirements installation"
         run: |
@@ -637,6 +628,15 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Test launching"
+        shell: python
+        run: |
+          from ansys.mapdl.core import launch_mapdl
+          mapdl = launch_mapdl(start_timeout=100)
+          print(mapdl.prep7())
+          print("Everything OK")
+          mapdl.exit()
 
       - name: "Unit testing requirements installation"
         run: |
