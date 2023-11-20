@@ -13,39 +13,39 @@ Contributing
    develop_pymapdl
 
 
-There are several ways to contribute to PyMAPDL library. 
+There are several ways to contribute to PyMAPDL. 
 
-* `Answering discussions`_
-* `Posting issues`_
+* `Answer discussions`_
+* `Post issues`_
 * :ref:`write_documentation`
 * :ref:`developing_pymapdl`
 
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <dev_guide_contributing_>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
-with it and all `Coding style <dev_guide_coding_style_>`_ before attempting to
+with it and the `Coding style <dev_guide_coding_style_>`_ before attempting to
 contribute to PyMAPDL.
  
 
-Answering discussions
-=====================
+Answer discussions
+==================
 
-Answering discussions in a excellent way to contribute to PyMAPDL project, and
+Answering discussions is an excellent way to contribute to PyMAPDL, and
 it does not require any setup, just a GitHub account.
 It is probably the first step towards becoming a full PyMAPDL developer, since it
-helps you deepen your understanding of the project, as engaging in
+helps you deepen your understanding of the project. Engaging in
 discussions often requires a thorough grasp of the project's goals and
 challenges.
 Your contributions can help other users or contributors who
 may be facing similar issues, making the repository more welcoming and
-inclusive. By providing answers or solution, you can directly contribute to the project's
+inclusive. By providing answers or solutions, you can directly contribute to the project's
 success, maintain its health, and encourage a positive, open source ecosystem.
 
-Visit `PyMAPDL discussions <pymapdl_discussions_>`_ and discover how you can help.
+To discover how you can help, see the `PyMAPDL Discussions <pymapdl_discussions_>`_ page.
 
 
-Posting issues
-==============
+Post issues
+===========
 
 Posting issues in a repository is a valuable contribution that benefits you, the
 repository, and PyMAPDL as a whole. It allows you to voice concerns, suggest
@@ -68,7 +68,7 @@ When possible, use these issue templates:
 * **🎓 Adding an example**: Proposing a new example for the library
 * **💡 New feature**: Enhancements to the code
 
-If your issue does not fit into one of these categories, click in
+If your issue does not fit into one of these categories, click
 `Open a blank issue <pymapdl_new_blank_issue_>`_.
 
 

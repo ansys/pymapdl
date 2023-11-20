@@ -2,19 +2,19 @@
 .. _developing_pymapdl:
 
 ===============
-Develop PyMAPDL
-===============
+Develop code
+============
 
-You can help PyMAPDL library by fixing an bug or developing a new feature.
-To do that, you need to setup the repository in your local machine as it is explained
-in the following sections.
+You can help improve PyMAPDL by fixing a bug or developing a new feature.
+To do either, you must set up the repository on your local machine as per the
+explanations in the following sections.
 
 
-Cloning the PyMAPDL repository
-==============================
+Clone the PyMAPDL repository
+============================
 
-To clone PyMAPDL repository, you'll need to install a version control system (VCS) such as Git.
-Later run this code to clone the latest development version of PyMAPDL:
+Before cloning the PyMAPDL repository, you must install a version control system such as Git.
+You can this run this code to clone the latest development version of PyMAPDL:
 
 .. code:: console
 
@@ -26,15 +26,13 @@ Later run this code to clone the latest development version of PyMAPDL:
 Create a Python virtual environment
 ===================================
 
-It is recommended you install PyMAPDL in its own virtual environment to avoid
-dependency conflicts and to easier manage upgrades.
-Visit `Setting up your development environment <dev_guide_setup_your_environment_>`_
-for detailed information on how to install Python and create a virtual environment.
+To avoid dependency conflicts and more easily manage upgrades, you should install PyMAPDL in its own virtual environment. For detailed information on how to install Python and create a virtual environment, see
+`Setting up your development environment <dev_guide_setup_your_environment_>`_.
 
 Install PyMAPDL in development mode
 ===================================
 
-Install the latest version of PyMAPDL in development mode:
+Install the latest version of PyMAPDL in development mode with these commands:
 
 
 .. code:: console
@@ -44,7 +42,7 @@ Install the latest version of PyMAPDL in development mode:
     pip install -e .
 
 
-If you are going to do testing, you need to install the testing dependencies:
+If you are going to do testing, you must install the testing dependencies with this command:
 
 
 .. code:: console
@@ -62,49 +60,48 @@ like Git, involves a set of essential guidelines to ensure efficient
 collaboration, code management, and tracking changes. Here are the main
 guidelines for developing code in a repository:
 
-#. **Use Branches**: Create branches for different features, bug fixes, or
+#. **Use branches**: Create branches for different features, bug fixes, or
    experiments. This keeps changes isolated and facilitates parallel
    development.
 
-#. **Write Descriptive Commit Messages**: Provide clear and concise commit
+#. **Write descriptive commit messages**: Provide clear and concise commit
    messages that explain the purpose and context of the changes. Follow a
    consistent style.
 
-#. **Commit Frequently**: Make small, meaningful commits frequently. Avoid
+#. **Commit frequently**: Make small, meaningful commits frequently. Avoid
    making a large number of unrelated changes in a single commit.
 
-#. **Pull Before You Push**: Always update your local branch with the latest
+#. **Pull before you push**: Always update your local branch with the latest
    changes from the remote repository before pushing your own changes to avoid
    conflicts.
 
-#. **Use Pull Requests (PRs)**: Use PRs to submit your changes for review.
+#. **Use pull requests (PRs)**: Use PRs to submit your changes for review.
    This allows for discussion and validation before merging into the main branch.
 
 #. **Write good documentation**: Maintain clear and up-to-date documentation for your
    contribution or changes, including README files, comments in code, and relevant project
    documentation. Make sure you update the related documentation as well.
-   Follow `numpydoc <numpydoc_>`_ convention for documenting code.
+   Follow the `numpydoc <numpydoc_>`_ convention for documenting code.
 
-#. **Test Your Changes**: Thoroughly test your contributions to ensure they work
-   as expected. If applicable, create or update unit tests which runs on the 
+#. **Test your changes**: Thoroughly test your changes to ensure that they work
+   as expected. If applicable, create or update the unit tests that run on the 
    continuous integration/continuous deployment (CI/CD) pipelines to catch issues early
-   and ensure reliable deployments. See `Unit testing`_ for more details.
+   and ensure reliable deployments. For more information, see `Unit testing`_.
 
-#. **Respect Code Style and Standards**: Follow consistent code style
+#. **Respect code style and standards**: Follow code style
    guidelines and adhere to coding standards specific to your language or
    framework.
 
-#. **Collaborate and Communicate**: Communicate with team members, provide
+#. **Collaborate and communicate**: Communicate with team members, provide
    updates on your progress, and resolve any conflicts promptly.
 
 #. **Ask for help**: To ensure code quality, identify issues, and share knowledge,
-   PyMAPDL developers are always happy to assist you through code reviews.
-   In case you need help, or guidance, mention ``@ansys/pymapdl-maintainers`` in a comment
-   so they can be notified.
+   ask PyMAPDL developers to assist you and review your code.
+   If you need help or guidance, mention ``@ansys/pymapdl-maintainers`` in a comment
+   so they they are notified.
 
 By following these guidelines, you can ensure smooth and organized code
-development within a repository, fostering collaboration, code quality, and help the
-project maintainers.
+development within a repository, fostering collaboration, code quality, and feature enhancement.
 
 
 .. _ref_unit_testing_contributing:
@@ -128,7 +125,7 @@ that they all work together.
 To verify that all code is properly tested, you must ensure that every piece of
 code is used (covered) in at least one unit test. In this repository, the
 `Codecov <codecov_>`_ tool generates a coverage report of the committed code. It
-details how merging a pull request would impact coverage. It is one of the
+indicates how merging a pull request would impact coverage. The generation of this report is one of the
 checks that must run successfully to merge code changes.
 
 
@@ -190,12 +187,12 @@ While the code coverage in either case is 100% for the function, the second case
 more useful for debugging the function.
 
 
-Continuous Integration and Continuous Deployment (CI/CD) approach
------------------------------------------------------------------
+Continuous integration and continuous deployment
+------------------------------------------------
 
-Unit tests and integration tests are part of Continuous Integration (CI). 
+Unit tests and integration tests are part of continuous integration (CI). 
 The automation of testing, monitoring, and deployment of newly added
-code allows Continuous Deployment (CD) throughout the app lifecycle,
+code allows continuous deployment (CD) throughout the app lifecycle,
 providing a comprehensive CI/CD approach.
 
 .. figure:: ../images/cicd.jpg
@@ -208,19 +205,19 @@ In the PyMAPDL repository, `pytest <pytest_>`_ is used to run tests.
 
 The name of a ``pytest`` file must be in the form ``test_XXX.py``, where ``XXX``
 is either the function, method, or class that you are testing or some other explicative
-name. In the command line, the ``-k`` argument can be used to filter the tests to run.
+name. In the command line, you can use the ``-k`` argument to filter the tests to run.
 For more information, see `pytest usage <pytest_usage_>`_.
 
 Here are some guidelines for creating good unit tests: 
 
 - Assign long and descriptive names to tests.
-- Use the `Codecov <codecov_>`_ tool to ensure all implemented code is tested.
+- Use the `Codecov <codecov_>`_ tool to ensure that all implemented code is tested.
 - Check that tests return the same results each time. 
 - Verify that tests are independent.
 - Write tests that verify only one part of the code at a time.
 - Make tests as short and fast as possible.
 
-`What makes a good unit test <article_good_unit_test_>`_ 
+`What makes a good unit test? <article_good_unit_test_>`_ 
 is an exhaustive list of tips for creating good unit tests.
 
 Most PyMAPDL tests require a connection to a running instance of
@@ -241,7 +238,7 @@ It is executed upstream of each test and not within all tests.
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
-In Windows, use:
+In Windows, use this code:
 
 .. code:: pwsh-session
 
@@ -249,7 +246,7 @@ In Windows, use:
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
     SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 
-In Linux, use:
+In Linux, use this code:
 
 .. code:: console
 
@@ -257,12 +254,12 @@ In Linux, use:
     export PYMAPDL_PORT=<MAPDL Port> (default 50052)
     export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 
-This tells ``ansys.mapdl.core`` to attempt to connect to the existing
+These environment variables tell PyMAPDL to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
 
-Additionally you can use the environment variables ``PYMAPDL_MAPDL_EXEC`` 
-and ``PYMAPDL_MAPDL_VERSION`` to specify MAPDL executable path and the
-version to launch (if multiple versions of MAPDL are installed).
+Additionally, you can use the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_MAPDL_VERSION`
+environment variables to specify the MAPDL executable path and the version to launch (if
+multiple versions of MAPDL are installed).
 
 
 Example
@@ -271,10 +268,9 @@ Example
 .. TO BE MODIFIED
 
 The `test_component.py <pymapdl_test_component_>`_ file contains
-the unit tests and integration tests of the
-:class:`ComponentManager <ansys.mapdl.core.component.ComponentManager>`.
-These are just some of the many tests that you can find in the
-`test directory <pymapdl_tests_>`_.
+the unit tests and integration tests for the
+:class:`ComponentManager <ansys.mapdl.core.component.ComponentManager>` class.
+These tests are just some of the many in the `test directory <pymapdl_tests_>`_.
 
 Here are some examples of how you use ``pytest``:
 
@@ -282,11 +278,10 @@ Here are some examples of how you use ``pytest``:
 
     import pytest
 
-
     # 'cube_geom_and_mesh' is another fixture defined in 'conftest.py'
     @pytest.fixture(scope="function")
     def basic_components(mapdl, cube_geom_and_mesh):
-        """Given a model in 'cube_geom_and_mesh', let's define some components to work with later."""
+        """Given a model in 'cube_geom_and_mesh', define some components to work with later."""
         mapdl.components["mycomp1"] = "NODE", [1, 2, 3]
         mapdl.components["mycomp2"] = "KP", [1, 3]
 
@@ -313,16 +308,16 @@ For further explanations, see the `pytest documentation <pytest_>`_.
 Code style
 ==========
 
-PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
+PyMAPDL follows the PEP8 standard as outlined in the `PyAnsys Development Guide
 <dev_guide_pyansys_>`_ and implements style checking using
 `pre-commit <precommit_>`_.
 
-To ensure your code meets minimum code styling standards, run::
+To ensure your code meets minimum code styling standards, run these commands::
 
   pip install pre-commit
   pre-commit run --all-files
 
-You can also install this as a pre-commit hook by running::
+You can also install this as a pre-commit hook by running this command::
 
   pre-commit install
 

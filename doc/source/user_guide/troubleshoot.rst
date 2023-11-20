@@ -34,7 +34,7 @@ script:
 You can attach this file to a bug report in the PyMAPDL GitHub repository for further investigation.
 If you are not able to identify the issue, you can open a discussion on the
 `PyMAPDL Discussions page <pymapdl_discussions_>`_.
-If you believe you have found a bug, open an issue on the `PyMAPDL Issues page <pymapdl_issues_>`_.
+If you believe you have found a bug, create an issue on the `PyMAPDL Issues page <pymapdl_issues_>`_.
 
 
 .. _ref_launching_issue:
