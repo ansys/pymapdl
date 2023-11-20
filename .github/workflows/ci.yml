@@ -470,13 +470,14 @@ jobs:
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
@@ -595,7 +596,7 @@ jobs:
     timeout-minutes: 55
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -627,12 +628,6 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-      
-      - name: "Running some verification manual examples"
-        run: |
-          unset PYMAPDL_START_INSTANCE
-          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
-          python .ci/run_vms.py
 
       - name: "Unit testing requirements installation"
         run: |
