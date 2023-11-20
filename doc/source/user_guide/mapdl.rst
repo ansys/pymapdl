@@ -448,23 +448,29 @@ attribute. For example:
 
         .. code:: python
 
-            # MAPDL parameters can be obtained using load_parameters
             if ARG1 == 0:
-                mapdl.run("*GET,ARG4,NX,ARG2     ")  # RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
-                mapdl.run("*GET,ARG5,NY,ARG2")
-                mapdl.run("*GET,ARG6,NZ,ARG2")
-                mapdl.run("*GET,ARG7,NX,ARG3")
-                mapdl.run("*GET,ARG8,NY,ARG3")
-                mapdl.run("*GET,ARG9,NZ,ARG3")
+                mapdl.get(ARG4,"NX",ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
+                mapdl.get(ARG5,"NY",ARG2)
+                mapdl.get(ARG6,"NZ",ARG2)
+                mapdl.get(ARG7,"NX",ARG3)
+                mapdl.get(ARG8,"NY",ARG3)
+                mapdl.get(ARG9,"NZ",ARG3)
             else:
-                mapdl.run(
-                    "*GET,ARG4,KX,ARG2     "
-                )  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
-                mapdl.run("*GET,ARG5,KY,ARG2")
-                mapdl.run("*GET,ARG6,KZ,ARG2")
-                mapdl.run("*GET,ARG7,KX,ARG3")
-                mapdl.run("*GET,ARG8,KY,ARG3")
-                mapdl.run("*GET,ARG9,KZ,ARG3")
+                mapdl.get(ARG4,"KX",ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
+                mapdl.get(ARG5,"KY",ARG2)
+                mapdl.get(ARG6,"KZ",ARG2)
+                mapdl.get(ARG7,"KX",ARG3)
+                mapdl.get(ARG8,"KY",ARG3)
+                mapdl.get(ARG9,"KZ",ARG3)
+In any case, the vales of `ARGX` parameters is not retrieved from the MAPDL instance.
+Meaning you cannot use those arguments in python code unless you do:
+
+.. code:: python
+
+   ARG4 = mapdl.parameters["ARG4"]
+   ARG5 = mapdl.parameters["ARG5"]
+   # ...
+   # etc
 
 APDL loops using ``*DO`` or ``*DOWHILE`` should also be implemented
 using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
