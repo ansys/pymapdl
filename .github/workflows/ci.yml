@@ -502,7 +502,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           apt update
-          apt install -y libgl1-mesa-glx xvfb
+          apt install -y libgl1-mesa-glx xvfb libgomp1
 
       - name: "Test virtual framebuffer"
         run: |
@@ -628,6 +628,11 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
 
       - name: "Unit testing requirements installation"
         run: |
