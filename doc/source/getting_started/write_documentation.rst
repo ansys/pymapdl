@@ -96,7 +96,7 @@ Here's a short summary of how to write good documentation:
 #. **Usage Examples**: Include real-world usage examples, code snippets, and
    explanations to demonstrate how users can make the most of PyMAPDL.
 
-#. **Document the API and code**: Thoroughly document each function, class, andmethod. Include
+#. **Document the API and code**: Thoroughly document each function, class, and method. Include
     parameter descriptions, return values, and usage examples. Follow the
     `numpydoc <numpydoc_>`_ convention for documenting code.
 
