@@ -1882,7 +1882,10 @@ def _verify_version(version):
         version = int(version * 10)
 
     if isinstance(version, str):
-        if version.upper().strip() in [
+        if version.lower().strip() == "latest":
+            return None  # Default behaviour is latest
+
+        elif version.upper().strip() in [
             str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
         ]:
             version = int(version)
