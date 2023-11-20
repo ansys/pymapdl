@@ -20,7 +20,7 @@ Launch PyMAPDL with a local MAPDL instance
 ------------------------------------------
 
 You can use the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
-method to start MAPDL and automatically connect to it:
+function to start MAPDL and automatically connect to it:
 
 .. code:: pycon
 
@@ -44,6 +44,9 @@ description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl
 
 Connect PyMAPDL to a local MAPDL instance
 -----------------------------------------
+
+Connect to a local MAPDL instance requires two steps: launching a
+local MAPDL session and connect to it.
 
 .. _launch_grpc_madpl_session:
 
