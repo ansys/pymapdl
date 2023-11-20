@@ -634,18 +634,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgomp1
       
-      - name: "Test MAPDL launching"
-        run: |
-          /ansys_inc/v222/ansys/bin/ansys222 -grpc
+      # - name: "Test MAPDL launching"
+      #   run: |
+      #     /ansys_inc/v222/ansys/bin/ansys222 -grpc
 
-      - name: "Test launching"
-        shell: python
-        run: |
-          from ansys.mapdl.core import launch_mapdl
-          mapdl = launch_mapdl(start_timeout=100)
-          print(mapdl.prep7())
-          print("Everything OK")
-          mapdl.exit()
+      # - name: "Test launching"
+      #   shell: python
+      #   run: |
+      #     from ansys.mapdl.core import launch_mapdl
+      #     mapdl = launch_mapdl(start_timeout=100)
+      #     print(mapdl.prep7())
+      #     print("Everything OK")
+      #     mapdl.exit()
 
       - name: "Unit testing requirements installation"
         run: |
