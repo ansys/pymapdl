@@ -632,7 +632,7 @@ jobs:
       - name: "Updating package"
         run: |
           sudo apt-get update
-          sudo apt-get install libgomp1
+          sudo apt-get install -y libgomp1
       
       - name: "Test MAPDL launching"
         run: |
