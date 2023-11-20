@@ -55,14 +55,14 @@ There are several issues that can cause MAPDL not to launch, including:
 - `Using a proxy server`_
 - `Firewall settings`_
 
-If you cannot find your issue, go to `More help needed?`_.
+If you cannot find your issue, see `More help needed?`_.
 
 
 Connection timeout
 ~~~~~~~~~~~~~~~~~~
 
 In some networks, MAPDL might take longer than expected to connect to the license server or to the remote instance.
-In those cases, you might see the following message:
+In those cases, you might see this message:
 
 
 .. code:: output
@@ -70,8 +70,7 @@ In those cases, you might see the following message:
     PyMAPDL is taking longer than expected to connect to an MAPDL session. Checking if there are any available licenses...
 
 
-You might consider to increase the starting timeout before trying other options.
-The start timeout can be increased using:
+First try increasing the starting timeout using this code:
 
 .. code:: python
 
@@ -422,7 +421,8 @@ Manually set the location of the executable file
 
 If you have a non-standard install, PyMAPDL might be unable find
 your MAPDL installation. If this is the case, provide the location of MAPDL
-as the first parameter to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
+as the first parameter to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+method.
 
 **On Windows**
 
@@ -616,20 +616,18 @@ More help needed?
 
 .. epigraph::
 
-   *"What do I do if a problem is not listed here?"*  
+   *"What do I do if an issue is not listed here?"*  
 
 .. vale on
 
-Go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and search to see if your 
-issue is already listed. If not, you can do one of the following:
+To see if your issue is already posted, search the `PyMAPDL Issues <pymapdl_issues_>`_ page. If not, do one of the following:
 
-* If you are not sure the cause, or you would like some explanation about the
-  usage of the function or its documentation, go to the
-  `PyMAPDL Discussions <pymapdl_discussions_>`_ page and create a discussion
-  to talk about it.
+* If you are not sure of the cause or would like some explanation about the
+  usage of the function or its documentation, create a discussion on the
+  `PyMAPDL Discussions <pymapdl_discussions_>`_ page.
 
-* If you believe you have found a bug or want to create a feature request
-  go to the `PyMAPDL Issues <pymapdl_issues_>`_ page and open an issue.
+* If you believe you have found a bug or want to create a feature request,
+  create an issue on the `PyMAPDL Issues <pymapdl_issues_>`_ page.
 
-For more complex issues or queries, contact `PyAnsys Core team <pyansys_core_>`_.
+For more complex issues or queries, contact the `PyAnsys Core team <pyansys_core_>`_.
 

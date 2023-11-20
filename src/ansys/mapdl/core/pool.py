@@ -93,8 +93,8 @@ class LocalMapdlPool:
         By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
-        See :func:`ansys.mapdl.core.launcher.launch_mapdl` for a complete
-        listing of all additional keyword arguments.
+        Additional keyword arguments. For a complete listing, see the description for the
+        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
 
     Examples
     --------

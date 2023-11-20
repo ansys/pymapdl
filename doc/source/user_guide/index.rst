@@ -36,7 +36,7 @@ PyMAPDL overview
 The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
-commands to that service. Errors and warnings are processed
+commands to that instance. Errors and warnings are processed
 Pythonically, letting you develop a script in real time, without
 worrying about it functioning correctly when deployed in batch
 mode.
@@ -44,7 +44,7 @@ mode.
 MAPDL can be started from Python in gRPC mode using the
 :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method. This starts
 MAPDL in a temporary directory by default. You can change this to
-your current directory with:
+your current directory with this code:
 
 .. code:: python
 

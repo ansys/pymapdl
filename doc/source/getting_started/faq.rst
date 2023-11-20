@@ -9,7 +9,7 @@ How do you report issues?
 
 If you find an issue, the first place to visit for possible solutions is the :ref:`troubleshooting section <ref_troubleshooting>`.
 
-If you do not find it there, you can search for your issue within the `GitHub repository <pymapdl_repo_>`_. You can use `the search box <pymapdl_search_issues_pr_>`_ to find related issues or pull requests.
+If you do not find a solution there, you can search for your issue within the `GitHub repository <pymapdl_repo_>`_. You can use `the search box <pymapdl_search_issues_pr_>`_ to find related issues or pull requests.
 
 To ask more open-ended questions or seek advice from the community,
 use the `PyMAPDL discussions <pymapdl_discussions_>`_ page of the GitHub repository.

@@ -9,7 +9,7 @@ Install MAPDL
 *************
 
 
-The PyAnsys ``ansys-mapdl-core`` or PyMAPDL package requires either a local or
+The PyAnsys ``ansys-mapdl-core`` package (PyMAPDL) requires either a local or
 remote instance of MAPDL to communicate with it. This section covers
 launching and interfacing with MAPDL from a local instance by
 launching it from Python.
@@ -28,7 +28,7 @@ This is especially convenient if you are using a non-supported platform such
 as MacOS.
 For more information, see :ref:`ref_pymapdl_and_macos`.
 
-You can also download and try the `Ansys Student Versions <ansys_student_version_>`_.
+You can also download and try the `Ansys Student Version <ansys_student_version_>`_.
 A Student Version is valid during a calendar year with limited capabilities. For
 example, there is a limit on the number of nodes and elements.
 
@@ -39,9 +39,9 @@ If you experience problems installing MAPDL on Linux, see
 Ansys software requirements
 ---------------------------
 
-For the latest features, you must have a copy of Ansys 2021 R1 or superior
+For the latest features, you must have a copy of Ansys 2021 R1 or later
 installed locally. However, PyMAPDL is compatible with Ansys 17.0 and later
-on Windows and with Ansys 13.0 on Linux, however its usage with these older
+on Windows and with Ansys 13.0 on Linux. However, its usage with these older
 versions is discouraged.
 
 .. note::
@@ -53,4 +53,4 @@ versions is discouraged.
 For more information, see :ref:`versions_and_interfaces`.
 
 
-Go to :ref:`ref_pymapdl_installation` to see how to install PyMAPDL.
+For information on installing PyMAPDL, see :ref:`ref_pymapdl_installation`.

@@ -165,7 +165,7 @@ For additional command line arguments, see the *Notes* section in the
 description for the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 function.
 
-You can use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
+You can use a script file (batch ``".bat"`` or PowerShell ``".ps"``).
 to run the preceding commands all at once.
 
 Once you have launched MAPDL, you should see the following content
