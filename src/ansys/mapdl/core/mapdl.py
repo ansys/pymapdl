@@ -826,9 +826,19 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Exiting non-interactive mode")
-            self._parent()._flush_stored()
             self._parent()._store_commands = False
+
+            if args[0] is not None:
+                # An exception was raised, let's exit now without flushing
+                self._parent()._log.debug(
+                    "An exception was found in the `non_interactive` environment. "
+                    "Hence the commands are not flushed."
+                )
+                return None
+            else:
+                # No exception so let's flush.
+                self._parent()._log.debug("Exiting non-interactive mode")
+                self._parent()._flush_stored()
 
     class _save_selection:
         """Save the selection and returns to it when exiting"""
@@ -3827,7 +3837,20 @@ class _MapdlCore(Commands):
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
         """
-        arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
+        parm_name = kwargs.get("parm", None)
+
+        if self._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` to specify the name of the MAPDL parameter where to store the retrieved value."
+            )
+
+        arr = self._get_array(
+            entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
+        )
 
         # edge case where corba refuses to return the array
         ntry = 0
@@ -3853,6 +3876,16 @@ class _MapdlCore(Commands):
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
+        if self._store_commands and not parm_name:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl._get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` or use the `parm` kwarg in "
+                "`mapdl._get_array` to specify the name of the MAPDL parameter where to store the retrieved value. In any case, this function will return `None`"
+            )
+
         if parm_name is None:
             parm_name = "__vget_tmp_%d__" % self._vget_arr_counter
             self._vget_arr_counter += 1
@@ -3868,6 +3901,10 @@ class _MapdlCore(Commands):
             kloop,
             mute=False,
         )
+
+        if self._store_commands:
+            # Return early
+            return None
 
         # check if empty array
         if "the dimension number 1 is 0" in out:

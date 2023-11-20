@@ -2184,3 +2184,10 @@ def test_vwrite(mapdl):
 
     assert "hello" == content.strip()
     os.remove("test_vwrite.txt")
+
+
+def test_get_array_non_interactive(mapdl, solved_box):
+    mapdl.allsel()
+    with pytest.raises(MapdlRuntimeError):
+        with mapdl.non_interactive:
+            mapdl.get_array("asdf", "2")
