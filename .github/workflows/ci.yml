@@ -629,6 +629,10 @@ jobs:
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
 
+      - name: "Test MAPDL launching"
+        run: |
+          /ansys_inc/v222/ansys/bin/ansys222 -grpc
+
       - name: "Test launching"
         shell: python
         run: |
