@@ -515,7 +515,7 @@ jobs:
           python -m build
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-          
+
       - name: "Unit testing requirements installation"
         run: |
           python -m pip install .[tests]
@@ -633,19 +633,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgomp1
-      
-      # - name: "Test MAPDL launching"
-      #   run: |
-      #     /ansys_inc/v222/ansys/bin/ansys222 -grpc
-
-      # - name: "Test launching"
-      #   shell: python
-      #   run: |
-      #     from ansys.mapdl.core import launch_mapdl
-      #     mapdl = launch_mapdl(start_timeout=100)
-      #     print(mapdl.prep7())
-      #     print("Everything OK")
-      #     mapdl.exit()
 
       - name: "Unit testing requirements installation"
         run: |
