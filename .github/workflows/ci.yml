@@ -629,9 +629,13 @@ jobs:
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
 
+      - name: "Updating package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgomp1
+      
       - name: "Test MAPDL launching"
         run: |
-          sudo apt-get install libgomp1
           /ansys_inc/v222/ansys/bin/ansys222 -grpc
 
       - name: "Test launching"
