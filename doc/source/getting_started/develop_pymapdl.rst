@@ -79,8 +79,10 @@ guidelines for developing code in a repository:
    This allows for discussion and validation before merging into the main branch.
 
 #. **Write good documentation**: Maintain clear and up-to-date documentation for your
-   contribution or changes, including README files, comments in code, and relevant project
-   documentation. Make sure you update the related documentation as well.
+   contribution or changes, including comments in code, and relevant project
+   documentation in rST or Markdown files.
+   If you implement a new feature or change the behaviour of the library in any way,
+   remember to mention it somewhere in the documentation (rST files in :file:`doc\source` directory)
    Follow the `numpydoc <numpydoc_>`_ convention for documenting code.
 
 #. **Test your changes**: Thoroughly test your changes to ensure that they work
