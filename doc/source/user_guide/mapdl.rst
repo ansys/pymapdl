@@ -449,19 +449,19 @@ attribute. For example:
         .. code:: python
 
             if ARG1 == 0:
-                mapdl.get(ARG4,"NX",ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
-                mapdl.get(ARG5,"NY",ARG2)
-                mapdl.get(ARG6,"NZ",ARG2)
-                mapdl.get(ARG7,"NX",ARG3)
-                mapdl.get(ARG8,"NY",ARG3)
-                mapdl.get(ARG9,"NZ",ARG3)
+                mapdl.get(ARG4, "NX", ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH NODES
+                mapdl.get(ARG5, "NY", ARG2)
+                mapdl.get(ARG6, "NZ", ARG2)
+                mapdl.get(ARG7, "NX", ARG3)
+                mapdl.get(ARG8, "NY", ARG3)
+                mapdl.get(ARG9, "NZ", ARG3)
             else:
-                mapdl.get(ARG4,"KX",ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
-                mapdl.get(ARG5,"KY",ARG2)
-                mapdl.get(ARG6,"KZ",ARG2)
-                mapdl.get(ARG7,"KX",ARG3)
-                mapdl.get(ARG8,"KY",ARG3)
-                mapdl.get(ARG9,"KZ",ARG3)
+                mapdl.get(ARG4, "KX", ARG2)  # RETRIEVE COORDINATE LOCATIONS OF BOTH KEYPOINTS
+                mapdl.get(ARG5, "KY", ARG2)
+                mapdl.get(ARG6, "KZ", ARG2)
+                mapdl.get(ARG7, "KX", ARG3)
+                mapdl.get(ARG8, "KY", ARG3)
+                mapdl.get(ARG9, "KZ", ARG3)
 In any case, the vales of `ARGX` parameters is not retrieved from the MAPDL instance.
 Meaning you cannot use those arguments in python code unless you do:
 
