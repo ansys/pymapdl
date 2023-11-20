@@ -176,17 +176,17 @@ variables:
 If PyMAPDL is unable to find a copy of MAPDL, you
 are prompted for the location of the MAPDL executable.
 
-Here is the prompt with an example response for Linux:
-
-.. code:: output
-
-    Enter location of MAPDL executable: /usr/ansys_inc/v222/ansys/bin/ansys222
-
 Here is the prompt with an example response for Windows:
 
 .. code:: output
 
     Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v222\ANSYS\bin\winx64\ansys222.exe
+
+Here is the prompt with an example response for Linux:
+
+.. code:: output
+
+    Enter location of MAPDL executable: /usr/ansys_inc/v222/ansys/bin/ansys222
 
 The settings file is stored locally, which means that you are not prompted
 to enter the path again. If you must change the default Ansys path
@@ -203,16 +203,8 @@ For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.co
 
 Additionally, it is possible to specify the executable in each PyMAPDL script using the ``exec_file`` keyword argument. 
 
-In Linux:
 
-.. code:: python
-
-    from ansys.mapdl.core import launch_mapdl
-
-    mapdl = launch_mapdl(exec_file="/usr/ansys_inc/v212/ansys/bin/ansys212")
-
-
-In Windows:
+**On Windows:**
 
 .. code:: python
 
@@ -221,6 +213,15 @@ In Windows:
     mapdl = launch_mapdl(
         exec_file="C://Program Files//ANSYS Inc//v212//ANSYS//bin//winx64//ansys212.exe"
     )
+
+**On Linux:**
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(exec_file="/usr/ansys_inc/v212/ansys/bin/ansys212")
+
 
 You could also specify a custom executable made from a custom MAPDL compilation by adding the correspondent flag (``-custom``) to the ``additional_switches``
 keyword argument:

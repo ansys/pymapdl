@@ -456,7 +456,9 @@ Ansys installations are normally under:
 
     C:/Program Files/ANSYS Inc/vXXX
 
+
 **On Linux**
+
 Ansys installations are normally under:
 
 .. code:: text
