@@ -278,6 +278,7 @@ Here are some examples of how you use ``pytest``:
 
     import pytest
 
+
     # 'cube_geom_and_mesh' is another fixture defined in 'conftest.py'
     @pytest.fixture(scope="function")
     def basic_components(mapdl, cube_geom_and_mesh):
