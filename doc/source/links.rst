@@ -157,6 +157,7 @@
 .. _pymapdl_examples_gallery: https://mapdl.docs.pyansys.com/version/stable/examples/index.html
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
+.. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
