@@ -94,6 +94,7 @@ def test_heal(pool):
     pool_sz = len(pool)
     pool_names = pool._names
     pool[0].exit()
+    pool[1].exit()
 
     time.sleep(1)  # wait for shutdown
     timeout = time.time() + TWAIT
