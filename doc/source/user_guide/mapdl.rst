@@ -462,8 +462,9 @@ attribute. For example:
                 mapdl.get(ARG7, "KX", ARG3)
                 mapdl.get(ARG8, "KY", ARG3)
                 mapdl.get(ARG9, "KZ", ARG3)
-In any case, the vales of `ARGX` parameters is not retrieved from the MAPDL instance.
-Meaning you cannot use those arguments in python code unless you do:
+
+The values of ``ARGX`` parameters are not retrieved from the MAPDL instance.
+Hence you cannot use those arguments in Python code unless you use the following commands:
 
 .. code:: python
 
