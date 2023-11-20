@@ -54,7 +54,7 @@ your current directory with this code:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active, and you can send commands to it as a genuine a
+MAPDL is now active, and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
 key points, you could run:
 
