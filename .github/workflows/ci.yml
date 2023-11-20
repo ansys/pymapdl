@@ -644,7 +644,6 @@ jobs:
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --skip-regression-check \
             --cov-report=xml:ubuntu-v22.2.0-local-minimal.xml
         
       - uses: codecov/codecov-action@v3
