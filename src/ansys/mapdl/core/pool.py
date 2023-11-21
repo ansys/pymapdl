@@ -218,7 +218,9 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
+            self._spawn_mapdl(
+                i, ports[i], pbar, name=self._names(i), thread_name=self._names(i)
+            )
             for i in range(n_instances)
         ]
         if wait:
@@ -236,7 +238,10 @@ class LocalMapdlPool:
 
         # monitor pool if requested
         if restart_failed:
-            self._pool_monitor_thread = self._monitor_pool()
+            # This name is using the wrapped to specify the thread name
+            self._pool_monitor_thread = self._monitor_pool(
+                thread_name="Monitoring_Thread"
+            )
 
         self._verify_unique_ports()
 
@@ -361,12 +366,12 @@ class LocalMapdlPool:
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
-        def func_wrapper(obj, func, timeout, args=None, name=""):
+        def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
             @threaded_daemon
-            def run(name=""):
+            def run():
                 if args is not None:
                     if isinstance(args, (tuple, list)):
                         results.append(func(obj, *args))
@@ -376,7 +381,7 @@ class LocalMapdlPool:
                     results.append(func(obj))
                 complete[0] = True
 
-            run_thread = run(name="map.run")
+            run_thread = run(thread_name="map.run")
             if timeout:
                 tstart = time.time()
                 while not complete[0]:
@@ -421,7 +426,9 @@ class LocalMapdlPool:
                 instance = self.next_available()
                 instance.locked = True
                 threads.append(
-                    func_wrapper(instance, func, timeout, args, name="Map_Thread")
+                    func_wrapper(
+                        instance, func, timeout, args, thread_name="Map_Thread"
+                    )
                 )
 
             if close_when_finished:
@@ -689,6 +696,8 @@ class LocalMapdlPool:
     def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
+
+
         """
         while self._active:
             for index, instance in enumerate(self._instances):

@@ -429,7 +429,9 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.pop("name", f"Threaded (with Daemon) `{func.__name__}` function")
+        name = kwargs.pop(
+            "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
+        )
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
