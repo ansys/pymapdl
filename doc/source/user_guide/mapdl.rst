@@ -140,7 +140,7 @@ Using :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
 can also be useful to run commands on the server side without the interaction
 of Python. This can speed up things greatly, but you should be aware of how
 APDL works. An interesting discussion about speed comparison between PyMAPDL and APDL
-can be found in `here <pymapdl_discussion_speed_pymapdl_mapdl_>`_.
+can be found in `Speed comparison between PyMAPDL and APDL <pymapdl_discussion_speed_pymapdl_mapdl_>`_.
 
 It is recommended to use
 :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` with precaution.
