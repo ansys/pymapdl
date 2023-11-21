@@ -239,7 +239,7 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'use_vtk' requires having Pyvista installed."
                 )
             else:
                 self._use_vtk = False
@@ -2381,7 +2381,7 @@ class _MapdlCore(Commands):
         # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
             raise ValueError(
-                f"It is discouraged the use of parameters starting with underscore ('_'). "
+                "It is discouraged the use of parameters starting with underscore ('_'). "
                 "This convention is reserved for parameters used by the GUI and/or Mechanical APDL-provided macros."
             )
 
@@ -2391,7 +2391,7 @@ class _MapdlCore(Commands):
             match_reserved_arg_parameter_name, param_name
         ):  # invalid parameter (using ARGXX or ARXX)
             raise ValueError(
-                f"The parameters 'ARGXX' and 'ARXX' where 'XX' are integers, are reserved for functions and macros local parameters."
+                "The parameters 'ARGXX' and 'ARXX' where 'XX' are integers, are reserved for functions and macros local parameters."
                 "Hence its use is not recommended outside them."
                 "You might run in unexpected behaviours, for example, parameters not being show in `mapdl.parameters`."
             )

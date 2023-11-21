@@ -817,7 +817,7 @@ class MeshGrpc:
             )
             values_ = [float(i) for i in each.strip().splitlines()[1].split()]
 
-            if not set_ in const_.keys():
+            if not set_ in const_:
                 const_[set_] = values
 
             for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):

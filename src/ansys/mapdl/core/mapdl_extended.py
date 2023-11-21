@@ -422,7 +422,7 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if vtk:
@@ -505,7 +505,7 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if vtk:
@@ -683,7 +683,7 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if vtk:
@@ -881,7 +881,7 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if vtk:
@@ -1057,7 +1057,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 import pyvista as pv
             else:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if "knum" in kwargs:
@@ -1187,7 +1187,7 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_PYVISTA:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
 
         if vtk:
@@ -1261,7 +1261,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if (not label or label == "ALL") and not entity:
             raise ValueError(
-                f"If not using label or label =='ALL', then you "
+                "If not using label or label =='ALL', then you "
                 "need to provide a valid entity."
             )
 
@@ -1305,7 +1305,7 @@ class _MapdlCommandExtended(_MapdlCore):
         }
         func = mapping[entity]
 
-        kwargs.setdefault("title", f"PyMAPDL CMPLOT")
+        kwargs.setdefault("title", "PyMAPDL CMPLOT")
         output = func(**kwargs)
 
         # returning to previous selection
@@ -1828,8 +1828,6 @@ class _MapdlExtended(_MapdlCommandExtended):
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
         """
-        parm_name = kwargs.get("parm", None)
-
         if self._store_commands:
             raise MapdlRuntimeError(
                 "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
@@ -1846,7 +1844,9 @@ class _MapdlExtended(_MapdlCommandExtended):
         # edge case where corba refuses to return the array
         ntry = 0
         while arr.size == 1 and arr[0] == -1:
-            arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
+            arr = self._get_array(
+                entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
+            )
             if ntry > 5:
                 raise MapdlRuntimeError("Unable to get array for %s" % entity)
             ntry += 1
