@@ -326,7 +326,7 @@ mapdl.post_processing.nodal_principal_stress("1")
 
 ###############################################################################
 # Get the principal nodal stresses of the node subset.
-mapdl.nsel("S", "S", 1, 6700, 7720)
+mapdl.nsel("S", vmin=1200, vmax=1210)
 mapdl.esln()
 mapdl.nsle()
 
