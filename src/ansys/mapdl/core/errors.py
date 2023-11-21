@@ -119,6 +119,13 @@ class DifferentSessionConnectionError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class DeprecationError(RuntimeError):
+    """Provides the error for deprecated commands, classes, interfaces, etc"""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""

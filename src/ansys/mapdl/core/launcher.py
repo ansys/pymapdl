@@ -26,6 +26,7 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
+    DeprecationError,
     LockFileException,
     MapdlDidNotStart,
     MapdlRuntimeError,
@@ -58,7 +59,7 @@ if not os.path.isdir(SETTINGS_DIR):
         )
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
-ALLOWABLE_MODES = ["corba", "console", "grpc"]
+ALLOWABLE_MODES = ["console", "grpc"]
 
 
 LOCALHOST = "127.0.0.1"
@@ -987,17 +988,12 @@ def launch_mapdl(
         Mode to launch MAPDL.  Must be one of the following:
 
         - ``'grpc'``
-        - ``'corba'``
         - ``'console'``
 
         The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
-        provides the best performance and stability.  The ``'corba'``
-        mode is available from v17.0 and newer and is given legacy
-        support. However only Python up to 3.8 is supported.
-        This mode requires the additional ``ansys_corba`` module.
-        Finally, the ``'console'`` mode
-        is for legacy use only Linux only prior to v17.0.  This console
-        mode is pending depreciation.
+        provides the best performance and stability.
+        The ``'console'`` mode is for legacy use only Linux only prior to v17.0.
+        This console mode is pending depreciation.
         Visit :ref:`versions_and_interfaces` for more information.
 
     override : bool, optional
@@ -1156,14 +1152,9 @@ def launch_mapdl(
           by default. See :ref:`vpn_issues_troubleshooting` for more information.
           Defaults to ``False``.
 
-        log_broadcast : :class:`bool`
-          *(Only for CORBA mode)*
-          Enables a logger to record broadcasted commands.
-          Defaults to ``False``.
-
     Returns
     -------
-    Union[MapdlGrpc, MapdlConsole, MapdlCorba]
+    Union[MapdlGrpc, MapdlConsole]
         An instance of Mapdl.  Type depends on the selected ``mode``.
 
     Notes
@@ -1298,10 +1289,6 @@ def launch_mapdl(
     >>> mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30',
     ...                      port=50001)
 
-    Force the usage of the CORBA protocol (not recommended).
-
-    >>> mapdl = launch_mapdl(mode='corba')
-
     Run MAPDL using the console mode (not recommended, and available only on Linux).
 
     >>> mapdl = launch_mapdl('/ansys_inc/v194/ansys/bin/ansys194',
@@ -1332,6 +1319,11 @@ def launch_mapdl(
     # Extract arguments:
     force_intel = kwargs.pop("force_intel", False)
     broadcast = kwargs.pop("log_broadcast", False)
+    if broadcast:
+        raise ValueError(
+            "The CORBA interface has been deprecated from 0.67."
+            "Hence this argument is not valid."
+        )
 
     # Raising error if using non-allowed arguments
     if kwargs:
@@ -1519,8 +1511,9 @@ def launch_mapdl(
         "print_com": print_com,
     }
 
-    if mode in ["console", "corba"]:
+    if mode == "console":
         start_parm["start_timeout"] = start_timeout
+
     else:
         start_parm["ram"] = ram
         start_parm["override"] = override
@@ -1540,23 +1533,7 @@ def launch_mapdl(
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
             mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
-        elif mode == "corba":
-            try:
-                # pending deprecation to ansys-mapdl-corba
-                from ansys.mapdl.core.mapdl_corba import MapdlCorba
-            except ModuleNotFoundError:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "To use this feature, install the MAPDL CORBA package"
-                    " with:\n\npip install ansys_corba"
-                ) from None
 
-            mapdl = MapdlCorba(
-                loglevel=loglevel,
-                log_apdl=log_apdl,
-                log_broadcast=broadcast,
-                verbose=verbose_mapdl,
-                **start_parm,
-            )
         elif mode == "grpc":
             port, actual_run_location, process = launch_grpc(
                 port=port,
@@ -1618,19 +1595,13 @@ def check_mode(mode, version):
                 elif os.name == "posix":
                     raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
         elif mode == "corba":
-            warnings.warn(
-                "The CORBA interface is going to be deprecated with the version"
+            raise DeprecationError(
+                "The CORBA interface has been deprecated with the"
                 " v0.67 release. Please use the gRPC interface instead.\n"
                 "For more information visit: "
                 "https://mapdl.docs.pyansys.com/version/0.66/getting_started/versioning.html#corba-interface"
             )
-            if version < 170:
-                raise VersionError("CORBA AAS mode requires MAPDL v17.0 or newer.")
-            if version >= 211:
-                warnings.warn(
-                    "CORBA AAS mode not recommended in MAPDL 2021R1 or newer.\n"
-                    "Recommend using gRPC mode instead."
-                )
+
         elif mode == "console":
             if os.name == "nt":
                 raise ValueError("Console mode requires Linux.")
@@ -1651,18 +1622,17 @@ def check_mode(mode, version):
         elif version == 202 and os.name == "nt":
             # Windows supports it as of 2020R2
             mode = "grpc"
-        elif version >= 170:
-            mode = "corba"
         else:
             if os.name == "nt":
                 raise VersionError(
                     "Running MAPDL as a service requires "
-                    "v17.0 or greater on Windows."
+                    "MAPDL 2020R2 or greater on Windows."
                 )
             mode = "console"
 
     if version < 130:
         warnings.warn("MAPDL as a service has not been tested on MAPDL < v13")
+        mode = "console"
 
     return mode
 
