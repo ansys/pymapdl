@@ -24,7 +24,7 @@ compatible format. For example, ``ESEL`` is now the
         .. code:: apdl
 
             ! Selecting elements whose centroid x coordinate
-            ! is between the 1 and 2.
+            ! is between 1 and 2.
             ESEL, S, CENT, X, 1, 2
 
     .. tab-item:: Python
@@ -33,7 +33,7 @@ compatible format. For example, ``ESEL`` is now the
         .. code:: python
 
             # Selecting elements whose centroid x coordinate
-            # is between the 1 and 2.
+            # is between 1 and 2.
             # returns an array of selected elements ids
             mapdl.esel("S", "CENT", "X", 1, 2)
     
@@ -136,29 +136,29 @@ method. Here is an example:
 You can then view the final response of the non-interactive context with the
 :attr:`Mapdl.last_response <ansys.mapdl.core.Mapdl.last_response>` attribute.
 
-Using :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
-can also be useful to run commands on the server side without the interaction
+Using the :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
+method can also be useful to run commands on the server side without the interaction
 of Python. This can speed up things greatly, but you should be aware of how
 APDL works. An interesting discussion about speed comparison between PyMAPDL and APDL
 can be found in `Speed comparison between PyMAPDL and APDL <pymapdl_discussion_speed_pymapdl_mapdl_>`_.
 
-It is recommended to use
-:meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` with precaution.
+You should use the
+:meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` method with caution.
 
-How non-interactive context manager works
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+How the non-interactive context manager works
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` is implemented
-as a `context manager <python_context_manager_>`_ which means that there are some actions
+The :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` method is implemented
+as a `context manager <python_context_manager_>`_, which means that there are some actions
 happening when entering and exit the context.
-When entering the context, :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` stops sending any APDL
+When entering the context, the class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` instance stops sending any APDL
 command to the MAPDL instance.
 Instead, it allocates a buffer for those APDL commands.
 For each PyMAPDL command inside that context, PyMAPDL stores the equivalent MAPDL command
 inside that buffer.
 Right before exiting the context, PyMAPDL creates a text file with all these APDL commands, sends it to
-the MAPDL instance and runs it using
-:func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`.
+the MAPDL instance, and runs it using the
+:meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method.
 
 
 For instance, the following :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>`:
