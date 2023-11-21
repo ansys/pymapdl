@@ -2202,6 +2202,7 @@ def test_default_file_type_for_plots(mapdl):
     mapdl.default_file_type_for_plots = "PNG"
 
 
+@requires("matplotlib")
 def test_use_vtk(mapdl):
     assert isinstance(mapdl.use_vtk, bool)
 
