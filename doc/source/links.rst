@@ -158,6 +158,9 @@
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 .. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
+.. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
+.. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
+.. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
