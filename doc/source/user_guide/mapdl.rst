@@ -1075,7 +1075,7 @@ These are described in the following table:
 
 +---------------------------------------+---------------------------------------------------------------------+
 | :envvar:`PYMAPDL_START_INSTANCE`      | Override the behavior of the                                        |
-|                                       | :func:`ansys.mapdl.core.launch_mapdl` function                      |
+|                                       | :func:`ansys.mapdl.core.launcher.launch_mapdl` function             |
 |                                       | to only attempt to connect to existing                              |
 |                                       | instances of PyMAPDL. Generally used                                |
 |                                       | in combination with ``PYMAPDL_PORT``.                               |
