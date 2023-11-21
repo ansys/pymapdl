@@ -58,7 +58,7 @@ Testing MAPDL
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
-In Windows, use:
+**On Windows**
 
 .. code:: pwsh-session
 
@@ -66,7 +66,7 @@ In Windows, use:
     SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
     SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 
-In Linux, use:
+**On Linux**
 
 .. code:: console
 
