@@ -32,7 +32,7 @@ Installation
 
 Python module
 ~~~~~~~~~~~~~
-The ``ansys.mapdl.core`` package currently supports Python 3.8 through
+The ``ansys.mapdl.core`` package currently supports Python 3.9 through
 Python 3.11 on Windows, Mac OS, and Linux.
 
 Install the latest release from 
@@ -71,17 +71,17 @@ of installing PyMAPDL is downloading the wheelhouse archive from the
 machine architecture.
 
 Each wheelhouse archive contains all the Python wheels necessary to install
-PyMAPDL from scratch on Windows and Linux for Python 3.8 and 3.9. You can install
+PyMAPDL from scratch on Windows and Linux for Python 3.9 to 3.12. You can install
 this on an isolated system with a fresh Python or on a virtual environment.
 
-For example, on Linux with Python 3.8, unzip it and install it with the following:
+For example, on Linux with Python 3.10, unzip it and install it with the following:
 
 .. code:: console
 
-   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.8.zip wheelhouse
+   unzip PyMAPDL-v0.62.dev1-wheelhouse-Linux-3.10.zip wheelhouse
    pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
 
-If you're on Windows with Python 3.9, unzip to a ``wheelhouse`` directory and
+If you're on Windows with Python 3.10, unzip to a ``wheelhouse`` directory and
 install using the preceding command.
 
 Consider installing using a `virtual environment <using_venv_>`_.
