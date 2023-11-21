@@ -151,7 +151,7 @@ How the non-interactive context manager works
 The :meth:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>` method is implemented
 as a `context manager <python_context_manager_>`_, which means that there are some actions
 happening when entering and exit the context.
-When entering the context, the class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` instance stops sending any APDL
+When entering the context, the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` instance stops sending any APDL
 command to the MAPDL instance.
 Instead, it allocates a buffer for those APDL commands.
 For each PyMAPDL command inside that context, PyMAPDL stores the equivalent MAPDL command
