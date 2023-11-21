@@ -2,6 +2,7 @@
 from functools import wraps
 import os
 import time
+from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
