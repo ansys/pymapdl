@@ -85,15 +85,6 @@ container.
 To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage``,
 use code like in the following examples.
 
-**On Linux**
-
-.. code:: bash
-
-  ANSYSLMD_LICENSE_FILE=1055@MY_LICENSE_SERVER_IP
-  LOCAL_MAPDL_PORT=50053
-  MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
-  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
-
 **On Windows**
 
 .. code:: pwsh-session
@@ -103,6 +94,16 @@ use code like in the following examples.
     $env:MAPDL_DOCKER_REGISTRY_URL="ghcr.io/myuser/myrepo/mymapdldockerimage"
 
     docker run -e ANSYSLMD_LICENSE_FILE=$env:ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $env:LOCAL_MAPDL_PORT`:50052   $env:MAPDL_DOCKER_REGISTRY_URL -smp
+
+
+**On Linux**
+
+.. code:: bash
+
+  ANSYSLMD_LICENSE_FILE=1055@MY_LICENSE_SERVER_IP
+  LOCAL_MAPDL_PORT=50053
+  MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
+  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
 
 
 The first time you instantiate the container, Docker logins into the registry and
@@ -162,10 +163,10 @@ number available on the host machine) with the ``-np`` switch:
 
 
 For additional command line arguments, see the *Notes* section in the
-description for the :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>`
+description for the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 function.
 
-You can use a script file (batch ``'.bat'`` or PowerShell ``'.ps'``)
+You can use a script file (batch ``".bat"`` or PowerShell ``".ps"``).
 to run the preceding commands all at once.
 
 Once you have launched MAPDL, you should see the following content

@@ -212,11 +212,44 @@ def test_global_mute(mapdl):
 
 def test_parsav_parres(mapdl, cleared, tmpdir):
     arr = np.random.random((10, 3))
+
     mapdl.parameters["MYARR"] = arr
-    mapdl.parsav("ALL", "tmp.txt")
+    mapdl.parsav("ALL", "db.txt")
+    mapdl.download("db.txt")
+
+    # Restoring
     mapdl.clear()
-    mapdl.parres("ALL", "tmp.txt")
+    mapdl.parres("ALL", "db.txt")
     assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # test no filename
+    mapdl.clear()
+    mapdl.parameters["MYARR"] = arr
+    mapdl.parsav("ALL")
+
+    mapdl.clear()
+    mapdl.parres("ALL")
+    assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # Test upload local
+    mapdl.clear()
+    if "db.txt" in mapdl.list_files():
+        mapdl.slashdelete("db.txt")
+
+    mapdl.parres("NEW", "db", "txt")
+    assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # Test directory error
+    mapdl.clear()
+    with pytest.raises(FileNotFoundError):
+        mapdl.parres("NEW", os.getcwd())
+
+    # Test non-existing file
+    mapdl.clear()
+    with pytest.raises(FileNotFoundError):
+        mapdl.parres("change", "mydummy", "file")
+
+    os.remove("db.txt")
 
 
 @requires("grpc")
@@ -2117,6 +2150,40 @@ def test_saving_selection_context(mapdl, cube_solve):
 
     assert "nod_selection_4".upper() not in mapdl.cmlist()
     assert "nod_selection_4" not in mapdl.components
+
+
+def test_inquire_invalid(mapdl):
+    with pytest.raises(ValueError, match="Arguments of this method have changed"):
+        mapdl.inquire("directory")
+
+    with pytest.raises(ValueError, match="The arguments "):
+        mapdl.inquire("dummy", "hi")
+
+
+def test_inquire_default(mapdl):
+    mapdl.title = "heeeelloo"
+    assert mapdl.directory == mapdl.inquire()
+
+
+def test_vwrite_error(mapdl):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.vwrite("adf")
+
+
+def test_vwrite(mapdl):
+    with mapdl.non_interactive:
+        mapdl.run("/out,test_vwrite.txt")
+        mapdl.vwrite("'hello'")
+        mapdl.run("(1X, A8)")
+        mapdl.run("/out")
+
+    mapdl.download("test_vwrite.txt")
+
+    with open("test_vwrite.txt", "r") as fid:
+        content = fid.read()
+
+    assert "hello" == content.strip()
+    os.remove("test_vwrite.txt")
 
 
 def test_get_array_non_interactive(mapdl, solved_box):
