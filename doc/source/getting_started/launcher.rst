@@ -36,7 +36,7 @@ While this is the easiest and fastest way to get PyMAPDL up and running.
 you must be able to launch MAPDL locally.
 
 If PyMAPDL cannot find your local installation, see
-`Setting MAPDL location in PyMAPDL`_.
+`Setting the MAPDL location in PyMAPDL`_.
 
 For more information on controlling how MAPDL launches locally, see the
 description of the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
