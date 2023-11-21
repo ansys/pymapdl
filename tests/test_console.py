@@ -582,7 +582,7 @@ def test_load_table(mapdl_console):
     assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
 
 
-def test_mode_corba(mapdl_console):
+def test_mode_console(mapdl_console):
     assert mapdl_console.mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba

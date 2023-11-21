@@ -417,7 +417,7 @@ def test__channel_str(mapdl):
     assert re.search("\d{4,6}", mapdl._channel_str)
 
 
-def test_mode_corba(mapdl):
+def test_mode(mapdl):
     assert mapdl.mode == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba

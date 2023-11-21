@@ -2,11 +2,13 @@
 
 import os
 import tempfile
-import weakref
 
+# CORBA and console available versions
+from ansys.tools.path import get_available_ansys_installations
 import pytest
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
@@ -22,18 +24,6 @@ from ansys.mapdl.core.launcher import (
 )
 from ansys.mapdl.core.licensing import LICENSES
 from conftest import skip_if_not_local, skip_on_linux, skip_on_windows
-
-try:
-    import ansys_corba  # noqa: F401
-
-    HAS_CORBA = True
-except:
-    HAS_CORBA = False
-
-# CORBA and console available versions
-from ansys.tools.path import get_available_ansys_installations
-
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
 valid_versions = list(get_available_ansys_installations().keys())
 
@@ -111,7 +101,7 @@ def test_invalid_mode():
 def test_old_version():
     exec_file = find_ansys("150")[0]
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
+        pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
 @skip_if_not_local
@@ -131,22 +121,6 @@ def test_launch_console(version):
     exec_file = find_ansys(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
-
-
-@skip_if_not_local
-@pytest.mark.corba
-@pytest.mark.parametrize("version", valid_versions)
-def test_launch_corba(version):
-    mapdl = pymapdl.launch_mapdl(
-        find_ansys(version)[0], mode="corba", start_timeout=start_timeout
-    )
-    assert mapdl.version == int(version) / 10
-    # mapdl.exit() # exit is already tested for in test_mapdl.py.
-    # Instead, test collection
-
-    mapdl_ref = weakref.ref(mapdl)
-    del mapdl
-    assert mapdl_ref() is None
 
 
 @skip_if_not_local
