@@ -1,8 +1,11 @@
 from functools import wraps
 
+from numpy.typing import DTypeLike, NDArray
+
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.errors import ComponentDoesNotExits, IncorrectWorkingDirectory
 from ansys.mapdl.core.mapdl_core import _MapdlCore
+from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
@@ -14,7 +17,7 @@ if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting import general_plotter
 
 
-class _MapdlExtended(_MapdlCore):
+class _MapdlCommandExtended(_MapdlCore):
     """Class that extended MAPDL capabilities by wrapping or overwriting commands"""
 
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
@@ -1477,3 +1480,753 @@ class _MapdlExtended(_MapdlCore):
         with self.non_interactive:
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
+
+    @wraps(Commands.get)
+    def get(
+        self,
+        par: str = "__floatparameter__",
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
+        self._check_parameter_name(par)
+
+        command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3},{it3num},{item4},{it4num}"
+        kwargs["mute"] = False
+
+        # Checking printout is not suppressed by checking "wrinqr" flag.
+        with self.force_output:
+            response = self.run(command, **kwargs)
+
+        if self._store_commands:
+            # Return early in non_interactive
+            return
+
+        value = response.split("=")[-1].strip()
+        if item3:
+            if len(value.splitlines()) > 1:
+                self._log.info(
+                    f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
+                )
+            value = value.splitlines()[0]
+
+        try:  # always either a float or string
+            return float(value)
+        except ValueError:
+            return value
+
+
+class _MapdlExtended(_MapdlCommandExtended):
+    """Extend Mapdl class with new functions"""
+
+    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
+        """Load a table from Python to into MAPDL.
+
+        Uses :func:`tread <Mapdl.tread>` to transfer the table.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : numpy.ndarray or list
+            List as a table or :class:`numpy.ndarray` array.
+
+        var1 : str, optional
+            Variable name corresponding to the first dimension (row).
+            Default ``"Row"``.
+
+            A primary variable (listed below) or can be an independent
+            parameter. If specifying an independent parameter, then you must
+            define an additional table for the independent parameter. The
+            additional table must have the same name as the independent
+            parameter and may be a function of one or more primary variables or
+            another independent parameter. All independent parameters must
+            relate to a primary variable.
+
+            - ``"TIME"``: Time
+            - ``"FREQ"``: Frequency
+            - ``"X"``: X-coordinate location
+            - ``"Y"``: Y-coordinate location
+            - ``"Z"``: Z-coordinate location
+            - ``"TEMP"``: Temperature
+            - ``"VELOCITY"``: Velocity
+            - ``"PRESSURE"``: Pressure
+            - ``"GAP"``: Geometric gap/penetration
+            - ``"SECTOR"``: Cyclic sector number
+            - ``"OMEGS"``: Amplitude of the rotational velocity vector
+            - ``"ECCENT"``: Eccentricity
+            - ``"THETA"``: Phase shift
+            - ``"ELEM"``: Element number
+            - ``"NODE"``: Node number
+            - ``"CONC"``: Concentration
+
+        var2 : str, optional
+            Variable name corresponding to the first dimension (column).
+            See ``var1``.  Default column.
+
+        var3 : str, optional
+            Variable name corresponding to the first dimension (plane).
+            See ``var1``. Default Plane.
+
+        csysid : str, optional
+            An integer corresponding to the coordinate system ID number.
+            APDL Default = 0 (global Cartesian)
+
+        Examples
+        --------
+        Transfer a table to MAPDL. The first column is time values and must be
+        ascending in order.
+
+        >>> my_conv = np.array([[0, 0.001],
+                                [120, 0.001],
+                                [130, 0.005],
+                                [700, 0.005],
+                                [710, 0.002],
+                                [1000, 0.002]])
+        >>> mapdl.load_table('MY_TABLE', my_conv, 'TIME')
+        >>> mapdl.parameters['MY_TABLE']
+        array([[0.001],
+               [0.001],
+               [0.005],
+               [0.005],
+               [0.002],
+               [0.002]])
+        """
+        if not isinstance(array, np.ndarray):
+            raise ValueError("The table should be a Numpy array")
+        if array.shape[0] < 2 or array.shape[1] < 2:
+            raise ValueError(
+                "One or two of the array dimensions are too small to create a table."
+            )
+
+        if array.ndim == 2:
+            self.dim(
+                name,
+                "TABLE",
+                imax=array.shape[0],
+                jmax=array.shape[1] - 1,
+                kmax="",
+                var1=var1,
+                var2=var2,
+                var3=var3,
+                csysid=csysid,
+            )
+        else:
+            raise ValueError(
+                f"Expecting only a 2D table, but input contains\n{array.ndim} dimensions"
+            )
+
+        if not np.all(array[:-1, 0] <= array[1:, 0]):
+            raise ValueError(
+                "The underlying ``TREAD`` command requires that the first column is in "
+                "ascending order."
+            )
+
+        # weird bug where MAPDL ignores the first row when there are greater than 2 columns
+        if array.shape[1] > 2:
+            array = np.vstack((array[0], array))
+
+        base_name = random_string() + ".txt"
+        filename = os.path.join(tempfile.gettempdir(), base_name)
+        np.savetxt(filename, array, header="File generated by PyMAPDL:load_table")
+
+        if not self._local:
+            self.upload(filename, progress_bar=False)
+            filename = base_name
+        # skip the first line its a header we wrote in np.savetxt
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if self._local:
+            os.remove(filename)
+        else:
+            self.slashdelete(filename)
+
+    def load_array(self, name, array):
+        """
+        Load an array from Python to MAPDL.
+
+        Uses ``VREAD`` to transfer the array.
+        The format of the numbers used in the intermediate file is F24.18.
+
+        Parameters
+        ----------
+        name : str
+            An alphanumeric name used to identify this table.  Name
+            may be up to 32 characters, beginning with a letter and
+            containing only letters, numbers, and underscores.
+            Examples: ``"ABC" "A3X" "TOP_END"``.
+
+        array : np.ndarray or list
+            List as a table or ``numpy`` array.
+
+        Examples
+        --------
+        >>> my_conv = np.array([[0, 0.001],
+        ...                     [120, 0.001],
+        ...                     [130, 0.005],
+        ...                     [700, 0.005],
+        ...                     [710, 0.002],
+        ...                     [1000, 0.002]])
+        >>> mapdl.load_array('MY_ARRAY', my_conv)
+        >>> mapdl.parameters['MY_ARRAY']
+        array([[0.0e+00, 1.0e-03],
+                [1.2e+02, 1.0e-03],
+                [1.3e+02, 5.0e-03],
+                [7.0e+02, 5.0e-03],
+                [7.1e+02, 2.0e-03],
+                [1.0e+03, 2.0e-03]])
+        """
+        if not isinstance(array, np.ndarray):
+            array = np.asarray(array)
+
+        if array.ndim > 2:
+            raise NotImplementedError(
+                "Only loading of 1D or 2D arrays is supported at the moment."
+            )
+
+        jmax = 1
+        kmax = ""
+
+        if array.ndim > 0:
+            imax = array.shape[0]
+
+        if array.ndim > 1:
+            jmax = array.shape[1]
+
+        self.dim(name, "ARRAY", imax=imax, jmax=jmax, kmax="")
+
+        base_name = random_string() + ".txt"
+        filename = os.path.join(tempfile.gettempdir(), base_name)
+        self._log.info(f"Generating file for table in {filename}")
+        np.savetxt(
+            filename,
+            array,
+            delimiter=",",
+            header="File generated by PyMAPDL:load_array",
+            fmt="%24.18e",
+        )
+
+        if not self._local:
+            self.upload(filename, progress_bar=False)
+            filename = base_name
+
+        with self.non_interactive:
+            label = "jik"
+            n1 = jmax
+            n2 = imax
+            n3 = kmax
+            self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
+            fmt = "(" + ",',',".join(["E24.18" for i in range(jmax)]) + ")"
+            logger.info("Using *VREAD with format %s in %s", fmt, filename)
+            self.run(fmt)
+
+        if self._local:
+            os.remove(filename)
+        else:
+            self.slashdelete(filename)
+
+    @supress_logging
+    def get_array(
+        self,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> NDArray[np.float64]:
+        """Uses the ``*VGET`` command to Return an array from ANSYS as a
+        Python array.
+
+        See `VGET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_VGET_st.html>`
+        for more details.
+
+        Parameters
+        ----------
+        entity
+            Entity keyword.  Valid keywords are NODE, ELEM, KP, LINE,
+            AREA, VOLU, etc
+
+        entnum
+            The number of the entity.
+
+        item1
+            The name of a particular item for the given entity.  Valid
+            items are as shown in the Item1 columns of the tables
+            below.
+
+        it1num
+            The number (or label) for the specified Item1 (if any).
+            Valid IT1NUM values are as shown in the IT1NUM columns of
+            the tables below.  Some Item1 labels do not require an
+            IT1NUM value.
+
+        item2, it2num
+            A second set of item labels and numbers to further qualify
+            the item for which data is to be retrieved.  Most items do
+            not require this level of information.
+
+        kloop
+            Field to be looped on:
+
+            - 0 or 2 : Loop on the ENTNUM field (default).
+            - 3 : Loop on the Item1 field.
+            - 4 : Loop on the IT1NUM field. Successive items are as shown with IT1NUM.
+            - 5 : Loop on the Item2 field.
+            - 6 : Loop on the IT2NUM field. Successive items are as shown with IT2NUM.
+
+        Notes
+        -----
+        Please reference your Ansys help manual ``*VGET`` command tables
+        for all the available ``*VGET`` values.
+
+        Examples
+        --------
+        List the current selected node numbers
+
+        >>> mapdl.get_array('NODE', item1='NLIST')
+        array([  1.,   2.,   3.,   4.,   5.,   6.,   7.,   8.,
+              ...
+              314., 315., 316., 317., 318., 319., 320., 321.])
+
+        List the displacement in the X direction for the first result
+
+        >>> mapdl.post1()
+        >>> mapdl.set(1, 1)
+        >>> disp_x = mapdl.get_array('NODE', item1='U', it1num='X')
+        array([ 0.01605306, -0.01605306,  0.00178402, -0.01605306,
+               ...
+               -0.00178402, -0.01234851,  0.01234851, -0.01234851])
+
+        """
+        parm_name = kwargs.get("parm", None)
+
+        if self._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` to specify the name of the MAPDL parameter where to store the retrieved value."
+            )
+
+        arr = self._get_array(
+            entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
+        )
+
+        # edge case where corba refuses to return the array
+        ntry = 0
+        while arr.size == 1 and arr[0] == -1:
+            arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
+            if ntry > 5:
+                raise MapdlRuntimeError("Unable to get array for %s" % entity)
+            ntry += 1
+        return arr
+
+    def _get_array(
+        self,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        kloop: MapdlFloat = "",
+        dtype: DTypeLike = None,
+        **kwargs,
+    ) -> NDArray[np.float64]:
+        """Uses the VGET command to get an array from ANSYS"""
+        parm_name = kwargs.pop("parm", None)
+
+        if self._store_commands and not parm_name:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl._get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` or use the `parm` kwarg in "
+                "`mapdl._get_array` to specify the name of the MAPDL parameter where to store the retrieved value. In any case, this function will return `None`"
+            )
+
+        if parm_name is None:
+            parm_name = "__vget_tmp_%d__" % self._vget_arr_counter
+            self._vget_arr_counter += 1
+
+        out = self.starvget(
+            parm_name,
+            entity,
+            entnum,
+            item1,
+            it1num,
+            item2,
+            it2num,
+            kloop,
+            mute=False,
+        )
+
+        if self._store_commands:
+            # Return early
+            return None
+
+        # check if empty array
+        if "the dimension number 1 is 0" in out:
+            return np.empty(0)
+
+        with self.non_interactive:
+            self.vwrite("%s(1)" % parm_name)
+            self.run("(F20.12)")
+
+        array = np.fromstring(self.last_response, sep="\n")
+        if dtype:
+            return array.astype(dtype)
+        else:
+            return array
+
+    def get_nodal_constrains(self, label=None):
+        """
+        Get the applied nodal constrains:
+
+        Uses ``DLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal constrains are filtered to correspondent given label.
+            Example of labels are ``UX``, ``UZ``, ``VOLT`` or ``TEMP``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        constrains = self.dlist().to_list()
+        if label:
+            constrains = np.array(
+                [[each[0], each[2], each[3]] for each in constrains if each[1] == label]
+            )
+        return constrains
+
+    def get_nodal_loads(self, label=None):
+        """
+        Get the applied nodal loads.
+
+        Uses ``FLIST``.
+
+        Parameters
+        ----------
+        label : [str], optional
+            If given, the output nodal loads are filtered to correspondent given label.
+            Example of labels are ``FX``, ``FZ``, ``CHRGS`` or ``CSGZ``. By default None
+
+        Returns
+        -------
+        List[List[Str]] or numpy.array
+            If parameter ``label`` is give, the output is converted to a
+            numpy array instead of a list of list of strings.
+        """
+        loads = self.flist().to_list()
+        if label:
+            loads = np.array(
+                [[each[0], each[2], each[3]] for each in loads if each[1] == label]
+            )
+        return loads
+
+    def modal_analysis(
+        self,
+        method="lanb",
+        nmode="",
+        freqb="",
+        freqe="",
+        cpxmod="",
+        nrmkey="",
+        modtype="",
+        memory_option="",
+        mxpand="",
+        elcalc=False,
+    ) -> str:
+        """Run a modal with basic settings analysis
+
+        Parameters
+        ----------
+        method : str
+            Mode-extraction method to be used for the modal analysis.
+            Defaults to lanb (block lanczos).  Must be one of the following:
+
+            - LANB : Block Lanczos
+            - LANPCG : PCG Lanczos
+            - SNODE : Supernode modal solver
+            - SUBSP : Subspace algorithm
+            - UNSYM : Unsymmetric matrix
+            - DAMP : Damped system
+            - QRDAMP : Damped system using QR algorithm
+            - VT : Variational Technology
+
+        nmode : int, optional
+            The number of modes to extract. The value can depend on
+            the value supplied for Method. NMODE has no default and
+            must be specified. If Method = LANB, LANPCG, or SNODE, the
+            number of modes that can be extracted can equal the DOFs
+            in the model after the application of all boundary
+            conditions.
+
+        freqb : float, optional
+            The beginning, or lower end, of the frequency range of
+            interest.
+
+        freqe : float, optional
+            The ending, or upper end, of the frequency range of
+            interest (in Hz). The default for Method = SNODE is
+            described below. The default for all other methods is to
+            calculate all modes, regardless of their maximum
+            frequency.
+
+        cpxmod : str, optional
+            Complex eigenmode key. Valid only when ``method='QRDAMP'``
+            or ``method='unsym'``
+
+            - AUTO : Determine automatically if the eigensolutions are
+              real or complex and output them accordingly. This is
+              the default for ``method='UNSYM'``.  Not supported for
+              Method = QRDAMP.
+            - ON or CPLX : Calculate and output complex eigenmode
+              shapes.
+            - OFF or REAL : Do not calculate complex eigenmode
+              shapes. This is required if a mode-
+              superposition analysis is intended after the
+              modal analysis for Method = QRDAMP. This is the
+              default for this method.
+
+        nrmkey : bool, optional
+            Mode shape normalization key.  When ``True`` (default),
+            normalize the mode shapes to the mass matrix.  When False,
+            Normalize the mode shapes to unity instead of to the mass
+            matrix.  If a subsequent spectrum or mode-superposition
+            analysis is planned, the mode shapes should be normalized
+            to the mass matrix.
+
+        modtype : str, optional
+            Type of modes calculated by the eigensolver. Only
+            applicable to the unsymmetric eigensolver.
+
+            - Blank : Right eigenmodes. This value is the default.
+            - BOTH : Right and left eigenmodes. The left eigenmodes are
+              written to Jobname.LMODE.  This option must be
+              activated if a mode-superposition analysis is intended.
+
+        memory_option : str, optional
+            Memory allocation option:
+
+            * ``DEFAULT`` - Default Memory mode
+                      Use the default memory allocation strategy for
+                      the sparse solver. The default strategy attempts
+                      to run in the INCORE memory mode. If there is
+                      not enough available physical memory when the
+                      solver starts to run in the ``INCORE`` memory
+                      mode, the solver will then attempt to run in the
+                      ``OUTOFCORE`` memory mode.
+
+            * ``INCORE`` - In-core memory mode
+                     Use a memory allocation strategy in the sparse
+                     solver that will attempt to obtain enough memory
+                     to run with the entire factorized matrix in
+                     memory. This option uses the most amount of
+                     memory and should avoid doing any I/O. By
+                     avoiding I/O, this option achieves optimal solver
+                     performance. However, a significant amount of
+                     memory is required to run in this mode, and it is
+                     only recommended on machines with a large amount
+                     of memory. If the allocation for in-core memory
+                     fails, the solver will automatically revert to
+                     out-of-core memory mode.
+
+            * ``OUTOFCORE`` - Out of core memory mode.
+                        Use a memory allocation strategy in the sparse
+                        solver that will attempt to allocate only
+                        enough work space to factor each individual
+                        frontal matrix in memory, but will store the
+                        entire factorized matrix on disk. Typically,
+                        this memory mode results in poor performance
+                        due to the potential bottleneck caused by the
+                        I/O to the various files written by the
+                        solver.
+
+        mxpand : bool, optional
+            Number of modes or array name (enclosed in percent signs)
+            to expand and write.  If -1, do not expand and do not
+            write modes to the results file during the
+            analysis. Default ``""``.
+        elcalc : bool, optional
+            Calculate element results, reaction forces, energies, and
+            the nodal degree of freedom solution.  Default ``False``.
+
+        Returns
+        -------
+        str
+            Output from MAPDL SOLVE command.
+
+        Notes
+        -----
+        For models that involve a non-symmetric element stiffness
+        matrix, as in the case of a contact element with frictional
+        contact, the QRDAMP eigensolver (MODOPT, QRDAMP) extracts
+        modes in the modal subspace formed by the eigenmodes from the
+        symmetrized eigenproblem. The QRDAMP eigensolver symmetrizes
+        the element stiffness matrix on the first pass of the
+        eigensolution, and in the second pass, eigenmodes are
+        extracted in the modal subspace of the first eigensolution
+        pass. For such non- symmetric eigenproblems, you should verify
+        the eigenvalue and eigenmode results using the non-symmetric
+        matrix eigensolver (MODOPT,UNSYM).
+
+        The DAMP and QRDAMP options cannot be followed by a subsequent
+        spectrum analysis. The UNSYM method supports spectrum analysis
+        when eigensolutions are real.
+
+        Examples
+        --------
+        Modal analysis using default parameters for the first 6 modes
+
+        >>> mapdl.modal_analysis(nmode=6)
+
+        """
+        if nrmkey:
+            if nrmkey.upper() != "OFF":
+                nrmkey = "ON"
+        nrmkey = "OFF"
+
+        self.slashsolu(mute=True)
+        self.antype(2, "new", mute=True)
+        self.modopt(method, nmode, freqb, freqe, cpxmod, nrmkey, modtype, mute=True)
+        self.bcsoption(memory_option, mute=True)
+
+        if mxpand:
+            self.mxpand(mute=True)
+        if elcalc:
+            self.mxpand(elcalc="YES", mute=True)
+
+        out = self.solve()
+        self.finish(mute=True)
+        return out
+
+    def get_value(
+        self,
+        entity: str = "",
+        entnum: str = "",
+        item1: str = "",
+        it1num: MapdlFloat = "",
+        item2: str = "",
+        it2num: MapdlFloat = "",
+        item3: MapdlFloat = "",
+        it3num: MapdlFloat = "",
+        item4: MapdlFloat = "",
+        it4num: MapdlFloat = "",
+        **kwargs: KwargDict,
+    ) -> Union[float, str]:
+        """Runs the MAPDL GET command and returns a Python value.
+
+        This method uses :func:`Mapdl.get`.
+
+        See the full MADPL command documentation at `*GET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
+
+        .. note::
+           This method is not available when within the
+           :func:`Mapdl.non_interactive`
+           context manager.
+
+        Parameters
+        ----------
+        entity : str
+            Entity keyword. Valid keywords are ``"NODE"``, ``"ELEM"``,
+            ``"KP"``, ``"LINE"``, ``"AREA"``, ``"VOLU"``, ``"PDS"``,
+            etc.
+
+        entnum : str, int, optional
+            The number or label for the entity. In some cases, a zero
+            (or blank ``""``) ``entnum`` represents all entities of
+            the set.
+
+        item1 : str, optional
+            The name of a particular item for the given entity.
+
+        it1num : str, int, optional
+            The number (or label) for the specified Item1 (if
+            any). Some Item1 labels do not require an IT1NUM value.
+
+        item2 : str, optional
+            A second set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it2num : str, int, optional
+            The number (or label) for the specified ``item2`` (if
+            any). Some ``item2`` labels do not require an ``it2num``
+            value.
+
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this
+            level of information.
+
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
+
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
+
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
+
+        Returns
+        -------
+        float
+            Floating point value of the parameter.
+
+        Examples
+        --------
+        Retrieve the number of nodes.
+
+        >>> value = ansys.get_value('node', '', 'count')
+        >>> value
+        3003
+
+        Retrieve the number of nodes using keywords.
+
+        >>> value = ansys.get_value(entity='node', item1='count')
+        >>> value
+        3003
+        """
+        return self._get(
+            entity=entity,
+            entnum=entnum,
+            item1=item1,
+            it1num=it1num,
+            item2=item2,
+            it2num=it2num,
+            item3=item3,
+            it3num=it3num,
+            item4=item4,
+            it4num=it4num,
+            **kwargs,
+        )
