@@ -3,7 +3,6 @@
 import os
 import tempfile
 
-from ansys.tools.path import get_available_ansys_installations
 import pytest
 
 from ansys.mapdl import core as pymapdl
