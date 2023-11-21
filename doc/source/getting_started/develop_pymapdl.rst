@@ -1,7 +1,7 @@
 
 .. _developing_pymapdl:
 
-===============
+============
 Develop code
 ============
 
