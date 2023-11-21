@@ -1623,7 +1623,9 @@ def launch_mapdl(
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-            mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+            mapdl = MapdlConsole(
+                loglevel=loglevel, log_apdl=log_apdl, use_vtk=use_vtk, **start_parm
+            )
 
         elif mode == "grpc":
             port, actual_run_location, process = launch_grpc(
