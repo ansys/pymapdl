@@ -844,7 +844,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
