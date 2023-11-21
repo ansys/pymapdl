@@ -176,7 +176,7 @@ The preceding code generates this input for MAPDL:
     NSEL,ALL   
     NSEL,R,LOC,Z,10
 
-which is executed with a :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` call.
+This MAPLD input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
 
 Because of the non-interactive context not running all the commands until the end,
 you might find issues interacting inside it, with Python for instance.
@@ -212,7 +212,7 @@ In the preceding script, the values obtained by the
     array([1., 2., 3.])
 
 This is because the first :meth:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
-call is executed actually *before* the :func:`Mapdl.k() <ansys.mapdl.core.Mapdl.k>` call.
+method call is executed *before* the :meth:`Mapdl.k() <ansys.mapdl.core.Mapdl.k>` method call.
 
 You should not retrieve any data in a Pythonic way from the MAPDL instance while using the
 :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method.
@@ -521,7 +521,7 @@ Prompts
 -------
 Prompts from MAPDL automatically continued as if MAPDL is in batch
 mode. Commands requiring user input, such as the
-:func:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>` method fail
+:meth:`Mapdl.vwrite() <ansys.mapdl.core.Mapdl.vwrite>` method, fail
 and must be entered in non-interactively.
 
 
