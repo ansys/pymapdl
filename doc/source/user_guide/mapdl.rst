@@ -161,7 +161,7 @@ the MAPDL instance, and runs it using the
 :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method.
 
 
-For instance, the following :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>`:
+For instance, this example code uses the :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method to generate input for MAPDL:
 
 .. code:: python
 
@@ -169,7 +169,7 @@ For instance, the following :meth:`non_interactive context <ansys.mapdl.core.Map
         mapdl.nsel("all")
         mapdl.nsel("R", "LOC", "Z", 10)
 
-generates the following input for MAPDL:
+The preceding code generates this input for MAPDL:
 
 .. code:: apdl
 
@@ -180,8 +180,8 @@ which is executed with a :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` ca
 
 Because of the non-interactive context not running all the commands until the end,
 you might find issues interacting inside it, with Python for instance.
-For example, running Python commands such as
-:func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
+For example, running Python commands such as the
+:meth:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` method
 inside the context can give you out-of-sync responses.
 The following code snippet is a demonstration of this kind of problem:
 
@@ -201,8 +201,8 @@ The following code snippet is a demonstration of this kind of problem:
 
     assert klist_inside != klist_outside  # Evaluates to true
 
-In the preceding script, the values obtained by
-:func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` are different:
+In the preceding script, the values obtained by the
+:meth:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>` method are different:
 
 .. code:: pycon
 
@@ -211,21 +211,20 @@ In the preceding script, the values obtained by
     >>> print(klist_outside)
     array([1., 2., 3.])
 
-This is because the first :func:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
+This is because the first :meth:`Mapdl.get_array() <ansys.mapdl.core.Mapdl.get_array>`
 call is executed actually *before* the :func:`Mapdl.k() <ansys.mapdl.core.Mapdl.k>` call.
 
-It is recommend to not retrieve any data in a pythonic way from the MAPDL instance while in the
-:meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>`.
-Being aware of this kind of behavior and how
-:meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>`
-works is crucial for an advanced usage of PyMAPDL.
+You should not retrieve any data in a Pythonic way from the MAPDL instance while using the
+:meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method.
+Being aware of this kind of behavior and how the :meth:`non_interactive context <ansys.mapdl.core.Mapdl.non_interactive>` method
+works is crucial for advanced usage of PyMAPDL.
 
 
 MAPDL macros
 ------------
 Note that macros created within PyMAPDL (rather than loaded from
-a file) do not appear to run correctly. For example, here is the macro
-``DISP`` created using the ``*CREATE`` command within APDL and within PyMAPDL:
+a file) do not appear to run correctly. For example, here is the ``DISP``
+macro created using the ``*CREATE`` command within APDL and within PyMAPDL:
 
 
 .. tab-set::
