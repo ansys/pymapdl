@@ -200,78 +200,115 @@ class ParameterDefinition:
 
         APDL Command: ``*GET``
 
+        See the full MADPL command at `*GET
+        <https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_cmd/Hlp_C_GET.html>`_
+
+        GET retrieves a value for a specified item and stores the
+        value as a scalar parameter, or as a value in a user-named
+        array parameter. An item is identified by various keyword,
+        label, and number combinations.  Usage is similar to the SET
+        command except that the parameter values are retrieved from
+        previously input or calculated results. For example,
+        ``GET,A,ELEM,5,CENT,X`` returns the centroid x-location of element
+        5 and stores the result as parameter A. GET command
+        operations, along with the associated Get functions return
+        values in the active coordinate system unless stated
+        otherwise. A Get function is an alternative in- line function
+        that can be used to retrieve a value instead of the GET
+        command (see Using In-line Get Functions for more
+        information).
+        Both GET and VGET retrieve information from the active data
+        stored in memory. The database is often the source, and
+        sometimes the information is retrieved from common memory
+        blocks that the program uses to manipulate
+        information. Although POST1 and POST26 operations use a .rst
+        file, GET data is accessed from the database or from the
+        common blocks. Get operations do not access the .rst file
+        directly. For repeated gets of sequential items, such as from
+        a series of elements, see the VGET command.
+        Most items are stored in the database after they are
+        calculated and are available anytime thereafter. Items are
+        grouped according to where they are usually first defined or
+        calculated. Preprocessing data will often not reflect the
+        calculated values generated from section data. Do not use GET
+        to obtain data from elements that use calculated section data,
+        such as beams or shells. Most of the general items listed
+        below are available from all modules.
+
         Parameters
         ----------
-        par
-            The name of the resulting parameter. See ``*SET`` for name
+        par : str, optional
+            The name of the resulting parameter. See \*SET for name
             restrictions.
 
         entity
-            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE, AREA,
-            VOLU, PDS, etc., as shown for Entity = in the tables below.
+            Entity keyword. Valid keywords are NODE, ELEM, KP, LINE,
+            AREA, VOLU, PDS, etc., as shown for Entity = in the tables
+            below.
 
         entnum
-            The number or label for the entity (as shown for ENTNUM = in the
-            tables below). In some cases, a zero (or blank) ENTNUM represents
-            all entities of the set.
+            The number or label for the entity (as shown for ENTNUM =
+            in the tables below). In some cases, a zero (or blank)
+            ENTNUM represents all entities of the set.
 
         item1
-            The name of a particular item for the given entity. Valid items are
-            as shown in the Item1 columns of the tables below.
+            The name of a particular item for the given entity.
 
         it1num
-            The number (or label) for the specified Item1 (if any). Valid
-            IT1NUM values are as shown in the IT1NUM columns of the tables
-            below. Some Item1 labels do not require an IT1NUM value.
+            The number (or label) for the specified Item1 (if
+            any). Valid IT1NUM values are as shown in the IT1NUM
+            columns of the tables below. Some Item1 labels do not
+            require an IT1NUM value.
 
         item2, it2num
-            A second set of item labels and numbers to further qualify the item
+            A second set of item labels and numbers to further qualify
+            the item for which data are to be retrieved. Most items do
+            not require this level of information.
+
+        item3
+            A third set of item labels to further qualify
+            the item for which data are to be retrieved. Almost all items do
+            not require this level of information.
+
+        item3 : str, optional
+            A third set of item labels and numbers to further qualify the item
             for which data are to be retrieved. Most items do not require this
             level of information.
 
-        Notes
-        -----
-        ``*GET`` retrieves a value for a specified item and stores the value as a
-        scalar parameter, or as a value in a user-named array parameter. An
-        item is identified by various keyword, label, and number combinations.
-        Usage is similar to the ``*SET`` command except that the parameter values
-        are retrieved from previously input or calculated results. For example,
-        ``*GET,A,ELEM,5,CENT,X`` returns the centroid x-location of element 5 and
-        stores the result as parameter A. ``*GET`` command operations, along with
-        the associated Get functions return values in the active coordinate
-        system unless stated otherwise. A Get function is an alternative in-
-        line function that can be used to retrieve a value instead of the ``*GET``
-        command (see Using In-line Get Functions for more information).
+        it3num : str, int, optional
+            The number (or label) for the specified ``item3`` (if
+            any). Some ``item3`` labels do not require an ``it3num``
+            value.
 
-        Both ``*GET`` and ``*VGET`` retrieve information from the active data stored in
-        memory. The database is often the source, and sometimes the information
-        is retrieved from common memory blocks that the program uses to
-        manipulate information. Although POST1 and POST26 operations use a
-        *.rst file, ``*GET`` data is accessed from the database or from the common
-        blocks. Get operations do not access the *.rst file directly. For
-        repeated gets of sequential items, such as from a series of elements,
-        see the ``*VGET`` command.
+        item4 : str, optional
+            A fourth set of item labels and numbers to further qualify the item
+            for which data are to be retrieved. Most items do not require this level of information.
 
-        Most items are stored in the database after they are calculated and are
-        available anytime thereafter. Items are grouped according to where they
-        are usually first defined or calculated. Preprocessing data will often
-        not reflect the calculated values generated from section data. Do not
-        use ``*GET`` to obtain data from elements that use calculated section data,
-        such as beams or shells. Most of the general items listed below are
-        available from all modules. Each of the sections for accessing ``*GET``
-        parameters are shown in the following order:
+        it4num : str, int, optional
+            The number (or label) for the specified ``item4`` (if
+            any). Some ``item4`` labels do not require an ``it4num``
+            value.
 
-        ``*GET`` General Entity Items
+        Returns
+        -------
+        float
+            Floating point value of the parameter.
 
-        ``*GET`` Preprocessing Entity Items
+        Examples
+        --------
+        Retrieve the number of nodes
 
-        ``*GET`` Solution Entity Items
+        >>> value = mapdl.get('val', 'node', '', 'count')
+        >>> value
+        3003
 
-        ``*GET`` Postprocessing Entity Items
+        Retrieve the number of nodes using keywords.  Note that the
+        parameter name is optional.
 
-        ``*GET`` Probabilistic Design Entity Items
+        >>> value = mapdl.get(entity='node', item1='count')
+        >>> value
+        3003
 
-        The ``*GET`` command is valid in any processor.
         """
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
