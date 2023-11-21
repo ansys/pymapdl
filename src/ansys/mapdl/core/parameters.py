@@ -334,7 +334,7 @@ class Parameters:
             raise MapdlRuntimeError(
                 "Cannot use `mapdl.parameters` to retrieve parameters when in "
                 "`non_interactive` mode. "
-                "Exit non_interactive mode before using this method."
+                "Exit `non_interactive` mode before using this method."
             )
 
         if not isinstance(key, str):
